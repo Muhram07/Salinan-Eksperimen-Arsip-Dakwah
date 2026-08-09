@@ -1,9 +1,14 @@
 ---
-judul: "Pengertian Tauhid"
-sub_judul: "Kunci utama ibadah seorang muslim"
+judul: "Tauhid Sedari Dink"
+sub_judul: "Ajarkan anak tauhid sejak dini sebagai pondasi agamanya"
 kategori: "Tauhid"
 tags: "aqidah, ibadah, rububiyyah"
 pdf: "/assets/pdf/brosur.pdf"
 ---
 
-Tauhid adalah mengesakan Allah dalam ibadah. Ini adalah pondasi utama dalam Islam. Jangan sampai kita menyekutukan Allah dalam bentuk apapun.
+Collab dakwah Sunnah
+@an.nashiha_daily
+@sunnahstori
+@silentreminder
+@studi_islam._id
+@akun_salafy
