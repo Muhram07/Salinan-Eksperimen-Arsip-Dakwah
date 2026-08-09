@@ -94,12 +94,25 @@ function pilihPoster(id) {
     }, 150);
 }
 
+// ==========================================
+// PERBAIKAN PENTING: FUNGSI FILTER + SCROLL
+// ==========================================
 function filterCategory(category) {
     resultBox.innerHTML = "";
     search.value = "";
+    
+    // 1. Filter data
     const hasil = posterData.filter(item => item.category === category);
     renderPoster(hasil);
-    document.getElementById("post-list").scrollIntoView({ behavior: "smooth" });
+    
+    // 2. Scroll ke daftar poster (dengan pengaman agar pasti jalan)
+    setTimeout(() => {
+        const element = document.getElementById("post-list");
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }, 300);
 }
+// ==========================================
 
 loadPosters();
