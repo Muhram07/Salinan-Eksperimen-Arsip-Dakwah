@@ -1,4 +1,3 @@
-
 let posterData = [];
 
 async function loadPosters() {
