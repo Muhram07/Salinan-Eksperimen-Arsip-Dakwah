@@ -95,23 +95,29 @@ function pilihPoster(id) {
 }
 
 // ==========================================
-// PERBAIKAN PALING AMPUH: requestAnimationFrame
+// PERBAIKAN TERAKHIR: Double Scroll
 // ==========================================
 function filterCategory(category) {
     resultBox.innerHTML = "";
     search.value = "";
     
-    // 1. Filter data
     const hasil = posterData.filter(item => item.category === category);
     renderPoster(hasil);
     
-    // 2. Gunakan requestAnimationFrame untuk scroll PERFECT
-    requestAnimationFrame(() => {
+    // Trik: Scroll pancingan, baru scroll asli
+    setTimeout(() => {
         const target = document.getElementById("post-list");
         if (target) {
             target.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-    });
+    }, 100);
+    
+    setTimeout(() => {
+        const target = document.getElementById("post-list");
+        if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    }, 600);
 }
 // ==========================================
 
