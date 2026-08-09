@@ -22,8 +22,8 @@
         .poster .tag{background:#FFD700;color:#111;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
         .poster .pdf-link{display:inline-block;margin-top:15px;color:#FFD700;text-decoration:underline;font-weight:bold;}
         .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
-        @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr);}}
-        @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr);}}
+        @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr));}}
+        @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr));}}
     </style>
 </head>
 <body>
@@ -34,11 +34,10 @@
     </div>
     <div id="post-list" class="loading">Memuat arsip...</div>
 
-    <!-- Library untuk membaca format Markdown (.md) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
-        // Daftar folder poster (Anda tinggal tambahkan nama folder di sini jika buat baru)
+        // DAFTAR FOLDER POSTER (Tambah di sini jika buat poster baru)
         const daftarFolder = [
             "posters/tauhid-001",
             "posters/bidah-001",
@@ -53,7 +52,6 @@
             
             for (let folder of daftarFolder) {
                 try {
-                    // Baca file poster.md dari dalam folder
                     const res = await fetch(`${folder}/poster.md`);
                     if (!res.ok) continue;
                     
@@ -69,16 +67,12 @@
                         });
                     }
 
-                    // Data yang akan ditampilkan
                     const judul = info.judul || "Tanpa Judul";
                     const subJudul = info.sub_judul || "";
                     const kategori = info.kategori || "Umum";
                     const tagArray = info.tags ? info.tags.split(',').map(t => t.trim()) : [];
-                    
-                    // Cari gambar di folder yang sama (image.jpg)
                     const imageSrc = `${folder}/image.jpg`;
 
-                    // Format konten lengkap untuk tombol copy
                     const kontenLengkap = `${judul}\n\n${subJudul}\n\n${contentBody}`;
 
                     htmlPoster += `
@@ -101,7 +95,6 @@
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
         }
 
-        // Fungsi Copy Konten Lengkap (Judul + Sub + Isi)
         function copyKontenLengkap(judul, subJudul, isi) {
             const konten = `${judul}\n\n${subJudul}\n\n${isi}`;
             navigator.clipboard.writeText(konten);
@@ -111,4 +104,4 @@
         loadPosters();
     </script>
 </body>
-    </html>
+</html>
