@@ -94,31 +94,15 @@ function pilihPoster(id) {
     }, 150);
 }
 
-// ==========================================
-// PERBAIKAN TERAKHIR: Double Scroll
-// ==========================================
 function filterCategory(category) {
     resultBox.innerHTML = "";
     search.value = "";
-    
     const hasil = posterData.filter(item => item.category === category);
     renderPoster(hasil);
-    
-    // Trik: Scroll pancingan, baru scroll asli
+    // Scroll otomatis dengan timeout agar rendering selesai
     setTimeout(() => {
-        const target = document.getElementById("post-list");
-        if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-    }, 100);
-    
-    setTimeout(() => {
-        const target = document.getElementById("post-list");
-        if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-    }, 600);
+        document.getElementById("post-list").scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 500);
 }
-// ==========================================
 
 loadPosters();
