@@ -4,44 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arsip Dakwah Manhaj Salaf</title>
-    <meta name="description" content="Perpustakaan Poster Dakwah Manhaj Salaf">
-    <meta name="theme-color" content="#111827">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{background:#0b0b0b;color:#fff;font-family:Arial, Helvetica, sans-serif;padding:20px;max-width:1200px;margin:auto;}
+        .hero{background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
+        .hero h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
+        .hero p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
+        #search{width:100%;max-width:600px;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;}
+        #post-list{display:grid;grid-template-columns:1fr;gap:20px;}
+        .poster{background:#151515;border:1px solid #252525;border-radius:20px;overflow:hidden;padding:20px;transition:0.3s;}
+        .poster:hover{border-color:#FFD700;}
+        .poster img{width:100%;border-radius:12px;margin-bottom:15px;}
+        .poster h3{color:#FFD700;font-size:24px;margin-bottom:10px;}
+        .poster .sub-caption{color:#bdbdbd;font-size:16px;margin-bottom:15px;font-style:italic;}
+        .poster p{color:#ddd;line-height:1.8;font-size:16px;}
+        .poster .tags{margin-top:15px;display:flex;flex-wrap:wrap;gap:8px;}
+        .poster .tag{background:#FFD700;color:#111;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+        .poster .pdf-link{display:inline-block;margin-top:15px;color:#FFD700;text-decoration:underline;font-weight:bold;}
+        .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
+        @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr);}}
+        @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr);}}
+    </style>
 </head>
 <body>
-    <header class="hero">
+    <div class="hero">
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
-        <p>Perpustakaan Digital Poster Dakwah Berdasarkan Bab Ilmu</p>
-        <input id="search" type="text" placeholder="🔍 Cari Poster, Caption atau Tag...">
-    </header>
+        <p>Perpustakaan Digital Poster Dakwah</p>
+        <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
+    </div>
+    <div id="post-list" class="loading">Memuat arsip...</div>
 
-    <section class="kategori-section">
-        <h2 class="judul">📂 Kategori</h2>
-        <div id="category-list" class="kategori">
-            <div class="loading">Memuat kategori...</div>
-        </div>
-    </section>
+    <!-- Library untuk membaca format Markdown (.md) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        // Daftar folder poster (Anda tinggal tambahkan nama folder di sini jika buat baru)
+        const daftarFolder = [
+            "posters/tauhid-001",
+            "posters/bidah-001",
+            "posters/syirik-001"
+        ];
 
-    <section class="terbaru">
-        <h2 class="judul">🆕 Poster Terbaru</h2>
-        <div id="post-list">
-            <div class="loading">Memuat poster...</div>
-        </div>
-    </section>
+        async function loadPosters() {
+            const container = document.getElementById("post-list");
+            container.innerHTML = '<div class="loading">📂 Memuat arsip...</div>';
+            
+            let htmlPoster = '';
+            
+            for (let folder of daftarFolder) {
+                try {
+                    // Baca file poster.md dari dalam folder
+                    const res = await fetch(`${folder}/poster.md`);
+                    if (!res.ok) continue;
+                    
+                    const text = await res.text();
+                    const dataMatch = text.match(/---([\s\S]*?)---/);
+                    const contentBody = text.replace(/---([\s\S]*?)---/, '').trim();
+                    const info = {};
 
-    <footer>
-        <b>Arsip Dakwah Manhaj Salaf</b>
-        <div>Perpustakaan Digital Poster Dakwah Berdasarkan Bab Ilmu</div>
-        <div class="akun">
-            <a href="https://instagram.com/tauhidsunnah_id" target="_blank">@tauhidsunnah_id</a> |
-            <a href="https://instagram.com/an.nashiha_daily" target="_blank">@an.nashiha_daily</a> |
-            <a href="https://instagram.com/studi_islam._id" target="_blank">@studi_islam._id</a>
-        </div>
-        <p>© 2026 Arsip Dakwah Manhaj Salaf</p>
-    </footer>
+                    if (dataMatch) {
+                        dataMatch[1].split('\n').forEach(line => {
+                            const [key, val] = line.split(':').map(s => s.trim());
+                            if(key && val) info[key] = val.replace(/^"|"$/g,'');
+                        });
+                    }
 
-    <script src="/assets/js/app.js"></script>
-    <script src="/assets/js/categories.js"></script>
+                    // Data yang akan ditampilkan
+                    const judul = info.judul || "Tanpa Judul";
+                    const subJudul = info.sub_judul || "";
+                    const kategori = info.kategori || "Umum";
+                    const tagArray = info.tags ? info.tags.split(',').map(t => t.trim()) : [];
+                    
+                    // Cari gambar di folder yang sama (image.jpg)
+                    const imageSrc = `${folder}/image.jpg`;
+
+                    // Format konten lengkap untuk tombol copy
+                    const kontenLengkap = `${judul}\n\n${subJudul}\n\n${contentBody}`;
+
+                    htmlPoster += `
+                        <div class="poster" data-kategori="${kategori}">
+                            <img src="${imageSrc}" alt="${judul}" onerror="this.style.display='none'">
+                            <h3>${judul}</h3>
+                            ${subJudul ? `<div class="sub-caption">${subJudul}</div>` : ''}
+                            <div style="color:#ddd;line-height:1.8;">${marked.parse(contentBody)}</div>
+                            ${info.pdf ? `<a href="${info.pdf}" target="_blank" class="pdf-link">📄 Download PDF</a>` : ''}
+                            ${tagArray.length > 0 ? `<div class="tags">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+                            <button onclick="copyKontenLengkap('${judul}','${subJudul}','${contentBody.replace(/'/g, "\\'")}')" style="margin-top:15px;padding:8px 15px;background:#FFD700;color:#111;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">📋 Copy Konten</button>
+                        </div>
+                    `;
+
+                } catch(e) {
+                    console.log("Gagal memuat folder:", folder);
+                }
+            }
+
+            container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
+        }
+
+        // Fungsi Copy Konten Lengkap (Judul + Sub + Isi)
+        function copyKontenLengkap(judul, subJudul, isi) {
+            const konten = `${judul}\n\n${subJudul}\n\n${isi}`;
+            navigator.clipboard.writeText(konten);
+            alert("✅ Konten lengkap berhasil disalin!");
+        }
+
+        loadPosters();
+    </script>
 </body>
-</html>
+    </html>
