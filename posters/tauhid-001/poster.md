@@ -1,6 +1,6 @@
 ---
 judul: "Tauhid Sedari Dini"
-sub_judul: "Ajarkan anak tauhid sejak dini sebagai pondasi agamanya"
+sub_judul: "Ajarkan anak dengan tauhid sejak dini sebagai pondasi agamanya"
 kategori: "Tauhid"
 tags: "aqidah, ibadah, rububiyyah"
 pdf: "/assets/pdf/brosur.pdf"
