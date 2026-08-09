@@ -1,5 +1,5 @@
 ---
-judul: "Tauhid Sedari Dink"
+judul: "Tauhid Sedari Dini"
 sub_judul: "Ajarkan anak tauhid sejak dini sebagai pondasi agamanya"
 kategori: "Tauhid"
 tags: "aqidah, ibadah, rububiyyah"
