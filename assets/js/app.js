@@ -95,7 +95,7 @@ function pilihPoster(id) {
 }
 
 // ==========================================
-// PERBAIKAN PENTING: FUNGSI FILTER + SCROLL
+// PERBAIKAN PALING AMPUH: Ganti fungsi filter
 // ==========================================
 function filterCategory(category) {
     resultBox.innerHTML = "";
@@ -105,13 +105,13 @@ function filterCategory(category) {
     const hasil = posterData.filter(item => item.category === category);
     renderPoster(hasil);
     
-    // 2. Scroll ke daftar poster (dengan pengaman agar pasti jalan)
+    // 2. SCROLL SETELAH POSTER DIMUAT (Timeout 500ms agar pasti jalan)
     setTimeout(() => {
-        const element = document.getElementById("post-list");
-        if (element) {
-            element.scrollIntoView({ behavior: "smooth", block: "start" });
+        const target = document.getElementById("post-list");
+        if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-    }, 300);
+    }, 500);
 }
 // ==========================================
 
