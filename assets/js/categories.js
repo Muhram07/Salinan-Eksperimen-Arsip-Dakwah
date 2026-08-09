@@ -41,8 +41,11 @@ function renderCategories() {
 
     categoryData.forEach(cat => {
 
+        // PERBAIKAN: Bersihkan nama kategori agar perbandingan lebih akurat
+        const kategoriName = cat.name.trim();
+
         const jumlah = posterData.filter(p =>
-            p.category === cat.name
+            p.category.trim() === kategoriName
         ).length;
 
         container.innerHTML += `
@@ -50,7 +53,7 @@ function renderCategories() {
         <div
         class="card"
         id="cat-${cat.id}"
-        onclick="pilihKategori('${cat.name}','${cat.id}')">
+        onclick="pilihKategori('${kategoriName}','${cat.id}')">
 
             <div style="font-size:42px;">
                 ${cat.icon}
@@ -61,7 +64,7 @@ function renderCategories() {
                 color:white;
                 font-size:24px;
             ">
-                ${cat.name}
+                ${kategoriName}
             </h3>
 
             <p style="
@@ -120,7 +123,7 @@ function pilihKategori(category, id) {
     if (aktif) {
 
         aktif.style.borderColor = "#FFD700";
-        akt if.style.boxShadow =
+        aktif.style.boxShadow =
         "0 0 20px rgba(255,215,0,.35)";
 
     }
