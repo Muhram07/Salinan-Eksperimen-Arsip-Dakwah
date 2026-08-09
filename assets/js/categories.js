@@ -8,7 +8,7 @@ async function loadCategories() {
 
     try {
 
-        const res = await fetch("data/categories.json");
+        const res = await fetch("/data/categories.json");
 
         if (!res.ok) throw new Error();
 
@@ -120,7 +120,7 @@ function pilihKategori(category, id) {
     if (aktif) {
 
         aktif.style.borderColor = "#FFD700";
-        aktif.style.boxShadow =
+        akt if.style.boxShadow =
         "0 0 20px rgba(255,215,0,.35)";
 
     }
