@@ -95,7 +95,7 @@ function pilihPoster(id) {
 }
 
 // ==========================================
-// PERBAIKAN PALING AMPUH: Ganti fungsi filter
+// PERBAIKAN PALING AMPUH: requestAnimationFrame
 // ==========================================
 function filterCategory(category) {
     resultBox.innerHTML = "";
@@ -105,13 +105,13 @@ function filterCategory(category) {
     const hasil = posterData.filter(item => item.category === category);
     renderPoster(hasil);
     
-    // 2. SCROLL SETELAH POSTER DIMUAT (Timeout 500ms agar pasti jalan)
-    setTimeout(() => {
+    // 2. Gunakan requestAnimationFrame untuk scroll PERFECT
+    requestAnimationFrame(() => {
         const target = document.getElementById("post-list");
         if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-    }, 500);
+    });
 }
 // ==========================================
 
