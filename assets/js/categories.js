@@ -41,7 +41,7 @@ function renderCategories() {
 
     categoryData.forEach(cat => {
 
-        // PERBAIKAN: Bersihkan nama kategori agar perbandingan lebih akurat
+        // Pastikan nama kategori bersih dari spasi
         const kategoriName = cat.name.trim();
 
         const jumlah = posterData.filter(p =>
@@ -53,7 +53,7 @@ function renderCategories() {
         <div
         class="card"
         id="cat-${cat.id}"
-        onclick="pilihKategori('${kategoriName}','${cat.id}')">
+        onclick="pilihKategori('${kategoriName}', '${cat.id}')">
 
             <div style="font-size:42px;">
                 ${cat.icon}
@@ -105,7 +105,7 @@ function updateCategoryCount() {
 }
 
 /* =========================
-   PILIH KATEGORI
+   PILIH KATEGORI - PERBAIKAN PALING PENTING
 ========================= */
 
 function pilihKategori(category, id) {
@@ -128,7 +128,13 @@ function pilihKategori(category, id) {
 
     }
 
-    filterCategory(category);
+    // Panggil fungsi filterCategory yang ada di app.js
+    // Pastikan category dikirim dengan nama yang sudah dipastikan benar
+    if (typeof filterCategory === "function") {
+        filterCategory(category);
+    } else {
+        console.error("Fungsi filterCategory tidak ditemukan di app.js!");
+    }
 
 }
 
