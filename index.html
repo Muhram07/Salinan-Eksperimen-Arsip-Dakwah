@@ -8,16 +8,25 @@
         *{box-sizing:border-box;margin:0;padding:0;}
         body{background:#0b0b0b;color:#fff;font-family:Arial, Helvetica, sans-serif;padding:20px;max-width:1200px;margin:auto;}
         
-        /* --- NAVIGASI FAVORIT DI ATAS (DIBERI JARAK) --- */
+        /* --- NAVIGASI FAVORIT DI ATAS --- */
         .nav-wrapper{display:flex;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;padding:0 5px;}
         .btn-nav{background:#FFD700;color:#111;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;}
         .btn-nav:hover{transform:scale(1.02);}
 
         /* --- HEADER UTAMA --- */
-        .header-container{background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
+        .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
         .header-container h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
         .header-container p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
-        #search{width:100%;max-width:600px;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;}
+        
+        /* --- SEARCH WRAPPER (Untuk Dropdown) --- */
+        .search-wrapper{position:relative;max-width:600px;margin:0 auto;}
+        #search{width:100%;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;background:#fff;color:#111;}
+        
+        /* --- DROPDOWN HASIL PENCARIAN (FITUR BARU) --- */
+        #search-result{position:absolute;top:100%;left:0;right:0;background:#151515;border:1px solid #252525;border-radius:14px;margin-top:5px;overflow:hidden;display:none;z-index:20;}
+        .search-item{padding:12px 16px;border-bottom:1px solid #252525;cursor:pointer;display:flex;justify-content:space-between;color:#fff;transition:0.2s;}
+        .search-item:hover{background:#252525;color:#FFD700;}
+        .search-item small{color:#888;font-size:12px;}
 
         /* --- KATEGORI --- */
         .kategori-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px;}
@@ -65,7 +74,12 @@
     <div class="header-container">
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
         <p>Perpustakaan Digital Poster Dakwah</p>
-        <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
+        
+        <!-- SEARCH WRAPPER -->
+        <div class="search-wrapper">
+            <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
+            <div id="search-result"></div>
+        </div>
     </div>
 
     <div id="kategori-wrap" class="kategori-container"></div>
@@ -77,6 +91,7 @@
         const daftarFolder = ["posters/tauhid-001"];
         let kategoriData = {};
         let kategoriAktif = null;
+        let semuaPosterCache = [];
 
         function getFavorit() {
             const data = localStorage.getItem('dakwahFavorit');
@@ -105,12 +120,14 @@
                 p.style.display = fav.includes(id) ? 'block' : 'none';
             });
             document.getElementById('search').value = '';
+            document.getElementById('search-result').style.display = 'none';
         }
 
         function resetSemua() {
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => p.style.display = 'block');
             document.getElementById('search').value = '';
+            document.getElementById('search-result').style.display = 'none';
             document.querySelectorAll('.card-kategori').forEach(el => el.style.borderColor = '#222');
             kategoriAktif = null;
         }
@@ -131,6 +148,20 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        }
+
+        // --- FUNGSI COPY CAPTION ---
+        function copyCaptionDariElemen(btn) {
+            const poster = btn.closest('.poster');
+            const judul = poster.querySelector('h3')?.innerText || '';
+            const sub = poster.querySelector('.sub-caption')?.innerText || '';
+            const isi = poster.querySelector('div[style*="line-height"]')?.innerText || '';
+            const konten = `${judul}\n\n${sub}\n\n${isi}`;
+            navigator.clipboard.writeText(konten).then(() => {
+                alert("✅ Caption berhasil disalin!");
+            }).catch(() => {
+                alert("❌ Gagal menyalin. Silakan salin secara manual.");
+            });
         }
 
         async function loadPosters() {
@@ -168,6 +199,9 @@
 
                     if(!kategoriData[kategori]) kategoriData[kategori] = 0;
                     kategoriData[kategori]++;
+
+                    // Simpan ke cache untuk pencarian
+                    semuaPosterCache.push({ id: posterId, judul, kategori, tags: tagArray.join(' ') });
 
                     const isFav = favList.includes(posterId);
 
@@ -214,27 +248,6 @@
             kategoriWrap.innerHTML = htmlKategori;
         }
 
-        // --- FUNGSI COPY CAPTION BARU (PASTI BERHASIL) ---
-        function copyCaptionDariElemen(btn) {
-            // Ambil elemen poster terdekat dari tombol yang ditekan
-            const poster = btn.closest('.poster');
-            // Ambil Judul, Sub Judul, dan Isi Teks
-            const judul = poster.querySelector('h3')?.innerText || '';
-            const sub = poster.querySelector('.sub-caption')?.innerText || '';
-            const isi = poster.querySelector('div[style*="line-height"]')?.innerText || '';
-            
-            // Gabungkan
-            const konten = `${judul}\n\n${sub}\n\n${isi}`;
-            
-            // Salin ke clipboard
-            navigator.clipboard.writeText(konten).then(() => {
-                // Tampilkan notifikasi sukses (Alerta)
-                alert("✅ Caption berhasil disalin!");
-            }).catch(() => {
-                alert("❌ Gagal menyalin. Silakan salin secara manual.");
-            });
-        }
-
         function filterKategori(nama) {
             kategoriAktif = nama;
             document.querySelectorAll('.card-kategori').forEach(el => {
@@ -260,20 +273,58 @@
                     if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 300);
             }
+            document.getElementById('search-result').style.display = 'none';
         }
 
-        document.getElementById('search').addEventListener('input', function() {
+        // --- FITUR PENCARIAN DROPDOWN (SEPERTI SITUS LAMA) ---
+        const searchInput = document.getElementById('search');
+        const resultBox = document.getElementById('search-result');
+
+        searchInput.addEventListener('input', function() {
             const key = this.value.trim().toLowerCase();
-            const posters = document.querySelectorAll('.poster');
-            posters.forEach(poster => {
-                const text = poster.innerText.toLowerCase();
-                poster.style.display = text.includes(key) ? 'block' : 'none';
-            });
-            if(key === '') {
-                document.querySelectorAll('.card-kategori').forEach(el => el.style.borderColor = '#222');
-                if(kategoriAktif) filterKategori(kategoriAktif);
+            if (key === '') {
+                resultBox.style.display = 'none';
+                resultBox.innerHTML = '';
+                // Reset poster
+                document.querySelectorAll('.poster').forEach(p => p.style.display = 'block');
+                return;
+            }
+
+            // Filter data dari cache
+            const hasil = semuaPosterCache.filter(item => 
+                item.judul.toLowerCase().includes(key) ||
+                item.kategori.toLowerCase().includes(key) ||
+                item.tags.toLowerCase().includes(key)
+            );
+
+            // Tampilkan dropdown
+            if (hasil.length > 0) {
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = hasil.map(item => `
+                    <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
+                        <span>📚 ${item.judul}</span>
+                        <small>📂 ${item.kategori}</small>
+                    </div>
+                `).join('');
+            } else {
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
             }
         });
+
+        function pilihDariDropdown(id) {
+            document.getElementById('search-result').style.display = 'none';
+            document.getElementById('search').value = '';
+            // Tampilkan hanya poster yang dipilih
+            document.querySelectorAll('.poster').forEach(p => {
+                const pid = p.getAttribute('data-id');
+                p.style.display = (pid === id) ? 'block' : 'none';
+            });
+            // Scroll ke poster
+            setTimeout(() => {
+                document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
+        }
 
         loadPosters();
     </script>
