@@ -1,4 +1,3 @@
-
 ---
 judul: "Tauhid Sedari Dini"
 sub_judul: "Ajarkan anak dengan tauhid sejak dini sebagai pondasi agamanya"
