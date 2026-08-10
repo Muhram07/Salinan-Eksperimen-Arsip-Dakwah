@@ -8,8 +8,8 @@
         *{box-sizing:border-box;margin:0;padding:0;}
         body{background:#0b0b0b;color:#fff;font-family:Arial, Helvetica, sans-serif;padding:20px;max-width:1200px;margin:auto;}
         
-        /* --- NAVIGASI FAVORIT DI ATAS HEADER --- */
-        .nav-wrapper{display:flex;justify-content:space-between;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+        /* --- NAVIGASI FAVORIT DI ATAS (DIBERI JARAK) --- */
+        .nav-wrapper{display:flex;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;padding:0 5px;}
         .btn-nav{background:#FFD700;color:#111;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;}
         .btn-nav:hover{transform:scale(1.02);}
 
@@ -55,13 +55,13 @@
 </head>
 <body>
 
-    <!-- NAVIGASI DI ATAS (Tidak Menyentuh Kotak) -->
+    <!-- NAVIGASI DI ATAS -->
     <div class="nav-wrapper">
         <button class="btn-nav" onclick="tampilkanFavorit()">❤️ Favorit</button>
         <button class="btn-nav" onclick="resetSemua()">📚 Semua</button>
     </div>
 
-    <!-- HEADER UTAMA (BERSIH) -->
+    <!-- HEADER UTAMA -->
     <div class="header-container">
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
         <p>Perpustakaan Digital Poster Dakwah</p>
@@ -169,7 +169,6 @@
                     if(!kategoriData[kategori]) kategoriData[kategori] = 0;
                     kategoriData[kategori]++;
 
-                    const kontenLengkap = `${judul}\n\n${subJudul}\n\n${contentBody}`;
                     const isFav = favList.includes(posterId);
 
                     htmlPoster += `
@@ -183,7 +182,7 @@
                             <div class="actions">
                                 <button onclick="downloadPDF('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>
                                 <button onclick="downloadGambar('${imageSrc}', '${judul}.jpg')">🖼️ Download Gambar</button>
-                                <button onclick="copyKontenLengkap('${judul}','${subJudul}','${contentBody}')">📋 Copy Caption</button>
+                                <button onclick="copyCaptionDariElemen(this)">📋 Copy Caption</button>
                             </div>
                             ${tagArray.length > 0 ? `<div class="tags">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
                         </div>
@@ -215,13 +214,24 @@
             kategoriWrap.innerHTML = htmlKategori;
         }
 
-        function copyKontenLengkap(judul, subJudul, isi) {
-            // Gunakan template literal untuk menggabungkan teks
-            const konten = `${judul}\n\n${subJudul}\n\n${isi}`;
+        // --- FUNGSI COPY CAPTION BARU (PASTI BERHASIL) ---
+        function copyCaptionDariElemen(btn) {
+            // Ambil elemen poster terdekat dari tombol yang ditekan
+            const poster = btn.closest('.poster');
+            // Ambil Judul, Sub Judul, dan Isi Teks
+            const judul = poster.querySelector('h3')?.innerText || '';
+            const sub = poster.querySelector('.sub-caption')?.innerText || '';
+            const isi = poster.querySelector('div[style*="line-height"]')?.innerText || '';
+            
+            // Gabungkan
+            const konten = `${judul}\n\n${sub}\n\n${isi}`;
+            
+            // Salin ke clipboard
             navigator.clipboard.writeText(konten).then(() => {
+                // Tampilkan notifikasi sukses (Alerta)
                 alert("✅ Caption berhasil disalin!");
             }).catch(() => {
-                alert("❌ Gagal menyalin. Silakan copy secara manual.");
+                alert("❌ Gagal menyalin. Silakan salin secara manual.");
             });
         }
 
