@@ -11,7 +11,13 @@
         .hero h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
         .hero p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
         #search{width:100%;max-width:600px;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;}
-        
+
+        /* --- NAVIGASI FAVORIT --- */
+        .nav-top{position:absolute;top:20px;right:20px;display:flex;gap:10px;z-index:10;}
+        .btn-fav-nav{background:#FFD700;color:#111;border:none;padding:8px 14px;border-radius:20px;font-weight:bold;cursor:pointer;}
+        .btn-fav-nav:hover{transform:scale(1.05);}
+
+        /* --- KATEGORI --- */
         .kategori-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px;}
         .card-kategori{background:#1a1a1a;padding:15px;border-radius:14px;text-align:center;border:1px solid #222;cursor:pointer;transition:0.3s;}
         .card-kategori:hover{background:#242424;border-color:#FFD700;transform:translateY(-2px);}
@@ -19,8 +25,9 @@
         .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
         .card-kategori .jumlah{color:#FFD700;font-size:14px;}
 
+        /* --- POSTER --- */
         #post-list{display:grid;grid-template-columns:1fr;gap:20px;}
-        .poster{background:#151515;border:1px solid #252525;border-radius:20px;overflow:hidden;padding:20px;transition:0.3s;}
+        .poster{background:#151515;border:1px solid #252525;border-radius:20px;overflow:hidden;padding:20px;transition:0.3s;position:relative;}
         .poster:hover{border-color:#FFD700;}
         .poster img{width:100%;border-radius:12px;margin-bottom:15px;}
         .poster h3{color:#FFD700;font-size:24px;margin-bottom:10px;}
@@ -28,7 +35,15 @@
         .poster p{color:#ddd;line-height:1.8;font-size:16px;}
         .poster .tags{margin-top:15px;display:flex;flex-wrap:wrap;gap:8px;}
         .poster .tag{background:#FFD700;color:#111;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
-        .poster .pdf-link{display:inline-block;margin-top:15px;color:#FFD700;text-decoration:underline;font-weight:bold;}
+        .poster .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;}
+        .poster .actions button{background:#FFD700;color:#111;border:none;padding:8px 15px;border-radius:20px;font-weight:bold;cursor:pointer;}
+        .poster .actions button:hover{transform:scale(1.02);}
+
+        /* --- TOMBOL FAVORIT DI POSTER --- */
+        .btn-fav{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:0.3s;}
+        .btn-fav:hover{transform:scale(1.1);}
+        .btn-fav.favorit{color:#FFD700;}
+        .btn-fav:not(.favorit){color:#888;}
         
         .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
 
@@ -37,6 +52,12 @@
     </style>
 </head>
 <body>
+
+    <!-- NAVIGASI FAVORIT -->
+    <div class="nav-top">
+        <button class="btn-fav-nav" onclick="tampilkanFavorit()">❤️ Favorit</button>
+        <button class="btn-fav-nav" onclick="resetSemua()">📚 Semua</button>
+    </div>
 
     <div class="hero">
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
@@ -54,12 +75,59 @@
         let kategoriData = {};
         let kategoriAktif = null;
 
+        // --- FUNGSI FAVORIT (LOCAL STORAGE) ---
+        function getFavorit() {
+            const data = localStorage.getItem('dakwahFavorit');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function toggleFavorit(id, btn) {
+            let fav = getFavorit();
+            if(fav.includes(id)) {
+                fav = fav.filter(f => f !== id);
+                btn.classList.remove('favorit');
+                btn.innerText = '🤍';
+            } else {
+                fav.push(id);
+                btn.classList.add('favorit');
+                btn.innerText = '❤️';
+            }
+            localStorage.setItem('dakwahFavorit', JSON.stringify(fav));
+        }
+
+        function tampilkanFavorit() {
+            const fav = getFavorit();
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(p => {
+                const id = p.getAttribute('data-id');
+                p.style.display = fav.includes(id) ? 'block' : 'none';
+            });
+        }
+
+        function resetSemua() {
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(p => p.style.display = 'block');
+            document.getElementById('search').value = '';
+        }
+
+        // --- FUNGSI DOWNLOAD GAMBAR ---
+        function downloadGambar(url, nama) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nama || 'poster.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // --- LOAD POSTER UTAMA ---
         async function loadPosters() {
             const container = document.getElementById('post-list');
             const kategoriWrap = document.getElementById('kategori-wrap');
             container.innerHTML = '<div class="loading">📂 Memuat arsip...</div>';
             
             let htmlPoster = '';
+            const favList = getFavorit();
             
             for (let folder of daftarFolder) {
                 try {
@@ -83,21 +151,29 @@
                     const kategori = info.kategori || "Umum";
                     const tagArray = info.tags ? info.tags.split(',').map(t => t.trim()) : [];
                     const imageSrc = `${folder}/image.jpg`;
+                    const pdfSrc = info.pdf || null;
+                    const posterId = folder.replace('posters/', '');
 
                     if(!kategoriData[kategori]) kategoriData[kategori] = 0;
                     kategoriData[kategori]++;
 
                     const kontenLengkap = `${judul}\n\n${subJudul}\n\n${contentBody}`;
+                    const isFav = favList.includes(posterId);
 
                     htmlPoster += `
-                        <div class="poster" data-kategori="${kategori}">
+                        <div class="poster" data-id="${posterId}" data-kategori="${kategori}">
+                            <button class="btn-fav ${isFav ? 'favorit' : ''}" onclick="toggleFavorit('${posterId}', this)">${isFav ? '❤️' : '🤍'}</button>
                             <img src="${imageSrc}" alt="${judul}" onerror="this.style.display='none'">
                             <h3>${judul}</h3>
                             ${subJudul ? `<div class="sub-caption">${subJudul}</div>` : ''}
                             <div style="color:#ddd;line-height:1.8;">${marked.parse(contentBody)}</div>
-                            ${info.pdf ? `<a href="${info.pdf}" target="_blank" class="pdf-link">📄 Download PDF</a>` : ''}
+                            
+                            <div class="actions">
+                                ${pdfSrc ? `<button onclick="window.open('${pdfSrc}', '_blank')">📄 Download PDF</button>` : ''}
+                                <button onclick="downloadGambar('${imageSrc}', '${judul}.jpg')">🖼️ Download Gambar</button>
+                                <button onclick="copyKontenLengkap('${judul}','${subJudul}','${contentBody.replace(/'/g, "\\'")}')">📋 Copy Konten</button>
+                            </div>
                             ${tagArray.length > 0 ? `<div class="tags">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
-                            <button onclick="copyKontenLengkap('${judul}','${subJudul}','${contentBody.replace(/'/g, "\\'")}')" style="margin-top:15px;padding:8px 15px;background:#FFD700;color:#111;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">📋 Copy Konten</button>
                         </div>
                     `;
 
@@ -108,6 +184,7 @@
 
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
 
+            // Tampilkan Kategori
             let htmlKategori = '';
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
                 let icon = '📂';
@@ -135,7 +212,6 @@
 
         function filterKategori(nama) {
             kategoriAktif = nama;
-            // Highlight kategori
             document.querySelectorAll('.card-kategori').forEach(el => {
                 const namaEl = el.querySelector('.nama').innerText;
                 el.style.borderColor = (namaEl === nama) ? '#FFD700' : '#222';
@@ -153,29 +229,21 @@
                 }
             });
 
-            // Scroll otomatis ke bagian poster
-            setTimeout(() => {
-                const target = document.getElementById('post-list');
-                if(target && adaPoster) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 300);
+            if(adaPoster) {
+                setTimeout(() => {
+                    const target = document.getElementById('post-list');
+                    if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+            }
         }
 
         document.getElementById('search').addEventListener('input', function() {
             const key = this.value.trim().toLowerCase();
             const posters = document.querySelectorAll('.poster');
-            let adaHasil = false;
             posters.forEach(poster => {
                 const text = poster.innerText.toLowerCase();
-                if(text.includes(key)) {
-                    poster.style.display = 'block';
-                    adaHasil = true;
-                } else {
-                    poster.style.display = 'none';
-                }
+                poster.style.display = text.includes(key) ? 'block' : 'none';
             });
-            // Reset highlight jika pencarian menghapus filter
             if(key === '') {
                 document.querySelectorAll('.card-kategori').forEach(el => el.style.borderColor = '#222');
                 if(kategoriAktif) filterKategori(kategoriAktif);
