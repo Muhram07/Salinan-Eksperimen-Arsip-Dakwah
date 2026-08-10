@@ -50,11 +50,9 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
-        const daftarFolder = [
-            "posters/tauhid-001"
-        ];
-
+        const daftarFolder = ["posters/tauhid-001"];
         let kategoriData = {};
+        let kategoriAktif = null;
 
         async function loadPosters() {
             const container = document.getElementById('post-list');
@@ -136,20 +134,52 @@
         }
 
         function filterKategori(nama) {
+            kategoriAktif = nama;
+            // Highlight kategori
+            document.querySelectorAll('.card-kategori').forEach(el => {
+                const namaEl = el.querySelector('.nama').innerText;
+                el.style.borderColor = (namaEl === nama) ? '#FFD700' : '#222';
+            });
+
             const posters = document.querySelectorAll('.poster');
+            let adaPoster = false;
             posters.forEach(poster => {
                 const kategori = poster.getAttribute('data-kategori');
-                poster.style.display = kategori === nama ? 'block' : 'none';
+                if(kategori === nama) {
+                    poster.style.display = 'block';
+                    adaPoster = true;
+                } else {
+                    poster.style.display = 'none';
+                }
             });
+
+            // Scroll otomatis ke bagian poster
+            setTimeout(() => {
+                const target = document.getElementById('post-list');
+                if(target && adaPoster) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
         }
 
         document.getElementById('search').addEventListener('input', function() {
             const key = this.value.trim().toLowerCase();
             const posters = document.querySelectorAll('.poster');
+            let adaHasil = false;
             posters.forEach(poster => {
                 const text = poster.innerText.toLowerCase();
-                poster.style.display = text.includes(key) ? 'block' : 'none';
+                if(text.includes(key)) {
+                    poster.style.display = 'block';
+                    adaHasil = true;
+                } else {
+                    poster.style.display = 'none';
+                }
             });
+            // Reset highlight jika pencarian menghapus filter
+            if(key === '') {
+                document.querySelectorAll('.card-kategori').forEach(el => el.style.borderColor = '#222');
+                if(kategoriAktif) filterKategori(kategoriAktif);
+            }
         });
 
         loadPosters();
