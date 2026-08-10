@@ -8,22 +8,27 @@
         *{box-sizing:border-box;margin:0;padding:0;}
         body{background:#0b0b0b;color:#fff;font-family:Arial, Helvetica, sans-serif;padding:20px;max-width:1200px;margin:auto;}
         
+        /* --- NAVIGASI FAVORIT DI ATAS --- */
         .nav-wrapper{display:flex;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;padding:0 5px;}
         .btn-nav{background:#FFD700;color:#111;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;}
         .btn-nav:hover{transform:scale(1.02);}
 
+        /* --- HEADER UTAMA --- */
         .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
         .header-container h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
         .header-container p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
         
+        /* --- SEARCH WRAPPER (Untuk Dropdown) --- */
         .search-wrapper{position:relative;max-width:600px;margin:0 auto;}
         #search{width:100%;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;background:#fff;color:#111;}
         
+        /* --- DROPDOWN HASIL PENCARIAN --- */
         #search-result{position:absolute;top:100%;left:0;right:0;background:#151515;border:1px solid #252525;border-radius:14px;margin-top:5px;overflow:hidden;display:none;z-index:20;}
         .search-item{padding:12px 16px;border-bottom:1px solid #252525;cursor:pointer;display:flex;justify-content:space-between;color:#fff;transition:0.2s;}
         .search-item:hover{background:#252525;color:#FFD700;}
         .search-item small{color:#888;font-size:12px;}
 
+        /* --- KATEGORI --- */
         .kategori-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px;}
         .card-kategori{background:#1a1a1a;padding:15px;border-radius:14px;text-align:center;border:1px solid #222;cursor:pointer;transition:0.3s;}
         .card-kategori:hover{background:#242424;border-color:#FFD700;transform:translateY(-2px);}
@@ -31,6 +36,7 @@
         .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
         .card-kategori .jumlah{color:#FFD700;font-size:14px;}
 
+        /* --- POSTER --- */
         #post-list{display:grid;grid-template-columns:1fr;gap:20px;}
         .poster{background:#151515;border:1px solid #252525;border-radius:20px;overflow:hidden;padding:20px;transition:0.3s;position:relative;}
         .poster:hover{border-color:#FFD700;}
@@ -46,13 +52,17 @@
         .read-more-btn{display:inline-block;margin-top:10px;background:transparent;color:#FFD700;border:none;font-weight:bold;cursor:pointer;font-size:15px;padding:5px 0;text-decoration:underline;}
         .read-more-btn:hover{color:#fff;}
 
-        .poster .tags{margin-top:15px;display:flex;flex-wrap:wrap;gap:8px;}
-        .poster .tag{background:#FFD700;color:#111;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+        /* --- TAG (DIDESAIN ULANG) --- */
+        .poster .tags-wrapper{margin-top:15px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+        .poster .tags-label{color:#bdbdbd;font-size:14px;font-weight:bold;margin-right:4px;}
+        .poster .tag{background:transparent;color:#FFD700;border:1px solid #FFD700;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
         
+        /* --- TOMBOL AKSI --- */
         .poster .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;align-items:center;}
         .poster .actions button{background:#FFD700;color:#111;border:none;padding:8px 18px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;}
         .poster .actions button:hover{transform:scale(1.02);}
 
+        /* --- TOMBOL FAVORIT --- */
         .btn-fav{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:0.3s;}
         .btn-fav:hover{transform:scale(1.1);}
         .btn-fav.favorit{color:#FFD700;}
@@ -66,14 +76,18 @@
 </head>
 <body>
 
+    <!-- NAVIGASI DI ATAS -->
     <div class="nav-wrapper">
         <button class="btn-nav" onclick="tampilkanFavorit()">❤️ Favorit</button>
         <button class="btn-nav" onclick="resetSemua()">📚 Semua</button>
     </div>
 
+    <!-- HEADER UTAMA -->
     <div class="header-container">
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
         <p>Perpustakaan Digital Poster Dakwah</p>
+        
+        <!-- SEARCH WRAPPER -->
         <div class="search-wrapper">
             <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
             <div id="search-result"></div>
@@ -91,6 +105,7 @@
         let kategoriAktif = null;
         let semuaPosterCache = [];
 
+        /* --- FAVORIT --- */
         function getFavorit() {
             const data = localStorage.getItem('dakwahFavorit');
             return data ? JSON.parse(data) : [];
@@ -130,6 +145,7 @@
             kategoriAktif = null;
         }
 
+        /* --- DOWNLOAD --- */
         function downloadGambar(url, nama) {
             const a = document.createElement('a');
             a.href = url;
@@ -148,11 +164,11 @@
             document.body.removeChild(a);
         }
 
+        /* --- COPY CAPTION --- */
         function copyCaptionDariElemen(btn) {
             const poster = btn.closest('.poster');
             const judul = poster.querySelector('h3')?.innerText || '';
             const sub = poster.querySelector('.sub-caption')?.innerText || '';
-            // Ambil teks dari content wrapper yang sudah di-expand
             const contentWrapper = poster.querySelector('.poster-content-wrapper');
             const isi = contentWrapper ? contentWrapper.innerText : '';
             const konten = `${judul}\n\n${sub}\n\n${isi}`;
@@ -163,6 +179,7 @@
             });
         }
 
+        /* --- LOAD POSTER --- */
         async function loadPosters() {
             const container = document.getElementById('post-list');
             const kategoriWrap = document.getElementById('kategori-wrap');
@@ -204,6 +221,7 @@
                     const isFav = favList.includes(posterId);
                     const parsedContent = marked.parse(contentBody);
 
+                    // --- TAMPILAN HTML PER POSTER ---
                     htmlPoster += `
                         <div class="poster" data-id="${posterId}" data-kategori="${kategori}">
                             <button class="btn-fav ${isFav ? 'favorit' : ''}" onclick="toggleFavorit('${posterId}', this)">${isFav ? '❤️' : '🤍'}</button>
@@ -211,7 +229,6 @@
                             <h3>${judul}</h3>
                             ${subJudul ? `<div class="sub-caption">${subJudul}</div>` : ''}
                             
-                            <!-- WRAPPER KONTEN DENGAN READ MORE -->
                             <div class="poster-content-wrapper collapsed" id="content-${posterId}">
                                 ${parsedContent}
                             </div>
@@ -222,7 +239,14 @@
                                 <button onclick="downloadGambar('${imageSrc}', '${judul}.jpg')">🖼️ Download Gambar</button>
                                 <button onclick="copyCaptionDariElemen(this)">📋 Copy Caption</button>
                             </div>
-                            ${tagArray.length > 0 ? `<div class="tags">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+                            
+                            <!-- TAGS DENGAN LABEL BARU -->
+                            ${tagArray.length > 0 ? `
+                            <div class="tags-wrapper">
+                                <span class="tags-label">Tagar :</span>
+                                ${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}
+                            </div>
+                            ` : ''}
                         </div>
                     `;
 
@@ -233,6 +257,7 @@
 
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
 
+            /* --- KATEGORI --- */
             let htmlKategori = '';
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
                 let icon = '📂';
@@ -252,7 +277,7 @@
             kategoriWrap.innerHTML = htmlKategori;
         }
 
-        // --- FUNGSI BACA SELENGKAPNYA ---
+        /* --- BACA SELENGKAPNYA --- */
         function toggleReadMore(id) {
             const content = document.getElementById(`content-${id}`);
             const btn = document.getElementById(`btn-${id}`);
@@ -268,6 +293,7 @@
             }
         }
 
+        /* --- FILTER KATEGORI --- */
         function filterKategori(nama) {
             kategoriAktif = nama;
             document.querySelectorAll('.card-kategori').forEach(el => {
@@ -296,6 +322,7 @@
             document.getElementById('search-result').style.display = 'none';
         }
 
+        /* --- PENCARIAN --- */
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
 
