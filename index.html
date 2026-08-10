@@ -11,6 +11,14 @@
         .hero h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
         .hero p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
         #search{width:100%;max-width:600px;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;}
+        
+        .kategori-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px;}
+        .card-kategori{background:#1a1a1a;padding:15px;border-radius:14px;text-align:center;border:1px solid #222;cursor:pointer;transition:0.3s;}
+        .card-kategori:hover{background:#242424;border-color:#FFD700;transform:translateY(-2px);}
+        .card-kategori .icon{font-size:32px;}
+        .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
+        .card-kategori .jumlah{color:#FFD700;font-size:14px;}
+
         #post-list{display:grid;grid-template-columns:1fr;gap:20px;}
         .poster{background:#151515;border:1px solid #252525;border-radius:20px;overflow:hidden;padding:20px;transition:0.3s;}
         .poster:hover{border-color:#FFD700;}
@@ -21,29 +29,36 @@
         .poster .tags{margin-top:15px;display:flex;flex-wrap:wrap;gap:8px;}
         .poster .tag{background:#FFD700;color:#111;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
         .poster .pdf-link{display:inline-block;margin-top:15px;color:#FFD700;text-decoration:underline;font-weight:bold;}
+        
         .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
+
         @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr));}}
         @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr));}}
     </style>
 </head>
 <body>
+
     <div class="hero">
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
         <p>Perpustakaan Digital Poster Dakwah</p>
         <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
     </div>
+
+    <div id="kategori-wrap" class="kategori-container"></div>
     <div id="post-list" class="loading">Memuat arsip...</div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
-        // DAFTAR FOLDER POSTER (Tambah di sini jika buat poster baru)
         const daftarFolder = [
             "posters/tauhid-001"
         ];
 
+        let kategoriData = {};
+
         async function loadPosters() {
-            const container = document.getElementById("post-list");
+            const container = document.getElementById('post-list');
+            const kategoriWrap = document.getElementById('kategori-wrap');
             container.innerHTML = '<div class="loading">📂 Memuat arsip...</div>';
             
             let htmlPoster = '';
@@ -71,6 +86,9 @@
                     const tagArray = info.tags ? info.tags.split(',').map(t => t.trim()) : [];
                     const imageSrc = `${folder}/image.jpg`;
 
+                    if(!kategoriData[kategori]) kategoriData[kategori] = 0;
+                    kategoriData[kategori]++;
+
                     const kontenLengkap = `${judul}\n\n${subJudul}\n\n${contentBody}`;
 
                     htmlPoster += `
@@ -91,6 +109,24 @@
             }
 
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
+
+            let htmlKategori = '';
+            for(let [nama, jumlah] of Object.entries(kategoriData)) {
+                let icon = '📂';
+                if(nama === 'Tauhid') icon = '📚';
+                else if(nama === 'Bid\'ah') icon = '🚫';
+                else if(nama === 'Syirik') icon = '⚠️';
+                else if(nama === 'Aqidah') icon = '🕌';
+
+                htmlKategori += `
+                    <div class="card-kategori" onclick="filterKategori('${nama}')">
+                        <div class="icon">${icon}</div>
+                        <div class="nama">${nama}</div>
+                        <div class="jumlah">${jumlah} Poster</div>
+                    </div>
+                `;
+            }
+            kategoriWrap.innerHTML = htmlKategori;
         }
 
         function copyKontenLengkap(judul, subJudul, isi) {
@@ -98,6 +134,23 @@
             navigator.clipboard.writeText(konten);
             alert("✅ Konten lengkap berhasil disalin!");
         }
+
+        function filterKategori(nama) {
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(poster => {
+                const kategori = poster.getAttribute('data-kategori');
+                poster.style.display = kategori === nama ? 'block' : 'none';
+            });
+        }
+
+        document.getElementById('search').addEventListener('input', function() {
+            const key = this.value.trim().toLowerCase();
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(poster => {
+                const text = poster.innerText.toLowerCase();
+                poster.style.display = text.includes(key) ? 'block' : 'none';
+            });
+        });
 
         loadPosters();
     </script>
