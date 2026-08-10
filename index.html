@@ -7,15 +7,17 @@
     <style>
         *{box-sizing:border-box;margin:0;padding:0;}
         body{background:#0b0b0b;color:#fff;font-family:Arial, Helvetica, sans-serif;padding:20px;max-width:1200px;margin:auto;}
-        .hero{background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
-        .hero h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
-        .hero p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
+        
+        /* --- HEADER UTAMA --- */
+        .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
+        .header-container h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
+        .header-container p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
         #search{width:100%;max-width:600px;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;}
 
-        /* --- NAVIGASI FAVORIT --- */
-        .nav-top{position:absolute;top:20px;right:20px;display:flex;gap:10px;z-index:10;}
-        .btn-fav-nav{background:#FFD700;color:#111;border:none;padding:8px 14px;border-radius:20px;font-weight:bold;cursor:pointer;}
-        .btn-fav-nav:hover{transform:scale(1.05);}
+        /* --- NAVIGASI FAVORIT (KIRI & KANAN) --- */
+        .nav-fav-container{position:absolute;top:15px;left:15px;display:flex;gap:8px;}
+        .nav-fav-container button, .nav-all-container button{background:#FFD700;color:#111;border:none;padding:6px 14px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;}
+        .nav-all-container{position:absolute;top:15px;right:15px;}
 
         /* --- KATEGORI --- */
         .kategori-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px;}
@@ -35,31 +37,37 @@
         .poster p{color:#ddd;line-height:1.8;font-size:16px;}
         .poster .tags{margin-top:15px;display:flex;flex-wrap:wrap;gap:8px;}
         .poster .tag{background:#FFD700;color:#111;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
-        .poster .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;}
-        .poster .actions button{background:#FFD700;color:#111;border:none;padding:8px 15px;border-radius:20px;font-weight:bold;cursor:pointer;}
+        
+        /* --- TOMBOL AKSI --- */
+        .poster .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;align-items:center;}
+        .poster .actions button{background:#FFD700;color:#111;border:none;padding:8px 18px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;}
         .poster .actions button:hover{transform:scale(1.02);}
 
         /* --- TOMBOL FAVORIT DI POSTER --- */
-        .btn-fav{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:0.3s;}
+        .btn-fav{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:0.3s;}
         .btn-fav:hover{transform:scale(1.1);}
         .btn-fav.favorit{color:#FFD700;}
         .btn-fav:not(.favorit){color:#888;}
-        
-        .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
 
+        .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
         @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr));}}
         @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr));}}
     </style>
 </head>
 <body>
 
-    <!-- NAVIGASI FAVORIT -->
-    <div class="nav-top">
-        <button class="btn-fav-nav" onclick="tampilkanFavorit()">❤️ Favorit</button>
-        <button class="btn-fav-nav" onclick="resetSemua()">📚 Semua</button>
-    </div>
+    <!-- HEADER DENGAN TOMBOL KIRI KANAN -->
+    <div class="header-container">
+        <!-- Kiri -->
+        <div class="nav-fav-container">
+            <button onclick="tampilkanFavorit()">❤️ Favorit</button>
+        </div>
+        <!-- Kanan -->
+        <div class="nav-all-container">
+            <button onclick="resetSemua()">📚 Semua</button>
+        </div>
 
-    <div class="hero">
+        <!-- Konten Tengah -->
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
         <p>Perpustakaan Digital Poster Dakwah</p>
         <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
@@ -102,19 +110,32 @@
                 const id = p.getAttribute('data-id');
                 p.style.display = fav.includes(id) ? 'block' : 'none';
             });
+            document.getElementById('search').value = '';
         }
 
         function resetSemua() {
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => p.style.display = 'block');
             document.getElementById('search').value = '';
+            document.querySelectorAll('.card-kategori').forEach(el => el.style.borderColor = '#222');
+            kategoriAktif = null;
         }
 
-        // --- FUNGSI DOWNLOAD GAMBAR ---
+        // --- FUNGSI DOWNLOAD GAMBAR & PDF ---
         function downloadGambar(url, nama) {
             const a = document.createElement('a');
             a.href = url;
             a.download = nama || 'poster.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function downloadPDF(url, nama) {
+            // Menggunakan metode yang sama seperti download gambar (tidak membuka tab baru)
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nama || 'file.pdf';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -169,9 +190,9 @@
                             <div style="color:#ddd;line-height:1.8;">${marked.parse(contentBody)}</div>
                             
                             <div class="actions">
-                                ${pdfSrc ? `<button onclick="window.open('${pdfSrc}', '_blank')">📄 Download PDF</button>` : ''}
+                                ${pdfSrc ? `<button onclick="downloadPDF('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
                                 <button onclick="downloadGambar('${imageSrc}', '${judul}.jpg')">🖼️ Download Gambar</button>
-                                <button onclick="copyKontenLengkap('${judul}','${subJudul}','${contentBody.replace(/'/g, "\\'")}')">📋 Copy Konten</button>
+                                <button onclick="copyKontenLengkap('${judul}','${subJudul}','${contentBody.replace(/'/g, "\\'")}')">📋 Copy Caption</button>
                             </div>
                             ${tagArray.length > 0 ? `<div class="tags">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
                         </div>
@@ -207,7 +228,7 @@
         function copyKontenLengkap(judul, subJudul, isi) {
             const konten = `${judul}\n\n${subJudul}\n\n${isi}`;
             navigator.clipboard.writeText(konten);
-            alert("✅ Konten lengkap berhasil disalin!");
+            alert("✅ Caption berhasil disalin!");
         }
 
         function filterKategori(nama) {
