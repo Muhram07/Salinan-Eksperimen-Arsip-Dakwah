@@ -24,12 +24,15 @@
         .brand-wrapper .developer-title{color:#888;font-size:11px;letter-spacing:0.5px;margin-top:2px;}
         .brand-divider{width:80px;height:1px;background:#FFD700;margin:10px auto 15px auto;opacity:0.5;}
 
-        /* --- NAVIGASI FAVORIT (DENGAN TOMBOL BERANDA) --- */
-        .nav-wrapper{display:flex;justify-content:center;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap;}
+        /* --- NAVIGASI FAVORIT (KIRI & KANAN) --- */
+        .nav-top-wrapper{display:flex;justify-content:center;gap:15px;margin-bottom:10px;flex-wrap:wrap;}
         .btn-nav{background:#FFD700;color:#111;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;}
         .btn-nav:hover{transform:scale(1.02);}
-        .btn-nav-beranda{background:transparent;color:#FFD700;border:1px solid #FFD700;padding:6px 16px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;transition:0.3s;}
-        .btn-nav-beranda:hover{background:#FFD700;color:#111;}
+
+        /* --- MODE BERANDA (TENGAH, BARIS SENDIRI) --- */
+        .nav-middle-wrapper{display:flex;justify-content:center;margin-bottom:20px;}
+        .btn-nav-beranda{background:#FFD700;color:#111;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;}
+        .btn-nav-beranda:hover{transform:scale(1.02);}
 
         .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
         .header-container h1{color:#FFD700;font-size:32px;margin-bottom:5px;}
@@ -71,24 +74,23 @@
         .read-more-btn{display:inline-block;margin-top:10px;background:transparent;color:#FFD700;border:none;font-weight:bold;cursor:pointer;font-size:15px;padding:5px 0;text-decoration:underline;}
         .read-more-btn:hover{color:#fff;}
 
-        /* --- GARIS PEMISAH (HR) --- */
         .divider{width:60%;height:1px;background:#FFD700;margin:20px auto;opacity:0.3;}
 
-        .poster .tags-wrapper{margin-top:15px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;}
-        .poster .tags-label{color:#bdbdbd;font-size:14px;font-weight:bold;margin-right:4px;}
+        /* --- TAGAR (LABEL DI ATAS, TOMBOL DI BAWAH) --- */
+        .poster .tags-wrapper{margin-top:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+        .poster .tags-label{color:#bdbdbd;font-size:14px;font-weight:bold;margin-bottom:5px;}
+        .poster .tag-container{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;}
         .poster .tag{background:transparent;color:#FFD700;border:1px solid #FFD700;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
         
         .poster .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;align-items:center;justify-content:center;}
         .poster .actions button{background:#FFD700;color:#111;border:none;padding:8px 18px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;}
         .poster .actions button:hover{transform:scale(1.02);}
 
-        /* --- TOMBOL SOSIAL (Save, Kirim, DM) --- */
         .poster .sosial-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;align-items:center;justify-content:center;}
         .poster .sosial-actions button{background:transparent;color:#FFD700;border:1px solid #FFD700;padding:8px 16px;border-radius:25px;font-weight:bold;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;transition:0.3s;}
         .poster .sosial-actions button:hover{background:#FFD700;color:#111;transform:scale(1.02);}
         .poster .sosial-actions button .icon{font-size:18px;}
         
-        /* --- TOMBOL BOOKMARK (SAVE) --- */
         .btn-save{display:flex;align-items:center;gap:5px;background:transparent;border:1px solid #FFD700;padding:8px 16px;border-radius:25px;color:#FFD700;font-weight:bold;cursor:pointer;font-size:14px;transition:0.3s;}
         .btn-save:hover{background:#FFD700;color:#111;transform:scale(1.02);}
         .btn-save.saved{background:#FFD700;color:#111;border-color:#FFD700;}
@@ -118,10 +120,15 @@
         <div class="brand-divider"></div>
     </div>
 
-    <div class="nav-wrapper">
+    <!-- BARIS PERTAMA: KIRI & KANAN -->
+    <div class="nav-top-wrapper">
         <button class="btn-nav" onclick="tampilkanFavorit()">🔖 Disimpan</button>
-        <button class="btn-nav-beranda" onclick="resetSemua()">⬅️ Beranda ➡️</button>
         <button class="btn-nav" onclick="resetSemua()">📚 Semua</button>
+    </div>
+
+    <!-- BARIS KEDUA: MODE BERANDA (TENGAH) -->
+    <div class="nav-middle-wrapper">
+        <button class="btn-nav-beranda" onclick="resetSemua()">↖️ Mode Beranda ↗️</button>
     </div>
 
     <div class="header-container">
@@ -294,7 +301,9 @@
                             ${tagArray.length > 0 ? `
                             <div class="tags-wrapper">
                                 <span class="tags-label">Tagar :</span>
-                                ${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}
+                                <div class="tag-container">
+                                    ${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}
+                                </div>
                             </div>
                             ` : ''}
                         </div>
