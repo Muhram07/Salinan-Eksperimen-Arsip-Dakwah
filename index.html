@@ -8,13 +8,13 @@
         *{box-sizing:border-box;margin:0;padding:0;}
         body{background:#0b0b0b;color:#fff;font-family:Arial, Helvetica, sans-serif;padding:20px;max-width:1200px;margin:auto;}
         
-        /* --- HEADER UTAMA --- */
+        /* --- HEADER --- */
         .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;}
         .header-container h1{color:#FFD700;font-size:32px;margin-bottom:10px;}
         .header-container p{color:#d1d5db;font-size:16px;margin-bottom:20px;}
         #search{width:100%;max-width:600px;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;}
 
-        /* --- NAVIGASI FAVORIT (KIRI & KANAN) --- */
+        /* --- NAVIGASI FAVORIT --- */
         .nav-fav-container{position:absolute;top:15px;left:15px;display:flex;gap:8px;}
         .nav-fav-container button, .nav-all-container button{background:#FFD700;color:#111;border:none;padding:6px 14px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;}
         .nav-all-container{position:absolute;top:15px;right:15px;}
@@ -50,24 +50,22 @@
         .btn-fav:not(.favorit){color:#888;}
 
         .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
+        
         @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr));}}
         @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr));}}
     </style>
 </head>
 <body>
 
-    <!-- HEADER DENGAN TOMBOL KIRI KANAN -->
+    <!-- HEADER -->
     <div class="header-container">
-        <!-- Kiri -->
         <div class="nav-fav-container">
             <button onclick="tampilkanFavorit()">❤️ Favorit</button>
         </div>
-        <!-- Kanan -->
         <div class="nav-all-container">
             <button onclick="resetSemua()">📚 Semua</button>
         </div>
 
-        <!-- Konten Tengah -->
         <h1>📚 Arsip Dakwah Manhaj Salaf</h1>
         <p>Perpustakaan Digital Poster Dakwah</p>
         <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
@@ -83,7 +81,7 @@
         let kategoriData = {};
         let kategoriAktif = null;
 
-        // --- FUNGSI FAVORIT (LOCAL STORAGE) ---
+        // --- FAVORIT ---
         function getFavorit() {
             const data = localStorage.getItem('dakwahFavorit');
             return data ? JSON.parse(data) : [];
@@ -121,7 +119,7 @@
             kategoriAktif = null;
         }
 
-        // --- FUNGSI DOWNLOAD GAMBAR & PDF ---
+        // --- DOWNLOAD GAMBAR & PDF ---
         function downloadGambar(url, nama) {
             const a = document.createElement('a');
             a.href = url;
@@ -132,7 +130,6 @@
         }
 
         function downloadPDF(url, nama) {
-            // Menggunakan metode yang sama seperti download gambar (tidak membuka tab baru)
             const a = document.createElement('a');
             a.href = url;
             a.download = nama || 'file.pdf';
@@ -141,7 +138,7 @@
             document.body.removeChild(a);
         }
 
-        // --- LOAD POSTER UTAMA ---
+        // --- LOAD POSTER ---
         async function loadPosters() {
             const container = document.getElementById('post-list');
             const kategoriWrap = document.getElementById('kategori-wrap');
@@ -172,7 +169,7 @@
                     const kategori = info.kategori || "Umum";
                     const tagArray = info.tags ? info.tags.split(',').map(t => t.trim()) : [];
                     const imageSrc = `${folder}/image.jpg`;
-                    const pdfSrc = info.pdf || null;
+                    const pdfSrc = `${folder}/brosur.pdf`; // PERUBAHAN PENTING: PDF di folder yang sama
                     const posterId = folder.replace('posters/', '');
 
                     if(!kategoriData[kategori]) kategoriData[kategori] = 0;
@@ -190,7 +187,7 @@
                             <div style="color:#ddd;line-height:1.8;">${marked.parse(contentBody)}</div>
                             
                             <div class="actions">
-                                ${pdfSrc ? `<button onclick="downloadPDF('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
+                                <button onclick="downloadPDF('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>
                                 <button onclick="downloadGambar('${imageSrc}', '${judul}.jpg')">🖼️ Download Gambar</button>
                                 <button onclick="copyKontenLengkap('${judul}','${subJudul}','${contentBody.replace(/'/g, "\\'")}')">📋 Copy Caption</button>
                             </div>
@@ -205,7 +202,6 @@
 
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
 
-            // Tampilkan Kategori
             let htmlKategori = '';
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
                 let icon = '📂';
