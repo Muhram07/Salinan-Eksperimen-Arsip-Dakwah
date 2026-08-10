@@ -89,7 +89,7 @@
         
         <!-- SEARCH WRAPPER -->
         <div class="search-wrapper">
-            <input type="text" id="search" placeholder="🔍 Cari judul, kategori, atau tag...">
+            <input type="text" id="search" placeholder="🔍 Cari judul, sub judul, kategori, tag, atau isi caption...">
             <div id="search-result"></div>
         </div>
     </div>
@@ -216,7 +216,15 @@
                     if(!kategoriData[kategori]) kategoriData[kategori] = 0;
                     kategoriData[kategori]++;
 
-                    semuaPosterCache.push({ id: posterId, judul, kategori, tags: tagArray.join(' ') });
+                    // --- SIMPAN KE CACHE UNTUK PENCARIAN ---
+                    semuaPosterCache.push({ 
+                        id: posterId, 
+                        judul, 
+                        subJudul, // <--- PERUBAHAN PENTING: Simpan sub judul
+                        kategori, 
+                        tags: tagArray.join(' '),
+                        caption: contentBody
+                    });
 
                     const isFav = favList.includes(posterId);
                     const parsedContent = marked.parse(contentBody);
@@ -322,7 +330,7 @@
             document.getElementById('search-result').style.display = 'none';
         }
 
-        /* --- PENCARIAN --- */
+        /* --- PENCARIAN (MENCARI DI JUDUL, SUB JUDUL, KATEGORI, TAG, DAN CAPTION) --- */
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
 
@@ -335,10 +343,13 @@
                 return;
             }
 
+            // PERUBAHAN UTAMA: Cari di judul, sub judul, kategori, tag, DAN caption
             const hasil = semuaPosterCache.filter(item => 
                 item.judul.toLowerCase().includes(key) ||
+                item.subJudul.toLowerCase().includes(key) ||
                 item.kategori.toLowerCase().includes(key) ||
-                item.tags.toLowerCase().includes(key)
+                item.tags.toLowerCase().includes(key) ||
+                item.caption.toLowerCase().includes(key)
             );
 
             if (hasil.length > 0) {
