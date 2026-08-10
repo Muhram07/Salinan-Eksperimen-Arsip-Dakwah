@@ -70,14 +70,16 @@
         .poster .tags-wrapper{margin-top:15px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
         .poster .tags-label{color:#bdbdbd;font-size:14px;font-weight:bold;margin-right:4px;}
         .poster .tag{background:transparent;color:#FFD700;border:1px solid #FFD700;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+        
         .poster .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;align-items:center;}
         .poster .actions button{background:#FFD700;color:#111;border:none;padding:8px 18px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;}
         .poster .actions button:hover{transform:scale(1.02);}
 
-        .btn-fav{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:0.3s;}
-        .btn-fav:hover{transform:scale(1.1);}
-        .btn-fav.favorit{color:#FFD700;}
-        .btn-fav:not(.favorit){color:#888;}
+        /* --- TOMBOL SOSIAL BARU (Love, Share, DM) --- */
+        .poster .sosial-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;align-items:center;justify-content:center;}
+        .poster .sosial-actions button{background:transparent;color:#FFD700;border:1px solid #FFD700;padding:8px 16px;border-radius:25px;font-weight:bold;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;transition:0.3s;}
+        .poster .sosial-actions button:hover{background:#FFD700;color:#111;transform:scale(1.02);}
+        .poster .sosial-actions button .icon{font-size:18px;}
 
         .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
         
@@ -124,11 +126,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
-        // DAFTAR FOLDER DENGAN STRUKTUR KATEGORI INDUK YANG BARU
-        const daftarFolder = [
-            "posters/tauhid/tauhid-001",
-            "posters/syirik/syirik-001"
-        ];
+        const daftarFolder = ["posters/tauhid/tauhid-001", "posters/syirik/syirik-001"];
         let kategoriData = {};
         let kategoriAktif = null;
         let semuaPosterCache = [];
@@ -259,7 +257,6 @@
 
                     htmlPoster += `
                         <div class="poster" data-id="${posterId}" data-kategori="${kategori}">
-                            <button class="btn-fav ${isFav ? 'favorit' : ''}" onclick="toggleFavorit('${posterId}', this)">${isFav ? '❤️' : '🤍'}</button>
                             ${carouselHTML}
                             <h3>${judul}</h3>
                             ${subJudul ? `<div class="sub-caption">${subJudul}</div>` : ''}
@@ -269,6 +266,17 @@
                                 ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
                                 <button onclick="downloadMultiImage('${posterId}')">🖼️ Download Gambar</button>
                                 <button onclick="copyCaptionDariElemen(this)">📋 Copy Caption</button>
+                            </div>
+                            <div class="sosial-actions">
+                                <button onclick="toggleFavorit('${posterId}', this)" style="${isFav ? 'background:#FFD700;color:#111;' : ''}">
+                                    <span class="icon">${isFav ? '❤️' : '🤍'}</span> Favorite
+                                </button>
+                                <button onclick="sharePoster('${judul}', '${window.location.href}')">
+                                    <span class="icon">✈️</span> Share
+                                </button>
+                                <button onclick="dmInstagram()">
+                                    <span class="icon">💬</span> DM
+                                </button>
                             </div>
                             ${tagArray.length > 0 ? `
                             <div class="tags-wrapper">
@@ -378,16 +386,41 @@
             document.getElementById('search-result').style.display = 'none';
         }
 
+        /* --- FUNGSI SHARE & DM --- */
+        function sharePoster(judul, url) {
+            if (navigator.share) {
+                navigator.share({ title: judul, url: url });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("✅ Link poster berhasil disalin!");
+            }
+        }
+
+        function dmInstagram() {
+            // Mengarahkan langsung ke DM Instagram @tauhidsunnah_id
+            window.open('https://www.instagram.com/tauhidsunnah_id', '_blank');
+            // Atau jika ingin langsung ke halaman DM (hanya bisa via mobile app):
+            // window.location.href = 'instagram://direct?recipient=tauhidsunnah_id';
+        }
+
+        /* --- PENCARIAN DENGAN HIGHLIGHTER (STABILO) --- */
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
+
         searchInput.addEventListener('input', function() {
             const key = this.value.trim().toLowerCase();
             if (key === '') {
                 resultBox.style.display = 'none';
                 resultBox.innerHTML = '';
                 document.querySelectorAll('.poster').forEach(p => p.style.display = 'block');
+                // Hapus highlight jika pencarian kosong
+                document.querySelectorAll('.highlight').forEach(el => {
+                    el.outerHTML = el.innerText;
+                });
                 return;
             }
+
+            // Filter data
             const hasil = semuaPosterCache.filter(item => 
                 item.judul.toLowerCase().includes(key) ||
                 item.subJudul.toLowerCase().includes(key) ||
@@ -395,6 +428,8 @@
                 item.tags.toLowerCase().includes(key) ||
                 item.caption.toLowerCase().includes(key)
             );
+
+            // Tampilkan dropdown
             if (hasil.length > 0) {
                 resultBox.style.display = 'block';
                 resultBox.innerHTML = hasil.map(item => `
@@ -416,11 +451,64 @@
                 const pid = p.getAttribute('data-id');
                 p.style.display = (pid === id) ? 'block' : 'none';
             });
+            // Lakukan Highlight setelah poster dipilih
             setTimeout(() => {
+                const key = document.getElementById('search').value.trim().toLowerCase();
+                if (key) highlightText(key);
                 document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 200);
         }
 
+        // Fungsi untuk memberi highlight/stabilo pada teks
+        function highlightText(key) {
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(poster => {
+                if (poster.style.display !== 'none') {
+                    // Highlight di Judul
+                    const judulEl = poster.querySelector('h3');
+                    if (judulEl) {
+                        const judulText = judulEl.innerHTML;
+                        const regex = new RegExp(`(${key})`, 'gi');
+                        judulEl.innerHTML = judulText.replace(regex, '<span class="highlight" style="background:#FFD700;color:#111;">$1</span>');
+                    }
+                    // Highlight di Caption
+                    const contentWrapper = poster.querySelector('.poster-content-wrapper');
+                    if (contentWrapper) {
+                        const contentText = contentWrapper.innerHTML;
+                        const regex = new RegExp(`(${key})`, 'gi');
+                        contentWrapper.innerHTML = contentText.replace(regex, '<span class="highlight" style="background:#FFD700;color:#111;">$1</span>');
+                    }
+                }
+            });
+        }
+
+        /* --- OVERRIDE PENCARIAN UNTUK HIGHLIGHT --- */
+        // Kita simpan fungsi asli loadPosters agar tidak bentrok
+        const originalLoad = loadPosters;
+
+        // Setelah load selesai, kita attach event listener pencarian yang sudah dimodifikasi
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search');
+            const resultBox = document.getElementById('search-result');
+
+            // Event listener pencarian yang sudah diubah untuk highlight
+            searchInput.addEventListener('input', function() {
+                const key = this.value.trim().toLowerCase();
+                // ... (logika pencarian dan filter sama seperti di atas, kita gunakan fungsi yang sudah ada)
+                // Untuk highlight, kita panggil fungsi highlightText setelah filter selesai
+                setTimeout(() => {
+                    if (key !== '') {
+                        // Reset highlight sebelumnya
+                        document.querySelectorAll('.highlight').forEach(el => {
+                            el.outerHTML = el.innerText;
+                        });
+                        highlightText(key);
+                    }
+                }, 100);
+            });
+        });
+
+        // Panggil fungsi loadPosters
         loadPosters();
     </script>
 </body>
