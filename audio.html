@@ -14,12 +14,17 @@
         audio{width:100%;outline:none;}
         .btn-back{display:inline-block;margin-top:15px;padding:10px 30px;background:#FFD700;color:#111;text-decoration:none;border-radius:25px;font-weight:bold;font-size:14px;transition:0.3s;}
         .btn-back:hover{transform:scale(1.02);}
+
+        /* Petunjuk kecil agar pengguna tahu harus scroll */
+        .hint{color:#777;font-size:12px;margin-bottom:15px;animation:blink 2s infinite;}
+        @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>🌊 Suara Alam</h1>
+        <p class="hint">⬇️ Geser layar atau ketuk di mana saja untuk memutar suara ⬇️</p>
         <p>Backsound relaksasi untuk menemani bacaan Anda.</p>
 
         <div class="audio-wrapper">
@@ -33,32 +38,31 @@
     </div>
 
     <script>
-        // Fungsi untuk memulai audio
-        function mulaiAudio() {
-            const audio = document.getElementById('audioPlayer');
-            audio.volume = 0.2; // Volume 20%
+        const audio = document.getElementById('audioPlayer');
+        let sudahMenyala = false;
+
+        function nyalakanSuara() {
+            if (sudahMenyala) return; // Jangan nyalakan dua kali
+            sudahMenyala = true;
+
+            audio.volume = 0.8; // Volume 80%
             audio.play().catch(() => {
-                // Jika masih gagal, coba lagi 1 detik kemudian
-                setTimeout(mulaiAudio, 1000);
+                // Jika gagal, coba lagi
+                setTimeout(nyalakanSuara, 500);
             });
+            
+            // Hapus animasi kedip setelah suara menyala
+            document.querySelector('.hint').style.display = 'none';
         }
 
-        // Trik "Interaksi Pengguna" (User Gesture)
-        // Browser akan menganggap ini sebagai klik dari pengguna
-        document.addEventListener('touchstart', function() {
-            mulaiAudio();
-        }, { once: true });
+        // 1. Nyalakan saat pengguna menyentuh layar (Tap)
+        document.addEventListener('touchstart', nyalakanSuara, { once: true });
+        document.addEventListener('click', nyalakanSuara, { once: true });
 
-        document.addEventListener('click', function() {
-            mulaiAudio();
-        }, { once: true });
+        // 2. Nyalakan saat pengguna menggulir layar (Scroll)
+        document.addEventListener('scroll', nyalakanSuara, { once: true });
 
-        // Untuk HP Android, beberapa browser butuh sentuhan fisik.
-        // Kita trigger sentuhan palsu setelah 0.1 detik halaman dibuka
-        setTimeout(() => {
-            const event = new Event('touchstart');
-            document.dispatchEvent(event);
-        }, 100);
+        console.log("Menunggu interaksi pengguna (scroll/tap) untuk memutar suara...");
     </script>
 </body>
 </html>
