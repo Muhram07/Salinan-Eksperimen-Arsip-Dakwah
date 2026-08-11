@@ -325,7 +325,7 @@
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
                 let icon = '📂';
                 if(nama === 'Tauhid') icon = '📚';
-                else if(nama === 'bidah') icon = '🚫'; // Ikon Bid'ah jadi 🚫
+                else if(nama === 'bidah') icon = '🚫';
                 else if(nama === 'Syirik') icon = '⚠️';
                 else if(nama === 'Sunnah') icon = '📖';
                 else if(nama === 'Aqidah') icon = '🕌';
@@ -430,11 +430,14 @@
             window.open('https://www.instagram.com/tauhidsunnah_id', '_blank');
         }
 
+        /* --- LOGIKA PENCARIAN YANG SUDAH TERBUKTI BERHASIL --- */
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
 
         searchInput.addEventListener('input', function() {
             const key = this.value.trim().toLowerCase();
+            
+            // Reset jika pencarian kosong
             if (key === '') {
                 resultBox.style.display = 'none';
                 resultBox.innerHTML = '';
@@ -445,6 +448,7 @@
                 return;
             }
 
+            // Filter data dari cache (mencari di judul, sub judul, kategori, tag, dan caption)
             const hasil = semuaPosterCache.filter(item => 
                 item.judul.toLowerCase().includes(key) ||
                 item.subJudul.toLowerCase().includes(key) ||
@@ -453,6 +457,7 @@
                 item.caption.toLowerCase().includes(key)
             );
 
+            // Tampilkan dropdown
             if (hasil.length > 0) {
                 resultBox.style.display = 'block';
                 resultBox.innerHTML = hasil.map(item => `
@@ -465,13 +470,28 @@
                 resultBox.style.display = 'block';
                 resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
             }
+
+            // 1. Filter poster di layar (HANYA tampilkan yang cocok)
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(poster => {
+                const text = poster.innerText.toLowerCase();
+                poster.style.display = text.includes(key) ? 'block' : 'none';
+            });
+
+            // 2. Beri highlight/stabilo kuning pada teks yang cocok
+            setTimeout(() => {
+                document.querySelectorAll('.highlight').forEach(el => {
+                    el.outerHTML = el.innerText;
+                });
+                highlightText(key);
+            }, 100);
         });
 
         function pilihDariDropdown(id) {
             document.getElementById('search-result').style.display = 'none';
             document.getElementById('search').value = '';
             
-            // PERBAIKAN: Filter poster berdasarkan ID yang dipilih
+            // Filter poster berdasarkan ID yang dipilih
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
