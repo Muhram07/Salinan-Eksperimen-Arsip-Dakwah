@@ -32,10 +32,10 @@
         .btn-nav-beranda{background:#FFD700;color:#111;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;}
         .btn-nav-beranda:hover{transform:scale(1.02);}
 
-        /* --- HEADER UTAMA (DENGAN EFEK CAHAYA PREMIUM YANG LEBIH LAMBAT) --- */
-        .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;overflow:hidden;}
+        /* --- HEADER UTAMA --- */
+        .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;overflow:hidden;z-index:10;} /* Menambahkan z-index agar menutupi dropdown */
         
-        /* ANIMASI CAHAYA LEWAT (SHIMMER) - LEBIH LAMBAT */
+        /* ANIMASI CAHAYA LEWAT (SHIMMER) */
         .header-container::after {
             content: '';
             position: absolute;
@@ -45,8 +45,8 @@
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transform: skewX(-25deg);
-            animation: shine 6s infinite; /* Diubah dari 4s menjadi 6s agar lebih lambat */
-            pointer-events: none; /* Supaya tidak menghalangi klik */
+            animation: shine 6s infinite;
+            pointer-events: none;
         }
 
         @keyframes shine {
@@ -61,6 +61,7 @@
         .search-wrapper{position:relative;max-width:600px;margin:20px auto 0 auto;}
         #search{width:100%;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;background:#fff;color:#111;}
         
+        /* --- DROPDOWN HASIL PENCARIAN (DIPERBAIKI POSISINYA) --- */
         #search-result{position:absolute;top:100%;left:0;right:0;background:#151515;border:1px solid #252525;border-radius:14px;margin-top:5px;overflow:hidden;display:none;z-index:20;}
         .search-item{padding:12px 16px;border-bottom:1px solid #252525;cursor:pointer;display:flex;justify-content:space-between;color:#fff;transition:0.2s;}
         .search-item:hover{background:#252525;color:#FFD700;}
@@ -71,7 +72,6 @@
         .card-kategori:hover{background:#242424;border-color:#FFD700;transform:translateY(-2px);}
         .card-kategori .icon{font-size:32px;display:inline-block;animation:floatIcon 3s ease-in-out infinite;}
         
-        /* ANIMASI GOYANG / MENGAMBANG UNTUK EMOTE KATEGORI */
         @keyframes floatIcon {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-5px); }
@@ -130,10 +130,9 @@
         @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr));}}
         @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr));}}
 
-        /* --- TOMBOL SUARA MENGAPUNG (DENGAN ANIMASI GOYANG PELAN) --- */
+        /* --- TOMBOL SUARA MENGAPUNG --- */
         .sound-float-btn{position:fixed;bottom:20px;right:20px;z-index:100;width:55px;height:55px;border-radius:50%;background:#FFD700;color:#111;border:none;font-size:24px;box-shadow:0 4px 15px rgba(0,0,0,0.5);cursor:pointer;transition:0.3s;display:flex;justify-content:center;align-items:center;animation:floatBtn 3s ease-in-out infinite;}
         
-        /* ANIMASI GOYANG PELAN UNTUK TOMBOL BACKSOUND */
         @keyframes floatBtn {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-3px); }
@@ -173,7 +172,6 @@
         <button class="btn-nav-beranda" onclick="resetSemua()">↖️ Pilih Mode Beranda ↗️</button>
     </div>
 
-    <!-- HEADER DENGAN EFEK CAHAYA PREMIUM -->
     <div class="header-container">
         <h1>Arsip Dakwah</h1>
         <div class="sub-title">📚 Manhaj Salaf 📚</div>
@@ -496,51 +494,58 @@
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
 
+        // --- TEKNIK DEBOUNCE (ANTI LAG SAAT NGETIK) ---
+        let timeoutId;
+
         searchInput.addEventListener('input', function() {
-            const key = this.value.trim().toLowerCase();
-            if (key === '') {
-                resultBox.style.display = 'none';
-                resultBox.innerHTML = '';
-                document.querySelectorAll('.poster').forEach(p => p.style.display = 'block');
-                document.querySelectorAll('.highlight').forEach(el => {
-                    el.outerHTML = el.innerText;
+            clearTimeout(timeoutId); // Hapus pencarian sebelumnya jika user masih mengetik
+            
+            timeoutId = setTimeout(() => {
+                const key = this.value.trim().toLowerCase();
+                if (key === '') {
+                    resultBox.style.display = 'none';
+                    resultBox.innerHTML = '';
+                    document.querySelectorAll('.poster').forEach(p => p.style.display = 'block');
+                    document.querySelectorAll('.highlight').forEach(el => {
+                        el.outerHTML = el.innerText;
+                    });
+                    return;
+                }
+
+                const hasil = semuaPosterCache.filter(item => 
+                    item.judul.toLowerCase().includes(key) ||
+                    item.subJudul.toLowerCase().includes(key) ||
+                    item.kategori.toLowerCase().includes(key) ||
+                    item.tags.toLowerCase().includes(key) ||
+                    item.caption.toLowerCase().includes(key)
+                );
+
+                if (hasil.length > 0) {
+                    resultBox.style.display = 'block';
+                    resultBox.innerHTML = hasil.map(item => `
+                        <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
+                            <span>📚 ${item.judul}</span>
+                            <small>📂 ${item.kategori}</small>
+                        </div>
+                    `).join('');
+                } else {
+                    resultBox.style.display = 'block';
+                    resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
+                }
+
+                const posters = document.querySelectorAll('.poster');
+                posters.forEach(poster => {
+                    const text = poster.innerText.toLowerCase();
+                    poster.style.display = text.includes(key) ? 'block' : 'none';
                 });
-                return;
-            }
 
-            const hasil = semuaPosterCache.filter(item => 
-                item.judul.toLowerCase().includes(key) ||
-                item.subJudul.toLowerCase().includes(key) ||
-                item.kategori.toLowerCase().includes(key) ||
-                item.tags.toLowerCase().includes(key) ||
-                item.caption.toLowerCase().includes(key)
-            );
-
-            if (hasil.length > 0) {
-                resultBox.style.display = 'block';
-                resultBox.innerHTML = hasil.map(item => `
-                    <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
-                        <span>📚 ${item.judul}</span>
-                        <small>📂 ${item.kategori}</small>
-                    </div>
-                `).join('');
-            } else {
-                resultBox.style.display = 'block';
-                resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
-            }
-
-            const posters = document.querySelectorAll('.poster');
-            posters.forEach(poster => {
-                const text = poster.innerText.toLowerCase();
-                poster.style.display = text.includes(key) ? 'block' : 'none';
-            });
-
-            setTimeout(() => {
-                document.querySelectorAll('.highlight').forEach(el => {
-                    el.outerHTML = el.innerText;
-                });
-                highlightText(key);
-            }, 100);
+                setTimeout(() => {
+                    document.querySelectorAll('.highlight').forEach(el => {
+                        el.outerHTML = el.innerText;
+                    });
+                    highlightText(key);
+                }, 100);
+            }, 300); // Delay 300ms setelah user berhenti mengetik
         });
 
         function pilihDariDropdown(id) {
