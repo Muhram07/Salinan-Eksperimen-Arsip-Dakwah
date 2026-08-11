@@ -3,7 +3,7 @@ judul: "Sesajen: Tradisi Jahiliyah yang Bertentangan dengan Tauhid"
 sub_judul: "Jangan Jadi Manusia Primitif yang Masih Doyan Ikut Tradisi"
 kategori: "Syirik"
 tags: "syirik, sesembahan, sesajen, jahil, tauhid"
-pdf: "brosur.pdf"
+tidakpakepdf: "brosur.pdf"
 images: "1.jpg, 2.jpg"
 ---
 
