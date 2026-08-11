@@ -100,11 +100,11 @@
         @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr));}}
         @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr));}}
 
-        /* --- KONTROL AUDIO DI POJOK KANAN BAWAH --- */
-        .audio-control{position:fixed;bottom:20px;right:20px;z-index:100;display:none;background:#1a1a1a;border:1px solid #333;border-radius:50px;padding:10px 15px;box-shadow:0 4px 15px rgba(0,0,0,0.8);align-items:center;gap:10px;}
-        .audio-control button{background:transparent;border:none;color:#FFD700;font-size:20px;cursor:pointer;}
-        .audio-control input[type="range"]{width:80px;accent-color:#FFD700;background:#333;height:4px;border-radius:5px;}
-        .audio-control input[type="range"]::-webkit-slider-thumb{background:#FFD700;border:none;border-radius:50%;width:14px;height:14px;cursor:pointer;}
+        /* --- TOMBOL SUARA MENGAPUNG (ELEGAN) --- */
+        .sound-float-btn{position:fixed;bottom:20px;right:20px;z-index:100;width:55px;height:55px;border-radius:50%;background:#FFD700;color:#111;border:none;font-size:24px;box-shadow:0 4px 15px rgba(0,0,0,0.5);cursor:pointer;transition:0.3s;display:flex;justify-content:center;align-items:center;}
+        .sound-float-btn:hover{transform:scale(1.05);}
+        .sound-float-btn.playing{background:#1a1a1a;color:#FFD700;border:2px solid #FFD700;}
+        .sound-float-btn.silent{background:#333;color:#888;}
     </style>
 </head>
 <body>
@@ -147,12 +147,8 @@
     <div id="kategori-wrap" class="kategori-container"></div>
     <div id="post-list" class="loading">Memuat arsip...</div>
 
-    <!-- KONTROL AUDIO DI POJOK KANAN BAWAH -->
-    <div class="audio-control" id="audioControl">
-        <button id="playBtn" onclick="togglePlay()">▶️</button>
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
-        <span style="color:#888;font-size:12px;">🔊</span>
-    </div>
+    <!-- TOMBOL SUARA DI POJOK KANAN BAWAH -->
+    <button class="sound-float-btn silent" id="soundBtn" onclick="toggleSuara()">🔇</button>
 
     <audio id="bgAudio" loop>
         <source src="suara-ombak.mp3" type="audio/mpeg">
@@ -552,41 +548,27 @@
 
 
         // =============================================
-        // FITUR SUARA ALAM (DI BERANDA)
+        // FITUR SUARA (TOMbol DI POJOK KANAN BAWAH)
         // =============================================
         const bgAudio = document.getElementById('bgAudio');
-        const audioControl = document.getElementById('audioControl');
-        const playBtn = document.getElementById('playBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-        let sudahMenyala = false;
+        const soundBtn = document.getElementById('soundBtn');
+        let suaraMenyala = false;
 
-        function nyalakanSuara() {
-            if (sudahMenyala) return;
-            sudahMenyala = true;
-
-            bgAudio.volume = parseFloat(volumeSlider.value);
-            bgAudio.play();
-            audioControl.style.display = 'flex';
-            playBtn.innerText = '⏸️';
-        }
-
-        function togglePlay() {
-            if (bgAudio.paused) {
+        function toggleSuara() {
+            suaraMenyala = !suaraMenyala;
+            if (suaraMenyala) {
+                bgAudio.volume = 0.8; // Volume 80%
                 bgAudio.play();
-                playBtn.innerText = '⏸️';
+                soundBtn.innerHTML = '🔊';
+                soundBtn.classList.remove('silent');
+                soundBtn.classList.add('playing');
             } else {
                 bgAudio.pause();
-                playBtn.innerText = '▶️';
+                soundBtn.innerHTML = '🔇';
+                soundBtn.classList.remove('playing');
+                soundBtn.classList.add('silent');
             }
         }
-
-        volumeSlider.addEventListener('input', function() {
-            bgAudio.volume = parseFloat(this.value);
-        });
-
-        document.addEventListener('touchstart', nyalakanSuara, { once: true });
-        document.addEventListener('click', nyalakanSuara, { once: true });
-        document.addEventListener('scroll', nyalakanSuara, { once: true });
         // =============================================
     </script>
 </body>
