@@ -33,9 +33,9 @@
         .btn-nav-beranda:hover{transform:scale(1.02);}
 
         /* --- HEADER UTAMA --- */
-        .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;overflow:hidden;z-index:10;}
+        .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;overflow:visible;z-index:10;}
         
-        /* ANIMASI CAHAYA LEWAT (SHIMMER) */
+        /* ANIMASI CAHAYA LEWAT */
         .header-container::after {
             content: '';
             position: absolute;
@@ -58,11 +58,12 @@
         .header-container h1{color:#FFD700;font-size:32px;margin-bottom:5px;}
         .header-container .sub-title{color:#d1d5db;font-size:18px;font-weight:normal;}
         
-        .search-wrapper{position:relative;max-width:600px;margin:0 auto;}
-        #search{width:100%;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;background:#fff;color:#111;margin-bottom:0;}
+        /* --- SEARCH WRAPPER (KEMBALI DI DALAM HEADER) --- */
+        .search-wrapper{position:relative;max-width:600px;margin:20px auto 0 auto;}
+        #search{width:100%;padding:14px 20px;border:none;border-radius:14px;font-size:16px;outline:none;background:#fff;color:#111;}
         
-        /* --- DROPDOWN HASIL PENCARIAN (DIPINDAHKAN KE LUAR HEADER) --- */
-        #search-result{position:absolute;top:100%;left:0;right:0;background:#151515;border:1px solid #252525;border-radius:14px;margin-top:5px;overflow:hidden;display:none;z-index:999;width:100%;max-width:600px;left:50%;transform:translateX(-50%);}
+        /* --- DROPDOWN HASIL PENCARIAN (DIPERBAIKI AGAR KELUAR DARI HEADER) --- */
+        #search-result{position:absolute;top:100%;left:0;right:0;background:#151515;border:1px solid #252525;border-radius:14px;margin-top:5px;overflow:hidden;display:none;z-index:999;}
         .search-item{padding:12px 16px;border-bottom:1px solid #252525;cursor:pointer;display:flex;justify-content:space-between;color:#fff;transition:0.2s;}
         .search-item:hover{background:#252525;color:#FFD700;}
         .search-item small{color:#888;font-size:12px;}
@@ -172,15 +173,14 @@
         <button class="btn-nav-beranda" onclick="resetSemua()">↖️ Pilih Mode Beranda ↗️</button>
     </div>
 
+    <!-- HEADER DENGAN PENCARIAN DI DALAMNYA -->
     <div class="header-container">
         <h1>Arsip Dakwah</h1>
         <div class="sub-title">📚 Manhaj Salaf 📚</div>
-    </div>
-
-    <!-- SEARCH WRAPPER DIPINDAHKAN KE LUAR HEADER -->
-    <div class="search-wrapper">
-        <input type="text" id="search" placeholder="🔍 Cari judul, sub judul, kategori, tag, atau isi caption...">
-        <div id="search-result"></div>
+        <div class="search-wrapper">
+            <input type="text" id="search" placeholder="🔍 Cari judul, sub judul, kategori, tag, atau isi caption...">
+            <div id="search-result"></div>
+        </div>
     </div>
 
     <div id="kategori-wrap" class="kategori-container"></div>
@@ -496,7 +496,6 @@
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
 
-        // --- TEKNIK DEBOUNCE (ANTI LAG SAAT NGETIK) ---
         let timeoutId;
 
         searchInput.addEventListener('input', function() {
