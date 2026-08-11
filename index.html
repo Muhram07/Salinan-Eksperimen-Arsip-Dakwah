@@ -325,7 +325,7 @@
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
                 let icon = '📂';
                 if(nama === 'Tauhid') icon = '📚';
-                else if(nama === 'Bid\'ah') icon = '🚫';
+                else if(nama === 'bidah') icon = '🚫'; // Ikon Bid'ah jadi 🚫
                 else if(nama === 'Syirik') icon = '⚠️';
                 else if(nama === 'Sunnah') icon = '📖';
                 else if(nama === 'Aqidah') icon = '🕌';
@@ -470,10 +470,14 @@
         function pilihDariDropdown(id) {
             document.getElementById('search-result').style.display = 'none';
             document.getElementById('search').value = '';
-            document.querySelectorAll('.poster').forEach(p => {
+            
+            // PERBAIKAN: Filter poster berdasarkan ID yang dipilih
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
                 p.style.display = (pid === id) ? 'block' : 'none';
             });
+
             setTimeout(() => {
                 const key = document.getElementById('search').value.trim().toLowerCase();
                 if (key) highlightText(key);
