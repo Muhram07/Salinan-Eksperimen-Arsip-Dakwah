@@ -1,13 +1,13 @@
 ---
-judul: "Amalan-Amalan Bid'ah Sesudah Sholat Fardhu"
+judul: "Amalan-Amalan bidah Sesudah Sholat Fardhu"
 sub_judul: "Kenali dan Jauhi, Agar Ibadah Kita Tetap Sesuai Sunnah"
-kategori: "Bid'ah"
+kategori: "bidah"
 tags: "bidah, sunnah, sholat, dzikir, fardhu"
 pdf: "brosur.pdf"
 images: "1.jpg"
 ---
 
-Berikut adalah 7 amalan yang sering dilakukan setelah sholat fardhu, namun termasuk dalam kategori bid'ah (perkara baru yang tidak dicontohkan oleh Rasulullah shallallahu 'alaihi wa sallam):
+Berikut adalah 7 amalan yang sering dilakukan setelah sholat fardhu, namun termasuk dalam kategori bidah (perkara baru yang tidak dicontohkan oleh Rasulullah shallallahu 'alaihi wa sallam):
 
 **1. Mengusap muka sesudah salam**
 
@@ -20,7 +20,7 @@ Berikut adalah 7 amalan yang sering dilakukan setelah sholat fardhu, namun terma
 
 **5. Berdzikir dengan suara keras,** bacaan dzikir tidak ada dalilnya, beramai-ramai dan dikomandoi oleh imam, apalagi menggunakan pengeras suara.
 
-**6. Selesai dzikir, berdiri, bersalam-salaman mengelilingi imam,** sambil membaca shalawat bid'ah dengan suara keras.
+**6. Selesai dzikir, berdiri, bersalam-salaman mengelilingi imam,** sambil membaca shalawat bidah dengan suara keras.
 
 **7. Merutinkan/membiasakan doa setelah sholat fardhu,** kadang dipimpin oleh imam.
 
