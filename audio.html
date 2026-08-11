@@ -10,10 +10,8 @@
         .container{text-align:center;max-width:500px;padding:40px 20px;background:#1a1a1a;border-radius:20px;border:1px solid #333;}
         h1{color:#FFD700;font-size:24px;font-weight:bold;margin-bottom:10px;}
         p{color:#bdbdbd;font-size:14px;margin-bottom:20px;line-height:1.6;}
-        
         .audio-wrapper{background:#0d1117;padding:15px;border-radius:15px;border:1px solid #30363d;margin:10px 0;}
         audio{width:100%;outline:none;}
-        
         .btn-back{display:inline-block;margin-top:15px;padding:10px 30px;background:#FFD700;color:#111;text-decoration:none;border-radius:25px;font-weight:bold;font-size:14px;transition:0.3s;}
         .btn-back:hover{transform:scale(1.02);}
     </style>
@@ -22,11 +20,10 @@
 
     <div class="container">
         <h1>🌊 Suara Alam</h1>
-        <p>Backsound relaksasi untuk menemani bacaan Anda.<br>Volume akan naik perlahan agar tidak kaget.</p>
+        <p>Backsound relaksasi untuk menemani bacaan Anda.</p>
 
         <div class="audio-wrapper">
-            <!-- Trik Utama: autoplay + muted -->
-            <audio id="audioPlayer" controls loop autoplay muted>
+            <audio id="audioPlayer" controls loop>
                 <source src="suara-ombak.mp3" type="audio/mpeg">
                 Browser Anda tidak mendukung tag audio.
             </audio>
@@ -36,24 +33,31 @@
     </div>
 
     <script>
-        // Trik "Fade In" (Naikkan volume perlahan)
-        const audio = document.getElementById('audioPlayer');
-        
-        // Tunggu 0.1 detik agar browser selesai memuat, lalu buka mute
-        setTimeout(() => {
-            audio.muted = false; 
-            audio.volume = 0.05; // Mulai dari volume paling pelan
-        }, 100);
+        // Fungsi untuk memulai audio
+        function mulaiAudio() {
+            const audio = document.getElementById('audioPlayer');
+            audio.volume = 0.2; // Volume 20%
+            audio.play().catch(() => {
+                // Jika masih gagal, coba lagi 1 detik kemudian
+                setTimeout(mulaiAudio, 1000);
+            });
+        }
 
-        // Naikkan volume perlahan ke 20% dalam waktu 2 detik
-        let vol = 0.05;
-        const interval = setInterval(() => {
-            if (vol < 0.2) {
-                vol += 0.01;
-                audio.volume = vol;
-            } else {
-                clearInterval(interval); // Hentikan saat volume mencapai 20%
-            }
+        // Trik "Interaksi Pengguna" (User Gesture)
+        // Browser akan menganggap ini sebagai klik dari pengguna
+        document.addEventListener('touchstart', function() {
+            mulaiAudio();
+        }, { once: true });
+
+        document.addEventListener('click', function() {
+            mulaiAudio();
+        }, { once: true });
+
+        // Untuk HP Android, beberapa browser butuh sentuhan fisik.
+        // Kita trigger sentuhan palsu setelah 0.1 detik halaman dibuka
+        setTimeout(() => {
+            const event = new Event('touchstart');
+            document.dispatchEvent(event);
         }, 100);
     </script>
 </body>
