@@ -3,7 +3,7 @@ judul: "Sunnah Ketika Terbangun di Malam Hari"
 sub_judul: "Amalan Ringan dengan Pahala yang Besar"
 kategori: "Sunnah"
 tags: "sunnah, dzikir, doa, malam, ibadah"
-pdf: "brosur.pdf"
+pdf: ""
 images: "1.jpg, 2.jpg, 3.jpg, 4.jpg"
 ---
 
