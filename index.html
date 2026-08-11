@@ -291,7 +291,8 @@
                             <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
                             <button class="read-more-btn" id="btn-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
                             <div class="actions">
-                                ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
+                                ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : 
+                                `<button onclick="alert('PDF tidak tersedia dalam konten ini')" style="opacity:0.6;cursor:default;">📄 Download PDF</button>`}
                                 <button onclick="downloadMultiImage('${posterId}')">🖼️ Download Gambar</button>
                                 <button onclick="copyCaptionDariElemen(this)">📋 Copy Caption</button>
                             </div>
@@ -418,10 +419,11 @@
         }
 
         function sharePoster(judul, url) {
+            const textToCopy = `Cari "${judul}" di situs ini: ${url}`;
             if (navigator.share) {
                 navigator.share({ title: judul, url: url });
             } else {
-                navigator.clipboard.writeText(url);
+                navigator.clipboard.writeText(textToCopy);
                 alert("✅ Link poster berhasil disalin!");
             }
         }
@@ -430,14 +432,11 @@
             window.open('https://www.instagram.com/tauhidsunnah_id', '_blank');
         }
 
-        /* --- LOGIKA PENCARIAN YANG SUDAH TERBUKTI BERHASIL --- */
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
 
         searchInput.addEventListener('input', function() {
             const key = this.value.trim().toLowerCase();
-            
-            // Reset jika pencarian kosong
             if (key === '') {
                 resultBox.style.display = 'none';
                 resultBox.innerHTML = '';
@@ -448,7 +447,6 @@
                 return;
             }
 
-            // Filter data dari cache (mencari di judul, sub judul, kategori, tag, dan caption)
             const hasil = semuaPosterCache.filter(item => 
                 item.judul.toLowerCase().includes(key) ||
                 item.subJudul.toLowerCase().includes(key) ||
@@ -457,7 +455,6 @@
                 item.caption.toLowerCase().includes(key)
             );
 
-            // Tampilkan dropdown
             if (hasil.length > 0) {
                 resultBox.style.display = 'block';
                 resultBox.innerHTML = hasil.map(item => `
@@ -471,14 +468,12 @@
                 resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
             }
 
-            // 1. Filter poster di layar (HANYA tampilkan yang cocok)
             const posters = document.querySelectorAll('.poster');
             posters.forEach(poster => {
                 const text = poster.innerText.toLowerCase();
                 poster.style.display = text.includes(key) ? 'block' : 'none';
             });
 
-            // 2. Beri highlight/stabilo kuning pada teks yang cocok
             setTimeout(() => {
                 document.querySelectorAll('.highlight').forEach(el => {
                     el.outerHTML = el.innerText;
@@ -491,7 +486,6 @@
             document.getElementById('search-result').style.display = 'none';
             document.getElementById('search').value = '';
             
-            // Filter poster berdasarkan ID yang dipilih
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
@@ -516,13 +510,13 @@
                     if (judulEl) {
                         const judulText = judulEl.innerHTML;
                         const regex = new RegExp(`(${key})`, 'gi');
-                        judulEl.innerHTML = judulText.replace(regex, '<span class="highlight" style="background:#FFD700;color:#111;">$1</span>');
+                        judulEl.innerHTML = judulText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
                     }
                     const contentWrapper = poster.querySelector('.poster-content-wrapper');
                     if (contentWrapper) {
                         const contentText = contentWrapper.innerHTML;
                         const regex = new RegExp(`(${key})`, 'gi');
-                        contentWrapper.innerHTML = contentText.replace(regex, '<span class="highlight" style="background:#FFD700;color:#111;">$1</span>');
+                        contentWrapper.innerHTML = contentText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
                     }
                 }
             });
