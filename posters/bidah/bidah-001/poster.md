@@ -3,7 +3,7 @@ judul: "Amalan-Amalan bidah Sesudah Sholat Fardhu"
 sub_judul: "Kenali dan Jauhi, Agar Ibadah Kita Tetap Sesuai Sunnah"
 kategori: "bidah"
 tags: "bidah, sunnah, sholat, dzikir, fardhu"
-pdf: "brosur.pdf"
+xpdf: "brosur.pdf"
 images: "1.jpg"
 ---
 
