@@ -32,10 +32,10 @@
         .btn-nav-beranda{background:#FFD700;color:#111;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;}
         .btn-nav-beranda:hover{transform:scale(1.02);}
 
-        /* --- HEADER UTAMA (DENGAN EFEK CAHAYA PREMIUM) --- */
+        /* --- HEADER UTAMA (DENGAN EFEK CAHAYA PREMIUM YANG LEBIH LAMBAT) --- */
         .header-container{position:relative;background:linear-gradient(135deg,#0f172a,#111827,#1e293b);padding:40px 20px;text-align:center;border-radius:20px;margin-bottom:30px;overflow:hidden;}
         
-        /* ANIMASI CAHAYA LEWAT (SHIMMER) */
+        /* ANIMASI CAHAYA LEWAT (SHIMMER) - LEBIH LAMBAT */
         .header-container::after {
             content: '';
             position: absolute;
@@ -45,13 +45,13 @@
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transform: skewX(-25deg);
-            animation: shine 4s infinite;
+            animation: shine 6s infinite; /* Diubah dari 4s menjadi 6s agar lebih lambat */
             pointer-events: none; /* Supaya tidak menghalangi klik */
         }
 
         @keyframes shine {
             0% { left: -100%; }
-            20% { left: 100%; }
+            30% { left: 100%; }
             100% { left: 100%; }
         }
 
@@ -69,7 +69,15 @@
         .kategori-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px;}
         .card-kategori{background:#1a1a1a;padding:15px;border-radius:14px;text-align:center;border:1px solid #222;cursor:pointer;transition:0.3s;}
         .card-kategori:hover{background:#242424;border-color:#FFD700;transform:translateY(-2px);}
-        .card-kategori .icon{font-size:32px;}
+        .card-kategori .icon{font-size:32px;display:inline-block;animation:floatIcon 3s ease-in-out infinite;}
+        
+        /* ANIMASI GOYANG / MENGAMBANG UNTUK EMOTE KATEGORI */
+        @keyframes floatIcon {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
         .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
         .card-kategori .jumlah{color:#FFD700;font-size:14px;}
 
@@ -122,8 +130,16 @@
         @media(min-width:600px){#post-list{grid-template-columns:repeat(2,1fr));}}
         @media(min-width:900px){#post-list{grid-template-columns:repeat(3,1fr));}}
 
-        /* --- TOMBOL SUARA MENGAPUNG --- */
-        .sound-float-btn{position:fixed;bottom:20px;right:20px;z-index:100;width:55px;height:55px;border-radius:50%;background:#FFD700;color:#111;border:none;font-size:24px;box-shadow:0 4px 15px rgba(0,0,0,0.5);cursor:pointer;transition:0.3s;display:flex;justify-content:center;align-items:center;}
+        /* --- TOMBOL SUARA MENGAPUNG (DENGAN ANIMASI GOYANG PELAN) --- */
+        .sound-float-btn{position:fixed;bottom:20px;right:20px;z-index:100;width:55px;height:55px;border-radius:50%;background:#FFD700;color:#111;border:none;font-size:24px;box-shadow:0 4px 15px rgba(0,0,0,0.5);cursor:pointer;transition:0.3s;display:flex;justify-content:center;align-items:center;animation:floatBtn 3s ease-in-out infinite;}
+        
+        /* ANIMASI GOYANG PELAN UNTUK TOMBOL BACKSOUND */
+        @keyframes floatBtn {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0px); }
+        }
+
         .sound-float-btn:hover{transform:scale(1.05);}
         .sound-float-btn.playing{background:#1a1a1a;color:#FFD700;border:2px solid #FFD700;}
         .sound-float-btn.silent{background:#333;color:#888;}
