@@ -74,8 +74,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            
-            /* --- KUNCI PERBAIKAN: PERANGKAP SHINE DI DALAM HEADER --- */
             overflow: hidden;
             z-index: 10;
         }
@@ -116,7 +114,7 @@
         #search:focus{background:rgba(255, 255, 255, 0.25);border-color:rgba(212, 175, 55, 0.3);}
         #search::placeholder{color:#aaa;}
         
-        /* --- DROPDOWN PENCARIAN (BEBAS TURUN) --- */
+        /* --- DROPDOWN PENCARIAN --- */
         #search-result{
             position:absolute;top:calc(100% + 10px);left:0;right:0;
             background:rgba(21, 21, 21, 0.95); backdrop-filter: blur(10px);
@@ -143,8 +141,11 @@
         .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
         .card-kategori .jumlah{color:#D4AF37;font-size:14px;}
 
-        /* --- POSTER --- */
-        #post-list{display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center;transition:all 0.3s ease;}
+        /* --- POSTER (DENGAN ANIMASI LAMBAT 1 DETIK) --- */
+        #post-list{
+            display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center;
+            transition: all 1s ease; /* Animasi diperlambat menjadi 1 detik agar berguyur perlahan */
+        }
         .poster{
             background:rgba(21, 21, 21, 0.4);
             border:1px solid rgba(255, 255, 255, 0.08);
@@ -291,7 +292,7 @@
     <div id="post-list" class="loading">Memuat arsip...</div>
 
     <!-- TOMBOL FLOAT KIRI (Toggle View) -->
-    <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()">📋</button>
+    <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()">🔠</button>
     <!-- TOMBOL FLOAT KANAN (Sound) -->
     <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()">🔇</button>
 
@@ -700,7 +701,7 @@
 
 
         // =============================================
-        // FITUR TOGGLE VIEW (LIST / GRID)
+        // FITUR TOGGLE VIEW (LIST / GRID) DENGAN EMOTE CERDAS
         // =============================================
         function toggleView() {
             const list = document.getElementById('post-list');
@@ -708,12 +709,14 @@
             isCompactView = !isCompactView;
             
             if (isCompactView) {
+                // Berubah menjadi List (Kecil)
                 list.classList.add('compact-view');
-                btn.innerHTML = '🗂️'; // Icon Grid
+                btn.innerHTML = '🅰️'; // Emote untuk membesarkan kembali
                 btn.title = "Kembali ke Tampilan Grid";
             } else {
+                // Berubah menjadi Grid (Besar)
                 list.classList.remove('compact-view');
-                btn.innerHTML = '📋'; // Icon List
+                btn.innerHTML = '🔠'; // Emote untuk mengecilkan ke List
                 btn.title = "Ubah ke Tampilan Daftar Kompak";
             }
         }
