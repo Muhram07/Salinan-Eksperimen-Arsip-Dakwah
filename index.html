@@ -42,16 +42,32 @@
         .brand-wrapper .developer-title{color:#888;font-size:11px;letter-spacing:0.5px;margin-top:2px;}
         .brand-divider{width:80px;height:1px;background:#D4AF37;margin:10px auto 15px auto;opacity:0.5;}
 
-        /* --- TOMBOL NAVIGASI ATAS (SOFT GLASS) --- */
-        .nav-top-wrapper{display:flex;justify-content:center;gap:15px;margin-bottom:10px;flex-wrap:wrap;}
+        /* --- TOMBOL NAVIGASI ATAS (POSISI DIUBAH & ANIMASI KHUSUS) --- */
+        .nav-top-wrapper{
+            display:flex;
+            justify-content:space-between; /* Memisahkan tombol ke tepi kiri & kanan */
+            padding:0 15px; /* Geser dikit dari ujung agar pas dengan garis sirkuit */
+            margin-bottom:10px;
+            flex-wrap:wrap;
+        }
         .btn-nav{
             background: rgba(20, 20, 20, 0.6);
             backdrop-filter: blur(4px);
             border: 1px solid rgba(212, 175, 55, 0.4);
             color: #D4AF37; padding:8px 20px; border-radius:20px;
-            font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;box-shadow:0 4px 15px rgba(0,0,0,0.3);
+            font-weight:bold;cursor:pointer;font-size:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.3);
+            /* Animasi Khusus: Cepat tapi smooth untuk efek "mode dulu" */
+            transition: transform 0.15s ease-in-out, background 0.3s, box-shadow 0.3s;
         }
-        .btn-nav:hover{background:rgba(212, 175, 55, 0.15);transform:scale(1.02);}
+        .btn-nav:hover{
+            background:rgba(212, 175, 55, 0.15);
+            transform:scale(1.04); /* Membesar sedikit saat di-hover */
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+        .btn-nav:active{
+            transform: scale(0.90) !important; /* Mengecil cepat saat ditekan (seperti efek tombol fisik) */
+        }
 
         .nav-middle-wrapper{display:flex;justify-content:center;margin-bottom:20px;}
         .btn-nav-beranda{
@@ -140,10 +156,10 @@
         .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
         .card-kategori .jumlah{color:#D4AF37;font-size:14px;}
 
-        /* --- POSTER (DENGAN ANIMASI PERLAHAN & EFEK ZOOM) --- */
+        /* --- POSTER --- */
         #post-list{
             display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center;
-            transition: all 1.2s ease; /* Animasi transisi konten menjadi 1.2 detik */
+            transition: all 1.2s ease;
         }
         .poster{
             background:rgba(21, 21, 21, 0.4);
@@ -151,8 +167,6 @@
             border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative;
             backdrop-filter: blur(6px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-            
-            /* Fitur Zoom Pelan Saat Transisi List/Grid */
             transform: scale(1);
             transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.2s ease;
         }
@@ -238,22 +252,17 @@
         .view-float-btn.active{border-color:#D4AF37;color:#D4AF37;}
 
 
-        /* ==========================================================
-           PERBAIKAN: MODE DAFTAR KOMPAK (SLOW MOTION + ZOOM + RAPI)
-           ========================================================== */
-
+        /* --- MODE DAFTAR KOMPAK (LIST VIEW) --- */
         #post-list.compact-view {
             display: flex;
             flex-direction: column;
             gap: 12px;
             max-width: 900px;
-            margin: 0 auto; /* Rata Tengah */
+            margin: 0 auto;
             padding: 10px 0;
             align-items: center;
             width: 100%;
         }
-
-        /* Efek Zoom Out Pelan Saat Mode List Diaktifkan */
         #post-list.compact-view .poster {
             width: 100%;
             max-width: 800px;
@@ -263,12 +272,10 @@
             justify-content: flex-start;
             gap: 18px;
             border-radius: 16px;
-            flex-wrap: wrap; /* Agar rapi di HP dan Laptop */
-            transform: scale(0.98); /* Efek zoom out perlahan */
+            flex-wrap: wrap;
+            transform: scale(0.98);
             margin: 0 auto;
         }
-
-        /* Ukuran Foto Mini (Seragam, Tidak Aneh) */
         #post-list.compact-view .carousel-container {
             width: 70px;
             height: 70px;
@@ -282,12 +289,10 @@
         #post-list.compact-view .carousel-slide img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Menjaga proporsi gambar */
+            object-fit: cover;
             border-radius: 12px;
             max-height: 70px;
         }
-
-        /* Sembunyikan Elemen yang Tidak Perlu di Mode List */
         #post-list.compact-view .carousel-btn,
         #post-list.compact-view .poster-id-wrapper,
         #post-list.compact-view .read-more-btn,
@@ -296,8 +301,6 @@
         #post-list.compact-view .divider {
             display: none;
         }
-
-        /* Konten Teks di Sebelah Foto (Rata Kiri & Rapi) */
         #post-list.compact-view .poster-content-wrapper {
             max-height: 35px;
             font-size: 13px;
@@ -308,7 +311,6 @@
         #post-list.compact-view .poster-content-wrapper.collapsed {
             max-height: 35px;
         }
-
         #post-list.compact-view h3 {
             font-size: 16px;
             margin: 0 0 3px 0;
@@ -317,7 +319,6 @@
             flex: 1 1 100%;
             width: 100%;
         }
-
         #post-list.compact-view .sub-caption {
             font-size: 13px;
             margin: 0 0 5px 0;
@@ -325,8 +326,6 @@
             line-height: 1.2;
             width: 100%;
         }
-
-        /* Tombol Aksi di Mode List (Disederhanakan) */
         #post-list.compact-view .actions {
             gap: 6px;
             margin-top: 0;
@@ -799,7 +798,7 @@
 
 
         // =============================================
-        // FITUR TOGGLE VIEW (LIST / GRID) DENGAN EMOTE CERDAS
+        // FITUR TOGGLE VIEW (LIST / GRID)
         // =============================================
         function toggleView() {
             const list = document.getElementById('post-list');
@@ -808,11 +807,11 @@
             
             if (isCompactView) {
                 list.classList.add('compact-view');
-                btn.innerHTML = '🅰️'; // Membesarkan
+                btn.innerHTML = '🅰️';
                 btn.title = "Kembali ke Tampilan Grid";
             } else {
                 list.classList.remove('compact-view');
-                btn.innerHTML = '🔠'; // Mengecilkan ke List
+                btn.innerHTML = '🔠';
                 btn.title = "Ubah ke Tampilan Daftar Kompak";
             }
         }
@@ -842,4 +841,4 @@
         }
     </script>
 </body>
-    </html>
+                </html>
