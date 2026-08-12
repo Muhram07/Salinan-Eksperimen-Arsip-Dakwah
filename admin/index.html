@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Arsip Dakwah</title>
     <style>
-        /* ==========================================
-           TEMA SITUS PUBLIK TERBARU (GLASSMORPHISM)
-           ========================================== */
+        /* --- TEMA GLASSMORPHISM --- */
         *{box-sizing:border-box;margin:0;padding:0;}
         body{
             background: radial-gradient(circle at 50% 0%, #181818 0%, #0b0b0b 70%);
@@ -19,7 +17,6 @@
             min-height:100vh;
         }
 
-        /* --- ELEMEN LOGIN & DASHBOARD --- */
         #loginPage, #adminDashboard{width:100%;}
         .admin-box{
             background:rgba(21, 21, 21, 0.4);
@@ -33,7 +30,6 @@
         .admin-box h1, .admin-box h2{color:#D4AF37;text-align:center;letter-spacing:1px;}
         .admin-box p{color:#bdbdbd;text-align:center;margin-bottom:15px;}
 
-        /* --- TOMBOL & FORM --- */
         input, select, textarea{
             width:100%;padding:14px 20px;border:none;
             border-radius:16px;font-size:16px;outline:none;
@@ -47,7 +43,6 @@
         textarea{min-height:120px;resize:vertical;}
         select option{background:#111;}
 
-        /* TOMBOL DENGAN ANIMASI DENYUT (SAMA SEPERTI PUBLIK) */
         .btn-gold{
             background: rgba(20, 20, 20, 0.6);
             backdrop-filter: blur(4px);
@@ -56,13 +51,9 @@
             padding:12px 20px; border-radius:20px;
             font-weight:bold;cursor:pointer;font-size:16px;width:100%;
             box-shadow:0 4px 15px rgba(0,0,0,0.3);
-            animation: pulse-nav 2.5s ease-in-out infinite; /* Denyut otomatis */
+            animation: pulse-nav 2.5s ease-in-out infinite;
         }
-        @keyframes pulse-nav {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pulse-nav {0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
         .btn-gold:hover{background:rgba(212, 175, 55, 0.15);box-shadow:0 0 25px rgba(212,175,55,0.2);animation-play-state:paused;transform:scale(1.05);}
         .btn-gold:active{transform:scale(0.95);}
 
@@ -73,7 +64,6 @@
         }
         .btn-solid:hover{transform:scale(1.02);}
 
-        /* --- STATISTIK DASHBOARD --- */
         .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0;}
         .stat-card{
             background:rgba(26, 26, 26, 0.4);padding:15px;border-radius:16px;text-align:center;
@@ -82,11 +72,9 @@
         .stat-number{font-size:28px;font-weight:bold;color:#D4AF37;}
         .stat-label{font-size:13px;color:#bdbdbd;}
 
-        /* --- MENU ADMIN --- */
         .admin-menu{display:flex;flex-direction:column;gap:10px;}
         .admin-menu .btn-gold{width:100%;text-align:center;}
 
-        /* --- DAFTAR POSTER (LIST VIEW) --- */
         #poster-list-admin{display:flex;flex-direction:column;gap:10px;margin-top:15px;}
         .poster-item{
             display:flex;justify-content:space-between;align-items:center;
@@ -99,7 +87,6 @@
         .poster-item .cat{color:#888;font-size:12px;}
         .poster-item .actions{display:flex;gap:10px;flex-wrap:wrap;}
 
-        /* --- MODAL TEMPLATE --- */
         #templateModal{
             position:fixed;top:0;left:0;width:100%;height:100%;
             background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
@@ -122,15 +109,14 @@
             <h1>🔐 Admin Panel</h1>
             <p>Masukkan PIN untuk mengelola konten</p>
             <input type="password" id="pinInput" placeholder="PIN Admin" style="text-align:center;">
-            <button class="btn-solid" onclick="login()">Masuk</button>
-            <p id="loginStatus" style="margin-top:10px;color:#ff5555;font-size:14px;"></p>
+            <button class="btn-solid" id="loginBtn">Masuk</button>
+            <p id="loginStatus" style="margin-top:10px;color:#ff5555;font-size:14px;font-weight:bold;"></p>
         </div>
     </div>
 
     <!-- ==================== ADMIN DASHBOARD ==================== -->
     <div id="adminDashboard" style="display:none;">
         
-        <!-- Header Dashboard -->
         <div class="admin-box">
             <h1>📚 Dashboard Admin</h1>
             <p>Selamat datang di panel kontrol Arsip Dakwah</p>
@@ -142,33 +128,31 @@
             </div>
         </div>
 
-        <!-- Menu Navigasi Admin -->
         <div class="admin-box">
             <div class="admin-menu">
                 <button class="btn-gold" onclick="showSection('list')">📂 Lihat Semua Poster</button>
-                <button class="btn-gold" onclick="showSection('add')">➕ Tambah Poster Baru (Manual)</button>
+                <button class="btn-gold" onclick="showSection('add')">➕ Tambah Poster Baru (MD)</button>
                 <button class="btn-gold" onclick="logout()">🚪 Logout</button>
             </div>
         </div>
 
-        <!-- SECTION: DAFTAR POSTER -->
         <div id="sectionList" class="admin-box">
             <h2>📂 Daftar Poster</h2>
-            <p>Klik tombol "Template" untuk menyalin format Markdown yang siap diisi.</p>
+            <p style="color:#aaa;">Data diambil dari file <code>data/posters.json</code> (Database sisa).</p>
             <div id="poster-list-admin">
                 <p style="color:#666;">Memuat data...</p>
             </div>
         </div>
 
-        <!-- SECTION: TAMBAH POSTER (Panduan Manual) -->
         <div id="sectionAdd" class="admin-box" style="display:none;">
-            <h2>🖼 Tambah Poster Baru</h2>
+            <h2>🖼 Tambah Poster Baru (Manual)</h2>
             <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">
-                Karena sistem ini <b>statis</b>, Anda tidak bisa langsung upload. Ikuti langkah ini:
+                Karena sistem ini <b>statis (berbasis Markdown)</b>, Anda tidak bisa upload langsung. Ikuti langkah ini:
                 <br>1. Buat folder baru di <code>posters/kategori-baru/nama-poster-001</code>.
-                <br>2. Upload gambar <code>1.jpg</code>, <code>2.jpg</code> (jika ada).
-                <br>3. Buat file <code>poster.md</code> dan paste template di bawah ini.
-                <br>4. Commit ke GitHub.
+                <br>2. Upload gambar ke folder itu dengan nama <code>1.jpg</code>, <code>2.jpg</code> (jika ada).
+                <br>3. Buat file <code>poster.md</code> di dalam folder itu.
+                <br>4. Gunakan alat di bawah ini untuk membuat template MD, lalu paste ke file <code>poster.md</code>.
+                <br>5. Commit ke GitHub.
             </p>
             
             <label>Judul Poster</label>
@@ -212,86 +196,92 @@
     </div>
 
     <script>
-        // ==================== LOGIN SYSTEM ====================
-        const PIN = "123456";
+        document.addEventListener('DOMContentLoaded', function() {
+            const PIN = "123456";
+            const loginPage = document.getElementById('loginPage');
+            const dashboard = document.getElementById('adminDashboard');
+            const pinInput = document.getElementById('pinInput');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginStatus = document.getElementById('loginStatus');
 
-        function login() {
-            const input = document.getElementById('pinInput').value;
-            if(input === PIN) {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('adminDashboard').style.display = 'block';
+            if(localStorage.getItem('adminLogin') === 'true') {
+                loginPage.style.display = 'none';
+                dashboard.style.display = 'block';
                 loadData();
-            } else {
-                document.getElementById('loginStatus').innerText = '❌ PIN Salah!';
-                document.getElementById('pinInput').value = '';
             }
-        }
 
-        function logout() {
-            document.getElementById('adminDashboard').style.display = 'none';
-            document.getElementById('loginPage').style.display = 'block';
-            document.getElementById('pinInput').value = '';
-            document.getElementById('loginStatus').innerText = '';
-        }
-
-        // Enter key untuk login
-        document.getElementById('pinInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') login();
-        });
-
-        // ==================== NAVIGASI ====================
-        function showSection(section) {
-            document.getElementById('sectionList').style.display = 'none';
-            document.getElementById('sectionAdd').style.display = 'none';
-            if(section === 'list') document.getElementById('sectionList').style.display = 'block';
-            if(section === 'add') document.getElementById('sectionAdd').style.display = 'block';
-        }
-
-        // ==================== LOAD DATA & STATISTIK ====================
-        async function loadData() {
-            try {
-                const res = await fetch('/data/posters.json');
-                const posters = await res.json();
-                
-                // Update Statistik
-                document.getElementById('totalPoster').innerText = posters.length;
-                
-                const cats = new Set(posters.map(p => p.category));
-                document.getElementById('totalKategori').innerText = cats.size;
-                document.getElementById('totalFolder').innerText = posters.length;
-
-                // Render Daftar Poster
-                const container = document.getElementById('poster-list-admin');
-                container.innerHTML = posters.map(p => `
-                    <div class="poster-item">
-                        <div class="info">
-                            <div class="title">${p.title}</div>
-                            <div class="cat">📂 ${p.category} | 🏷️ ${(p.tags || []).join(', ')}</div>
-                        </div>
-                        <div class="actions">
-                            <button class="btn-gold" style="width:auto;padding:6px 14px;font-size:12px;" onclick="alert('Folder: posters/${p.category.toLowerCase()}/${p.id}')">📁 Cek Folder</button>
-                        </div>
-                    </div>
-                `).join('');
-
-            } catch(e) {
-                document.getElementById('poster-list-admin').innerHTML = `<p style="color:#ff5555;">❌ Gagal memuat data. Pastikan Cloudflare Pages sudah membaca `data/posters.json`.</p>`;
+            function handleLogin() {
+                if(pinInput.value === PIN) {
+                    localStorage.setItem('adminLogin', 'true');
+                    loginPage.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    loadData();
+                } else {
+                    loginStatus.innerText = '❌ PIN Salah!';
+                    pinInput.value = '';
+                    setTimeout(() => { loginStatus.innerText = ''; }, 3000);
+                }
             }
-        }
 
-        // ==================== GENERATE TEMPLATE MARKDOWN ====================
-        function generateTemplate() {
-            const judul = document.getElementById('inpJudul').value.trim();
-            const kategori = document.getElementById('inpKategori').value;
-            const tags = document.getElementById('inpTag').value.trim();
-            const caption = document.getElementById('inpCaption').value.trim();
-            const content = document.getElementById('inpContent').value.trim();
+            loginBtn.addEventListener('click', handleLogin);
+            pinInput.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') handleLogin();
+            });
 
-            if(!judul) return alert('Masukkan judul poster terlebih dahulu!');
+            window.logout = function() {
+                localStorage.removeItem('adminLogin');
+                dashboard.style.display = 'none';
+                loginPage.style.display = 'block';
+                pinInput.value = '';
+                loginStatus.innerText = '';
+            };
 
-            const id = `${kategori.toLowerCase().replace(/ /g, '-')}-${Date.now()}`;
-            
-            const template = `---
+            window.showSection = function(section) {
+                document.getElementById('sectionList').style.display = 'none';
+                document.getElementById('sectionAdd').style.display = 'none';
+                if(section === 'list') document.getElementById('sectionList').style.display = 'block';
+                if(section === 'add') document.getElementById('sectionAdd').style.display = 'block';
+            };
+
+            async function loadData() {
+                try {
+                    const res = await fetch('/data/posters.json');
+                    if(!res.ok) throw new Error("Gagal mengambil data");
+                    const posters = await res.json();
+                    
+                    document.getElementById('totalPoster').innerText = posters.length;
+                    const cats = new Set(posters.map(p => p.category));
+                    document.getElementById('totalKategori').innerText = cats.size;
+                    document.getElementById('totalFolder').innerText = posters.length;
+
+                    const container = document.getElementById('poster-list-admin');
+                    container.innerHTML = posters.map(p => `
+                        <div class="poster-item">
+                            <div class="info">
+                                <div class="title">${p.title}</div>
+                                <div class="cat">📂 ${p.category} | 🏷️ ${(p.tags || []).join(', ')}</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn-gold" style="width:auto;padding:6px 14px;font-size:12px;" onclick="alert('Folder: posters/${p.category.toLowerCase()}/${p.id}')">📁 Cek Folder</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch(e) {
+                    document.getElementById('poster-list-admin').innerHTML = `<p style="color:#ff5555;">❌ Gagal memuat data. Pastikan file data/posters.json sudah ada di GitHub (untuk keperluan statistik admin).</p>`;
+                }
+            }
+
+            window.generateTemplate = function() {
+                const judul = document.getElementById('inpJudul').value.trim();
+                const kategori = document.getElementById('inpKategori').value;
+                const tags = document.getElementById('inpTag').value.trim();
+                const caption = document.getElementById('inpCaption').value.trim();
+                const content = document.getElementById('inpContent').value.trim();
+
+                if(!judul) return alert('Masukkan judul poster terlebih dahulu!');
+
+                const id = `${kategori.toLowerCase().replace(/ /g, '-')}-${Date.now()}`;
+                const template = `---
 judul: "${judul}"
 sub_judul: "Tulis sub judul di sini"
 kategori: "${kategori}"
@@ -306,18 +296,18 @@ ${caption}
 
 ${content}`;
 
-            document.getElementById('mdOutput').value = template;
-            document.getElementById('templateModal').style.display = 'flex';
-        }
+                document.getElementById('mdOutput').value = template;
+                document.getElementById('templateModal').style.display = 'flex';
+            };
 
-        function closeTemplate() {
-            document.getElementById('templateModal').style.display = 'none';
-        }
+            window.closeTemplate = function() {
+                document.getElementById('templateModal').style.display = 'none';
+            };
 
-        // Tutup modal jika klik di luar area konten
-        document.getElementById('templateModal').addEventListener('click', function(e) {
-            if(e.target === this) closeTemplate();
+            document.getElementById('templateModal').addEventListener('click', function(e) {
+                if(e.target === this) closeTemplate();
+            });
         });
     </script>
 </body>
-  </html>
+    </html>
