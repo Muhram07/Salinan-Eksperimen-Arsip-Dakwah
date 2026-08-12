@@ -57,18 +57,16 @@
             color: #D4AF37; padding:8px 20px; border-radius:20px;
             font-weight:bold;cursor:pointer;font-size:15px;
             box-shadow:0 4px 15px rgba(0,0,0,0.3);
-            /* ANIMASI BERDENYUT SETIAP SAAT */
             animation: pulse-nav 2.5s ease-in-out infinite;
         }
         @keyframes pulse-nav {
             0% { transform: scale(1); }
-            50% { transform: scale(1.06); } /* Membesar perlahan */
-            100% { transform: scale(1); }    /* Kembali normal */
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
         }
         .btn-nav:hover{
             background:rgba(212, 175, 55, 0.15);
             box-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
-            /* Saat disentuh, tetap mempertahankan efek membesar agar tidak terputus */
             animation-play-state: paused; 
             transform: scale(1.08);
         }
@@ -98,7 +96,6 @@
             z-index: 10;
         }
         
-        /* ANIMASI CAHAYA */
         .header-container::after {
             content: '';
             position: absolute;
@@ -133,7 +130,6 @@
         #search:focus{background:rgba(255, 255, 255, 0.25);border-color:rgba(212, 175, 55, 0.3);}
         #search::placeholder{color:#aaa;}
         
-        /* --- DROPDOWN PENCARIAN --- */
         #search-result{
             position:absolute;top:calc(100% + 10px);left:0;right:0;
             background:rgba(21, 21, 21, 0.95); backdrop-filter: blur(10px);
@@ -144,7 +140,6 @@
         .search-item:hover{background:rgba(212, 175, 55, 0.15);color:#D4AF37;}
         .search-item small{color:#888;font-size:12px;}
 
-        /* --- KATEGORI --- */
         .kategori-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:30px;}
         .card-kategori{
             background:rgba(26, 26, 26, 0.4);
@@ -160,7 +155,6 @@
         .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
         .card-kategori .jumlah{color:#D4AF37;font-size:14px;}
 
-        /* --- POSTER --- */
         #post-list{
             display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center;
             transition: all 1.2s ease;
@@ -224,7 +218,6 @@
 
         .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
         
-        /* --- RESPONSIVE DESKTOP --- */
         @media(min-width:600px){
             #post-list:not(.compact-view){grid-template-columns:repeat(2, 1fr);}
         }
@@ -232,7 +225,6 @@
             #post-list:not(.compact-view){grid-template-columns:repeat(3, 1fr);}
         }
 
-        /* --- TOMBOL FLOAT KIRI & KANAN (SINKRON) --- */
         .btn-float-common{
             position:fixed; bottom:25px; z-index:100;
             width:55px; height:55px; border-radius:50%;
@@ -256,7 +248,6 @@
         .view-float-btn.active{border-color:#D4AF37;color:#D4AF37;}
 
 
-        /* --- MODE DAFTAR KOMPAK (LIST VIEW) --- */
         #post-list.compact-view {
             display: flex;
             flex-direction: column;
@@ -392,9 +383,7 @@
     <div id="kategori-wrap" class="kategori-container"></div>
     <div id="post-list" class="loading">Memuat arsip...</div>
 
-    <!-- TOMBOL FLOAT KIRI (Toggle View) -->
     <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()">🔠</button>
-    <!-- TOMBOL FLOAT KANAN (Sound) -->
     <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()">🔇</button>
 
     <audio id="bgAudio" loop>
@@ -410,7 +399,8 @@
             "posters/sunnah/sunnah-001",
             "posters/bidah/bidah-001",
             "posters/tafsir/tafsir-001",
-            "posters/hadits/hadits-001"
+            "posters/hadits/hadits-001",
+            "posters/aqidah/aqidah-001" // Kategori Aqidah Ditambahkan
         ];
         let kategoriData = {};
         let kategoriAktif = null;
@@ -599,7 +589,8 @@
                 else if(nama === 'Sunnah') icon = '👤';
                 else if(nama === 'Tafsir') icon = '📖';
                 else if(nama === 'Hadits') icon = '🗨️';
-                else if(nama === 'Aqidah') icon = '🕌';
+                else if(nama === 'Aqidah') icon = '🛡️'; // Tambahkan Ikon Aqidah
+                else if(nama === 'Aqidah') icon = '🛡️';
                 htmlKategori += `
                     <div class="card-kategori" onclick="filterKategori('${nama}')">
                         <div class="icon">${icon}</div>
