@@ -42,11 +42,11 @@
         .brand-wrapper .developer-title{color:#888;font-size:11px;letter-spacing:0.5px;margin-top:2px;}
         .brand-divider{width:80px;height:1px;background:#D4AF37;margin:10px auto 15px auto;opacity:0.5;}
 
-        /* --- TOMBOL NAVIGASI ATAS (POSISI DIUBAH & ANIMASI KHUSUS) --- */
+        /* --- TOMBOL NAVIGASI ATAS (ANIMASI BERDENYUT OTOMATIS) --- */
         .nav-top-wrapper{
             display:flex;
-            justify-content:space-between; /* Memisahkan tombol ke tepi kiri & kanan */
-            padding:0 15px; /* Geser dikit dari ujung agar pas dengan garis sirkuit */
+            justify-content:space-between;
+            padding:0 15px;
             margin-bottom:10px;
             flex-wrap:wrap;
         }
@@ -57,16 +57,20 @@
             color: #D4AF37; padding:8px 20px; border-radius:20px;
             font-weight:bold;cursor:pointer;font-size:15px;
             box-shadow:0 4px 15px rgba(0,0,0,0.3);
-            /* Animasi Khusus: Cepat tapi smooth untuk efek "mode dulu" */
-            transition: transform 0.15s ease-in-out, background 0.3s, box-shadow 0.3s;
+            /* ANIMASI BERDENYUT SETIAP SAAT */
+            animation: pulse-nav 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse-nav {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.06); } /* Membesar perlahan */
+            100% { transform: scale(1); }    /* Kembali normal */
         }
         .btn-nav:hover{
             background:rgba(212, 175, 55, 0.15);
-            transform:scale(1.04); /* Membesar sedikit saat di-hover */
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-        }
-        .btn-nav:active{
-            transform: scale(0.90) !important; /* Mengecil cepat saat ditekan (seperti efek tombol fisik) */
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
+            /* Saat disentuh, tetap mempertahankan efek membesar agar tidak terputus */
+            animation-play-state: paused; 
+            transform: scale(1.08);
         }
 
         .nav-middle-wrapper{display:flex;justify-content:center;margin-bottom:20px;}
@@ -841,4 +845,4 @@
         }
     </script>
 </body>
-                </html>
+    </html>
