@@ -116,7 +116,7 @@
         <div id="sectionAdd" class="admin-box" style="display:none;">
             <h2>🚀 Generator Poster Terpadu</h2>
             <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">
-                Isi data poster, upload gambar dan PDF, lalu klik tombol <b>Buat Poster</b>. Semua file (gambar, PDF, dan .md) akan otomatis terdownload dengan nama dan struktur folder yang sudah benar.
+                Isi data poster, upload gambar dan PDF, lalu klik tombol <b>Buat Poster</b>. Semua file (gambar, PDF, dan .md) akan otomatis terdownload dengan nama yang benar.
             </p>
             
             <label>Judul Poster</label>
@@ -156,10 +156,13 @@
                 <input type="file" id="inpFilePdf" accept=".pdf">
             </div>
 
-            <!-- TOMBOL UTAMA YANG DIMINTA -->
+            <!-- TOMBOL UTAMA -->
             <button class="btn-solid" onclick="buatPoster()" style="margin-bottom:10px;font-size:18px;padding:15px;">🚀 BUAT POSTER (Download Otomatis)</button>
             
-            <div id="statusProgress" style="display:none; text-align:center; color:#D4AF37; font-weight:bold; margin:10px 0;"></div>
+            <div id="statusProgress" style="display:none; text-align:left; background:#111; padding:15px; border-radius:12px; border:1px solid #D4AF37; margin-top:10px;">
+                <span style="color:#D4AF37; font-weight:bold;">📌 Status:</span>
+                <div id="statusText" style="color:#fff; margin-top:10px; line-height:1.6;"></div>
+            </div>
         </div>
     </div>
 
@@ -233,8 +236,9 @@
             // --- FUNGSI UTAMA MEMBUAT POSTER ---
             window.buatPoster = async function() {
                 const status = document.getElementById('statusProgress');
+                const statusText = document.getElementById('statusText');
                 status.style.display = 'block';
-                status.innerText = '⏳ Sedang memproses...';
+                statusText.innerHTML = '⏳ Sedang memproses...';
 
                 const judul = document.getElementById('inpJudul').value.trim();
                 const kategori = document.getElementById('inpKategori').value;
@@ -245,43 +249,42 @@
                 const pdfInput = document.getElementById('inpFilePdf');
 
                 if(!judul) {
-                    status.innerText = '❌ Masukkan judul poster terlebih dahulu!';
+                    statusText.innerHTML = '❌ Masukkan judul poster terlebih dahulu!';
                     setTimeout(() => status.style.display = 'none', 3000);
                     return;
                 }
 
-                // 1. Tentukan Nama Folder / Slug
+                // 1. Tentukan Nama Folder / Slug (Hanya untuk panduan UI)
                 const slug = toSlug(judul);
                 const folderPath = `posters/${kategori.toLowerCase()}/${slug}-001`;
 
                 // 2. Generate & Download Gambar (rename otomatis ke 1.jpg, 2.jpg...)
                 if(gambarInput.files.length > 0) {
-                    status.innerText = `📸 Mendownload ${gambarInput.files.length} gambar...`;
+                    statusText.innerHTML = `📸 Mendownload ${gambarInput.files.length} gambar...`;
                     for(let i = 0; i < gambarInput.files.length; i++) {
                         const file = gambarInput.files[i];
-                        // Mengubah nama file menjadi 1.jpg, 2.jpg (dipaksa .jpg agar seragam)
+                        // Mengubah nama file menjadi 1.jpg, 2.jpg
                         const newFileName = `${i + 1}.jpg`;
                         const url = URL.createObjectURL(file);
                         await downloadFile(url, newFileName);
-                        URL.revokeObjectURL(url); // bersihkan memori
+                        URL.revokeObjectURL(url);
                     }
                 }
 
-                // 3. Generate & Download PDF (rename ke brosur.pdf)
+                // 3. Generate & Download PDF (rename ke brosur.pdf MURNI)
                 if(pdfInput.files.length > 0) {
-                    status.innerText = `📄 Mendownload PDF (brosur.pdf)...`;
+                    statusText.innerHTML = `📄 Mendownload PDF (brosur.pdf)...`;
                     const file = pdfInput.files[0];
                     const url = URL.createObjectURL(file);
                     await downloadFile(url, 'brosur.pdf');
                     URL.revokeObjectURL(url);
                 }
 
-                // 4. Generate & Download Template .md
-                status.innerText = `📝 Mendownload poster.md...`;
+                // 4. Generate & Download Template .md (Hanya nama poster.md)
+                statusText.innerHTML = `📝 Mendownload poster.md...`;
                 
                 // Jumlah gambar berdasarkan yang diupload
                 const jmlGambar = gambarInput.files.length > 0 ? gambarInput.files.length : 1;
-                // Buat string images (1.jpg, 2.jpg)
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
 
                 const template = `---
@@ -297,16 +300,20 @@ ${content || 'Tulis isi caption di sini...'}`;
 
                 const blob = new Blob([template], { type: 'text/markdown' });
                 const url = URL.createObjectURL(blob);
-                // NAMA FILE OUTPUT DENGAN PATH FOLDER
-                const mdFileName = `${folderPath}/poster.md`;
-                await downloadFile(url, mdFileName);
+                
+                // PERBAIKAN: Nama file didownload hanya "poster.md"
+                await downloadFile(url, 'poster.md');
                 URL.revokeObjectURL(url);
 
-                status.innerHTML = '✅ Berhasil! Semua file sudah didownload dengan nama yang benar.<br>Silakan upload ke GitHub Anda.';
-                setTimeout(() => {
-                    status.style.display = 'none';
-                    status.innerText = '';
-                }, 5000);
+                // 5. Tampilkan Instruksi Upload yang jelas
+                statusText.innerHTML = `
+                    ✅ <b>Berhasil! Semua file sudah terunduh dengan nama yang benar.</b><br><br>
+                    📁 <b>Langkah Upload ke GitHub:</b><br>
+                    1. Buat folder baru di repositori Anda dengan alamat path: <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code style="background:#0b0b0b;padding:4px 8px;border-radius:6px;color:#D4AF37;font-size:14px;">${folderPath}</code><br><br>
+                    2. Pindahkan file <b>poster.md</b>, <b>brosur.pdf</b>, dan <b>1.jpg, 2.jpg, dst</b> yang baru saja terunduh ke dalam folder tersebut.<br><br>
+                    <span style="font-size:12px;color:#888;">💡 Catatan: Browser tidak mengizinkan pembuatan folder saat download, jadi langkah manual ini diperlukan.</span>
+                `;
             };
         });
     </script>
