@@ -116,7 +116,7 @@
         <div id="sectionAdd" class="admin-box" style="display:none;">
             <h2>🚀 Generator Poster Terpadu</h2>
             <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">
-                Isi data poster, upload gambar dan PDF, lalu klik tombol <b>Buat Poster</b>. Semua file (gambar, PDF, dan .md) akan otomatis terdownload dengan nama yang benar.
+                Isi data poster, upload gambar, pilih opsi PDF, lalu klik tombol <b>Buat Poster</b>. Semua file (gambar, PDF opsional, dan .md) akan otomatis terdownload dengan nama yang benar.
             </p>
             
             <label>Judul Poster</label>
@@ -150,10 +150,19 @@
                 <input type="file" id="inpFileGambar" multiple accept="image/*">
             </div>
 
+            <!-- OPSI PDF DINAMIS -->
             <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
-                <label style="font-weight:bold;color:#D4AF37;">📄 Upload & Rename PDF</label>
-                <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih file PDF. Nama file akan otomatis berubah menjadi <b>brosur.pdf</b>.</p>
-                <input type="file" id="inpFilePdf" accept=".pdf">
+                <label style="font-weight:bold;color:#D4AF37;">📄 Opsi PDF</label>
+                <select id="inpPdfOption" onchange="togglePdfInput()">
+                    <option value="tidak">Tidak Pakai PDF</option>
+                    <option value="ya">Pakai PDF</option>
+                </select>
+                
+                <!-- Bagian input PDF, akan muncul jika memilih 'ya' -->
+                <div id="pdfUploadWrapper" style="display:none; margin-top:15px;">
+                    <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih file PDF. Nama file akan otomatis berubah menjadi <b>brosur.pdf</b>.</p>
+                    <input type="file" id="inpFilePdf" accept=".pdf">
+                </div>
             </div>
 
             <!-- TOMBOL UTAMA -->
@@ -213,12 +222,24 @@
                 }
             };
 
+            // FUNGSI TOGGLE PDF
+            window.togglePdfInput = function() {
+                const val = document.getElementById('inpPdfOption').value;
+                const wrapper = document.getElementById('pdfUploadWrapper');
+                if(val === 'ya') {
+                    wrapper.style.display = 'block';
+                } else {
+                    wrapper.style.display = 'none';
+                    document.getElementById('inpFilePdf').value = ''; // Reset input file
+                }
+            }
+
             // Helper untuk mengubah judul menjadi slug folder
             function toSlug(text) {
                 return text.toLowerCase()
-                    .replace(/[^\w\s]/g, '') // buang karakter spesial
-                    .replace(/\s+/g, '-')    // ganti spasi jadi strip
-                    .replace(/-+/g, '-');    // hapus strip ganda
+                    .replace(/[^\w\s]/g, '') 
+                    .replace(/\s+/g, '-')    
+                    .replace(/-+/g, '-');    
             }
 
             // Helper untuk mendownload file dari URL object
@@ -229,7 +250,6 @@
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                // Beri jeda agar browser tidak memblokir multiple download
                 return new Promise(resolve => setTimeout(resolve, 500));
             }
 
@@ -247,6 +267,7 @@
                 const content = document.getElementById('inpContent').value.trim();
                 const gambarInput = document.getElementById('inpFileGambar');
                 const pdfInput = document.getElementById('inpFilePdf');
+                const pilihanPdf = document.getElementById('inpPdfOption').value;
 
                 if(!judul) {
                     statusText.innerHTML = '❌ Masukkan judul poster terlebih dahulu!';
@@ -254,16 +275,14 @@
                     return;
                 }
 
-                // 1. Tentukan Nama Folder / Slug (Hanya untuk panduan UI)
                 const slug = toSlug(judul);
                 const folderPath = `posters/${kategori.toLowerCase()}/${slug}-001`;
 
-                // 2. Generate & Download Gambar (rename otomatis ke 1.jpg, 2.jpg...)
+                // 2. Generate & Download Gambar
                 if(gambarInput.files.length > 0) {
                     statusText.innerHTML = `📸 Mendownload ${gambarInput.files.length} gambar...`;
                     for(let i = 0; i < gambarInput.files.length; i++) {
                         const file = gambarInput.files[i];
-                        // Mengubah nama file menjadi 1.jpg, 2.jpg
                         const newFileName = `${i + 1}.jpg`;
                         const url = URL.createObjectURL(file);
                         await downloadFile(url, newFileName);
@@ -271,19 +290,31 @@
                     }
                 }
 
-                // 3. Generate & Download PDF (rename ke brosur.pdf MURNI)
-                if(pdfInput.files.length > 0) {
-                    statusText.innerHTML = `📄 Mendownload PDF (brosur.pdf)...`;
-                    const file = pdfInput.files[0];
-                    const url = URL.createObjectURL(file);
-                    await downloadFile(url, 'brosur.pdf');
-                    URL.revokeObjectURL(url);
+                // 3. Logika PDF - SESUAI PERMINTAAN ANDA ("HACK TEMPLATE MD")
+                let pdfLine = '';
+                if(pilihanPdf === 'ya') {
+                    if(pdfInput.files.length > 0) {
+                        statusText.innerHTML = `📄 Mendownload PDF (brosur.pdf)...`;
+                        const file = pdfInput.files[0];
+                        const url = URL.createObjectURL(file);
+                        await downloadFile(url, 'brosur.pdf');
+                        URL.revokeObjectURL(url);
+                        
+                        // Jika Pakai PDF -> tulis "pdf: "
+                        pdfLine = `pdf: "brosur.pdf"`;
+                    } else {
+                        statusText.innerHTML = '❌ Anda memilih "Pakai PDF" tetapi belum mengupload filenya!';
+                        setTimeout(() => status.style.display = 'none', 3000);
+                        return;
+                    }
+                } else {
+                    // Jika TIDAK Pakai PDF -> tulis "tidakpakepdf: " (Sesuai hack MD yang diminta)
+                    pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
-                // 4. Generate & Download Template .md (Hanya nama poster.md)
+                // 4. Generate & Download Template .md
                 statusText.innerHTML = `📝 Mendownload poster.md...`;
                 
-                // Jumlah gambar berdasarkan yang diupload
                 const jmlGambar = gambarInput.files.length > 0 ? gambarInput.files.length : 1;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
 
@@ -293,7 +324,7 @@ sub_judul: "${caption || 'Tulis sub judul di sini'}"
 kategori: "${kategori}"
 tags: "${tags || 'tag1, tag2'}"
 images: "${imagesStr}"
-pdf: "brosur.pdf"
+${pdfLine}
 ---
 
 ${content || 'Tulis isi caption di sini...'}`;
@@ -301,17 +332,15 @@ ${content || 'Tulis isi caption di sini...'}`;
                 const blob = new Blob([template], { type: 'text/markdown' });
                 const url = URL.createObjectURL(blob);
                 
-                // PERBAIKAN: Nama file didownload hanya "poster.md"
                 await downloadFile(url, 'poster.md');
                 URL.revokeObjectURL(url);
 
-                // 5. Tampilkan Instruksi Upload yang jelas
                 statusText.innerHTML = `
                     ✅ <b>Berhasil! Semua file sudah terunduh dengan nama yang benar.</b><br><br>
                     📁 <b>Langkah Upload ke GitHub:</b><br>
                     1. Buat folder baru di repositori Anda dengan alamat path: <br>
                     &nbsp;&nbsp;&nbsp;&nbsp;<code style="background:#0b0b0b;padding:4px 8px;border-radius:6px;color:#D4AF37;font-size:14px;">${folderPath}</code><br><br>
-                    2. Pindahkan file <b>poster.md</b>, <b>brosur.pdf</b>, dan <b>1.jpg, 2.jpg, dst</b> yang baru saja terunduh ke dalam folder tersebut.<br><br>
+                    2. Pindahkan file <b>poster.md</b>, <b>${pilihanPdf === 'ya' ? 'brosur.pdf, ' : ''}1.jpg, 2.jpg, dst</b> yang baru saja terunduh ke dalam folder tersebut.<br><br>
                     <span style="font-size:12px;color:#888;">💡 Catatan: Browser tidak mengizinkan pembuatan folder saat download, jadi langkah manual ini diperlukan.</span>
                 `;
             };
