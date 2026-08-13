@@ -4,117 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Arsip Dakwah</title>
-    <!-- Library JSZip untuk kompresi file menjadi ZIP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- Library QRCode untuk generate QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* --- TEMA GLASSMORPHISM --- */
         *{box-sizing:border-box;margin:0;padding:0;}
         body{
             background: radial-gradient(circle at 50% 0%, #181818 0%, #0b0b0b 70%);
-            color:#fff;
-            font-family:'Segoe UI', Arial, sans-serif;
-            padding:20px;
-            max-width:1100px;
-            margin:auto;
-            min-height:100vh;
+            color:#fff; font-family:'Segoe UI', Arial, sans-serif; padding:20px; max-width:1100px; margin:auto; min-height:100vh;
         }
         #loginPage, #adminDashboard{width:100%;}
         .admin-box{
-            background:rgba(21, 21, 21, 0.4);
-            border:1px solid rgba(255, 255, 255, 0.08);
-            border-radius:24px;
-            padding:30px;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-            margin-bottom:20px;
+            background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px; padding:30px;
+            backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); margin-bottom:20px;
         }
         .admin-box h1, .admin-box h2{color:#D4AF37;text-align:center;letter-spacing:1px;}
         .admin-box p{color:#bdbdbd;text-align:center;margin-bottom:15px;}
 
         input, select, textarea{
-            width:100%;padding:14px 20px;border:none;
-            border-radius:16px;font-size:16px;outline:none;
-            background:rgba(255, 255, 255, 0.12); color:#fff;
-            box-shadow:0 4px 15px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom:15px;font-family:inherit;
+            width:100%;padding:14px 20px;border:none; border-radius:16px;font-size:16px;outline:none;
+            background:rgba(255, 255, 255, 0.12); color:#fff; box-shadow:0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom:15px; font-family:inherit;
         }
-        input[type="file"]{
-            padding:10px; cursor:pointer;
-        }
+        input[type="file"]{padding:10px; cursor:pointer;}
         input:focus, textarea:focus, select:focus{border-color:#D4AF37;background:rgba(255,255,255,0.2);}
         textarea{min-height:120px;resize:vertical;}
         select option{background:#111;}
 
         .btn-gold{
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            color: #D4AF37;
-            padding:12px 20px; border-radius:20px;
-            font-weight:bold;cursor:pointer;font-size:16px;width:100%;
-            box-shadow:0 4px 15px rgba(0,0,0,0.3);
-            animation: pulse-nav 2.5s ease-in-out infinite;
+            background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(4px); border: 1px solid rgba(212, 175, 55, 0.4);
+            color: #D4AF37; padding:12px 20px; border-radius:20px; font-weight:bold;cursor:pointer;font-size:16px;width:100%;
+            box-shadow:0 4px 15px rgba(0,0,0,0.3); animation: pulse-nav 2.5s ease-in-out infinite;
         }
         @keyframes pulse-nav {0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
         .btn-gold:hover{background:rgba(212, 175, 55, 0.15);box-shadow:0 0 25px rgba(212,175,55,0.2);animation-play-state:paused;transform:scale(1.05);}
         .btn-gold:active{transform:scale(0.95);}
 
         .btn-solid{
-            background: linear-gradient(135deg, #D4AF37, #E6B800); color:#111;
-            border:none;padding:12px 20px;border-radius:20px;font-weight:bold;cursor:pointer;width:100%;
-            transition:0.3s;
+            background: linear-gradient(135deg, #D4AF37, #E6B800); color:#111; border:none; padding:12px 20px; border-radius:20px;
+            font-weight:bold;cursor:pointer;width:100%; transition:0.3s;
         }
         .btn-solid:hover{transform:scale(1.02);}
 
         .admin-menu{display:flex;flex-direction:column;gap:10px;}
         .admin-menu .btn-gold{width:100%;text-align:center;}
-
-        #templateModal{
-            position:fixed;top:0;left:0;width:100%;height:100%;
-            background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
-            display:none;justify-content:center;align-items:center;z-index:9999;padding:20px;
-        }
-        .modal-content{
-            background:rgba(21,21,21,0.95);border:1px solid #D4AF37;
-            border-radius:24px;padding:25px;max-width:600px;width:100%;
-            box-shadow:0 20px 50px rgba(0,0,0,0.8);
-        }
-        .modal-content textarea{width:100%;height:250px;background:#0b0b0b;color:#D4AF37;font-family:monospace;font-size:14px;margin-top:10px;}
-        .close-modal{float:right;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;}
-
-        /* --- GAYA UNTUK QR CODE --- */
-        #qrcode-wrapper{
-            display:none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            margin-top: 20px;
-            border: 1px dashed #D4AF37;
-        }
-        #qrcode-wrapper p{
-            color: #aaa;
-            font-size: 13px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        #qrcode{
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            display: inline-block;
-        }
+        
+        #qrcode-wrapper{ display:none; flex-direction: column; align-items: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 16px; margin-top: 20px; border: 1px dashed #D4AF37;}
+        #qrcode{ background: white; padding: 15px; border-radius: 12px; display: inline-block;}
+        
+        #statusProgress{ display:none; text-align:left; background:#111; padding:15px; border-radius:12px; border:1px solid #D4AF37; margin-top:10px;}
     </style>
 </head>
 <body>
-
-    <!-- ==================== LOGIN PAGE ==================== -->
     <div id="loginPage">
         <div class="admin-box" style="max-width:400px;margin:auto;margin-top:100px;">
             <h1>🔐 Admin Panel</h1>
@@ -125,51 +65,34 @@
         </div>
     </div>
 
-    <!-- ==================== ADMIN DASHBOARD ==================== -->
     <div id="adminDashboard" style="display:none;">
-        
         <div class="admin-box">
             <h1>📚 Dashboard Admin</h1>
             <p>Selamat datang di panel kontrol Arsip Dakwah</p>
         </div>
-
         <div class="admin-box">
             <div class="admin-menu">
-                <button class="btn-gold" onclick="alert('Karena sistem Markdown/Folder, daftar poster hanya bisa dilihat melalui GitHub.')">📂 Lihat Semua Poster</button>
+                <button class="btn-gold" onclick="window.open('https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/tree/main/posters', '_blank')">📂 Lihat Semua Poster</button>
                 <button class="btn-gold" onclick="showSection('add')">➕ Buat Poster Baru</button>
                 <button class="btn-gold" onclick="logout()">🚪 Logout</button>
             </div>
         </div>
 
-        <!-- SECTION: GENERATOR POSTER TERPADU -->
         <div id="sectionAdd" class="admin-box" style="display:none;">
             <h2>🚀 Generator Poster Terpadu</h2>
-            <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">
-                Isi data poster, upload gambar, pilih opsi PDF, lalu klik tombol <b>Buat Poster</b>. Semua file akan dirangkum menjadi satu file ZIP, dan sistem membuat QR Code untuk path folder GitHub Anda.
-            </p>
+            <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">Isi data poster, upload gambar, pilih opsi PDF, lalu klik <b>Buat Poster</b>. Panel ini otomatis menyesuaikan kategori berdasarkan data terbaru dari manifest.</p>
             
             <label>Judul Poster</label>
             <input type="text" id="inpJudul" placeholder="Masukkan judul poster">
-
-            <label>Kategori</label>
-            <select id="inpKategori">
-                <option value="Tauhid">Tauhid</option>
-                <option value="Sunnah">Sunnah</option>
-                <option value="Bid'ah">Bid'ah</option>
-                <option value="Syirik">Syirik</option>
-                <option value="Aqidah">Aqidah</option>
-                <option value="Fikih">Fikih</option>
-                <option value="Hadits">Hadits</option>
-                <option value="Tafsir">Tafsir</option>
-                <option value="Akhlak">Akhlak</option>
-            </select>
+            
+            <label>Kategori (Ketik untuk mencari atau menambah baru)</label>
+            <input type="text" id="inpKategori" list="kategori-list" placeholder="Misal: Tauhid, Aqidah, atau Fiqih...">
+            <datalist id="kategori-list"></datalist>
 
             <label>Tag (pisahkan koma)</label>
             <input type="text" id="inpTag" placeholder="sunnah, dzikir, sholat">
-
             <label>Sub Judul / Caption Singkat</label>
             <textarea id="inpCaption" placeholder="Tulis sub judul di sini..."></textarea>
-
             <label>Isi Caption Lengkap</label>
             <textarea id="inpContent" placeholder="Tulis isi caption lengkap di sini..."></textarea>
 
@@ -185,22 +108,18 @@
                     <option value="tidak">Tidak Pakai PDF</option>
                     <option value="ya">Pakai PDF</option>
                 </select>
-                
                 <div id="pdfUploadWrapper" style="display:none; margin-top:15px;">
                     <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih file PDF. Nama file akan otomatis berubah menjadi <b>brosur.pdf</b>.</p>
                     <input type="file" id="inpFilePdf" accept=".pdf">
                 </div>
             </div>
 
-            <!-- TOMBOL UTAMA & FITUR ZIP / QR CODE -->
             <button class="btn-solid" onclick="buatPoster()" style="margin-bottom:10px;font-size:18px;padding:15px;">🚀 BUAT POSTER (Download ZIP + QR Code)</button>
             
-            <div id="statusProgress" style="display:none; text-align:left; background:#111; padding:15px; border-radius:12px; border:1px solid #D4AF37; margin-top:10px;">
+            <div id="statusProgress">
                 <span style="color:#D4AF37; font-weight:bold;">📌 Status:</span>
                 <div id="statusText" style="color:#fff; margin-top:10px; line-height:1.6;"></div>
             </div>
-
-            <!-- CONTAINER QR CODE -->
             <div id="qrcode-wrapper">
                 <p>📱 Scan QR Code ini untuk membuka path folder poster di GitHub.</p>
                 <div id="qrcode"></div>
@@ -221,6 +140,7 @@
             if(localStorage.getItem('adminLogin') === 'true') {
                 loginPage.style.display = 'none';
                 dashboard.style.display = 'block';
+                loadKategoriList(); // Load kategori saat dashboard terbuka
             }
 
             function handleLogin() {
@@ -228,6 +148,7 @@
                     localStorage.setItem('adminLogin', 'true');
                     loginPage.style.display = 'none';
                     dashboard.style.display = 'block';
+                    loadKategoriList(); // Load kategori saat login sukses
                 } else {
                     loginStatus.innerText = '❌ PIN Salah!';
                     pinInput.value = '';
@@ -267,25 +188,35 @@
                 }
             }
 
-            // Helper untuk mengubah judul menjadi slug folder
-            function toSlug(text) {
-                return text.toLowerCase()
-                    .replace(/[^\w\s]/g, '') 
-                    .replace(/\s+/g, '-')    
-                    .replace(/-+/g, '-');    
+            // FUNGSI BARU: Mengambil kategori dari manifest.json untuk Datalist
+            async function loadKategoriList() {
+                const datalist = document.getElementById('kategori-list');
+                try {
+                    const res = await fetch('/manifest.json');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if(data.kategori_list && data.kategori_list.length > 0) {
+                            datalist.innerHTML = data.kategori_list.map(k => `<option value="${k}">`).join('');
+                            return;
+                        }
+                    }
+                } catch (e) { /* Fallback jika manifest belum ada */ }
+                
+                // Fallback Hardcode jika fetch gagal atau manifest belum dibuat bot
+                const fallback = ["Tauhid", "Sunnah", "Bid'ah", "Syirik", "Aqidah", "Fikih", "Hadits", "Tafsir", "Akhlak"];
+                datalist.innerHTML = fallback.map(k => `<option value="${k}">`).join('');
             }
 
-            // Helper mendownload file dari URL object
+            function toSlug(text) {
+                return text.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+            }
+
             function downloadFile(url, fileName) {
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                a.href = url; a.download = fileName;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
             }
 
-            // --- FUNGSI UTAMA MEMBUAT POSTER ---
             window.buatPoster = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
@@ -293,14 +224,12 @@
                 const qrContainer = document.getElementById('qrcode');
                 const qrLinkText = document.getElementById('qrLinkText');
 
-                // Reset tampilan QR Code
-                qrWrapper.style.display = 'none';
-                qrContainer.innerHTML = '';
+                qrWrapper.style.display = 'none'; qrContainer.innerHTML = '';
                 status.style.display = 'block';
                 statusText.innerHTML = '⏳ Mengemas file menjadi satu ZIP...';
 
                 const judul = document.getElementById('inpJudul').value.trim();
-                const kategori = document.getElementById('inpKategori').value;
+                const kategori = document.getElementById('inpKategori').value.trim();
                 const tags = document.getElementById('inpTag').value.trim();
                 const caption = document.getElementById('inpCaption').value.trim();
                 const content = document.getElementById('inpContent').value.trim();
@@ -308,8 +237,8 @@
                 const pdfInput = document.getElementById('inpFilePdf');
                 const pilihanPdf = document.getElementById('inpPdfOption').value;
 
-                if(!judul) {
-                    statusText.innerHTML = '❌ Masukkan judul poster terlebih dahulu!';
+                if(!judul || !kategori) {
+                    statusText.innerHTML = '❌ Masukkan Judul dan Kategori terlebih dahulu!';
                     setTimeout(() => status.style.display = 'none', 3000);
                     return;
                 }
@@ -317,18 +246,12 @@
                 const slug = toSlug(judul);
                 const namaFolder = `${kategori.toLowerCase()}/${slug}-001`;
                 const namaZip = `${slug}-001.zip`;
-
-                // Inisialisasi JSZip
                 const zip = new JSZip();
 
-                // 1. Masukkan Gambar ke dalam ZIP (1.jpg, 2.jpg...)
                 if(gambarInput.files.length > 0) {
                     statusText.innerHTML = `📸 Memasukkan ${gambarInput.files.length} gambar ke ZIP...`;
                     for(let i = 0; i < gambarInput.files.length; i++) {
-                        const file = gambarInput.files[i];
-                        const newFileName = `${i + 1}.jpg`;
-                        // Masukkan file asli (Blob) langsung ke ZIP tanpa rename manual di PC
-                        zip.file(newFileName, file);
+                        zip.file(`${i + 1}.jpg`, gambarInput.files[i]);
                     }
                 } else {
                     statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
@@ -336,13 +259,11 @@
                     return;
                 }
 
-                // 2. Masukkan PDF (jika ada) ke dalam ZIP (brosur.pdf)
                 let pdfLine = '';
                 if(pilihanPdf === 'ya') {
                     if(pdfInput.files.length > 0) {
                         statusText.innerHTML = `📄 Memasukkan PDF ke ZIP...`;
-                        const file = pdfInput.files[0];
-                        zip.file('brosur.pdf', file);
+                        zip.file('brosur.pdf', pdfInput.files[0]);
                         pdfLine = `pdf: "brosur.pdf"`;
                     } else {
                         statusText.innerHTML = '❌ Anda memilih "Pakai PDF" tetapi belum mengupload filenya!';
@@ -353,11 +274,9 @@
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
-                // 3. Generate & Masukkan poster.md ke dalam ZIP
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
-
                 const template = `---
 judul: "${judul}"
 sub_judul: "${caption || 'Tulis sub judul di sini'}"
@@ -366,40 +285,28 @@ tags: "${tags || 'tag1, tag2'}"
 images: "${imagesStr}"
 ${pdfLine}
 ---
-
 ${content || 'Tulis isi caption di sini...'}`;
-
                 zip.file('poster.md', template);
 
-                // 4. Download Semua Sebagai Satu file ZIP
                 statusText.innerHTML = `📦 Download ZIP... (${namaZip})`;
                 const contentZip = await zip.generateAsync({type:"blob"});
                 const urlZip = URL.createObjectURL(contentZip);
                 downloadFile(urlZip, namaZip);
                 URL.revokeObjectURL(urlZip);
 
-                // 5. Generate QR Code (Path folder + .gitkeep di ujungnya)
                 statusText.innerHTML = `✅ Berhasil! Mendownload ZIP dan membuat QR Code.`;
-                // PERUBAHAN DI SINI: Ditambahkan /.gitkeep di ujung link
                 const qrLink = `https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/tree/main/posters/${namaFolder}/.gitkeep`;
                 
                 qrWrapper.style.display = 'flex';
                 qrLinkText.innerText = `🔗 Path GitHub: ${qrLink}`;
-
-                // Hapus QR lama jika ada
                 qrContainer.innerHTML = '';
-                
-                // Buat QR Code baru di dalam div
                 new QRCode(qrContainer, {
-                    text: qrLink,
-                    width: 200,
-                    height: 200,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
+                    text: qrLink, width: 200, height: 200,
+                    colorDark : "#000000", colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
             };
         });
     </script>
 </body>
-                    </html>
+                </html>
