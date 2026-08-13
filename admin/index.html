@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Arsip Dakwah</title>
+    <!-- Library JSZip untuk kompresi file menjadi ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Library QRCode untuk generate QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* --- TEMA GLASSMORPHISM (Sesuai Website Publik) --- */
+        /* --- TEMA GLASSMORPHISM --- */
         *{box-sizing:border-box;margin:0;padding:0;}
         body{
             background: radial-gradient(circle at 50% 0%, #181818 0%, #0b0b0b 70%);
@@ -81,6 +85,31 @@
         }
         .modal-content textarea{width:100%;height:250px;background:#0b0b0b;color:#D4AF37;font-family:monospace;font-size:14px;margin-top:10px;}
         .close-modal{float:right;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;}
+
+        /* --- GAYA UNTUK QR CODE --- */
+        #qrcode-wrapper{
+            display:none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            margin-top: 20px;
+            border: 1px dashed #D4AF37;
+        }
+        #qrcode-wrapper p{
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        #qrcode{
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -116,7 +145,7 @@
         <div id="sectionAdd" class="admin-box" style="display:none;">
             <h2>🚀 Generator Poster Terpadu</h2>
             <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">
-                Isi data poster, upload gambar, pilih opsi PDF, lalu klik tombol <b>Buat Poster</b>. Semua file (gambar, PDF opsional, dan .md) akan otomatis terdownload dengan nama yang benar.
+                Isi data poster, upload gambar, pilih opsi PDF, lalu klik tombol <b>Buat Poster</b>. Semua file akan dirangkum menjadi satu file ZIP, dan sistem membuat QR Code untuk path folder GitHub Anda.
             </p>
             
             <label>Judul Poster</label>
@@ -146,11 +175,10 @@
 
             <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
                 <label style="font-weight:bold;color:#D4AF37;">📸 Upload & Rename Gambar</label>
-                <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih gambar. Nama file akan otomatis berubah menjadi <b>1.jpg, 2.jpg, 3.jpg</b> (sesuai urutan unggahan).</p>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih gambar. Nama file akan otomatis berubah menjadi <b>1.jpg, 2.jpg, 3.jpg</b>.</p>
                 <input type="file" id="inpFileGambar" multiple accept="image/*">
             </div>
 
-            <!-- OPSI PDF DINAMIS -->
             <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
                 <label style="font-weight:bold;color:#D4AF37;">📄 Opsi PDF</label>
                 <select id="inpPdfOption" onchange="togglePdfInput()">
@@ -158,19 +186,25 @@
                     <option value="ya">Pakai PDF</option>
                 </select>
                 
-                <!-- Bagian input PDF, akan muncul jika memilih 'ya' -->
                 <div id="pdfUploadWrapper" style="display:none; margin-top:15px;">
                     <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih file PDF. Nama file akan otomatis berubah menjadi <b>brosur.pdf</b>.</p>
                     <input type="file" id="inpFilePdf" accept=".pdf">
                 </div>
             </div>
 
-            <!-- TOMBOL UTAMA -->
-            <button class="btn-solid" onclick="buatPoster()" style="margin-bottom:10px;font-size:18px;padding:15px;">🚀 BUAT POSTER (Download Otomatis)</button>
+            <!-- TOMBOL UTAMA & FITUR ZIP / QR CODE -->
+            <button class="btn-solid" onclick="buatPoster()" style="margin-bottom:10px;font-size:18px;padding:15px;">🚀 BUAT POSTER (Download ZIP + QR Code)</button>
             
             <div id="statusProgress" style="display:none; text-align:left; background:#111; padding:15px; border-radius:12px; border:1px solid #D4AF37; margin-top:10px;">
                 <span style="color:#D4AF37; font-weight:bold;">📌 Status:</span>
                 <div id="statusText" style="color:#fff; margin-top:10px; line-height:1.6;"></div>
+            </div>
+
+            <!-- CONTAINER QR CODE -->
+            <div id="qrcode-wrapper">
+                <p>📱 Scan QR Code ini untuk membuka path folder poster di GitHub.</p>
+                <div id="qrcode"></div>
+                <p style="margin-top:15px;font-size:12px;color:#888;" id="qrLinkText"></p>
             </div>
         </div>
     </div>
@@ -222,7 +256,6 @@
                 }
             };
 
-            // FUNGSI TOGGLE PDF
             window.togglePdfInput = function() {
                 const val = document.getElementById('inpPdfOption').value;
                 const wrapper = document.getElementById('pdfUploadWrapper');
@@ -230,7 +263,7 @@
                     wrapper.style.display = 'block';
                 } else {
                     wrapper.style.display = 'none';
-                    document.getElementById('inpFilePdf').value = ''; // Reset input file
+                    document.getElementById('inpFilePdf').value = '';
                 }
             }
 
@@ -242,7 +275,7 @@
                     .replace(/-+/g, '-');    
             }
 
-            // Helper untuk mendownload file dari URL object
+            // Helper mendownload file dari URL object
             function downloadFile(url, fileName) {
                 const a = document.createElement('a');
                 a.href = url;
@@ -250,15 +283,21 @@
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                return new Promise(resolve => setTimeout(resolve, 500));
             }
 
             // --- FUNGSI UTAMA MEMBUAT POSTER ---
             window.buatPoster = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
+                const qrWrapper = document.getElementById('qrcode-wrapper');
+                const qrContainer = document.getElementById('qrcode');
+                const qrLinkText = document.getElementById('qrLinkText');
+
+                // Reset tampilan QR Code
+                qrWrapper.style.display = 'none';
+                qrContainer.innerHTML = '';
                 status.style.display = 'block';
-                statusText.innerHTML = '⏳ Sedang memproses...';
+                statusText.innerHTML = '⏳ Mengemas file menjadi satu ZIP...';
 
                 const judul = document.getElementById('inpJudul').value.trim();
                 const kategori = document.getElementById('inpKategori').value;
@@ -276,31 +315,34 @@
                 }
 
                 const slug = toSlug(judul);
-                const folderPath = `posters/${kategori.toLowerCase()}/${slug}-001`;
+                const namaFolder = `${kategori.toLowerCase()}/${slug}-001`;
+                const namaZip = `${slug}-001.zip`;
 
-                // 2. Generate & Download Gambar
+                // Inisialisasi JSZip
+                const zip = new JSZip();
+
+                // 1. Masukkan Gambar ke dalam ZIP (1.jpg, 2.jpg...)
                 if(gambarInput.files.length > 0) {
-                    statusText.innerHTML = `📸 Mendownload ${gambarInput.files.length} gambar...`;
+                    statusText.innerHTML = `📸 Memasukkan ${gambarInput.files.length} gambar ke ZIP...`;
                     for(let i = 0; i < gambarInput.files.length; i++) {
                         const file = gambarInput.files[i];
                         const newFileName = `${i + 1}.jpg`;
-                        const url = URL.createObjectURL(file);
-                        await downloadFile(url, newFileName);
-                        URL.revokeObjectURL(url);
+                        // Masukkan file asli (Blob) langsung ke ZIP tanpa rename manual di PC
+                        zip.file(newFileName, file);
                     }
+                } else {
+                    statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
                 }
 
-                // 3. Logika PDF - SESUAI PERMINTAAN ANDA ("HACK TEMPLATE MD")
+                // 2. Masukkan PDF (jika ada) ke dalam ZIP (brosur.pdf)
                 let pdfLine = '';
                 if(pilihanPdf === 'ya') {
                     if(pdfInput.files.length > 0) {
-                        statusText.innerHTML = `📄 Mendownload PDF (brosur.pdf)...`;
+                        statusText.innerHTML = `📄 Memasukkan PDF ke ZIP...`;
                         const file = pdfInput.files[0];
-                        const url = URL.createObjectURL(file);
-                        await downloadFile(url, 'brosur.pdf');
-                        URL.revokeObjectURL(url);
-                        
-                        // Jika Pakai PDF -> tulis "pdf: "
+                        zip.file('brosur.pdf', file);
                         pdfLine = `pdf: "brosur.pdf"`;
                     } else {
                         statusText.innerHTML = '❌ Anda memilih "Pakai PDF" tetapi belum mengupload filenya!';
@@ -308,14 +350,12 @@
                         return;
                     }
                 } else {
-                    // Jika TIDAK Pakai PDF -> tulis "tidakpakepdf: " (Sesuai hack MD yang diminta)
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
-                // 4. Generate & Download Template .md
-                statusText.innerHTML = `📝 Mendownload poster.md...`;
-                
-                const jmlGambar = gambarInput.files.length > 0 ? gambarInput.files.length : 1;
+                // 3. Generate & Masukkan poster.md ke dalam ZIP
+                statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
+                const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
 
                 const template = `---
@@ -329,22 +369,36 @@ ${pdfLine}
 
 ${content || 'Tulis isi caption di sini...'}`;
 
-                const blob = new Blob([template], { type: 'text/markdown' });
-                const url = URL.createObjectURL(blob);
-                
-                await downloadFile(url, 'poster.md');
-                URL.revokeObjectURL(url);
+                zip.file('poster.md', template);
 
-                statusText.innerHTML = `
-                    ✅ <b>Berhasil! Semua file sudah terunduh dengan nama yang benar.</b><br><br>
-                    📁 <b>Langkah Upload ke GitHub:</b><br>
-                    1. Buat folder baru di repositori Anda dengan alamat path: <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;<code style="background:#0b0b0b;padding:4px 8px;border-radius:6px;color:#D4AF37;font-size:14px;">${folderPath}</code><br><br>
-                    2. Pindahkan file <b>poster.md</b>, <b>${pilihanPdf === 'ya' ? 'brosur.pdf, ' : ''}1.jpg, 2.jpg, dst</b> yang baru saja terunduh ke dalam folder tersebut.<br><br>
-                    <span style="font-size:12px;color:#888;">💡 Catatan: Browser tidak mengizinkan pembuatan folder saat download, jadi langkah manual ini diperlukan.</span>
-                `;
+                // 4. Download Semua Sebagai Satu file ZIP
+                statusText.innerHTML = `📦 Download ZIP... (${namaZip})`;
+                const contentZip = await zip.generateAsync({type:"blob"});
+                const urlZip = URL.createObjectURL(contentZip);
+                downloadFile(urlZip, namaZip);
+                URL.revokeObjectURL(urlZip);
+
+                // 5. Generate QR Code (Path folder)
+                statusText.innerHTML = `✅ Berhasil! Mendownload ZIP dan membuat QR Code.`;
+                const qrLink = `https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/tree/main/posters/${namaFolder}`;
+                
+                qrWrapper.style.display = 'flex';
+                qrLinkText.innerText = `🔗 Path GitHub: ${qrLink}`;
+
+                // Hapus QR lama jika ada
+                qrContainer.innerHTML = '';
+                
+                // Buat QR Code baru di dalam div
+                new QRCode(qrContainer, {
+                    text: qrLink,
+                    width: 200,
+                    height: 200,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
             };
         });
     </script>
 </body>
-    </html>
+                </html>
