@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Arsip Dakwah</title>
     <style>
-        /* --- TEMA GLASSMORPHISM --- */
+        /* --- TEMA GLASSMORPHISM (Sesuai Website Publik) --- */
         *{box-sizing:border-box;margin:0;padding:0;}
         body{
             background: radial-gradient(circle at 50% 0%, #181818 0%, #0b0b0b 70%);
@@ -104,19 +104,19 @@
         <div class="admin-box">
             <div class="admin-menu">
                 <button class="btn-gold" onclick="alert('Karena sistem Markdown/Folder, daftar poster hanya bisa dilihat melalui GitHub, bukan di dashboard ini.')">📂 Lihat Semua Poster</button>
-                <button class="btn-gold" onclick="showSection('add')">➕ Tambah Poster Baru (Generator MD)</button>
+                <button class="btn-gold" onclick="showSection('add')">➕ Tambah Poster Baru</button>
                 <button class="btn-gold" onclick="logout()">🚪 Logout</button>
             </div>
         </div>
 
-        <!-- SECTION: GENERATOR TEMPLATE -->
+        <!-- SECTION: GENERATOR & DOWNLOAD TEMPLATE -->
         <div id="sectionAdd" class="admin-box" style="display:none;">
-            <h2>🖼 Generator Template Markdown</h2>
+            <h2>🖼 Generator & Download Template</h2>
             <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">
-                Isi formulir di bawah, lalu klik "Salin Template" untuk mendapatkan kode <code>poster.md</code>.
+                Isi formulir di bawah, lalu klik <b>Salin Template</b> untuk menyalin kode, atau <b>Download .md</b> untuk mengunduh file langsung.
                 <br>1. Buat folder baru di <code>posters/kategori/nama-poster-001</code>.
                 <br>2. Upload gambar ke folder itu dengan nama <code>1.jpg, 2.jpg</code>.
-                <br>3. Paste template MD ke file <code>poster.md</code> di dalam folder tersebut.
+                <br>3. Paste template MD ke file <code>poster.md</code> di dalam folder tersebut, atau upload file `.md` hasil download.
                 <br>4. Commit ke GitHub.
             </p>
             
@@ -139,13 +139,14 @@
             <label>Tag (pisahkan koma)</label>
             <input type="text" id="inpTag" placeholder="sunnah, dzikir, sholat">
 
-            <label>Caption Singkat (Sub Judul)</label>
+            <label>Sub Judul / Caption Singkat</label>
             <textarea id="inpCaption" placeholder="Tulis sub judul di sini..."></textarea>
 
             <label>Isi Caption Lengkap</label>
             <textarea id="inpContent" placeholder="Tulis isi caption lengkap di sini..."></textarea>
 
-            <button class="btn-solid" onclick="generateTemplate()">📋 Salin Template MD</button>
+            <button class="btn-solid" onclick="generateTemplate()" style="margin-bottom:10px;">📋 Salin Template MD</button>
+            <button class="btn-solid" onclick="downloadTemplate()" style="background: #333; color: #D4AF37; border: 1px solid #D4AF37;">⬇️ Download File .md</button>
         </div>
     </div>
 
@@ -169,6 +170,7 @@
             const loginBtn = document.getElementById('loginBtn');
             const loginStatus = document.getElementById('loginStatus');
 
+            // Cek status login sebelumnya
             if(localStorage.getItem('adminLogin') === 'true') {
                 loginPage.style.display = 'none';
                 dashboard.style.display = 'block';
@@ -207,6 +209,7 @@
                 }
             };
 
+            // --- FUNGSI SALIN TEMPLATE (COPY-PASTE) ---
             window.generateTemplate = function() {
                 const judul = document.getElementById('inpJudul').value.trim();
                 const kategori = document.getElementById('inpKategori').value;
@@ -232,6 +235,42 @@ ${content || 'Tulis isi caption di sini...'}`;
                 document.getElementById('templateModal').style.display = 'flex';
             };
 
+            // --- FUNGSI DOWNLOAD FILE .md (MURNI JS, TANPA API) ---
+            window.downloadTemplate = function() {
+                const judul = document.getElementById('inpJudul').value.trim();
+                const kategori = document.getElementById('inpKategori').value;
+                const tags = document.getElementById('inpTag').value.trim();
+                const caption = document.getElementById('inpCaption').value.trim();
+                const content = document.getElementById('inpContent').value.trim();
+
+                if(!judul) return alert('Masukkan judul poster terlebih dahulu!');
+
+                const id = `${kategori.toLowerCase().replace(/ /g, '-')}-${Date.now()}`;
+                const template = `---
+judul: "${judul}"
+sub_judul: "${caption || 'Tulis sub judul di sini'}"
+kategori: "${kategori}"
+tags: "${tags || 'tag1, tag2'}"
+images: "1.jpg, 2.jpg"
+tidakpakepdf: "brosur.pdf"
+---
+
+${content || 'Tulis isi caption di sini...'}`;
+
+                // Membuat file teks dan mendownloadnya
+                const blob = new Blob([template], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${id}.md`; // Nama file otomatis mengikuti ID poster
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert(`✅ File ${id}.md berhasil di-download! Upload file ini ke folder poster di GitHub.`);
+            };
+
             window.closeTemplate = function() {
                 document.getElementById('templateModal').style.display = 'none';
             };
@@ -242,4 +281,4 @@ ${content || 'Tulis isi caption di sini...'}`;
         });
     </script>
 </body>
-</html>
+                </html>
