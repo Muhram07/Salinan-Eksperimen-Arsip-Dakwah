@@ -38,6 +38,9 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom:15px;font-family:inherit;
         }
+        input[type="file"]{
+            padding:10px; cursor:pointer;
+        }
         input:focus, textarea:focus, select:focus{border-color:#D4AF37;background:rgba(255,255,255,0.2);}
         textarea{min-height:120px;resize:vertical;}
         select option{background:#111;}
@@ -103,21 +106,17 @@
 
         <div class="admin-box">
             <div class="admin-menu">
-                <button class="btn-gold" onclick="alert('Karena sistem Markdown/Folder, daftar poster hanya bisa dilihat melalui GitHub, bukan di dashboard ini.')">📂 Lihat Semua Poster</button>
-                <button class="btn-gold" onclick="showSection('add')">➕ Tambah Poster Baru</button>
+                <button class="btn-gold" onclick="alert('Karena sistem Markdown/Folder, daftar poster hanya bisa dilihat melalui GitHub.')">📂 Lihat Semua Poster</button>
+                <button class="btn-gold" onclick="showSection('add')">➕ Buat Poster Baru</button>
                 <button class="btn-gold" onclick="logout()">🚪 Logout</button>
             </div>
         </div>
 
-        <!-- SECTION: GENERATOR & DOWNLOAD TEMPLATE -->
+        <!-- SECTION: GENERATOR POSTER TERPADU -->
         <div id="sectionAdd" class="admin-box" style="display:none;">
-            <h2>🖼 Generator & Download Template</h2>
+            <h2>🚀 Generator Poster Terpadu</h2>
             <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">
-                Isi formulir di bawah, lalu klik <b>Salin Template</b> untuk menyalin kode, atau <b>Download .md</b> untuk mengunduh file langsung.
-                <br>1. Buat folder baru di <code>posters/kategori/nama-poster-001</code>.
-                <br>2. Upload gambar ke folder itu dengan nama <code>1.jpg, 2.jpg</code> sesuai opsi di bawah.
-                <br>3. Paste template MD atau upload file `.md` hasil download ke folder tersebut.
-                <br>4. Commit ke GitHub.
+                Isi data poster, upload gambar dan PDF, lalu klik tombol <b>Buat Poster</b>. Semua file (gambar, PDF, dan .md) akan otomatis terdownload dengan nama dan struktur folder yang sudah benar.
             </p>
             
             <label>Judul Poster</label>
@@ -145,28 +144,22 @@
             <label>Isi Caption Lengkap</label>
             <textarea id="inpContent" placeholder="Tulis isi caption lengkap di sini..."></textarea>
 
-            <label>Berapa Jumlah Gambar? (1 - 50)</label>
-            <input type="number" id="inpJmlGambar" min="1" max="50" value="1">
+            <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
+                <label style="font-weight:bold;color:#D4AF37;">📸 Upload & Rename Gambar</label>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih gambar. Nama file akan otomatis berubah menjadi <b>1.jpg, 2.jpg, 3.jpg</b> (sesuai urutan unggahan).</p>
+                <input type="file" id="inpFileGambar" multiple accept="image/*">
+            </div>
 
-            <label>Menggunakan PDF?</label>
-            <select id="inpPdf">
-                <option value="tidak">Tidak</option>
-                <option value="ya">Ya</option>
-            </select>
+            <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
+                <label style="font-weight:bold;color:#D4AF37;">📄 Upload & Rename PDF</label>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih file PDF. Nama file akan otomatis berubah menjadi <b>brosur.pdf</b>.</p>
+                <input type="file" id="inpFilePdf" accept=".pdf">
+            </div>
 
-            <button class="btn-solid" onclick="generateTemplate()" style="margin-bottom:10px;">📋 Salin Template MD</button>
-            <button class="btn-solid" onclick="downloadTemplate()" style="background: #333; color: #D4AF37; border: 1px solid #D4AF37;">⬇️ Download File .md</button>
-        </div>
-    </div>
-
-    <!-- ==================== MODAL TEMPLATE ==================== -->
-    <div id="templateModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeTemplate()">✕</button>
-            <h2 style="color:#D4AF37;">📋 Template Markdown</h2>
-            <p style="font-size:14px;color:#aaa;">Salin teks di bawah ini, lalu paste ke file <code>poster.md</code> Anda.</p>
-            <textarea id="mdOutput" readonly onclick="this.select();document.execCommand('copy');alert('✅ Template berhasil disalin!')"></textarea>
-            <button class="btn-solid" onclick="closeTemplate()" style="margin-top:10px;">Tutup</button>
+            <!-- TOMBOL UTAMA YANG DIMINTA -->
+            <button class="btn-solid" onclick="buatPoster()" style="margin-bottom:10px;font-size:18px;padding:15px;">🚀 BUAT POSTER (Download Otomatis)</button>
+            
+            <div id="statusProgress" style="display:none; text-align:center; color:#D4AF37; font-weight:bold; margin:10px 0;"></div>
         </div>
     </div>
 
@@ -217,92 +210,104 @@
                 }
             };
 
-            // Fungsi Helper untuk generate string gambar
-            function getImagesString(jml) {
-                let arr = [];
-                for(let i = 1; i <= jml; i++) {
-                    arr.push(i + '.jpg');
-                }
-                return arr.join(', ');
+            // Helper untuk mengubah judul menjadi slug folder
+            function toSlug(text) {
+                return text.toLowerCase()
+                    .replace(/[^\w\s]/g, '') // buang karakter spesial
+                    .replace(/\s+/g, '-')    // ganti spasi jadi strip
+                    .replace(/-+/g, '-');    // hapus strip ganda
             }
 
-            // --- FUNGSI SALIN TEMPLATE (COPY-PASTE) ---
-            window.generateTemplate = function() {
-                const judul = document.getElementById('inpJudul').value.trim();
-                const kategori = document.getElementById('inpKategori').value;
-                const tags = document.getElementById('inpTag').value.trim();
-                const caption = document.getElementById('inpCaption').value.trim();
-                const content = document.getElementById('inpContent').value.trim();
-                const jmlGambar = parseInt(document.getElementById('inpJmlGambar').value) || 1;
-                const pilihanPdf = document.getElementById('inpPdf').value;
-
-                if(!judul) return alert('Masukkan judul poster terlebih dahulu!');
-
-                const imagesStr = getImagesString(jmlGambar);
-                const pdfStr = pilihanPdf === 'ya' ? 'pdf' : 'tidakpakepdf';
-
-                const template = `---
-judul: "${judul}"
-sub_judul: "${caption || 'Tulis sub judul di sini'}"
-kategori: "${kategori}"
-tags: "${tags || 'tag1, tag2'}"
-images: "${imagesStr}"
-${pdfStr}: "brosur.pdf"
----
-
-${content || 'Tulis isi caption di sini...'}`;
-
-                document.getElementById('mdOutput').value = template;
-                document.getElementById('templateModal').style.display = 'flex';
-            };
-
-            // --- FUNGSI DOWNLOAD FILE .md (MURNI JS, TANPA API) ---
-            window.downloadTemplate = function() {
-                const judul = document.getElementById('inpJudul').value.trim();
-                const kategori = document.getElementById('inpKategori').value;
-                const tags = document.getElementById('inpTag').value.trim();
-                const caption = document.getElementById('inpCaption').value.trim();
-                const content = document.getElementById('inpContent').value.trim();
-                const jmlGambar = parseInt(document.getElementById('inpJmlGambar').value) || 1;
-                const pilihanPdf = document.getElementById('inpPdf').value;
-
-                if(!judul) return alert('Masukkan judul poster terlebih dahulu!');
-
-                const imagesStr = getImagesString(jmlGambar);
-                const pdfStr = pilihanPdf === 'ya' ? 'pdf' : 'tidakpakepdf';
-
-                const template = `---
-judul: "${judul}"
-sub_judul: "${caption || 'Tulis sub judul di sini'}"
-kategori: "${kategori}"
-tags: "${tags || 'tag1, tag2'}"
-images: "${imagesStr}"
-${pdfStr}: "brosur.pdf"
----
-
-${content || 'Tulis isi caption di sini...'}`;
-
-                // Download file dengan nama poster.md
-                const blob = new Blob([template], { type: 'text/markdown' });
-                const url = URL.createObjectURL(blob);
+            // Helper untuk mendownload file dari URL object
+            function downloadFile(url, fileName) {
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'poster.md'; // Nama file diubah sesuai permintaan
+                a.download = fileName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                // Beri jeda agar browser tidak memblokir multiple download
+                return new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            // --- FUNGSI UTAMA MEMBUAT POSTER ---
+            window.buatPoster = async function() {
+                const status = document.getElementById('statusProgress');
+                status.style.display = 'block';
+                status.innerText = '⏳ Sedang memproses...';
+
+                const judul = document.getElementById('inpJudul').value.trim();
+                const kategori = document.getElementById('inpKategori').value;
+                const tags = document.getElementById('inpTag').value.trim();
+                const caption = document.getElementById('inpCaption').value.trim();
+                const content = document.getElementById('inpContent').value.trim();
+                const gambarInput = document.getElementById('inpFileGambar');
+                const pdfInput = document.getElementById('inpFilePdf');
+
+                if(!judul) {
+                    status.innerText = '❌ Masukkan judul poster terlebih dahulu!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
+                }
+
+                // 1. Tentukan Nama Folder / Slug
+                const slug = toSlug(judul);
+                const folderPath = `posters/${kategori.toLowerCase()}/${slug}-001`;
+
+                // 2. Generate & Download Gambar (rename otomatis ke 1.jpg, 2.jpg...)
+                if(gambarInput.files.length > 0) {
+                    status.innerText = `📸 Mendownload ${gambarInput.files.length} gambar...`;
+                    for(let i = 0; i < gambarInput.files.length; i++) {
+                        const file = gambarInput.files[i];
+                        // Mengubah nama file menjadi 1.jpg, 2.jpg (dipaksa .jpg agar seragam)
+                        const newFileName = `${i + 1}.jpg`;
+                        const url = URL.createObjectURL(file);
+                        await downloadFile(url, newFileName);
+                        URL.revokeObjectURL(url); // bersihkan memori
+                    }
+                }
+
+                // 3. Generate & Download PDF (rename ke brosur.pdf)
+                if(pdfInput.files.length > 0) {
+                    status.innerText = `📄 Mendownload PDF (brosur.pdf)...`;
+                    const file = pdfInput.files[0];
+                    const url = URL.createObjectURL(file);
+                    await downloadFile(url, 'brosur.pdf');
+                    URL.revokeObjectURL(url);
+                }
+
+                // 4. Generate & Download Template .md
+                status.innerText = `📝 Mendownload poster.md...`;
                 
-                alert('✅ File poster.md berhasil di-download!');
-            };
+                // Jumlah gambar berdasarkan yang diupload
+                const jmlGambar = gambarInput.files.length > 0 ? gambarInput.files.length : 1;
+                // Buat string images (1.jpg, 2.jpg)
+                const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
 
-            window.closeTemplate = function() {
-                document.getElementById('templateModal').style.display = 'none';
-            };
+                const template = `---
+judul: "${judul}"
+sub_judul: "${caption || 'Tulis sub judul di sini'}"
+kategori: "${kategori}"
+tags: "${tags || 'tag1, tag2'}"
+images: "${imagesStr}"
+pdf: "brosur.pdf"
+---
 
-            document.getElementById('templateModal').addEventListener('click', function(e) {
-                if(e.target === this) closeTemplate();
-            });
+${content || 'Tulis isi caption di sini...'}`;
+
+                const blob = new Blob([template], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                // NAMA FILE OUTPUT DENGAN PATH FOLDER
+                const mdFileName = `${folderPath}/poster.md`;
+                await downloadFile(url, mdFileName);
+                URL.revokeObjectURL(url);
+
+                status.innerHTML = '✅ Berhasil! Semua file sudah didownload dengan nama yang benar.<br>Silakan upload ke GitHub Anda.';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                    status.innerText = '';
+                }, 5000);
+            };
         });
     </script>
 </body>
