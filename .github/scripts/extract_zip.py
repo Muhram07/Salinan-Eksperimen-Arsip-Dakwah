@@ -12,17 +12,17 @@ def main():
 
     # Validasi folder _uploads
     if not os.path.exists(zip_dir):
-        print("❌ ERROR: Folder '_uploads' tidak ditemukan.")
+        print("ERROR: Folder '_uploads' tidak ditemukan.")
         sys.exit(1)
 
     zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
     
     if not zip_files:
-        print("📭 Tidak ada file ZIP ditemukan di _uploads. Selesai.")
+        print("Tidak ada file ZIP ditemukan di _uploads. Selesai.")
         return
 
     zip_file_path = os.path.join(zip_dir, zip_files[0])
-    print(f"📦 Memproses ZIP: {zip_file_path}")
+    print(f"Memproses ZIP: {zip_file_path}")
 
     os.makedirs(temp_dir, exist_ok=True)
 
@@ -51,16 +51,16 @@ def main():
                     
                     slug_name = slug
                     target_folder = os.path.join('posters', kategori.lower(), f"{slug}-001")
-                    print(f"✅ Target folder ditemukan: {target_folder}")
+                    print(f"Target folder ditemukan: {target_folder}")
 
                 except Exception as e:
-                    print(f"⚠️ Gagal parsing YAML di poster.md: {e}")
+                    print(f"Gagal parsing YAML di poster.md: {e}")
             
     if not target_folder:
         fallback_name = os.path.splitext(zip_files[0])[0]
         target_folder = os.path.join('posters', 'unknown', fallback_name)
         slug_name = fallback_name
-        print(f"⚠️ Menggunakan fallback folder: {target_folder}")
+        print(f"Menggunakan fallback folder: {target_folder}")
 
     # 3. Pindahkan file ke folder target yang sebenarnya
     os.makedirs(target_folder, exist_ok=True)
@@ -74,10 +74,10 @@ def main():
     # Hapus folder temp
     shutil.rmtree(temp_dir)
     os.remove(zip_file_path)
-    print("✅ ZIP berhasil diekstrak dan dipindahkan.")
+    print("ZIP berhasil diekstrak dan dipindahkan.")
 
     # ============= BAGIAN BARU: SCAN & BUAT MANIFEST =============
-    print("📊 Memindai seluruh folder posters untuk memperbarui indeks...")
+    print("Memindai seluruh folder posters untuk memperbarui indeks...")
     
     manifest_data = {
         "kategori_list": [],
@@ -120,8 +120,8 @@ def main():
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("🎉 Selesai! 'manifest.json' berhasil diperbarui di root repository.")
-    print(f"📊 Total Poster: {manifest_data['total_poster']}, Kategori: {manifest_data['kategori_list']}")
+    print("Selesai! 'manifest.json' berhasil diperbarui di root repository.")
+    print(f"Total Poster: {manifest_data['total_poster']}, Kategori: {manifest_data['kategori_list']}")
 
 if __name__ == "__main__":
-    main()￼Enter
+    main()
