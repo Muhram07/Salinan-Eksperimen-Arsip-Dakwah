@@ -89,6 +89,12 @@
             <input type="text" id="inpKategori" list="kategori-list" placeholder="Misal: Tauhid, Aqidah, atau Fiqih...">
             <datalist id="kategori-list"></datalist>
 
+            <label>Emoji Ikon Kategori (Bisa diedit kapan saja)</label>
+            <input type="text" id="inpEmoji" list="emoji-list" placeholder="Pilih emoji, misal: ☝️, 🛡️, atau biarkan kosong (default 📂)">
+            <datalist id="emoji-list">
+                <option value="☝️"><option value="☪️"><option value="🕋"><option value="📖"><option value="🛡️"><option value="⚠️"><option value="🚫"><option value="👤"><option value="🗨️"><option value="⏰"><option value="💡"><option value="🔔"><option value="🕊️"><option value="🌟">
+            </datalist>
+
             <label>Tag (pisahkan koma)</label>
             <input type="text" id="inpTag" placeholder="sunnah, dzikir, sholat">
             <label>Sub Judul / Caption Singkat</label>
@@ -140,7 +146,7 @@
             if(localStorage.getItem('adminLogin') === 'true') {
                 loginPage.style.display = 'none';
                 dashboard.style.display = 'block';
-                loadKategoriList(); // Load kategori saat dashboard terbuka
+                loadKategoriList();
             }
 
             function handleLogin() {
@@ -148,7 +154,7 @@
                     localStorage.setItem('adminLogin', 'true');
                     loginPage.style.display = 'none';
                     dashboard.style.display = 'block';
-                    loadKategoriList(); // Load kategori saat login sukses
+                    loadKategoriList();
                 } else {
                     loginStatus.innerText = '❌ PIN Salah!';
                     pinInput.value = '';
@@ -188,7 +194,6 @@
                 }
             }
 
-            // FUNGSI BARU: Mengambil kategori dari manifest.json untuk Datalist
             async function loadKategoriList() {
                 const datalist = document.getElementById('kategori-list');
                 try {
@@ -202,7 +207,6 @@
                     }
                 } catch (e) { /* Fallback jika manifest belum ada */ }
                 
-                // Fallback Hardcode jika fetch gagal atau manifest belum dibuat bot
                 const fallback = ["Tauhid", "Sunnah", "Bid'ah", "Syirik", "Aqidah", "Fikih", "Hadits", "Tafsir", "Akhlak"];
                 datalist.innerHTML = fallback.map(k => `<option value="${k}">`).join('');
             }
@@ -230,6 +234,7 @@
 
                 const judul = document.getElementById('inpJudul').value.trim();
                 const kategori = document.getElementById('inpKategori').value.trim();
+                const emoji = document.getElementById('inpEmoji').value.trim();
                 const tags = document.getElementById('inpTag').value.trim();
                 const caption = document.getElementById('inpCaption').value.trim();
                 const content = document.getElementById('inpContent').value.trim();
@@ -277,10 +282,13 @@
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
+                
+                const finalEmoji = emoji || '📂';
                 const template = `---
 judul: "${judul}"
 sub_judul: "${caption || 'Tulis sub judul di sini'}"
 kategori: "${kategori}"
+kategori_emoji: "${finalEmoji}"
 tags: "${tags || 'tag1, tag2'}"
 images: "${imagesStr}"
 ${pdfLine}
@@ -309,4 +317,4 @@ ${content || 'Tulis isi caption di sini...'}`;
         });
     </script>
 </body>
-                </html>
+                    </html>
