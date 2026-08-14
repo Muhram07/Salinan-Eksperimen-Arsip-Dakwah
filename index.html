@@ -152,6 +152,7 @@
         let kategoriAktif = null;
         let semuaPosterCache = [];
         let isCompactView = false;
+        let isSelecting = false; // <--- BENDERA BARU (PENTING!)
 
         function getFavorit() {
             const data = localStorage.getItem('dakwahFavorit');
@@ -218,16 +219,13 @@
             const favList = getFavorit();
             let manifestData = { posters: [] };
 
-            // 1. Fetch manifest.json
             try {
                 const res = await fetch('/manifest.json');
                 if(res.ok) manifestData = await res.json();
             } catch(e) { console.warn("Gagal mengambil manifest, pakai struktur manual jika ada"); }
 
-            // 2. Build Data Kategori dari Manifest
             if(manifestData && manifestData.posters && manifestData.posters.length > 0) {
                 
-                // Bangun data kategori
                 manifestData.posters.forEach(p => {
                     const k = p.kategori || "Umum";
                     if(!kategoriData[k]) kategoriData[k] = 0;
@@ -235,26 +233,21 @@
                     semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: k, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content : '') });
                 });
 
-                // Render Poster
                 for (let p of manifestData.posters) {
                     const folder = `posters/${p.path}`;
                     const judul = p.judul || "Tanpa Judul";
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
                     const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
-                    // Cek ada pdf atau tidak (logika hack: tidakpakepdf)
                     let pdfSrc = null;
-                    if(p.pdf && p.pdf !== "brosur.pdf") { // Kalau pdf key-nya ada tapi bukan "brosur.pdf" (YAML hack logic)
+                    if(p.pdf && p.pdf !== "brosur.pdf") { 
                         pdfSrc = `${folder}/brosur.pdf`;
                     } else if (p.tidakpakepdf) {
-                        // Tidak pakai pdf, skip
                     } else if (p.pdf) {
                          pdfSrc = `${folder}/brosur.pdf`;
                     }
 
-                    // Gunakan data content jika ada di JSON, jika tidak fetch manual file .md (fallback)
                     let contentBody = p.content || p.isi_caption || "";
-                    // Jika content tidak ada di JSON, ambil dari folder (skenario emergency)
                     if(!contentBody) {
                          try {
                              const resMd = await fetch(`${folder}/poster.md`);
@@ -319,15 +312,12 @@
                 }
             }
 
-            // Render Hasil
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
             
-            // Ambil mapping emoji dari manifest (jika ada)
             const emojiMap = manifestData.kategori_emoji || {};
 
             let htmlKategori = '';
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
-                // Gunakan emoji dari manifest, atau fallback ke 📂
                 let icon = emojiMap[nama.toLowerCase()] || '📂';
                 
                 htmlKategori += `
@@ -413,7 +403,14 @@
         const resultBox = document.getElementById('search-result');
         let timeoutId;
 
+        // =============== PERBAIKAN FINAL PADA EVENT INPUT ===============
         searchInput.addEventListener('input', function() {
+            // Jika isSelecting bernilai true, reset flag dan batalkan proses pencarian
+            if (isSelecting) {
+                isSelecting = false;
+                return;
+            }
+
             clearTimeout(timeoutId); 
             
             timeoutId = setTimeout(() => {
@@ -459,35 +456,34 @@
             }, 300);
         });
 
-        // =============== FINAL FIX: PERBAIKAN FITUR DROPDOWN ===============
+        // =============== PERBAIKAN FINAL PADA DROPDOWN ===============
         function pilihDariDropdown(id) {
-            // Batalkan proses filter input yang tertunda
             clearTimeout(timeoutId);
             
+            // Nyalakan bendera untuk menahan filter agar tidak bertabrakan
+            isSelecting = true;
+
             const resultBox = document.getElementById('search-result');
             const searchInput = document.getElementById('search');
 
-            // Tutup dropdown
             resultBox.style.display = 'none';
-            
-            // Kosongkan input agar tidak ada filter teks yang menimpa pilihan
             searchInput.value = '';
-            searchInput.blur(); // Tutup keyboard HP
+            searchInput.blur();
 
-            // Force DOM untuk menampilkan hanya poster yang dipilih (Override)
+            // Filter DOM agar hanya menampilkan poster yang dipilih
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
                 p.style.display = (pid === id) ? 'block' : 'none';
             });
 
-            // Scroll halus ke list poster dengan jeda waktu yang cukup agar DOM HP selesai render
+            // Scroll halus dengan jeda waktu yang cukup untuk HP
             setTimeout(() => {
                 const target = document.getElementById('post-list');
                 if(target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-            }, 500); // Dinaikkan ke 500ms agar responsif di HP
+            }, 500);
         }
 
         function highlightText(key) {
@@ -531,4 +527,4 @@
         loadPosters();
     </script>
 </body>
-                                                                        </html>
+        </html>
