@@ -337,16 +337,14 @@
             // Render Hasil
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
             
+            // Ambil mapping emoji dari manifest (jika ada)
+            const emojiMap = manifestData.kategori_emoji || {};
+
             let htmlKategori = '';
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
-                let icon = '📂';
-                if(nama === 'Tauhid') icon = '☝️';
-                else if(nama === 'Bid\'ah') icon = '🚫';
-                else if(nama === 'Syirik') icon = '⚠️';
-                else if(nama === 'Sunnah') icon = '👤';
-                else if(nama === 'Tafsir') icon = '📖';
-                else if(nama === 'Hadits') icon = '🗨️';
-                else if(nama === 'Aqidah') icon = '🛡️';
+                // Gunakan emoji dari manifest, atau fallback ke 📂
+                let icon = emojiMap[nama] || '📂';
+                
                 htmlKategori += `
                     <div class="card-kategori" onclick="filterKategori('${nama}')">
                         <div class="icon">${icon}</div>
