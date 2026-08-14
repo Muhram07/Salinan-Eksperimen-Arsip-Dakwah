@@ -412,6 +412,7 @@
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
         let timeoutId;
+
         searchInput.addEventListener('input', function() {
             clearTimeout(timeoutId); 
             
@@ -423,6 +424,7 @@
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
                     return;
                 }
+
                 const hasil = semuaPosterCache.filter(item => 
                     item.judul.toLowerCase().includes(key) ||
                     item.subJudul.toLowerCase().includes(key) ||
@@ -430,6 +432,7 @@
                     item.tags.toLowerCase().includes(key) ||
                     item.caption.toLowerCase().includes(key)
                 );
+
                 if (hasil.length > 0) {
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = hasil.map(item => `
@@ -442,11 +445,13 @@
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
                 }
+
                 const posters = document.querySelectorAll('.poster');
                 posters.forEach(poster => {
                     const text = poster.innerText.toLowerCase();
                     poster.style.display = text.includes(key) ? 'block' : 'none';
                 });
+
                 setTimeout(() => {
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
                     highlightText(key);
@@ -454,33 +459,32 @@
             }, 300);
         });
 
-        // =============== PERBAIKAN UTAMA DI SINI ===============
+        // =============== PERBAIKAN FITUR DROPDOWN ===============
         function pilihDariDropdown(id) {
             const resultBox = document.getElementById('search-result');
             const searchInput = document.getElementById('search');
             
             // 1. Tutup dropdown & Batalkan proses input yang tertunda
-            clearTimeout(timeoutId); // Mencegah listener input menimpa filter
+            clearTimeout(timeoutId); 
             resultBox.style.display = 'none';
             
-            // 2. Kosongkan input agar tidak memicu bentrok filter
-            searchInput.value = '';
-            searchInput.blur(); 
+            // 2. Jangan hapus teks user agar filter teks tidak tiba-tiba reset (INI KUNCI PERBAIKANNYA)
+            // searchInput.value = ''; <-- Dihapus agar teks user tetap ada
 
-            // 3. Filter poster agar hanya menampilkan yang dipilih
+            // 3. Filter poster agar hanya menampilkan yang dipilih (Override filter teks)
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
                 p.style.display = (pid === id) ? 'block' : 'none';
             });
 
-            // 4. Scroll halus ke bagian daftar poster
+            // 4. Scroll halus langsung ke daftar poster yang sudah difilter
             setTimeout(() => {
                 const target = document.getElementById('post-list');
                 if(target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-            }, 350);
+            }, 300);
         }
 
         function highlightText(key) {
