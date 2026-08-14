@@ -459,32 +459,35 @@
             }, 300);
         });
 
-        // =============== PERBAIKAN FITUR DROPDOWN ===============
+        // =============== FINAL FIX: PERBAIKAN FITUR DROPDOWN ===============
         function pilihDariDropdown(id) {
+            // Batalkan proses filter input yang tertunda
+            clearTimeout(timeoutId);
+            
             const resultBox = document.getElementById('search-result');
             const searchInput = document.getElementById('search');
-            
-            // 1. Tutup dropdown & Batalkan proses input yang tertunda
-            clearTimeout(timeoutId); 
+
+            // Tutup dropdown
             resultBox.style.display = 'none';
             
-            // 2. Jangan hapus teks user agar filter teks tidak tiba-tiba reset (INI KUNCI PERBAIKANNYA)
-            // searchInput.value = ''; <-- Dihapus agar teks user tetap ada
+            // Kosongkan input agar tidak ada filter teks yang menimpa pilihan
+            searchInput.value = '';
+            searchInput.blur(); // Tutup keyboard HP
 
-            // 3. Filter poster agar hanya menampilkan yang dipilih (Override filter teks)
+            // Force DOM untuk menampilkan hanya poster yang dipilih (Override)
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
                 p.style.display = (pid === id) ? 'block' : 'none';
             });
 
-            // 4. Scroll halus langsung ke daftar poster yang sudah difilter
+            // Scroll halus ke list poster dengan jeda waktu yang cukup agar DOM HP selesai render
             setTimeout(() => {
                 const target = document.getElementById('post-list');
                 if(target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-            }, 300);
+            }, 500); // Dinaikkan ke 500ms agar responsif di HP
         }
 
         function highlightText(key) {
@@ -528,4 +531,4 @@
         loadPosters();
     </script>
 </body>
-    </html>
+                                                                        </html>
