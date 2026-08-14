@@ -6,11 +6,30 @@ import re
 import sys
 import json
 
+def get_next_sequence(kategori_path, slug_base):
+    """Mencari nomor urut tertinggi di dalam folder kategori"""
+    if not os.path.exists(kategori_path):
+        return 1
+    
+    max_num = 0
+    for folder in os.listdir(kategori_path):
+        if os.path.isdir(os.path.join(kategori_path, folder)):
+            # Cek apakah foldernya diawali dengan slug yang sama
+            if folder.startswith(slug_base):
+                parts = folder.split('-')
+                if len(parts) > 1 and parts[-1].isdigit():
+                    try:
+                        num = int(parts[-1])
+                        if num > max_num:
+                            max_num = num
+                    except ValueError:
+                        pass
+    return max_num + 1
+
 def main():
     zip_dir = '_uploads'
     temp_dir = '_temp_extract'
 
-    # Validasi folder _uploads
     if not os.path.exists(zip_dir):
         print("ERROR: Folder '_uploads' tidak ditemukan.")
         sys.exit(1)
@@ -19,8 +38,7 @@ def main():
     
     if not zip_files:
         print("Tidak ada file ZIP ditemukan di _uploads. Selesai.")
-        # Tetap lanjut ke scanning untuk self-healing jika ada ZIP
-        scan_and_repair()
+        scan_and_repair() # Tetap repair jika tidak ada ZIP
         return
 
     zip_file_path = os.path.join(zip_dir, zip_files[0])
@@ -43,13 +61,18 @@ def main():
                     kategori = data.get('kategori', 'Unknown')
                     judul = data.get('judul', 'Unknown')
 
-                    slug = re.sub(r'[^a-z0-9]+', '-', judul.lower()).strip('-')
-                    if not slug: 
-                        slug = 'poster-001'
+                    slug_base = re.sub(r'[^a-z0-9]+', '-', judul.lower()).strip('-')
+                    if not slug_base: 
+                        slug_base = 'poster'
+
+                    # === LOGIKA AUTO-INCREMENT NOMOR ===
+                    kategori_path = os.path.join('posters', kategori.lower())
+                    next_num = get_next_sequence(kategori_path, slug_base)
+                    num_str = f"{next_num:03d}" # Format 001, 002, 003
+                    final_slug = f"{slug_base}-{num_str}"
                     
-                    # Gunakan lowercase untuk konsistensi folder
-                    target_folder = os.path.join('posters', kategori.lower(), f"{slug}-001")
-                    print(f"Target folder ditemukan: {target_folder}")
+                    target_folder = os.path.join('posters', kategori.lower(), final_slug)
+                    print(f"Target folder ditemukan (Auto-Increment): {target_folder}")
 
                 except Exception as e:
                     print(f"Gagal parsing YAML di poster.md: {e}")
@@ -71,9 +94,7 @@ def main():
     os.remove(zip_file_path)
     print("ZIP berhasil diekstrak dan dipindahkan.")
 
-    # Panggil fungsi scan & repair
     scan_and_repair()
-
 
 def scan_and_repair():
     """Memindai semua folder untuk perbaikan otomatis (Self-Healing) dan update manifest"""
@@ -93,17 +114,14 @@ def scan_and_repair():
         print("Folder posters belum ada.")
         return
 
-    # Loop semua folder di dalam posters
     for kategori in os.listdir(base_poster_path):
         kategori_path = os.path.join(base_poster_path, kategori)
         if os.path.isdir(kategori_path):
             
-            # Normalisasi key (abaikan besar/kecil)
             kategori_key = kategori.lower()
             if kategori_key not in kategori_map:
                 kategori_map[kategori_key] = kategori
 
-            # Loop semua folder poster
             for poster_folder in os.listdir(kategori_path):
                 poster_path = os.path.join(kategori_path, poster_folder)
                 if os.path.isdir(poster_path):
@@ -119,32 +137,34 @@ def scan_and_repair():
                                     yaml_slug = data.get('judul', poster_folder)
                                     slug = re.sub(r'[^a-z0-9]+', '-', yaml_slug.lower()).strip('-')
                                     
-                                    # === LOGIKA SELF-HEALING ===
-                                    # Jika folder saat ini 'unknown', tapi YAML menyebut kategori lain
+                                    # === SELF-HEALING UNTUK FOLDER SALAH ===
                                     if kategori.lower() == 'unknown' and yaml_kategori.lower() != 'unknown':
-                                        target_folder = os.path.join('posters', yaml_kategori.lower(), f"{slug}-001")
+                                        # Dapatkan nomor urut terbaru untuk kategori baru
+                                        kategori_baru_path = os.path.join('posters', yaml_kategori.lower())
+                                        next_num = get_next_sequence(kategori_baru_path, slug)
+                                        num_str = f"{next_num:03d}"
+                                        final_slug = f"{slug}-{num_str}"
+                                        
+                                        target_folder = os.path.join('posters', yaml_kategori.lower(), final_slug)
                                         print(f"🛠️ Self-Healing: Memindahkan {poster_path} -> {target_folder}")
                                         
-                                        # Hapus dulu folder target jika sudah ada agar tidak error
                                         if os.path.exists(target_folder):
                                             shutil.rmtree(target_folder)
                                             
-                                        # Pindahkan folder
                                         shutil.move(poster_path, target_folder)
-                                        # Hapus folder unknown jika sudah kosong
                                         if not os.listdir(kategori_path):
                                             os.rmdir(kategori_path)
                                             
-                                        # Update path ke target yang baru
                                         poster_path = target_folder
                                         
                                     elif kategori.lower() != yaml_kategori.lower():
-                                         # Jika ada ketidakcocokan nama folder tapi bukan unknown, beri warning saja
                                          print(f"⚠️ Warning: Folder '{kategori}' tidak cocok dengan YAML '{yaml_kategori}' di {poster_folder}")
 
-                                    # === BACA DATA SETELAH SELF-HEALING ===
-                                    # Ambil data dari YAML lagi (sudah terlanjur diambil di data)
-                                    data['path'] = f"{yaml_kategori.lower()}/{slug}-001"
+                                    # === BACA DATA UNTUK MANIFEST ===
+                                    # Mengambil nama folder yang sebenarnya setelah pindah
+                                    real_folder_name = os.path.basename(poster_path)
+                                    real_kategori = os.path.basename(os.path.dirname(poster_path))
+                                    data['path'] = f"{real_kategori.lower()}/{real_folder_name}"
                                     
                                     current_emoji = data.get('kategori_emoji', '📂')
                                     manifest_data['kategori_emoji'][yaml_kategori.lower()] = current_emoji
@@ -155,7 +175,6 @@ def scan_and_repair():
                         except Exception as e:
                             print(f"Gagal membaca {md_file_path}: {e}")
 
-    # Build daftar kategori dari hasil mapping nama asli
     manifest_data['kategori_list'] = [kategori_map[k] for k in sorted(kategori_map.keys())]
 
     manifest_path = "manifest.json"
