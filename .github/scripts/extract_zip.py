@@ -80,14 +80,21 @@ def main():
         "total_poster": 0,
         "posters": []
     }
-    kategori_set = set()
+    
+    # Gunakan dictionary untuk memetakan lowercase ke display name asli
+    kategori_map = {} 
 
     base_poster_path = "posters"
     if os.path.exists(base_poster_path):
         for kategori in os.listdir(base_poster_path):
             kategori_path = os.path.join(base_poster_path, kategori)
             if os.path.isdir(kategori_path):
-                kategori_set.add(kategori)
+                # Normalisasi key (abaikan besar/kecil)
+                kategori_key = kategori.lower()
+                
+                # Simpan nama tampilan asli pertama yang ditemui
+                if kategori_key not in kategori_map:
+                    kategori_map[kategori_key] = kategori
                 
                 for poster_folder in os.listdir(kategori_path):
                     poster_path = os.path.join(kategori_path, poster_folder)
@@ -103,23 +110,24 @@ def main():
                                         rel_path = f"{kategori}/{poster_folder}"
                                         data['path'] = rel_path
                                         
-                                        # PERUBAHAN LOGIKA: Ambil emoji, dan TIMPA (Update) selalu
+                                        # Ambil emoji, dan TIMPA ke key lowercase agar seragam
                                         current_emoji = data.get('kategori_emoji', '📂')
-                                        manifest_data['kategori_emoji'][kategori] = current_emoji
+                                        manifest_data['kategori_emoji'][kategori_key] = current_emoji
 
                                         manifest_data['posters'].append(data)
                                         manifest_data['total_poster'] += 1
                             except Exception as e:
                                 print(f"Gagal membaca {md_file_path}: {e}")
 
-    manifest_data['kategori_list'] = sorted(list(kategori_set))
+    # Bangun daftar kategori yang rapi (menggunakan mapping nama asli, bukan lowercase)
+    manifest_data['kategori_list'] = [kategori_map[k] for k in sorted(kategori_map.keys())]
 
     manifest_path = "manifest.json"
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
     print("Selesai! 'manifest.json' berhasil diperbarui.")
-    print(f"Total Poster: {manifest_data['total_poster']}, Emoji terdeteksi: {manifest_data['kategori_emoji']}")
+    print(f"Total Poster: {manifest_data['total_poster']}, Kategori: {manifest_data['kategori_list']}")
 
 if __name__ == "__main__":
     main()
