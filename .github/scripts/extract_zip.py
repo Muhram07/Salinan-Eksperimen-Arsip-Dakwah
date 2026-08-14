@@ -10,6 +10,7 @@ def main():
     zip_dir = '_uploads'
     temp_dir = '_temp_extract'
 
+    # Validasi folder _uploads
     if not os.path.exists(zip_dir):
         print("ERROR: Folder '_uploads' tidak ditemukan.")
         sys.exit(1)
@@ -18,21 +19,20 @@ def main():
     
     if not zip_files:
         print("Tidak ada file ZIP ditemukan di _uploads. Selesai.")
+        # Tetap lanjut ke scanning untuk self-healing jika ada ZIP
+        scan_and_repair()
         return
 
     zip_file_path = os.path.join(zip_dir, zip_files[0])
     print(f"Memproses ZIP: {zip_file_path}")
 
     os.makedirs(temp_dir, exist_ok=True)
-
     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
         zip_ref.extractall(temp_dir)
 
     target_folder = None
 
     md_path = os.path.join(temp_dir, 'poster.md')
-    poster_data = {}
-    
     if os.path.exists(md_path):
         with open(md_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -40,7 +40,6 @@ def main():
             if yaml_match:
                 try:
                     data = yaml.safe_load(yaml_match.group(1))
-                    poster_data = data
                     kategori = data.get('kategori', 'Unknown')
                     judul = data.get('judul', 'Unknown')
 
@@ -48,6 +47,7 @@ def main():
                     if not slug: 
                         slug = 'poster-001'
                     
+                    # Gunakan lowercase untuk konsistensi folder
                     target_folder = os.path.join('posters', kategori.lower(), f"{slug}-001")
                     print(f"Target folder ditemukan: {target_folder}")
 
@@ -71,8 +71,13 @@ def main():
     os.remove(zip_file_path)
     print("ZIP berhasil diekstrak dan dipindahkan.")
 
-    # ============= SCAN & BUAT MANIFEST =============
-    print("Memindai seluruh folder posters untuk memperbarui indeks & emoji...")
+    # Panggil fungsi scan & repair
+    scan_and_repair()
+
+
+def scan_and_repair():
+    """Memindai semua folder untuk perbaikan otomatis (Self-Healing) dan update manifest"""
+    print("Memindai & memperbaiki struktur folder posters...")
     
     manifest_data = {
         "kategori_list": [],
@@ -81,45 +86,76 @@ def main():
         "posters": []
     }
     
-    # Gunakan dictionary untuk memetakan lowercase ke display name asli
     kategori_map = {} 
 
     base_poster_path = "posters"
-    if os.path.exists(base_poster_path):
-        for kategori in os.listdir(base_poster_path):
-            kategori_path = os.path.join(base_poster_path, kategori)
-            if os.path.isdir(kategori_path):
-                # Normalisasi key (abaikan besar/kecil)
-                kategori_key = kategori.lower()
-                
-                # Simpan nama tampilan asli pertama yang ditemui
-                if kategori_key not in kategori_map:
-                    kategori_map[kategori_key] = kategori
-                
-                for poster_folder in os.listdir(kategori_path):
-                    poster_path = os.path.join(kategori_path, poster_folder)
-                    if os.path.isdir(poster_path):
-                        md_file_path = os.path.join(poster_path, 'poster.md')
-                        if os.path.exists(md_file_path):
-                            try:
-                                with open(md_file_path, 'r', encoding='utf-8') as f:
-                                    content = f.read()
-                                    yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
-                                    if yaml_match:
-                                        data = yaml.safe_load(yaml_match.group(1))
-                                        rel_path = f"{kategori}/{poster_folder}"
-                                        data['path'] = rel_path
+    if not os.path.exists(base_poster_path):
+        print("Folder posters belum ada.")
+        return
+
+    # Loop semua folder di dalam posters
+    for kategori in os.listdir(base_poster_path):
+        kategori_path = os.path.join(base_poster_path, kategori)
+        if os.path.isdir(kategori_path):
+            
+            # Normalisasi key (abaikan besar/kecil)
+            kategori_key = kategori.lower()
+            if kategori_key not in kategori_map:
+                kategori_map[kategori_key] = kategori
+
+            # Loop semua folder poster
+            for poster_folder in os.listdir(kategori_path):
+                poster_path = os.path.join(kategori_path, poster_folder)
+                if os.path.isdir(poster_path):
+                    md_file_path = os.path.join(poster_path, 'poster.md')
+                    if os.path.exists(md_file_path):
+                        try:
+                            with open(md_file_path, 'r', encoding='utf-8') as f:
+                                content = f.read()
+                                yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
+                                if yaml_match:
+                                    data = yaml.safe_load(yaml_match.group(1))
+                                    yaml_kategori = data.get('kategori', kategori)
+                                    yaml_slug = data.get('judul', poster_folder)
+                                    slug = re.sub(r'[^a-z0-9]+', '-', yaml_slug.lower()).strip('-')
+                                    
+                                    # === LOGIKA SELF-HEALING ===
+                                    # Jika folder saat ini 'unknown', tapi YAML menyebut kategori lain
+                                    if kategori.lower() == 'unknown' and yaml_kategori.lower() != 'unknown':
+                                        target_folder = os.path.join('posters', yaml_kategori.lower(), f"{slug}-001")
+                                        print(f"🛠️ Self-Healing: Memindahkan {poster_path} -> {target_folder}")
                                         
-                                        # Ambil emoji, dan TIMPA ke key lowercase agar seragam
-                                        current_emoji = data.get('kategori_emoji', '📂')
-                                        manifest_data['kategori_emoji'][kategori_key] = current_emoji
+                                        # Hapus dulu folder target jika sudah ada agar tidak error
+                                        if os.path.exists(target_folder):
+                                            shutil.rmtree(target_folder)
+                                            
+                                        # Pindahkan folder
+                                        shutil.move(poster_path, target_folder)
+                                        # Hapus folder unknown jika sudah kosong
+                                        if not os.listdir(kategori_path):
+                                            os.rmdir(kategori_path)
+                                            
+                                        # Update path ke target yang baru
+                                        poster_path = target_folder
+                                        
+                                    elif kategori.lower() != yaml_kategori.lower():
+                                         # Jika ada ketidakcocokan nama folder tapi bukan unknown, beri warning saja
+                                         print(f"⚠️ Warning: Folder '{kategori}' tidak cocok dengan YAML '{yaml_kategori}' di {poster_folder}")
 
-                                        manifest_data['posters'].append(data)
-                                        manifest_data['total_poster'] += 1
-                            except Exception as e:
-                                print(f"Gagal membaca {md_file_path}: {e}")
+                                    # === BACA DATA SETELAH SELF-HEALING ===
+                                    # Ambil data dari YAML lagi (sudah terlanjur diambil di data)
+                                    data['path'] = f"{yaml_kategori.lower()}/{slug}-001"
+                                    
+                                    current_emoji = data.get('kategori_emoji', '📂')
+                                    manifest_data['kategori_emoji'][yaml_kategori.lower()] = current_emoji
+                                    
+                                    manifest_data['posters'].append(data)
+                                    manifest_data['total_poster'] += 1
 
-    # Bangun daftar kategori yang rapi (menggunakan mapping nama asli, bukan lowercase)
+                        except Exception as e:
+                            print(f"Gagal membaca {md_file_path}: {e}")
+
+    # Build daftar kategori dari hasil mapping nama asli
     manifest_data['kategori_list'] = [kategori_map[k] for k in sorted(kategori_map.keys())]
 
     manifest_path = "manifest.json"
