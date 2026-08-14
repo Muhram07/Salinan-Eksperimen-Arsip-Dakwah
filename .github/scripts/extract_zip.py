@@ -10,7 +10,6 @@ def main():
     zip_dir = '_uploads'
     temp_dir = '_temp_extract'
 
-    # Validasi folder _uploads
     if not os.path.exists(zip_dir):
         print("ERROR: Folder '_uploads' tidak ditemukan.")
         sys.exit(1)
@@ -26,15 +25,14 @@ def main():
 
     os.makedirs(temp_dir, exist_ok=True)
 
-    # 1. Ektrak ZIP
     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
         zip_ref.extractall(temp_dir)
 
     target_folder = None
-    slug_name = ""
 
-    # 2. Baca Metadata dari poster.md
     md_path = os.path.join(temp_dir, 'poster.md')
+    poster_data = {}
+    
     if os.path.exists(md_path):
         with open(md_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -42,6 +40,7 @@ def main():
             if yaml_match:
                 try:
                     data = yaml.safe_load(yaml_match.group(1))
+                    poster_data = data
                     kategori = data.get('kategori', 'Unknown')
                     judul = data.get('judul', 'Unknown')
 
@@ -49,7 +48,6 @@ def main():
                     if not slug: 
                         slug = 'poster-001'
                     
-                    slug_name = slug
                     target_folder = os.path.join('posters', kategori.lower(), f"{slug}-001")
                     print(f"Target folder ditemukan: {target_folder}")
 
@@ -59,10 +57,8 @@ def main():
     if not target_folder:
         fallback_name = os.path.splitext(zip_files[0])[0]
         target_folder = os.path.join('posters', 'unknown', fallback_name)
-        slug_name = fallback_name
         print(f"Menggunakan fallback folder: {target_folder}")
 
-    # 3. Pindahkan file ke folder target yang sebenarnya
     os.makedirs(target_folder, exist_ok=True)
     
     for root, dirs, files in os.walk(temp_dir):
@@ -71,22 +67,21 @@ def main():
             dst_path = os.path.join(target_folder, file)
             shutil.move(src_path, dst_path)
 
-    # Hapus folder temp
     shutil.rmtree(temp_dir)
     os.remove(zip_file_path)
     print("ZIP berhasil diekstrak dan dipindahkan.")
 
-    # ============= BAGIAN BARU: SCAN & BUAT MANIFEST =============
-    print("Memindai seluruh folder posters untuk memperbarui indeks...")
+    # ============= SCAN & BUAT MANIFEST =============
+    print("Memindai seluruh folder posters untuk memperbarui indeks & emoji...")
     
     manifest_data = {
         "kategori_list": [],
+        "kategori_emoji": {},
         "total_poster": 0,
         "posters": []
     }
     kategori_set = set()
 
-    # Scan semua folder poster
     base_poster_path = "posters"
     if os.path.exists(base_poster_path):
         for kategori in os.listdir(base_poster_path):
@@ -105,9 +100,13 @@ def main():
                                     yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
                                     if yaml_match:
                                         data = yaml.safe_load(yaml_match.group(1))
-                                        # Tambahkan path folder untuk akses gambar
                                         rel_path = f"{kategori}/{poster_folder}"
                                         data['path'] = rel_path
+                                        
+                                        # PERUBAHAN LOGIKA: Ambil emoji, dan TIMPA (Update) selalu
+                                        current_emoji = data.get('kategori_emoji', '📂')
+                                        manifest_data['kategori_emoji'][kategori] = current_emoji
+
                                         manifest_data['posters'].append(data)
                                         manifest_data['total_poster'] += 1
                             except Exception as e:
@@ -115,13 +114,12 @@ def main():
 
     manifest_data['kategori_list'] = sorted(list(kategori_set))
 
-    # Tulis manifest.json ke root repositori
     manifest_path = "manifest.json"
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("Selesai! 'manifest.json' berhasil diperbarui di root repository.")
-    print(f"Total Poster: {manifest_data['total_poster']}, Kategori: {manifest_data['kategori_list']}")
+    print("Selesai! 'manifest.json' berhasil diperbarui.")
+    print(f"Total Poster: {manifest_data['total_poster']}, Emoji terdeteksi: {manifest_data['kategori_emoji']}")
 
 if __name__ == "__main__":
     main()
