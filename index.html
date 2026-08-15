@@ -152,7 +152,9 @@
         let kategoriAktif = null;
         let semuaPosterCache = [];
         let isCompactView = false;
-        let isSelecting = false; // <--- BENDERA BARU (PENTING!)
+        
+        // BENDERA BARU: Untuk memblokir filter teks saat memilih dropdown
+        let isSelecting = false; 
 
         function getFavorit() {
             const data = localStorage.getItem('dakwahFavorit');
@@ -403,11 +405,10 @@
         const resultBox = document.getElementById('search-result');
         let timeoutId;
 
-        // =============== PERBAIKAN FINAL PADA EVENT INPUT ===============
+        // ==================== PERBAIKAN EVENT INPUT ====================
         searchInput.addEventListener('input', function() {
-            // Jika isSelecting bernilai true, reset flag dan batalkan proses pencarian
+            // 1. JALANKAN PERTAHANAN: Jika bendera isSelecting aktif, batalkan proses!
             if (isSelecting) {
-                isSelecting = false;
                 return;
             }
 
@@ -456,34 +457,44 @@
             }, 300);
         });
 
-        // =============== PERBAIKAN FINAL PADA DROPDOWN ===============
+        // ==================== PERBAIKAN LOGIKA KETIKA DROPDOWN DI TEKAN ====================
         function pilihDariDropdown(id) {
-            clearTimeout(timeoutId);
-            
-            // Nyalakan bendera untuk menahan filter agar tidak bertabrakan
+            // 1. Nyalakan bendera pertahanan untuk memblokir event input dari browser
             isSelecting = true;
+            
+            clearTimeout(timeoutId);
 
             const resultBox = document.getElementById('search-result');
             const searchInput = document.getElementById('search');
 
+            // 2. Tutup dropdown
             resultBox.style.display = 'none';
+            
+            // 3. Kosongkan input. (Jangan khawatir, event input yang akan muncul akan diblokir oleh isSelecting)
             searchInput.value = '';
-            searchInput.blur();
+            
+            // 4. Tutup keyboard di HP
+            document.activeElement.blur();
 
-            // Filter DOM agar hanya menampilkan poster yang dipilih
+            // 5. Filter DOM secara paksa hanya menampilkan poster yang dipilih
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
                 p.style.display = (pid === id) ? 'block' : 'none';
             });
 
-            // Scroll halus dengan jeda waktu yang cukup untuk HP
+            // 6. Scroll ke poster tujuan dengan jeda 500ms
             setTimeout(() => {
                 const target = document.getElementById('post-list');
                 if(target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }, 500);
+
+            // 7. Setelah semuanya beres, matikan kembali bendera pertahanan
+            setTimeout(() => {
+                isSelecting = false;
+            }, 600);
         }
 
         function highlightText(key) {
@@ -527,4 +538,4 @@
         loadPosters();
     </script>
 </body>
-        </html>
+    </html>
