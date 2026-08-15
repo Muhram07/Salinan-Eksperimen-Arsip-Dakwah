@@ -6,24 +6,23 @@ import re
 import sys
 import json
 
-def get_next_sequence(kategori_path, slug_base):
-    """Mencari nomor urut tertinggi di dalam folder kategori"""
+def get_next_sequence(kategori_path):
+    """Mencari nomor urut tertinggi di dalam folder kategori (GLOBAL per kategori)"""
     if not os.path.exists(kategori_path):
         return 1
     
     max_num = 0
     for folder in os.listdir(kategori_path):
         if os.path.isdir(os.path.join(kategori_path, folder)):
-            # Cek apakah foldernya diawali dengan slug yang sama
-            if folder.startswith(slug_base):
-                parts = folder.split('-')
-                if len(parts) > 1 and parts[-1].isdigit():
-                    try:
-                        num = int(parts[-1])
-                        if num > max_num:
-                            max_num = num
-                    except ValueError:
-                        pass
+            # Ambil angka terakhir dari folder manapun di dalam kategori tersebut
+            parts = folder.split('-')
+            if len(parts) > 1 and parts[-1].isdigit():
+                try:
+                    num = int(parts[-1])
+                    if num > max_num:
+                        max_num = num
+                except ValueError:
+                    pass
     return max_num + 1
 
 def main():
@@ -65,14 +64,15 @@ def main():
                     if not slug_base: 
                         slug_base = 'poster'
 
-                    # === LOGIKA AUTO-INCREMENT NOMOR ===
+                    # === LOGIKA BARU: URUTAN GLOBAL PER KATEGORI ===
                     kategori_path = os.path.join('posters', kategori.lower())
-                    next_num = get_next_sequence(kategori_path, slug_base)
+                    # Tidak perlu kirim slug_base lagi. Fungsi akan scan semua folder di kategori.
+                    next_num = get_next_sequence(kategori_path) 
                     num_str = f"{next_num:03d}" # Format 001, 002, 003
                     final_slug = f"{slug_base}-{num_str}"
                     
                     target_folder = os.path.join('posters', kategori.lower(), final_slug)
-                    print(f"Target folder ditemukan (Auto-Increment): {target_folder}")
+                    print(f"Target folder ditemukan (Auto-Increment Global): {target_folder}")
 
                 except Exception as e:
                     print(f"Gagal parsing YAML di poster.md: {e}")
@@ -139,9 +139,9 @@ def scan_and_repair():
                                     
                                     # === SELF-HEALING UNTUK FOLDER SALAH ===
                                     if kategori.lower() == 'unknown' and yaml_kategori.lower() != 'unknown':
-                                        # Dapatkan nomor urut terbaru untuk kategori baru
+                                        # Dapatkan nomor urut global terbaru untuk kategori baru
                                         kategori_baru_path = os.path.join('posters', yaml_kategori.lower())
-                                        next_num = get_next_sequence(kategori_baru_path, slug)
+                                        next_num = get_next_sequence(kategori_baru_path) 
                                         num_str = f"{next_num:03d}"
                                         final_slug = f"{slug}-{num_str}"
                                         
