@@ -283,11 +283,9 @@
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
             }
 
-            // === PERBAIKAN BAGIAN CAPTION: 1x ENTER JADI 2x ENTER ===
+            // === PERBAIKAN CAPTION: 1x ENTER JADI 2x ENTER ===
             function cleanMarkdownText(text) {
                 if (!text) return '';
-                // Normalisasi Windows line endings, hapus tab berlebih, ubah 3+ enter jadi 2 enter,
-                // lalu ubah 1x enter (yang selama ini jadi biang kerok) menjadi 2x enter untuk paragraf MD yang rapi
                 return text
                     .replace(/\r\n/g, '\n')
                     .replace(/\t/g, ' ')
@@ -363,7 +361,6 @@
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
-                // === TERAPKAN PEMBERSIH CAPTION ===
                 const finalCaption = cleanMarkdownText(caption);
                 const finalContent = cleanMarkdownText(content);
 
@@ -454,7 +451,6 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
-                // === TERAPKAN PEMBERSIH CAPTION ===
                 const finalCaption = cleanMarkdownText(caption);
                 const finalContent = cleanMarkdownText(content);
 
@@ -484,10 +480,14 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     return;
                 }
 
-                statusText.innerHTML = `📤 Mengirim ZIP ke Cloudflare API... (${(contentZip.size / 1024 / 1024).toFixed(2)} MB)`;
+                statusText.innerHTML = `🔄 Mengonversi ZIP ke Base64 di HP...`;
+                const base64String = await blobToBase64(contentZip);
+
+                statusText.innerHTML = `📤 Mengirim Base64 ke Cloudflare API... (${(contentZip.size / 1024 / 1024).toFixed(2)} MB)`;
                 
+                // === PERBAIKAN NAMA FIELD ===
                 const formData = new FormData();
-                formData.append('file', contentZip, namaZip);
+                formData.append('content_base64', base64String); // WAJIB SAMA DENGAN WORKER
                 formData.append('filename', namaZip);
 
                 try {
