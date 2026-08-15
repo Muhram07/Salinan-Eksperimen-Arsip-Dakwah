@@ -6,6 +6,10 @@ import re
 import sys
 import json
 
+# Fungsi baru untuk penomoran dinamis (001 sampai 999, lalu 1000, 1001 dst)
+def get_padded_number(num):
+    return f"{num:0{max(3, len(str(num)))}d}"
+
 def get_next_sequence(kategori_path):
     """Mencari nomor urut tertinggi di dalam folder kategori (GLOBAL per kategori)"""
     if not os.path.exists(kategori_path):
@@ -64,11 +68,10 @@ def main():
                     if not slug_base: 
                         slug_base = 'poster'
 
-                    # === LOGIKA BARU: URUTAN GLOBAL PER KATEGORI ===
+                    # === LOGIKA PENOMORAN DINAMIS ===
                     kategori_path = os.path.join('posters', kategori.lower())
-                    # Tidak perlu kirim slug_base lagi. Fungsi akan scan semua folder di kategori.
-                    next_num = get_next_sequence(kategori_path) 
-                    num_str = f"{next_num:03d}" # Format 001, 002, 003
+                    next_num = get_next_sequence(kategori_path)
+                    num_str = get_padded_number(next_num) # Gunakan fungsi dinamis
                     final_slug = f"{slug_base}-{num_str}"
                     
                     target_folder = os.path.join('posters', kategori.lower(), final_slug)
@@ -142,7 +145,7 @@ def scan_and_repair():
                                         # Dapatkan nomor urut global terbaru untuk kategori baru
                                         kategori_baru_path = os.path.join('posters', yaml_kategori.lower())
                                         next_num = get_next_sequence(kategori_baru_path) 
-                                        num_str = f"{next_num:03d}"
+                                        num_str = get_padded_number(next_num) # Gunakan fungsi dinamis
                                         final_slug = f"{slug}-{num_str}"
                                         
                                         target_folder = os.path.join('posters', yaml_kategori.lower(), final_slug)
