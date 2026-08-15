@@ -96,18 +96,37 @@
         .sound-float-btn.playing{border-color:#D4AF37;color:#D4AF37;}
         .view-float-btn{left:25px;}
         .view-float-btn.active{border-color:#D4AF37;color:#D4AF37;}
+
+        /* --- PERUBAHAN MODE KOMPAK DI SINI --- */
         #post-list.compact-view { display: flex; flex-direction: column; gap: 12px; max-width: 900px; margin: 0 auto; padding: 10px 0; align-items: center; width: 100%; }
-        #post-list.compact-view .poster { width: 100%; max-width: 800px; padding: 12px 20px; display: flex; align-items: center; justify-content: flex-start; gap: 18px; border-radius: 16px; flex-wrap: wrap; transform: scale(0.98); margin: 0 auto; }
-        #post-list.compact-view .carousel-container { width: 70px; height: 70px; min-width: 70px; margin: 0; border-radius: 12px; box-shadow: none; flex-shrink: 0; overflow: hidden; }
-        #post-list.compact-view .carousel-slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; max-height: 70px; }
-        #post-list.compact-view .carousel-btn, #post-list.compact-view .poster-id-wrapper, #post-list.compact-view .read-more-btn, #post-list.compact-view .sosial-actions, #post-list.compact-view .tags-wrapper, #post-list.compact-view .divider { display: none; }
-        #post-list.compact-view .poster-content-wrapper { max-height: 35px; font-size: 13px; text-align: left; display: block; padding-right: 10px; }
+        #post-list.compact-view .poster { width: 100%; max-width: 800px; padding: 12px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; border-radius: 16px; transform: scale(0.98); margin: 0 auto; }
+        
+        /* Hapus batasan 70px agar carousel menjadi besar seperti poster tunggal */
+        #post-list.compact-view .carousel-container { width: 100%; max-width: 400px; height: auto; min-width: unset; margin: 0 auto 10px auto; border-radius: 12px; box-shadow: none; flex-shrink: unset; overflow: hidden; }
+        #post-list.compact-view .carousel-slide img { width: 100%; height: auto; object-fit: cover; border-radius: 12px; max-height: unset; }
+        
+        /* Munculkan kembali tombol navigasi carousel */
+        #post-list.compact-view .carousel-btn { display: flex !important; }
+        
+        #post-list.compact-view .poster-id-wrapper,
+        #post-list.compact-view .read-more-btn,
+        #post-list.compact-view .divider,
+        #post-list.compact-view .tags-wrapper { display: none; }
+        
+        #post-list.compact-view .poster-content-wrapper { max-height: 35px; font-size: 13px; text-align: center; display: block; padding-right: 10px; }
         #post-list.compact-view .poster-content-wrapper.collapsed { max-height: 35px; }
-        #post-list.compact-view h3 { font-size: 16px; margin: 0 0 3px 0; text-align: left; color: #D4AF37; flex: 1 1 100%; width: 100%; }
-        #post-list.compact-view .sub-caption { font-size: 13px; margin: 0 0 5px 0; text-align: left; line-height: 1.2; width: 100%; }
-        #post-list.compact-view .actions { gap: 6px; margin-top: 0; align-items: center; justify-content: flex-end; flex-wrap: wrap; width: 100%; }
-        #post-list.compact-view .actions button { font-size: 11px; padding: 5px 12px; background: transparent; color: #D4AF37; border: 1px solid #D4AF37; }
-        #post-list.compact-view .actions button:hover { background: #D4AF37; color: #111; }
+        
+        #post-list.compact-view h3 { font-size: 16px; margin: 0 0 5px 0; text-align: center; color: #D4AF37; width: 100%; }
+        #post-list.compact-view .sub-caption { font-size: 13px; margin: 0 0 5px 0; text-align: center; line-height: 1.2; width: 100%; }
+        
+        /* Samakan style tombol simpan dengan tombol aksi lainnya di mode kompak */
+        #post-list.compact-view .actions { gap: 6px; margin-top: 0; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%; }
+        #post-list.compact-view .actions button, 
+        #post-list.compact-view .actions .btn-save { font-size: 11px; padding: 5px 12px; background: transparent; color: #D4AF37; border: 1px solid #D4AF37; }
+        #post-list.compact-view .actions button:hover, 
+        #post-list.compact-view .actions .btn-save:hover { background: #D4AF37; color: #111; }
+        
+        #post-list.compact-view .sosial-actions { display: none; } /* Sembunyikan action sosial di mode kompak */
     </style>
 </head>
 <body>
@@ -152,7 +171,7 @@
         let kategoriAktif = null;
         let semuaPosterCache = [];
         let isCompactView = false;
-        let isSelecting = false; // Bendera untuk memblokir filter teks
+        let isSelecting = false;
 
         function getFavorit() {
             const data = localStorage.getItem('dakwahFavorit');
@@ -294,14 +313,19 @@
                             ${subJudul ? `<div class="sub-caption">${subJudul}</div>` : ''}
                             <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
                             <button class="read-more-btn" id="btn-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
+                            
                             <div class="actions">
+                                <!-- TOMBOL SIMPAN DIPINDAHKAN KE SINI AGAR MUNCUL DI MODE RINGKAS -->
+                                <button class="btn-save ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '🔖 Belum Disimpan'}</button>
                                 ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
                                 <button onclick="downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">🖼️ Download Gambar</button>
                                 <button onclick="copyCaptionDariElemen(this)">📋 Copy Caption</button>
                             </div>
+                            
                             <hr class="divider">
+                            
                             <div class="sosial-actions">
-                                <button class="btn-save ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '🔖 Belum Disimpan'}</button>
+                                <!-- TOMBOL SIMPAN SUDAH DIPINDAHKAN KE ATAS -->
                                 <button onclick="sharePoster('${judul}', '${window.location.href}')"><span class="icon">✈️</span> Kirim ke Teman</button>
                                 <button onclick="dmInstagram()"><span class="icon">💬</span> DM</button>
                             </div>
@@ -453,7 +477,6 @@
             }, 300);
         });
 
-        // ==================== FINAL FIX: PERBAIKAN IDENTIFIKASI DROPDOWN ====================
         function pilihDariDropdown(id) {
             isSelecting = true;
             clearTimeout(timeoutId);
@@ -465,7 +488,6 @@
             searchInput.value = '';
             document.activeElement.blur();
 
-            // KUNCI PERBAIKAN: Ubah garis miring (/) menjadi strip (-) agar cocok dengan data-id di HTML
             const searchId = id.replace(/\//g, '-');
 
             const posters = document.querySelectorAll('.poster');
@@ -527,4 +549,4 @@
         loadPosters();
     </script>
 </body>
-        </html>
+    </html>
