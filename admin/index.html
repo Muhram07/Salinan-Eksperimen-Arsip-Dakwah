@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Arsip Dakwah</title>
+    <!-- Library JSZip untuk kompresi file menjadi ZIP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;}
         body{
@@ -48,10 +48,27 @@
         .admin-menu{display:flex;flex-direction:column;gap:10px;}
         .admin-menu .btn-gold{width:100%;text-align:center;}
         
-        #qrcode-wrapper{ display:none; flex-direction: column; align-items: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 16px; margin-top: 20px; border: 1px dashed #D4AF37;}
-        #qrcode{ background: white; padding: 15px; border-radius: 12px; display: inline-block;}
-        
         #statusProgress{ display:none; text-align:left; background:#111; padding:15px; border-radius:12px; border:1px solid #D4AF37; margin-top:10px;}
+
+        /* Tombol baru menuju folder _uploads */
+        .btn-upload-navigate {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            text-decoration: none;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            padding: 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-upload-navigate:hover {
+            background: #D4AF37;
+            color: #111;
+            transform: scale(1.02);
+        }
     </style>
 </head>
 <body>
@@ -120,17 +137,15 @@
                 </div>
             </div>
 
-            <button class="btn-solid" onclick="buatPoster()" style="margin-bottom:10px;font-size:18px;padding:15px;">🚀 BUAT POSTER (Download ZIP + QR Code)</button>
+            <button class="btn-solid" onclick="buatPoster()" style="margin-bottom:10px;font-size:18px;padding:15px;">🚀 BUAT POSTER (Download ZIP)</button>
             
             <div id="statusProgress">
                 <span style="color:#D4AF37; font-weight:bold;">📌 Status:</span>
                 <div id="statusText" style="color:#fff; margin-top:10px; line-height:1.6;"></div>
             </div>
-            <div id="qrcode-wrapper">
-                <p>📱 Scan QR Code ini untuk membuka path folder poster di GitHub.</p>
-                <div id="qrcode"></div>
-                <p style="margin-top:15px;font-size:12px;color:#888;" id="qrLinkText"></p>
-            </div>
+
+            <!-- TOMBOL BARU: Langsung menuju folder _uploads -->
+            <a href="https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/tree/main/_uploads" target="_blank" class="btn-upload-navigate">📤 Buka Folder _uploads di GitHub</a>
         </div>
     </div>
 
@@ -224,11 +239,7 @@
             window.buatPoster = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
-                const qrWrapper = document.getElementById('qrcode-wrapper');
-                const qrContainer = document.getElementById('qrcode');
-                const qrLinkText = document.getElementById('qrLinkText');
 
-                qrWrapper.style.display = 'none'; qrContainer.innerHTML = '';
                 status.style.display = 'block';
                 statusText.innerHTML = '⏳ Mengemas file menjadi satu ZIP...';
 
@@ -302,19 +313,9 @@ ${content || 'Tulis isi caption di sini...'}`;
                 downloadFile(urlZip, namaZip);
                 URL.revokeObjectURL(urlZip);
 
-                statusText.innerHTML = `✅ Berhasil! Mendownload ZIP dan membuat QR Code.`;
-                const qrLink = `https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/tree/main/posters/${namaFolder}/.gitkeep`;
-                
-                qrWrapper.style.display = 'flex';
-                qrLinkText.innerText = `🔗 Path GitHub: ${qrLink}`;
-                qrContainer.innerHTML = '';
-                new QRCode(qrContainer, {
-                    text: qrLink, width: 200, height: 200,
-                    colorDark : "#000000", colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
+                statusText.innerHTML = `✅ Berhasil! ZIP berhasil didownload. Silakan buka folder <b>_uploads</b> dan upload ZIP ini ke GitHub.`;
             };
         });
     </script>
 </body>
-                </html>
+                                                                            </html>
