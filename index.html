@@ -105,9 +105,28 @@
         #post-list.compact-view .carousel-container { width: 100%; max-width: 400px; height: auto; min-width: unset; margin: 0 auto 10px auto; border-radius: 12px; box-shadow: none; flex-shrink: unset; overflow: hidden; }
         #post-list.compact-view .carousel-slide img { width: 100%; height: auto; object-fit: cover; border-radius: 12px; max-height: unset; }
         
-        /* Munculkan kembali tombol navigasi carousel */
-        #post-list.compact-view .carousel-btn { display: flex !important; }
-        
+        /* === PERBAIKAN POSISI PANAH CAROUSEL DI MODE RINGKAS === */
+        #post-list.compact-view .carousel-btn {
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: none; /* Hilangkan blur agar lebih tajam di mode kecil */
+            border: 1px solid rgba(212, 175, 55, 0.5); /* Tambahkan border emas tipis */
+            color: #D4AF37;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            padding: 0;
+        }
+        #post-list.compact-view .carousel-btn.prev { left: 8px; }
+        #post-list.compact-view .carousel-btn.next { right: 8px; }
+        /* ======================================================== */
+
         #post-list.compact-view .poster-id-wrapper,
         #post-list.compact-view .read-more-btn,
         #post-list.compact-view .divider,
@@ -130,6 +149,7 @@
     </style>
 </head>
 <body>
+    <!-- Bagian HTML body sama persis seperti sebelumnya -->
     <div class="follow-wrapper">
         <div class="follow-text">Mari follow akun dakwah kami untuk konten manhaj salaf bermanfaat lainnya</div>
         <div class="sosmed-container">
@@ -315,7 +335,6 @@
                             <button class="read-more-btn" id="btn-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
                             
                             <div class="actions">
-                                <!-- TOMBOL SIMPAN DIPINDAHKAN KE SINI AGAR MUNCUL DI MODE RINGKAS -->
                                 <button class="btn-save ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '🔖 Belum Disimpan'}</button>
                                 ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
                                 <button onclick="downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">🖼️ Download Gambar</button>
@@ -325,7 +344,6 @@
                             <hr class="divider">
                             
                             <div class="sosial-actions">
-                                <!-- TOMBOL SIMPAN SUDAH DIPINDAHKAN KE ATAS -->
                                 <button onclick="sharePoster('${judul}', '${window.location.href}')"><span class="icon">✈️</span> Kirim ke Teman</button>
                                 <button onclick="dmInstagram()"><span class="icon">💬</span> DM</button>
                             </div>
