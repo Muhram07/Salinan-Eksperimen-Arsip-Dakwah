@@ -6,7 +6,7 @@ import re
 import sys
 import json
 
-# Fungsi baru untuk penomoran dinamis (001 sampai 999, lalu 1000, 1001 dst)
+# Fungsi untuk penomoran dinamis (001 sampai 999, lalu 1000, 1001 dst)
 def get_padded_number(num):
     return f"{num:0{max(3, len(str(num)))}d}"
 
@@ -37,6 +37,8 @@ def main():
         print("ERROR: Folder '_uploads' tidak ditemukan.")
         sys.exit(1)
 
+    # === PERUBAHAN UTAMA DI SINI ===
+    # Ambil daftar semua file .zip di dalam folder
     zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
     
     if not zip_files:
@@ -44,59 +46,62 @@ def main():
         scan_and_repair() # Tetap repair jika tidak ada ZIP
         return
 
-    zip_file_path = os.path.join(zip_dir, zip_files[0])
-    print(f"Memproses ZIP: {zip_file_path}")
+    # Loop untuk memproses SEMUA file ZIP sampai habis
+    for zip_filename in zip_files:
+        zip_file_path = os.path.join(zip_dir, zip_filename)
+        print(f"Memproses ZIP: {zip_file_path}")
 
-    os.makedirs(temp_dir, exist_ok=True)
-    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-        zip_ref.extractall(temp_dir)
+        os.makedirs(temp_dir, exist_ok=True)
+        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
 
-    target_folder = None
+        target_folder = None
 
-    md_path = os.path.join(temp_dir, 'poster.md')
-    if os.path.exists(md_path):
-        with open(md_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-            yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
-            if yaml_match:
-                try:
-                    data = yaml.safe_load(yaml_match.group(1))
-                    kategori = data.get('kategori', 'Unknown')
-                    judul = data.get('judul', 'Unknown')
+        md_path = os.path.join(temp_dir, 'poster.md')
+        if os.path.exists(md_path):
+            with open(md_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
+                if yaml_match:
+                    try:
+                        data = yaml.safe_load(yaml_match.group(1))
+                        kategori = data.get('kategori', 'Unknown')
+                        judul = data.get('judul', 'Unknown')
 
-                    slug_base = re.sub(r'[^a-z0-9]+', '-', judul.lower()).strip('-')
-                    if not slug_base: 
-                        slug_base = 'poster'
+                        slug_base = re.sub(r'[^a-z0-9]+', '-', judul.lower()).strip('-')
+                        if not slug_base: 
+                            slug_base = 'poster'
 
-                    # === LOGIKA PENOMORAN DINAMIS ===
-                    kategori_path = os.path.join('posters', kategori.lower())
-                    next_num = get_next_sequence(kategori_path)
-                    num_str = get_padded_number(next_num) # Gunakan fungsi dinamis
-                    final_slug = f"{slug_base}-{num_str}"
-                    
-                    target_folder = os.path.join('posters', kategori.lower(), final_slug)
-                    print(f"Target folder ditemukan (Auto-Increment Global): {target_folder}")
+                        # === LOGIKA PENOMORAN DINAMIS ===
+                        kategori_path = os.path.join('posters', kategori.lower())
+                        next_num = get_next_sequence(kategori_path)
+                        num_str = get_padded_number(next_num)
+                        final_slug = f"{slug_base}-{num_str}"
+                        
+                        target_folder = os.path.join('posters', kategori.lower(), final_slug)
+                        print(f"Target folder ditemukan (Auto-Increment Global): {target_folder}")
 
-                except Exception as e:
-                    print(f"Gagal parsing YAML di poster.md: {e}")
-            
-    if not target_folder:
-        fallback_name = os.path.splitext(zip_files[0])[0]
-        target_folder = os.path.join('posters', 'unknown', fallback_name)
-        print(f"Menggunakan fallback folder: {target_folder}")
+                    except Exception as e:
+                        print(f"Gagal parsing YAML di poster.md: {e}")
+                
+        if not target_folder:
+            fallback_name = os.path.splitext(zip_filename)[0]
+            target_folder = os.path.join('posters', 'unknown', fallback_name)
+            print(f"Menggunakan fallback folder: {target_folder}")
 
-    os.makedirs(target_folder, exist_ok=True)
-    
-    for root, dirs, files in os.walk(temp_dir):
-        for file in files:
-            src_path = os.path.join(root, file)
-            dst_path = os.path.join(target_folder, file)
-            shutil.move(src_path, dst_path)
+        os.makedirs(target_folder, exist_ok=True)
+        
+        for root, dirs, files in os.walk(temp_dir):
+            for file in files:
+                src_path = os.path.join(root, file)
+                dst_path = os.path.join(target_folder, file)
+                shutil.move(src_path, dst_path)
 
-    shutil.rmtree(temp_dir)
-    os.remove(zip_file_path)
-    print("ZIP berhasil diekstrak dan dipindahkan.")
+        shutil.rmtree(temp_dir)
+        os.remove(zip_file_path)
+        print("ZIP berhasil diekstrak dan dipindahkan.")
 
+    # === SETELAH SEMUA ZIP DIPROSES, BARU PANGGIL SCAN & REPAIR ===
     scan_and_repair()
 
 def scan_and_repair():
@@ -145,7 +150,7 @@ def scan_and_repair():
                                         # Dapatkan nomor urut global terbaru untuk kategori baru
                                         kategori_baru_path = os.path.join('posters', yaml_kategori.lower())
                                         next_num = get_next_sequence(kategori_baru_path) 
-                                        num_str = get_padded_number(next_num) # Gunakan fungsi dinamis
+                                        num_str = get_padded_number(next_num)
                                         final_slug = f"{slug}-{num_str}"
                                         
                                         target_folder = os.path.join('posters', yaml_kategori.lower(), final_slug)
