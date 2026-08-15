@@ -49,7 +49,6 @@
         
         #statusProgress{ display:none; text-align:left; background:#111; padding:15px; border-radius:12px; border:1px solid #D4AF37; margin-top:10px;}
 
-        /* Konfigurasi API */
         .api-config {
             background: rgba(255,255,255,0.05);
             border: 1px solid #444;
@@ -174,7 +173,6 @@
     </div>
 
     <script>
-        // === KONFIGURASI API TERSIMPAN DI LOCALSTORAGE ===
         document.addEventListener('DOMContentLoaded', function() {
             const PIN = "123456";
             const loginPage = document.getElementById('loginPage');
@@ -283,15 +281,16 @@
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
             }
 
-            // === PERBAIKAN CAPTION: 1x ENTER JADI 2x ENTER ===
+            // === FUNGSI PEMBERSIH CAPTION TERBARU (100% Anti Nyambung) ===
             function cleanMarkdownText(text) {
                 if (!text) return '';
+                // Normalisasi, pisahkan per baris, buang spasi di ujung, buang baris kosong, gabung kembali dengan \n\n
                 return text
                     .replace(/\r\n/g, '\n')
-                    .replace(/\t/g, ' ')
-                    .replace(/\n{3,}/g, '\n\n')
-                    .replace(/(?<!\n)\n(?!\n)/g, '\n\n')
-                    .trim();
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .join('\n\n');
             }
 
             // === FUNGSI KONVERSI BLOB KE BASE64 DI BROWSER ===
@@ -485,9 +484,8 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
 
                 statusText.innerHTML = `📤 Mengirim Base64 ke Cloudflare API... (${(contentZip.size / 1024 / 1024).toFixed(2)} MB)`;
                 
-                // === PERBAIKAN NAMA FIELD ===
                 const formData = new FormData();
-                formData.append('content_base64', base64String); // WAJIB SAMA DENGAN WORKER
+                formData.append('content_base64', base64String);
                 formData.append('filename', namaZip);
 
                 try {
