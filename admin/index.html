@@ -124,7 +124,8 @@
             <input type="text" id="inpJudul" placeholder="Masukkan judul poster">
             
             <label>Kategori (Ketik untuk mencari atau menambah baru)</label>
-            <input type="text" id="inpKategori" list="kategori-list" placeholder="cth: tauhid, aqidah, sunnah">
+            <!-- PERBAIKAN 1: Otomatis ubah jadi huruf kecil saat diketik -->
+            <input type="text" id="inpKategori" list="kategori-list" placeholder="cth: tauhid, aqidah, sunnah" oninput="this.value = this.value.toLowerCase()">
             <datalist id="kategori-list"></datalist>
 
             <label>Emoji Ikon Kategori (Bisa diedit kapan saja)</label>
@@ -173,6 +174,9 @@
     </div>
 
     <script>
+        // Variabel untuk menyimpan emoji yang sudah ada dari manifest
+        let cachedKategoriEmojis = {};
+
         document.addEventListener('DOMContentLoaded', function() {
             const PIN = "123456";
             const loginPage = document.getElementById('loginPage');
@@ -260,12 +264,14 @@
                     const res = await fetch('/manifest.json');
                     if (res.ok) {
                         const data = await res.json();
+                        // Simpan data emoji untuk logika otomatis nanti
+                        cachedKategoriEmojis = data.kategori_emoji || {};
                         if(data.kategori_list && data.kategori_list.length > 0) {
                             datalist.innerHTML = data.kategori_list.map(k => `<option value="${k}">`).join('');
                             return;
                         }
                     }
-                } catch (e) { /* Fallback jika manifest belum ada */ }
+                } catch (e) { /* Fallback */ }
                 
                 const fallback = ["Tauhid", "Sunnah", "Bid'ah", "Syirik", "Aqidah", "Fikih", "Hadits", "Tafsir", "Akhlak"];
                 datalist.innerHTML = fallback.map(k => `<option value="${k}">`).join('');
@@ -281,10 +287,9 @@
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
             }
 
-            // === FUNGSI PEMBERSIH CAPTION TERBARU (100% Anti Nyambung) ===
+            // === FUNGSI PEMBERSIH CAPTION ===
             function cleanMarkdownText(text) {
                 if (!text) return '';
-                // Normalisasi, pisahkan per baris, buang spasi di ujung, buang baris kosong, gabung kembali dengan \n\n
                 return text
                     .replace(/\r\n/g, '\n')
                     .split('\n')
@@ -293,7 +298,7 @@
                     .join('\n\n');
             }
 
-            // === FUNGSI KONVERSI BLOB KE BASE64 DI BROWSER ===
+            // === FUNGSI KONVERSI BLOB KE BASE64 ===
             function blobToBase64(blob) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -367,7 +372,11 @@
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
                 
-                const finalEmoji = emoji || '📂';
+                // PERBAIKAN 2: Logika Emoji Pintar
+                // Jika input emoji kosong, ambil emoji lama dari manifest (jika ada)
+                const existingEmoji = cachedKategoriEmojis[kategori];
+                const finalEmoji = emoji || existingEmoji || '📂';
+
                 const template = `---
 judul: "${judul}"
 sub_judul: "${finalCaption || 'Tulis sub judul di sini'}"
@@ -457,7 +466,10 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
                 
-                const finalEmoji = emoji || '📂';
+                // PERBAIKAN 2: Logika Emoji Pintar
+                const existingEmoji = cachedKategoriEmojis[kategori];
+                const finalEmoji = emoji || existingEmoji || '📂';
+
                 const template = `---
 judul: "${judul}"
 sub_judul: "${finalCaption || 'Tulis sub judul di sini'}"
@@ -517,4 +529,4 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
         });
     </script>
 </body>
-    </html>
+                    </html>
