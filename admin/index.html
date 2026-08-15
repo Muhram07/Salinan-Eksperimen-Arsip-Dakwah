@@ -114,7 +114,6 @@
             <h2>🚀 Generator Poster Terpadu</h2>
             <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">Isi data poster, upload gambar, pilih opsi PDF, lalu klik <b>Kirim ke GitHub</b>.</p>
             
-            <!-- KONFIGURASI API (DENGAN SAVED LOCALSTORAGE) -->
             <div class="api-config">
                 <label>🌐 Cloudflare Worker API URL</label>
                 <input type="text" id="inpApiUrl" placeholder="https://api-dakwah.mnursurisma.workers.dev" style="font-size:13px;">
@@ -126,7 +125,6 @@
             <input type="text" id="inpJudul" placeholder="Masukkan judul poster">
             
             <label>Kategori (Ketik untuk mencari atau menambah baru)</label>
-            <!-- Dihapus teks petunjuk, hanya menyisakan datalist yang berfungsi -->
             <input type="text" id="inpKategori" list="kategori-list" placeholder="cth: tauhid, aqidah, sunnah">
             <datalist id="kategori-list"></datalist>
 
@@ -187,7 +185,6 @@
             const apiUrlInput = document.getElementById('inpApiUrl');
             const apiKeyInput = document.getElementById('inpApiKey');
 
-            // --- FITUR SIMPAN KONFIGURASI KE LOCALSTORAGE ---
             apiUrlInput.addEventListener('input', () => {
                 localStorage.setItem('dakwahApiUrl', apiUrlInput.value);
             });
@@ -283,6 +280,21 @@
                 const a = document.createElement('a');
                 a.href = url; a.download = fileName;
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            }
+
+            // === FUNGSI KONVERSI BLOB KE BASE64 DI BROWSER ===
+            function blobToBase64(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const dataUrl = reader.result;
+                        // Hapus header "data:application/zip;base64,"
+                        const base64 = dataUrl.split(',')[1];
+                        resolve(base64);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
             }
 
             window.downloadZipManual = async function() {
@@ -451,10 +463,15 @@ ${content || 'Tulis isi caption di sini...'}`;
                     return;
                 }
 
-                statusText.innerHTML = `📤 Mengirim ZIP ke Cloudflare API... (${(contentZip.size / 1024 / 1024).toFixed(2)} MB)`;
+                // === PERUBAHAN PENTING: KONVERSI BASE64 DI SISI BROWSER ===
+                statusText.innerHTML = `🔄 Mengonversi ZIP ke Base64 di HP...`;
+                const base64String = await blobToBase64(contentZip);
+
+                statusText.innerHTML = `📤 Mengirim Base64 ke Cloudflare API... (${(contentZip.size / 1024 / 1024).toFixed(2)} MB)`;
                 
+                // Kirim Base64 yang sudah jadi ke Worker
                 const formData = new FormData();
-                formData.append('file', contentZip, namaZip);
+                formData.append('content_base64', base64String);
                 formData.append('filename', namaZip);
 
                 try {
