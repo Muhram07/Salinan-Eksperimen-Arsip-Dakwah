@@ -126,7 +126,6 @@
             <input type="text" id="inpJudul" placeholder="Masukkan judul poster">
             
             <label>Kategori (Ketik untuk mencari atau menambah baru)</label>
-            <!-- Dihapus teks petunjuk, hanya menyisakan datalist yang berfungsi -->
             <input type="text" id="inpKategori" list="kategori-list" placeholder="cth: tauhid, aqidah, sunnah">
             <datalist id="kategori-list"></datalist>
 
@@ -176,6 +175,7 @@
     </div>
 
     <script>
+        // === KONFIGURASI API TERSIMPAN OTOMATIS DI LOCALSTORAGE ===
         document.addEventListener('DOMContentLoaded', function() {
             const PIN = "123456";
             const loginPage = document.getElementById('loginPage');
@@ -187,7 +187,6 @@
             const apiUrlInput = document.getElementById('inpApiUrl');
             const apiKeyInput = document.getElementById('inpApiKey');
 
-            // --- FITUR SIMPAN KONFIGURASI KE LOCALSTORAGE ---
             apiUrlInput.addEventListener('input', () => {
                 localStorage.setItem('dakwahApiUrl', apiUrlInput.value);
             });
@@ -285,6 +284,17 @@
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
             }
 
+            // === FITUR BARU: Pembersih Format Caption dari WhatsApp/Clipboard ===
+            function cleanMarkdownText(text) {
+                if (!text) return '';
+                return text
+                    .replace(/\r\n/g, '\n')           // Normalisasi Windows line ending ke Unix
+                    .replace(/\t/g, ' ')              // Ubah Tab menjadi spasi
+                    .replace(/\n{3,}/g, '\n\n')        // Ubah 3 enter beruntun menjadi 2 enter (format paragraf MD)
+                    .trim();                         // Bersihkan spasi di awal dan akhir kalimat
+            }
+
+            // === FUNGSI PLAN B: DOWNLOAD ZIP ===
             window.downloadZipManual = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
@@ -338,6 +348,10 @@
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
+                // === TERAPKAN FUNGSI PEMBERSIH CAPTION ===
+                const finalCaption = cleanMarkdownText(caption);
+                const finalContent = cleanMarkdownText(content);
+
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
@@ -345,14 +359,14 @@
                 const finalEmoji = emoji || '📂';
                 const template = `---
 judul: "${judul}"
-sub_judul: "${caption || 'Tulis sub judul di sini'}"
+sub_judul: "${finalCaption || 'Tulis sub judul di sini'}"
 kategori: "${kategori}"
 kategori_emoji: "${finalEmoji}"
 tags: "${tags || 'tag1, tag2'}"
 images: "${imagesStr}"
 ${pdfLine}
 ---
-${content || 'Tulis isi caption di sini...'}`;
+${finalContent || 'Tulis isi caption di sini...'}`;
                 zip.file('poster.md', template);
 
                 statusText.innerHTML = `📦 Download ZIP... (${namaZip})`;
@@ -364,6 +378,7 @@ ${content || 'Tulis isi caption di sini...'}`;
                 statusText.innerHTML = `✅ Berhasil! ZIP didownload. Silakan upload ke folder _uploads secara manual.`;
             };
 
+            // === FUNGSI PLAN A: KIRIM API ===
             window.kirimKeGitHub = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
@@ -425,6 +440,10 @@ ${content || 'Tulis isi caption di sini...'}`;
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
+                // === TERAPKAN FUNGSI PEMBERSIH CAPTION ===
+                const finalCaption = cleanMarkdownText(caption);
+                const finalContent = cleanMarkdownText(content);
+
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
@@ -432,14 +451,14 @@ ${content || 'Tulis isi caption di sini...'}`;
                 const finalEmoji = emoji || '📂';
                 const template = `---
 judul: "${judul}"
-sub_judul: "${caption || 'Tulis sub judul di sini'}"
+sub_judul: "${finalCaption || 'Tulis sub judul di sini'}"
 kategori: "${kategori}"
 kategori_emoji: "${finalEmoji}"
 tags: "${tags || 'tag1, tag2'}"
 images: "${imagesStr}"
 ${pdfLine}
 ---
-${content || 'Tulis isi caption di sini...'}`;
+${finalContent || 'Tulis isi caption di sini...'}`;
                 zip.file('poster.md', template);
 
                 statusText.innerHTML = `📦 Menyiapkan ZIP...`;
