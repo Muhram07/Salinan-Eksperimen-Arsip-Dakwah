@@ -9,13 +9,23 @@ images: "1.jpg, 2.jpg"
 tidakpakepdf: "brosur.pdf"
 ---
 ﷽ Segeralah lunasi hutang mu...
+
 .
+
 Rasulullah Shallallahu alaihi wa sallam bersabda :
+
 .
+
 مَطْلُ الْغَنِيِّ ظُلْمٌ
+
 .
+
 Menunda membayar utang dalam keadaan mampu adalah sebuah KEDZALIMAN
+
 .
+
 ( HR. Al-Bukhari no. 2222)
+
 .
+
 🌐Source : shahihfiqih.com
