@@ -247,13 +247,27 @@
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
+        // === FUNGSI BARU: MEMBERSIHKAN TEKS SEBELUM DI COPY (Kebalikan dari Fungsi Admin) ===
+        function cleanCopyText(text) {
+            if (!text) return '';
+            return text
+                .replace(/\r\n/g, '\n')               // Normalisasi format baris baru
+                .replace(/\n{2,}/g, '\n')              // Ubah 2 enter/lebih menjadi 1 enter (spasi normal)
+                .replace(/[ \t]+$/gm, '')              // Buang spasi berlebih di ujung setiap baris
+                .trim();                              // Buang spasi kosong di awal dan akhir total
+        }
+
         function copyCaptionDariElemen(btn) {
             const poster = btn.closest('.poster');
             const judul = poster.querySelector('h3')?.innerText || '';
             const sub = poster.querySelector('.sub-caption')?.innerText || '';
             const contentWrapper = poster.querySelector('.poster-content-wrapper');
             const isi = contentWrapper ? contentWrapper.innerText : '';
-            const konten = `${judul}\n\n${sub}\n\n${isi}`;
+            
+            // Gabungkan bagian-bagian yang sudah dibersihkan dengan 1x enter agar jarak normal
+            const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
+            const konten = parts.join('\n');
+            
             navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
         }
 
@@ -575,4 +589,4 @@
         loadPosters();
     </script>
 </body>
-            </html>
+    </html>
