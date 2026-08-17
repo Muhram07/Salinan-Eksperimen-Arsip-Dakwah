@@ -247,14 +247,13 @@
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
-        // === FUNGSI BARU: MEMBERSIHKAN TEKS SEBELUM DI COPY (Kebalikan dari Fungsi Admin) ===
         function cleanCopyText(text) {
             if (!text) return '';
             return text
-                .replace(/\r\n/g, '\n')               // Normalisasi format baris baru
-                .replace(/\n{2,}/g, '\n')              // Ubah 2 enter/lebih menjadi 1 enter (spasi normal)
-                .replace(/[ \t]+$/gm, '')              // Buang spasi berlebih di ujung setiap baris
-                .trim();                              // Buang spasi kosong di awal dan akhir total
+                .replace(/\r\n/g, '\n')
+                .replace(/\n{2,}/g, '\n')
+                .replace(/[ \t]+$/gm, '')
+                .trim();
         }
 
         function copyCaptionDariElemen(btn) {
@@ -264,9 +263,9 @@
             const contentWrapper = poster.querySelector('.poster-content-wrapper');
             const isi = contentWrapper ? contentWrapper.innerText : '';
             
-            // Gabungkan bagian-bagian yang sudah dibersihkan dengan 1x enter agar jarak normal
+            // PERBAIKAN DI SINI: Ganti .join('\n') menjadi .join('\n\n') agar ada jarak 1 baris kosong
             const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
-            const konten = parts.join('\n');
+            const konten = parts.join('\n\n');
             
             navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
         }
