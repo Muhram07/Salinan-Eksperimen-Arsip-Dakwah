@@ -157,7 +157,6 @@
         <div class="sub-title">📚 Manhaj Salaf 📚</div>
     </div>
     <div class="search-wrapper">
-        <!-- PERBAIKAN: Hapus 'sub judul,' dan 'isi ' saja -->
         <input type="text" id="search" placeholder="Cari judul, kategori, tag, atau caption...">
         <div id="search-result"></div>
     </div>
@@ -234,6 +233,7 @@
             const judul = poster.querySelector('h3')?.innerText || '';
             const subElement = poster.querySelector('.sub-caption');
             let sub = '';
+            // Ambil data-raw yang sudah bersih (tanpa asterisk) untuk di-copy
             if (subElement && subElement.dataset && subElement.dataset.raw) {
                 sub = subElement.dataset.raw;
             } else if (subElement) {
@@ -322,6 +322,10 @@
                         `;
                     }
 
+                    // === PERBAIKAN DI SINI ===
+                    // Hapus asterisk (*) untuk data-raw (agar saat copy bintangnya hilang)
+                    const plainSubJudul = subJudul ? subJudul.replace(/\*/g, '').trim() : '';
+                    // Tetap gunakan marked.parse untuk tampilan miring di web
                     const parsedSubJudul = subJudul ? marked.parse(subJudul) : '';
 
                     htmlPoster += `
@@ -331,7 +335,7 @@
                                 <span class="poster-id">${posterId}</span>
                             </div>
                             <h3>${judul}</h3>
-                            ${subJudul ? `<div class="sub-caption" data-raw="${subJudul}">${parsedSubJudul}</div>` : ''}
+                            ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
                             <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
                             <button class="read-more-btn" id="btn-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
                             
