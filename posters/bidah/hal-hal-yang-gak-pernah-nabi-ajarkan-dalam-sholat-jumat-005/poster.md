@@ -1,10 +1,7 @@
 ---
 judul: "Hal hal yang gak pernah nabi ajarkan dalam sholat Jumat"
-sub_judul: "*Akun*
-*dakwah*
-*Sunnah*
-*@an.nashiha_daily*
-*@thequran_path*"
+sub_judul: "@an.nashiha_daily
+@thequran_path"
 kategori: "bidah"
 kategori_emoji: "📂"
 tags: "Sholatjumat,jumat,bidah,sholat, khutbah"
