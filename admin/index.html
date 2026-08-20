@@ -136,7 +136,6 @@
             <label>Tag (pisahkan koma)</label>
             <input type="text" id="inpTag" placeholder="sunnah, dzikir, sholat">
 
-            <!-- LABEL DIGANTI COLLABORATOR (Tidak ada tulisan Sub Judul) -->
             <label>Collaborator</label>
             <textarea id="inpCaption" placeholder="@tauhidsunnah_id @an.nashiha_daily @sunnahstori"></textarea>
 
@@ -310,12 +309,9 @@
                 });
             }
 
-            // === FUNGSI FORMAT COLLABORATOR (ITALIC + 1 ENTER) ===
             function formatCollaborator(text) {
                 if (!text) return '';
-                // Pisahkan berdasarkan spasi atau koma
                 let lines = text.split(/\s*[\s,]\s*/).filter(line => line.trim().length > 0);
-                // Bungkus setiap akun dengan * (italic) dan gabung dengan \n (1 enter)
                 return lines.map(line => `*${line.trim()}*`).join('\n');
             }
 
@@ -348,6 +344,8 @@
 
                 if(gambarInput.files.length > 0) {
                     statusText.innerHTML = `📸 Memasukkan ${gambarInput.files.length} gambar ke ZIP...`;
+                    // === KEMBALIKAN LOGIKA DASAR (TANPA REVERSE / SORT) ===
+                    // Akan mengambil urutan file persis seperti Anda mengetuk di galeri.
                     for(let i = 0; i < gambarInput.files.length; i++) {
                         zip.file(`${i + 1}.jpg`, gambarInput.files[i]);
                     }
@@ -438,6 +436,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
 
                 if(gambarInput.files.length > 0) {
                     statusText.innerHTML = `📸 Memasukkan ${gambarInput.files.length} gambar ke ZIP...`;
+                    // === KEMBALIKAN LOGIKA DASAR (TANPA REVERSE / SORT) ===
                     for(let i = 0; i < gambarInput.files.length; i++) {
                         zip.file(`${i + 1}.jpg`, gambarInput.files[i]);
                     }
