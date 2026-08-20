@@ -135,8 +135,11 @@
 
             <label>Tag (pisahkan koma)</label>
             <input type="text" id="inpTag" placeholder="sunnah, dzikir, sholat">
-            <label>Sub Judul / Caption Singkat</label>
-            <textarea id="inpCaption" placeholder="Tulis sub judul di sini..."></textarea>
+
+            <!-- PERUBAHAN: Label dan Placeholder Collaborator -->
+            <label>Collaborator</label>
+            <textarea id="inpCaption" placeholder="@tauhidsunnah_id @an.nashiha_daily @sunnahstori"></textarea>
+
             <label>Isi Caption Lengkap</label>
             <textarea id="inpContent" placeholder="Tulis isi caption lengkap di sini..."></textarea>
 
@@ -173,10 +176,9 @@
     </div>
 
     <script>
-        // === PERUBAHAN PIN DI SINI ===
-        const allowedPins = ["301102", "291104"];
-
+        // === KONFIGURASI API TERSIMPAN DI LOCALSTORAGE ===
         document.addEventListener('DOMContentLoaded', function() {
+            const PIN = "301102";
             const loginPage = document.getElementById('loginPage');
             const dashboard = document.getElementById('adminDashboard');
             const pinInput = document.getElementById('pinInput');
@@ -206,8 +208,7 @@
             }
 
             function handleLogin() {
-                // Cek apakah PIN yang dimasukkan ada di dalam daftar allowedPins
-                if (allowedPins.includes(pinInput.value)) {
+                if(pinInput.value === PIN) {
                     localStorage.setItem('adminLogin', 'true');
                     loginPage.style.display = 'none';
                     dashboard.style.display = 'block';
@@ -310,6 +311,15 @@
                 });
             }
 
+            // === FUNGSI FORMAT COLLABORATOR (ITALIC + 1 ENTER) ===
+            function formatCollaborator(text) {
+                if (!text) return '';
+                // Pisahkan berdasarkan spasi atau koma
+                let lines = text.split(/\s*[\s,]\s*/).filter(line => line.trim().length > 0);
+                // Bungkus setiap akun dengan * (italic) dan gabung dengan \n (1 enter)
+                return lines.map(line => `*${line.trim()}*`).join('\n');
+            }
+
             window.downloadZipManual = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
@@ -321,7 +331,7 @@
                 const kategori = document.getElementById('inpKategori').value.trim();
                 const emoji = document.getElementById('inpEmoji').value.trim();
                 const tags = document.getElementById('inpTag').value.trim();
-                const caption = document.getElementById('inpCaption').value.trim();
+                const collaborator = document.getElementById('inpCaption').value.trim();
                 const content = document.getElementById('inpContent').value.trim();
                 const gambarInput = document.getElementById('inpFileGambar');
                 const pdfInput = document.getElementById('inpFilePdf');
@@ -363,19 +373,18 @@
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
-                const finalCaption = cleanMarkdownText(caption);
                 const finalContent = cleanMarkdownText(content);
+                // Format collaborator menjadi italic + 1 enter
+                const finalCollaborator = formatCollaborator(collaborator);
 
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
                 
-                const existingEmoji = cachedKategoriEmojis[kategori];
-                const finalEmoji = emoji || existingEmoji || '📂';
-
+                const finalEmoji = emoji || '📂';
                 const template = `---
 judul: "${judul}"
-sub_judul: "${finalCaption || 'Tulis sub judul di sini'}"
+sub_judul: "${finalCollaborator || 'Tulis collaborator di sini'}"
 kategori: "${kategori}"
 kategori_emoji: "${finalEmoji}"
 tags: "${tags || 'tag1, tag2'}"
@@ -413,7 +422,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const kategori = document.getElementById('inpKategori').value.trim();
                 const emoji = document.getElementById('inpEmoji').value.trim();
                 const tags = document.getElementById('inpTag').value.trim();
-                const caption = document.getElementById('inpCaption').value.trim();
+                const collaborator = document.getElementById('inpCaption').value.trim();
                 const content = document.getElementById('inpContent').value.trim();
                 const gambarInput = document.getElementById('inpFileGambar');
                 const pdfInput = document.getElementById('inpFilePdf');
@@ -455,19 +464,18 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     pdfLine = `tidakpakepdf: "brosur.pdf"`;
                 }
 
-                const finalCaption = cleanMarkdownText(caption);
                 const finalContent = cleanMarkdownText(content);
+                // Format collaborator menjadi italic + 1 enter
+                const finalCollaborator = formatCollaborator(collaborator);
 
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
                 const jmlGambar = gambarInput.files.length;
                 const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
                 
-                const existingEmoji = cachedKategoriEmojis[kategori];
-                const finalEmoji = emoji || existingEmoji || '📂';
-
+                const finalEmoji = emoji || '📂';
                 const template = `---
 judul: "${judul}"
-sub_judul: "${finalCaption || 'Tulis sub judul di sini'}"
+sub_judul: "${finalCollaborator || 'Tulis collaborator di sini'}"
 kategori: "${kategori}"
 kategori_emoji: "${finalEmoji}"
 tags: "${tags || 'tag1, tag2'}"
@@ -524,4 +532,4 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
         });
     </script>
 </body>
-    </html>
+</html>
