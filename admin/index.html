@@ -83,6 +83,59 @@
             color: #111;
             transform: scale(1.02);
         }
+
+        /* --- STYLE UNTUK PREVIEW GAMBAR & TOMBOL URUTAN --- */
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0 20px 0;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 16px;
+            border: 1px dashed #444;
+        }
+        .preview-item {
+            position: relative;
+            width: 70px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .preview-item img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #555;
+            background: #111;
+        }
+        .preview-item .order-controls {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .preview-item .order-controls button {
+            background: transparent;
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+        .preview-item .order-controls button:hover {
+            background: #D4AF37;
+            color: #111;
+        }
+        .preview-item .order-number {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -145,7 +198,10 @@
             <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
                 <label style="font-weight:bold;color:#D4AF37;">📸 Upload & Rename Gambar</label>
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih gambar. Nama file akan otomatis berubah menjadi <b>1.jpg, 2.jpg, 3.jpg</b>.</p>
-                <input type="file" id="inpFileGambar" multiple accept="image/*">
+                <input type="file" id="inpFileGambar" multiple accept="image/*" onchange="handleFileSelect(event)">
+                
+                <!-- KONTENER PREVIEW GAMBAR -->
+                <div id="previewContainer" class="preview-container"></div>
             </div>
 
             <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
@@ -275,6 +331,7 @@
             }
 
             let cachedKategoriEmojis = {};
+            let selectedFiles = []; // Array global untuk menyimpan urutan file
 
             function toSlug(text) {
                 return text.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
@@ -315,6 +372,53 @@
                 return lines.map(line => `*${line.trim()}*`).join('\n');
             }
 
+            // === FITUR BARU: HANDLE PREVIEW GAMBAR & URUTAN ===
+            window.handleFileSelect = function(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    // Tidak menggunakan reverse/sort sama sekali. Kita ambil apa adanya dari browser.
+                    selectedFiles = Array.from(files);
+                    renderPreview();
+                }
+            };
+
+            function renderPreview() {
+                const container = document.getElementById('previewContainer');
+                container.innerHTML = '';
+                
+                if (selectedFiles.length === 0) return;
+
+                selectedFiles.forEach((file, index) => {
+                    const url = URL.createObjectURL(file);
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    
+                    div.innerHTML = `
+                        <img src="${url}" alt="Preview ${index+1}">
+                        <div class="order-number">${index + 1}.jpg</div>
+                        <div class="order-controls">
+                            <button onclick="moveUp(${index})" ${index === 0 ? 'disabled' : ''}>▲</button>
+                            <button onclick="moveDown(${index})" ${index === selectedFiles.length - 1 ? 'disabled' : ''}>▼</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            window.moveUp = function(index) {
+                if (index > 0) {
+                    [selectedFiles[index], selectedFiles[index-1]] = [selectedFiles[index-1], selectedFiles[index]];
+                    renderPreview();
+                }
+            };
+
+            window.moveDown = function(index) {
+                if (index < selectedFiles.length - 1) {
+                    [selectedFiles[index], selectedFiles[index+1]] = [selectedFiles[index+1], selectedFiles[index]];
+                    renderPreview();
+                }
+            };
+
             window.downloadZipManual = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
@@ -328,7 +432,6 @@
                 const tags = document.getElementById('inpTag').value.trim();
                 const collaborator = document.getElementById('inpCaption').value.trim();
                 const content = document.getElementById('inpContent').value.trim();
-                const gambarInput = document.getElementById('inpFileGambar');
                 const pdfInput = document.getElementById('inpFilePdf');
                 const pilihanPdf = document.getElementById('inpPdfOption').value;
 
@@ -337,22 +440,21 @@
                     setTimeout(() => status.style.display = 'none', 3000);
                     return;
                 }
+                
+                if(selectedFiles.length === 0) {
+                    statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
+                }
 
                 const slug = toSlug(judul);
                 const namaZip = `${slug}-001.zip`;
                 const zip = new JSZip();
 
-                if(gambarInput.files.length > 0) {
-                    statusText.innerHTML = `📸 Memasukkan ${gambarInput.files.length} gambar ke ZIP...`;
-                    // === KEMBALIKAN LOGIKA DASAR (TANPA REVERSE / SORT) ===
-                    // Akan mengambil urutan file persis seperti Anda mengetuk di galeri.
-                    for(let i = 0; i < gambarInput.files.length; i++) {
-                        zip.file(`${i + 1}.jpg`, gambarInput.files[i]);
-                    }
-                } else {
-                    statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
-                    setTimeout(() => status.style.display = 'none', 3000);
-                    return;
+                // === PROSES SESUAI URUTAN PREVIEW (TANPA REVERSE/SORT) ===
+                statusText.innerHTML = `📸 Memasukkan ${selectedFiles.length} gambar ke ZIP...`;
+                for(let i = 0; i < selectedFiles.length; i++) {
+                    zip.file(`${i + 1}.jpg`, selectedFiles[i]);
                 }
 
                 let pdfLine = '';
@@ -374,8 +476,7 @@
                 const finalCollaborator = formatCollaborator(collaborator);
 
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
-                const jmlGambar = gambarInput.files.length;
-                const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
+                const imagesStr = Array.from({length: selectedFiles.length}, (_, i) => `${i + 1}.jpg`).join(', ');
                 
                 const finalEmoji = emoji || '📂';
                 const template = `---
@@ -420,7 +521,6 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const tags = document.getElementById('inpTag').value.trim();
                 const collaborator = document.getElementById('inpCaption').value.trim();
                 const content = document.getElementById('inpContent').value.trim();
-                const gambarInput = document.getElementById('inpFileGambar');
                 const pdfInput = document.getElementById('inpFilePdf');
                 const pilihanPdf = document.getElementById('inpPdfOption').value;
 
@@ -430,20 +530,20 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     return;
                 }
 
+                if(selectedFiles.length === 0) {
+                    statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
+                }
+
                 const slug = toSlug(judul);
                 const namaZip = `${slug}-001.zip`;
                 const zip = new JSZip();
 
-                if(gambarInput.files.length > 0) {
-                    statusText.innerHTML = `📸 Memasukkan ${gambarInput.files.length} gambar ke ZIP...`;
-                    // === KEMBALIKAN LOGIKA DASAR (TANPA REVERSE / SORT) ===
-                    for(let i = 0; i < gambarInput.files.length; i++) {
-                        zip.file(`${i + 1}.jpg`, gambarInput.files[i]);
-                    }
-                } else {
-                    statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
-                    setTimeout(() => status.style.display = 'none', 3000);
-                    return;
+                // === PROSES SESUAI URUTAN PREVIEW (TANPA REVERSE/SORT) ===
+                statusText.innerHTML = `📸 Memasukkan ${selectedFiles.length} gambar ke ZIP...`;
+                for(let i = 0; i < selectedFiles.length; i++) {
+                    zip.file(`${i + 1}.jpg`, selectedFiles[i]);
                 }
 
                 let pdfLine = '';
@@ -465,8 +565,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const finalCollaborator = formatCollaborator(collaborator);
 
                 statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
-                const jmlGambar = gambarInput.files.length;
-                const imagesStr = Array.from({length: jmlGambar}, (_, i) => `${i + 1}.jpg`).join(', ');
+                const imagesStr = Array.from({length: selectedFiles.length}, (_, i) => `${i + 1}.jpg`).join(', ');
                 
                 const finalEmoji = emoji || '📂';
                 const template = `---
