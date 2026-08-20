@@ -220,6 +220,7 @@
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
+        // === KEMBALIKAN KE LOGIKA COPY LAMA YANG SUDAH PASTI BERHASIL ===
         function cleanCopyText(text) {
             if (!text) return '';
             return text
@@ -232,20 +233,20 @@
         function copyCaptionDariElemen(btn) {
             const poster = btn.closest('.poster');
             const judul = poster.querySelector('h3')?.innerText || '';
-            const sub = poster.querySelector('.sub-caption')?.innerText || '';
+            // Ambil teks collaborator dari dataset.raw agar format italic (asterisk) tetap terjaga saat copy
+            const subElement = poster.querySelector('.sub-caption');
+            let sub = '';
+            if (subElement && subElement.dataset && subElement.dataset.raw) {
+                sub = subElement.dataset.raw;
+            } else if (subElement) {
+                sub = subElement.innerText || '';
+            }
+            
             const contentWrapper = poster.querySelector('.poster-content-wrapper');
             const isi = contentWrapper ? contentWrapper.innerText : '';
             
-            // PERBAIKAN COPY CAPTION: Ubah collaborator menjadi italic (asterisk) per baris
-            let finalSub = sub;
-            if(finalSub) {
-                finalSub = finalSub.split('\n').map(line => {
-                    // Hapus spasi di depan belakang lalu tambahkan asterisk
-                    return `*${line.trim()}*`;
-                }).join('\n');
-            }
-
-            const parts = [judul, finalSub, isi].filter(p => p && p.length > 0);
+            // Bersihkan dan gabung dengan jarak 2 enter (1 baris kosong)
+            const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
             const konten = parts.join('\n\n');
             
             navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
@@ -324,6 +325,10 @@
                         `;
                     }
 
+                    // === PERBAIKAN RENDER COLLABORATOR ===
+                    // Simpan teks asli (dengan *) di data-raw agar saat disalin format italic tetap terjaga, dan render HTML yang sudah diparse (miring) untuk tampilan web.
+                    const parsedSubJudul = subJudul ? marked.parse(subJudul) : '';
+
                     htmlPoster += `
                         <div class="poster" data-id="${posterId}" data-kategori="${kategori}">
                             ${carouselHTML}
@@ -331,7 +336,7 @@
                                 <span class="poster-id">${posterId}</span>
                             </div>
                             <h3>${judul}</h3>
-                            ${subJudul ? `<div class="sub-caption">${subJudul}</div>` : ''}
+                            ${subJudul ? `<div class="sub-caption" data-raw="${subJudul}">${parsedSubJudul}</div>` : ''}
                             <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
                             <button class="read-more-btn" id="btn-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
                             
