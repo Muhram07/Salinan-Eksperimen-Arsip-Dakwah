@@ -244,7 +244,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const PIN = "301102";
+            // Menggunakan array untuk mendukung 2 PIN Login
+            const ALLOWED_PINS = ["301102", "291104"];
             const loginPage = document.getElementById('loginPage');
             const dashboard = document.getElementById('adminDashboard');
             const pinInput = document.getElementById('pinInput');
@@ -274,7 +275,7 @@
             }
 
             function handleLogin() {
-                if(pinInput.value === PIN) {
+                if(ALLOWED_PINS.includes(pinInput.value.trim())) {
                     localStorage.setItem('adminLogin', 'true');
                     loginPage.style.display = 'none';
                     dashboard.style.display = 'block';
@@ -388,7 +389,6 @@
             window.handleFileSelect = function(event) {
                 const files = event.target.files;
                 if (files.length > 0) {
-                    // Tidak menggunakan reverse/sort sama sekali. Kita ambil apa adanya dari browser.
                     selectedFiles = Array.from(files);
                     renderPreview();
                 }
@@ -463,7 +463,6 @@
                 const namaZip = `${slug}-001.zip`;
                 const zip = new JSZip();
 
-                // === PROSES SESUAI URUTAN PREVIEW (TANPA REVERSE/SORT) ===
                 statusText.innerHTML = `📸 Memasukkan ${selectedFiles.length} gambar ke ZIP...`;
                 for(let i = 0; i < selectedFiles.length; i++) {
                     zip.file(`${i + 1}.jpg`, selectedFiles[i]);
@@ -552,7 +551,6 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const namaZip = `${slug}-001.zip`;
                 const zip = new JSZip();
 
-                // === PROSES SESUAI URUTAN PREVIEW (TANPA REVERSE/SORT) ===
                 statusText.innerHTML = `📸 Memasukkan ${selectedFiles.length} gambar ke ZIP...`;
                 for(let i = 0; i < selectedFiles.length; i++) {
                     zip.file(`${i + 1}.jpg`, selectedFiles[i]);
