@@ -131,15 +131,15 @@
         .sound-float-btn.playing{border-color:#D4AF37;color:#D4AF37;}
         .view-float-btn{left:25px;}
 
-        /* --- MODE KOMPAK/PADAT YANG DITINGKATKAN (FIX GAMBAR MERATA TANPA PACAH/MOLOR) --- */
+        /* --- MODE KOMPAK/PADAT YANG DITINGKATKAN --- */
         #post-list.compact-view { display: flex; flex-direction: column; gap: 14px; max-width: 800px; margin: 0 auto; width: 100%; }
-        #post-list.compact-view .poster { width: 100%; padding: 12px; display: grid; grid-template-columns: 120px 1fr; gap: 14px; border-radius: 18px; align-items: center; background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer; }
+        #post-list.compact-view .poster { width: 100%; padding: 12px; display: grid; grid-template-columns: 110px 1fr; gap: 14px; border-radius: 18px; align-items: center; background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer; }
         #post-list.compact-view .poster:hover { border-color: #D4AF37; background: rgba(30, 30, 30, 0.9); }
         
-        #post-list.compact-view .poster > img { width: 100% !important; height: auto !important; max-height: 150px !important; object-fit: contain !important; border-radius: 12px !important; margin: 0 !important; background: transparent; }
-        #post-list.compact-view .carousel-container { width: 100% !important; height: auto !important; max-height: 150px !important; border-radius: 12px !important; margin: 0 !important; box-shadow: none !important; flex-shrink: 0; background: transparent; }
-        #post-list.compact-view .carousel-slide { height: auto !important; }
-        #post-list.compact-view .carousel-slide img { width: 100% !important; height: auto !important; max-height: 150px !important; object-fit: contain !important; border-radius: 12px !important; }
+        #post-list.compact-view .poster > img { width: 110px !important; height: 130px !important; object-fit: contain !important; border-radius: 12px !important; margin: 0 !important; background: #000; }
+        #post-list.compact-view .carousel-container { width: 110px !important; height: 130px !important; border-radius: 12px !important; margin: 0 !important; box-shadow: none !important; flex-shrink: 0; background: #000; }
+        #post-list.compact-view .carousel-slide { height: 130px !important; }
+        #post-list.compact-view .carousel-slide img { width: 110px !important; height: 130px !important; object-fit: contain !important; border-radius: 12px !important; }
         #post-list.compact-view .carousel-btn { width: 22px !important; height: 22px !important; font-size: 10px !important; }
         #post-list.compact-view .carousel-slide .slide-number { font-size: 8px !important; padding: 2px 4px !important; bottom: 3px !important; right: 3px !important; }
         
@@ -392,7 +392,7 @@
                         <div class="carousel-container" id="carousel-${posterId}">
                             <div class="carousel-track" id="track-${posterId}">
                                 ${imageList.map((img, idx) => `
-                                    <div class="carousel-slide">
+                                    <div class="carousel-slide" onclick="event.stopPropagation()">
                                         <img src="${folder}/${img}" alt="${judul} - Slide ${idx+1}" onerror="this.style.display='none'">
                                         <div class="slide-number">${idx+1} / ${imageList.length}</div>
                                     </div>
@@ -566,7 +566,6 @@
         /* --- HANDLER MODAL UNTUK MODE KOMPAK --- */
         function handleCardClick(event, posterId) {
             if (!isCompactView) return;
-            // Jika tombol khusus (aksi/navigasi slide) ditekan, jangan buka modal
             if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
             
             const rawItem = rawManifestPosters.find(p => p.path.replace(/\//g, '-') === posterId);
@@ -708,7 +707,7 @@
             });
             setTimeout(() => {
                 const target = document.getElementById('post-list');
-                if(target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 500);
+                if(target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
             }, 500);
             setTimeout(() => { isSelecting = false; }, 600);
         }
