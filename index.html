@@ -61,8 +61,8 @@
         .card-kategori .nama{color:#fff;font-size:18px;font-weight:bold;margin:5px 0;}
         .card-kategori .jumlah{color:#D4AF37;font-size:14px;}
 
-        #post-list{ display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center; transition: all 1.2s ease; }
-        .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative; backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.2s ease; }
+        #post-list{ display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center; transition: all 0.5s ease; }
+        .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative; backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); }
         .poster:hover{border-color:#D4AF37;transform:scale(1.02);box-shadow:0 12px 40px rgba(212,175,55,0.05);}
         .poster-id-wrapper{text-align:center;margin-top:-10px;margin-bottom:10px;}
         .poster-id{display:inline-block;background:rgba(0,0,0,0.6);color:#D4AF37;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:bold;letter-spacing:0.5px;}
@@ -102,6 +102,7 @@
         .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
         @media(min-width:600px){ #post-list:not(.compact-view){grid-template-columns:repeat(2, 1fr);} }
         @media(min-width:900px){ #post-list:not(.compact-view){grid-template-columns:repeat(3, 1fr);} }
+
         .btn-float-common{ position:fixed; bottom:25px; z-index:100; width:55px; height:55px; border-radius:50%; background:rgba(20, 20, 20, 0.8); border: 2px solid #D4AF37; color:#D4AF37; font-size:24px; box-shadow:0 4px 15px rgba(0,0,0,0.5); cursor:pointer; transition:0.3s; display:flex; justify-content:center; align-items:center; backdrop-filter: blur(4px); animation: floatBtn 3s ease-in-out infinite; }
         @keyframes floatBtn {0%{transform:translateY(0px);}50%{transform:translateY(-3px);}100%{transform:translateY(0px);}}
         .btn-float-common:hover{transform:scale(1.05);background:rgba(212, 175, 55, 0.2);}
@@ -111,24 +112,28 @@
         .view-float-btn{left:25px;}
         .view-float-btn.active{border-color:#D4AF37;color:#D4AF37;}
 
-        /* --- MODE KOMPAK --- */
-        #post-list.compact-view { display: flex; flex-direction: column; gap: 12px; max-width: 900px; margin: 0 auto; padding: 10px 0; align-items: center; width: 100%; }
-        #post-list.compact-view .poster { width: 100%; max-width: 800px; padding: 12px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; border-radius: 16px; transform: scale(0.98); margin: 0 auto; }
-        #post-list.compact-view .poster img { max-width: 400px; width: 100%; height: auto !important; max-height: unset !important; object-fit: contain !important; display: block; margin: 0 auto 10px auto; border-radius: 12px; }
-        #post-list.compact-view .carousel-container { width: 100%; max-width: 400px; height: auto; min-width: unset; margin: 0 auto 10px auto; border-radius: 12px; box-shadow: none; flex-shrink: unset; overflow: hidden; }
-        #post-list.compact-view .carousel-slide img { width: 100%; height: auto; object-fit: contain !important; border-radius: 12px; max-height: unset !important; }
-        #post-list.compact-view .carousel-btn { display: flex !important; justify-content: center; align-items: center; width: 32px; height: 32px; font-size: 16px; border-radius: 50%; background: rgba(0, 0, 0, 0.7); backdrop-filter: none; border: 1px solid rgba(212, 175, 55, 0.5); color: #D4AF37; top: 50%; transform: translateY(-50%); z-index: 10; padding: 0; }
-        #post-list.compact-view .carousel-btn.prev { left: 8px; }
-        #post-list.compact-view .carousel-btn.next { right: 8px; }
-        #post-list.compact-view .poster-id-wrapper, #post-list.compact-view .read-more-btn, #post-list.compact-view .divider, #post-list.compact-view .tags-wrapper { display: none; }
-        #post-list.compact-view .poster-content-wrapper { max-height: 35px; font-size: 13px; text-align: center; display: block; padding-right: 10px; }
-        #post-list.compact-view .poster-content-wrapper.collapsed { max-height: 35px; }
-        #post-list.compact-view h3 { font-size: 16px; margin: 0 0 5px 0; text-align: center; color: #D4AF37; width: 100%; }
-        #post-list.compact-view .sub-caption { font-size: 13px; margin: 0 0 5px 0; text-align: center; line-height: 1.2; width: 100%; }
-        #post-list.compact-view .actions { gap: 6px; margin-top: 0; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%; }
-        #post-list.compact-view .actions button, #post-list.compact-view .actions .btn-save { font-size: 11px; padding: 5px 12px; background: transparent; color: #D4AF37; border: 1px solid #D4AF37; }
-        #post-list.compact-view .actions button:hover, #post-list.compact-view .actions .btn-save:hover { background: #D4AF37; color: #111; }
-        #post-list.compact-view .sosial-actions { display: none; }
+        /* --- MODE KOMPAK/EKSPERIMEN (MODERN CARD LIST) --- */
+        #post-list.compact-view { display: flex; flex-direction: column; gap: 14px; max-width: 800px; margin: 0 auto; width: 100%; }
+        #post-list.compact-view .poster { width: 100%; padding: 14px; display: grid; grid-template-columns: 110px 1fr; gap: 16px; border-radius: 18px; align-items: center; background: rgba(22, 22, 22, 0.7); border: 1px solid rgba(212, 175, 55, 0.2); }
+        #post-list.compact-view .poster > img { width: 110px !important; height: 110px !important; object-fit: cover !important; border-radius: 14px !important; margin: 0 !important; }
+        #post-list.compact-view .carousel-container { width: 110px !important; height: 110px !important; border-radius: 14px !important; margin: 0 !important; box-shadow: none !important; flex-shrink: 0; }
+        #post-list.compact-view .carousel-slide img { width: 110px !important; height: 110px !important; object-fit: cover !important; border-radius: 14px !important; }
+        #post-list.compact-view .carousel-btn, #post-list.compact-view .slide-number { display: none !important; }
+        
+        #post-list.compact-view .poster-id-wrapper, 
+        #post-list.compact-view .read-more-btn, 
+        #post-list.compact-view .divider, 
+        #post-list.compact-view .tags-wrapper,
+        #post-list.compact-view .sosial-actions,
+        #post-list.compact-view .poster-content-wrapper { display: none !important; }
+        
+        #post-list.compact-view .compact-right-wrapper { display: flex; flex-direction: column; justify-content: center; gap: 6px; text-align: left; }
+        #post-list.compact-view .compact-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.5px; }
+        #post-list.compact-view h3 { font-size: 16px; margin: 0; text-align: left; color: #fff; line-height: 1.3; font-weight: 700; }
+        #post-list.compact-view .sub-caption { font-size: 13px; margin: 0; text-align: left; color: #aaa; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        #post-list.compact-view .actions { display: flex; gap: 8px; margin-top: 6px; justify-content: flex-start; }
+        #post-list.compact-view .actions button { font-size: 11px; padding: 4px 10px; background: transparent; color: #D4AF37; border: 1px solid rgba(212, 175, 55, 0.5); border-radius: 12px; font-weight: 600; }
+        #post-list.compact-view .actions button:hover { background: #D4AF37; color: #111; }
     </style>
 </head>
 <body>
@@ -199,7 +204,7 @@
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const id = p.getAttribute('data-id');
-                p.style.display = fav.includes(id) ? 'block' : 'none';
+                p.style.display = fav.includes(id) ? (isCompactView ? 'grid' : 'block') : 'none';
             });
             document.getElementById('search').value = '';
             document.getElementById('search-result').style.display = 'none';
@@ -208,7 +213,7 @@
 
         function resetSemua() {
             const posters = document.querySelectorAll('.poster');
-            posters.forEach(p => p.style.display = 'block');
+            posters.forEach(p => p.style.display = isCompactView ? 'grid' : 'block');
             document.getElementById('search').value = '';
             document.getElementById('search-result').style.display = 'none';
             document.querySelectorAll('.card-kategori').forEach(el => el.style.borderColor = 'rgba(255, 255, 255, 0.05)');
@@ -279,6 +284,7 @@
                     const judul = p.judul || "Tanpa Judul";
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
+                    const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || '📂';
                     const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
                     let pdfSrc = null;
                     if(p.pdf && p.pdf !== "brosur.pdf") { 
@@ -294,7 +300,6 @@
                              const resMd = await fetch(`${folder}/poster.md`);
                              if(resMd.ok) {
                                  const text = await resMd.text();
-                                 const dataMatch = text.match(/---([\s\S]*?)---/);
                                  contentBody = text.replace(/---([\s\S]*?)---/, '').trim();
                              }
                          } catch(e) {}
@@ -331,19 +336,22 @@
                     htmlPoster += `
                         <div class="poster" data-id="${posterId}" data-kategori="${kategori}">
                             ${carouselHTML}
-                            <div class="poster-id-wrapper">
-                                <span class="poster-id">${posterId}</span>
-                            </div>
-                            <h3>${judul}</h3>
-                            ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
-                            <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
-                            <button class="read-more-btn" id="btn-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
-                            
-                            <div class="actions">
-                                <button class="btn-save ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '🔖 Belum Disimpan'}</button>
-                                ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
-                                <button onclick="downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">🖼️ Download Gambar</button>
-                                <button onclick="copyCaptionDariElemen(this)">📋 Copy Caption</button>
+                            <div class="compact-right-wrapper">
+                                <div class="compact-badge">${katEmoji} ${kategori}</div>
+                                <div class="poster-id-wrapper">
+                                    <span class="poster-id">${posterId}</span>
+                                </div>
+                                <h3>${judul}</h3>
+                                ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
+                                <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
+                                <button class="read-more-btn" id="btn-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
+                                
+                                <div class="actions">
+                                    <button class="btn-save ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '🔖 Belum Disimpan'}</button>
+                                    ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 Download PDF</button>` : ''}
+                                    <button onclick="downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">🖼️ Download Gambar</button>
+                                    <button onclick="copyCaptionDariElemen(this)">📋 Copy Caption</button>
+                                </div>
                             </div>
                             
                             <hr class="divider">
@@ -428,8 +436,12 @@
             let adaPoster = false;
             posters.forEach(poster => {
                 const kategori = poster.getAttribute('data-kategori');
-                if(kategori === nama) { poster.style.display = 'block'; adaPoster = true; } 
-                else { poster.style.display = 'none'; }
+                if(kategori === nama) { 
+                    poster.style.display = isCompactView ? 'grid' : 'block'; 
+                    adaPoster = true; 
+                } else { 
+                    poster.style.display = 'none'; 
+                }
             });
             if(adaPoster) setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
             document.getElementById('search-result').style.display = 'none';
@@ -454,7 +466,7 @@
                 const key = this.value.trim().toLowerCase();
                 if (key === '') {
                     resultBox.style.display = 'none'; resultBox.innerHTML = '';
-                    document.querySelectorAll('.poster').forEach(p => p.style.display = 'block');
+                    document.querySelectorAll('.poster').forEach(p => p.style.display = isCompactView ? 'grid' : 'block');
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
                     return;
                 }
@@ -483,7 +495,7 @@
                 const posters = document.querySelectorAll('.poster');
                 posters.forEach(poster => {
                     const text = poster.innerText.toLowerCase();
-                    poster.style.display = text.includes(key) ? 'block' : 'none';
+                    poster.style.display = text.includes(key) ? (isCompactView ? 'grid' : 'block') : 'none';
                 });
                 setTimeout(() => {
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
@@ -504,7 +516,7 @@
             const posters = document.querySelectorAll('.poster');
             posters.forEach(p => {
                 const pid = p.getAttribute('data-id');
-                p.style.display = (pid === searchId) ? 'block' : 'none';
+                p.style.display = (pid === searchId) ? (isCompactView ? 'grid' : 'block') : 'none';
             });
             setTimeout(() => {
                 const target = document.getElementById('post-list');
@@ -541,9 +553,25 @@
         function toggleView() {
             const list = document.getElementById('post-list');
             const btn = document.getElementById('viewToggle');
+            const posters = document.querySelectorAll('.poster');
+            
             isCompactView = !isCompactView;
-            if (isCompactView) { list.classList.add('compact-view'); btn.innerHTML = '🅰️'; btn.title = "Kembali ke Tampilan Grid"; } 
-            else { list.classList.remove('compact-view'); btn.innerHTML = '🔠'; btn.title = "Ubah ke Tampilan Daftar Kompak"; }
+            
+            if (isCompactView) { 
+                list.classList.add('compact-view'); 
+                btn.innerHTML = '🅰️'; 
+                btn.title = "Kembali ke Tampilan Utama";
+                posters.forEach(p => {
+                    if (p.style.display !== 'none') p.style.display = 'grid';
+                });
+            } else { 
+                list.classList.remove('compact-view'); 
+                btn.innerHTML = '🔠'; 
+                btn.title = "Ubah ke Tampilan Kompak"; 
+                posters.forEach(p => {
+                    if (p.style.display !== 'none') p.style.display = 'block';
+                });
+            }
         }
 
         const bgAudio = document.getElementById('bgAudio');
