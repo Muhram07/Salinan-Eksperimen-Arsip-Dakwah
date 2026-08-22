@@ -31,10 +31,10 @@
         .brand-wrapper .developer-title{color:#888;font-size:11px;letter-spacing:0.5px;margin-top:2px;}
         .brand-divider{width:80px;height:1px;background:#D4AF37;margin:10px auto 15px auto;opacity:0.5;}
 
-        .nav-top-wrapper{display:flex;justify-content:space-between;padding:0 15px;margin-bottom:10px;flex-wrap:wrap;}
+        .nav-top-wrapper{display:flex;justify-content:center;gap:10px;padding:0 15px;margin-bottom:10px;flex-wrap:wrap;}
         .btn-nav{ background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(4px); border: 1px solid rgba(212, 175, 55, 0.4); color: #D4AF37; padding:8px 20px; border-radius:20px; font-weight:bold;cursor:pointer;font-size:15px; box-shadow:0 4px 15px rgba(0,0,0,0.3); animation: pulse-nav 2.5s ease-in-out infinite; }
         @keyframes pulse-nav { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
-        .btn-nav:hover{ background:rgba(212, 175, 55, 0.15); box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); animation-play-state: paused; transform: scale(1.08); }
+        .btn-nav:hover, .btn-nav.active{ background:rgba(212, 175, 55, 0.25); box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); animation-play-state: paused; transform: scale(1.08); }
 
         .nav-middle-wrapper{display:flex;justify-content:center;margin-bottom:20px;}
         .btn-nav-beranda{ background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(4px); border: 1px solid rgba(212, 175, 55, 0.4); color: #D4AF37; padding:8px 20px; border-radius:20px; font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;box-shadow:0 4px 15px rgba(0,0,0,0.3); }
@@ -214,12 +214,16 @@
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
     </div>
+    
+    <!-- 3 MODE BERANDA (KIRI: TERSIMPAN | TENGAH: HANYA PDF | KANAN: SEMUA) -->
     <div class="nav-top-wrapper">
-        <button class="btn-nav" onclick="tampilkanFavorit()">🔖 Disimpan</button>
-        <button class="btn-nav" onclick="resetSemua()">📚 Semua</button>
+        <button class="btn-nav" id="btnModeFav" onclick="switchBerandaMode('fav')">🔖 Disimpan</button>
+        <button class="btn-nav" id="btnModePdf" onclick="switchBerandaMode('pdf')">📄 Hanya PDF</button>
+        <button class="btn-nav active" id="btnModeAll" onclick="switchBerandaMode('all')">📚 Semua</button>
     </div>
+    
     <div class="nav-middle-wrapper">
-        <button class="btn-nav-beranda" onclick="resetSemua()">↖️ Pilih Mode Beranda ↗️</button>
+        <button class="btn-nav-beranda" onclick="switchBerandaMode('all')">↖️ Pilih Mode Beranda ↗️</button>
     </div>
     <div class="header-container">
         <h1>Arsip Dakwah</h1>
@@ -256,6 +260,7 @@
     <script>
         let kategoriData = {};
         let kategoriAktif = null;
+        let berandaModeAktif = 'all'; // 'all', 'pdf', 'fav'
         let semuaPosterCache = [];
         let isCompactView = false;
         let isSelecting = false;
@@ -288,28 +293,56 @@
                     b.innerHTML = '🔖 Belum Disimpan';
                 }
             });
+
+            if (berandaModeAktif === 'fav') filterDisplayPosters();
         }
 
-        function tampilkanFavorit() {
+        /* FUNGSI UTAMA SWITCH MODE BERANDA (3 TOMBOL TAB TOP) */
+        function switchBerandaMode(mode) {
+            berandaModeAktif = mode;
+
+            document.getElementById('btnModeFav').classList.toggle('active', mode === 'fav');
+            document.getElementById('btnModePdf').classList.toggle('active', mode === 'pdf');
+            document.getElementById('btnModeAll').classList.toggle('active', mode === 'all');
+
+            document.getElementById('search').value = '';
+            document.getElementById('search-result').style.display = 'none';
+
+            filterDisplayPosters();
+            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+        }
+
+        function tampilkanFavorit() { switchBerandaMode('fav'); }
+        function resetSemua() { 
+            kategoriAktif = null;
+            document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.card-kategori-all').forEach(el => el.classList.add('active'));
+            switchBerandaMode('all'); 
+        }
+
+        /* FUNGSI SINKRONISASI FILTER (MODE BERANDA + KATEGORI BAB) */
+        function filterDisplayPosters() {
             const fav = getFavorit();
             const posters = document.querySelectorAll('.poster');
+
             posters.forEach(p => {
                 const id = p.getAttribute('data-id');
-                p.style.display = fav.includes(id) ? (isCompactView ? 'grid' : 'block') : 'none';
-            });
-            document.getElementById('search').value = '';
-            document.getElementById('search-result').style.display = 'none';
-            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
-        }
+                const kat = p.getAttribute('data-kategori');
+                const hasPdf = p.getAttribute('data-has-pdf') === 'true';
 
-        function resetSemua() {
-            const posters = document.querySelectorAll('.poster');
-            posters.forEach(p => p.style.display = isCompactView ? 'grid' : 'block');
-            document.getElementById('search').value = '';
-            document.getElementById('search-result').style.display = 'none';
-            document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
-            kategoriAktif = null;
-            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+                let passMode = true;
+                if (berandaModeAktif === 'fav') passMode = fav.includes(id);
+                else if (berandaModeAktif === 'pdf') passMode = hasPdf;
+
+                let passKategori = true;
+                if (kategoriAktif !== null) passKategori = (kat === kategoriAktif);
+
+                if (passMode && passKategori) {
+                    p.style.display = isCompactView ? 'grid' : 'block';
+                } else {
+                    p.style.display = 'none';
+                }
+            });
         }
 
         function downloadFile(url, nama) {
@@ -375,6 +408,7 @@
                     const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || '📂';
                     const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
                     let pdfSrc = p.pdf ? `${folder}/brosur.pdf` : null;
+                    const hasPdf = !!p.pdf;
 
                     let contentBody = p.content || p.isi_caption || "";
                     if(!contentBody) {
@@ -417,7 +451,7 @@
                     const parsedSubJudul = subJudul ? marked.parse(subJudul) : '';
 
                     htmlPoster += `
-                        <div class="poster" data-id="${posterId}" data-kategori="${kategori}" onclick="handleCardClick(event, '${posterId}')">
+                        <div class="poster" data-id="${posterId}" data-kategori="${kategori}" data-has-pdf="${hasPdf}" onclick="handleCardClick(event, '${posterId}')">
                             ${carouselHTML}
                             
                             <div class="poster-header-info">
@@ -457,9 +491,9 @@
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
 
             // Render Tab ORI (Grid)
-            let htmlKategoriOri = `<div class="card-kategori active" onclick="resetSemua()"><span class="icon">📚</span><span class="nama">Semua</span></div>`;
+            let htmlKategoriOri = `<div class="card-kategori card-kategori-all active" onclick="resetSemua()"><span class="icon">📚</span><span class="nama">Semua</span></div>`;
             // Render Tab Compact (Horizontal)
-            let htmlKategoriCompact = `<div class="card-kategori active" onclick="resetSemua()"><span class="icon">📚</span><span class="nama">Semua</span></div>`;
+            let htmlKategoriCompact = `<div class="card-kategori card-kategori-all active" onclick="resetSemua()"><span class="icon">📚</span><span class="nama">Semua</span></div>`;
 
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
                 let icon = emojiMapGlobal[nama.toLowerCase()] || '📂';
@@ -480,6 +514,8 @@
             }
             kategoriOri.innerHTML = htmlKategoriOri;
             kategoriCompact.innerHTML = htmlKategoriCompact;
+            
+            filterDisplayPosters();
         }
 
         /* --- CAROUSEL LOGIC --- */
@@ -553,18 +589,8 @@
             document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
             if(element) element.classList.add('active');
 
-            const posters = document.querySelectorAll('.poster');
-            let adaPoster = false;
-            posters.forEach(poster => {
-                const kategori = poster.getAttribute('data-kategori');
-                if(kategori === nama) { 
-                    poster.style.display = isCompactView ? 'grid' : 'block'; 
-                    adaPoster = true; 
-                } else { 
-                    poster.style.display = 'none'; 
-                }
-            });
-            if(adaPoster) setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
+            filterDisplayPosters();
+            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
             document.getElementById('search-result').style.display = 'none';
         }
 
@@ -666,7 +692,7 @@
                 const key = this.value.trim().toLowerCase();
                 if (key === '') {
                     resultBox.style.display = 'none'; resultBox.innerHTML = '';
-                    document.querySelectorAll('.poster').forEach(p => p.style.display = isCompactView ? 'grid' : 'block');
+                    filterDisplayPosters();
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
                     return;
                 }
@@ -750,7 +776,6 @@
         function toggleView() {
             const list = document.getElementById('post-list');
             const btn = document.getElementById('viewToggle');
-            const posters = document.querySelectorAll('.poster');
             
             isCompactView = !isCompactView;
             
@@ -759,18 +784,13 @@
                 list.classList.add('compact-view'); 
                 btn.innerHTML = '🅰️'; 
                 btn.title = "Kembali ke Tampilan Utama";
-                posters.forEach(p => {
-                    if (p.style.display !== 'none') p.style.display = 'grid';
-                });
             } else { 
                 document.body.classList.remove('is-compact');
                 list.classList.remove('compact-view'); 
                 btn.innerHTML = '🔠'; 
                 btn.title = "Ubah ke Tampilan Kompak"; 
-                posters.forEach(p => {
-                    if (p.style.display !== 'none') p.style.display = 'block';
-                });
             }
+            filterDisplayPosters();
         }
 
         /* --- BG AUDIO --- */
