@@ -20,15 +20,15 @@ BEGINILAH SOSOK PEDAGANG YANG BER-TAUHID
 
 .
 
-1) Merasa yakin bahwa Allah Ta'ala yang mendatangkan pembeli.
+1)Merasa yakin bahwa Allah Ta'ala yang mendatangkan pembeli.
 
-2) Tidak terlalu sedih ketika dagangannya tidak laku.
+2)Tidak terlalu sedih ketika dagangannya tidak laku.
 
-3) Tidak sombong ketika dagangannya laris manis.
+3)Tidak sombong ketika dagangannya laris manis.
 
-4) Tidak kecewa ketika ada pembeli yang PHP.
+4)Tidak kecewa ketika ada pembeli yang PHP.
 
-5) Tidak iri ketika melihat dagangan teman lebih laris.
+5)Tidak iri ketika melihat dagangan teman lebih laris.
 
 .
 
