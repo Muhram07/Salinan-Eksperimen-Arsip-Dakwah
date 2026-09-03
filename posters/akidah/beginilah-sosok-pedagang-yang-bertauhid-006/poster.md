@@ -18,6 +18,7 @@ tidakpakepdf: "brosur.pdf"
 ---
 BEGINILAH SOSOK PEDAGANG YANG BER-TAUHID
 
+
 1) Merasa yakin bahwa Allah Ta'ala yang mendatangkan pembeli.
 
 2) Tidak terlalu sedih ketika dagangannya tidak laku.
@@ -27,5 +28,6 @@ BEGINILAH SOSOK PEDAGANG YANG BER-TAUHID
 4) Tidak kecewa ketika ada pembeli yang PHP.
 
 5) Tidak iri ketika melihat dagangan teman lebih laris.
+
 
 Karena kita harus yakin rezeki sudah digariskan oleh Allah Ta'ala dan tidak akan pernah tertukar.
