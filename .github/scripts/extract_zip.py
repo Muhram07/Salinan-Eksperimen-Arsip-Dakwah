@@ -37,7 +37,6 @@ def main():
         print("ERROR: Folder '_uploads' tidak ditemukan.")
         sys.exit(1)
 
-    # === PERUBAHAN UTAMA DI SINI ===
     # Ambil daftar semua file .zip di dalam folder
     zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
     
@@ -108,9 +107,21 @@ def scan_and_repair():
     """Memindai semua folder untuk perbaikan otomatis (Self-Healing) dan update manifest"""
     print("Memindai & memperbaiki struktur folder posters...")
     
+    manifest_path = "manifest.json"
+    existing_emoji_map = {}
+
+    # === BACAN EMOJI LAMA AGAR TIDAK TERHAPUS/RESET ===
+    if os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                old_manifest = json.load(f)
+                existing_emoji_map = old_manifest.get('kategori_emoji', {})
+        except Exception as e:
+            print(f"Gagal membaca manifest.json lama: {e}")
+
     manifest_data = {
         "kategori_list": [],
-        "kategori_emoji": {},
+        "kategori_emoji": existing_emoji_map, # Pertahankan emoji yang sudah tersimpan
         "total_poster": 0,
         "posters": []
     }
@@ -169,13 +180,17 @@ def scan_and_repair():
                                          print(f"⚠️ Warning: Folder '{kategori}' tidak cocok dengan YAML '{yaml_kategori}' di {poster_folder}")
 
                                     # === BACA DATA UNTUK MANIFEST ===
-                                    # Mengambil nama folder yang sebenarnya setelah pindah
                                     real_folder_name = os.path.basename(poster_path)
                                     real_kategori = os.path.basename(os.path.dirname(poster_path))
                                     data['path'] = f"{real_kategori.lower()}/{real_folder_name}"
                                     
-                                    current_emoji = data.get('kategori_emoji', '📂')
-                                    manifest_data['kategori_emoji'][yaml_kategori.lower()] = current_emoji
+                                    # Hanya perbarui emoji jika di poster.md ada emoji baru yang valid (bukan '📂')
+                                    new_emoji = data.get('kategori_emoji')
+                                    kat_key = yaml_kategori.lower()
+                                    if new_emoji and new_emoji != '📂':
+                                        manifest_data['kategori_emoji'][kat_key] = new_emoji
+                                    elif kat_key not in manifest_data['kategori_emoji']:
+                                        manifest_data['kategori_emoji'][kat_key] = '📂'
                                     
                                     manifest_data['posters'].append(data)
                                     manifest_data['total_poster'] += 1
@@ -185,13 +200,11 @@ def scan_and_repair():
 
     manifest_data['kategori_list'] = [kategori_map[k] for k in sorted(kategori_map.keys())]
 
-    manifest_path = "manifest.json"
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("Selesai! 'manifest.json' berhasil diperbarui.")
+    print("Selesai! 'manifest.json' berhasil diperbarui tanpa menghapus emoji lama.")
     print(f"Total Poster: {manifest_data['total_poster']}, Kategori: {manifest_data['kategori_list']}")
 
 if __name__ == "__main__":
     main()
-
