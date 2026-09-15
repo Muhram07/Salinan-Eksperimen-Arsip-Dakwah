@@ -28,7 +28,7 @@ Berikut ringkasan bentuk pelanggarannya :
 
 .
 
-1. Pelanggaran Tauhid Rububiyah (Meyakini ada selain Allah yang mencipta, menguasai, atau mengatur alam semesta.)
+1)Pelanggaran Tauhid Rububiyah (Meyakini ada selain Allah yang mencipta, menguasai, atau mengatur alam semesta.)
 
 .
 
@@ -48,7 +48,7 @@ Berikut ringkasan bentuk pelanggarannya :
 
 .
 
-2. Pelanggaran Tauhid Uluhiyah (Mengarahkan ibadah, doa, rasa takut, atau pengharapan kepada selain Allah.)
+2)Pelanggaran Tauhid Uluhiyah (Mengarahkan ibadah, doa, rasa takut, atau pengharapan kepada selain Allah.)
 
 .
 
@@ -72,7 +72,7 @@ Berikut ringkasan bentuk pelanggarannya :
 
 .
 
-3. Pelanggaran Tauhid Asma Wa Shifat (Penyimpangan dalam memahami Nama dan Sifat Allah.)
+3)Pelanggaran Tauhid Asma Wa Shifat (Penyimpangan dalam memahami Nama dan Sifat Allah.)
 
 .
 
