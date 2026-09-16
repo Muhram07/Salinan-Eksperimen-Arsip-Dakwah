@@ -13,7 +13,7 @@ sub_judul: "*Collab*
 kategori: "tauhid"
 kategori_emoji: "📂"
 tags: "tauhid,akidah,dakwahtauhid,salaf,manhajsalaf,tauhidsunnah,syirik,syirikkecil,syirikbesar,tauhidsunnahid,annashihadaily"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg"
+images: "1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg"
 tidakpakepdf: "brosur.pdf"
 ---
 Pentingnya Memahami Bentuk Pelanggaran Tauhid Dalam Kehidupan Sehari-hari.
