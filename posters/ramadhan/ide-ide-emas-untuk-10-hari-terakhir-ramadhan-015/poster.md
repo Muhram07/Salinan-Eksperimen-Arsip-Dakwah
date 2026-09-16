@@ -39,19 +39,19 @@ Manfaatkan setiap malam di penghujung bulan Ramadhan dengan amalan-amalan ringan
 
 .
 
-7. Mendoakan ampunan untuk seluruh kaum mukminin & mukminat (HR. Thabrani).
+7)Mendoakan ampunan untuk seluruh kaum mukminin & mukminat (HR. Thabrani).
 
 .
 
-8. Mengucapkan "Subhanallah" 100 kali (HR. Muslim).
+8)Mengucapkan "Subhanallah" 100 kali (HR. Muslim).
 
 .
 
-9. Mengucapkan "Subhanallahil 'azhim wa bihamdih" 100 kali (HR. Tirmidzi).
+9)Mengucapkan "Subhanallahil 'azhim wa bihamdih" 100 kali (HR. Tirmidzi).
 
 .
 
-10. Membaca shalawat "Allahumma shalli 'ala Muhammad..." 100 kali (HR. Muslim).
+10)Membaca shalawat "Allahumma shalli 'ala Muhammad..." 100 kali (HR. Muslim).
 
 .
 
