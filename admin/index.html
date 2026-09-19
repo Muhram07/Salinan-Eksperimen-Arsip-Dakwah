@@ -84,10 +84,10 @@
             transform: scale(1.02);
         }
 
-        /* --- STYLE UNTUK PREVIEW GAMBAR (DIPERBESAR & TIDAK KEPOTONG) --- */
+        /* --- STYLE UNTUK PREVIEW GAMBAR --- */
         .preview-container {
             display: flex;
-            flex-direction: column; /* Satu kolom vertikal agar gambar sebesar mungkin */
+            flex-direction: column;
             gap: 20px;
             margin: 15px 0 20px 0;
             background: rgba(255,255,255,0.05);
@@ -100,7 +100,7 @@
         .preview-item {
             position: relative;
             width: 100%;
-            max-width: 500px; /* Batas lebar maksimal agar tidak terlalu lebar */
+            max-width: 500px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -108,13 +108,13 @@
             margin-bottom: 5px;
         }
         .preview-item img {
-            width: 100%; /* Mengisi lebar container */
+            width: 100%;
             height: auto;
-            object-fit: contain; /* Tidak memotong gambar */
+            object-fit: contain;
             border-radius: 12px;
             border: 1px solid #555;
             background: #111;
-            max-height: 80vh; /* Agar tidak melebihi tinggi layar HP */
+            max-height: 80vh;
         }
         .preview-item .order-number {
             font-size: 14px;
@@ -147,6 +147,52 @@
             cursor: not-allowed;
             border-color: #555;
             color: #555;
+        }
+
+        /* --- STYLE BARU COLLABORATOR QUICK-PICK --- */
+        .collab-wrapper {
+            background: rgba(255,255,255,0.04);
+            border: 1px dashed rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .collab-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+        .collab-chip {
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+        }
+        .collab-chip:hover {
+            background: #D4AF37;
+            color: #111;
+        }
+        .collab-chip.selected {
+            background: #D4AF37;
+            color: #111;
+            font-weight: bold;
+        }
+        .btn-small-gold {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -201,8 +247,20 @@
             <label>Tag (pisahkan koma)</label>
             <input type="text" id="inpTag" placeholder="sunnah, dzikir, sholat">
 
+            <!-- FITUR BARU: COLLABORATOR QUICK SELECT -->
             <label>Collaborator</label>
-            <textarea id="inpCaption" placeholder="@tauhidsunnah_id @an.nashiha_daily @sunnahstori @al.nasiha @thalabulilmi.id"></textarea>
+            <div class="collab-wrapper">
+                <div style="display:flex; justify-shadow:space-between; align-items:center; flex-wrap:wrap; gap:5px;">
+                    <span style="font-size:12px; color:#D4AF37; font-weight:bold;">⚡ Pilih Username Collaborator (Maksimal 6):</span>
+                    <button class="btn-small-gold" onclick="manageCollabList()">⚙️ Edit Master List Username</button>
+                </div>
+                <div id="collabChips" class="collab-chips"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-small-gold" onclick="resetCollaboratorText()" style="background:rgba(255,255,255,0.05); color:#aaa; border-color:#555;">🔄 Reset Teks Collab</button>
+                </div>
+            </div>
+
+            <textarea id="inpCaption" placeholder="Collab Dakwah Sunnah :\n.\n@tauhidsunnah_id"></textarea>
 
             <label>Isi Caption Lengkap</label>
             <textarea id="inpContent" placeholder="Tulis caption lengkap di sini..."></textarea>
@@ -244,8 +302,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Menggunakan array untuk mendukung 2 PIN Login
-            const ALLOWED_PINS = ["301102", "291104"];
+            // PERBAIKAN 1: Menambahkan PIN ke-3 "666666"
+            const ALLOWED_PINS = ["301102", "291104", "666666"];
+            
             const loginPage = document.getElementById('loginPage');
             const dashboard = document.getElementById('adminDashboard');
             const pinInput = document.getElementById('pinInput');
@@ -254,6 +313,17 @@
             
             const apiUrlInput = document.getElementById('inpApiUrl');
             const apiKeyInput = document.getElementById('inpApiKey');
+
+            // Default Master List Collaborator jika belum tersimpan
+            const DEFAULT_COLLABS = [
+                "@tauhidsunnah_id",
+                "@an.nashiha_daily",
+                "@sunnahstori",
+                "@al.nasiha",
+                "@thalabulilmi.id",
+                "@akun_salafy",
+                "@tawheedfirst.id"
+            ];
 
             apiUrlInput.addEventListener('input', () => {
                 localStorage.setItem('dakwahApiUrl', apiUrlInput.value);
@@ -272,6 +342,7 @@
                 if(savedKey) apiKeyInput.value = savedKey;
                 
                 loadKategoriList();
+                initCollaboratorSystem();
             }
 
             function handleLogin() {
@@ -286,6 +357,7 @@
                     if(savedKey) apiKeyInput.value = savedKey;
                     
                     loadKategoriList();
+                    initCollaboratorSystem();
                 } else {
                     loginStatus.innerText = '❌ PIN Salah!';
                     pinInput.value = '';
@@ -309,6 +381,7 @@
             window.showSection = function(section) {
                 if(section === 'add') {
                     document.getElementById('sectionAdd').style.display = 'block';
+                    initCollaboratorSystem();
                 } else {
                     document.getElementById('sectionAdd').style.display = 'none';
                 }
@@ -324,6 +397,90 @@
                     document.getElementById('inpFilePdf').value = '';
                 }
             }
+
+            // === FITUR BARU: COLLABORATOR MANAGEMENT ===
+            function getCollabList() {
+                const saved = localStorage.getItem('dakwahCollabList');
+                if (saved) {
+                    try { return JSON.parse(saved); } catch(e){}
+                }
+                return DEFAULT_COLLABS;
+            }
+
+            function initCollaboratorSystem() {
+                const captionTextarea = document.getElementById('inpCaption');
+                if (!captionTextarea.value.trim()) {
+                    resetCollaboratorText();
+                }
+                renderCollabChips();
+            }
+
+            window.resetCollaboratorText = function() {
+                const captionTextarea = document.getElementById('inpCaption');
+                captionTextarea.value = "Collab Dakwah Sunnah :\n.";
+                renderCollabChips();
+            };
+
+            function renderCollabChips() {
+                const container = document.getElementById('collabChips');
+                const list = getCollabList();
+                const currentText = document.getElementById('inpCaption').value;
+
+                container.innerHTML = '';
+                list.forEach(username => {
+                    const cleanUser = username.startsWith('@') ? username : '@' + username;
+                    const isSelected = currentText.includes(cleanUser);
+
+                    const chip = document.createElement('span');
+                    chip.className = `collab-chip ${isSelected ? 'selected' : ''}`;
+                    chip.innerText = cleanUser;
+                    chip.onclick = () => toggleCollabUser(cleanUser);
+                    container.appendChild(chip);
+                });
+            }
+
+            function toggleCollabUser(username) {
+                const captionTextarea = document.getElementById('inpCaption');
+                let lines = captionTextarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+                // Dapatkan baris pembuka "Collab Dakwah Sunnah :" & "."
+                let headerLines = ["Collab Dakwah Sunnah :", "."];
+                let currentUsers = lines.filter(l => l.startsWith('@'));
+
+                if (currentUsers.includes(username)) {
+                    // Hapus jika sudah ada
+                    currentUsers = currentUsers.filter(u => u !== username);
+                } else {
+                    // Cek batas maksimal 6 username
+                    if (currentUsers.length >= 6) {
+                        alert('⚠️ Maksimal 6 username collaborator!');
+                        return;
+                    }
+                    currentUsers.push(username);
+                }
+
+                // Susun ulang isi textarea
+                captionTextarea.value = headerLines.join('\n') + '\n' + currentUsers.join('\n');
+                renderCollabChips();
+            }
+
+            window.manageCollabList = function() {
+                const currentList = getCollabList().join(', ');
+                const input = prompt('Masukkan daftar username collaborator (pisahkan dengan koma):', currentList);
+                
+                if (input !== null) {
+                    const newList = input.split(',')
+                        .map(item => item.trim())
+                        .filter(item => item.length > 0)
+                        .map(item => item.startsWith('@') ? item : '@' + item);
+
+                    localStorage.setItem('dakwahCollabList', JSON.stringify(newList));
+                    renderCollabChips();
+                }
+            };
+
+            // Update chips jika user mengetik manual di textarea Collaborator
+            document.getElementById('inpCaption').addEventListener('input', renderCollabChips);
 
             async function loadKategoriList() {
                 const datalist = document.getElementById('kategori-list');
@@ -381,11 +538,16 @@
 
             function formatCollaborator(text) {
                 if (!text) return '';
-                let lines = text.split(/\s*[\s,]\s*/).filter(line => line.trim().length > 0);
-                return lines.map(line => `*${line.trim()}*`).join('\n');
+                let lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+                return lines.map(line => {
+                    if (line.startsWith('@')) {
+                        return `*${line}*`;
+                    }
+                    return line;
+                }).join('\n');
             }
 
-            // === FITUR BARU: HANDLE PREVIEW GAMBAR & URUTAN ===
+            // === HANDLE PREVIEW GAMBAR & URUTAN ===
             window.handleFileSelect = function(event) {
                 const files = event.target.files;
                 if (files.length > 0) {
