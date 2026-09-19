@@ -8,7 +8,7 @@
         *{box-sizing:border-box;margin:0;padding:0;}
         body{ background: #0b0b0b; background: radial-gradient(circle at 50% 0%, #181818 0%, #0b0b0b 70%); color:#fff; font-family:'Segoe UI', Arial, sans-serif; padding:20px; max-width:1100px; margin:auto; min-height:100vh; }
         
-        /* --- ESTETIK 3D "M" LOGO LOADING OVERLAY --- */
+        /* --- ESTETIK 3D "M" LOGO & RING LOADING OVERLAY --- */
         #app-loader {
             position: fixed;
             top: 0;
@@ -25,89 +25,141 @@
             transition: opacity 0.6s ease, visibility 0.6s ease;
         }
 
-        .loader-3d-scene {
-            width: 120px;
-            height: 120px;
-            perspective: 800px;
+        .loader-ring-wrapper {
+            position: relative;
+            width: 220px;
+            height: 220px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
+        /* Ring Indikator Loading Melingkar */
+        .loader-svg-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .loader-svg-ring circle {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        .loader-svg-ring .ring-bg {
+            stroke: rgba(212, 175, 55, 0.1);
+        }
+
+        .loader-svg-ring .ring-progress {
+            stroke: linear-gradient(135deg, #FFE082, #D4AF37);
+            stroke: #D4AF37;
+            stroke-dasharray: 628; /* 2 * PI * r (r=100) */
+            stroke-dashoffset: 628;
+            transition: stroke-dashoffset 0.2s ease;
+            filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.8));
+        }
+
+        .loader-3d-scene {
+            width: 100px;
+            height: 100px;
+            perspective: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        /* LOGO M KEREN & PRESISI */
         .m-logo-3d {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 60px;
             position: relative;
             transform-style: preserve-3d;
             animation: rotate3DM 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
         }
 
-        /* Struktur Huruf M Estetik dengan Emas & Glow ringan */
         .m-side {
             position: absolute;
-            background: linear-gradient(135deg, #FFE082, #D4AF37, #996515);
-            border-radius: 4px;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            background: linear-gradient(135deg, #FFF1B0, #D4AF37, #996515);
+            border-radius: 3px;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
             will-change: transform;
         }
 
-        /* Batang Kiri */
+        /* Batang Kiri Tegak */
         .m-side.left-bar {
-            width: 14px;
-            height: 70px;
-            left: 10px;
-            top: 5px;
-            transform: translateZ(10px);
+            width: 12px;
+            height: 56px;
+            left: 2px;
+            top: 2px;
+            transform: translateZ(8px);
         }
 
-        /* Batang Kanan */
+        /* Batang Kanan Tegak */
         .m-side.right-bar {
-            width: 14px;
-            height: 70px;
-            right: 10px;
-            top: 5px;
-            transform: translateZ(10px);
+            width: 12px;
+            height: 56px;
+            right: 2px;
+            top: 2px;
+            transform: translateZ(8px);
         }
 
-        /* Diag Kiri */
+        /* Diagonal Kiri M */
         .m-side.diag-left {
-            width: 12px;
-            height: 42px;
-            left: 24px;
-            top: 8px;
+            width: 10px;
+            height: 38px;
+            left: 12px;
+            top: 2px;
             transform-origin: top left;
-            transform: rotate(-28deg) translateZ(12px);
+            transform: rotate(-32deg) translateZ(10px);
         }
 
-        /* Diag Kanan */
+        /* Diagonal Kanan M */
         .m-side.diag-right {
-            width: 12px;
-            height: 42px;
-            right: 24px;
-            top: 8px;
+            width: 10px;
+            height: 38px;
+            right: 12px;
+            top: 2px;
             transform-origin: top right;
-            transform: rotate(28deg) translateZ(12px);
+            transform: rotate(32deg) translateZ(10px);
         }
 
-        /* Bayangan Kilat 3D Presisi */
+        /* Bayangan 3D Presisi */
         .m-shadow {
             position: absolute;
-            width: 70px;
-            height: 12px;
+            width: 60px;
+            height: 10px;
             background: rgba(0, 0, 0, 0.6);
             border-radius: 50%;
-            bottom: -15px;
-            filter: blur(8px);
+            bottom: 25px;
+            filter: blur(6px);
             animation: shadowPulse 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
         }
 
+        /* Angka Persentase Loading */
+        .loader-percentage {
+            position: absolute;
+            bottom: 30px;
+            color: #FFE082;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+            z-index: 2;
+        }
+
+        /* Teks Memuat Arsip */
         .loader-text {
-            margin-top: 25px;
+            margin-top: 20px;
             color: #D4AF37;
             font-size: 13px;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 600;
+            text-align: center;
+            width: 100%;
             animation: textPulse 1.8s ease-in-out infinite alternate;
         }
 
@@ -123,7 +175,7 @@
         }
 
         @keyframes textPulse {
-            0% { opacity: 0.4; }
+            0% { opacity: 0.5; }
             100% { opacity: 1; }
         }
 
@@ -150,7 +202,7 @@
         .brand-wrapper .developer-title{color:#888;font-size:11px;letter-spacing:0.5px;margin-top:2px;}
         .brand-divider{width:80px;height:1px;background:#D4AF37;margin:10px auto 15px auto;opacity:0.5;}
 
-        /* --- SEGMENTED MODE SWITCHER (TERLOKASI PRESISI DITENGAH) --- */
+        /* --- SEGMENTED MODE SWITCHER --- */
         .mode-switcher-container {
             display: flex;
             justify-content: center;
@@ -199,7 +251,6 @@
             color: #fff;
         }
 
-        /* STATE AKTIF: WARNA KUNING SOLID & TEKS HITAM */
         .btn-mode-segmented.active {
             background: #D4AF37;
             color: #111;
@@ -239,7 +290,6 @@
         .kategori-scroll-compact .card-kategori .nama { color: #fff; font-size: 13px; font-weight: 600; text-transform: capitalize; }
         .kategori-scroll-compact .card-kategori .jumlah { color: #D4AF37; font-size: 11px; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 10px; }
 
-        /* Switch Kategori Berdasarkan Mode */
         body.is-compact .kategori-grid-ori { display: none; }
         body.is-compact .kategori-scroll-compact { display: block; }
 
@@ -361,18 +411,25 @@
     </style>
 </head>
 <body>
-    <!-- ELEMEN LOADING LOGO 3D "M" -->
+    <!-- ELEMEN LOADING LOGO 3D "M", LINGKARAN PROGRESS, & TEKS RATA TENGAH -->
     <div id="app-loader">
-        <div class="loader-3d-scene">
-            <div class="m-logo-3d">
-                <div class="m-side left-bar"></div>
-                <div class="m-side diag-left"></div>
-                <div class="m-side diag-right"></div>
-                <div class="m-side right-bar"></div>
+        <div class="loader-ring-wrapper">
+            <svg class="loader-svg-ring" viewBox="0 0 220 220">
+                <circle class="ring-bg" cx="110" cy="110" r="100"></circle>
+                <circle class="ring-progress" id="loader-ring" cx="110" cy="110" r="100"></circle>
+            </svg>
+            <div class="loader-3d-scene">
+                <div class="m-logo-3d">
+                    <div class="m-side left-bar"></div>
+                    <div class="m-side diag-left"></div>
+                    <div class="m-side diag-right"></div>
+                    <div class="m-side right-bar"></div>
+                </div>
+                <div class="m-shadow"></div>
             </div>
-            <div class="m-shadow"></div>
+            <div class="loader-percentage" id="loader-percent">0%</div>
         </div>
-        <div class="loader-text">Memuat Arsip...</div>
+        <div class="loader-text">...Memuat Arsip...</div>
     </div>
 
     <div class="follow-wrapper">
@@ -438,14 +495,29 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
+        // FUNGSI UNTUK MENGUPDATE PROGRESS LOADING RING DAN PERSENTASE
+        function updateProgress(percent) {
+            const ring = document.getElementById('loader-ring');
+            const percentText = document.getElementById('loader-percent');
+            if (ring && percentText) {
+                const circumference = 628;
+                const offset = circumference - (percent / 100) * circumference;
+                ring.style.strokeDashoffset = offset;
+                percentText.innerText = `${Math.round(percent)}%`;
+            }
+        }
+
         // FUNGSI UNTUK MENUTUP SCREEN LOADING 3D SETELAH DATA SELESAI SIAP
         function hideAppLoader() {
-            const loader = document.getElementById('app-loader');
-            if (loader) {
-                loader.style.opacity = '0';
-                loader.style.visibility = 'hidden';
-                setTimeout(() => { loader.remove(); }, 600);
-            }
+            updateProgress(100);
+            setTimeout(() => {
+                const loader = document.getElementById('app-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    loader.style.visibility = 'hidden';
+                    setTimeout(() => { loader.remove(); }, 600);
+                }
+            }, 300);
         }
 
         let kategoriData = {};
@@ -565,6 +637,7 @@
         }
 
         async function loadPosters() {
+            updateProgress(15);
             const container = document.getElementById('post-list');
             const kategoriOri = document.getElementById('kategori-wrap-ori');
             const kategoriCompact = document.getElementById('kategori-wrap-compact');
@@ -579,10 +652,15 @@
                 if(res.ok) manifestData = await res.json();
             } catch(e) { console.warn("Gagal mengambil manifest"); }
 
+            updateProgress(40);
+
             emojiMapGlobal = manifestData.kategori_emoji || {};
             rawManifestPosters = manifestData.posters || [];
 
             if(rawManifestPosters.length > 0) {
+                const totalItems = rawManifestPosters.length;
+                let loadedItems = 0;
+
                 rawManifestPosters.forEach(p => {
                     const k = p.kategori || "Umum";
                     if(!kategoriData[k]) kategoriData[k] = 0;
@@ -675,12 +753,16 @@
                             ${tagArray.length > 0 ? `<div class="tags-wrapper"><span class="tags-label">Tagar :</span><div class="tag-container">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div></div>` : ''}
                         </div>
                     `;
+
+                    loadedItems++;
+                    updateProgress(40 + (loadedItems / totalItems) * 50);
                 }
+            } else {
+                updateProgress(90);
             }
 
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
 
-            // Menghitung total seluruh poster yang dimuat
             const totalPoster = semuaPosterCache.length;
 
             let htmlKategoriOri = `
@@ -719,7 +801,7 @@
             
             filterDisplayPosters();
 
-            // MENUTUP LAYAR LOADING SELESAI
+            // Selesai Memuat
             hideAppLoader();
         }
 
