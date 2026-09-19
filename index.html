@@ -77,8 +77,8 @@
             height: 60px;
             position: relative;
             transform-style: preserve-3d;
-            /* Putaran 3D berjalan secara kontinu & smooth */
-            animation: rotate3DM 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            /* Putaran 3D berjalan secara kontinu & smooth di semua tahap */
+            animation: rotate3DM 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
         .m-side {
@@ -89,29 +89,28 @@
             will-change: transform, opacity;
         }
 
-        /* Batang Kiri Tegak (Fade in halus) */
+        /* Batang Kiri Tegak (Tahap 3: Muncul saat atap turunk/mereka membentuk M) */
         .m-side.left-bar {
             width: 12px;
             height: 56px;
             left: 2px;
             top: 2px;
             opacity: 0;
-            animation: fadeInOuterBar 0.6s ease forwards 0.8s;
+            animation: fadeInOuterBar 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
-        /* Batang Kanan Tegak (Fade in halus) */
+        /* Batang Kanan Tegak */
         .m-side.right-bar {
             width: 12px;
             height: 56px;
             right: 2px;
             top: 2px;
             opacity: 0;
-            animation: fadeInOuterBar 0.6s ease forwards 0.8s;
+            animation: fadeInOuterBar 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
         /* 
-           BATANG BUKU / ATAP A (JATUH DARI ATAS MEREKAH JADI M)
-           Diagonal Kiri M
+           ANIMASI 4 TAHAP DIAGONAL (ATAP BUKU -> MEREKAH TURUN -> BENTUK M -> BERPUTAR)
         */
         .m-side.diag-left {
             width: 10px;
@@ -119,17 +118,16 @@
             left: 12px;
             top: 2px;
             transform-origin: top left;
-            animation: dropBookToMLeft 1s cubic-bezier(0.25, 1.25, 0.5, 1) forwards 0.1s;
+            animation: stageDiagLeft 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
-        /* Diagonal Kanan M */
         .m-side.diag-right {
             width: 10px;
             height: 38px;
             right: 12px;
             top: 2px;
             transform-origin: top right;
-            animation: dropBookToMRight 1s cubic-bezier(0.25, 1.25, 0.5, 1) forwards 0.1s;
+            animation: stageDiagRight 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
         /* Bayangan 3D Presisi */
@@ -141,47 +139,64 @@
             border-radius: 50%;
             bottom: 25px;
             filter: blur(6px);
-            animation: shadowPulse 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            animation: shadowPulse 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
-        /* --- ANIMASI KEYFRAMES BATANG JATUH & BERPUTAR --- */
-        
-        /* Animasi Jatuh Batang Diagonal Kiri: Dari posisi Atap "A" / Buku Naik ke Atas -> Jatuh Presisi ke Posisi M */
-        @keyframes dropBookToMLeft {
-            0% {
-                opacity: 0;
-                transform: translateY(-20px) rotate(-38deg) translateZ(10px);
-            }
-            40% {
+        /* --- KEYFRAMES ANIMASI 4 TAHAP LOGO M --- */
+
+        /* 
+           Tahap 1 (0% - 20%): Atap Buku Terbuka (V Terbalik)
+           Tahap 2 (20% - 45%): Merekah Turun / Jatuh
+           Tahap 3 (45% - 75%): Mengunci ke Bentuk M Tegak
+           Tahap 4 (75% - 100%): Transisi Halus Kembali ke Atap Buku sambil Terus Berputar 3D
+        */
+        @keyframes stageDiagLeft {
+            0%, 20% {
                 opacity: 1;
+                transform: translateY(-16px) rotate(35deg) translateZ(10px);
             }
-            100% {
+            45%, 75% {
                 opacity: 1;
                 transform: translateY(0px) rotate(-32deg) translateZ(10px);
             }
+            90%, 100% {
+                opacity: 1;
+                transform: translateY(-16px) rotate(35deg) translateZ(10px);
+            }
         }
 
-        /* Animasi Jatuh Batang Diagonal Kanan */
-        @keyframes dropBookToMRight {
-            0% {
-                opacity: 0;
-                transform: translateY(-20px) rotate(38deg) translateZ(10px);
-            }
-            40% {
+        @keyframes stageDiagRight {
+            0%, 20% {
                 opacity: 1;
+                transform: translateY(-16px) rotate(-35deg) translateZ(10px);
             }
-            100% {
+            45%, 75% {
                 opacity: 1;
                 transform: translateY(0px) rotate(32deg) translateZ(10px);
             }
+            90%, 100% {
+                opacity: 1;
+                transform: translateY(-16px) rotate(-35deg) translateZ(10px);
+            }
         }
 
+        /* Batang Luar Tegak Muncul Ketika Atap Turun Membentuk M */
         @keyframes fadeInOuterBar {
-            0% { opacity: 0; transform: translateZ(0px) scaleY(0.7); }
-            100% { opacity: 1; transform: translateZ(8px) scaleY(1); }
+            0%, 20% { 
+                opacity: 0; 
+                transform: translateZ(0px) scaleY(0.5); 
+            }
+            45%, 75% { 
+                opacity: 1; 
+                transform: translateZ(8px) scaleY(1); 
+            }
+            90%, 100% { 
+                opacity: 0; 
+                transform: translateZ(0px) scaleY(0.5); 
+            }
         }
 
-        /* Rotasi Smooth 3D Berkelanjutan */
+        /* Rotasi Continuous 3D dari Tengah Sampai Akhir */
         @keyframes rotate3DM {
             0% { transform: rotateY(0deg) rotateX(10deg); }
             50% { transform: rotateY(180deg) rotateX(-5deg); }
@@ -455,7 +470,7 @@
     </style>
 </head>
 <body>
-    <!-- ELEMEN LOADING LOGO 3D "M" BUKU JATUH & BERPUTAR SMOOTH -->
+    <!-- ELEMEN LOADING LOGO 3D "M" 4 TAHAP ANIMASI HASIL TRANSISI -->
     <div id="app-loader">
         <div class="loader-ring-wrapper">
             <svg class="loader-svg-ring" viewBox="0 0 260 260">
