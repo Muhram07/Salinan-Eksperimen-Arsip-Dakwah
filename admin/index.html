@@ -84,7 +84,7 @@
             transform: scale(1.02);
         }
 
-        /* --- STYLE PREVIEW GAMBAR --- */
+        /* PREVIEW GAMBAR */
         .preview-container {
             display: flex;
             flex-direction: column;
@@ -149,7 +149,7 @@
             color: #555;
         }
 
-        /* --- STYLE COLLABORATOR CHIPS --- */
+        /* COLLABORATOR CHIPS */
         .collab-wrapper {
             background: rgba(255,255,255,0.04);
             border: 1px dashed rgba(212, 175, 55, 0.3);
@@ -256,7 +256,7 @@
                 <div id="collabChips" class="collab-chips"></div>
                 <button class="btn-small-gold" type="button" onclick="resetCollaboratorText()" style="background:rgba(255,255,255,0.05); color:#aaa; border-color:#555;">🔄 Reset Teks Collab</button>
             </div>
-            <textarea id="inpCaption" placeholder="Collab Dakwah Sunnah :\n.\n@tauhidsunnah_id"></textarea>
+            <textarea id="inpCaption" placeholder="Collab Dakwah Sunnah :\n@tauhidsunnah_id"></textarea>
 
             <label>Isi Caption Lengkap</label>
             <textarea id="inpContent" placeholder="Tulis caption lengkap di sini..."></textarea>
@@ -266,7 +266,6 @@
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih gambar. Nama file akan otomatis berubah menjadi <b>1.jpg, 2.jpg, 3.jpg</b>.</p>
                 <input type="file" id="inpFileGambar" multiple accept="image/*" onchange="handleFileSelect(event)">
                 
-                <!-- KONTENER PREVIEW GAMBAR -->
                 <div id="previewContainer" class="preview-container"></div>
             </div>
 
@@ -297,7 +296,6 @@
     </div>
 
     <script>
-        // MASTER PIN LOGIN DENGAN 3 PIN ("666666" TERMASUK)
         const ALLOWED_PINS = ["301102", "291104", "666666"];
         
         const DEFAULT_COLLABS = [
@@ -310,7 +308,6 @@
             "@tawheedfirst.id"
         ];
 
-        // --- FUNGSI GLOBAL UTAMA (DIJAMIN PERSIS SEPERTI VERSI FIX) ---
         function logout() {
             localStorage.removeItem('adminLogin');
             document.getElementById('adminDashboard').style.display = 'none';
@@ -339,7 +336,6 @@
             }
         }
 
-        // --- FUNGSI COLLABORATOR ---
         function getCollabList() {
             const saved = localStorage.getItem('dakwahCollabList');
             if (saved) {
@@ -358,7 +354,8 @@
 
         function resetCollaboratorText() {
             const captionTextarea = document.getElementById('inpCaption');
-            captionTextarea.value = "Collab Dakwah Sunnah :\n.";
+            // Titik diujung kata default resmi dihapus
+            captionTextarea.value = "Collab Dakwah Sunnah :";
             renderCollabChips();
         }
 
@@ -385,7 +382,8 @@
             const captionTextarea = document.getElementById('inpCaption');
             let lines = captionTextarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-            let headerLines = ["Collab Dakwah Sunnah :", "."];
+            // Tanpa titik
+            let headerLines = ["Collab Dakwah Sunnah :"];
             let currentUsers = lines.filter(l => l.startsWith('@'));
 
             if (currentUsers.includes(username)) {
@@ -417,7 +415,6 @@
             }
         }
 
-        // --- DOM CONTENT LOADED ---
         document.addEventListener('DOMContentLoaded', function() {
             const loginPage = document.getElementById('loginPage');
             const dashboard = document.getElementById('adminDashboard');
@@ -746,12 +743,12 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const contentZip = await zip.generateAsync({type:"blob"});
                 
                 if (contentZip.size > 100 * 1024 * 1024) {
-                    statusText.innerHTML = '❌ GAGAL! Ukuran ZIP melebihi 100 MB (Batas Cloudflare Worker). Silakan kurangi jumlah gambar.';
+                    statusText.innerHTML = '❌ GAGAL! Ukuran ZIP melebihi 100 MB. Silakan kurangi jumlah gambar.';
                     setTimeout(() => status.style.display = 'none', 5000);
                     return;
                 }
 
-                statusText.innerHTML = `🔄 Mengonversi ZIP ke Base64 di HP...`;
+                statusText.innerHTML = `🔄 Mengonversi ZIP ke Base64...`;
                 const base64String = await blobToBase64(contentZip);
 
                 statusText.innerHTML = `📤 Mengirim Base64 ke Cloudflare API... (${(contentZip.size / 1024 / 1024).toFixed(2)} MB)`;
@@ -778,7 +775,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     }
 
                     if (response.ok && result.success) {
-                        statusText.innerHTML = `✅ Berhasil! ZIP berhasil dikirim ke GitHub. Bot akan memprosesnya secara otomatis.`;
+                        statusText.innerHTML = `✅ Berhasil! ZIP dikirim ke GitHub. Bot akan memprosesnya otomatis.`;
                     } else {
                         statusText.innerHTML = `❌ Gagal mengirim ke API: ${result.error || 'Unknown Error'}`;
                     }
