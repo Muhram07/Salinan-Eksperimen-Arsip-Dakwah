@@ -1,7 +1,6 @@
 ---
 judul: "Doa Berlindung Dari Azab Neraka Jahanam"
 sub_judul: "Collab Dakwah Sunnah :
-.
 *@an.nashiha_daily*
 *@thequran_path*"
 kategori: "doa"
