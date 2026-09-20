@@ -6,6 +6,16 @@ import re
 import sys
 import json
 
+# ==========================================
+# PEMETAAN NAMA KATEGORI OTOMATIS
+# Tambahkan nama kategori lain sendiri di sini nanti
+# ==========================================
+CATEGORY_MAP = {
+    "ramadhan": "Ramadhan (9)",
+    "Ramadhan": "Ramadhan (9)",
+    "ramadan": "Ramadhan (9)",
+}
+
 # Fungsi untuk penomoran dinamis (001 sampai 999, lalu 1000, 1001 dst)
 def get_padded_number(num):
     return f"{num:0{max(3, len(str(num)))}d}"
@@ -110,7 +120,7 @@ def scan_and_repair():
     manifest_path = "manifest.json"
     existing_emoji_map = {}
 
-    # === BACAN EMOJI LAMA AGAR TIDAK TERHAPUS/RESET ===
+    # === BACA EMOJI LAMA AGAR TIDAK TERHAPUS/RESET ===
     if os.path.exists(manifest_path):
         try:
             with open(manifest_path, 'r', encoding='utf-8') as f:
@@ -182,11 +192,23 @@ def scan_and_repair():
                                     # === BACA DATA UNTUK MANIFEST ===
                                     real_folder_name = os.path.basename(poster_path)
                                     real_kategori = os.path.basename(os.path.dirname(poster_path))
+                                    
+                                    # Terjemahkan nama kategori tampilan
+                                    display_kategori = CATEGORY_MAP.get(yaml_kategori, yaml_kategori)
+                                    data['kategori'] = display_kategori
                                     data['path'] = f"{real_kategori.lower()}/{real_folder_name}"
                                     
-                                    # Hanya perbarui emoji jika di poster.md ada emoji baru yang valid (bukan '📂')
+                                    # === PENGELOLAAN EMOJI SANGAT AMAN ===
                                     new_emoji = data.get('kategori_emoji')
-                                    kat_key = yaml_kategori.lower()
+                                    kat_key = display_kategori
+                                    
+                                    # Jika key lama (misal 'ramadhan' / 'Ramadhan') punya emoji di manifest lama,
+                                    # otomatis wariskan emojinya ke key baru 'Ramadhan (9)'
+                                    for old_key in [yaml_kategori, yaml_kategori.lower(), 'ramadhan']:
+                                        if old_key in manifest_data['kategori_emoji'] and kat_key not in manifest_data['kategori_emoji']:
+                                            manifest_data['kategori_emoji'][kat_key] = manifest_data['kategori_emoji'][old_key]
+
+                                    # Update jika ada emoji baru dari poster.md
                                     if new_emoji and new_emoji != '📂':
                                         manifest_data['kategori_emoji'][kat_key] = new_emoji
                                     elif kat_key not in manifest_data['kategori_emoji']:
@@ -198,7 +220,12 @@ def scan_and_repair():
                         except Exception as e:
                             print(f"Gagal membaca {md_file_path}: {e}")
 
-    manifest_data['kategori_list'] = [kategori_map[k] for k in sorted(kategori_map.keys())]
+    # Buat daftar kategori unik untuk manifest_data['kategori_list']
+    mapped_categories = set()
+    for k in kategori_map.keys():
+        mapped_categories.add(CATEGORY_MAP.get(k, CATEGORY_MAP.get(kategori_map[k], kategori_map[k])))
+    
+    manifest_data['kategori_list'] = sorted(list(mapped_categories))
 
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
