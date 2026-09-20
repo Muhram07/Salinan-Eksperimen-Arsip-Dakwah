@@ -69,6 +69,9 @@ CATEGORY_MAP = {
     "Dzulhijjah": "Dzulhijjah (12)",
 }
 
+# Daftar nama kategori bulan hijriah yang otomatis pakai emoji bulan 🌙
+HIJRIAH_MONTHS = set(CATEGORY_MAP.values())
+
 # Fungsi untuk penomoran dinamis (001 sampai 999, lalu 1000, 1001 dst)
 def get_padded_number(num):
     return f"{num:0{max(3, len(str(num)))}d}"
@@ -264,7 +267,11 @@ def scan_and_repair():
                                     if new_emoji and new_emoji != '📂':
                                         manifest_data['kategori_emoji'][kat_key] = new_emoji
                                     elif kat_key not in manifest_data['kategori_emoji']:
-                                        manifest_data['kategori_emoji'][kat_key] = '📂'
+                                        # Jika kategori termasuk 12 Bulan Hijriah, pakai emoji 🌙 secara otomatis
+                                        if kat_key in HIJRIAH_MONTHS:
+                                            manifest_data['kategori_emoji'][kat_key] = '🌙'
+                                        else:
+                                            manifest_data['kategori_emoji'][kat_key] = '📂'
                                     
                                     manifest_data['posters'].append(data)
                                     manifest_data['total_poster'] += 1
