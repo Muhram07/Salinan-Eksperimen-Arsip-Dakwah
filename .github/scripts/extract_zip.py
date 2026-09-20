@@ -7,13 +7,66 @@ import sys
 import json
 
 # ==========================================
-# PEMETAAN NAMA KATEGORI OTOMATIS
-# Tambahkan nama kategori lain sendiri di sini nanti
+# PEMETAAN NAMA KATEGORI OTOMATIS (12 BULAN HIJRIAH)
 # ==========================================
 CATEGORY_MAP = {
+    # 1. Muharram
+    "muharram": "Muharram (1)",
+    "Muharram": "Muharram (1)",
+    
+    # 2. Safar
+    "safar": "Safar (2)",
+    "Safar": "Safar (2)",
+    
+    # 3. Rabi'ul Awal
+    "rabiul awal": "Rabi'ul Awal (3)",
+    "Rabiul Awal": "Rabi'ul Awal (3)",
+    "rabi'ul awal": "Rabi'ul Awal (3)",
+    
+    # 4. Rabi'ul Akhir
+    "rabiul akhir": "Rabi'ul Akhir (4)",
+    "Rabiul Akhir": "Rabi'ul Akhir (4)",
+    "rabi'ul akhir": "Rabi'ul Akhir (4)",
+    
+    # 5. Jumadil Awal
+    "jumadil awal": "Jumadil Awal (5)",
+    "Jumadil Awal": "Jumadil Awal (5)",
+    "jumadal ula": "Jumadil Awal (5)",
+    "Jumadal Ula": "Jumadil Awal (5)",
+    
+    # 6. Jumadil Akhir
+    "jumadil akhir": "Jumadil Akhir (6)",
+    "Jumadil Akhir": "Jumadil Akhir (6)",
+    "jumadal akhirah": "Jumadil Akhir (6)",
+    "Jumadal Akhirah": "Jumadil Akhir (6)",
+    
+    # 7. Rajab
+    "rajab": "Rajab (7)",
+    "Rajab": "Rajab (7)",
+    
+    # 8. Sya'ban
+    "sya'ban": "Sya'ban (8)",
+    "Sya'ban": "Sya'ban (8)",
+    "syaban": "Sya'ban (8)",
+    
+    # 9. Ramadhan
     "ramadhan": "Ramadhan (9)",
     "Ramadhan": "Ramadhan (9)",
     "ramadan": "Ramadhan (9)",
+    
+    # 10. Syawwal
+    "syawwal": "Syawwal (10)",
+    "Syawwal": "Syawwal (10)",
+    "syawal": "Syawwal (10)",
+    
+    # 11. Dzulqa'dah
+    "dzulqa'dah": "Dzulqa'dah (11)",
+    "Dzulqa'dah": "Dzulqa'dah (11)",
+    "dzulqadah": "Dzulqa'dah (11)",
+    
+    # 12. Dzulhijjah
+    "dzulhijjah": "Dzulhijjah (12)",
+    "Dzulhijjah": "Dzulhijjah (12)",
 }
 
 # Fungsi untuk penomoran dinamis (001 sampai 999, lalu 1000, 1001 dst)
@@ -193,7 +246,7 @@ def scan_and_repair():
                                     real_folder_name = os.path.basename(poster_path)
                                     real_kategori = os.path.basename(os.path.dirname(poster_path))
                                     
-                                    # Terjemahkan nama kategori tampilan
+                                    # Terjemahkan nama kategori tampilan berdasarkan CATEGORY_MAP
                                     display_kategori = CATEGORY_MAP.get(yaml_kategori, yaml_kategori)
                                     data['kategori'] = display_kategori
                                     data['path'] = f"{real_kategori.lower()}/{real_folder_name}"
@@ -202,9 +255,8 @@ def scan_and_repair():
                                     new_emoji = data.get('kategori_emoji')
                                     kat_key = display_kategori
                                     
-                                    # Jika key lama (misal 'ramadhan' / 'Ramadhan') punya emoji di manifest lama,
-                                    # otomatis wariskan emojinya ke key baru 'Ramadhan (9)'
-                                    for old_key in [yaml_kategori, yaml_kategori.lower(), 'ramadhan']:
+                                    # Wariskan emoji lama jika nama kunci kategori berubah karena CATEGORY_MAP
+                                    for old_key in [yaml_kategori, yaml_kategori.lower()]:
                                         if old_key in manifest_data['kategori_emoji'] and kat_key not in manifest_data['kategori_emoji']:
                                             manifest_data['kategori_emoji'][kat_key] = manifest_data['kategori_emoji'][old_key]
 
