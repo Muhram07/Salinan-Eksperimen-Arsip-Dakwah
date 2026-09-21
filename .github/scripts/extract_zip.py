@@ -22,14 +22,13 @@ HIJRIAH_ORDER = [
     "Dzulhijjah (12)"
 ]
 
-HIJRIAH_MONTHS_SET = set(HIJRIAH_ORDER)
+# Mapping untuk normalisasi key bulan Hijriah agar tidak terduplikasi
+HIJRIAH_MAP = {m.lower(): m for m in HIJRIAH_ORDER}
 
-# Fungsi untuk penomoran dinamis (001 sampai 999, lalu 1000, 1001 dst)
 def get_padded_number(num):
     return f"{num:0{max(3, len(str(num)))}d}"
 
 def get_next_sequence(kategori_path):
-    """Mencari nomor urut tertinggi di dalam folder kategori (GLOBAL per kategori)"""
     if not os.path.exists(kategori_path):
         return 1
     
@@ -54,15 +53,13 @@ def main():
         print("ERROR: Folder '_uploads' tidak ditemukan.")
         sys.exit(1)
 
-    # Ambil daftar semua file .zip di dalam folder
     zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
     
     if not zip_files:
         print("Tidak ada file ZIP ditemukan di _uploads. Selesai.")
-        scan_and_repair() # Tetap repair jika tidak ada ZIP
+        scan_and_repair()
         return
 
-    # Loop untuk memproses SEMUA file ZIP sampai habis
     for zip_filename in zip_files:
         zip_file_path = os.path.join(zip_dir, zip_filename)
         print(f"Memproses ZIP: {zip_file_path}")
@@ -88,14 +85,13 @@ def main():
                         if not slug_base: 
                             slug_base = 'poster'
 
-                        # === LOGIKA PENOMORAN DINAMIS ===
                         kategori_path = os.path.join('posters', kategori.lower())
                         next_num = get_next_sequence(kategori_path)
                         num_str = get_padded_number(next_num)
                         final_slug = f"{slug_base}-{num_str}"
                         
                         target_folder = os.path.join('posters', kategori.lower(), final_slug)
-                        print(f"Target folder ditemukan (Auto-Increment Global): {target_folder}")
+                        print(f"Target folder ditemukan: {target_folder}")
 
                     except Exception as e:
                         print(f"Gagal parsing YAML di poster.md: {e}")
@@ -117,17 +113,14 @@ def main():
         os.remove(zip_file_path)
         print("ZIP berhasil diekstrak dan dipindahkan.")
 
-    # === SETELAH SEMUA ZIP DIPROSES, BARU PANGGIL SCAN & REPAIR ===
     scan_and_repair()
 
 def scan_and_repair():
-    """Memindai semua folder untuk perbaikan otomatis (Self-Healing) dan update manifest"""
     print("Memindai & memperbaiki struktur folder posters...")
     
     manifest_path = "manifest.json"
     existing_emoji_map = {}
 
-    # === BACA EMOJI LAMA AGAR TIDAK TERHAPUS/RESET ===
     if os.path.exists(manifest_path):
         try:
             with open(manifest_path, 'r', encoding='utf-8') as f:
@@ -136,23 +129,20 @@ def scan_and_repair():
         except Exception as e:
             print(f"Gagal membaca manifest.json lama: {e}")
 
-    # Berikan emoji default 🌙 untuk bulan Hijriah HANYA jika belum ada di existing_emoji_map
+    # Set default emoji 🌙 untuk bulan Hijriah
     for month in HIJRIAH_ORDER:
-        if month not in existing_emoji_map and month.lower() not in existing_emoji_map:
+        if month not in existing_emoji_map:
             existing_emoji_map[month] = "🌙"
 
     manifest_data = {
         "kategori_list": [],
-        "kategori_emoji": existing_emoji_map, # Pertahankan emoji yang sudah tersimpan dari panel/lama
+        "kategori_emoji": existing_emoji_map,
         "total_poster": 0,
         "posters": []
     }
     
+    # Map untuk menyimpan nama tampilan kategori unik
     kategori_map = {}
-
-    # Pastikan seluruh 12 Bulan Hijriah terdaftar di kategori_map
-    for month in HIJRIAH_ORDER:
-        kategori_map[month.lower()] = month
 
     base_poster_path = "posters"
     if not os.path.exists(base_poster_path):
@@ -162,10 +152,6 @@ def scan_and_repair():
     for kategori in os.listdir(base_poster_path):
         kategori_path = os.path.join(base_poster_path, kategori)
         if os.path.isdir(kategori_path):
-            
-            kategori_key = kategori.lower()
-            if kategori_key not in kategori_map:
-                kategori_map[kategori_key] = kategori
 
             for poster_folder in os.listdir(kategori_path):
                 poster_path = os.path.join(kategori_path, poster_folder)
@@ -182,11 +168,11 @@ def scan_and_repair():
                                     yaml_slug = data.get('judul', poster_folder)
                                     slug = re.sub(r'[^a-z0-9]+', '-', yaml_slug.lower()).strip('-')
                                     
-                                    # === SELF-HEALING UNTUK FOLDER SALAH ===
+                                    # Self-Healing untuk folder unknown
                                     if kategori.lower() == 'unknown' and yaml_kategori.lower() != 'unknown':
                                         kategori_baru_path = os.path.join('posters', yaml_kategori.lower())
                                         next_num = get_next_sequence(kategori_baru_path) 
-                                        num_str = get_padded_number(num_str) if 'num_str' in locals() else get_padded_number(next_num)
+                                        num_str = get_padded_number(next_num)
                                         final_slug = f"{slug}-{num_str}"
                                         
                                         target_folder = os.path.join('posters', yaml_kategori.lower(), final_slug)
@@ -200,25 +186,25 @@ def scan_and_repair():
                                             os.rmdir(kategori_path)
                                             
                                         poster_path = target_folder
-                                        
-                                    elif kategori.lower() != yaml_kategori.lower():
-                                         print(f"⚠️ Warning: Folder '{kategori}' tidak cocok dengan YAML '{yaml_kategori}' di {poster_folder}")
 
-                                    # === BACA DATA UNTUK MANIFEST ===
+                                    # Masukkan data kategori ke kategori_map dengan proteksi duplikasi
+                                    kat_lower = yaml_kategori.lower()
+                                    if kat_lower in HIJRIAH_MAP:
+                                        display_kat = HIJRIAH_MAP[kat_lower]
+                                    else:
+                                        display_kat = yaml_kategori.title()
+                                    
+                                    # Normalisasi isi kategori di data agar konsisten
+                                    data['kategori'] = display_kat
+                                    kategori_map[kat_lower] = display_kat
+
                                     real_folder_name = os.path.basename(poster_path)
                                     real_kategori = os.path.basename(os.path.dirname(poster_path))
                                     data['path'] = f"{real_kategori.lower()}/{real_folder_name}"
                                     
-                                    # Hanya perbarui emoji jika di poster.md ada emoji baru yang valid (bukan '📂')
                                     new_emoji = data.get('kategori_emoji')
-                                    kat_key = yaml_kategori.lower()
-                                    kat_display = yaml_kategori
-                                    
                                     if new_emoji and new_emoji != '📂':
-                                        manifest_data['kategori_emoji'][kat_display] = new_emoji
-                                        manifest_data['kategori_emoji'][kat_key] = new_emoji
-                                    elif kat_display not in manifest_data['kategori_emoji'] and kat_key not in manifest_data['kategori_emoji']:
-                                        manifest_data['kategori_emoji'][kat_display] = '📂'
+                                        manifest_data['kategori_emoji'][display_kat] = new_emoji
                                     
                                     manifest_data['posters'].append(data)
                                     manifest_data['total_poster'] += 1
@@ -226,17 +212,23 @@ def scan_and_repair():
                         except Exception as e:
                             print(f"Gagal membaca {md_file_path}: {e}")
 
-    # === PENGURUTAN KATEGORI RESMI: HIJRIAH DIPERIKSA DAHULU, BARU NON-HIJRIAH ===
-    non_hijriah_keys = [k for k in kategori_map.keys() if kategori_map[k] not in HIJRIAH_MONTHS_SET]
-    sorted_non_hijriah = sorted([kategori_map[k] for k in non_hijriah_keys])
+    # === LOGIKA DEDUPLIKASI DAN PENGURUTAN KATEGORI ===
+    # 1. Ambil Kategori Bulan Hijriah yang memang ada di postingan
+    hijriah_terpakai = [m for m in HIJRIAH_ORDER if m.lower() in kategori_map]
     
-    manifest_data['kategori_list'] = HIJRIAH_ORDER + sorted_non_hijriah
+    # 2. Ambil Kategori Non-Hijriah (Unik) dan Urutkan secara alfabetis
+    non_hijriah = sorted(list(set(
+        v for k, v in kategori_map.items() if k not in HIJRIAH_MAP
+    )))
+
+    # Gabungkan tanpa ada elemen ganda
+    manifest_data['kategori_list'] = hijriah_terpakai + non_hijriah
 
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("Selesai! 'manifest.json' berhasil diperbarui tanpa menghapus emoji lama.")
-    print(f"Total Poster: {manifest_data['total_poster']}, Kategori: {manifest_data['kategori_list']}")
+    print("Selesai! Manifest diperbarui tanpa duplikasi kategori.")
+    print(f"Total Poster: {manifest_data['total_poster']}")
 
 if __name__ == "__main__":
     main()
