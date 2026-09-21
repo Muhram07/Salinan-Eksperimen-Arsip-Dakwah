@@ -124,7 +124,6 @@ def consolidate_folders():
         normalized_cat = normalize_category_name(folder_name)
         target_folder_name = re.sub(r'[^a-z0-9]+', '-', normalized_cat.lower()).strip('-')
 
-        # Jika nama folder fisik tidak sesuai standar (misal: 'ramadhan' != 'ramadhan-9')
         if folder_name != target_folder_name:
             target_folder_path = os.path.join(base_poster_path, target_folder_name)
             os.makedirs(target_folder_path, exist_ok=True)
@@ -136,7 +135,6 @@ def consolidate_folders():
                 if os.path.isdir(src_sub):
                     dst_sub = os.path.join(target_folder_path, subfolder)
 
-                    # Jika ada nama poster yang sama di folder target, perbarui penomorannya
                     if os.path.exists(dst_sub):
                         next_num = get_next_sequence(target_folder_path)
                         num_str = get_padded_number(next_num)
@@ -145,7 +143,6 @@ def consolidate_folders():
 
                     shutil.move(src_sub, dst_sub)
 
-                    # Perbarui atribut kategori di poster.md
                     md_path = os.path.join(dst_sub, 'poster.md')
                     if os.path.exists(md_path):
                         try:
@@ -162,7 +159,6 @@ def consolidate_folders():
                         except Exception as e:
                             print(f"Gagal memperbarui MD di {md_path}: {e}")
 
-            # Hapus folder lama setelah semua isinya dipindahkan
             if os.path.exists(folder_path) and not os.listdir(folder_path):
                 os.rmdir(folder_path)
 
@@ -239,7 +235,6 @@ def main():
     scan_and_repair()
 
 def scan_and_repair():
-    # Perbaiki dan gabungkan seluruh folder tidak teratur terlebih dahulu
     consolidate_folders()
 
     print("Memindai & memperbarui struktur kategori...")
@@ -256,10 +251,6 @@ def scan_and_repair():
             print(f"Gagal membaca manifest.json lama: {e}")
 
     updated_emoji_map = existing_emoji_map.copy()
-    
-    # Paksa emoji 🌙 untuk seluruh 12 Bulan Hijriah secara mutlak
-    for month in HIJRIAH_ORDER:
-        updated_emoji_map[month] = "🌙"
 
     categories_set = set(HIJRIAH_ORDER)
 
@@ -298,9 +289,9 @@ def scan_and_repair():
                                         data['kategori'] = display_kategori
                                         data['path'] = f"{real_kategori.lower()}/{real_folder_name}"
                                         
-                                        # Simpan emoji kustom dari poster.md HANYA untuk kategori umum (bukan bulan Hijriah)
                                         yaml_emoji = data.get('kategori_emoji')
                                         if yaml_emoji and yaml_emoji != '📂':
+                                            # Simpan emoji dari MD jika kategori tersebut BUKAN bulan Hijriah
                                             if display_kategori not in HIJRIAH_MONTHS_SET:
                                                 manifest_data['kategori_emoji'][display_kategori] = yaml_emoji
                                         
@@ -310,13 +301,17 @@ def scan_and_repair():
                             except Exception as e:
                                 print(f"Gagal membaca {md_file_path}: {e}")
 
+    # PAKSA SELURUH 12 BULAN HIJRIAH MENGGUNAKAN EMOJI 🌙 (KUNCI MUTLAK DI AKHIR)
+    for month in HIJRIAH_ORDER:
+        manifest_data['kategori_emoji'][month] = "🌙"
+
     other_categories = sorted([c for c in categories_set if c not in HIJRIAH_MONTHS_SET])
     manifest_data['kategori_list'] = HIJRIAH_ORDER + other_categories
 
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("Selesai! Seluruh 12 Bulan Hijriah dipaksa menggunakan emoji bulan 🌙 dan manifest.json diperbarui.")
+    print("Selesai! Emoji 🌙 berhasil dikunci mutlak untuk seluruh 12 Bulan Hijriah.")
 
 if __name__ == "__main__":
     main()
