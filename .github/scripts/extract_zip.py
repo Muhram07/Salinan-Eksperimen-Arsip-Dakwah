@@ -124,7 +124,7 @@ def consolidate_folders():
         normalized_cat = normalize_category_name(folder_name)
         target_folder_name = re.sub(r'[^a-z0-9]+', '-', normalized_cat.lower()).strip('-')
 
-        # Jika nama folder fisik tidak sesuai standar (misal: 'ramadhan' != 'ramadhan-9' atau 'syawal' != 'syawwal-10')
+        # Jika nama folder fisik tidak sesuai standar (misal: 'ramadhan' != 'ramadhan-9')
         if folder_name != target_folder_name:
             target_folder_path = os.path.join(base_poster_path, target_folder_name)
             os.makedirs(target_folder_path, exist_ok=True)
@@ -255,18 +255,20 @@ def scan_and_repair():
         except Exception as e:
             print(f"Gagal membaca manifest.json lama: {e}")
 
+    updated_emoji_map = existing_emoji_map.copy()
+    
+    # Paksa emoji 🌙 untuk seluruh 12 Bulan Hijriah secara mutlak
+    for month in HIJRIAH_ORDER:
+        updated_emoji_map[month] = "🌙"
+
     categories_set = set(HIJRIAH_ORDER)
 
     manifest_data = {
         "kategori_list": [],
-        "kategori_emoji": existing_emoji_map,
+        "kategori_emoji": updated_emoji_map,
         "total_poster": 0,
         "posters": []
     }
-    
-    for month in HIJRIAH_ORDER:
-        if month not in manifest_data['kategori_emoji']:
-            manifest_data['kategori_emoji'][month] = "🌙"
 
     base_poster_path = "posters"
     
@@ -296,9 +298,11 @@ def scan_and_repair():
                                         data['kategori'] = display_kategori
                                         data['path'] = f"{real_kategori.lower()}/{real_folder_name}"
                                         
-                                        new_emoji = data.get('kategori_emoji')
-                                        if new_emoji and new_emoji != '📂':
-                                            manifest_data['kategori_emoji'][display_kategori] = new_emoji
+                                        # Simpan emoji kustom dari poster.md HANYA untuk kategori umum (bukan bulan Hijriah)
+                                        yaml_emoji = data.get('kategori_emoji')
+                                        if yaml_emoji and yaml_emoji != '📂':
+                                            if display_kategori not in HIJRIAH_MONTHS_SET:
+                                                manifest_data['kategori_emoji'][display_kategori] = yaml_emoji
                                         
                                         manifest_data['posters'].append(data)
                                         manifest_data['total_poster'] += 1
@@ -312,7 +316,7 @@ def scan_and_repair():
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("Selesai! Seluruh folder fisik berhasil diselaraskan dan manifest.json telah diperbarui.")
+    print("Selesai! Seluruh 12 Bulan Hijriah dipaksa menggunakan emoji bulan 🌙 dan manifest.json diperbarui.")
 
 if __name__ == "__main__":
     main()
