@@ -144,12 +144,6 @@
 
         /* --- KEYFRAMES ANIMASI 4 TAHAP LOGO M --- */
 
-        /* 
-           Tahap 1 (0% - 20%): Atap Buku Terbuka (V Terbalik)
-           Tahap 2 (20% - 45%): Merekah Turun / Jatuh
-           Tahap 3 (45% - 75%): Mengunci ke Bentuk M Tegak
-           Tahap 4 (75% - 100%): Transisi Halus Kembali ke Atap Buku sambil Terus Berputar 3D
-        */
         @keyframes stageDiagLeft {
             0%, 20% {
                 opacity: 1;
@@ -467,6 +461,129 @@
         .modal-card .m-actions button:hover { background: #D4AF37; color: #111; }
         .modal-card .m-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 15px; }
         .modal-card .m-tag { background: transparent; color: #888; border: 1px solid #444; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+
+        /* --- STYLE POPUP MODAL FOLLOW GATE (ELEGAN & MEWAH) --- */
+        .follow-gate-card {
+            background: linear-gradient(145deg, #181818, #0e0e0e);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 24px;
+            max-width: 440px;
+            width: 100%;
+            padding: 28px 22px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(212, 175, 55, 0.15);
+            position: relative;
+            animation: gatePopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes gatePopIn {
+            0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .gate-icon-badge {
+            width: 60px;
+            height: 60px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid #D4AF37;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .gate-title {
+            color: #D4AF37;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .gate-msg {
+            color: #d1d5db;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .gate-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .gate-btn-follow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            border-radius: 30px;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #D4AF37;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .gate-btn-follow:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #D4AF37;
+            transform: translateY(-2px);
+        }
+
+        .gate-btn-follow.clicked {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: #4CAF50;
+            color: #81C784;
+        }
+
+        .gate-btn-follow .status-icon {
+            font-size: 16px;
+        }
+
+        .gate-quote {
+            font-style: italic;
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 22px;
+            line-height: 1.4;
+        }
+
+        .gate-btn-continue {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            border: none;
+            background: #333;
+            color: #777;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .gate-btn-continue.active {
+            background: linear-gradient(135deg, #D4AF37, #E6B800);
+            color: #111;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .gate-btn-continue.active:hover {
+            transform: scale(1.02);
+        }
     </style>
 </head>
 <body>
@@ -548,6 +665,32 @@
         </div>
     </div>
 
+    <!-- POPUP MODAL FOLLOW GATE (ELEGAN & MEWAH) -->
+    <div class="modal-overlay" id="followGateModal">
+        <div class="follow-gate-card">
+            <div class="gate-icon-badge">✨</div>
+            <div class="gate-title">Dukungan Dakwah</div>
+            <p class="gate-msg">Untuk meneruskan, silahkan follow dulu 2 akun dakwah kami berikut:</p>
+            
+            <div class="gate-buttons">
+                <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" id="gateBtn1" class="gate-btn-follow" onclick="trackGateFollow(1)">
+                    <span>➡️ @tauhidsunnah_id</span>
+                    <span class="status-icon" id="gateCheck1">🔗</span>
+                </a>
+                <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" id="gateBtn2" class="gate-btn-follow" onclick="trackGateFollow(2)">
+                    <span>➡️ @an.nashiha_daily</span>
+                    <span class="status-icon" id="gateCheck2">🔗</span>
+                </a>
+            </div>
+
+            <p class="gate-quote">"Semoga semua kontennya bermanfaat buat ummat..."</p>
+
+            <button id="gateContinueBtn" class="gate-btn-continue" disabled onclick="executePendingGateAction()">
+                🔒 Klik Kedua Akun Di Atas Untuk Lanjut
+            </button>
+        </div>
+    </div>
+
     <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()">🔠</button>
     <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()">🔇</button>
     <audio id="bgAudio" loop><source src="suara-ombak.mp3" type="audio/mpeg"></audio>
@@ -587,6 +730,52 @@
         let isSelecting = false;
         let emojiMapGlobal = {};
         let rawManifestPosters = [];
+
+        /* --- SISTEM FOLLOW GATE (PEMBATAS AKSES) --- */
+        let gateFollowed1 = false;
+        let gateFollowed2 = false;
+        let pendingGateAction = null;
+
+        function requireFollowGate(actionCallback) {
+            const hasUnlocked = localStorage.getItem('has_followed_dakwah_accounts');
+            if (hasUnlocked === 'true') {
+                actionCallback();
+            } else {
+                pendingGateAction = actionCallback;
+                document.getElementById('followGateModal').classList.add('active');
+            }
+        }
+
+        function trackGateFollow(accountNum) {
+            if (accountNum === 1) {
+                gateFollowed1 = true;
+                const btn1 = document.getElementById('gateBtn1');
+                btn1.classList.add('clicked');
+                document.getElementById('gateCheck1').innerText = "✓";
+            } else if (accountNum === 2) {
+                gateFollowed2 = true;
+                const btn2 = document.getElementById('gateBtn2');
+                btn2.classList.add('clicked');
+                document.getElementById('gateCheck2').innerText = "✓";
+            }
+
+            if (gateFollowed1 && gateFollowed2) {
+                const continueBtn = document.getElementById('gateContinueBtn');
+                continueBtn.disabled = false;
+                continueBtn.classList.add('active');
+                continueBtn.innerHTML = "🔓 Lanjutkan Ambil Konten";
+            }
+        }
+
+        function executePendingGateAction() {
+            localStorage.setItem('has_followed_dakwah_accounts', 'true');
+            document.getElementById('followGateModal').classList.remove('active');
+            
+            if (pendingGateAction) {
+                pendingGateAction();
+                pendingGateAction = null;
+            }
+        }
 
         function getFavorit() {
             const data = localStorage.getItem('dakwahFavorit');
@@ -667,8 +856,10 @@
         }
 
         function downloadFile(url, nama) {
-            const a = document.createElement('a'); a.href = url; a.download = nama || 'file';
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            requireFollowGate(function() {
+                const a = document.createElement('a'); a.href = url; a.download = nama || 'file';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            });
         }
 
         function cleanCopyText(text) {
@@ -681,18 +872,20 @@
         }
 
         function copyCaptionDariElemen(btn) {
-            const poster = btn.closest('.poster') || btn.closest('.modal-card');
-            const judul = poster.querySelector('h3')?.innerText || '';
-            const subElement = poster.querySelector('.sub-caption');
-            let sub = subElement ? (subElement.dataset.raw || subElement.innerText) : '';
-            
-            const contentWrapper = poster.querySelector('.poster-content-wrapper') || poster.querySelector('.m-content');
-            const isi = contentWrapper ? contentWrapper.innerText : '';
-            
-            const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
-            const konten = parts.join('\n\n');
-            
-            navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
+            requireFollowGate(function() {
+                const poster = btn.closest('.poster') || btn.closest('.modal-card');
+                const judul = poster.querySelector('h3')?.innerText || '';
+                const subElement = poster.querySelector('.sub-caption');
+                let sub = subElement ? (subElement.dataset.raw || subElement.innerText) : '';
+                
+                const contentWrapper = poster.querySelector('.poster-content-wrapper') || poster.querySelector('.m-content');
+                const isi = contentWrapper ? contentWrapper.innerText : '';
+                
+                const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
+                const konten = parts.join('\n\n');
+                
+                navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
+            });
         }
 
         async function loadPosters() {
@@ -887,23 +1080,27 @@
         }
 
         async function downloadMultiImage(id, folder, imagesStr) {
-            const imageList = imagesStr.split(',').map(s => s.trim());
-            if (imageList.length === 0) return;
-            const choice = prompt(`Pilih slide yang ingin didownload (pisahkan dengan koma), atau ketik "all" untuk semua.\nTersedia: 1 - ${imageList.length}`);
-            if (!choice) return;
-            if (choice.toLowerCase() === 'all') {
-                for (let i = 0; i < imageList.length; i++) {
-                    downloadFile(`${folder}/${imageList[i]}`, `${id}-${i+1}.jpg`);
+            requireFollowGate(function() {
+                const imageList = imagesStr.split(',').map(s => s.trim());
+                if (imageList.length === 0) return;
+                const choice = prompt(`Pilih slide yang ingin didownload (pisahkan dengan koma), atau ketik "all" untuk semua.\nTersedia: 1 - ${imageList.length}`);
+                if (!choice) return;
+                if (choice.toLowerCase() === 'all') {
+                    for (let i = 0; i < imageList.length; i++) {
+                        const a = document.createElement('a'); a.href = `${folder}/${imageList[i]}`; a.download = `${id}-${i+1}.jpg`;
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    }
+                    alert(`✅ Semua ${imageList.length} gambar sedang didownload.`);
+                } else {
+                    const selected = choice.split(',').map(n => parseInt(n.trim()) - 1).filter(n => n >= 0 && n < imageList.length);
+                    if (selected.length === 0) return alert("Tidak ada slide yang valid.");
+                    for (let i of selected) {
+                        const a = document.createElement('a'); a.href = `${folder}/${imageList[i]}`; a.download = `${id}-${i+1}.jpg`;
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    }
+                    alert(`✅ ${selected.length} gambar sedang didownload.`);
                 }
-                alert(`✅ Semua ${imageList.length} gambar sedang didownload.`);
-            } else {
-                const selected = choice.split(',').map(n => parseInt(n.trim()) - 1).filter(n => n >= 0 && n < imageList.length);
-                if (selected.length === 0) return alert("Tidak ada slide yang valid.");
-                for (let i of selected) {
-                    downloadFile(`${folder}/${imageList[i]}`, `${id}-${i+1}.jpg`);
-                }
-                alert(`✅ ${selected.length} gambar sedang didownload.`);
-            }
+            });
         }
 
         function toggleReadMore(id) {
