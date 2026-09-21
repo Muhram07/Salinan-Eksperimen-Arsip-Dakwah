@@ -7,7 +7,7 @@ import sys
 import json
 
 # ==========================================
-# PEMETAAN NAMA KATEGORI OTOMATIS (12 BULAN HIJRIAH)
+# PEMETAAN NAMA KATEGORI OTOMATIS (12 BULAN HIJRIAH & KATEGORI UMUM)
 # ==========================================
 CATEGORY_MAP = {
     # 1. Muharram
@@ -67,7 +67,6 @@ CATEGORY_MAP = {
     "dzulhijjah (12)": "Dzulhijjah (12)",
 }
 
-# Daftar Urutan Resmi 12 Bulan Hijriah
 HIJRIAH_ORDER = [
     "Muharram (1)",
     "Safar (2)",
@@ -110,6 +109,62 @@ def normalize_category_name(kat_str):
         return "Unknown"
     clean_key = kat_str.strip().lower()
     return CATEGORY_MAP.get(clean_key, kat_str.strip())
+
+def consolidate_folders():
+    """Memindahkan isi seluruh folder fisik lama/tidak standar ke folder resmi standar"""
+    base_poster_path = "posters"
+    if not os.path.exists(base_poster_path):
+        return
+
+    for folder_name in os.listdir(base_poster_path):
+        folder_path = os.path.join(base_poster_path, folder_name)
+        if not os.path.isdir(folder_path):
+            continue
+
+        normalized_cat = normalize_category_name(folder_name)
+        target_folder_name = re.sub(r'[^a-z0-9]+', '-', normalized_cat.lower()).strip('-')
+
+        # Jika nama folder fisik tidak sesuai standar (misal: 'ramadhan' != 'ramadhan-9' atau 'syawal' != 'syawwal-10')
+        if folder_name != target_folder_name:
+            target_folder_path = os.path.join(base_poster_path, target_folder_name)
+            os.makedirs(target_folder_path, exist_ok=True)
+
+            print(f"Mengonsolidasi folder: {folder_path} -> {target_folder_path}")
+
+            for subfolder in os.listdir(folder_path):
+                src_sub = os.path.join(folder_path, subfolder)
+                if os.path.isdir(src_sub):
+                    dst_sub = os.path.join(target_folder_path, subfolder)
+
+                    # Jika ada nama poster yang sama di folder target, perbarui penomorannya
+                    if os.path.exists(dst_sub):
+                        next_num = get_next_sequence(target_folder_path)
+                        num_str = get_padded_number(next_num)
+                        slug_base = re.sub(r'-\d+$', '', subfolder)
+                        dst_sub = os.path.join(target_folder_path, f"{slug_base}-{num_str}")
+
+                    shutil.move(src_sub, dst_sub)
+
+                    # Perbarui atribut kategori di poster.md
+                    md_path = os.path.join(dst_sub, 'poster.md')
+                    if os.path.exists(md_path):
+                        try:
+                            with open(md_path, 'r', encoding='utf-8') as f:
+                                content = f.read()
+                            yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
+                            if yaml_match:
+                                data = yaml.safe_load(yaml_match.group(1))
+                                data['kategori'] = normalized_cat
+                                new_yaml = yaml.dump(data, allow_unicode=True, sort_keys=False)
+                                new_content = f"---\n{new_yaml}---" + content[yaml_match.end():]
+                                with open(md_path, 'w', encoding='utf-8') as f:
+                                    f.write(new_content)
+                        except Exception as e:
+                            print(f"Gagal memperbarui MD di {md_path}: {e}")
+
+            # Hapus folder lama setelah semua isinya dipindahkan
+            if os.path.exists(folder_path) and not os.listdir(folder_path):
+                os.rmdir(folder_path)
 
 def main():
     zip_dir = '_uploads'
@@ -184,6 +239,9 @@ def main():
     scan_and_repair()
 
 def scan_and_repair():
+    # Perbaiki dan gabungkan seluruh folder tidak teratur terlebih dahulu
+    consolidate_folders()
+
     print("Memindai & memperbarui struktur kategori...")
     
     manifest_path = "manifest.json"
@@ -197,7 +255,6 @@ def scan_and_repair():
         except Exception as e:
             print(f"Gagal membaca manifest.json lama: {e}")
 
-    # Inisialisasi daftar kategori wajib dengan seluruh 12 Bulan Hijriah
     categories_set = set(HIJRIAH_ORDER)
 
     manifest_data = {
@@ -207,7 +264,6 @@ def scan_and_repair():
         "posters": []
     }
     
-    # Daftarkan emoji bawaan untuk bulan Hijriah jika belum terdaftar
     for month in HIJRIAH_ORDER:
         if month not in manifest_data['kategori_emoji']:
             manifest_data['kategori_emoji'][month] = "🌙"
@@ -230,30 +286,10 @@ def scan_and_repair():
                                     if yaml_match:
                                         data = yaml.safe_load(yaml_match.group(1))
                                         raw_kategori = data.get('kategori', kategori)
-                                        yaml_slug = data.get('judul', poster_folder)
-                                        slug = re.sub(r'[^a-z0-9]+', '-', yaml_slug.lower()).strip('-')
                                         
                                         display_kategori = normalize_category_name(raw_kategori)
                                         categories_set.add(display_kategori)
                                         
-                                        # Self-Healing folder "unknown"
-                                        if kategori.lower() == 'unknown' and raw_kategori.lower() != 'unknown':
-                                            target_kat_folder = re.sub(r'[^a-z0-9]+', '-', display_kategori.lower()).strip('-')
-                                            kategori_baru_path = os.path.join('posters', target_kat_folder)
-                                            next_num = get_next_sequence(kategori_baru_path) 
-                                            num_str = get_padded_number(next_num)
-                                            final_slug = f"{slug}-{num_str}"
-                                            
-                                            target_folder = os.path.join('posters', target_kat_folder, final_slug)
-                                            if os.path.exists(target_folder):
-                                                shutil.rmtree(target_folder)
-                                                
-                                            shutil.move(poster_path, target_folder)
-                                            if not os.listdir(kategori_path):
-                                                os.rmdir(kategori_path)
-                                                
-                                            poster_path = target_folder
-
                                         real_folder_name = os.path.basename(poster_path)
                                         real_kategori = os.path.basename(os.path.dirname(poster_path))
                                         
@@ -270,14 +306,13 @@ def scan_and_repair():
                             except Exception as e:
                                 print(f"Gagal membaca {md_file_path}: {e}")
 
-    # Pengurutan kategori: Bulan Hijriah berdasarkan urutan (1-12), dilanjutkan kategori umum lainnya
     other_categories = sorted([c for c in categories_set if c not in HIJRIAH_MONTHS_SET])
     manifest_data['kategori_list'] = HIJRIAH_ORDER + other_categories
 
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("Selesai! Seluruh 12 Bulan Hijriah serta kategori umum lainnya berhasil didaftarkan ke manifest.json.")
+    print("Selesai! Seluruh folder fisik berhasil diselaraskan dan manifest.json telah diperbarui.")
 
 if __name__ == "__main__":
     main()
