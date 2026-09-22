@@ -367,7 +367,6 @@
 
         function resetCollaboratorText() {
             const captionTextarea = document.getElementById('inpCaption');
-            // Titik diujung kata default resmi dihapus
             captionTextarea.value = "Collab Dakwah Sunnah :";
             renderCollabChips();
         }
@@ -395,7 +394,6 @@
             const captionTextarea = document.getElementById('inpCaption');
             let lines = captionTextarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-            // Tanpa titik
             let headerLines = ["Collab Dakwah Sunnah :"];
             let currentUsers = lines.filter(l => l.startsWith('@'));
 
@@ -502,9 +500,9 @@
                     "Dzulhijjah (12)"
                 ];
 
-                // Kategori umum lainnya
+                // Master kategori umum dengan ejaan baku "Akidah" (disesuaikan dengan folder GitHub)
                 const masterKategoriUmum = [
-                    "Tauhid", "Sunnah", "Aqidah", "Fikih", "Hadits", "Tafsir", "Akhlak", "Bid'ah", "Syirik"
+                    "Tauhid", "Sunnah", "Akidah", "Fikih", "Hadits", "Tafsir", "Akhlak", "Bid'ah", "Syirik"
                 ];
 
                 let categoriesFromManifest = [];
@@ -520,10 +518,9 @@
                     }
                 } catch (e) { /* Ignore error */ }
 
-                // Gabungkan 12 bulan berurutan + kategori umum + daftar dari manifest.json tanpa duplikat
+                // Gabungkan seluruh kategori tanpa duplikasi
                 const combinedList = Array.from(new Set([...masterBulanHijriah, ...masterKategoriUmum, ...categoriesFromManifest]));
 
-                // Tampilkan seluruh rekomendasi di datalist
                 datalist.innerHTML = combinedList.map(k => `<option value="${k}">`).join('');
             }
 
