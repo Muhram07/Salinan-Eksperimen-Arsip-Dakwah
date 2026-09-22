@@ -485,20 +485,46 @@
 
             async function loadKategoriList() {
                 const datalist = document.getElementById('kategori-list');
+                
+                // Master list 12 Bulan Hijriah berurutan lengkap (W double, Awwal & Akhir)
+                const masterBulanHijriah = [
+                    "Muharram (1)",
+                    "Safar (2)",
+                    "Rabi'ul Awwal (3)",
+                    "Rabi'ul Akhir (4)",
+                    "Jumadil Awwal (5)",
+                    "Jumadil Akhir (6)",
+                    "Rajab (7)",
+                    "Sya'ban (8)",
+                    "Ramadhan (9)",
+                    "Syawwal (10)",
+                    "Dzulqa'dah (11)",
+                    "Dzulhijjah (12)"
+                ];
+
+                // Kategori umum lainnya
+                const masterKategoriUmum = [
+                    "Tauhid", "Sunnah", "Aqidah", "Fikih", "Hadits", "Tafsir", "Akhlak", "Bid'ah", "Syirik"
+                ];
+
+                let categoriesFromManifest = [];
+
                 try {
                     const res = await fetch('/manifest.json');
                     if (res.ok) {
                         const data = await res.json();
                         cachedKategoriEmojis = data.kategori_emoji || {};
                         if(data.kategori_list && data.kategori_list.length > 0) {
-                            datalist.innerHTML = data.kategori_list.map(k => `<option value="${k}">`).join('');
-                            return;
+                            categoriesFromManifest = data.kategori_list;
                         }
                     }
-                } catch (e) { /* Fallback */ }
-                
-                const fallback = ["Tauhid", "Sunnah", "Bid'ah", "Syirik", "Aqidah", "Fikih", "Hadits", "Tafsir", "Akhlak"];
-                datalist.innerHTML = fallback.map(k => `<option value="${k}">`).join('');
+                } catch (e) { /* Ignore error */ }
+
+                // Gabungkan 12 bulan berurutan + kategori umum + daftar dari manifest.json tanpa duplikat
+                const combinedList = Array.from(new Set([...masterBulanHijriah, ...masterKategoriUmum, ...categoriesFromManifest]));
+
+                // Tampilkan seluruh rekomendasi di datalist
+                datalist.innerHTML = combinedList.map(k => `<option value="${k}">`).join('');
             }
 
             let cachedKategoriEmojis = {};
