@@ -22,26 +22,34 @@ HIJRIAH_ORDER = [
     "Dzulhijjah (12)"
 ]
 
-# Mapping fleksibel untuk mencocokkan berbagai variasi penulisan ke ejaan baku
 HIJRIAH_NORMALIZE_MAP = {}
 for m in HIJRIAH_ORDER:
-    # Ambil angka di dalam kurung
     num_match = re.search(r'\((\d+)\)', m)
     num = num_match.group(1) if num_match else ""
-    # Variasi nama dasar tanpa nomor
     base_name = re.sub(r'\s*\(\d+\)', '', m).strip().lower()
     
-    # Variasi kata kunci yang sering diketik salah/berbeda
     HIJRIAH_NORMALIZE_MAP[m.lower()] = m
     HIJRIAH_NORMALIZE_MAP[base_name] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_name}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_name} {num}"] = m
     
-    # Variasi ejaan lama/satu huruf 'w'
     base_single_w = base_name.replace('awwal', 'awal').replace('syawwal', 'syawal')
     HIJRIAH_NORMALIZE_MAP[base_single_w] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w} {num}"] = m
+
+# Pemetaan sinonim kategori agar tidak ada folder ganda (misal: Aqidah vs Akidah)
+KATEGORI_REPLACE_MAP = {
+    "aqidah": "Akidah",
+    "akidah": "Akidah",
+    "fiqih": "Fikih",
+    "fikih": "Fikih",
+    "shalat": "Sholat",
+    "sholat": "Sholat",
+    "hadits": "Hadits",
+    "dzikir": "Dzikir",
+    "zikir": "Dzikir",
+}
 
 def get_canonical_kategori(kat_str):
     if not kat_str:
@@ -49,11 +57,12 @@ def get_canonical_kategori(kat_str):
     clean_str = kat_str.strip().lower()
     if clean_str in HIJRIAH_NORMALIZE_MAP:
         return HIJRIAH_NORMALIZE_MAP[clean_str]
+    if clean_str in KATEGORI_REPLACE_MAP:
+        return KATEGORI_REPLACE_MAP[clean_str]
     return kat_str.strip().title()
 
 def get_folder_slug(kat_str):
     canonical = get_canonical_kategori(kat_str)
-    # Membuat slug folder yang aman & konsisten, cth: "syawwal-(10)" atau "rumah-tangga"
     slug = canonical.lower()
     slug = re.sub(r'\s+', '-', slug)
     slug = re.sub(r'[^a-z0-9\-\(\)]+', '', slug)
@@ -65,7 +74,6 @@ def get_padded_number(num):
 def get_next_sequence(kategori_path):
     if not os.path.exists(kategori_path):
         return 1
-    
     max_num = 0
     for folder in os.listdir(kategori_path):
         if os.path.isdir(os.path.join(kategori_path, folder)):
@@ -88,7 +96,6 @@ def main():
         sys.exit(1)
 
     zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
-    
     if not zip_files:
         print("Tidak ada file ZIP ditemukan di _uploads. Melanjutkan ke pemindaian & perbaikan folder...")
         scan_and_repair()
@@ -107,7 +114,6 @@ def main():
             continue
 
         target_folder = None
-
         md_path = os.path.join(temp_dir, 'poster.md')
         if os.path.exists(md_path):
             with open(md_path, 'r', encoding='utf-8') as f:
@@ -133,7 +139,6 @@ def main():
                         
                         target_folder = os.path.join('posters', kat_folder_slug, final_slug)
                         print(f"Target folder ditemukan: {target_folder}")
-
                     except Exception as e:
                         print(f"Gagal parsing YAML di poster.md: {e}")
                 
@@ -143,7 +148,6 @@ def main():
             print(f"Menggunakan fallback folder: {target_folder}")
 
         os.makedirs(target_folder, exist_ok=True)
-        
         for root, dirs, files in os.walk(temp_dir):
             for file in files:
                 src_path = os.path.join(root, file)
@@ -158,7 +162,6 @@ def main():
 
 def scan_and_repair():
     print("Memindai & memperbaiki struktur folder posters (Auto-Merge & Self-Healing)...")
-    
     manifest_path = "manifest.json"
     existing_emoji_map = {}
 
@@ -170,7 +173,6 @@ def scan_and_repair():
         except Exception as e:
             print(f"Gagal membaca manifest.json lama: {e}")
 
-    # Set default emoji 🌙 untuk bulan Hijriah jika belum ada
     for month in HIJRIAH_ORDER:
         if month not in existing_emoji_map:
             existing_emoji_map[month] = "🌙"
@@ -189,7 +191,6 @@ def scan_and_repair():
         print("Folder posters belum ada.")
         return
 
-    # === TAHAP 1: AUTO-MERGE FOLDER KATEGORI GANDA ===
     for kat_folder in os.listdir(base_poster_path):
         kat_folder_path = os.path.join(base_poster_path, kat_folder)
         if os.path.isdir(kat_folder_path):
@@ -197,7 +198,6 @@ def scan_and_repair():
             target_kat_folder = get_folder_slug(canonical_kat)
             target_kat_path = os.path.join(base_poster_path, target_kat_folder)
 
-            # Jika folder saat ini beda penamaan dengan folder baku (misal 'syawwal-10' vs 'syawwal-(10)')
             if kat_folder != target_kat_folder:
                 os.makedirs(target_kat_path, exist_ok=True)
                 print(f"🔀 Merging Folder Kategori: {kat_folder} -> {target_kat_folder}")
@@ -207,18 +207,15 @@ def scan_and_repair():
                     if not os.path.exists(dst_sub):
                         shutil.move(src_sub, dst_sub)
                     else:
-                        # Jika folder poster juga sudah ada, gabungkan isinya
                         if os.path.isdir(src_sub):
                             for f_in in os.listdir(src_sub):
                                 shutil.move(os.path.join(src_sub, f_in), os.path.join(dst_sub, f_in))
                             shutil.rmtree(src_sub)
                 shutil.rmtree(kat_folder_path)
 
-    # === TAHAP 2: PEMINDAIAN DATA DAN PEMBAHARUAN MANIFEST ===
     for kat_folder in os.listdir(base_poster_path):
         kat_folder_path = os.path.join(base_poster_path, kat_folder)
         if os.path.isdir(kat_folder_path):
-
             for poster_folder in os.listdir(kat_folder_path):
                 poster_path = os.path.join(kat_folder_path, poster_folder)
                 if os.path.isdir(poster_path):
@@ -233,7 +230,6 @@ def scan_and_repair():
                                     raw_kategori = data.get('kategori', kat_folder)
                                     display_kat = get_canonical_kategori(raw_kategori)
                                     
-                                    # Update data kategori di dalam poster
                                     data['kategori'] = display_kat
                                     kategori_terpakai_set.add(display_kat)
 
@@ -247,11 +243,9 @@ def scan_and_repair():
                                     
                                     manifest_data['posters'].append(data)
                                     manifest_data['total_poster'] += 1
-
                         except Exception as e:
                             print(f"Gagal membaca {md_file_path}: {e}")
 
-    # === TAHAP 3: URUTKAN KATEGORI MANIFEST ===
     hijriah_terpakai = [m for m in HIJRIAH_ORDER if m in kategori_terpakai_set]
     non_hijriah = sorted(list(kategori_terpakai_set - set(HIJRIAH_ORDER)))
 
