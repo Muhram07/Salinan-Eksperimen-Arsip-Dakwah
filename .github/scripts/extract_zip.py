@@ -38,7 +38,7 @@ for m in HIJRIAH_ORDER:
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w} {num}"] = m
 
-# KAMUS TAMPILAN RESMI (PUBLIK & ADMIN MENGGUNAKAN INI)
+# KAMUS STANDarisasI KATEGORI BAKU (DENGAN PETIK UNTUK TAMPILAN YAML)
 DISPLAY_KATEGORI_MAP = {
     "aqidah": "Akidah",
     "akidah": "Akidah",
@@ -66,7 +66,7 @@ def get_canonical_kategori(kat_str):
 
 def get_folder_slug(kat_str):
     """
-    BELAKANG LAYAR: MENGHASILKAN SLUG BERSIH TANPA PETIK ATAU SPASI UNTUK FOLDER FISIK.
+    BELAKANG LAYAR: MENGHASILKAN FOLDER SLUG BERSIH TANPA PETIK ATAU SPASI.
     (Contoh: "Bid'ah" -> "bidah", "Rabi'ul Akhir (4)" -> "rabiul-akhir-4")
     """
     canonical = get_canonical_kategori(kat_str)
@@ -158,10 +158,11 @@ def main():
             os.remove(zip_file_path)
             print("ZIP berhasil diekstrak dan dipindahkan.")
 
+    # REKONSTRUKSI MENYELURUH (BERSIHKAN FOLDER SLUG & TIMPA ULANG YAML POSTER.MD)
     scan_and_reconstruct_posters()
 
 def scan_and_reconstruct_posters():
-    print("Memindai & merekonstruksi struktur folder bersih & manifest...")
+    print("Memindai & merekonstruksi seluruh folder dan memperbaiki file poster.md...")
     manifest_path = "manifest.json"
     existing_emoji_map = {}
 
@@ -217,6 +218,7 @@ def scan_and_reconstruct_posters():
                 raw_kategori = data.get('kategori', 'Umum')
                 canonical_kat = get_canonical_kategori(raw_kategori)
                 
+                # PERBAIKI SECARA PAKSA KATEGORI DI DALAM FILE YAML MENJADI BAKU
                 data['kategori'] = canonical_kat
                 kategori_terpakai_set.add(canonical_kat)
 
@@ -224,13 +226,14 @@ def scan_and_reconstruct_posters():
                 if new_emoji and new_emoji != '📂':
                     manifest_data['kategori_emoji'][canonical_kat] = new_emoji
 
+                # Tulis ulang file poster.md dengan YAML yang sudah diperbaiki
                 new_yaml_content = yaml.dump(data, allow_unicode=True, sort_keys=False)
                 new_full_content = f"---\n{new_yaml_content}---\n" + content[yaml_match.end():]
                 
                 with open(md_file_path, 'w', encoding='utf-8') as f:
                     f.write(new_full_content)
 
-                # FOLDER FISIK DIJAMIN BERSIH TANPA PETIK ATAU SPASI (SLUG)
+                # PINDAHKAN KE FOLDER SLUG FISIK YANG BERSIH TANPA PETIK/SPASI
                 target_kat_slug = get_folder_slug(canonical_kat)
                 target_kat_path = os.path.join(base_poster_path, target_kat_slug)
                 os.makedirs(target_kat_path, exist_ok=True)
@@ -252,6 +255,7 @@ def scan_and_reconstruct_posters():
                         shutil.rmtree(poster_path)
                         correct_poster_dir = new_destination
 
+                # Perbarui path relatif di manifest
                 real_folder_name = os.path.basename(correct_poster_dir)
                 real_kategori_folder = os.path.basename(os.path.dirname(correct_poster_dir))
                 data['path'] = f"{real_kategori_folder}/{real_folder_name}"
@@ -262,6 +266,7 @@ def scan_and_reconstruct_posters():
         except Exception as e:
             print(f"Gagal merekonstruksi {md_file_path}: {e}")
 
+    # Bersihkan folder kategori lama yang kosong atau salah format
     for kat_folder in os.listdir(base_poster_path):
         kat_folder_path = os.path.join(base_poster_path, kat_folder)
         if os.path.isdir(kat_folder_path) and not os.listdir(kat_folder_path):
@@ -275,7 +280,7 @@ def scan_and_reconstruct_posters():
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print(f"✅ Rekonstruksi Selesai! Total Poster Aktif: {manifest_data['total_poster']}")
+    print(f"✅ Rekonstruksi Total Selesai! Total Poster Aktif: {manifest_data['total_poster']}")
 
 if __name__ == "__main__":
     main()
