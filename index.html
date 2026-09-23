@@ -625,26 +625,17 @@
         let emojiMapGlobal = {};
         let rawManifestPosters = [];
 
-        // KAMUS FORMAT TAMPILAN PUBLIK (OTOMATIS MEMBUAT KATA KUNCI MENJADI BERPETIK/CANTIK)
-        function formatDisplayCategory(str) {
+        // TANPA PETIK SAMA SEKALI - BERSIH TOTAL UNTUK PENCARIAN & KLIK
+        function cleanCategoryName(str) {
             if (!str) return "Umum";
-            const lower = str.toLowerCase().trim();
-            if (lower === "bidah" || lower === "bid'ah" || lower === "bid’ah") return "Bid'ah";
-            if (lower.includes("rabi") && lower.includes("akhir") && lower.includes("4")) return "Rabi'ul Akhir (4)";
-            if (lower.includes("rabi") && lower.includes("awwal") && lower.includes("3")) return "Rabi'ul Awwal (3)";
-            if (lower === "akidah" || lower === "aqidah") return "Akidah";
-            if (lower === "fikih" || lower === "fiqih") return "Fikih";
-            if (lower === "sholat" || lower === "shalat") return "Sholat";
-            if (lower === "dzikir" || lower === "zikir") return "Dzikir";
-            return str.trim();
+            return str.replace(/['"’‘]/g, "").trim();
         }
 
         function normalizeCategory(str) {
             if (!str) return "";
             return str.toLowerCase()
-                      .replace(/[’‘]/g, "'")
-                      .replace(/['"()]/g, "")
-                      .replace(/\s+/g, " ")
+                      .replace(/['"’‘()]/g, "")
+                      .replace(/\s+/g, "")
                       .trim();
         }
 
@@ -841,12 +832,12 @@
 
                 rawManifestPosters.forEach(p => {
                     const rawK = p.kategori || "Umum";
-                    const prettyK = formatDisplayCategory(rawK); // Otomatis berpetik cantik untuk publik
-                    p.kategori = prettyK;
+                    const cleanK = cleanCategoryName(rawK); // TANPA PETIK
+                    p.kategori = cleanK;
 
-                    if(!kategoriData[prettyK]) kategoriData[prettyK] = 0;
-                    kategoriData[prettyK]++;
-                    semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: prettyK, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content : '') });
+                    if(!kategoriData[cleanK]) kategoriData[cleanK] = 0;
+                    kategoriData[cleanK]++;
+                    semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: cleanK, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content : '') });
                 });
 
                 for (let p of rawManifestPosters) {
@@ -964,21 +955,20 @@
                 </div>`;
 
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
-                let prettyNama = formatDisplayCategory(nama); // TAMPILKAN DENGAN PETIK KE PUBLIK
-                let icon = emojiMapGlobal[normalizeCategory(prettyNama)] || emojiMapGlobal[prettyNama] || '📂';
-                let safeNama = JSON.stringify(prettyNama);
+                let icon = emojiMapGlobal[normalizeCategory(nama)] || emojiMapGlobal[nama] || '📂';
+                let safeNama = JSON.stringify(nama);
                 
                 htmlKategoriOri += `
                     <div class="card-kategori" onclick='filterKategori(${safeNama}, this)'>
                         <span class="icon">${icon}</span>
-                        <span class="nama">${prettyNama}</span>
+                        <span class="nama">${nama}</span>
                         <span class="jumlah">${jumlah} Poster</span>
                     </div>
                 `;
                 htmlKategoriCompact += `
                     <div class="card-kategori" onclick='filterKategori(${safeNama}, this)'>
                         <span class="icon">${icon}</span>
-                        <span class="nama">${prettyNama}</span>
+                        <span class="nama">${nama}</span>
                         <span class="jumlah">${jumlah}</span>
                     </div>
                 `;
