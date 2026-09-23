@@ -38,10 +38,12 @@ for m in HIJRIAH_ORDER:
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w} {num}"] = m
 
-# Pemetaan sinonim kategori agar tidak ada folder ganda (misal: Aqidah vs Akidah)
+# Pemetaan sinonim kategori agar tidak ada folder ganda (diselaraskan dengan standar baku)
 KATEGORI_REPLACE_MAP = {
     "aqidah": "Akidah",
     "akidah": "Akidah",
+    "bidah": "Bid'ah",
+    "bid'ah": "Bid'ah",
     "fiqih": "Fikih",
     "fikih": "Fikih",
     "shalat": "Sholat",
