@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Setiap orang yang berpuasa amalannya sama, Menahan diri dari pembatal puasa dari subuh sampai magrib
 
 Bedanya adalah :

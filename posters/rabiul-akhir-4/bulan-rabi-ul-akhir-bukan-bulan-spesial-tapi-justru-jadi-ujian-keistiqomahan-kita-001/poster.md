@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Rabi'ul Akhir tidak punya keutamaan khusus seperti Ramadhan,(bulan puasa), Dzulhijjah (bulan haji), dll.
 
 .

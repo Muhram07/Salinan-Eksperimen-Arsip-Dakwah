@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Ketika ada musibah Kematian, seharusnya kita lah yang membuatkan/memasakkan makanan untuk keluarga mayit.
 
 Bukannya justru merepotkan mereka dengan makan-makan enak dirumahnya dan pulang bawa kantong besek.

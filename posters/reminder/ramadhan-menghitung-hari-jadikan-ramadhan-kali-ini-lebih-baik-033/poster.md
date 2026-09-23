@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 RAMADHAN MENGHITUNG HARI
 
 Sudah cukup Ramadhan sebelumnya yang berlalu begitu saja, kurang maksimal ibadahnya, lebih banyak lalai daripada taat, Lebih banyak malasnya dan ngabuburitnya

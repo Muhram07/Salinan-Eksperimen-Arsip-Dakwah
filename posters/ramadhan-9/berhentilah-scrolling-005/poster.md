@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 BERHENTILAH SCROLLING
 
 Jika selama ini umurmu habis hanya untuk men-scroll tanpa makna, buang waktu sia-sia, quota habis, tapi yang didapat kadang hanya dosa

@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 ATURAN KETIKA WANITA MUSLIMAH MEMAKAI JAKET
 
 1. Jangan memakai jaket yang sempit dan pakailah jaket didalam jilbab/khimar, agar bentuk tubuh tidak terlihat

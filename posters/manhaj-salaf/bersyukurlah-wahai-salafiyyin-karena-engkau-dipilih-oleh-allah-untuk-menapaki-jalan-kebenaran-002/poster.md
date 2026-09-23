@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 Bersyukurlah Wahai Salafiyyin, Karena Engkau Dipilih oleh Allah Untuk Menapaki Jalan Kebenaran.....
 
 .
