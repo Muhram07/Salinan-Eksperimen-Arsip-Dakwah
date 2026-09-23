@@ -6,7 +6,6 @@ import re
 import sys
 import json
 
-# === DAFTAR URUTAN RESMI 12 BULAN HIJRIAH ===
 HIJRIAH_ORDER = [
     "Muharram (1)",
     "Safar (2)",
@@ -38,12 +37,12 @@ for m in HIJRIAH_ORDER:
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w} {num}"] = m
 
-# Pemetaan sinonim kategori agar tidak ada folder ganda (diselaraskan dengan standar baku)
 KATEGORI_REPLACE_MAP = {
     "aqidah": "Akidah",
     "akidah": "Akidah",
     "bidah": "Bid'ah",
     "bid'ah": "Bid'ah",
+    "bid’ah": "Bid'ah",
     "fiqih": "Fikih",
     "fikih": "Fikih",
     "shalat": "Sholat",
@@ -56,7 +55,7 @@ KATEGORI_REPLACE_MAP = {
 def get_canonical_kategori(kat_str):
     if not kat_str:
         return "Umum"
-    clean_str = kat_str.strip().lower()
+    clean_str = kat_str.strip().lower().replace("’", "'").replace("‘", "'")
     if clean_str in HIJRIAH_NORMALIZE_MAP:
         return HIJRIAH_NORMALIZE_MAP[clean_str]
     if clean_str in KATEGORI_REPLACE_MAP:
@@ -65,7 +64,7 @@ def get_canonical_kategori(kat_str):
 
 def get_folder_slug(kat_str):
     canonical = get_canonical_kategori(kat_str)
-    slug = canonical.lower()
+    slug = canonical.lower().replace("’", "").replace("'", "")
     slug = re.sub(r'\s+', '-', slug)
     slug = re.sub(r'[^a-z0-9\-\(\)]+', '', slug)
     return slug
@@ -112,7 +111,7 @@ def main():
             with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
         except Exception as e:
-            print(f"Gagal mengesktrak {zip_filename}: {e}")
+            print(f"Gagal mengekstrak {zip_filename}: {e}")
             continue
 
         target_folder = None
