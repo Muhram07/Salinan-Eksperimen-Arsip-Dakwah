@@ -3,1173 +3,806 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Arsip Dakwah Sunnah</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <title>Arsip Dakwah Manhaj Salaf</title>
     <style>
-        /* ==========================================================================
-           RESET & CSS VARIABLES
-           ========================================================================== */
-        :root {
-            --bg-color: #0d0f12;
-            --card-bg: #161a1f;
-            --card-border: #232931;
-            --accent-gold: #D4AF37;
-            --accent-gold-hover: #E6C200;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --success: #10b981;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding-bottom: 80px;
-            overflow-x: hidden;
-        }
-
-        /* ==========================================================================
-           LOADER 3D DENGAN HURUF M
-           ========================================================================== */
-        #loader-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-color);
-            z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-
-        .loader-circle {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .loader-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 4px solid rgba(212, 175, 55, 0.15);
-            border-top: 4px solid var(--accent-gold);
-            animation: spinRing 1s linear infinite;
-        }
-
-        .loader-logo-m {
-            font-size: 42px;
-            font-weight: 800;
-            color: var(--accent-gold);
-            text-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-            animation: pulseM 1.5s ease-in-out infinite;
-        }
-
-        .loader-text {
-            margin-top: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--accent-gold);
-            letter-spacing: 1px;
-        }
-
-        @keyframes spinRing {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes pulseM {
-            0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.1); opacity: 1; }
-        }
-
-        /* ==========================================================================
-           HEADER & NAVIGASI
-           ========================================================================== */
-        header {
-            padding: 30px 20px 20px 20px;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(22, 26, 31, 0.8) 0%, rgba(13, 15, 18, 0) 100%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .header-title {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .header-title span {
-            color: var(--accent-gold);
-        }
-
-        .header-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            max-width: 500px;
-            margin: 0 auto 20px auto;
-        }
-
-        /* Segmented Mode */
-        .segmented-mode {
-            display: inline-flex;
-            background: var(--card-bg);
-            padding: 4px;
-            border-radius: 30px;
-            border: 1px solid var(--card-border);
-            gap: 4px;
-            margin-bottom: 15px;
-        }
-
-        .segmented-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .segmented-btn.active {
-            background: var(--accent-gold);
-            color: #000;
-            box-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
-        }
-
-        /* Pencarian */
-        .search-wrapper {
-            position: relative;
-            max-width: 500px;
-            margin: 0 auto 25px auto;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 20px 14px 45px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            color: var(--text-main);
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-gold);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            color: var(--text-muted);
-        }
-
-        /* Dropdown Hasil Pencarian */
-        .search-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            margin-top: 6px;
-            max-height: 250px;
-            overflow-y: auto;
-            z-index: 100;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            display: none;
-        }
-
-        .search-dropdown-item {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 13px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .search-dropdown-item:hover {
-            background: rgba(212, 175, 55, 0.1);
-            color: var(--accent-gold);
-        }
-
-        /* ==========================================================================
-           GRID KARTU KATEGORI
-           ========================================================================== */
-        .kategori-container {
-            max-width: 1100px;
-            margin: 0 auto 30px auto;
-            padding: 0 16px;
-        }
-
-        .grid-kategori {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        @media (min-width: 600px) {
-            .grid-kategori { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (min-width: 900px) {
-            .grid-kategori { grid-template-columns: repeat(4, 1fr); }
-        }
-        @media (min-width: 1100px) {
-            .grid-kategori { grid-template-columns: repeat(6, 1fr); }
-        }
-
-        .card-kategori {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 16px 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            user-select: none;
-        }
-
-        .card-kategori:hover {
-            border-color: var(--accent-gold);
-            transform: translateY(-2px);
-        }
-
-        .card-kategori.active {
-            background: rgba(212, 175, 55, 0.15);
-            border-color: var(--accent-gold);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-        }
-
-        .card-kategori .icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-
-        /* Mengatur agar teks nama kategori tidak diubah paksa kapital oleh CSS */
-        .card-kategori .nama {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-main);
-            text-transform: none !important;
-            line-height: 1.3;
-        }
-
-        .card-kategori .jumlah {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--accent-gold);
-        }
-
-        /* ==========================================================================
-           DAFTAR POSTER (GRID / COMPACT LIST)
-           ========================================================================== */
-        .posters-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 16px;
-            scroll-margin-top: 30px;
-        }
-
-        .grid-posters {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-        }
-
-        @media (min-width: 650px) {
-            .grid-posters { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (min-width: 1000px) {
-            .grid-posters { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        .card-poster {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        .card-poster:hover {
-            border-color: var(--accent-gold);
-        }
-
-        /* Carousel Gambar */
-        .carousel-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 9/16;
-            max-height: 480px;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .carousel-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .slide-counter {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: var(--accent-gold);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-        }
-
-        .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.6);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            user-select: none;
-        }
-
-        .nav-btn:hover {
-            background: var(--accent-gold);
-            color: #000;
-            border-color: var(--accent-gold);
-        }
-
-        .nav-prev { left: 8px; }
-        .nav-next { right: 8px; }
-
-        /* Detail Info Poster */
-        .poster-info {
-            margin-top: 14px;
-        }
-
-        .poster-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--accent-gold);
-            margin-bottom: 6px;
-            text-transform: none;
-        }
-
-        .poster-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-main);
-            line-height: 1.4;
-            margin-bottom: 6px;
-        }
-
-        .poster-collab {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-style: italic;
-            margin-bottom: 12px;
-        }
-
-        /* Bagian Caption */
-        .caption-wrapper {
-            margin-top: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 10px 12px;
-        }
-
-        .caption-toggle {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--accent-gold);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .caption-content {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #d1d5db;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            display: none;
-        }
-
-        .caption-content.open {
-            display: block;
-        }
-
-        /* Tombol Aksi */
-        .action-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 14px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-act {
-            flex: 1;
-            min-width: 75px;
-            padding: 8px 10px;
-            border-radius: 20px;
-            border: none;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .btn-act-primary {
-            background: var(--accent-gold);
-            color: #000;
-        }
-
-        .btn-act-primary:hover {
-            background: var(--accent-gold-hover);
-        }
-
-        .btn-act-secondary {
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--text-main);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-act-secondary:hover {
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        /* ==========================================================================
-           MODAL FOLLOW-GATE (10 DETIK TIMER INSTAGRAM)
-           ========================================================================== */
-        #gate-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 100000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-
-        .gate-card {
-            background: var(--card-bg);
-            border: 1px solid var(--accent-gold);
-            border-radius: 24px;
-            max-width: 420px;
-            width: 100%;
-            padding: 24px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-
-        .gate-icon {
-            font-size: 40px;
-            margin-bottom: 12px;
-        }
-
-        .gate-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 8px;
-        }
-
-        .gate-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .gate-account {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            margin-bottom: 10px;
-        }
-
-        .gate-acc-name {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent-gold);
-        }
-
-        .btn-gate-follow {
-            padding: 6px 14px;
-            border-radius: 12px;
-            background: var(--accent-gold);
-            color: #000;
-            font-size: 11px;
-            font-weight: 700;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* Floating Action Buttons */
-        .fab-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 1000;
-        }
-
-        .fab-btn {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-        }
-
-        .fab-btn:hover {
-            transform: scale(1.08);
-        }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{ background: #0b0b0b; background: radial-gradient(circle at 50% 0%, #181818 0%, #0b0b0b 70%); color:#fff; font-family:'Segoe UI', Arial, sans-serif; padding:20px; max-width:1100px; margin:auto; min-height:100vh; }
+        
+        /* Top Navigation & Branding */
+        .follow-wrapper{text-align:center;margin-bottom:15px;padding:0 10px;}
+        .follow-text{color:#bdbdbd;font-size:14px;margin-bottom:12px;line-height:1.5;letter-spacing:0.5px;}
+        .sosmed-container{ display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 auto; }
+        .btn-sosmed{ display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 25px; text-decoration: none; font-size: 13px; font-weight: bold; color: #D4AF37; background: rgba(212, 175, 55, 0.05); transition: 0.3s; backdrop-filter: blur(4px); position: relative; }
+        .btn-sosmed:hover{background:#D4AF37;color:#111;transform:scale(1.05);}
+        .anim-down { animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards, floatKiri 4s ease-in-out 0.8s infinite; }
+        .anim-up { animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards, floatKanan 4s ease-in-out 0.8s infinite; }
+        @keyframes slideDown { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(20px); } }
+        @keyframes floatKiri { 0% { transform: translateY(-7px); } 50% { transform: translateY(7px); } 100% { transform: translateY(-7px); } }
+        @keyframes floatKanan { 0% { transform: translateY(7px); } 50% { transform: translateY(-7px); } 100% { transform: translateY(7px); } }
+
+        .brand-wrapper{text-align:center;margin-bottom:20px;padding:10px 0 0 0;position:relative;}
+        .circuit-line{display:inline-block;width:40px;height:2px;background:#D4AF37;position:relative;vertical-align:middle;margin:0 10px;}
+        .circuit-line::before{content:'';position:absolute;width:6px;height:6px;background:#D4AF37;border-radius:50%;top:-2px;}
+        .circuit-line.left::before{left:-3px;}
+        .circuit-line.right::before{right:-3px;}
+        .circuit-line::after{content:'';position:absolute;width:2px;height:12px;background:#D4AF37;top:-14px;left:50%;transform:translateX(-50%);}
+        .brand-wrapper .developer-name{color:#D4AF37;font-size:16px;font-weight:bold;letter-spacing:1px;}
+        .brand-wrapper .developer-title{color:#888;font-size:11px;letter-spacing:0.5px;margin-top:2px;}
+        .brand-divider{width:80px;height:1px;background:#D4AF37;margin:10px auto 15px auto;opacity:0.5;}
+
+        .nav-top-wrapper{display:flex;justify-content:space-between;padding:0 15px;margin-bottom:10px;flex-wrap:wrap;}
+        .btn-nav{ background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(4px); border: 1px solid rgba(212, 175, 55, 0.4); color: #D4AF37; padding:8px 20px; border-radius:20px; font-weight:bold;cursor:pointer;font-size:15px; box-shadow:0 4px 15px rgba(0,0,0,0.3); animation: pulse-nav 2.5s ease-in-out infinite; }
+        @keyframes pulse-nav { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
+        .btn-nav:hover{ background:rgba(212, 175, 55, 0.15); box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); animation-play-state: paused; transform: scale(1.08); }
+
+        .nav-middle-wrapper{display:flex;justify-content:center;margin-bottom:20px;}
+        .btn-nav-beranda{ background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(4px); border: 1px solid rgba(212, 175, 55, 0.4); color: #D4AF37; padding:8px 20px; border-radius:20px; font-weight:bold;cursor:pointer;font-size:15px;transition:0.3s;box-shadow:0 4px 15px rgba(0,0,0,0.3); }
+        .btn-nav-beranda:hover{background:rgba(212, 175, 55, 0.15);transform:scale(1.02);}
+
+        .header-container{ position:relative; background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.6)); padding:40px 20px 55px 20px; text-align:center; border-radius:24px 24px 0 0; margin-bottom:0; border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); overflow: hidden; z-index: 10; }
+        .header-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent); transform: skewX(-25deg); animation: shine 5s infinite; pointer-events: none; }
+        @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+        .header-container h1{color:#D4AF37;font-size:32px;margin-bottom:15px;letter-spacing:1px;text-shadow:0 0 20px rgba(212,175,55,0.2);}
+        .header-container .sub-title{color:#d1d5db;font-size:18px;font-weight:normal;letter-spacing:1px;}
+        
+        .search-wrapper{position:relative;max-width:550px;margin:-25px auto 25px auto;width:90%;z-index:20;}
+        #search{ width:100%;padding:14px 20px;border:none; border-radius:24px;font-size:16px;outline:none; background:rgba(255, 255, 255, 0.12); color:#fff; box-shadow:0 8px 32px rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; }
+        #search:focus{background:rgba(255, 255, 255, 0.25);border-color:rgba(212, 175, 55, 0.3);}
+        #search-result{ position:absolute;top:calc(100% + 10px);left:0;right:0; background:rgba(21, 21, 21, 0.95); backdrop-filter: blur(10px); border:1px solid rgba(255, 255, 255, 0.1); border-radius:16px; overflow:hidden; max-height:350px; overflow-y:auto; display:none; z-index:9999; }
+        .search-item{padding:12px 16px;border-bottom:1px solid rgba(255, 255, 255, 0.05);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;color:#fff;transition:0.2s;}
+        .search-item:hover{background:rgba(212, 175, 55, 0.15);color:#D4AF37;}
+        .search-item span{font-size:14px;line-height:1.4;word-break:break-word;flex:1;}
+        .search-item small{color:#D4AF37;font-size:12px;white-space:nowrap;background:rgba(212,175,55,0.1);padding:3px 8px;border-radius:12px;border:1px solid rgba(212,175,55,0.2);flex-shrink:0;}
+
+        /* --- KATEGORI GRID (ORI MODE) --- */
+        .kategori-grid-ori { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .kategori-grid-ori .card-kategori { background: rgba(30, 30, 30, 0.6); padding: 12px; border-radius: 16px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(6px); cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+        .kategori-grid-ori .card-kategori:hover, .kategori-grid-ori .card-kategori.active { background: rgba(212, 175, 55, 0.15); border-color: #D4AF37; transform: translateY(-3px); }
+        .kategori-grid-ori .card-kategori .icon { font-size: 24px; }
+        /* PERBAIKAN: text-transform diubah ke none agar huruf setelah tanda petik tidak dipaksa kapital (Do'a, bukan Do'A) */
+        .kategori-grid-ori .card-kategori .nama { color: #fff; font-size: 13px; font-weight: 600; text-transform: none; }
+        .kategori-grid-ori .card-kategori .jumlah { color: #D4AF37; font-size: 11px; font-weight: bold; }
+
+        /* --- KATEGORI HORIZONTAL SCROLL (COMPACT MODE) --- */
+        .kategori-scroll-compact { width: 100%; overflow-x: auto; padding: 5px 0 15px 0; margin-bottom: 20px; scrollbar-width: none; -ms-overflow-style: none; display: none; }
+        .kategori-scroll-compact::-webkit-scrollbar { display: none; }
+        .kategori-scroll-compact .kategori-container { display: flex; flex-wrap: nowrap; gap: 10px; width: max-content; }
+        .kategori-scroll-compact .card-kategori { background: rgba(30, 30, 30, 0.6); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(6px); cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        .kategori-scroll-compact .card-kategori:hover, .kategori-scroll-compact .card-kategori.active { background: rgba(212, 175, 55, 0.2); border-color: #D4AF37; }
+        .kategori-scroll-compact .card-kategori .icon { font-size: 16px; }
+        /* PERBAIKAN: text-transform diubah ke none agar huruf setelah tanda petik tidak dipaksa kapital (Do'a, bukan Do'A) */
+        .kategori-scroll-compact .card-kategori .nama { color: #fff; font-size: 13px; font-weight: 600; text-transform: none; }
+        .kategori-scroll-compact .card-kategori .jumlah { color: #D4AF37; font-size: 11px; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 10px; }
+
+        /* Switch Kategori Berdasarkan Mode */
+        body.is-compact .kategori-grid-ori { display: none; }
+        body.is-compact .kategori-scroll-compact { display: block; }
+
+        /* --- POSTER LIST TAMPILAN STANDAR (ORI) --- */
+        #post-list{ display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center; transition: all 0.5s ease; }
+        .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative; backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); }
+        .poster:hover{border-color:#D4AF37;transform:scale(1.02);box-shadow:0 12px 40px rgba(212,175,55,0.05);}
+        .poster-id-wrapper{text-align:center;margin-top:-10px;margin-bottom:10px;}
+        .poster-id{display:inline-block;background:rgba(0,0,0,0.6);color:#D4AF37;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:bold;letter-spacing:0.5px;}
+        
+        /* FIX GAMBAR: Mengunci rasio & ukuran agar proporsional */
+        .poster > img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; border-radius: 16px; margin-bottom: 15px; background: #000; }
+        .carousel-container{position:relative;width:100%;aspect-ratio: 1 / 1;overflow:hidden;border-radius:16px;margin-bottom:15px;touch-action:pan-y;box-shadow:0 8px 25px rgba(0,0,0,0.3); background: #000;}
+        .carousel-track{display:flex;height:100%;transition:transform 0.3s ease;}
+        .carousel-slide{min-width:100%;height:100%;position:relative;display:flex;justify-content:center;align-items:center;background:#000;}
+        .carousel-slide img{width:100%;height:100%;border-radius:16px;display:block;object-fit:contain;}
+        .carousel-slide .slide-number{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 10px;border-radius:12px;font-size:12px;z-index:5;}
+        .carousel-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;z-index:10;backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;}
+        .carousel-btn:hover{background:#D4AF37;color:#111;}
+        .carousel-btn.prev{left:8px;}
+        .carousel-btn.next{right:8px;}
+
+        .poster h3{color:#D4AF37;font-size:24px;margin-bottom:10px;text-align:center;letter-spacing:1px;}
+        .poster .sub-caption{color:#D4AF37;font-size:16px;margin-bottom:15px;font-style:italic;text-align:center;}
+        .poster-content-wrapper{position:relative;color:#ddd;line-height:1.8;font-size:16px;overflow:hidden;transition:max-height 0.4s ease;text-align:center;}
+        .poster-content-wrapper.collapsed{max-height:250px;}
+        .poster-content-wrapper.expanded{max-height:2000px;}
+        .read-more-btn{display:inline-block;margin-top:10px;background:transparent;color:#D4AF37;border:none;font-weight:bold;cursor:pointer;font-size:15px;padding:5px 0;text-decoration:underline;}
+        .read-more-btn:hover{color:#fff;}
+
+        .divider{width:60%;height:1px;background:rgba(212, 175, 55, 0.3);margin:20px auto;opacity:0.5;}
+        .poster .tags-wrapper{margin-top:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+        .poster .tags-label{color:#bdbdbd;font-size:14px;font-weight:bold;margin-bottom:5px;}
+        .poster .tag-container{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;}
+        .poster .tag{background:transparent;color:#D4AF37;border:1px solid #D4AF37;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+        .poster .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;align-items:center;justify-content:center;}
+        .poster .actions button{ background: linear-gradient(135deg, #D4AF37, #E6B800); color:#111;border:none;padding:8px 18px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px;box-shadow:0 4px 10px rgba(212,175,55,0.2);transition:0.3s; }
+        .poster .actions button:hover{transform:scale(1.02);}
+        .poster .sosial-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;align-items:center;justify-content:center;}
+        .poster .sosial-actions button{ background:transparent;color:#D4AF37;border:1px solid #D4AF37;padding:8px 16px;border-radius:25px;font-weight:bold;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;transition:0.3s; }
+        .poster .sosial-actions button:hover{background:#D4AF37;color:#111;transform:scale(1.02);}
+        .poster .sosial-actions button .icon{font-size:18px;}
+        .btn-save{display:flex;align-items:center;gap:5px;background:transparent;border:1px solid #D4AF37;padding:8px 16px;border-radius:25px;color:#D4AF37;font-weight:bold;cursor:pointer;font-size:14px;transition:0.3s;}
+        .btn-save:hover{background:#D4AF37;color:#111;transform:scale(1.02);}
+        .btn-save.saved{background:#D4AF37;color:#111;border-color:#D4AF37;}
+        .loading{text-align:center;color:#888;padding:20px;font-size:18px;}
+        
+        @media(min-width:600px){ #post-list:not(.compact-view){grid-template-columns:repeat(2, 1fr);} }
+        @media(min-width:900px){ #post-list:not(.compact-view){grid-template-columns:repeat(3, 1fr);} }
+
+        /* --- FLOATING BUTTONS --- */
+        .btn-float-common{ position:fixed; bottom:25px; z-index:100; width:55px; height:55px; border-radius:50%; background:rgba(20, 20, 20, 0.8); border: 2px solid #D4AF37; color:#D4AF37; font-size:24px; box-shadow:0 4px 15px rgba(0,0,0,0.5); cursor:pointer; transition:0.3s; display:flex; justify-content:center; align-items:center; backdrop-filter: blur(4px); animation: floatBtn 3s ease-in-out infinite; }
+        @keyframes floatBtn {0%{transform:translateY(0px);}50%{transform:translateY(-3px);}100%{transform:translateY(0px);}}
+        .btn-float-common:hover{transform:scale(1.05);background:rgba(212, 175, 55, 0.2);}
+        .sound-float-btn{right:25px;}
+        .sound-float-btn.silent{border-color:#555;color:#888;}
+        .sound-float-btn.playing{border-color:#D4AF37;color:#D4AF37;}
+        .view-float-btn{left:25px;}
+
+        /* --- MODE KOMPAK/PADAT YANG DITINGKATKAN --- */
+        #post-list.compact-view { display: flex; flex-direction: column; gap: 14px; max-width: 800px; margin: 0 auto; width: 100%; }
+        #post-list.compact-view .poster { width: 100%; padding: 12px; display: grid; grid-template-columns: 110px 1fr; gap: 14px; border-radius: 18px; align-items: center; background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer; }
+        #post-list.compact-view .poster:hover { border-color: #D4AF37; background: rgba(30, 30, 30, 0.9); }
+        
+        #post-list.compact-view .poster > img { width: 110px !important; height: 110px !important; aspect-ratio: 1 / 1 !important; object-fit: contain !important; border-radius: 12px !important; margin: 0 !important; background: #000; }
+        #post-list.compact-view .carousel-container { width: 110px !important; height: 110px !important; aspect-ratio: 1 / 1 !important; border-radius: 12px !important; margin: 0 !important; box-shadow: none !important; flex-shrink: 0; background: #000; }
+        #post-list.compact-view .carousel-slide { height: 110px !important; }
+        #post-list.compact-view .carousel-slide img { width: 110px !important; height: 110px !important; object-fit: contain !important; border-radius: 12px !important; }
+        #post-list.compact-view .carousel-btn { width: 22px !important; height: 22px !important; font-size: 10px !important; }
+        #post-list.compact-view .carousel-slide .slide-number { font-size: 8px !important; padding: 2px 4px !important; bottom: 3px !important; right: 3px !important; }
+        
+        #post-list.compact-view .poster-id-wrapper, 
+        #post-list.compact-view .read-more-btn, 
+        #post-list.compact-view .divider, 
+        #post-list.compact-view .tags-wrapper,
+        #post-list.compact-view .sosial-actions,
+        #post-list.compact-view .poster-content-wrapper { display: none !important; }
+        
+        #post-list.compact-view .compact-right-wrapper { display: flex; flex-direction: column; justify-content: center; gap: 6px; text-align: left; }
+        #post-list.compact-view .compact-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.5px; }
+        #post-list.compact-view h3 { font-size: 15px; margin: 0; text-align: left; color: #fff; line-height: 1.3; font-weight: 700; }
+        #post-list.compact-view .sub-caption { font-size: 12px; margin: 0; text-align: left; color: #aaa; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        #post-list.compact-view .actions { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-start; flex-wrap: wrap; }
+        #post-list.compact-view .actions button { font-size: 11px; padding: 4px 10px; background: rgba(212, 175, 55, 0.1); color: #D4AF37; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; font-weight: 600; box-shadow: none; }
+        #post-list.compact-view .actions button:hover { background: #D4AF37; color: #111; }
+
+        /* --- MODAL DETAIL FULL VIEW --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 99999; padding: 15px; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: #151515; border: 1px solid #D4AF37; border-radius: 20px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
+        .modal-close-btn { position: absolute; top: 12px; right: 15px; background: rgba(255,255,255,0.1); border: 1px solid #D4AF37; color: #D4AF37; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 20; transition: 0.3s; }
+        .modal-close-btn:hover { background: #D4AF37; color: #111; }
+
+        /* Style Terpisah Khusus Konten Modal Full View */
+        .modal-card .m-carousel-container { position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 16px; margin-bottom: 15px; background: #000; }
+        .modal-card .m-carousel-track { display: flex; height: 100%; transition: transform 0.3s ease; }
+        .modal-card .m-carousel-slide { min-width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; background: #000; }
+        .modal-card .m-carousel-slide img { width: 100%; height: 100%; object-fit: contain; border-radius: 16px; }
+        .modal-card .m-carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #D4AF37; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .modal-card .m-carousel-btn.prev { left: 8px; }
+        .modal-card .m-carousel-btn.next { right: 8px; }
+        .modal-card .m-slide-number { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; padding: 3px 8px; border-radius: 10px; font-size: 11px; }
+
+        .modal-card .m-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(212,175,55,0.15); color: #D4AF37; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 10px; border: 1px solid rgba(212,175,55,0.3); }
+        .modal-card h3 { color: #D4AF37; font-size: 20px; text-align: center; margin-bottom: 10px; }
+        .modal-card .sub-caption { color: #bbb; font-size: 14px; text-align: center; margin-bottom: 15px; font-style: italic; }
+        .modal-card .m-content { color: #ddd; font-size: 14px; line-height: 1.6; text-align: center; overflow: hidden; transition: max-height 0.4s ease; }
+        .modal-card .m-content.collapsed { max-height: 180px; }
+        .modal-card .m-content.expanded { max-height: 3000px; }
+        .modal-card .m-read-more-btn { display: block; margin: 10px auto; background: transparent; color: #D4AF37; border: none; font-weight: bold; cursor: pointer; font-size: 14px; text-decoration: underline; }
+        
+        .modal-card .m-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; }
+        .modal-card .m-actions button { background: rgba(212, 175, 55, 0.1); color: #D4AF37; border: 1px solid #D4AF37; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .modal-card .m-actions button:hover { background: #D4AF37; color: #111; }
+        .modal-card .m-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 15px; }
+        .modal-card .m-tag { background: transparent; color: #888; border: 1px solid #444; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
     </style>
 </head>
 <body>
-
-    <!-- AUDIO LATAR SUARA OMBAK -->
-    <audio id="ambient-audio" loop preload="none">
-        <source src="https://raw.githubusercontent.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/main/suara-ombak.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- LOADER RING DENGAN HURUF M -->
-    <div id="loader-wrapper">
-        <div class="loader-circle">
-            <div class="loader-ring"></div>
-            <div class="loader-logo-m">M</div>
+    <div class="follow-wrapper">
+        <div class="follow-text">Mari follow akun dakwah kami untuk konten manhaj salaf bermanfaat lainnya</div>
+        <div class="sosmed-container">
+            <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" class="btn-sosmed anim-down">➡️ @tauhidsunnah_id</a>
+            <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" class="btn-sosmed anim-up">➡️ @an.nashiha_daily</a>
         </div>
-        <div class="loader-text" id="loader-percent">MEMUAT ARSIP 15%</div>
+    </div>
+    <div class="brand-wrapper">
+        <span class="circuit-line left"></span>
+        <span class="developer-name">Muhram Nur Surisma</span>
+        <span class="circuit-line right"></span>
+        <div class="developer-title">Digital Dakwah Developer</div>
+        <div class="brand-divider"></div>
+    </div>
+    <div class="nav-top-wrapper">
+        <button class="btn-nav" onclick="tampilkanFavorit()">🔖 Disimpan</button>
+        <button class="btn-nav" onclick="resetSemua()">📚 Semua</button>
+    </div>
+    <div class="nav-middle-wrapper">
+        <button class="btn-nav-beranda" onclick="resetSemua()">↖️ Pilih Mode Beranda ↗️</button>
+    </div>
+    <div class="header-container">
+        <h1>Arsip Dakwah</h1>
+        <div class="sub-title">📚 Manhaj Salaf 📚</div>
+    </div>
+    <div class="search-wrapper">
+        <input type="text" id="search" placeholder="Cari judul, kategori, tag, atau caption...">
+        <div id="search-result"></div>
+    </div>
+    
+    <!-- Tab Kategori Versi ORI (Grid Utama) -->
+    <div id="kategori-wrap-ori" class="kategori-grid-ori"></div>
+
+    <!-- Tab Kategori Versi Ringkas (Horizontal Scroll) -->
+    <div class="kategori-scroll-compact">
+        <div id="kategori-wrap-compact" class="kategori-container"></div>
     </div>
 
-    <!-- HEADER & PENCARIAN -->
-    <header>
-        <h1 class="header-title">Arsip Dakwah <span>Sunnah</span></h1>
-        <p class="header-desc">Katalog digital poster, PDF brosur, dan faedah ilmu syar'i sesuai Manhaj Salafus Shalih.</p>
+    <div id="post-list" class="loading">Memuat arsip...</div>
 
-        <!-- Segmented Mode -->
-        <div class="segmented-mode">
-            <button class="segmented-btn active" onclick="setAppMode('all', this)">🪧 Semua</button>
-            <button class="segmented-btn" onclick="setAppMode('pdf', this)">📄 PDF Mode</button>
-            <button class="segmented-btn" onclick="setAppMode('saved', this)">🔖 Disimpan</button>
-        </div>
-
-        <!-- Kolom Pencarian -->
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-box" class="search-input" placeholder="Cari judul faedah, doa, perawi, atau tagar..." oninput="handleSearch(this.value)">
-            <div id="search-dropdown" class="search-dropdown"></div>
-        </div>
-    </header>
-
-    <!-- GRID KATEGORI -->
-    <section class="kategori-container">
-        <div id="grid-kategori" class="grid-kategori"></div>
-    </section>
-
-    <!-- DAFTAR POSTER DAKWAH (TARGET SCROLL: #post-list) -->
-    <main class="posters-container" id="post-list">
-        <div id="grid-posters" class="grid-posters"></div>
-    </main>
-
-    <!-- MODAL PROTEKSI FOLLOW-GATE -->
-    <div id="gate-modal">
-        <div class="gate-card">
-            <div class="gate-icon">🔒</div>
-            <h3 class="gate-title">Dukung Dakwah Sunnah</h3>
-            <p class="gate-desc">Silakan ikuti akun Instagram dakwah berikut untuk membuka akses unduh resolusi tinggi & salin caption secara gratis.</p>
-            
-            <div class="gate-account">
-                <span class="gate-acc-name">@tauhidsunnah_id</span>
-                <button class="btn-gate-follow" id="gate-btn-1" onclick="handleGateClick(1, 'https://instagram.com/tauhidsunnah_id')">Follow</button>
-            </div>
-
-            <div class="gate-account">
-                <span class="gate-acc-name">@an.nashiha_daily</span>
-                <button class="btn-gate-follow" id="gate-btn-2" onclick="handleGateClick(2, 'https://instagram.com/an.nashiha_daily')">Follow</button>
-            </div>
-
-            <button id="gate-unlock-btn" class="btn-act btn-act-primary" style="width: 100%; margin-top: 15px; padding: 12px; display: none;" onclick="unlockGateAccess()">
-                ✅ Buka Akses Unduhan
-            </button>
+    <!-- Modal Full View untuk Mode Padat -->
+    <div class="modal-overlay" id="detailModal" onclick="checkCloseModal(event)">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="tutupModalDetail()">✕</button>
+            <div id="modalBody"></div>
         </div>
     </div>
 
-    <!-- FLOATING ACTION BUTTONS -->
-    <div class="fab-container">
-        <button class="fab-btn" title="Putar / Heningkan Suara Ombak" onclick="toggleAudio()">🔊</button>
-        <button class="fab-btn" title="Kembali ke Atas" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆️</button>
-    </div>
+    <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()">🔠</button>
+    <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()">🔇</button>
+    <audio id="bgAudio" loop><source src="suara-ombak.mp3" type="audio/mpeg"></audio>
 
-    <!-- JAVASCRIPT SISTEM LENGKAP -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // ==============================================================================
-        // KONFIGURASI DAN STATE APLIKASI
-        // ==============================================================================
-        const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/main";
-        
-        let allPosters = [];
-        let kategoriList = [];
-        let kategoriEmojiMap = {};
-        let activeKategori = null;
-        let currentAppMode = 'all';
-        let savedFavorites = JSON.parse(localStorage.getItem('dakwahFavorit') || '[]');
-        let carouselIndices = {};
-        let pendingDownloadAction = null;
-        let isAudioPlaying = false;
+        let kategoriData = {};
+        let kategoriAktif = null;
+        let semuaPosterCache = [];
+        let isCompactView = false;
+        let isSelecting = false;
+        let emojiMapGlobal = {};
+        let rawManifestPosters = [];
 
-        let gateFollowed1 = false;
-        let gateFollowed2 = false;
-
-        // ==============================================================================
-        // FUNGSI NORMALISASI KATEGORI (MENCEGAH TABRAKAN PETIK & FORMAT BAKU)
-        // ==============================================================================
-        function normalizeCategory(str) {
+        // Helper fungsi normalisasi pencocokan kategori aman dari tanda petik
+        function cleanCategory(str) {
             if (!str) return "";
-            return str
-                .toLowerCase()
-                .replace(/['"’‘()]/g, "")
-                .replace(/\s+/g, "")
+            return str.toLowerCase().replace(/['"’‘()]/g, "").replace(/\s+/g, "").trim();
+        }
+
+        // Helper fungsi penamaan kategori tampilan agar bebas dari cacat huruf besar
+        function formatDisplayKategori(str) {
+            if (!str) return "Umum";
+            let s = str.trim();
+            if (s.toLowerCase() === "do'a" || s.toLowerCase() === "doa" || s === "Do'A") return "Do'a";
+            if (s.toLowerCase() === "bid'ah" || s.toLowerCase() === "bidah" || s === "Bid'Ah") return "Bid'ah";
+            return s;
+        }
+
+        function getFavorit() {
+            const data = localStorage.getItem('dakwahFavorit');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function toggleFavorit(id, btn) {
+            let fav = getFavorit();
+            if(fav.includes(id)) {
+                fav = fav.filter(f => f !== id);
+                if(btn) { btn.classList.remove('saved'); btn.innerHTML = '🔖 Belum Disimpan'; }
+            } else {
+                fav.push(id);
+                if(btn) { btn.classList.add('saved'); btn.innerHTML = '🔖 Sudah Disimpan'; }
+            }
+            localStorage.setItem('dakwahFavorit', JSON.stringify(fav));
+            
+            const allBtns = document.querySelectorAll(`.btn-save-id-${id}`);
+            allBtns.forEach(b => {
+                if(fav.includes(id)) {
+                    b.classList.add('saved');
+                    b.innerHTML = '🔖 Sudah Disimpan';
+                } else {
+                    b.classList.remove('saved');
+                    b.innerHTML = '🔖 Belum Disimpan';
+                }
+            });
+        }
+
+        function tampilkanFavorit() {
+            const fav = getFavorit();
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(p => {
+                const id = p.getAttribute('data-id');
+                p.style.display = fav.includes(id) ? (isCompactView ? 'grid' : 'block') : 'none';
+            });
+            document.getElementById('search').value = '';
+            document.getElementById('search-result').style.display = 'none';
+            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+        }
+
+        function resetSemua() {
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(p => p.style.display = isCompactView ? 'grid' : 'block');
+            document.getElementById('search').value = '';
+            document.getElementById('search-result').style.display = 'none';
+            document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
+            kategoriAktif = null;
+            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+        }
+
+        function downloadFile(url, nama) {
+            const a = document.createElement('a'); a.href = url; a.download = nama || 'file';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        function cleanCopyText(text) {
+            if (!text) return '';
+            return text
+                .replace(/\r\n/g, '\n')
+                .replace(/\n{2,}/g, '\n')
+                .replace(/[ \t]+$/gm, '')
                 .trim();
         }
 
-        // Fungsi khusus untuk menampilkan nama kategori berpetik dengan indah tanpa cacat Do'A
-        function formatDisplayKategori(str) {
-            if (!str) return "Umum";
-            let trimmed = str.trim();
-            if (trimmed.toLowerCase() === "do'a" || trimmed.toLowerCase() === "doa" || trimmed === "Do'A") {
-                return "Do'a";
-            }
-            if (trimmed.toLowerCase() === "bid'ah" || trimmed.toLowerCase() === "bidah" || trimmed === "Bid'Ah") {
-                return "Bid'ah";
-            }
-            return trimmed;
+        function copyCaptionDariElemen(btn) {
+            const poster = btn.closest('.poster') || btn.closest('.modal-card');
+            const judul = poster.querySelector('h3')?.innerText || '';
+            const subElement = poster.querySelector('.sub-caption');
+            let sub = subElement ? (subElement.dataset.raw || subElement.innerText) : '';
+            
+            const contentWrapper = poster.querySelector('.poster-content-wrapper') || poster.querySelector('.m-content');
+            const isi = contentWrapper ? contentWrapper.innerText : '';
+            
+            const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
+            const konten = parts.join('\n\n');
+            
+            navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
         }
 
-        // ==============================================================================
-        // INISIALISASI & PENGAMBILAN MANIFEST.JSON
-        // ==============================================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            let percent = 15;
-            const percentEl = document.getElementById('loader-percent');
+        async function loadPosters() {
+            const container = document.getElementById('post-list');
+            const kategoriOri = document.getElementById('kategori-wrap-ori');
+            const kategoriCompact = document.getElementById('kategori-wrap-compact');
+            container.innerHTML = '<div class="loading">📂 Memuat arsip...</div>';
             
-            const timer = setInterval(() => {
-                percent += 15;
-                if (percent <= 85 && percentEl) {
-                    percentEl.innerText = `MEMUAT ARSIP ${percent}%`;
+            let htmlPoster = '';
+            const favList = getFavorit();
+            let manifestData = { posters: [] };
+
+            try {
+                const res = await fetch('manifest.json');
+                if(res.ok) {
+                    manifestData = await res.json();
+                } else {
+                    const resRoot = await fetch('/manifest.json');
+                    if(resRoot.ok) manifestData = await resRoot.json();
                 }
-            }, 120);
+            } catch(e) { console.warn("Gagal mengambil manifest"); }
 
-            fetch('manifest.json')
-                .then(res => {
-                    if (!res.ok) throw new Error("Gagal mengambil manifest");
-                    return res.json();
-                })
-                .then(data => {
-                    clearInterval(timer);
-                    if (percentEl) percentEl.innerText = "MEMUAT ARSIP 100%";
+            emojiMapGlobal = manifestData.kategori_emoji || {};
+            rawManifestPosters = manifestData.posters || [];
 
-                    allPosters = data.posters || [];
-                    kategoriList = data.kategori_list || [];
-                    kategoriEmojiMap = data.kategori_emoji || {};
-
-                    // Normalisasi awal data kategori di tiap poster
-                    allPosters.forEach(p => {
-                        p.kategori = formatDisplayKategori(p.kategori);
-                    });
-
-                    // Render kategori & poster awal
-                    renderKategoriGrid();
-                    renderPosters();
-
-                    // Sembunyikan loader
-                    setTimeout(() => {
-                        const loader = document.getElementById('loader-wrapper');
-                        if (loader) {
-                            loader.style.opacity = '0';
-                            loader.style.visibility = 'hidden';
-                        }
-                    }, 400);
-                })
-                .catch(err => {
-                    console.warn("Gagal memuat manifest lokal, mencoba cadangan online:", err);
-                    clearInterval(timer);
-                    const loader = document.getElementById('loader-wrapper');
-                    if (loader) {
-                        loader.style.opacity = '0';
-                        loader.style.visibility = 'hidden';
-                    }
+            if(rawManifestPosters.length > 0) {
+                rawManifestPosters.forEach(p => {
+                    const k = formatDisplayKategori(p.kategori || "Umum");
+                    p.kategori = k;
+                    if(!kategoriData[k]) kategoriData[k] = 0;
+                    kategoriData[k]++;
+                    semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: k, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content : '') });
                 });
-        });
 
-        // ==============================================================================
-        // PERENDERAN KARTU KATEGORI (AMAN DARI PETIK & BERGULIR KE KONTEN)
-        // ==============================================================================
-        function renderKategoriGrid() {
-            const container = document.getElementById('grid-kategori');
-            if (!container) return;
+                for (let p of rawManifestPosters) {
+                    const folder = `posters/${p.path}`;
+                    const judul = p.judul || "Tanpa Judul";
+                    const subJudul = p.sub_judul || "";
+                    const kategori = p.kategori || "Umum";
+                    const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[cleanCategory(kategori)] || '📂';
+                    const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
+                    let pdfSrc = p.pdf ? `${folder}/brosur.pdf` : null;
 
-            // Hitung jumlah poster per kategori secara akurat
-            const countMap = {};
-            allPosters.forEach(p => {
-                const normKey = normalizeCategory(p.kategori);
-                countMap[normKey] = (countMap[normKey] || 0) + 1;
-            });
+                    let contentBody = p.content || p.isi_caption || "";
+                    if(!contentBody) {
+                         try {
+                             const resMd = await fetch(`${folder}/poster.md`);
+                             if(resMd.ok) {
+                                 const text = await resMd.text();
+                                 contentBody = text.replace(/---([\s\S]*?)---/, '').trim();
+                             }
+                         } catch(e) {}
+                    }
+                    p.compiledContent = contentBody;
 
-            let html = `
-                <div class="card-kategori ${activeKategori === null ? 'active' : ''}" onclick="handleKategoriClick(null, this)">
-                    <span class="icon">🪧</span>
-                    <span class="nama">Semua</span>
-                    <span class="jumlah">${allPosters.length} Poster</span>
-                </div>
-            `;
+                    const posterId = p.path.replace(/\//g, '-');
+                    const isSaved = favList.includes(posterId);
+                    const parsedContent = marked.parse(contentBody || "Konten belum tersedia.");
+                    const imageList = (p.images || "1.jpg").split(',').map(s => s.trim());
 
-            kategoriList.forEach(kat => {
-                const normKey = normalizeCategory(kat);
-                const emoji = kategoriEmojiMap[normKey] || kategoriEmojiMap[kat] || '📂';
-                const jumlah = countMap[normKey] || 0;
-                const displayNama = formatDisplayKategori(kat);
-                
-                // MENGGUNAKAN encodeURIComponent AGAR TANDA PETIK (') PADA DO'A, BID'AH, DLL. 
-                // TIDAK PERNAH MERUSAK ATRIBUT ONCLICK DI LEVEL HTML!
-                const encodedKat = encodeURIComponent(kat);
+                    let carouselHTML = '';
+                    if (imageList.length === 1) {
+                        carouselHTML = `<img src="${folder}/${imageList[0]}" alt="${judul}" onerror="this.style.display='none'">`;
+                    } else {
+                        carouselHTML = `
+                        <div class="carousel-container" id="carousel-${posterId}">
+                            <div class="carousel-track" id="track-${posterId}">
+                                ${imageList.map((img, idx) => `
+                                    <div class="carousel-slide" onclick="event.stopPropagation()">
+                                        <img src="${folder}/${img}" alt="${judul} - Slide ${idx+1}" onerror="this.style.display='none'">
+                                        <div class="slide-number">${idx+1} / ${imageList.length}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="carousel-btn prev" onclick="event.stopPropagation(); slideCarousel('${posterId}', -1)">❮</button>
+                            <button class="carousel-btn next" onclick="event.stopPropagation(); slideCarousel('${posterId}', 1)">❯</button>
+                        </div>
+                        `;
+                    }
 
-                html += `
-                    <div class="card-kategori ${activeKategori === kat ? 'active' : ''}" onclick="handleKategoriClick('${encodedKat}', this)">
-                        <span class="icon">${emoji}</span>
+                    const plainSubJudul = subJudul ? subJudul.replace(/\*/g, '').trim() : '';
+                    const parsedSubJudul = subJudul ? marked.parse(subJudul) : '';
+
+                    htmlPoster += `
+                        <div class="poster" data-id="${posterId}" data-kategori="${kategori}" onclick="handleCardClick(event, '${posterId}')">
+                            ${carouselHTML}
+                            <div class="compact-right-wrapper">
+                                <div class="compact-badge">${katEmoji} ${kategori}</div>
+                                <div class="poster-id-wrapper">
+                                    <span class="poster-id">${posterId}</span>
+                                </div>
+                                <h3>${judul}</h3>
+                                ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
+                                <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
+                                <button class="read-more-btn" id="btn-${posterId}" onclick="event.stopPropagation(); toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
+                                
+                                <div class="actions">
+                                    <button class="btn-save btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '🔖 Belum Disimpan'}</button>
+                                    ${pdfSrc ? `<button onclick="event.stopPropagation(); downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
+                                    <button onclick="event.stopPropagation(); downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">🖼️ Gambar</button>
+                                    <button onclick="event.stopPropagation(); copyCaptionDariElemen(this)">📋 Caption</button>
+                                </div>
+                            </div>
+                            
+                            <hr class="divider">
+                            
+                            <div class="sosial-actions">
+                                <button onclick="event.stopPropagation(); sharePoster('${judul}', '${window.location.href}')"><span class="icon">✈️</span> Kirim ke Teman</button>
+                                <button onclick="event.stopPropagation(); dmInstagram()"><span class="icon">💬</span> DM</button>
+                            </div>
+                            <hr class="divider">
+                            ${tagArray.length > 0 ? `<div class="tags-wrapper"><span class="tags-label">Tagar :</span><div class="tag-container">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div></div>` : ''}
+                        </div>
+                    `;
+                }
+            }
+
+            container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
+
+            // Render Tab ORI (Grid)
+            let htmlKategoriOri = `<div class="card-kategori active" onclick="resetSemua()"><span class="icon">📚</span><span class="nama">Semua</span></div>`;
+            // Render Tab Compact (Horizontal)
+            let htmlKategoriCompact = `<div class="card-kategori active" onclick="resetSemua()"><span class="icon">📚</span><span class="nama">Semua</span></div>`;
+
+            for(let [nama, jumlah] of Object.entries(kategoriData)) {
+                let icon = emojiMapGlobal[nama.toLowerCase()] || emojiMapGlobal[cleanCategory(nama)] || '📂';
+                let displayNama = formatDisplayKategori(nama);
+                // PERBAIKAN: Gunakan encodeURIComponent agar tanda petik (') pada Do'a, Bid'ah, dll. TIDAK MERUSAK string JavaScript onclick!
+                let safeNama = encodeURIComponent(nama);
+
+                htmlKategoriOri += `
+                    <div class="card-kategori" onclick="filterKategori('${safeNama}', this)">
+                        <span class="icon">${icon}</span>
                         <span class="nama">${displayNama}</span>
                         <span class="jumlah">${jumlah} Poster</span>
                     </div>
                 `;
-            });
-
-            container.innerHTML = html;
+                htmlKategoriCompact += `
+                    <div class="card-kategori" onclick="filterKategori('${safeNama}', this)">
+                        <span class="icon">${icon}</span>
+                        <span class="nama">${displayNama}</span>
+                        <span class="jumlah">${jumlah}</span>
+                    </div>
+                `;
+            }
+            kategoriOri.innerHTML = htmlKategoriOri;
+            kategoriCompact.innerHTML = htmlKategoriCompact;
         }
 
-        // ==============================================================================
-        // HANDLER KLIK KATEGORI & PENGGULIRAN OTOMATIS KE KONTEN TUJUAN
-        // ==============================================================================
-        function handleKategoriClick(encodedKat, element) {
-            // Decode kembali nama kategori
-            const namaKategori = encodedKat ? decodeURIComponent(encodedKat) : null;
-            activeKategori = namaKategori;
+        /* --- CAROUSEL LOGIC --- */
+        let carouselIndex = {};
+        function slideCarousel(id, dir) {
+            if (!carouselIndex[id]) carouselIndex[id] = 0;
+            const track = document.getElementById(`track-${id}`);
+            if (!track) return;
+            const slides = track.querySelectorAll('.carousel-slide');
+            const max = slides.length;
+            carouselIndex[id] = (carouselIndex[id] + dir + max) % max;
+            track.style.transform = `translateX(-${carouselIndex[id] * 100}%)`;
+        }
 
-            // Perbarui kelas visual tombol aktif
+        let modalCarouselIndex = 0;
+        function slideModalCarousel(dir, max) {
+            const track = document.getElementById('modalCarouselTrack');
+            const numLabel = document.getElementById('modalSlideNum');
+            if (!track) return;
+            modalCarouselIndex = (modalCarouselIndex + dir + max) % max;
+            track.style.transform = `translateX(-${modalCarouselIndex * 100}%)`;
+            if (numLabel) numLabel.innerText = `${modalCarouselIndex + 1} / ${max}`;
+        }
+
+        async function downloadMultiImage(id, folder, imagesStr) {
+            const imageList = imagesStr.split(',').map(s => s.trim());
+            if (imageList.length === 0) return;
+            const choice = prompt(`Pilih slide yang ingin didownload (pisahkan dengan koma), atau ketik "all" untuk semua.\nTersedia: 1 - ${imageList.length}`);
+            if (!choice) return;
+            if (choice.toLowerCase() === 'all') {
+                for (let i = 0; i < imageList.length; i++) {
+                    downloadFile(`${folder}/${imageList[i]}`, `${id}-${i+1}.jpg`);
+                }
+                alert(`✅ Semua ${imageList.length} gambar sedang didownload.`);
+            } else {
+                const selected = choice.split(',').map(n => parseInt(n.trim()) - 1).filter(n => n >= 0 && n < imageList.length);
+                if (selected.length === 0) return alert("Tidak ada slide yang valid.");
+                for (let i of selected) {
+                    downloadFile(`${folder}/${imageList[i]}`, `${id}-${i+1}.jpg`);
+                }
+                alert(`✅ ${selected.length} gambar sedang didownload.`);
+            }
+        }
+
+        function toggleReadMore(id) {
+            const content = document.getElementById(`content-${id}`);
+            const btn = document.getElementById(`btn-${id}`);
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed'); content.classList.add('expanded');
+                btn.innerText = '📕 Tutup';
+            } else {
+                content.classList.remove('expanded'); content.classList.add('collapsed');
+                btn.innerText = '📖 Baca Selengkapnya';
+            }
+        }
+
+        function toggleModalReadMore() {
+            const content = document.getElementById('modalContentBody');
+            const btn = document.getElementById('modalReadMoreBtn');
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed'); content.classList.add('expanded');
+                btn.innerText = '📕 Tutup';
+            } else {
+                content.classList.remove('expanded'); content.classList.add('collapsed');
+                btn.innerText = '📖 Baca Selengkapnya';
+            }
+        }
+
+        // PERBAIKAN: Mendekode nama kategori aman petik & langsung menggulir mulus ke #post-list
+        function filterKategori(namaParam, element) {
+            const nama = namaParam ? decodeURIComponent(namaParam) : '';
+            kategoriAktif = nama;
             document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
-            if (element) {
-                element.classList.add('active');
+            if(element) element.classList.add('active');
+
+            const posters = document.querySelectorAll('.poster');
+            let adaPoster = false;
+            posters.forEach(poster => {
+                const kategori = poster.getAttribute('data-kategori');
+                if(cleanCategory(kategori) === cleanCategory(nama)) { 
+                    poster.style.display = isCompactView ? 'grid' : 'block'; 
+                    adaPoster = true; 
+                } else { 
+                    poster.style.display = 'none'; 
+                }
+            });
+            // Bergulir langsung ke daftar poster secara halus
+            if(adaPoster) setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+            document.getElementById('search-result').style.display = 'none';
+        }
+
+        function sharePoster(judul, url) {
+            const textToCopy = `Cari "${judul}" di situs ini: ${url}`;
+            if (navigator.share) { navigator.share({ title: judul, url: url }); } 
+            else { navigator.clipboard.writeText(textToCopy); alert("✅ Link poster berhasil disalin!"); }
+        }
+
+        function dmInstagram() { window.open('https://www.instagram.com/tauhidsunnah_id', '_blank'); }
+
+        /* --- HANDLER MODAL UNTUK MODE KOMPAK --- */
+        function handleCardClick(event, posterId) {
+            if (!isCompactView) return;
+            if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
+            
+            const rawItem = rawManifestPosters.find(p => p.path.replace(/\//g, '-') === posterId);
+            if (!rawItem) return;
+
+            const folder = `posters/${rawItem.path}`;
+            const judul = rawItem.judul || "Tanpa Judul";
+            const subJudul = rawItem.sub_judul || "";
+            const kategori = rawItem.kategori || "Umum";
+            const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[cleanCategory(kategori)] || '📂';
+            const tagArray = rawItem.tags ? rawItem.tags.split(',').map(t => t.trim()) : [];
+            const pdfSrc = rawItem.pdf ? `${folder}/brosur.pdf` : null;
+            const favList = getFavorit();
+            const isSaved = favList.includes(posterId);
+            const parsedContent = marked.parse(rawItem.compiledContent || "Konten belum tersedia.");
+            const imageList = (rawItem.images || "1.jpg").split(',').map(s => s.trim());
+
+            modalCarouselIndex = 0;
+            let carouselHTML = '';
+            if (imageList.length === 1) {
+                carouselHTML = `<div class="m-carousel-container"><img src="${folder}/${imageList[0]}" alt="${judul}"></div>`;
+            } else {
+                carouselHTML = `
+                <div class="m-carousel-container">
+                    <div class="m-carousel-track" id="modalCarouselTrack">
+                        ${imageList.map((img, idx) => `
+                            <div class="m-carousel-slide">
+                                <img src="${folder}/${img}" alt="${judul}">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="m-carousel-btn prev" onclick="slideModalCarousel(-1, ${imageList.length})">❮</button>
+                    <button class="m-carousel-btn next" onclick="slideModalCarousel(1, ${imageList.length})">❯</button>
+                    <div class="m-slide-number" id="modalSlideNum">1 / ${imageList.length}</div>
+                </div>
+                `;
             }
 
-            // Tampilkan poster yang terfilter
-            renderPosters();
+            const plainSubJudul = subJudul ? subJudul.replace(/\*/g, '').trim() : '';
+            const parsedSubJudul = subJudul ? marked.parse(subJudul) : '';
 
-            // PENGGULIRAN HALUS (SMOOTH SCROLL) KE KONTEN DAFTAR POSTER (#post-list)
-            setTimeout(() => {
-                const postListEl = document.getElementById('post-list');
-                if (postListEl) {
-                    postListEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                ${carouselHTML}
+                <div style="text-align:center;">
+                    <div class="m-badge">${katEmoji} ${kategori}</div>
+                    <h3>${judul}</h3>
+                    ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
+                    <div class="m-content collapsed" id="modalContentBody">${parsedContent}</div>
+                    <button class="m-read-more-btn" id="modalReadMoreBtn" onclick="toggleModalReadMore()">📖 Baca Selengkapnya</button>
+                    
+                    <div class="m-actions">
+                        <button class="btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '🔖 Belum Disimpan'}</button>
+                        ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
+                        <button onclick="downloadMultiImage('${posterId}', '${folder}', '${rawItem.images || "1.jpg"}')">🖼️ Gambar</button>
+                        <button onclick="copyCaptionDariElemen(this)">📋 Caption</button>
+                    </div>
+
+                    ${tagArray.length > 0 ? `<div class="m-tags">${tagArray.map(t => `<span class="m-tag">#${t}</span>`).join('')}</div>` : ''}
+                </div>
+            `;
+
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function tutupModalDetail() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function checkCloseModal(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                tutupModalDetail();
+            }
+        }
+
+        /* --- SEARCH DROPDOWN LOGIC --- */
+        const searchInput = document.getElementById('search');
+        const resultBox = document.getElementById('search-result');
+        let timeoutId;
+
+        searchInput.addEventListener('input', function() {
+            if (isSelecting) { return; }
+            clearTimeout(timeoutId); 
+            timeoutId = setTimeout(() => {
+                const key = this.value.trim().toLowerCase();
+                if (key === '') {
+                    resultBox.style.display = 'none'; resultBox.innerHTML = '';
+                    document.querySelectorAll('.poster').forEach(p => p.style.display = isCompactView ? 'grid' : 'block');
+                    document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
+                    return;
                 }
-            }, 60);
+                const hasil = semuaPosterCache.filter(item => 
+                    item.judul.toLowerCase().includes(key) ||
+                    item.subJudul.toLowerCase().includes(key) ||
+                    item.kategori.toLowerCase().includes(key) ||
+                    item.tags.toLowerCase().includes(key) ||
+                    item.caption.toLowerCase().includes(key)
+                );
+                if (hasil.length > 0) {
+                    resultBox.style.display = 'block';
+                    resultBox.innerHTML = hasil.map(item => {
+                        const katEmoji = emojiMapGlobal[item.kategori.toLowerCase()] || emojiMapGlobal[cleanCategory(item.kategori)] || '📂';
+                        return `
+                            <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
+                                <span>📚 ${item.judul}</span>
+                                <small>${katEmoji} ${item.kategori}</small>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    resultBox.style.display = 'block';
+                    resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
+                }
+                const posters = document.querySelectorAll('.poster');
+                posters.forEach(poster => {
+                    const text = poster.innerText.toLowerCase();
+                    poster.style.display = text.includes(key) ? (isCompactView ? 'grid' : 'block') : 'none';
+                });
+                setTimeout(() => {
+                    document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
+                    highlightText(key);
+                }, 100);
+            }, 300);
+        });
+
+        function pilihDariDropdown(id) {
+            isSelecting = true;
+            clearTimeout(timeoutId);
+            const resultBox = document.getElementById('search-result');
+            const searchInput = document.getElementById('search');
+            resultBox.style.display = 'none';
+            searchInput.value = '';
+            document.activeElement.blur();
+            const searchId = id.replace(/\//g, '-');
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(p => {
+                const pid = p.getAttribute('data-id');
+                p.style.display = (pid === searchId) ? (isCompactView ? 'grid' : 'block') : 'none';
+            });
+            setTimeout(() => {
+                const target = document.getElementById('post-list');
+                if(target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            }, 500);
+            setTimeout(() => { isSelecting = false; }, 600);
         }
 
-        // ==============================================================================
-        // PENGATURAN MODE SEGMENTED (SEMUA / PDF / DISIMPAN)
-        // ==============================================================================
-        function setAppMode(mode, btn) {
-            currentAppMode = mode;
-            document.querySelectorAll('.segmented-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            renderPosters();
-        }
-
-        // ==============================================================================
-        // PERENDERAN DAFTAR POSTER DAKWAH
-        // ==============================================================================
-        function renderPosters() {
-            const container = document.getElementById('grid-posters');
-            if (!container) return;
-
-            const searchVal = (document.getElementById('search-box')?.value || '').toLowerCase().trim();
-
-            // Filter data poster
-            const filtered = allPosters.filter(p => {
-                const pId = p.path.replace(/\//g, '-');
-                
-                // Filter Mode
-                if (currentAppMode === 'saved' && !savedFavorites.includes(pId)) return false;
-                if (currentAppMode === 'pdf' && !p.pdf) return false;
-
-                // Filter Kategori
-                if (activeKategori !== null) {
-                    if (normalizeCategory(p.kategori) !== normalizeCategory(activeKategori)) {
-                        return false;
+        function highlightText(key) {
+            document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(poster => {
+                if (poster.style.display !== 'none') {
+                    const judulEl = poster.querySelector('h3');
+                    if (judulEl) {
+                        const judulText = judulEl.innerHTML;
+                        const regex = new RegExp(`(${key})`, 'gi');
+                        judulEl.innerHTML = judulText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
+                    }
+                    const contentWrapper = poster.querySelector('.poster-content-wrapper');
+                    if (contentWrapper) {
+                        const contentText = contentWrapper.innerHTML;
+                        const regex = new RegExp(`(${key})`, 'gi');
+                        contentWrapper.innerHTML = contentText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
                     }
                 }
-
-                // Filter Pencarian
-                if (searchVal) {
-                    const inJudul = p.judul.toLowerCase().includes(searchVal);
-                    const inSub = (p.sub_judul || '').toLowerCase().includes(searchVal);
-                    const inTags = (p.tags || '').toLowerCase().includes(searchVal);
-                    if (!inJudul && !inSub && !inTags) return false;
-                }
-
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px;">
-                        Belum ada arsip dakwah yang cocok dengan kriteria filter.
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            filtered.forEach(p => {
-                const pId = p.path.replace(/\//g, '-');
-                const imagesArr = (p.images || "1.jpg").split(',').map(s => s.trim());
-                const curSlide = carouselIndices[pId] || 0;
-                const isFav = savedFavorites.includes(pId);
-                const currentImgUrl = `${GITHUB_RAW_BASE}/posters/${p.path}/${imagesArr[curSlide]}`;
-                const pdfUrl = `${GITHUB_RAW_BASE}/posters/${p.path}/brosur.pdf`;
-
-                html += `
-                    <div class="card-poster" id="poster-${pId}">
-                        <!-- Carousel Slide -->
-                        <div class="carousel-wrapper">
-                            <img src="${currentImgUrl}" alt="${p.judul}" class="carousel-img" loading="lazy" onerror="this.src='https://placehold.co/600x1066/161a1f/D4AF37?text=Poster+Dakwah'">
-                            
-                            ${imagesArr.length > 1 ? `
-                                <span class="slide-counter">${curSlide + 1} / ${imagesArr.length}</span>
-                                <button class="nav-btn nav-prev" onclick="changeSlide('${pId}', -1, ${imagesArr.length})">❮</button>
-                                <button class="nav-btn nav-next" onclick="changeSlide('${pId}', 1, ${imagesArr.length})">❯</button>
-                            ` : ''}
-                        </div>
-
-                        <!-- Informasi Faedah -->
-                        <div class="poster-info">
-                            <span class="poster-badge">📂 ${formatDisplayKategori(p.kategori)}</span>
-                            <h3 class="poster-title">${p.judul}</h3>
-                            ${p.sub_judul ? `<div class="poster-collab">${p.sub_judul.replace(/\*/g, '')}</div>` : ''}
-
-                            <!-- Caption Dropdown -->
-                            ${p.content ? `
-                                <div class="caption-wrapper">
-                                    <div class="caption-toggle" onclick="toggleCaption('${pId}')">
-                                        <span>📜 Buka Teks Caption</span>
-                                        <span id="caption-arrow-${pId}">▼</span>
-                                    </div>
-                                    <div class="caption-content" id="caption-text-${pId}">${p.content}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-
-                        <!-- Tombol Aksi -->
-                        <div class="action-buttons">
-                            <button class="btn-act ${isFav ? 'btn-act-primary' : 'btn-act-secondary'}" onclick="toggleBookmark('${pId}')">
-                                ${isFav ? '🔖 Disimpan' : '👆 Simpan'}
-                            </button>
-
-                            <button class="btn-act btn-act-primary" onclick="requestDownloadImage('${pId}', '${currentImgUrl}', '${p.judul}-slide-${curSlide + 1}.jpg')">
-                                📥 Gambar
-                            </button>
-
-                            ${p.pdf ? `
-                                <button class="btn-act btn-act-primary" onclick="requestDownloadPdf('${pdfUrl}', '${p.judul}.pdf')">
-                                    📄 PDF
-                                </button>
-                            ` : ''}
-
-                            <button class="btn-act btn-act-secondary" onclick="copyPosterCaption('${pId}')">
-                                📋 Salin
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // ==============================================================================
-        // CAROUSEL NAVIGASI
-        // ==============================================================================
-        function changeSlide(pId, dir, total) {
-            const current = carouselIndices[pId] || 0;
-            const next = (current + dir + total) % total;
-            carouselIndices[pId] = next;
-            renderPosters();
-        }
-
-        // ==============================================================================
-        // BUKA / TUTUP CAPTION
-        // ==============================================================================
-        function toggleCaption(pId) {
-            const contentEl = document.getElementById(`caption-text-${pId}`);
-            const arrowEl = document.getElementById(`caption-arrow-${pId}`);
-            if (contentEl) {
-                const isOpen = contentEl.classList.contains('open');
-                if (isOpen) {
-                    contentEl.classList.remove('open');
-                    if (arrowEl) arrowEl.innerText = '▼';
-                } else {
-                    contentEl.classList.add('open');
-                    if (arrowEl) arrowEl.innerText = '▲';
-                }
-            }
-        }
-
-        // ==============================================================================
-        // SISTEM PENCARIAN & LIVE DROPDOWN
-        // ==============================================================================
-        function handleSearch(val) {
-            const dropdown = document.getElementById('search-dropdown');
-            const key = val.trim().toLowerCase();
-
-            if (!key) {
-                if (dropdown) dropdown.style.display = 'none';
-                renderPosters();
-                return;
-            }
-
-            const matched = allPosters.filter(p => p.judul.toLowerCase().includes(key)).slice(0, 5);
-            if (dropdown) {
-                if (matched.length > 0) {
-                    dropdown.innerHTML = matched.map(p => `
-                        <div class="search-dropdown-item" onclick="selectSearchPoster('${encodeURIComponent(p.judul)}')">
-                            📚 ${p.judul}
-                        </div>
-                    `).join('');
-                    dropdown.style.display = 'block';
-                } else {
-                    dropdown.style.display = 'none';
-                }
-            }
-
-            renderPosters();
-        }
-
-        function selectSearchPoster(encodedJudul) {
-            const judul = decodeURIComponent(encodedJudul);
-            const input = document.getElementById('search-box');
-            if (input) input.value = judul;
-            const dropdown = document.getElementById('search-dropdown');
-            if (dropdown) dropdown.style.display = 'none';
-            renderPosters();
-        }
-
-        // ==============================================================================
-        // FAVORIT & BOOKMARK
-        // ==============================================================================
-        function toggleBookmark(pId) {
-            if (savedFavorites.includes(pId)) {
-                savedFavorites = savedFavorites.filter(id => id !== pId);
-            } else {
-                savedFavorites.push(pId);
-            }
-            localStorage.setItem('dakwahFavorit', JSON.stringify(savedFavorites));
-            renderPosters();
-        }
-
-        // ==============================================================================
-        // FOLLOW-GATE SISTEM (PROTEKSI UNDUH & SALIN)
-        // ==============================================================================
-        function checkGateAccess(callback) {
-            const hasUnlocked = localStorage.getItem('has_followed_dakwah_accounts');
-            if (hasUnlocked === 'true') {
-                callback();
-            } else {
-                pendingDownloadAction = callback;
-                const modal = document.getElementById('gate-modal');
-                if (modal) modal.style.display = 'flex';
-            }
-        }
-
-        function handleGateClick(accountNum, url) {
-            window.open(url, '_blank');
-            const btn = document.getElementById(`gate-btn-${accountNum}`);
-            if (btn) {
-                btn.innerText = 'Memverifikasi (10d)...';
-                btn.style.opacity = '0.7';
-                btn.disabled = true;
-            }
-
-            setTimeout(() => {
-                if (btn) {
-                    btn.innerText = '✅ Diikuti';
-                    btn.style.background = 'var(--success)';
-                    btn.style.color = '#fff';
-                }
-                if (accountNum === 1) gateFollowed1 = true;
-                if (accountNum === 2) gateFollowed2 = true;
-
-                if (gateFollowed1 && gateFollowed2) {
-                    const unlockBtn = document.getElementById('gate-unlock-btn');
-                    if (unlockBtn) unlockBtn.style.display = 'block';
-                }
-            }, 10000);
-        }
-
-        function unlockGateAccess() {
-            localStorage.setItem('has_followed_dakwah_accounts', 'true');
-            const modal = document.getElementById('gate-modal');
-            if (modal) modal.style.display = 'none';
-            if (pendingDownloadAction) {
-                pendingDownloadAction();
-                pendingDownloadAction = null;
-            }
-        }
-
-        // ==============================================================================
-        // AKSI DOWNLOAD & SALIN
-        // ==============================================================================
-        function requestDownloadImage(pId, url, filename) {
-            checkGateAccess(() => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
             });
         }
 
-        function requestDownloadPdf(url, filename) {
-            checkGateAccess(() => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-
-        function copyPosterCaption(pId) {
-            const poster = allPosters.find(p => p.path.replace(/\//g, '-') === pId);
-            if (!poster) return;
-
-            checkGateAccess(() => {
-                const text = `${poster.judul}\n\n${poster.sub_judul || ''}\n\n${poster.content || ''}`;
-                navigator.clipboard.writeText(text).then(() => {
-                    alert("✅ Caption faedah dakwah berhasil disalin!");
+        /* --- TOGGLE TAMPILAN KOMPAK VS ORI --- */
+        function toggleView() {
+            const list = document.getElementById('post-list');
+            const btn = document.getElementById('viewToggle');
+            const posters = document.querySelectorAll('.poster');
+            
+            isCompactView = !isCompactView;
+            
+            if (isCompactView) { 
+                document.body.classList.add('is-compact');
+                list.classList.add('compact-view'); 
+                btn.innerHTML = '🅰️'; 
+                btn.title = "Kembali ke Tampilan Utama";
+                posters.forEach(p => {
+                    if (p.style.display !== 'none') p.style.display = 'grid';
                 });
-            });
-        }
-
-        // ==============================================================================
-        // AUDIO OMBAK AMBIENT
-        // ==============================================================================
-        function toggleAudio() {
-            const audio = document.getElementById('ambient-audio');
-            if (!audio) return;
-
-            if (isAudioPlaying) {
-                audio.pause();
-                isAudioPlaying = false;
-            } else {
-                audio.volume = 0.6;
-                audio.play().then(() => {
-                    isAudioPlaying = true;
-                }).catch(err => {
-                    console.warn("Autoplay diblokir oleh browser:", err);
+            } else { 
+                document.body.classList.remove('is-compact');
+                list.classList.remove('compact-view'); 
+                btn.innerHTML = '🔠'; 
+                btn.title = "Ubah ke Tampilan Kompak"; 
+                posters.forEach(p => {
+                    if (p.style.display !== 'none') p.style.display = 'block';
                 });
             }
         }
+
+        /* --- BG AUDIO --- */
+        const bgAudio = document.getElementById('bgAudio');
+        const soundBtn = document.getElementById('soundBtn');
+        let suaraMenyala = false;
+        function toggleSuara() {
+            suaraMenyala = !suaraMenyala;
+            if (suaraMenyala) { bgAudio.volume = 0.8; bgAudio.play(); soundBtn.innerHTML = '🔊'; soundBtn.classList.remove('silent'); soundBtn.classList.add('playing'); } 
+            else { bgAudio.pause(); soundBtn.innerHTML = '🔇'; soundBtn.classList.remove('playing'); soundBtn.classList.add('silent'); }
+        }
+
+        loadPosters();
     </script>
 </body>
 </html>
