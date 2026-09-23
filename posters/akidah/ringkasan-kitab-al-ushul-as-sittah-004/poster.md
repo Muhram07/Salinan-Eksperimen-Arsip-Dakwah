@@ -10,6 +10,7 @@ pdf: brosur.pdf
 ---
 
 
+
 Ringkasan kitab al-ushul as-sittah versi awam
 
 .

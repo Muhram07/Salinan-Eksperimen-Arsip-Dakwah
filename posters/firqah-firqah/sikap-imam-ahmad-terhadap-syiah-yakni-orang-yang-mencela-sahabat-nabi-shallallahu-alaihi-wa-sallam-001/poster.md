@@ -10,6 +10,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 Imam Ahmad bin Hanbal rahimahullah, Beliau ditanya tentang seorang lelaki yang mencela seorang shahabat Nabi Shallallahu 'alaihi wa sallam (Syi'ah) maka dia menjawab,
 
 .

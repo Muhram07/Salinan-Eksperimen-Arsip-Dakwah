@@ -9,6 +9,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 Sebagai ummat Rasulullah shalallahu 'alaihi wa sallam, alangkah baiknya kita hanya mengerjakan apa-apa yang beliau perintahkan saja, itupun kita gak pernah bisa melakukan semua yang diperintahkan,
 
 .

@@ -1,12 +1,13 @@
 ---
 judul: Doa Berlindung Dari Azab Neraka Jahanam
 sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
-kategori: Doa
+kategori: Do'a
 kategori_emoji: 📂
 tags: doa,doasore,doaharian,doaislam,doaqurani,doaperlindungan,alfurqan,azabneraka,jahanam,posterdoa,dakwahsunnah,annashihadaily
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 DO'A BERLINDUNG DARI AZAB NERAKA JAHANAM

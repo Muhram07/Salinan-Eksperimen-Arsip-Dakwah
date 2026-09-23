@@ -9,6 +9,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 Untukmu Akhawatillah..
 
 Sebaiknya seorang Muslimah tidak memakai pakaian yang ada coraknya, Seperti: kembang-kembang, garis-garis, polkadot, renda-renda, borkat dan sejenisnya yang menarik perhatian....

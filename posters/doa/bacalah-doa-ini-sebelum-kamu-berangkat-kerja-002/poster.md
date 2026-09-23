@@ -1,12 +1,13 @@
 ---
 judul: Bacalah Doa Ini Sebelum Kamu Berangkat Kerja
 sub_judul: '*@an.nashiha_daily*'
-kategori: Doa
+kategori: Do'a
 kategori_emoji: 📂
 tags: doa,rejekihalal,keberkahan,kerja,doarezeki,sunnah,doadandzikir,manhajsalaf
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 BACALAH DOA INI SEBELUM KAMU BERANGKAT KERJA

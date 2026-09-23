@@ -9,6 +9,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 ALLAH GAK BUTUH PUASAMU
 
 Seandainya kamu berpuasa maka hendaknya pendengaranmu, penglihatanmu dan lisanmu turut berpuasa dari dusta dan hal-hal haram serta janganlah kamu menyakiti tetangga. Bersikap tenang dan berwibawalah di hari puasamu. Janganlah kamu jadikan hari puasamu dan hari tidak berpuasamu sama saja.

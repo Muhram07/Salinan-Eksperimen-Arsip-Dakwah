@@ -10,6 +10,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 BUKAN EMAS, DAN BUKAN PERAK, TAPI INILAH SIMPANAN HARTA TERBAIK, YANG TIDAK MENGANDUNG KEJELEKAN DIDALAMNYA
 
 1) Lisan yang senantiasa berdzikir yang mengingatkan dirinya kepada Allah Ta'ala dalam kesendiriannya maupun di tengah keramaian

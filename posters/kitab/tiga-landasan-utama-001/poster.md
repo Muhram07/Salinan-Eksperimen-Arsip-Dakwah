@@ -9,6 +9,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 ☝️Pertama: Mengenal Rabb kita Allah, yaitu mengenalnya sebagaimana terdapat dalam Alquran, dan lewat lisan Rasulullah shallallahu ‘alaihi wa sallam. Mengenalnya berarti mengenal keesaan Allah, juga mengenal nama dan sifat-Nya. Inilah landasan pokok dari landasan lainnya. Kita wajib mengenal Allah sehingga kita bisa menyembah Allah di atas bashirah (bukti) dan keyakinan.
 
 .

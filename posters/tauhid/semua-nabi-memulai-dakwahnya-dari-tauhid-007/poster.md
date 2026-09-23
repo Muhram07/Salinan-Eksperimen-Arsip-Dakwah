@@ -10,6 +10,7 @@ tidakpakepdf: brosur.pdf
 ---
 
 
+
 Seluruh nabi dan rasul mengawali jalan dakwah mereka dari satu fondasi yang sama : yakni mengajak manusia mentauhidkan Allah.
 
 .
