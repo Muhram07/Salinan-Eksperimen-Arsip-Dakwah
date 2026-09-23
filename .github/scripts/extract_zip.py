@@ -6,7 +6,7 @@ import re
 import sys
 import json
 
-# === DAFTAR URUTAN RESMI 12 BULAN HIJRIAH ===
+# === DAFTAR URUTAN RESMI 12 BULAN HIJRIAH (TAMPILAN ESTETIK BERPETIK) ===
 HIJRIAH_ORDER = [
     "Muharram",
     "Safar",
@@ -32,13 +32,16 @@ for i, m in enumerate(HIJRIAH_ORDER, 1):
     HIJRIAH_NORMALIZE_MAP[f"{base_name}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_name} {num}"] = m
     
+    # Variasi ejaan tanpa tanda petik / variasi penulisan
+    base_no_quote = base_name.replace("'", "").replace("’", "").replace("`", "")
+    HIJRIAH_NORMALIZE_MAP[base_no_quote] = m
+    HIJRIAH_NORMALIZE_MAP[f"{base_no_quote} ({num})"] = m
+    
     base_single_w = base_name.replace('awwal', 'awal').replace('syawwal', 'syawal')
     HIJRIAH_NORMALIZE_MAP[base_single_w] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w} ({num})"] = m
-    HIJRIAH_NORMALIZE_MAP[f"{base_single_w}-{num}"] = m
-    HIJRIAH_NORMALIZE_MAP[f"{base_single_w} {num}"] = m
 
-# KAMUS BAKU KATEGORI AGAR SERAGAM TOTAL
+# KAMUS BAKU KATEGORI
 KATEGORI_REPLACE_MAP = {
     "aqidah": "Akidah",
     "akidah": "Akidah",
@@ -52,9 +55,13 @@ KATEGORI_REPLACE_MAP = {
     "hadits": "Hadits",
     "dzikir": "Dzikir",
     "zikir": "Zikir",
+    "doa": "Do'a",
+    "do'a": "Do'a",
+    "do’a": "Do'a",
 }
 
 def get_canonical_kategori(kat_str):
+    """Mengembalikan nama kategori resmi dengan tanda petik untuk tampilan public/manifest."""
     if not kat_str:
         return "Umum"
     clean_str = kat_str.strip().lower().replace("’", "'").replace("‘", "'")
@@ -65,22 +72,23 @@ def get_canonical_kategori(kat_str):
     return kat_str.strip().title()
 
 def get_folder_slug(kat_str):
+    """Menghasilkan nama folder fisik yang bersih 100% dari tanda petik & simbol."""
     canonical = get_canonical_kategori(kat_str)
     
-    # Ubah ke huruf kecil
+    # 1. Konversi ke huruf kecil
     slug = canonical.lower()
     
-    # Hapus angka dalam kurung jika ada (misal: (4), (9), dll)
+    # 2. Hapus nomor urut dalam kurung jika ada
     slug = re.sub(r'\s*\(\d+\)', '', slug)
     
-    # --- BERSIHKAN SEMUA TANDA PETIK & SIMBOL DI BELAKANG LAYAR ---
-    slug = slug.replace("’", "").replace("'", "").replace("`", "")
+    # 3. BERSIHKAN TOTAL SEMUA JENIS TANDA PETIK
+    slug = slug.replace("’", "").replace("'", "").replace("`", "").replace("‘", "")
     
-    # Ganti spasi dengan strip (-) dan buang karakter non-alfanumerik lainnya
+    # 4. Ganti spasi/karakter non-alfanumerik dengan strip (-)
     slug = re.sub(r'\s+', '-', slug)
     slug = re.sub(r'[^a-z0-9\-]+', '', slug)
     
-    # Rapikan strip ganda
+    # 5. Rapikan pemisah strip ganda
     slug = re.sub(r'-+', '-', slug).strip('-')
     
     return slug
@@ -167,7 +175,6 @@ def main():
             os.remove(zip_file_path)
             print("ZIP berhasil diekstrak dan dipindahkan.")
 
-    # REKONSTRUKSI MENYELURUH (FULL SCAN, FIX YAML, & RE-MERGE FOLDER)
     scan_and_reconstruct_posters()
 
 def scan_and_reconstruct_posters():
@@ -226,6 +233,7 @@ def scan_and_reconstruct_posters():
                 raw_kategori = data.get('kategori', 'Umum')
                 canonical_kat = get_canonical_kategori(raw_kategori)
                 
+                # Pertahankan nama estetik di frontmatter
                 data['kategori'] = canonical_kat
                 kategori_terpakai_set.add(canonical_kat)
 
@@ -239,6 +247,7 @@ def scan_and_reconstruct_posters():
                 with open(md_file_path, 'w', encoding='utf-8') as f:
                     f.write(new_full_content)
 
+                # Gunakan slug tanpa petik untuk penataan folder fisik
                 target_kat_slug = get_folder_slug(canonical_kat)
                 current_parent_slug = os.path.basename(os.path.dirname(poster_path))
                 
@@ -253,7 +262,7 @@ def scan_and_reconstruct_posters():
                     if not os.path.exists(new_destination):
                         shutil.move(poster_path, new_destination)
                         correct_poster_dir = new_destination
-                        print(f"🔀 Memindahkan poster ke kategori baku: {canonical_kat} ({folder_name})")
+                        print(f"🔀 Memindahkan poster ke folder bersih: {target_kat_slug} ({folder_name})")
                     else:
                         for item in os.listdir(poster_path):
                             s_item = os.path.join(poster_path, item)
@@ -273,6 +282,7 @@ def scan_and_reconstruct_posters():
         except Exception as e:
             print(f"Gagal merekonstruksi {md_file_path}: {e}")
 
+    # Menghapus folder kategori lama yang kosong / berpetik
     for kat_folder in os.listdir(base_poster_path):
         kat_folder_path = os.path.join(base_poster_path, kat_folder)
         if os.path.isdir(kat_folder_path) and not os.listdir(kat_folder_path):
@@ -291,4 +301,3 @@ def scan_and_reconstruct_posters():
 
 if __name__ == "__main__":
     main()
-
