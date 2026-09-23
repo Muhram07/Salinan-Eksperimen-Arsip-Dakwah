@@ -1,15 +1,13 @@
 ---
-judul: "7 Pesan Dalam Menjaga Perasaan Sesama Manusia,yakni Adab Dan Empati Dalam Berinteraksi"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,empati,menjagaperasaan,akhlak,nasihat,hrthabrani,thequranpath,annashihadaily,bedahkitab"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: 7 Pesan Dalam Menjaga Perasaan Sesama Manusia,yakni Adab Dan Empati Dalam Berinteraksi
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,empati,menjagaperasaan,akhlak,nasihat,hrthabrani,thequranpath,annashihadaily,bedahkitab
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 7 PESAN DALAM MENJAGA PERASAAN SESAMA MANUSIA
 
 .

@@ -1,12 +1,13 @@
 ---
-judul: "14 Amalan Yang Keliru Di Bulan Ramadhan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "bidah"
-kategori_emoji: "🚫"
-tags: "bidah,amalanpalsu,kekeliruanramadhan,ramadhan,fikihramadhan,sunnah,manhajsalaf,ziarahkubur,imsak,tarawih,zakatfithri"
-images: "1.jpg, 2.jpg, 3.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: 14 Amalan Yang Keliru Di Bulan Ramadhan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Bid'ah
+kategori_emoji: 🚫
+tags: bidah,amalanpalsu,kekeliruanramadhan,ramadhan,fikihramadhan,sunnah,manhajsalaf,ziarahkubur,imsak,tarawih,zakatfithri
+images: 1.jpg, 2.jpg, 3.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 14 AMALAN YANG KELIRU DI BULAN RAMADHAN
 
 1] Mengkhususkan Ziarah Kubur Menjelang Ramadhan

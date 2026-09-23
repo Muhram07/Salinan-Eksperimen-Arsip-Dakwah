@@ -1,12 +1,14 @@
 ---
-judul: "Ingat Ya Shalihah... Tidak Sah Sholat Seorang Wanita Jika Terlihat Telapak Kakinya"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,fikhwanita,auratwanita,telapakkaki,syaratsholat,syaikhalalbani,binbaz,lajnahdaimah,rumaysho,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ingat Ya Shalihah... Tidak Sah Sholat Seorang Wanita Jika Terlihat Telapak
+  Kakinya
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,fikhwanita,auratwanita,telapakkaki,syaratsholat,syaikhalalbani,binbaz,lajnahdaimah,rumaysho,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 INGAT YA SHALIHAH... TIDAK SAH SHOLAT SEORANG WANITA JIKA TERLIHAT TELAPAK KAKINYA
 
 Tidak sah sholatnya seorang wanita tanpa menutupi kedua telapak kakinya. Jika dia tidak mengetahuinya maka diingatkan. Kemudian jika dia sudah mengetahuinya dan dia masih bermudah mudahan, (membiarkan saja) maka sholatnya tidak sah.

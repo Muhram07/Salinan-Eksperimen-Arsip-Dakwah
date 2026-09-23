@@ -1,12 +1,13 @@
 ---
-judul: "Variasi Bacaan saat Ruku' Dalam Sholat Sesuai Hadist Shahih"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "🕌"
-tags: "sholat,bacaanruku,ruku,doasholat,fiqihsholat,sunnah,doadandzikir,manhajsalaf"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Variasi Bacaan saat Ruku' Dalam Sholat Sesuai Hadist Shahih
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 🕌
+tags: sholat,bacaanruku,ruku,doasholat,fiqihsholat,sunnah,doadandzikir,manhajsalaf
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 VARIASI BACAAN WAKTU RUKUK DALAM SHOLAT SESUAI HADIST SHAHIH
 
 1. Bacaan Pertama:

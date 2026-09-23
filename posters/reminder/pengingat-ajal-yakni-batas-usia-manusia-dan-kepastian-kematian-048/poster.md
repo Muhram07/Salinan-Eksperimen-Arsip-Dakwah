@@ -1,15 +1,13 @@
 ---
-judul: "Pengingat Ajal,yakni Batas Usia Manusia Dan Kepastian Kematian"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "reminder,pengingatdiri,kematian,ingatmati,ajal,alaraf,alaraf34,muhasabah,nasihat,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Pengingat Ajal,yakni Batas Usia Manusia Dan Kepastian Kematian
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: reminder,pengingatdiri,kematian,ingatmati,ajal,alaraf,alaraf34,muhasabah,nasihat,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Bahkan Secanggih dan Setinggi Apapun Ilmu Kedokteran, Tidak Akan Mampu Memperpanjang Usiamu Meskipun Hanya Sedetik
 
 .

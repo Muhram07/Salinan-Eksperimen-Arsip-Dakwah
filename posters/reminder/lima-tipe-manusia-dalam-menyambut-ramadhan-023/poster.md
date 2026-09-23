@@ -1,12 +1,13 @@
 ---
-judul: "Lima Tipe Manusia Dalam Menyambut Ramadhan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "ramadhan,persiapanramadhan,tipemanusia,reminder,nasihat,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Lima Tipe Manusia Dalam Menyambut Ramadhan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: ramadhan,persiapanramadhan,tipemanusia,reminder,nasihat,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 LIMA TYPE MANUSIA DALAM MENYAMBUT RAMADHAN
 
 .

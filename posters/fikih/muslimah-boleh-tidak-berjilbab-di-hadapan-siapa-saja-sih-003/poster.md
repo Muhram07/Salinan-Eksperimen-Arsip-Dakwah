@@ -1,12 +1,13 @@
 ---
-judul: "Muslimah Boleh Tidak Berjilbab di Hadapan Siapa Saja sih ?"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "mahram,mahrammuslimah,aurat,jilbab,fikihwanita,adab,manhajsalaf,muslimah,fikih"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Muslimah Boleh Tidak Berjilbab di Hadapan Siapa Saja sih ?
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: mahram,mahrammuslimah,aurat,jilbab,fikihwanita,adab,manhajsalaf,muslimah,fikih
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Muslimah Boleh Tidak Berjilbab di hadapan:
 
 1) Ayah Kandung

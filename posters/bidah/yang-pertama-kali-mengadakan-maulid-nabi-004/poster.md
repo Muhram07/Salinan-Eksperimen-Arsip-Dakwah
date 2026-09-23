@@ -1,12 +1,13 @@
 ---
-judul: "Yang pertama kali mengadakan maulid nabi"
-sub_judul: "@an.nashiha_daily"
-kategori: "bidah"
-kategori_emoji: "🚫"
-tags: "Maulid, maulidnabi,bidah, ultah, Syiah,fakta"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Yang pertama kali mengadakan maulid nabi
+sub_judul: '@an.nashiha_daily'
+kategori: Bid'ah
+kategori_emoji: 🚫
+tags: Maulid, maulidnabi,bidah, ultah, Syiah,fakta
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Gak malu kah sama nabi shalallahu 'alaihi wa sallam?
 
 .

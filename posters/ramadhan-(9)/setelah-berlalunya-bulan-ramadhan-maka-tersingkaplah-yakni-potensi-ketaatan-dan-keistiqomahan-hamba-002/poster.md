@@ -1,14 +1,14 @@
 ---
-judul: "Setelah Berlalunya Bulan Ramadhan, Maka Tersingkaplah,yakni Potensi Ketaatan Dan Keistiqomahan Hamba"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@sunnahstori*"
-kategori: "ramadhan (9)"
-kategori_emoji: "🌙"
-tags: "ramadhan,setelahramadhan,istiqomah,kebiasaanbaik,potensidiri,muhasabah,nasihat,sunnahstori,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Setelah Berlalunya Bulan Ramadhan, Maka Tersingkaplah,yakni Potensi Ketaatan
+  Dan Keistiqomahan Hamba
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@sunnahstori*'
+kategori: Ramadhan (9)
+kategori_emoji: 🌙
+tags: ramadhan,setelahramadhan,istiqomah,kebiasaanbaik,potensidiri,muhasabah,nasihat,sunnahstori,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Setelah Berlalunya Bulan Ramadhan, Maka Tersingkaplah :
 
 .

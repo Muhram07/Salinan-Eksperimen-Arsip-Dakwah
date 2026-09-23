@@ -1,12 +1,13 @@
 ---
-judul: "Kehendak Allah Adalah Yang Terbaik Untukmu"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "remindertakdir,kehendakallah,ridho,ikhlas,suratalbaqarah216,reminder,nasihat,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kehendak Allah Adalah Yang Terbaik Untukmu
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: remindertakdir,kehendakallah,ridho,ikhlas,suratalbaqarah216,reminder,nasihat,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Jika sesuatu tidak berjalan sesuai dengan kehendakmu..
 
 Maka Berbahagialah...

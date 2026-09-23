@@ -7,6 +7,7 @@ tags: ramadhan,setelahramadhan,istiqomah,ketaatan,syawwal,syaikhfauzan,shalihalf
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 RAMADHAN PERGI, SEMOGA IMAN DAN KETAATAN KITA TIDAK IKUT PERGI...
 
 .

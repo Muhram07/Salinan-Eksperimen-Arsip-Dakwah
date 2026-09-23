@@ -1,12 +1,14 @@
 ---
-judul: "Inilah Yang Harus Kita Lakukan Ketika Terjadi Fitnah dan Peperangan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "fitnah,peperangan,sikapmuslim,syaikhabdussalamassuhaimi,kembali-kepada-sunnah,persatuan,reminderdiri,annashihadaily,manhajsalaf, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Inilah Yang Harus Kita Lakukan Ketika Terjadi Fitnah dan Peperangan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: fitnah,peperangan,sikapmuslim,syaikhabdussalamassuhaimi,kembali-kepada-sunnah,persatuan,reminderdiri,annashihadaily,manhajsalaf,
+  reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Inilah Yang Harus Kita Lakukan Ketika Terjadi Fitnah dan Peperangan
 
 .

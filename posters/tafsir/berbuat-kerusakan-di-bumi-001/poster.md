@@ -1,13 +1,13 @@
 ---
-judul: "Berbuat Kerusakan di bumi"
-sub_judul: "🖇Collabs :
-@thequran_path x @tauhidsunnah_id"
-kategori: "tafsir"
-kategori_emoji: "📖"
-tags: "kajiantafsir,tafsir,tafsiralquran,alquran,kerusakan,hutan,kemaksiatan"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Berbuat Kerusakan di bumi
+sub_judul: '🖇Collabs : @thequran_path x @tauhidsunnah_id'
+kategori: Tafsir
+kategori_emoji: 📖
+tags: kajiantafsir,tafsir,tafsiralquran,alquran,kerusakan,hutan,kemaksiatan
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Cek tafsirnya⤵️
 -----
 📚 Zubdatut Tafsir Min Fathil Qadir / Syaikh Dr. Muhammad Sulaiman Al Asyqar, mudarris tafsir Universitas Islam Madinah

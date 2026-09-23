@@ -1,12 +1,14 @@
 ---
-judul: "Ketika Sujud Dalam Sholat Tidak Cukup Hanya Dengan Menyentuhkan Dahi Dan Hidung Tapi Harus Dengan Menekan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,sujud,tatacarasholat,sujudmenekan,dahidanhidung,abudaud,tirmidzi,albani,bedahkitab,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ketika Sujud Dalam Sholat Tidak Cukup Hanya Dengan Menyentuhkan Dahi Dan Hidung
+  Tapi Harus Dengan Menekan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,sujud,tatacarasholat,sujudmenekan,dahidanhidung,abudaud,tirmidzi,albani,bedahkitab,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 PENTING UNTUK DIKETAHUI
 
 Ketika Sujud Dalam Sholat Tidak Cukup Hanya Dengan Menyentuhkan Dahi dan Hidung Saja di Tempat Sujud, Tapi Harus Dengan Menekan..!

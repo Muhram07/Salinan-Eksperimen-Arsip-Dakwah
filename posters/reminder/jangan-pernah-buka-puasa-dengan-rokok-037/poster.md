@@ -1,12 +1,14 @@
 ---
-judul: "Jangan Pernah Buka Puasa Dengan Rokok"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "puasa,ramadhan,rokok,bukapuasa,bahayarokok,hukumrokok,alaraf157,nasihatdiri,bedahkitab,annashihadaily,manhajsalaf, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Jangan Pernah Buka Puasa Dengan Rokok
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: puasa,ramadhan,rokok,bukapuasa,bahayarokok,hukumrokok,alaraf157,nasihatdiri,bedahkitab,annashihadaily,manhajsalaf,
+  reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 JANGAN PERNAH BUKA PUASA DENGAN ROKOK
 
 Berbuka puasa dengan rokok berarti menyambut nikmat berbuka dengan maksiat, dengan sesuatu yang diharamkan Allah, bukan dengan syukur.

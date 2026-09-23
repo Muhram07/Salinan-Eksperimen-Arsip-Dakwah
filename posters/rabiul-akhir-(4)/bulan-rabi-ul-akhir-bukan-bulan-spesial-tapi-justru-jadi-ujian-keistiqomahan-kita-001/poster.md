@@ -1,18 +1,15 @@
 ---
-judul: "Bulan Rabi'ul Akhir Bukan Bulan Spesial Tapi Justru Jadi Ujian Keistiqomahan Kita"
-sub_judul: "Collab Dakwah Sunnah :
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@al.nasiha*
-*@bedahkitab_*
-*@thalabulilmi.id*"
-kategori: "rabi'ul akhir (4)"
-kategori_emoji: "🌙"
-tags: "rabiulakhir,istiqomah,ibadahkarenaallah,bulantanpakeutamaan,konsisten,tauhidsunnahid,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bulan Rabi'ul Akhir Bukan Bulan Spesial Tapi Justru Jadi Ujian Keistiqomahan
+  Kita
+sub_judul: 'Collab Dakwah Sunnah : *@tauhidsunnah_id* *@an.nashiha_daily* *@sunnahstori*
+  *@al.nasiha* *@bedahkitab_* *@thalabulilmi.id*'
+kategori: Rabi'ul Akhir (4)
+kategori_emoji: 🌙
+tags: rabiulakhir,istiqomah,ibadahkarenaallah,bulantanpakeutamaan,konsisten,tauhidsunnahid,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Rabi'ul Akhir tidak punya keutamaan khusus seperti Ramadhan,(bulan puasa), Dzulhijjah (bulan haji), dll.
 
 .

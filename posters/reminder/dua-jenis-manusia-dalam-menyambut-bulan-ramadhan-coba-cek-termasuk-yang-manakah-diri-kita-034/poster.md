@@ -1,12 +1,14 @@
 ---
-judul: "Dua Jenis Manusia Dalam Menyambut Bulan Ramadhan Coba Cek Termasuk Yang Manakah Diri Kita"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "ramadhan,sambutramadhan,persiapanramadhan,shalihalfauzan,mukmin,munafiq,nasihatdiri,reminder,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Dua Jenis Manusia Dalam Menyambut Bulan Ramadhan Coba Cek Termasuk Yang Manakah
+  Diri Kita
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: ramadhan,sambutramadhan,persiapanramadhan,shalihalfauzan,mukmin,munafiq,nasihatdiri,reminder,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Coba Cek Termasuk Yang Manakah Diri Kita...??
 
 DUA JENIS MANUSIA DALAM MENYAMBUT BULAN RAMADHAN

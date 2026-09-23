@@ -1,14 +1,14 @@
 ---
-judul: "Cara Melakukan Puasa Syawal Menurut Para Ulama Syafi'iyah,yakni Tata Cara Dan Ketentuan Puasa Syawal"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*"
-kategori: "syawwal (10)"
-kategori_emoji: "🌙"
-tags: "syawwal,puasasyawal,syafiiyah,mazhabsyafii,fiqihpuasa,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Cara Melakukan Puasa Syawal Menurut Para Ulama Syafi'iyah,yakni Tata Cara Dan
+  Ketentuan Puasa Syawal
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_*'
+kategori: Syawwal (10)
+kategori_emoji: 🌙
+tags: syawwal,puasasyawal,syafiiyah,mazhabsyafii,fiqihpuasa,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Cara Melakukan Puasa Syawal Menurut Para Ulama Syafi'iyah
 
 .

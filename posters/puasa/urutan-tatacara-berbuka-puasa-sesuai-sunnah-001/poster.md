@@ -1,12 +1,13 @@
 ---
-judul: "Urutan Tatacara Berbuka Puasa Sesuai Sunnah"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "puasa"
-kategori_emoji: "🍽️"
-tags: "puasa,tatacarabukapuasa,bukapuasa,sunnahberbuka,doabukapuasa,ruthab,tamr,dzahabazhzhamaau,bedahkitab,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Urutan Tatacara Berbuka Puasa Sesuai Sunnah
+sub_judul: '*@an.nashiha_daily*'
+kategori: Puasa
+kategori_emoji: 🍽️
+tags: puasa,tatacarabukapuasa,bukapuasa,sunnahberbuka,doabukapuasa,ruthab,tamr,dzahabazhzhamaau,bedahkitab,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 URUTAN TATACARA BERBUKA PUASA SESUAI SUNNAH
 
 1) Membaca “Bismillah”.

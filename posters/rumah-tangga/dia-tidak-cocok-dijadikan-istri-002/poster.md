@@ -1,12 +1,13 @@
 ---
 judul: Dia Tidak Cocok Dijadikan Istri
 sub_judul: '*@an.nashiha_daily*'
-kategori: rumah tangga
+kategori: Rumah Tangga
 kategori_emoji: 📂
 tags: pernikahan,wanitashalihah,kriteriaistri,rasamalu,tabarruj,nasihatdiri,yanifahriansyah,annashihadaily,manhajsalaf,sunnah,rumahtangga
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 Dia Tidak Cocok Dijadikan Istri ....
 
 Seorang wanita yang hobi memamerkan tubuhnya didepan publik untuk menarik perhatian para lelaki walaupun dengan menutup aurat, tidak cocok dijadikan istri

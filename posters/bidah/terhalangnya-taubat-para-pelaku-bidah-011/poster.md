@@ -1,21 +1,14 @@
 ---
-judul: "Terhalangnya Taubat Para Pelaku Bidah"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@akun_salafy*
-*@al.nasiha*
-*@thalabulilmi.id*"
-kategori: "bidah"
-kategori_emoji: "📂"
-tags: "bidah,terhalangnyataubat,taubat,pelakubidah,penjelasanterhalang,hsiabdullahroy,ustadzabdullahroy,hrthabrani,syaikhalalbani,tauhidsunnahid,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Terhalangnya Taubat Para Pelaku Bidah
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
+kategori: Bid'ah
+kategori_emoji: 📂
+tags: bidah,terhalangnyataubat,taubat,pelakubidah,penjelasanterhalang,hsiabdullahroy,ustadzabdullahroy,hrthabrani,syaikhalalbani,tauhidsunnahid,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 TERHALANGNYA TAUBAT PARA PELAKU BID'AH
 
 .

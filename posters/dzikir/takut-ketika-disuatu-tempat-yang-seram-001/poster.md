@@ -1,16 +1,13 @@
 ---
-judul: "TAKUT ketika disuatu tempat yang SERAM ?"
-sub_judul: "*🖇Collabs*
-*:*
-*@thequran_path*
-*x*
-*@tauhidsunnah_id*"
-kategori: "dzikir"
-kategori_emoji: "🙌"
-tags: "Takut,malam,dzikir,seram"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: TAKUT ketika disuatu tempat yang SERAM ?
+sub_judul: '*🖇Collabs* *:* *@thequran_path* *x* *@tauhidsunnah_id*'
+kategori: Dzikir
+kategori_emoji: 🙌
+tags: Takut,malam,dzikir,seram
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 ﷽ TAKUT ketika disuatu tempat yang SERAM❓baca dzikir berikut...
 
 .

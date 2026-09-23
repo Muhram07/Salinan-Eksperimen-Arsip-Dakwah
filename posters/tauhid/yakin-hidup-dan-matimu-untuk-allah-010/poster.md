@@ -1,17 +1,14 @@
 ---
-judul: "Yakin Hidup dan Matimu untuk Allah?"
-sub_judul: "*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@al.nasiha*
-*@akun_salafy*
-*@tawheedfirst.id*
-*@thalabulilmi.id*"
-kategori: "tauhid"
-kategori_emoji: "📂"
-tags: "tauhid,tauhidrububiyyah,tauhiduluhiyyah,belajartauhid,iman,takdir,tawakal,salaf,manhajsalaf,tauhidsunnah,tauhidsunnahid,annashihadaily"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Yakin Hidup dan Matimu untuk Allah?
+sub_judul: '*@tauhidsunnah_id* *@an.nashiha_daily* *@al.nasiha* *@akun_salafy* *@tawheedfirst.id*
+  *@thalabulilmi.id*'
+kategori: Tauhid
+kategori_emoji: 📂
+tags: tauhid,tauhidrububiyyah,tauhiduluhiyyah,belajartauhid,iman,takdir,tawakal,salaf,manhajsalaf,tauhidsunnah,tauhidsunnahid,annashihadaily
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 YAKIN HIDUP DAN MATIMU UNTUK ALLAH?
 
 .

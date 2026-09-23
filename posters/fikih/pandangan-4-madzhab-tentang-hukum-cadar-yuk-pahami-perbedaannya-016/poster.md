@@ -1,15 +1,13 @@
 ---
-judul: "Pandangan 4 Madzhab Tentang Hukum Cadar, Yuk Pahami Perbedaannya"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*
-*@bedahkitab_*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,hukumcadar,cadar,empatmadzhab,hanafi,syafii,maliki,hambali,auratwanita,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Pandangan 4 Madzhab Tentang Hukum Cadar, Yuk Pahami Perbedaannya
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path* *@bedahkitab_*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,hukumcadar,cadar,empatmadzhab,hanafi,syafii,maliki,hambali,auratwanita,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 HUKUM CADAR MENURUT EMPAT MADZHAB
 
 .

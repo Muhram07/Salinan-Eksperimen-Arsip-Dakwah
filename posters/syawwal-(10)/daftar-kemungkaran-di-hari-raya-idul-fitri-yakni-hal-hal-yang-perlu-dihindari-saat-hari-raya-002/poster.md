@@ -1,14 +1,14 @@
 ---
-judul: "Daftar Kemungkaran Di Hari Raya Idul Fitri,yakni Hal-Hal Yang Perlu Dihindari Saat Hari Raya"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*"
-kategori: "syawwal (10)"
-kategori_emoji: "📂"
-tags: "syawwal,idulfitri,kemungkaran,hariraya,nasihat,almanhaj,rumaysho,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Daftar Kemungkaran Di Hari Raya Idul Fitri,yakni Hal-Hal Yang Perlu Dihindari
+  Saat Hari Raya
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
+kategori: Syawwal (10)
+kategori_emoji: 📂
+tags: syawwal,idulfitri,kemungkaran,hariraya,nasihat,almanhaj,rumaysho,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Daftar Kemungkaran Di Hari Raya Idul Fitri
 
 .

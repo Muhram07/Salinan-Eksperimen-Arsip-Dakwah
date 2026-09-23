@@ -1,12 +1,13 @@
 ---
-judul: "Apapun Keadaanmu Tetap Pujilah Allah"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "dzikir"
-kategori_emoji: "📂"
-tags: "doa,alhamdulillah,pujian,dzikir,sunnah,doadandzikir,manhajsalaf,bedahkitab"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Apapun Keadaanmu Tetap Pujilah Allah
+sub_judul: '*@an.nashiha_daily*'
+kategori: Dzikir
+kategori_emoji: 📂
+tags: doa,alhamdulillah,pujian,dzikir,sunnah,doadandzikir,manhajsalaf,bedahkitab
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 APAPUN KEADAANMU, TETAP PUJILAH ALLAH TA'ALA
 
 Apabila Rasulullah ﷺ melihat sesuatu yang beliau sukai, beliau mengucapkan:

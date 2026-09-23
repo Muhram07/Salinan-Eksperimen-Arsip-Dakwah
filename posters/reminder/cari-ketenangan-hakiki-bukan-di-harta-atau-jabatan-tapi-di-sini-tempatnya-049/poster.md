@@ -1,14 +1,14 @@
 ---
-judul: "Cari Ketenangan Hakiki? Bukan Di Harta Atau Jabatan, Tapi Di Sini Tempatnya"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "adab,ketenangan,kebahagiaan,taat,ketaatan,suratalfath,alfath4,thequranpath,annashihadaily, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Cari Ketenangan Hakiki? Bukan Di Harta Atau Jabatan, Tapi Di Sini Tempatnya
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: adab,ketenangan,kebahagiaan,taat,ketaatan,suratalfath,alfath4,thequranpath,annashihadaily,
+  reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Sesuatu hal yang paling dicari oleh manusia adalah ketenangan dan kebahagiaan, Tapi kebanyakan mereka mencarinya dalam harta, jabatan dan pujian manusia
 
 .

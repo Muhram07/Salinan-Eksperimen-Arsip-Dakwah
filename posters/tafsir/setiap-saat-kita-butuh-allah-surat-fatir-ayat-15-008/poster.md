@@ -1,12 +1,13 @@
 ---
-judul: "Setiap Saat Kita Butuh Allah ,Surat Fatir Ayat 15"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "tafsir"
-kategori_emoji: "📂"
-tags: "tafsir,faedahquran,fatir,butuhallah,tafsiralmuyassar,kemenagksa,tafsirweb,annashihadaily,thequranpath"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Setiap Saat Kita Butuh Allah ,Surat Fatir Ayat 15
+sub_judul: '*@an.nashiha_daily*'
+kategori: Tafsir
+kategori_emoji: 📂
+tags: tafsir,faedahquran,fatir,butuhallah,tafsiralmuyassar,kemenagksa,tafsirweb,annashihadaily,thequranpath
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 SETIAP SAAT KITA BUTUH ALLAH
 
 .

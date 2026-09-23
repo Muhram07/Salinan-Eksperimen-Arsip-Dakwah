@@ -1,12 +1,13 @@
 ---
-judul: "Beberapa Macam Do'a Istiftah Pendek Yang Mudah Untuk Dihafal"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,doaistiftah,istiftah,doasholat,fiqihsholat,sunnah,doadandzikir,manhajsalaf"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Beberapa Macam Do'a Istiftah Pendek Yang Mudah Untuk Dihafal
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,doaistiftah,istiftah,doasholat,fiqihsholat,sunnah,doadandzikir,manhajsalaf
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 BEBERAPA MACAM DO'A ISTIFTAH PENDEK YANG MUDAH UNTUK DIHAFAL
 
 Yang Dibaca oleh Rasulullah Shallallahu 'alaihi wa sallam dan Para Shahabat, Berdasarkan Riwayat-riwayat yang Shahih.

@@ -1,12 +1,13 @@
 ---
-judul: "Bagaimana Cara Niat Puasa Ramadhan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,niatpuasa,ramadhan,fikihpuasa,niatdalamhati,sahur,sunnah,manhajsalaf,bedahkitab"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bagaimana Cara Niat Puasa Ramadhan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,niatpuasa,ramadhan,fikihpuasa,niatdalamhati,sahur,sunnah,manhajsalaf,bedahkitab
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Bagaimana Cara Niat Puasa Ramadhan ?
 
 1) Niat cukup dalam hati dan tidak perlu dilafalkan

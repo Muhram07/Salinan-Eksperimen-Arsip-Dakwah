@@ -1,21 +1,14 @@
 ---
-judul: "Bentuk-Bentuk Pelanggaran Tauhid yang Sering Dianggap Sepele"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@bedahkitab_*
-*@backtosalafuhshaleh*
-*@akun_salafy*"
-kategori: "tauhid"
-kategori_emoji: "📂"
-tags: "tauhid,akidah,dakwahtauhid,salaf,manhajsalaf,tauhidsunnah,syirik,syirikkecil,syirikbesar,tauhidsunnahid,annashihadaily"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bentuk-Bentuk Pelanggaran Tauhid yang Sering Dianggap Sepele
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@bedahkitab_* *@backtosalafuhshaleh* *@akun_salafy*'
+kategori: Tauhid
+kategori_emoji: 📂
+tags: tauhid,akidah,dakwahtauhid,salaf,manhajsalaf,tauhidsunnah,syirik,syirikkecil,syirikbesar,tauhidsunnahid,annashihadaily
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Pentingnya Memahami Bentuk Pelanggaran Tauhid Dalam Kehidupan Sehari-hari.
 
 .

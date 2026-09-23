@@ -1,12 +1,13 @@
 ---
-judul: "Beberapa Kebiasaan & Petunjuk Rasulullah Pada Bulan Ramadhan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,sunnah,petunjuknabi,ramadhan,hilal,sahur,itikaf,tadarus,kedermawanan,manhajsalaf"
-images: "1.jpg, 2.jpg, 3.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Beberapa Kebiasaan & Petunjuk Rasulullah Pada Bulan Ramadhan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,sunnah,petunjuknabi,ramadhan,hilal,sahur,itikaf,tadarus,kedermawanan,manhajsalaf
+images: 1.jpg, 2.jpg, 3.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 YUK, BERILMU SEBELUM MEMASUKI RAMADHAN
 
 Beberapa Kebiasaan & Petunjuk Rasulullah Shallallahu 'alaihi wa sallam pada Bulan Ramadhan:

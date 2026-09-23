@@ -1,13 +1,14 @@
 ---
-judul: "Segeralah lunasi hutang mu"
-sub_judul: "🖇Collabs :
-@thequran_path x @tauhidsunnah_id"
-kategori: "muamalah"
-kategori_emoji: "🤝"
-tags: "manhajsalaf ,sunnah ,hutang ,utang ,piutang ,berhutang ,hadistshahih ,haditsshahih ,hadistbukhari ,hadistmuslim"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Segeralah lunasi hutang mu
+sub_judul: '🖇Collabs : @thequran_path x @tauhidsunnah_id'
+kategori: Muamalah
+kategori_emoji: 🤝
+tags: manhajsalaf ,sunnah ,hutang ,utang ,piutang ,berhutang ,hadistshahih ,haditsshahih
+  ,hadistbukhari ,hadistmuslim
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 ﷽ Segeralah lunasi hutang mu...
 
 .

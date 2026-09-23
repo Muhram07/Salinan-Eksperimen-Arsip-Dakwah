@@ -1,14 +1,13 @@
 ---
-judul: "Salah Satu Variasi Bacaan Waktu Sujud Dalam Sholat"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,sujud,bacaansujud,doasujud,ampunan,mintaampunan,doaharian,hrmuslim,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Salah Satu Variasi Bacaan Waktu Sujud Dalam Sholat
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,sujud,bacaansujud,doasujud,ampunan,mintaampunan,doaharian,hrmuslim,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Salah Satu Variasi Bacaan Waktu Sujud Dalam Sholat
 
 .

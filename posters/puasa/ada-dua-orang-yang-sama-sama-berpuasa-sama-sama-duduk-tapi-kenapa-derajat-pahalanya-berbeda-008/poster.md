@@ -1,12 +1,14 @@
 ---
-judul: "Ada Dua Orang Yang Sama-Sama Berpuasa & Sama-Sama Duduk, Tapi Kenapa Derajat Pahalanya Berbeda?"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "puasa"
-kategori_emoji: "📂"
-tags: "puasa,pahalapuasa,dzikir,mengingatallah,keutamaanpuasa,hrmusnadahmad,annashihadaily,manhajsalaf"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ada Dua Orang Yang Sama-Sama Berpuasa & Sama-Sama Duduk, Tapi Kenapa Derajat
+  Pahalanya Berbeda?
+sub_judul: '*@an.nashiha_daily*'
+kategori: Puasa
+kategori_emoji: 📂
+tags: puasa,pahalapuasa,dzikir,mengingatallah,keutamaanpuasa,hrmusnadahmad,annashihadaily,manhajsalaf
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Ada dua orang yang sama-sama berpuasa & sama-sama duduk.
 
 .

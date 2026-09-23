@@ -1,12 +1,13 @@
 ---
-judul: "Penjelasan Doa Dan Dzikir Setelah Sholat Sesuai Sunnah"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "🕌"
-tags: "sholat,dzikirsetelahsholat,doasetelahsholat,sunnah,fiqihsholat,manhajsalaf,salafi,penjelasan"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Penjelasan Doa Dan Dzikir Setelah Sholat Sesuai Sunnah
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 🕌
+tags: sholat,dzikirsetelahsholat,doasetelahsholat,sunnah,fiqihsholat,manhajsalaf,salafi,penjelasan
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Ada Yang Mengatakan:
 
 PENGIKUT SALAFI TIDAK BERDO'A DAN BERDZIKIR SETELAH SHOLAT ..!

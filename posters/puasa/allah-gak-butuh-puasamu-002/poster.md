@@ -1,12 +1,13 @@
 ---
-judul: "Allah Gak Butuh Puasamu"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "puasa"
-kategori_emoji: "📂"
-tags: "puasa,ramadhan,perkataandusta,dosa,lathoifalmaarif,hrbukhari1903,maksiat,bedahkitab,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Allah Gak Butuh Puasamu
+sub_judul: '*@an.nashiha_daily*'
+kategori: Puasa
+kategori_emoji: 📂
+tags: puasa,ramadhan,perkataandusta,dosa,lathoifalmaarif,hrbukhari1903,maksiat,bedahkitab,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 ALLAH GAK BUTUH PUASAMU
 
 Seandainya kamu berpuasa maka hendaknya pendengaranmu, penglihatanmu dan lisanmu turut berpuasa dari dusta dan hal-hal haram serta janganlah kamu menyakiti tetangga. Bersikap tenang dan berwibawalah di hari puasamu. Janganlah kamu jadikan hari puasamu dan hari tidak berpuasamu sama saja.

@@ -1,12 +1,13 @@
 ---
-judul: "Kapan tauhid terwujud ?"
-sub_judul: "Follow @Tauhid_Base untuk konten bermanfaat lainnya..."
-kategori: "tauhid"
-kategori_emoji: "☝️"
-tags: "Tauhid,lailahaillallah,maknatauhid"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kapan tauhid terwujud ?
+sub_judul: Follow @Tauhid_Base untuk konten bermanfaat lainnya...
+kategori: Tauhid
+kategori_emoji: ☝️
+tags: Tauhid,lailahaillallah,maknatauhid
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Kapan tauhid benar-benar terwujud dalam diri kita?
 Syekh Muhammad bin Abdullah Al-Habdan menjelaskan bahwa:
 

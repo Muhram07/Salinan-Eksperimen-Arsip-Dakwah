@@ -1,14 +1,13 @@
 ---
-judul: "Bantah Kesesatan Syi'ah Rafidhah Berpahala? Ini Kata Syaikhul Islam"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*"
-kategori: "firqah-firqah"
-kategori_emoji: "📂"
-tags: "firqah,syiah,syiahrafidhah,membantahsyiah,ibnudaimiyah,jamaah,sunnah,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bantah Kesesatan Syi'ah Rafidhah Berpahala? Ini Kata Syaikhul Islam
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_*'
+kategori: Firqah-Firqah
+kategori_emoji: 📂
+tags: firqah,syiah,syiahrafidhah,membantahsyiah,ibnudaimiyah,jamaah,sunnah,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 DIHITUNG SEBAGAI IBADAH DAN AKAN MENDAPAT PAHALA
 
 .

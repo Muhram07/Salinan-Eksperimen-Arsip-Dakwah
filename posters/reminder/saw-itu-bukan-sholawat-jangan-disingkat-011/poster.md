@@ -1,21 +1,15 @@
 ---
-judul: "Saw itu bukan sholawat,jangan disingkat"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@akun_salafy*
-*@al.nasiha*
-*@thalabulilmi.id*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "Saw,swt,ass, sholawat, pujian,dakwahsunnah ,manhajsalaf ,adabmenulis ,selfreminder ,tauhid ,sunnah reminder,cintanabi,nabi,wa,"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Saw itu bukan sholawat,jangan disingkat
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: Saw,swt,ass, sholawat, pujian,dakwahsunnah ,manhajsalaf ,adabmenulis ,selfreminder
+  ,tauhid ,sunnah reminder,cintanabi,nabi,wa,
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Bismillah...
 
 .

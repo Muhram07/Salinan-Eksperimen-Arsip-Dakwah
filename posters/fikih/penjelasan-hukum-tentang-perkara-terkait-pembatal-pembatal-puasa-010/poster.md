@@ -1,12 +1,13 @@
 ---
-judul: "Penjelasan Hukum Tentang Perkara Terkait Pembatal-Pembatal Puasa"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "puasa,pembatalpuasa,fiqhpuasa,hukumpuasa,suntikan,berbekam,obattetes,istimna,siwak,asma,ramadhan,ibnubaz,annashihadaily,manhajsalaf,fikih"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Penjelasan Hukum Tentang Perkara Terkait Pembatal-Pembatal Puasa
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: puasa,pembatalpuasa,fiqhpuasa,hukumpuasa,suntikan,berbekam,obattetes,istimna,siwak,asma,ramadhan,ibnubaz,annashihadaily,manhajsalaf,fikih
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 PENJELASAN HUKUM TENTANG PERKARA TERKAIT PEMBATAL-PEMBATAL PUASA
 
 1] BEBERAPA JENIS SUNTIKAN

@@ -1,12 +1,13 @@
 ---
-judul: "Wanita Lebih Utama Sholat Tarawih Di Mesjid Atau Di Rumah?"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,tarawih,wanitatarawih,sholattarawih,tarawihdirumah,tarawihdimasjid,fikhwanita,alutsaimin,musthofaaladawiy,muslimahorid"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Wanita Lebih Utama Sholat Tarawih Di Mesjid Atau Di Rumah?
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,tarawih,wanitatarawih,sholattarawih,tarawihdirumah,tarawihdimasjid,fikhwanita,alutsaimin,musthofaaladawiy,muslimahorid
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 WANITA LEBIH UTAMA SHOLAT TARAWIH DI MESJID ATAU DI RUMAH?
 
 Disyariatkan untuk laki-laki apabila luput dari shalat jama'ah tarawih, maka dia menunaikannya sendirian. Adapun shalat tarawih untuk wanita lebih utama dilakukan di rumah daripada di masjid.

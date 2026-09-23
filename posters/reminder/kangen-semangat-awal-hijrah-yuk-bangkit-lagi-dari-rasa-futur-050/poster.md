@@ -1,14 +1,13 @@
 ---
-judul: "Kangen Semangat Awal Hijrah? Yuk Bangkit Lagi Dari Rasa Futur!"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@sunnahstori*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "reminder,futur,hijrah,istiqomah,taat,semangathijrah,sunnahstori,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kangen Semangat Awal Hijrah? Yuk Bangkit Lagi Dari Rasa Futur!
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@sunnahstori*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: reminder,futur,hijrah,istiqomah,taat,semangathijrah,sunnahstori,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 THE LOST
 
 .

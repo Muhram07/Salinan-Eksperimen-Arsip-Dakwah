@@ -1,15 +1,13 @@
 ---
-judul: "Bukti Kebenaran Al-Qur'an,Gunung Mengokohkan Bumi"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*
-*@bedahkitab_*"
-kategori: "tafsir"
-kategori_emoji: "📂"
-tags: "tafsir,tafsirquran,an-nahl,sainsquran,keajaibanquran,buktikebenaran,gunung,bedahkitab,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bukti Kebenaran Al-Qur'an,Gunung Mengokohkan Bumi
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path* *@bedahkitab_*'
+kategori: Tafsir
+kategori_emoji: 📂
+tags: tafsir,tafsirquran,an-nahl,sainsquran,keajaibanquran,buktikebenaran,gunung,bedahkitab,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 INILAH SALAH SATU BUKTI KEBENARAN DALAM AL QUR'AN
 
 .

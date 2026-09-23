@@ -1,15 +1,13 @@
 ---
-judul: "Hukum Zakat Fitrah,yakni Tidak Sah Membayar Zakat Fitrah Dengan Uang"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,zakat,zakatfitrah,hukumzakat,syaiskhalifauzan,fauzan,sunnah,ramadhan,bedahkitab,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Hukum Zakat Fitrah,yakni Tidak Sah Membayar Zakat Fitrah Dengan Uang
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,zakat,zakatfitrah,hukumzakat,syaiskhalifauzan,fauzan,sunnah,ramadhan,bedahkitab,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 TIDAK SAH MEMBAYAR ZAKAT FITRAH DENGAN UANG
 
 .

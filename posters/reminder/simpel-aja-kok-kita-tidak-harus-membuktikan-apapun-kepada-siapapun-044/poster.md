@@ -1,12 +1,13 @@
 ---
-judul: "Simpel Aja Kok,Kita Tidak Harus Membuktikan Apapun Kepada Siapapun"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "reminder,selfreminder,nasihat,nasihatdiri,penyemangat,ikhlas,penilaianmanusia,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Simpel Aja Kok,Kita Tidak Harus Membuktikan Apapun Kepada Siapapun
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: reminder,selfreminder,nasihat,nasihatdiri,penyemangat,ikhlas,penilaianmanusia,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Simpel Aja Kok...
 
 .

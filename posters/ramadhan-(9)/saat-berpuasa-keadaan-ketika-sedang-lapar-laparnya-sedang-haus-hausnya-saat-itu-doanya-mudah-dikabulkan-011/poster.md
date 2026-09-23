@@ -8,6 +8,7 @@ tags: ramadhan,puasa,doamustajab,waktumustajab,berdoa,ustadzfirandaandirja,annas
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 Saat berpuasa, Keadaan ketika sedang lapar-laparnya, sedang haus-hausnya, saat itu doanya mudah dikabulkan, dan semua doa mudah di dikabulkan ketika keadaan lelah setelah beribadah
 
 .

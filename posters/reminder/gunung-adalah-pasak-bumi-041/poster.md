@@ -1,21 +1,15 @@
 ---
-judul: "Gunung Adalah Pasak Bumi"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@akun_salafy*
-*@al.nasiha*
-*@thalabulilmi.id*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "gunung,pasakbumi,harikiamat,kiamat,bumigonchang,tadabbur,ustadzraehanulbahrein,tauhidsunnahid,annashihadaily,manhajsalaf, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Gunung Adalah Pasak Bumi
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: gunung,pasakbumi,harikiamat,kiamat,bumigonchang,tadabbur,ustadzraehanulbahrein,tauhidsunnahid,annashihadaily,manhajsalaf,
+  reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 GUNUNG ADALAH "PASAK BUMI"
 
 Dalam Al Quran, Apabila gunung meletus dahsyat dan berterbangan, maka berbagai lapisan tanah akan bergerak.

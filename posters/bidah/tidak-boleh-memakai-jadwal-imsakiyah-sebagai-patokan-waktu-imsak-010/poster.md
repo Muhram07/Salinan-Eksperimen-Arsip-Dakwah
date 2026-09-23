@@ -1,12 +1,13 @@
 ---
-judul: "Tidak Boleh Memakai Jadwal Imsakiyah Sebagai Patokan Waktu Imsak"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "bidah"
-kategori_emoji: "📂"
-tags: "imsak,imsakiyah,jadwalimsakiyah,bidah,fatwaulama,binbaz,utsaimin,hukumpuasa,fajarshadiq,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Tidak Boleh Memakai Jadwal Imsakiyah Sebagai Patokan Waktu Imsak
+sub_judul: '*@an.nashiha_daily*'
+kategori: Bid'ah
+kategori_emoji: 📂
+tags: imsak,imsakiyah,jadwalimsakiyah,bidah,fatwaulama,binbaz,utsaimin,hukumpuasa,fajarshadiq,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Tidak Boleh Memakai Jadwal IMSAKIYAH Sebagai Patokan Waktu Imsak
 
 Fatwa Syaikh Aziz bin Baz Rahimahullah:

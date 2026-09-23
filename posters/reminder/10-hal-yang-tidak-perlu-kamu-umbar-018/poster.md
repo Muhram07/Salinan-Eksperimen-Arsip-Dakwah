@@ -1,12 +1,13 @@
 ---
-judul: "10 Hal Yang Tidak Perlu Kamu Umbar"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "adab,penyakitain,pamer,privasi,nasihat,akhlak,manhajsalaf,sunnah, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: 10 Hal Yang Tidak Perlu Kamu Umbar
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: adab,penyakitain,pamer,privasi,nasihat,akhlak,manhajsalaf,sunnah, reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 10 HAL YANG TIDAK PERLU KAMU UMBAR
 
 1. Amal Shalihmu

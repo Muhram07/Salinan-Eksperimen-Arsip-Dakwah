@@ -1,12 +1,13 @@
 ---
-judul: "Tiga landasan utama"
-sub_judul: "Follow @Tauhid_Base | @Tauhid_Base_Collection untuk konten bermanfaat lainnya..."
-kategori: "kitab"
-kategori_emoji: "📚"
-tags: "Kitab, ushultsalatsah,ulama,kitabulama,kubur"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Tiga landasan utama
+sub_judul: Follow @Tauhid_Base | @Tauhid_Base_Collection untuk konten bermanfaat lainnya...
+kategori: Kitab
+kategori_emoji: 📚
+tags: Kitab, ushultsalatsah,ulama,kitabulama,kubur
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 ☝️Pertama: Mengenal Rabb kita Allah, yaitu mengenalnya sebagaimana terdapat dalam Alquran, dan lewat lisan Rasulullah shallallahu ‘alaihi wa sallam. Mengenalnya berarti mengenal keesaan Allah, juga mengenal nama dan sifat-Nya. Inilah landasan pokok dari landasan lainnya. Kita wajib mengenal Allah sehingga kita bisa menyembah Allah di atas bashirah (bukti) dan keyakinan.
 
 .

@@ -1,12 +1,13 @@
 ---
-judul: "Puasa Tapi Pamer Aurat"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "puasa"
-kategori_emoji: "📂"
-tags: "puasa,pameraurat,aurat,jilbabsyari,tabarruj,berpakaiantapitelanjang,fikhwanita,ustadzfirandaandirja,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Puasa Tapi Pamer Aurat
+sub_judul: '*@an.nashiha_daily*'
+kategori: Puasa
+kategori_emoji: 📂
+tags: puasa,pameraurat,aurat,jilbabsyari,tabarruj,berpakaiantapitelanjang,fikhwanita,ustadzfirandaandirja,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 PUASA TAPI PAMER AURAT
 
 Wanita yang tidak pakai jilbab dan membuka aurat termasuk ke dalam dosa besar.

@@ -1,12 +1,13 @@
 ---
-judul: "4 Variasi Bacaan Dzikir Setelah Shalat Wajib"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "🕌"
-tags: "sholat,dzikir,dzikirsetelahshalat,fiqihsholat,sunnah,fikih,manhajsalaf,reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: 4 Variasi Bacaan Dzikir Setelah Shalat Wajib
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 🕌
+tags: sholat,dzikir,dzikirsetelahshalat,fiqihsholat,sunnah,fikih,manhajsalaf,reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 4 VARIASI BACAAN DZIKIR SETELAH SHALAT WAJIB
 
 1) SUBHANALLAH 10 kali, ALHAMDULILLAH 10 kali, ALLAHU AKBAR 10 kali (untuk mereka yang tergesa-gesa).

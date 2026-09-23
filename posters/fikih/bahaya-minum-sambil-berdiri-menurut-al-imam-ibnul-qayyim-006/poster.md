@@ -1,12 +1,13 @@
 ---
-judul: "Bahaya Minum Sambil Berdiri Menurut Al-Imam Ibnul Qayyim"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "🖊️"
-tags: "adab,fikih,minumberdiri,adabmakanminum,kesehatan,ibnulqayyim,thibbunnabawi,sunnah,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bahaya Minum Sambil Berdiri Menurut Al-Imam Ibnul Qayyim
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 🖊️
+tags: adab,fikih,minumberdiri,adabmakanminum,kesehatan,ibnulqayyim,thibbunnabawi,sunnah,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 BAHAYA MINUM SAMBIL BERDIRI
 
 Al-Imam Ibnul Qayyim rahimahullah berkata :

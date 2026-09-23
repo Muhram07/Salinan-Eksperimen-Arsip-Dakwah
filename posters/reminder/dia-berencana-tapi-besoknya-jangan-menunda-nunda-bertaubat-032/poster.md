@@ -1,12 +1,13 @@
 ---
-judul: "Dia Berencana Tapi Besoknya Jangan Menunda Nunda Bertaubat"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "menundatoba,taubat,kematian,ajal,kematianmendadak,luqman,ibnuabidunya,nasihatdiri,reminder,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Dia Berencana Tapi Besoknya Jangan Menunda Nunda Bertaubat
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: menundatoba,taubat,kematian,ajal,kematianmendadak,luqman,ibnuabidunya,nasihatdiri,reminder,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 DIA BERENCANA
 
 Aku akan sholat besok

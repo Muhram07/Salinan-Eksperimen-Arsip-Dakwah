@@ -13,12 +13,13 @@ sub_judul: 'Collab dakwah Sunnah
   @studi_islam._id
 
   @akun_salafy'
-kategori: hadits dhaif & maudhu
+kategori: Hadits Dhaif & Maudhu
 kategori_emoji: ❌
 tags: Hadis,hadispalsu,palsu,maudhu,hadismaudhu,merdeka,merahputih
 images: 1.jpg, 2.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 Hati-hati nih...
 
 .

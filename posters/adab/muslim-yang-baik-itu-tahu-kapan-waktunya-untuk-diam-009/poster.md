@@ -1,14 +1,13 @@
 ---
-judul: "Muslim Yang Baik Itu Tahu Kapan Waktunya Untuk Diam"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,adablisan,menjagalisan,adabberbicara,diam,hikmah,nasihat,akhlak,adabmuslim,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Muslim Yang Baik Itu Tahu Kapan Waktunya Untuk Diam
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,adablisan,menjagalisan,adabberbicara,diam,hikmah,nasihat,akhlak,adabmuslim,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Muslim Yang Baik Itu Tahu Kapan Waktunya Untuk Diam
 
 .

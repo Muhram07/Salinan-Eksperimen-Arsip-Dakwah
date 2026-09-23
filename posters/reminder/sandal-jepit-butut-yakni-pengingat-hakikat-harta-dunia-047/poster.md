@@ -1,15 +1,13 @@
 ---
-judul: "Sandal Jepit Butut,yakni Pengingat Hakikat Harta Dunia"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "reminder,pengingatdiri,kematian,ingatmati,hartadunia,duniafana,muhasabah,nasihat,bukhari,muslim,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Sandal Jepit Butut,yakni Pengingat Hakikat Harta Dunia
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: reminder,pengingatdiri,kematian,ingatmati,hartadunia,duniafana,muhasabah,nasihat,bukhari,muslim,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 SENDAL JEPIT BUTUT
 
 .

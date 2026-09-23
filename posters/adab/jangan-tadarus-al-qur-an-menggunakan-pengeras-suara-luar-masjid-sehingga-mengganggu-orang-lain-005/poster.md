@@ -1,12 +1,14 @@
 ---
-judul: "Jangan Tadarus Al-Qur'an Menggunakan Pengeras Suara Luar Masjid Sehingga Mengganggu Orang Lain"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,tadarusan,pengerassuara,speaker,masjid,ibnutaimiyyah,ibnuutsaimin,bacaquran,bedahkitab,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Jangan Tadarus Al-Qur'an Menggunakan Pengeras Suara Luar Masjid Sehingga Mengganggu
+  Orang Lain
+sub_judul: '*@an.nashiha_daily*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,tadarusan,pengerassuara,speaker,masjid,ibnutaimiyyah,ibnuutsaimin,bacaquran,bedahkitab,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 JANGAN TADARUS AL-QUR'AN MENGGUNAKAN PENGERAS SUARA LUAR MASJID SEHINGGA MENGGANGGU ORANG LAIN
 
 Tidak boleh bagi seseorang untuk mengeraskan bacaan Al-Qur’an, baik di dalam shalat ataupun ketika di luar shalat. Jika dia di masjid, perbuatan itu akan mengganggu jama’ah lain karena suaranya.

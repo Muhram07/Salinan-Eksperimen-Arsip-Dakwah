@@ -1,21 +1,15 @@
 ---
-judul: "Kita Hanya Takut Pada Letusan Gunung Berapi,Tapi Tidak Takut Dengan Rabb Yang Punya Kendali Atas Gunung Tersebut !"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@akun_salafy*
-*@al.nasiha*
-*@thalabulilmi.id*"
-kategori: "syirik"
-kategori_emoji: "📂"
-tags: "syirik,tauhid,sesajen,gunungberapi,bencana,ritual,muhasabah,introspeksidosa,tauhidsunnahid,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kita Hanya Takut Pada Letusan Gunung Berapi,Tapi Tidak Takut Dengan Rabb Yang
+  Punya Kendali Atas Gunung Tersebut !
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
+kategori: Syirik
+kategori_emoji: 📂
+tags: syirik,tauhid,sesajen,gunungberapi,bencana,ritual,muhasabah,introspeksidosa,tauhidsunnahid,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 KITA HANYA TAKUT PADA LETUSAN GUNUNG BERAPI.... TAPI TIDAK TAKUT DENGAN RABB YANG PUNYA KENDALI ATAS GUNUNG TERSEBUT !
 
 .

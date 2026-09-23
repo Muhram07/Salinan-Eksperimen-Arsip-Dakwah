@@ -1,22 +1,23 @@
 ---
-judul: "Akidah itu cerminan akhlak mu"
-sub_judul: "Collab dakwah Sunnah
+judul: Akidah itu cerminan akhlak mu
+sub_judul: 'Collab dakwah Sunnah
 
-@tauhidsunnah_id
+  @tauhidsunnah_id
 
-@an.nashiha_daily
+  @an.nashiha_daily
 
-@sunnahstori
+  @sunnahstori
 
-@silentreminder
+  @silentreminder
 
-@studi_islam._id
+  @studi_islam._id
 
-@al.nasiha @thalabulilmi.id"
-kategori: "akidah"
-kategori_emoji: "🛡️"
-tags: "akidah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+  @al.nasiha @thalabulilmi.id'
+kategori: Akidah
+kategori_emoji: 🛡️
+tags: akidah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 mari kita dahulukan bab ilmu dasar dulu seperti akidah,tauhid,dsb...

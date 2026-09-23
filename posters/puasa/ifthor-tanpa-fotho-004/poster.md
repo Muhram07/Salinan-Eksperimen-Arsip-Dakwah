@@ -1,12 +1,13 @@
 ---
-judul: "Ifthor Tanpa Fotho"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "puasa"
-kategori_emoji: "📂"
-tags: "ifthor,bukapuasa,fotho,pamermakanan,riya,ujub,sosmed,sunnahberbuka,attakatsur8,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ifthor Tanpa Fotho
+sub_judul: '*@an.nashiha_daily*'
+kategori: Puasa
+kategori_emoji: 📂
+tags: ifthor,bukapuasa,fotho,pamermakanan,riya,ujub,sosmed,sunnahberbuka,attakatsur8,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 IFTHOR TANPA FOTHO
 
 Cara Buka Puasa Yang Bener Itu, Baca Bismillaah Dulu, Trus Makan Kurma dan minum Air putih, Lalu Berdo'a :

@@ -1,13 +1,14 @@
 ---
-judul: "Pertemuan Keluarga Besar,yakni Pencapaian Tertinggi Adalah Istiqomah Di Atas Sunnah"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*"
-kategori: "syawwal (10)"
-kategori_emoji: "🌙"
-tags: "syawwal,lebaran,kumpulkeluarga,istiqomah,sunnah,pencapaian,duniawi,ustadzyulianpurnama,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Pertemuan Keluarga Besar,yakni Pencapaian Tertinggi Adalah Istiqomah Di Atas
+  Sunnah
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily*'
+kategori: Syawwal (10)
+kategori_emoji: 🌙
+tags: syawwal,lebaran,kumpulkeluarga,istiqomah,sunnah,pencapaian,duniawi,ustadzyulianpurnama,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Pertemuan keluarga besar seringkali menjadi ajang adu pencapaian masalah duniawi, Allahul musta'an.
 
 .

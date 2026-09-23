@@ -1,12 +1,14 @@
 ---
-judul: "Doa Yang Lebih Urgent Daripada Meminta Harta Doa Meminta Dijauhkan Dari Azab Neraka Jahanam"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "doa"
-kategori_emoji: "🤲"
-tags: "doa,doapilihan,nerakajahanam,siksaanselamat,alfurqan,hsiabdullahroy,reminder,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Doa Yang Lebih Urgent Daripada Meminta Harta Doa Meminta Dijauhkan Dari Azab
+  Neraka Jahanam
+sub_judul: '*@an.nashiha_daily*'
+kategori: Doa
+kategori_emoji: 🤲
+tags: doa,doapilihan,nerakajahanam,siksaanselamat,alfurqan,hsiabdullahroy,reminder,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 DOA YANG LEBIH URGENT DARIPADA MEMINTA HARTA
 
 Doa Meminta Dijauhkan dari Azab Neraka Jahanam

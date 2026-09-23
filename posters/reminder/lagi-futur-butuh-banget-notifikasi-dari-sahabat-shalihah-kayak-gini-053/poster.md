@@ -1,14 +1,14 @@
 ---
-judul: "Lagi Futur Butuh Banget Notifikasi Dari Sahabat Shalihah Kayak Gini"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@sunnahstori*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "adab,temanshalihah,sahabatshalihah,futur,majelisilmu,kajiansunnah,ukhwatuna,sunnahstori,annashihadaily, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Lagi Futur Butuh Banget Notifikasi Dari Sahabat Shalihah Kayak Gini
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@sunnahstori*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: adab,temanshalihah,sahabatshalihah,futur,majelisilmu,kajiansunnah,ukhwatuna,sunnahstori,annashihadaily,
+  reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Ukh, kemana aja? Kenapa beberapa pekan ini gak hadir di majelis ilmu?
 
 .

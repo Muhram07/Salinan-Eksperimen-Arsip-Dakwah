@@ -1,21 +1,14 @@
 ---
-judul: "Beginilah Sosok Pedagang Yang Bertauhid"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@akun_salafy*
-*@al.nasiha*
-*@thalabulilmi.id*"
-kategori: "akidah"
-kategori_emoji: "📂"
-tags: "tauhid,pedagang,rezeki,tawakal,akidah,dagang,bisnis,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Beginilah Sosok Pedagang Yang Bertauhid
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
+kategori: Akidah
+kategori_emoji: 📂
+tags: tauhid,pedagang,rezeki,tawakal,akidah,dagang,bisnis,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 BEGINILAH SOSOK PEDAGANG YANG BER-TAUHID
 
 .

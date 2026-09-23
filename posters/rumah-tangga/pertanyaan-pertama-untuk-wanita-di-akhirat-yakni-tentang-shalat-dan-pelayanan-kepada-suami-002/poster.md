@@ -1,14 +1,14 @@
 ---
-judul: "Pertanyaan Pertama Untuk Wanita Di Akhirat yakni Tentang Shalat Dan Pelayanan Kepada Suami"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*"
-kategori: "rumah tangga"
-kategori_emoji: "📂"
-tags: "rumahtangga,wanitashalihah,sholat,suamiistri,ibnukatsir,akhirat,nasihatwanita,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Pertanyaan Pertama Untuk Wanita Di Akhirat yakni Tentang Shalat Dan Pelayanan
+  Kepada Suami
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_*'
+kategori: Rumah Tangga
+kategori_emoji: 📂
+tags: rumahtangga,wanitashalihah,sholat,suamiistri,ibnukatsir,akhirat,nasihatwanita,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 FIRST QUESTION
 
 .

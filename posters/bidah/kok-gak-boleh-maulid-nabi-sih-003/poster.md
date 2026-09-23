@@ -1,24 +1,25 @@
 ---
-judul: "Kok gak boleh maulid nabi sih"
-sub_judul: "Collab dakwah Sunnah
+judul: Kok gak boleh maulid nabi sih
+sub_judul: 'Collab dakwah Sunnah
 
-@tauhidsunnah_id
+  @tauhidsunnah_id
 
-@an.nashiha_daily
+  @an.nashiha_daily
 
-@sunnahstori
+  @sunnahstori
 
-@bummimadara
+  @bummimadara
 
-@thalabulilmi.id
+  @thalabulilmi.id
 
-@akun_salafy"
-kategori: "bidah"
-kategori_emoji: "🚫"
-tags: "Maulidnabi,maulid,ultah,Sunnah,bidah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+  @akun_salafy'
+kategori: Bid'ah
+kategori_emoji: 🚫
+tags: Maulidnabi,maulid,ultah,Sunnah,bidah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Bentuk cinta kepada Rasulullah shalallahu 'alaihi wa sallam itu yakni dengan mengamalkan Sunnah Sunnah beliau semampu kita
 
 .

@@ -1,14 +1,14 @@
 ---
-judul: "Ciri Orang Beriman yakni Aib Saudara Cukup Berhenti Di Kamu, Jangan Disebar Lagi"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@sunnahstori*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,menutupaib,jagalisan,orangberiman,hrmuslim,sunnahstori,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ciri Orang Beriman yakni Aib Saudara Cukup Berhenti Di Kamu, Jangan Disebar
+  Lagi
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@sunnahstori*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,menutupaib,jagalisan,orangberiman,hrmuslim,sunnahstori,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 AIB SESEORANG AKAN STOP/TERHENTI PADA ORANG BERIMAN.....
 
 .

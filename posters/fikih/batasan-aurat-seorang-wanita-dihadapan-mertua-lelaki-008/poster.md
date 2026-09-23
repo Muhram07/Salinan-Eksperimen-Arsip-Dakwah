@@ -1,12 +1,13 @@
 ---
-judul: "Batasan Aurat Seorang Wanita Dihadapan Mertua Lelaki"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,aurat,auratwanita,mahram,mertua,mertualelaki,adabberpakaian,bedahkitab,mayshurhasansalman,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Batasan Aurat Seorang Wanita Dihadapan Mertua Lelaki
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,aurat,auratwanita,mahram,mertua,mertualelaki,adabberpakaian,bedahkitab,mayshurhasansalman,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 BATASAN AURAT SEORANG WANITA DIHADAPAN MERTUA LELAKI
 
 Mertua adalah termasuk mahram, Bahkan mertuanya adalah mahram seumur hidup walaupun sudah bercerai dengan anaknya.

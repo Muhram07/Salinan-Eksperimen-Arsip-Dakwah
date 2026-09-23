@@ -1,12 +1,13 @@
 ---
-judul: "Bersabarlah Ketika Kata-Kata Mereka Sangat Menyakiti"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,akhlak,sabar,menjagahatidanlisan,almuzzammil10,nasihatdiri,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bersabarlah Ketika Kata-Kata Mereka Sangat Menyakiti
+sub_judul: '*@an.nashiha_daily*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,akhlak,sabar,menjagahatidanlisan,almuzzammil10,nasihatdiri,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Bersabarlah, Ketika kata-kata mereka sangat menyakiti perasaan dan menggoreskan luka di hatimu, Jangan kamu balas dengan kata-kata yang lebih menyakitkan...
 
 .

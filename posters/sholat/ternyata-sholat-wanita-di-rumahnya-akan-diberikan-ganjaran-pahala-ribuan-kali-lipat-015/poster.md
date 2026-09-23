@@ -1,12 +1,14 @@
 ---
-judul: "Ternyata Sholat Wanita di Rumahnya, Akan Diberikan Ganjaran Pahala Ribuan Kali Lipat"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,sholatwanita,sholatdirumah,fikhwanita,keutamaansholat,syaikhalalbani,silsilahalhudawannur,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ternyata Sholat Wanita di Rumahnya, Akan Diberikan Ganjaran Pahala Ribuan Kali
+  Lipat
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,sholatwanita,sholatdirumah,fikhwanita,keutamaansholat,syaikhalalbani,silsilahalhudawannur,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Ternyata Sholat Wanita di Rumahnya, Akan Diberikan Ganjaran Pahala Ribuan Kali Lipat
 
 Baca Poin Penjelasan dari Syaikh al Albani Rahimahullah :

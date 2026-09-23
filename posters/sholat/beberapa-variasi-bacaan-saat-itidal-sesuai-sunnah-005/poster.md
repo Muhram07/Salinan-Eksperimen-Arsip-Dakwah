@@ -1,12 +1,13 @@
 ---
-judul: "Beberapa Variasi Bacaan saat itidal Sesuai Sunnah"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "🛐"
-tags: "itidal,bacaanitidal,variasibacaan,sholat,fiqihsholat,sunnah,doadandzikir,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Beberapa Variasi Bacaan saat itidal Sesuai Sunnah
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 🛐
+tags: itidal,bacaanitidal,variasibacaan,sholat,fiqihsholat,sunnah,doadandzikir,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Beberapa Variasi Bacaan Waktu I'tidal Sesuai Sunnah
 
 1.

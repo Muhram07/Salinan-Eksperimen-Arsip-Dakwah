@@ -1,21 +1,15 @@
 ---
-judul: "Ibadah nya sih hebat,tapi sia sia tanpa tauhid"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@akun_salafy*
-*@al.nasiha*
-*@thalabulilmi.id*"
-kategori: "akidah"
-kategori_emoji: "📂"
-tags: "tauhid ,manhajsalaf ,dakwahsunnah ,Aqidah,salafushshalih ,selfreminder ,syirik ,ingatmati ,ilmusyari,akidah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ibadah nya sih hebat,tapi sia sia tanpa tauhid
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
+kategori: Akidah
+kategori_emoji: 📂
+tags: tauhid ,manhajsalaf ,dakwahsunnah ,Aqidah,salafushshalih ,selfreminder ,syirik
+  ,ingatmati ,ilmusyari,akidah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Konsekuensi hukum Tahta Masyhi'atillah :
 
 .

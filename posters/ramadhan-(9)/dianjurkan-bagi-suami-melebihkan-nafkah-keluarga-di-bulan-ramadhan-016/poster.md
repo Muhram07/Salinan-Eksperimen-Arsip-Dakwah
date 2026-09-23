@@ -7,6 +7,7 @@ tags: ramadhan,nafkalkeluarga,suamiistri,bedahkitab,fiqhsyafii,fiqihramadhan,sed
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 DIANJURKAN UNTUK PARA SUAMI AGAR MEMBERIKAN NAFKAH YANG LEBIH DARI BIASANYA KEPADA KELUARGA DI BULAN RAMADHAN
 
 .

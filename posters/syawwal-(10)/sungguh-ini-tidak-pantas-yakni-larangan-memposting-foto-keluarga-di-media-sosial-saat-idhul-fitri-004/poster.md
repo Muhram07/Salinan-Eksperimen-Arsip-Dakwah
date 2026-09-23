@@ -1,14 +1,14 @@
 ---
-judul: "Sungguh, Ini Tidak Pantas,yakni Larangan Memposting Foto Keluarga Di Media Sosial Saat Idhul Fitri"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*"
-kategori: "syawwal (10)"
-kategori_emoji: "🌙"
-tags: "syawwal,idhulfitri,hariraya,postingfoto,tasyabuh,adabmedsos,ustadzahmadmurzani,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Sungguh, Ini Tidak Pantas,yakni Larangan Memposting Foto Keluarga Di Media
+  Sosial Saat Idhul Fitri
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
+kategori: Syawwal (10)
+kategori_emoji: 🌙
+tags: syawwal,idhulfitri,hariraya,postingfoto,tasyabuh,adabmedsos,ustadzahmadmurzani,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Sungguh, Ini Tidak Pantas
 
 .

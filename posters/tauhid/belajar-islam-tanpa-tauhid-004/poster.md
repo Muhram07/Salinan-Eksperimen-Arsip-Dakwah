@@ -1,24 +1,25 @@
 ---
-judul: "Belajar Islam tanpa Tauhid"
-sub_judul: "Collab dakwah Sunnah
+judul: Belajar Islam tanpa Tauhid
+sub_judul: 'Collab dakwah Sunnah
 
-@tauhidsunnah_id
+  @tauhidsunnah_id
 
-@an.nashiha_daily
+  @an.nashiha_daily
 
-@studi_islam._id
+  @studi_islam._id
 
-@sunnahstori
+  @sunnahstori
 
-@silentreminder
+  @silentreminder
 
-@akun_salafy"
-kategori: "tauhid"
-kategori_emoji: "☝️"
-tags: "tauhid,pondasiislam,akidah,dasarislam,,"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+  @akun_salafy'
+kategori: Tauhid
+kategori_emoji: ☝️
+tags: tauhid,pondasiislam,akidah,dasarislam,,
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Maka kenalilah mana bab ilmu yang prioritas (akidah, tauhid dll) dan mana bab ilmu yang opsional (tambahan/wawasan lain)...
 
 .

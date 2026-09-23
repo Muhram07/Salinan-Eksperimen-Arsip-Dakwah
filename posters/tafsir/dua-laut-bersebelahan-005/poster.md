@@ -1,22 +1,24 @@
 ---
-judul: "Dua laut bersebelahan"
-sub_judul: "🖇Collabs :
+judul: Dua laut bersebelahan
+sub_judul: '🖇Collabs :
 
-@thequran_path x @tauhidsunnah_id
+  @thequran_path x @tauhidsunnah_id
 
-.
+  .
 
-Unduh poster/video HD,grup telegram dan lainnya...
+  Unduh poster/video HD,grup telegram dan lainnya...
 
-⬇️⬇️⬇️
+  ⬇️⬇️⬇️
 
-Link di bio @tauhidsunnah_id"
-kategori: "tafsir"
-kategori_emoji: "📖"
-tags: "manhajsalaf ,tauhid ,sunnah ,kajiantafsir ,tafsir ,tafsiralquran ,alquran ,laut, lautterpisah"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+  Link di bio @tauhidsunnah_id'
+kategori: Tafsir
+kategori_emoji: 📖
+tags: manhajsalaf ,tauhid ,sunnah ,kajiantafsir ,tafsir ,tafsiralquran ,alquran ,laut,
+  lautterpisah
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 {﷽}
 
 .

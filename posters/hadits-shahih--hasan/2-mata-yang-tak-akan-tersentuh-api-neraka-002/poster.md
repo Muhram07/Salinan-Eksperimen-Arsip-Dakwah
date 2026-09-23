@@ -2,13 +2,14 @@
 judul: 2 Mata Yang Tak Akan Tersentuh Api Neraka
 sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
   *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
-kategori: hadits shahih & hasan
+kategori: Hadits Shahih & Hasan
 kategori_emoji: 📂
 tags: 2mata,selamatdarineraka,menangiskarenallah,khasyyah,ribath,jihad,keutamaannangis,hrtirmidzi,tauhidsunnahid,annashihadaily,manhajsalaf,shahih,Hasan,
   hadist
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 2 MATA YANG TAK AKAN TERSENTUH API NERAKA
 
 Nabi shallallahu 'alaihi wa sallam bersabda:

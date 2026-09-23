@@ -1,14 +1,14 @@
 ---
-judul: "Bukan Cuma Asal Mubah, Semangat Wanita Salafiyyah Itu Selalu Mengincar yang Paling Afdhol"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,pakaianmuslimah,pakaianhitam,wanitasalafiyyah,salafiyyah,afdhol,pakaianafdal,ustadzmuhammadafifuddin,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bukan Cuma Asal Mubah, Semangat Wanita Salafiyyah Itu Selalu Mengincar yang
+  Paling Afdhol
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,pakaianmuslimah,pakaianhitam,wanitasalafiyyah,salafiyyah,afdhol,pakaianafdal,ustadzmuhammadafifuddin,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Pakaian yang paling afdhol adalah yang berwarna gelap, dan yang paling gelap adalah warna hitam
 
 .

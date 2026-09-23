@@ -1,15 +1,13 @@
 ---
-judul: "Bukan Patriarki! Ini Kriteria Istri Shalihah Menurut Imam Adz-Dzahabi"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "rumah tangga"
-kategori_emoji: "📂"
-tags: "rumahtangga,istrishalihah,adabistri,suamiistri,alkabair,imammadzhab,adz-dzahabi,bedahkitab,annashihadaily,thequranpath"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bukan Patriarki! Ini Kriteria Istri Shalihah Menurut Imam Adz-Dzahabi
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Rumah Tangga
+kategori_emoji: 📂
+tags: rumahtangga,istrishalihah,adabistri,suamiistri,alkabair,imammadzhab,adz-dzahabi,bedahkitab,annashihadaily,thequranpath
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Ini Bukan Poin-Poin Patriarki, Tapi Seperti Inilah Seharusnya Sifat Seorang Istri Shalihah....
 
 .

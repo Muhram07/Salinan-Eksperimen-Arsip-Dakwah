@@ -1,24 +1,25 @@
 ---
-judul: "Berbaik sangka kepada Allah meski dirasa pahit"
-sub_judul: "Collab dakwah Sunnah
+judul: Berbaik sangka kepada Allah meski dirasa pahit
+sub_judul: 'Collab dakwah Sunnah
 
-@tauhidsunnah_id
+  @tauhidsunnah_id
 
-@an.nashiha_daily
+  @an.nashiha_daily
 
-@sunnahstori
+  @sunnahstori
 
-@bummimadara
+  @bummimadara
 
-@thalabulilmi.id
+  @thalabulilmi.id
 
-@akun_salafy"
-kategori: "reminder"
-kategori_emoji: "📌"
-tags: "Husnudzan, reminder,pahit, musibah, bencana, ujian, depresi, tangis"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+  @akun_salafy'
+kategori: Reminder
+kategori_emoji: 📌
+tags: Husnudzan, reminder,pahit, musibah, bencana, ujian, depresi, tangis
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Karena apapun yang terjadi dalam hidup kita, terutama hal buruk yang hanya menurut pandangan kita,maka tetaplah husnudzan kepada Allah ta'ala ...
 
 .

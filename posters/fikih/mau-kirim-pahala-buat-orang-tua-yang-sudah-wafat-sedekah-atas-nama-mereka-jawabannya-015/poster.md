@@ -1,15 +1,14 @@
 ---
-judul: "Mau Kirim Pahala Buat Orang Tua Yang Sudah Wafat? Sedekah Atas Nama Mereka Jawabannya"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,sedekah,orangtua,berbakti,pahala,imamnawawi,syarhushohihmuslim,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Mau Kirim Pahala Buat Orang Tua Yang Sudah Wafat? Sedekah Atas Nama Mereka
+  Jawabannya
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,sedekah,orangtua,berbakti,pahala,imamnawawi,syarhushohihmuslim,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 INILAH SALAH SATU AMALAN YANG PAHALANYA AKAN SAMPAI PADA ORANG TUAMU YANG SUDAH MENINGGAL DUNIA
 
 .

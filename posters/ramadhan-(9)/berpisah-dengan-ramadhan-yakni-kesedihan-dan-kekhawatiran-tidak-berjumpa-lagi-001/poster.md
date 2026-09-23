@@ -1,14 +1,13 @@
 ---
-judul: "Berpisah Dengan Ramadhan,yakni Kesedihan Dan Kekhawatiran Tidak Berjumpa Lagi"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@sunnahstori*"
-kategori: "ramadhan (9)"
-kategori_emoji: "📂"
-tags: "ramadhan,perpisahanramadhan,lathaifalmaarif,ibnurajab,nasihat,sunnahstori,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Berpisah Dengan Ramadhan,yakni Kesedihan Dan Kekhawatiran Tidak Berjumpa Lagi
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@sunnahstori*'
+kategori: Ramadhan (9)
+kategori_emoji: 📂
+tags: ramadhan,perpisahanramadhan,lathaifalmaarif,ibnurajab,nasihat,sunnahstori,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Air Mata Mengalir dan Kalbu Bersedih Berpisah Denganmu Wahai Ramadhan....
 
 .

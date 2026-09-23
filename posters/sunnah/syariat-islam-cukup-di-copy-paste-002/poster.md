@@ -1,24 +1,25 @@
 ---
-judul: "Syariat Islam cukup di copy paste"
-sub_judul: "Collab Dakwah Sunnah :
+judul: Syariat Islam cukup di copy paste
+sub_judul: 'Collab Dakwah Sunnah :
 
-@tauhidsunnah_id 
+  @tauhidsunnah_id
 
-@an.nashiha_daily 
+  @an.nashiha_daily
 
-@sunnahstori 
+  @sunnahstori
 
-@rindu_sunnah 
+  @rindu_sunnah
 
-@al.nasiha
+  @al.nasiha
 
-@thalabulilmi.id"
-kategori: "sunnah"
-kategori_emoji: "👤"
-tags: "Syariat,Sunnah,bidah,islam"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+  @thalabulilmi.id'
+kategori: Sunnah
+kategori_emoji: 👤
+tags: Syariat,Sunnah,bidah,islam
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Apakah ada dari kalian yang meragukan tuntunan Rasulullah ﷺ yang udah lengkap banget,sampai kalian seenak hati mengubahnya❓^^
 
 

@@ -1,14 +1,13 @@
 ---
-judul: "Stop Pertanyaan Menyakitkan Mending Mendoakan Kemudahan Bagi Sesama"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@sunnahstori*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,jagalisan,menjagaperasaan,doakan,silaturahmi,empati,nasihat,sunnahstori,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Stop Pertanyaan Menyakitkan Mending Mendoakan Kemudahan Bagi Sesama
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@sunnahstori*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,jagalisan,menjagaperasaan,doakan,silaturahmi,empati,nasihat,sunnahstori,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Jangan Tanya Sesuatu Yang Belum Ada pada Dirinya, Tapi Do'akan lah Agar Allah Memberikannya Kemudahan
 
 .

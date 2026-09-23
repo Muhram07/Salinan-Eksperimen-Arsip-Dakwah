@@ -1,12 +1,13 @@
 ---
-judul: "Tentang Fidyah dan Cara Membayarnya"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,fidyah,puasa,ramadhan,utangpuasa,qadha,makanan,rumaysho,annashihadaily,bedahkitab"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Tentang Fidyah dan Cara Membayarnya
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,fidyah,puasa,ramadhan,utangpuasa,qadha,makanan,rumaysho,annashihadaily,bedahkitab
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Tentang Fidyah & Cara Membayarnya
 
 .

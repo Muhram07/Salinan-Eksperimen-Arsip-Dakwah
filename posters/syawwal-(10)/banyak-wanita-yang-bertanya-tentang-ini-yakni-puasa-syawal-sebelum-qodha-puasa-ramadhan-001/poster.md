@@ -1,14 +1,14 @@
 ---
-judul: "Banyak Wanita Yang Bertanya Tentang Ini,yakni Puasa Syawal Sebelum Qodha Puasa Ramadhan"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*"
-kategori: "syawwal (10)"
-kategori_emoji: "🌙"
-tags: "syawwal,puasasyawal,qodhapuasa,puasaramadhan,hukumpuasasyawal,ibnuutsaimin,fatawa,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Banyak Wanita Yang Bertanya Tentang Ini,yakni Puasa Syawal Sebelum Qodha Puasa
+  Ramadhan
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path*'
+kategori: Syawwal (10)
+kategori_emoji: 🌙
+tags: syawwal,puasasyawal,qodhapuasa,puasaramadhan,hukumpuasasyawal,ibnuutsaimin,fatawa,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Banyak Wanita Yang Bertanya Tentang Ini:
 
 .

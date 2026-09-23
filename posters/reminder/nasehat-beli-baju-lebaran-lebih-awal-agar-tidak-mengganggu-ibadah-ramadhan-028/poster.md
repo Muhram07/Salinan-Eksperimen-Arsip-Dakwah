@@ -1,12 +1,13 @@
 ---
-judul: "Nasehat Beli Baju Lebaran Lebih Awal Agar Tidak Mengganggu Ibadah Ramadhan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "bajulebaran,ramadhan,10hariterakhir,persiapanlebaran,ibadahramadhan,nasihat,khalidbasalamah,reminder,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Nasehat Beli Baju Lebaran Lebih Awal Agar Tidak Mengganggu Ibadah Ramadhan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: bajulebaran,ramadhan,10hariterakhir,persiapanlebaran,ibadahramadhan,nasihat,khalidbasalamah,reminder,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Nasehat dari Ustadz Khalid Basalamah Hafidzahullah :
 
 Kalau Mau Beli Baju Lebaran, Belilah dari Sekarang, Jangan Sampai Mengganggu Hari-hari Ibadah Kita di Ramadhan, Terutama 10 hari Terakhir Ramadhan...

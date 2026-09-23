@@ -1,12 +1,13 @@
 ---
-judul: "Pesan Dariku"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "reminder,hijrah,istiqomah,nasihat,taubat,adab,manhajsalaf,akhlak"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Pesan Dariku
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: reminder,hijrah,istiqomah,nasihat,taubat,adab,manhajsalaf,akhlak
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Pesan Dari-ku
 
 Tolong, seburuk apapun kisahku dimasa lalu, jangan pernah untuk dicari lagi kisahnya, Karena aku sudah tidak berada disana lagi.

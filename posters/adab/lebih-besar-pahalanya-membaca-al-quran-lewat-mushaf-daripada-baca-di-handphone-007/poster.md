@@ -1,12 +1,13 @@
 ---
-judul: "Lebih Besar Pahalanya Membaca Al Quran Lewat Mushaf Daripada Baca di Handphone"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "mushaf,alquran,bacamushaf,quranponsel,adabalquran,syaikhsulaimanarruhaili,syaikhmuhammadmusaalunashr,bedahkitab,annashihadaily,manhajsalaf,adab"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Lebih Besar Pahalanya Membaca Al Quran Lewat Mushaf Daripada Baca di Handphone
+sub_judul: '*@an.nashiha_daily*'
+kategori: Adab
+kategori_emoji: 📂
+tags: mushaf,alquran,bacamushaf,quranponsel,adabalquran,syaikhsulaimanarruhaili,syaikhmuhammadmusaalunashr,bedahkitab,annashihadaily,manhajsalaf,adab
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 LEBIH BESAR PAHALANYA MEMBACA AL QURAN LEWAT MUSHAF DARIPADA BACA DI HANDPHONE
 
 .

@@ -1,14 +1,14 @@
 ---
-judul: "Ramadhan Pergi,kok Masjid Malah jadi Sepi? Yuk Jadi Penghuni Asli Bukan Cuma Tamu Musiman"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*"
-kategori: "syawwal (10)"
-kategori_emoji: "📂"
-tags: "syawwal,ramadhan,istiqomah,masjid,sholatberjamaah,lathaifalmaarif,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ramadhan Pergi,kok Masjid Malah jadi Sepi? Yuk Jadi Penghuni Asli Bukan Cuma
+  Tamu Musiman
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_*'
+kategori: Syawwal (10)
+kategori_emoji: 📂
+tags: syawwal,ramadhan,istiqomah,masjid,sholatberjamaah,lathaifalmaarif,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Tamu-tamu Ramadhan ini, Telah Berpamitan...
 
 .

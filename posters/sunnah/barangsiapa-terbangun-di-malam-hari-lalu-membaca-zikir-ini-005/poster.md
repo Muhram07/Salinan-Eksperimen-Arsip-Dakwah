@@ -1,15 +1,13 @@
 ---
-judul: "Barangsiapa Terbangun di Malam Hari Lalu Membaca Zikir Ini"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "sunnah"
-kategori_emoji: "📂"
-tags: "sunnah,zikir,zikirmalam,terbangunmalam,doaterkabul,amalanmalam,sholatmalam,bukhari,muslim,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Barangsiapa Terbangun di Malam Hari Lalu Membaca Zikir Ini
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Sunnah
+kategori_emoji: 📂
+tags: sunnah,zikir,zikirmalam,terbangunmalam,doaterkabul,amalanmalam,sholatmalam,bukhari,muslim,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Barangsiapa Terbangun di Malam hari, Lalu dia Membaca :
 
 .

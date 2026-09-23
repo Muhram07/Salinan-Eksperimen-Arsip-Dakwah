@@ -1,12 +1,13 @@
 ---
-judul: "Kualitas Iman Dan Taqwa Teruji Saat Sendirian"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "reminder,iman,taqwa,sepi,sendiri,akhlak,nasihat,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kualitas Iman Dan Taqwa Teruji Saat Sendirian
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: reminder,iman,taqwa,sepi,sendiri,akhlak,nasihat,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 When you are ALONE
 
 Kwalitas iman dan taqwamu bisa dilihat saat kamu sedang sendirian...

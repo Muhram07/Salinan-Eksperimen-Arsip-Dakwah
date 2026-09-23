@@ -1,12 +1,14 @@
 ---
-judul: "Bukan Adab Yang Baik Terhadap Al Qur'an, Memutar Murottal Tetapi Dirinya Sibuk Dengan Urusan Yang Lain"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,murottal,alquran,adabalquran,mendengarkanquran,syaikhutsaimin,minhajulhaq,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bukan Adab Yang Baik Terhadap Al Qur'an, Memutar Murottal Tetapi Dirinya Sibuk
+  Dengan Urusan Yang Lain
+sub_judul: '*@an.nashiha_daily*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,murottal,alquran,adabalquran,mendengarkanquran,syaikhutsaimin,minhajulhaq,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 BUKAN ADAB YANG BAIK TERHADAP AL QUR'AN, MEMUTAR MUROTTAL TETAPI DIRINYA SIBUK DENGAN URUSAN YANG LAIN
 
 (Syaikh Al Allamah Al Utsaimin Rahimahullah)

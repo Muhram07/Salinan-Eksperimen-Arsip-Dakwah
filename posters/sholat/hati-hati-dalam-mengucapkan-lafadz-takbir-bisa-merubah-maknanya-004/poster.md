@@ -1,12 +1,13 @@
 ---
-judul: "Hati Hati Dalam Mengucapkan Lafadz Takbir Bisa Merubah Maknanya"
-sub_judul: "*reminder@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "🛐"
-tags: "takbir,takbiratulihram,kesalahantakbir,sholat,fiqihsholat,sunnah,manhajsalaf,reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Hati Hati Dalam Mengucapkan Lafadz Takbir Bisa Merubah Maknanya
+sub_judul: '*reminder@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 🛐
+tags: takbir,takbiratulihram,kesalahantakbir,sholat,fiqihsholat,sunnah,manhajsalaf,reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Hati-hati.. Kesalahan Dalam Mengucapkan Lafadz Takbir, Bisa Merubah Maknanya Menjadi Kalimat Kekufuran.!
 
 Kesalahan Mengucapkan Lafadz Takbir Yang Sering Terjadi:

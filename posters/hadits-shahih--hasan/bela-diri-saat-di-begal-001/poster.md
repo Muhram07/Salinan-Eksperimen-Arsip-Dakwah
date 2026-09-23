@@ -3,12 +3,13 @@ judul: Bela diri saat di begal
 sub_judul: '﷽ Cek caption ⤵️ apa pendapatmu❓... . Follow kami jika bermanfaat... .
   🖇Collabs : @tauhidsunnah_id x @thalabulilmi.id x @an.nashiihah_daily x @al.nasiha
   x @thequran_verse x @tauhidsunnahid'
-kategori: hadits shahih & hasan
+kategori: Hadits Shahih & Hasan
 kategori_emoji: ✅
 tags: manhajsalaf ,tauhid ,sunnah ,pencurian ,copet ,beladiri, hadits,hadis,shahih
 images: 1.jpg, 2.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 ➡️Ternyata membela diri dari tukang begal/perampok, lalu ia mati,maka bisa dicatat syahid. Adapun jika ia membela diri dan ia berhasil membunuh tukang begal tersebut, tukang begal itulah yang masuk neraka. Karena orang yang masih hidup itu cuma membela diri, sedangkan yang mati punya niatan membunuh.
 
 ➖➖➖

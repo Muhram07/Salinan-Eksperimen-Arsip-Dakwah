@@ -1,12 +1,13 @@
 ---
-judul: "Keutamaan Qiyamullail Sholat Malam"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,qiyamullail,sholatmalam,tahajud,keutamaan,keutaamaansholat,sunnah,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Keutamaan Qiyamullail Sholat Malam
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,qiyamullail,sholatmalam,tahajud,keutamaan,keutaamaansholat,sunnah,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Begitu Banyak Keutamaan Qiyamullail (Sholat Malam), Tapi Sayangnya Kita Lebih Memilih Untuk Terlelap Tidur
 
 Rasulullah ﷺ bersabda:

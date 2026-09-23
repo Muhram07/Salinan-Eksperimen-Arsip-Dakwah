@@ -1,21 +1,14 @@
 ---
-judul: "Dzikir Sesudah Sholat Lengkap Sesuai Sunnah"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@akun_salafy*
-*@bedahkitab_*
-*@thalabulilmi.id*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "dzikir,dzikirsesudahsholat,dzikirsetelahsholat,sholat,sunnah,manhajsalaf,salaf,tauhidsunnah,tauhidsunnahid,annashihadaily"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg, 8.jpg, 9.jpg, 10.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Dzikir Sesudah Sholat Lengkap Sesuai Sunnah
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@akun_salafy* *@bedahkitab_* *@thalabulilmi.id*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: dzikir,dzikirsesudahsholat,dzikirsetelahsholat,sholat,sunnah,manhajsalaf,salaf,tauhidsunnah,tauhidsunnahid,annashihadaily
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg, 8.jpg, 9.jpg, 10.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Dzikir Sesudah Sholat Lengkap Sesuai Sunnah (Manhaj Salaf)
 
 .

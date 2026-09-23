@@ -1,12 +1,13 @@
 ---
-judul: "Salah Satu Bentuk Judi Terselubung"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,juditerselubung,muamalah,fikihmuamalah,hukumjudi,maisir,manhajsalaf,sunnah,bedahkitab"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Salah Satu Bentuk Judi Terselubung
+sub_judul: '*@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,juditerselubung,muamalah,fikihmuamalah,hukumjudi,maisir,manhajsalaf,sunnah,bedahkitab
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 SALAH SATU BENTUK JUDI TERSELUBUNG
 
 GRATIS BUKU UNTUK 100 PENDAFTAR PERTAMA

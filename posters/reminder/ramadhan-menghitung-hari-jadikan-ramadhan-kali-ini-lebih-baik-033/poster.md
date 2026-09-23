@@ -1,12 +1,13 @@
 ---
-judul: "Ramadhan Menghitung Hari Jadikan Ramadhan Kali Ini Lebih Baik"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "ramadhan,sambutramadhan,persiapanramadhan,nasihatdiri,persiapanibadah,yanifahriansyah,reminder,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ramadhan Menghitung Hari Jadikan Ramadhan Kali Ini Lebih Baik
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: ramadhan,sambutramadhan,persiapanramadhan,nasihatdiri,persiapanibadah,yanifahriansyah,reminder,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 RAMADHAN MENGHITUNG HARI
 
 Sudah cukup Ramadhan sebelumnya yang berlalu begitu saja, kurang maksimal ibadahnya, lebih banyak lalai daripada taat, Lebih banyak malasnya dan ngabuburitnya

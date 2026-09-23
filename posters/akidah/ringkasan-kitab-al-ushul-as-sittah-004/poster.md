@@ -1,21 +1,14 @@
 ---
-judul: "Ringkasan kitab al-ushul as-sittah"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@sunnahstori*
-*@ushul_sittah*
-*@al.nasiha*
-*@thalabulilmi.id*"
-kategori: "akidah"
-kategori_emoji: "📂"
-tags: "Kuburan,wali,akidah,tauhid, pemerintah,"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg"
-pdf: "brosur.pdf"
+judul: Ringkasan kitab al-ushul as-sittah
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@sunnahstori* *@ushul_sittah* *@al.nasiha* *@thalabulilmi.id*'
+kategori: Akidah
+kategori_emoji: 📂
+tags: Kuburan,wali,akidah,tauhid, pemerintah,
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg
+pdf: brosur.pdf
 ---
+
 Ringkasan kitab al-ushul as-sittah versi awam
 
 .

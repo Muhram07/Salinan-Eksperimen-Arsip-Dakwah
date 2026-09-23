@@ -1,15 +1,13 @@
 ---
-judul: "Ucapkan Ini Sebelum Berdoa, Maka Doamu Akan Terkabul"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "doa"
-kategori_emoji: "📂"
-tags: "doa,doamustajab,ismuladham,namaallah,pengabuldoa,doaharian,adabberdoa,ibnumajah,abudaud,annasai,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ucapkan Ini Sebelum Berdoa, Maka Doamu Akan Terkabul
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Doa
+kategori_emoji: 📂
+tags: doa,doamustajab,ismuladham,namaallah,pengabuldoa,doaharian,adabberdoa,ibnumajah,abudaud,annasai,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 UCAPKAN INI SEBELUM BERDOA, MAKA DOAMU AKAN TERKABUL
 
 .

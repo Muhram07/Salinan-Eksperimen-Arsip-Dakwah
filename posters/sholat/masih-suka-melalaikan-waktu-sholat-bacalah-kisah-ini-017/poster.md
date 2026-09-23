@@ -1,12 +1,13 @@
 ---
-judul: "Masih Suka Melalaikan Waktu Sholat? Bacalah Kisah Ini"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,waktusholat,melalaikansholat,kisahsalaf,imamibnuljauzi,attabshirah,nasihatdiri,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Masih Suka Melalaikan Waktu Sholat? Bacalah Kisah Ini
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,waktusholat,melalaikansholat,kisahsalaf,imamibnuljauzi,attabshirah,nasihatdiri,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 MASIH SUKA MELALAIKAN WAKTU SHOLAT?
 
 .

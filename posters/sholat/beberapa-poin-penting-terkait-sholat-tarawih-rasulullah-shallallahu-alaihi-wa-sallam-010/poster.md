@@ -1,12 +1,14 @@
 ---
-judul: "Beberapa Poin Penting Terkait Sholat Tarawih Rasulullah Shallallahu 'alaihi wa sallam"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,tarawih,sholattarawih,ramadhan,qiyammulail,rakaat,sunnah,tatacarasholat,almanhaj,muslimorid"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Beberapa Poin Penting Terkait Sholat Tarawih Rasulullah Shallallahu 'alaihi
+  wa sallam
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,tarawih,sholattarawih,ramadhan,qiyammulail,rakaat,sunnah,tatacarasholat,almanhaj,muslimorid
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Beberapa Poin Penting Terkait Sholat Tarawih Rasulullah Shalallahu 'alaihi wa sallam
 
 1) Nabi shalallahu alaihi wa sallam Tidak Pernah Shalat Tarawih Melebihi Sebelas Raka'at

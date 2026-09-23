@@ -1,12 +1,14 @@
 ---
-judul: "Angan-Angan Mayit Tentang Ramadhan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "ramadhan,angananganmayit,penghunikubur,ibnuljauzi,attabsirah,kematian,nasihatdiri,bedahkitab,annashihadaily,manhajsalaf,reminder, kematian"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Angan-Angan Mayit Tentang Ramadhan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: ramadhan,angananganmayit,penghunikubur,ibnuljauzi,attabsirah,kematian,nasihatdiri,bedahkitab,annashihadaily,manhajsalaf,reminder,
+  kematian
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 ANGAN-ANGAN MAYIT TENTANG RAMADHAN
 
 Demi Allah, seandainya ditanyakan kepada penghuni kubur, 'Berangan-anganlah...', niscaya mereka akan berangan-angan untuk mendapatkan satu hari saja di bulan Ramadhan

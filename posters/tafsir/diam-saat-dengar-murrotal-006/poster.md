@@ -1,28 +1,29 @@
 ---
-judul: "Diam saat dengar murrotal"
-sub_judul: "Yuk follow kami untuk materi islami lainnya...
+judul: Diam saat dengar murrotal
+sub_judul: 'Yuk follow kami untuk materi islami lainnya...
 
-.
+  .
 
-🖇Collabs : ⬇️⬇️⬇️
+  🖇Collabs : ⬇️⬇️⬇️
 
-.
+  .
 
-@tauhidsunnah_id
+  @tauhidsunnah_id
 
-@tauhidsunnah_id
+  @tauhidsunnah_id
 
-x
+  x
 
-@thequran_path
+  @thequran_path
 
-@thequran_path"
-kategori: "tafsir"
-kategori_emoji: "📖"
-tags: "kajiantafsir ,tafsir ,tafsiralquran ,alquran , murrotal"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+  @thequran_path'
+kategori: Tafsir
+kategori_emoji: 📖
+tags: kajiantafsir ,tafsir ,tafsiralquran ,alquran , murrotal
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 {﷽}
 
 .

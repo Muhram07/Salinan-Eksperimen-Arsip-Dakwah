@@ -1,15 +1,14 @@
 ---
-judul: "Moment Lebaran, Mungkin Ada Pandangan Kagum Orang Lain Pada Anak-anak Kita,maka baca Doa untuk Memohon Perlindungan Anak Dari Bahaya 'Ain"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "syawwal (10)"
-kategori_emoji: "🌙"
-tags: "doa,peliharaanak,penyakitain,hariraya,lebaran,syawwal,hrbukhari,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Moment Lebaran, Mungkin Ada Pandangan Kagum Orang Lain Pada Anak-anak Kita,maka
+  baca Doa untuk Memohon Perlindungan Anak Dari Bahaya 'Ain
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Syawwal (10)
+kategori_emoji: 🌙
+tags: doa,peliharaanak,penyakitain,hariraya,lebaran,syawwal,hrbukhari,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Moment Lebaran, Mungkin Ada Pandangan Kagum Orang Lain Pada Anak-anak Kita....
 
 .

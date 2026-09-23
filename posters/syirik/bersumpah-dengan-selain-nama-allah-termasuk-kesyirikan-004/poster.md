@@ -1,12 +1,13 @@
 ---
-judul: "Bersumpah Dengan Selain Nama Allah Termasuk Kesyirikan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "syirik"
-kategori_emoji: "📂"
-tags: "akidah,aqidah,sumpah,bersumpah,syirik,kafarat,laailahaillallah,bukhari,abudaud,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bersumpah Dengan Selain Nama Allah Termasuk Kesyirikan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Syirik
+kategori_emoji: 📂
+tags: akidah,aqidah,sumpah,bersumpah,syirik,kafarat,laailahaillallah,bukhari,abudaud,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 BERSUMPAH DENGAN SELAIN NAMA ALLAH TERMASUK KESYIRIKAN
 
 Contoh :

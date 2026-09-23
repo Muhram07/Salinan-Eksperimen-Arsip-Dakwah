@@ -1,12 +1,14 @@
 ---
-judul: "Simpanan Harta Terbaik Yang Tidak Mengandung Kejelekan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "simpananharta,hartaterbaik,dzikir,syukur,istrisolehah,reminder,nasihat,manhajsalaf,sunnah, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Simpanan Harta Terbaik Yang Tidak Mengandung Kejelekan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: simpananharta,hartaterbaik,dzikir,syukur,istrisolehah,reminder,nasihat,manhajsalaf,sunnah,
+  reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 BUKAN EMAS, DAN BUKAN PERAK, TAPI INILAH SIMPANAN HARTA TERBAIK, YANG TIDAK MENGANDUNG KEJELEKAN DIDALAMNYA
 
 1) Lisan yang senantiasa berdzikir yang mengingatkan dirinya kepada Allah Ta'ala dalam kesendiriannya maupun di tengah keramaian

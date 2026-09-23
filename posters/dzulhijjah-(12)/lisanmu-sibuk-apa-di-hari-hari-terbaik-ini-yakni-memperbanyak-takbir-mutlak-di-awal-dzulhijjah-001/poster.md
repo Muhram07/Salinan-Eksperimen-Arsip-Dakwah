@@ -1,15 +1,14 @@
 ---
-judul: "Lisanmu Sibuk Apa Di Hari-Hari Terbaik Ini,yakni Memperbanyak Takbir Mutlak Di Awal Dzulhijjah"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@bedahkitab_*
-*@thequran_path*"
-kategori: "dzulhijjah (12)"
-kategori_emoji: "🌙"
-tags: "dzulhijjah,10hariawaldzulhijjah,takbirmutlak,takbiran,dzikir,hrahmad,thequranpath,bedahkitab,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Lisanmu Sibuk Apa Di Hari-Hari Terbaik Ini,yakni Memperbanyak Takbir Mutlak
+  Di Awal Dzulhijjah
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
+kategori: Dzulhijjah (12)
+kategori_emoji: 🌙
+tags: dzulhijjah,10hariawaldzulhijjah,takbirmutlak,takbiran,dzikir,hrahmad,thequranpath,bedahkitab,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 LISANMU SIBUK APA DI HARI-HARI TERBAIK INI...??
 
 .

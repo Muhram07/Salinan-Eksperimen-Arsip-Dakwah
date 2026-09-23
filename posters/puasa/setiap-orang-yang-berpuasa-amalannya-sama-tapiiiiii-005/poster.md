@@ -1,12 +1,13 @@
 ---
-judul: "Setiap Orang Yang Berpuasa Amalannya Sama,tapiiiiii..."
-sub_judul: "*@an.nashiha_daily*"
-kategori: "puasa"
-kategori_emoji: "📂"
-tags: "puasa,ramadhan,amalanpuasa,tilawah,sedekah,memberimakan,dzikir,doa,menahanmaksiat,ustadzahmadzainuddin,bedahkitab,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Setiap Orang Yang Berpuasa Amalannya Sama,tapiiiiii...
+sub_judul: '*@an.nashiha_daily*'
+kategori: Puasa
+kategori_emoji: 📂
+tags: puasa,ramadhan,amalanpuasa,tilawah,sedekah,memberimakan,dzikir,doa,menahanmaksiat,ustadzahmadzainuddin,bedahkitab,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Setiap orang yang berpuasa amalannya sama, Menahan diri dari pembatal puasa dari subuh sampai magrib
 
 Bedanya adalah :

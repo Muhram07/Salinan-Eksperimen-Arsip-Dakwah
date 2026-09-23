@@ -1,12 +1,14 @@
 ---
-judul: "Kunci Bahagia Bagi Wanita yakni Sedikit Melihat, Sedikit Mendengar, Sedikit Bergaul"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "reminder,selfreminder,wanita,muslimah,kuncibahagia,penyakithati,firandaandirja,nasihat,annashihadaily,bedahkitab"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kunci Bahagia Bagi Wanita yakni Sedikit Melihat, Sedikit Mendengar, Sedikit
+  Bergaul
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: reminder,selfreminder,wanita,muslimah,kuncibahagia,penyakithati,firandaandirja,nasihat,annashihadaily,bedahkitab
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Kunci Bahagia Bagi Wanita :
 
 SEDIKIT MELIHAT,

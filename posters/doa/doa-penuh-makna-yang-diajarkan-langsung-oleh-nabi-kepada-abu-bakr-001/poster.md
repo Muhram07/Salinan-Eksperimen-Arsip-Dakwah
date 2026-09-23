@@ -1,12 +1,13 @@
 ---
-judul: "Doa Penuh Makna Yang Diajarkan Langsung Oleh Nabi Kepada Abu Bakr"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "doa"
-kategori_emoji: "🤲"
-tags: "doa,doamemohonampunan,doasebelumsalam,sholat,sunnah,doadandzikir,manhajsalaf,abubakar"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Doa Penuh Makna Yang Diajarkan Langsung Oleh Nabi Kepada Abu Bakr
+sub_judul: '*@an.nashiha_daily*'
+kategori: Doa
+kategori_emoji: 🤲
+tags: doa,doamemohonampunan,doasebelumsalam,sholat,sunnah,doadandzikir,manhajsalaf,abubakar
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Do'a penuh makna yang diajarkan langsung oleh Nabi ﷺ kepada Abu Bakr As-Siddiq radhiyallahu 'anhu:
 
 اللَّهُمَّ إِنِّي ظَلَمْتُ نَفْسِي ظُلْمًا كَثِيرًا وَلاَ يَغْفِرُ الذُّنُوبَ إِلاَّ أَنْتَ فَاغْفِرْ لِي مَغْفِرَةً مِنْ عِنْدِكَ وَارْحَمْنِي إِنَّكَ أَنْتَ الْغَفُورُ الرَّحِيمُ

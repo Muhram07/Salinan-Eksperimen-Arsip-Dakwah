@@ -1,12 +1,13 @@
 ---
-judul: "11 Hari Lagi Menuju Ramadhan Sambutlah Dengan Ketaatan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "ramadhan,persiapanramadhan,ketaatan,reminder,nasihat,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: 11 Hari Lagi Menuju Ramadhan Sambutlah Dengan Ketaatan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: ramadhan,persiapanramadhan,ketaatan,reminder,nasihat,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 11 Hari Lagi Menuju RAMADHAN (In Sya Allah)
 
 Sambutlah Dengan Ketaatan

@@ -1,18 +1,15 @@
 ---
-judul: "Bagaimana Tauhid Meruntuhkan Kasta Sosial,yakni Bukti Tauhid Menyamakan Derajat Manusia"
-sub_judul: "Collab Dakwah Sunnah :
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@akun_salafy*
-*@tawheedfirst.id*
-*@silentreminder*
-*@thalabulilmi.id*"
-kategori: "tauhid"
-kategori_emoji: "📂"
-tags: "tauhid,kastasosial,kemuliaan,kesombongan,alhujurat13,hrahmad,takwa,muhasabahdiri,tawheedfirst,tauhidsunnahid,annashihadaily"
-images: "1.jpg, 2.jpg, 3.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Bagaimana Tauhid Meruntuhkan Kasta Sosial,yakni Bukti Tauhid Menyamakan Derajat
+  Manusia
+sub_judul: 'Collab Dakwah Sunnah : *@tauhidsunnah_id* *@an.nashiha_daily* *@akun_salafy*
+  *@tawheedfirst.id* *@silentreminder* *@thalabulilmi.id*'
+kategori: Tauhid
+kategori_emoji: 📂
+tags: tauhid,kastasosial,kemuliaan,kesombongan,alhujurat13,hrahmad,takwa,muhasabahdiri,tawheedfirst,tauhidsunnahid,annashihadaily
+images: 1.jpg, 2.jpg, 3.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 TAUHID MERUNTUHKAN KASTA SOSIAL
 
 .

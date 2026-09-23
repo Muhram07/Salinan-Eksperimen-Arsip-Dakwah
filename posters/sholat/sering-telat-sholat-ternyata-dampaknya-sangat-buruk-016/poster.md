@@ -1,12 +1,13 @@
 ---
-judul: "Sering Telat Sholat ? Ternyata Dampaknya Sangat Buruk !!"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,telatsholat,dampakburuk,shafpertama,ancamansholat,ustadzabdullahzaen,hrabudawud,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Sering Telat Sholat ? Ternyata Dampaknya Sangat Buruk !!
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,telatsholat,dampakburuk,shafpertama,ancamansholat,ustadzabdullahzaen,hrabudawud,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 SERING TELAT SHOLAT ? TERNYATA DAMPAKNYA SANGAT BURUK ..!!
 
 .

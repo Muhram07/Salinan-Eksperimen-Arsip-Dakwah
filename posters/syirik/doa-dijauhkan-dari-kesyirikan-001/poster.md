@@ -1,12 +1,13 @@
 ---
-judul: "Doa dijauhkan dari kesyirikan"
-sub_judul: "Follow @Tauhid_Base | @Tauhid_Base_Collection untuk konten bermanfaat lainnya..."
-kategori: "syirik"
-kategori_emoji: "⚠️"
-tags: "Syirik,doa,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Doa dijauhkan dari kesyirikan
+sub_judul: Follow @Tauhid_Base | @Tauhid_Base_Collection untuk konten bermanfaat lainnya...
+kategori: Syirik
+kategori_emoji: ⚠️
+tags: Syirik,doa,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Pernahkah kita berdoa agar dijauhkan dari kesyirikan?
 
 .

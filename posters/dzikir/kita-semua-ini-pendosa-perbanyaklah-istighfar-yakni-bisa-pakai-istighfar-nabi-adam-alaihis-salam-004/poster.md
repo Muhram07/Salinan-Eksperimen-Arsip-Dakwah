@@ -1,12 +1,14 @@
 ---
-judul: "Kita Semua Ini Pendosa, Perbanyaklah Istighfar,yakni bisa pakai istighfar Nabi Adam Alaihis Salam"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "dzikir"
-kategori_emoji: "📂"
-tags: "dzikir,istighfar,nabiadam,doa,taubat,pendosa,alaraf,amalan,annashihadaily,thequranpath"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kita Semua Ini Pendosa, Perbanyaklah Istighfar,yakni bisa pakai istighfar Nabi
+  Adam Alaihis Salam
+sub_judul: '*@an.nashiha_daily*'
+kategori: Dzikir
+kategori_emoji: 📂
+tags: dzikir,istighfar,nabiadam,doa,taubat,pendosa,alaraf,amalan,annashihadaily,thequranpath
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Kita Semua Ini Pendosa, Perbanyaklah Istighfar, Inilah Salah Satu Istighfar Yang Bisa Diamalkan :
 
 .

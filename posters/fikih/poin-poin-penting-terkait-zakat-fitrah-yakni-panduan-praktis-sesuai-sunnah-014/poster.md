@@ -1,13 +1,13 @@
 ---
-judul: "Poin-Poin Penting Terkait Zakat Fitrah,yakni Panduan Praktis Sesuai Sunnah"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*"
-kategori: "fikih"
-kategori_emoji: "📂"
-tags: "fikih,zakat,zakatfitrah,hukumzakat,panduanzakat,sunnah,ramadhan,makananpokok,fakirmiskin,rumaysho,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Poin-Poin Penting Terkait Zakat Fitrah,yakni Panduan Praktis Sesuai Sunnah
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily*'
+kategori: Fikih
+kategori_emoji: 📂
+tags: fikih,zakat,zakatfitrah,hukumzakat,panduanzakat,sunnah,ramadhan,makananpokok,fakirmiskin,rumaysho,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Poin-Poin Penting Terkait Zakat Fitrah
 
 .

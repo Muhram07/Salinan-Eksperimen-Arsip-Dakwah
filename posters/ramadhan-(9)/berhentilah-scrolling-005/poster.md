@@ -7,6 +7,7 @@ tags: scrolling,hp,sosmed,ramadhan,mushaf,tilawah,waktu,nasihatdiri,reminder,ann
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 BERHENTILAH SCROLLING
 
 Jika selama ini umurmu habis hanya untuk men-scroll tanpa makna, buang waktu sia-sia, quota habis, tapi yang didapat kadang hanya dosa

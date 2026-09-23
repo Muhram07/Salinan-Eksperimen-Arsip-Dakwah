@@ -1,12 +1,14 @@
 ---
-judul: "Memiliki Circle Yang Beraqidah dan Bertauhid Lurus Itu Penting"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "reminder"
-kategori_emoji: "📂"
-tags: "adab,temanpergaulan,circleshalih,aqidah,tauhid,manhajsalaf,attaubah119,nasihatdiri,annashihadaily,sunnah, reminder"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Memiliki Circle Yang Beraqidah dan Bertauhid Lurus Itu Penting
+sub_judul: '*@an.nashiha_daily*'
+kategori: Reminder
+kategori_emoji: 📂
+tags: adab,temanpergaulan,circleshalih,aqidah,tauhid,manhajsalaf,attaubah119,nasihatdiri,annashihadaily,sunnah,
+  reminder
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Memiliki Circle Yang Beraqidah dan Bertauhid Lurus itu Penting
 
 Memiliki Circle Yang Berada Diatas Manhaj Salaf itu Penting

@@ -1,12 +1,14 @@
 ---
-judul: "Belajarlah Aqidah Yang Benar Sehingga Kamu Tidak Ikutan Latah Mengucapkan Ini Pada Orang Yang Meninggal Dunia"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "akidah"
-kategori_emoji: "📂"
-tags: "akidah,aqidah,meninggaldunia,kematian,alamkubur,istirja,rip,tirmidzi,manhajsalaf,sunnah"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Belajarlah Aqidah Yang Benar Sehingga Kamu Tidak Ikutan Latah Mengucapkan Ini
+  Pada Orang Yang Meninggal Dunia
+sub_judul: '*@an.nashiha_daily*'
+kategori: Akidah
+kategori_emoji: 📂
+tags: akidah,aqidah,meninggaldunia,kematian,alamkubur,istirja,rip,tirmidzi,manhajsalaf,sunnah
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Belajarlah Aqidah Yang Benar, Sehingga Kamu Tidak Ikutan Latah Mengucapkan Ini Pada Orang yang Meninggal Dunia
 
 1) Mengucapkan RIP (Rest in Peace) atau "Beristirahatlah dalam Damai", Ini adalah kebiasaan orang-orang kafir. Adapun yang disyari'atkan adalah mengucapkan istirja' (innaa lillahi wa innaa ilaihi rooji'un) dan mendoakan agar si mayit mendapatkan ampunan.

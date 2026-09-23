@@ -1,15 +1,13 @@
 ---
-judul: "Titik Tertinggi Ketika Marah,yakni Diam dan Menjauhi"
-sub_judul: "Collab Dakwah Sunnah :
-*@an.nashiha_daily*
-*@thequran_path*
-*@bedahkitab_*"
-kategori: "adab"
-kategori_emoji: "📂"
-tags: "adab,adabmarah,menjagadiri,sabar,almuzzammil,nasihat,akhlak,bedahkitab,thequranpath,annashihadaily"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Titik Tertinggi Ketika Marah,yakni Diam dan Menjauhi
+sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@thequran_path* *@bedahkitab_*'
+kategori: Adab
+kategori_emoji: 📂
+tags: adab,adabmarah,menjagadiri,sabar,almuzzammil,nasihat,akhlak,bedahkitab,thequranpath,annashihadaily
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Titik tertinggi ketika marah itu, bukanlah dengan membentak atau berteriak, Tapi cukup diam dan pelan-pelan menjauhi....
 
 .

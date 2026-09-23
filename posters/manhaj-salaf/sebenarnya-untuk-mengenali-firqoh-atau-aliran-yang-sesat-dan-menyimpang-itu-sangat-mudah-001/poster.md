@@ -3,12 +3,13 @@ judul: Sebenarnya Untuk Mengenali Firqoh atau Aliran Yang Sesat Dan Menyimpang I
   Sangat Mudah
 sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
   *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
-kategori: manhaj salaf
+kategori: Manhaj Salaf
 kategori_emoji: 🔥
 tags: manhajsalaf,firqah,firqahsesat,aliranmenyimpang,al-salaf,syaikhalfauzan,alajwibahalmufidah,nasihat,annashihadaily,tauhidsunnahid
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 SEBENARNYA UNTUK MENGENALI FIRQOH/ALIRAN YANG SESAT DAN MENYIMPANG ITU SANGAT MUDAH
 
 .

@@ -1,12 +1,13 @@
 ---
-judul: "Penyedot Pahala Puasa Ramadhan"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "puasa"
-kategori_emoji: "📂"
-tags: "puasa,penyedotpahala,ramadhan,tabarruj,pacaran,mencela,ghibah,namimah,drakor,tidursiang,ustadzzaenalabidin,bedahkitab,annashihadaily,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Penyedot Pahala Puasa Ramadhan
+sub_judul: '*@an.nashiha_daily*'
+kategori: Puasa
+kategori_emoji: 📂
+tags: puasa,penyedotpahala,ramadhan,tabarruj,pacaran,mencela,ghibah,namimah,drakor,tidursiang,ustadzzaenalabidin,bedahkitab,annashihadaily,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 PENYEDOT PAHALA PUASA RAMADHAN
 
 1) Menyaksikan wanita tabarruj dan buka aurat di sosmed

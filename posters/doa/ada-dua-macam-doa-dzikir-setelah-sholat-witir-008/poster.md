@@ -1,12 +1,13 @@
 ---
-judul: "Ada Dua Macam Doa/Dzikir Setelah Sholat Witir"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "doa"
-kategori_emoji: "📂"
-tags: "dzikir,doa,sholatwitir,doawitir,dzikirwitir,subhaanalmalikilqudduus,abudaud,tirmidzi,rumaysho,manhajsalaf"
-images: "1.jpg, 2.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Ada Dua Macam Doa/Dzikir Setelah Sholat Witir
+sub_judul: '*@an.nashiha_daily*'
+kategori: Doa
+kategori_emoji: 📂
+tags: dzikir,doa,sholatwitir,doawitir,dzikirwitir,subhaanalmalikilqudduus,abudaud,tirmidzi,rumaysho,manhajsalaf
+images: 1.jpg, 2.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 ADA DUA MACAM DOA/DZIKIR SETELAH SHOLAT WITIR
 
 ---

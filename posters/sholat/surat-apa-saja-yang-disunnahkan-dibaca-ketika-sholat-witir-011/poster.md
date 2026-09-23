@@ -1,12 +1,13 @@
 ---
-judul: "Surat Apa Saja Yang Disunnahkan Dibaca Ketika Sholat Witir?"
-sub_judul: "*@an.nashiha_daily*"
-kategori: "sholat"
-kategori_emoji: "📂"
-tags: "sholat,witir,sholatwitir,suratwitir,alalaa,alkafirun,alikhlas,alfalaq,annas,annisa,sunnah,konsultasisyariah,rumaysho,manhajsalaf"
-images: "1.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Surat Apa Saja Yang Disunnahkan Dibaca Ketika Sholat Witir?
+sub_judul: '*@an.nashiha_daily*'
+kategori: Sholat
+kategori_emoji: 📂
+tags: sholat,witir,sholatwitir,suratwitir,alalaa,alkafirun,alikhlas,alfalaq,annas,annisa,sunnah,konsultasisyariah,rumaysho,manhajsalaf
+images: 1.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 SURAT APA SAJA YANG DISUNNAHKAN DIBACA KETIKA SHOLAT WITIR?
 
 1) Jika shalat witirnya 3 rakaat, membaca surat Al-A'laa pada rakaat pertama, surat Al-Kafirun pada rakaat kedua, surat Al-Ikhlas pada rakaat ketiga.

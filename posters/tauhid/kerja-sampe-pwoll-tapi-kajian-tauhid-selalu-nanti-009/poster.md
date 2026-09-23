@@ -1,21 +1,14 @@
 ---
-judul: "Kerja Sampe Pwoll Tapi Kajian Tauhid Selalu Nanti"
-sub_judul: "*Collab*
-*dakwah*
-*Sunnah*
-*:*
-*@tauhidsunnah_id*
-*@an.nashiha_daily*
-*@al.nasiha*
-*@akun_salafy*
-*@tawheedfirst.id*
-*@thalabulilmi.id*"
-kategori: "tauhid"
-kategori_emoji: "📂"
-tags: "tauhid,ilmutauhid,belajartauhid,rezeki,utamakandakwah,salaf,manhajsalaf,tauhidsunnah,tauhidsunnahid,annashihadaily"
-images: "1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg, 8.jpg"
-tidakpakepdf: "brosur.pdf"
+judul: Kerja Sampe Pwoll Tapi Kajian Tauhid Selalu Nanti
+sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
+  *@al.nasiha* *@akun_salafy* *@tawheedfirst.id* *@thalabulilmi.id*'
+kategori: Tauhid
+kategori_emoji: 📂
+tags: tauhid,ilmutauhid,belajartauhid,rezeki,utamakandakwah,salaf,manhajsalaf,tauhidsunnah,tauhidsunnahid,annashihadaily
+images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg, 8.jpg
+tidakpakepdf: brosur.pdf
 ---
+
 Kerja Sampai Pol, Tapi Menuntut Ilmu Tauhid Selalu Ditunda?
 
 .
