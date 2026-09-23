@@ -291,3 +291,4 @@ def scan_and_reconstruct_posters():
 
 if __name__ == "__main__":
     main()
+
