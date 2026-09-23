@@ -731,6 +731,11 @@
         let emojiMapGlobal = {};
         let rawManifestPosters = [];
 
+        /* --- FUNGSI NORMALISASI KATEGORI (FIX RABI'UL AKHIR, BID'AH, DLL) --- */
+        function normalizeCategory(str) {
+            return str ? str.toLowerCase().replace(/['"()]/g, "").trim() : "";
+        }
+
         /* --- SISTEM FOLLOW GATE (PEMBATAS AKSES) --- */
         let gateFollowed1 = false;
         let gateFollowed2 = false;
@@ -846,7 +851,7 @@
             switchBerandaMode('all'); 
         }
 
-        /* FUNGSI SINKRONISASI FILTER */
+        /* FUNGSI SINKRONISASI FILTER (DENGAN NORMALISASI KATEGORI) */
         function filterDisplayPosters() {
             const fav = getFavorit();
             const posters = document.querySelectorAll('.poster');
@@ -861,7 +866,9 @@
                 else if (berandaModeAktif === 'pdf') passMode = hasPdf;
 
                 let passKategori = true;
-                if (kategoriAktif !== null) passKategori = (kat === kategoriAktif);
+                if (kategoriAktif !== null) {
+                    passKategori = (normalizeCategory(kat) === normalizeCategory(kategoriAktif));
+                }
 
                 if (passMode && passKategori) {
                     p.style.display = isCompactView ? 'grid' : 'block';
@@ -941,7 +948,11 @@
                     const judul = p.judul || "Tanpa Judul";
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
-                    const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || '📂';
+                    
+                    // Pencocokan aman emoji kategori
+                    const katCleanKey = normalizeCategory(kategori);
+                    const katEmoji = emojiMapGlobal[katCleanKey] || emojiMapGlobal[kategori] || '📂';
+                    
                     const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
                     let pdfSrc = p.pdf ? `${folder}/brosur.pdf` : null;
                     const hasPdf = !!p.pdf;
@@ -1048,7 +1059,7 @@
                 </div>`;
 
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
-                let icon = emojiMapGlobal[nama.toLowerCase()] || '📂';
+                let icon = emojiMapGlobal[normalizeCategory(nama)] || emojiMapGlobal[nama] || '📂';
                 htmlKategoriOri += `
                     <div class="card-kategori" onclick="filterKategori('${nama}', this)">
                         <span class="icon">${icon}</span>
@@ -1172,7 +1183,7 @@
             const judul = rawItem.judul || "Tanpa Judul";
             const subJudul = rawItem.sub_judul || "";
             const kategori = rawItem.kategori || "Umum";
-            const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || '📂';
+            const katEmoji = emojiMapGlobal[normalizeCategory(kategori)] || emojiMapGlobal[kategori] || '📂';
             const tagArray = rawItem.tags ? rawItem.tags.split(',').map(t => t.trim()) : [];
             const pdfSrc = rawItem.pdf ? `${folder}/brosur.pdf` : null;
             const favList = getFavorit();
@@ -1264,7 +1275,7 @@
                 if (hasil.length > 0) {
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = hasil.map(item => {
-                        const katEmoji = emojiMapGlobal[item.kategori.toLowerCase()] || '📂';
+                        const katEmoji = emojiMapGlobal[normalizeCategory(item.kategori)] || emojiMapGlobal[item.kategori] || '📂';
                         return `
                             <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
                                 <span>📚 ${item.judul}</span>
