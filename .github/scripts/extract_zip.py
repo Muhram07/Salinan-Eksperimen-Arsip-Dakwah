@@ -6,6 +6,7 @@ import re
 import sys
 import json
 
+# === DAFTAR URUTAN RESMI 12 BULAN HIJRIAH ===
 HIJRIAH_ORDER = [
     "Muharram (1)",
     "Safar (2)",
@@ -139,14 +140,12 @@ def main():
                         final_slug = f"{slug_base}-{num_str}"
                         
                         target_folder = os.path.join('posters', kat_folder_slug, final_slug)
-                        print(f"Target folder ditemukan: {target_folder}")
                     except Exception as e:
                         print(f"Gagal parsing YAML di poster.md: {e}")
                 
         if not target_folder:
             fallback_name = os.path.splitext(zip_filename)[0]
             target_folder = os.path.join('posters', 'unknown', fallback_name)
-            print(f"Menggunakan fallback folder: {target_folder}")
 
         os.makedirs(target_folder, exist_ok=True)
         for root, dirs, files in os.walk(temp_dir):
@@ -162,7 +161,7 @@ def main():
     scan_and_repair()
 
 def scan_and_repair():
-    print("Memindai & memperbaiki struktur folder posters (Auto-Merge & Self-Healing)...")
+    print("Memindai & memperbaiki struktur folder posters...")
     manifest_path = "manifest.json"
     existing_emoji_map = {}
 
@@ -201,7 +200,6 @@ def scan_and_repair():
 
             if kat_folder != target_kat_folder:
                 os.makedirs(target_kat_path, exist_ok=True)
-                print(f"🔀 Merging Folder Kategori: {kat_folder} -> {target_kat_folder}")
                 for sub_item in os.listdir(kat_folder_path):
                     src_sub = os.path.join(kat_folder_path, sub_item)
                     dst_sub = os.path.join(target_kat_path, sub_item)
@@ -255,8 +253,7 @@ def scan_and_repair():
     with open(manifest_path, 'w', encoding='utf-8') as f:
         json.dump(manifest_data, f, indent=2, ensure_ascii=False)
     
-    print("✅ Selesai! Seluruh folder telah digabungkan & Manifest diperbarui tanpa duplikasi.")
-    print(f"📊 Total Poster Aktif: {manifest_data['total_poster']}")
+    print(f"✅ Selesai! Total Poster Aktif: {manifest_data['total_poster']}")
 
 if __name__ == "__main__":
     main()
