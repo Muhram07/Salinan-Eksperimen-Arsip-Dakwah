@@ -14,6 +14,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Yang sangat kita butuhkan di zaman ini adalah berkumpul dengan teman-teman yang baik, yang se-Manhaj dan se-Aqidah
 
 .

@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 JANGAN TADARUS AL-QUR'AN MENGGUNAKAN PENGERAS SUARA LUAR MASJID SEHINGGA MENGGANGGU ORANG LAIN
 
 Tidak boleh bagi seseorang untuk mengeraskan bacaan Al-Qur’an, baik di dalam shalat ataupun ketika di luar shalat. Jika dia di masjid, perbuatan itu akan mengganggu jama’ah lain karena suaranya.

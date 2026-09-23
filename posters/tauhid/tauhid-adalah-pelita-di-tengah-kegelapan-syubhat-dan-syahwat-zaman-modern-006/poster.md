@@ -14,6 +14,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Tauhid adalah cahaya yang menjaga hati dari dua bahaya besar yakni : syubhat dan syahwat.
 
 .

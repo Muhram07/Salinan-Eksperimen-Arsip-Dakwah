@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 RAMADHAN JANGAN HANYA FOKUS MEMIKIRKAN MENU, KARENA RAMADHAN BUKANLAH JAMUAN UNTUK PERUT, TAPI JAMUAN UNTUK HATI
 
 Hati-hatilah dari berlebihan dalam makan dan minum. Karena banyak orang menjadikan Ramadhan sebagai jamuan untuk perut, bukan sebagai jamuan untuk hati.

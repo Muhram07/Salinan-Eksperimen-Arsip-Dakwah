@@ -14,6 +14,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Jangan hanya takut syirik besar, waspadai juga syirik kecil yang sering menyelinap dalam amal harian.
 
 .

@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 DIANTARA MAKSIAT YANG HARUS KITA HINDARI, TERUTAMA KETIKA KITA DI BULAN RAMADHAN ADALAH MENONTON FILM
 
 Dampak maksiat nonton film yaitu menghilangkan kenikmatan/kelezatan melihat pasangan halal kita, sampai setan membuat pasangan kita tidak menarik lagi (perasaan jadi hambar)

@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Saat berpuasa, Keadaan ketika sedang lapar-laparnya, sedang haus-hausnya, saat itu doanya mudah dikabulkan, dan semua doa mudah di dikabulkan ketika keadaan lelah setelah beribadah
 
 .

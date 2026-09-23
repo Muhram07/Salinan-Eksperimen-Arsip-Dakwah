@@ -12,6 +12,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Jangan hanya semangat ikut kajian tentang perasaan, cinta-cintaan, pernikahan, curhat-curhat sampai buka aib, atau yang sejenisnya...!
 
 TAPI MELUPAKAN PONDASI ILMU YANG SANGAT PENTING UNTUK DIPELAJARI YAITU ILMU AQIDAH DAN TAUHID

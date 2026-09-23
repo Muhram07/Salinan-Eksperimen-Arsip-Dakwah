@@ -12,6 +12,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 5 NASIHAT PENTING DALAM RAMADHAN KHUSUSNYA UNTUK GEN Z
 
 1) Kurangi Screen Time, Batasi Penggunaan Media Sosial. Ramadhan terlalu berharga untuk kita habiskan dengan scroll yang tidak bermanfaat. Media sosial adalah pencuri waktu terbesar kita.

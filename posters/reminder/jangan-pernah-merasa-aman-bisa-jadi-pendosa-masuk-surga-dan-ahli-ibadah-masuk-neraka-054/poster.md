@@ -12,6 +12,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Bisa jadi dia seorang pendosa, Tapi masuk Syurga karena kesungguhan taubatnya.
 
 .

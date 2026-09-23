@@ -12,6 +12,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Kita butuh pasangan yang mau belajar dan tumbuh bersama, bukan pasangan yang selalu beralasan 'Aku memang begini orangnya...'
 
 Rumah tangga idaman adalah rumah tangga yang menjadikan akhirat sebagai tujuan utamanya. Suami dan istri saling menjadikan pasangannya sebagai tempat untuk mendulang pahala.

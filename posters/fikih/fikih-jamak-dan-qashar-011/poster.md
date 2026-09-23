@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Rangkuman fikih ini untuk mempermudah kita semua, terutama yang awam,yang kadang bingung sebenarnya gimana mau sholat sedangkan masih dalam perjalanan,lagi darurat, udzur hujan,dsb,masih merasa salah karena meninggalkan sholat saat safar,dll...?
 
 .

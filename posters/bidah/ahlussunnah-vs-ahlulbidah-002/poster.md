@@ -24,6 +24,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Meninggalkan Bid'ah itu tidak akan membuat tanganmu terpotong,atau hal hal buruk lainnya kok.
 
 .
