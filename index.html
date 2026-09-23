@@ -731,9 +731,14 @@
         let emojiMapGlobal = {};
         let rawManifestPosters = [];
 
-        /* --- FUNGSI NORMALISASI KATEGORI (FIX RABI'UL AKHIR, BID'AH, DLL) --- */
+        /* --- FUNGSI NORMALISASI KATEGORI (MENGATASI PERBEDAAN TANDA PETIK & SIMBOL) --- */
         function normalizeCategory(str) {
-            return str ? str.toLowerCase().replace(/['"()]/g, "").trim() : "";
+            if (!str) return "";
+            return str.toLowerCase()
+                      .replace(/[’‘]/g, "'") // Samakan semua jenis petik satu
+                      .replace(/['"()]/g, "") // Hapus tanda petik dan kurung agar kebal typo
+                      .replace(/\s+/g, " ")   // Rapikan spasi ganda
+                      .trim();
         }
 
         /* --- SISTEM FOLLOW GATE (PEMBATAS AKSES) --- */
@@ -851,7 +856,7 @@
             switchBerandaMode('all'); 
         }
 
-        /* FUNGSI SINKRONISASI FILTER (DENGAN NORMALISASI KATEGORI) */
+        /* FUNGSI SINKRONISASI FILTER */
         function filterDisplayPosters() {
             const fav = getFavorit();
             const posters = document.querySelectorAll('.poster');
@@ -949,7 +954,7 @@
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
                     
-                    // Pencocokan aman emoji kategori
+                    // Pencarian emoji dengan fallback normalisasi aman
                     const katCleanKey = normalizeCategory(kategori);
                     const katEmoji = emojiMapGlobal[katCleanKey] || emojiMapGlobal[kategori] || '📂';
                     
