@@ -8,33 +8,33 @@ import json
 
 # === DAFTAR URUTAN RESMI 12 BULAN HIJRIAH ===
 HIJRIAH_ORDER = [
-    "Muharram (1)",
-    "Safar (2)",
-    "Rabi'ul Awwal (3)",
-    "Rabi'ul Akhir (4)",
-    "Jumadil Awwal (5)",
-    "Jumadil Akhir (6)",
-    "Rajab (7)",
-    "Sya'ban (8)",
-    "Ramadhan (9)",
-    "Syawwal (10)",
-    "Dzulqa'dah (11)",
-    "Dzulhijjah (12)"
+    "Muharram",
+    "Safar",
+    "Rabi'ul Awwal",
+    "Rabi'ul Akhir",
+    "Jumadil Awwal",
+    "Jumadil Akhir",
+    "Rajab",
+    "Sya'ban",
+    "Ramadhan",
+    "Syawwal",
+    "Dzulqa'dah",
+    "Dzulhijjah"
 ]
 
 HIJRIAH_NORMALIZE_MAP = {}
-for m in HIJRIAH_ORDER:
-    num_match = re.search(r'\((\d+)\)', m)
-    num = num_match.group(1) if num_match else ""
-    base_name = re.sub(r'\s*\(\d+\)', '', m).strip().lower()
+for i, m in enumerate(HIJRIAH_ORDER, 1):
+    base_name = m.lower()
+    num = str(i)
     
-    HIJRIAH_NORMALIZE_MAP[m.lower()] = m
     HIJRIAH_NORMALIZE_MAP[base_name] = m
+    HIJRIAH_NORMALIZE_MAP[f"{base_name} ({num})"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_name}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_name} {num}"] = m
     
     base_single_w = base_name.replace('awwal', 'awal').replace('syawwal', 'syawal')
     HIJRIAH_NORMALIZE_MAP[base_single_w] = m
+    HIJRIAH_NORMALIZE_MAP[f"{base_single_w} ({num})"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w}-{num}"] = m
     HIJRIAH_NORMALIZE_MAP[f"{base_single_w} {num}"] = m
 
@@ -66,9 +66,23 @@ def get_canonical_kategori(kat_str):
 
 def get_folder_slug(kat_str):
     canonical = get_canonical_kategori(kat_str)
-    slug = canonical.lower().replace("’", "").replace("'", "")
+    
+    # Ubah ke huruf kecil
+    slug = canonical.lower()
+    
+    # Hapus angka dalam kurung jika ada (misal: (4), (9), dll)
+    slug = re.sub(r'\s*\(\d+\)', '', slug)
+    
+    # --- BERSIHKAN SEMUA TANDA PETIK & SIMBOL DI BELAKANG LAYAR ---
+    slug = slug.replace("’", "").replace("'", "").replace("`", "")
+    
+    # Ganti spasi dengan strip (-) dan buang karakter non-alfanumerik lainnya
     slug = re.sub(r'\s+', '-', slug)
-    slug = re.sub(r'[^a-z0-9\-\(\)]+', '', slug)
+    slug = re.sub(r'[^a-z0-9\-]+', '', slug)
+    
+    # Rapikan strip ganda
+    slug = re.sub(r'-+', '-', slug).strip('-')
+    
     return slug
 
 def get_padded_number(num):
@@ -178,7 +192,6 @@ def scan_and_reconstruct_posters():
         print("Folder posters belum ada.")
         return
 
-    # Kumpulkan semua poster dari seluruh subfolder fisik yang ada
     all_posters_temp = []
     
     for kat_folder in os.listdir(base_poster_path):
@@ -213,23 +226,19 @@ def scan_and_reconstruct_posters():
                 raw_kategori = data.get('kategori', 'Umum')
                 canonical_kat = get_canonical_kategori(raw_kategori)
                 
-                # PERBAIKI KATEGORI DI DALAM FILE YAML AGAR SESUAI BAKU
                 data['kategori'] = canonical_kat
                 kategori_terpakai_set.add(canonical_kat)
 
-                # Cek emoji kategori
                 new_emoji = data.get('kategori_emoji')
                 if new_emoji and new_emoji != '📂':
                     manifest_data['kategori_emoji'][canonical_kat] = new_emoji
 
-                # Tulis ulang file poster.md dengan kategori yang sudah diperbaiki secara baku
                 new_yaml_content = yaml.dump(data, allow_unicode=True, sort_keys=False)
                 new_full_content = f"---\n{new_yaml_content}---\n" + content[yaml_match.end():]
                 
                 with open(md_file_path, 'w', encoding='utf-8') as f:
                     f.write(new_full_content)
 
-                # Pindahkan folder ke jalur slug kategori yang benar jika belum pas
                 target_kat_slug = get_folder_slug(canonical_kat)
                 current_parent_slug = os.path.basename(os.path.dirname(poster_path))
                 
@@ -246,7 +255,6 @@ def scan_and_reconstruct_posters():
                         correct_poster_dir = new_destination
                         print(f"🔀 Memindahkan poster ke kategori baku: {canonical_kat} ({folder_name})")
                     else:
-                        # Jika folder tujuan sudah ada, gabungkan isinya
                         for item in os.listdir(poster_path):
                             s_item = os.path.join(poster_path, item)
                             d_item = os.path.join(new_destination, item)
@@ -255,7 +263,6 @@ def scan_and_reconstruct_posters():
                         shutil.rmtree(poster_path)
                         correct_poster_dir = new_destination
 
-                # Perbarui path relatif di manifest
                 real_folder_name = os.path.basename(correct_poster_dir)
                 real_kategori_folder = os.path.basename(os.path.dirname(correct_poster_dir))
                 data['path'] = f"{real_kategori_folder}/{real_folder_name}"
@@ -266,7 +273,6 @@ def scan_and_reconstruct_posters():
         except Exception as e:
             print(f"Gagal merekonstruksi {md_file_path}: {e}")
 
-    # Bersihkan folder kategori kosong yang mungkin tertinggal
     for kat_folder in os.listdir(base_poster_path):
         kat_folder_path = os.path.join(base_poster_path, kat_folder)
         if os.path.isdir(kat_folder_path) and not os.listdir(kat_folder_path):
