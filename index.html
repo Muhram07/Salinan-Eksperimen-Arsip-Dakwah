@@ -954,7 +954,6 @@
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
                     
-                    // Pencarian emoji dengan fallback normalisasi aman
                     const katCleanKey = normalizeCategory(kategori);
                     const katEmoji = emojiMapGlobal[katCleanKey] || emojiMapGlobal[kategori] || '📂';
                     
@@ -1065,15 +1064,17 @@
 
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
                 let icon = emojiMapGlobal[normalizeCategory(nama)] || emojiMapGlobal[nama] || '📂';
+                let safeNama = JSON.stringify(nama); // DIJAMIN AMAN DARI PETIK SATU & SPASI (MENGATASI BID'AH & RABI'UL AKHIR)
+                
                 htmlKategoriOri += `
-                    <div class="card-kategori" onclick="filterKategori('${nama}', this)">
+                    <div class="card-kategori" onclick='filterKategori(${safeNama}, this)'>
                         <span class="icon">${icon}</span>
                         <span class="nama">${nama}</span>
                         <span class="jumlah">${jumlah} Poster</span>
                     </div>
                 `;
                 htmlKategoriCompact += `
-                    <div class="card-kategori" onclick="filterKategori('${nama}', this)">
+                    <div class="card-kategori" onclick='filterKategori(${safeNama}, this)'>
                         <span class="icon">${icon}</span>
                         <span class="nama">${nama}</span>
                         <span class="jumlah">${jumlah}</span>
@@ -1084,8 +1085,6 @@
             kategoriCompact.innerHTML = htmlKategoriCompact;
             
             filterDisplayPosters();
-
-            // Selesai Memuat
             hideAppLoader();
         }
 
