@@ -1,60 +1,121 @@
+# ==============================================================================
+# SCRIPT OTOMATISASI EKSTRAKSI ZIP & PEMBUAT MANIFEST DAKWAH SUNNAH
+# ==============================================================================
+
 import os
-import shutil
-import zipfile
-import yaml
 import re
-import sys
 import json
+import zipfile
+import shutil
+import sys
 
-# === DAFTAR URUTAN RESMI 12 BULAN HIJRIAH ===
-HIJRIAH_ORDER = [
-    "Muharram (1)",
-    "Safar (2)",
-    "Rabi'ul Awwal (3)",
-    "Rabi'ul Akhir (4)",
-    "Jumadil Awwal (5)",
-    "Jumadil Akhir (6)",
-    "Rajab (7)",
-    "Sya'ban (8)",
-    "Ramadhan (9)",
-    "Syawwal (10)",
-    "Dzulqa'dah (11)",
-    "Dzulhijjah (12)"
-]
-
-HIJRIAH_NORMALIZE_MAP = {}
-for m in HIJRIAH_ORDER:
-    num_match = re.search(r'\((\d+)\)', m)
-    num = num_match.group(1) if num_match else ""
-    base_name = re.sub(r'\s*\(\d+\)', '', m).strip().lower()
-    
-    HIJRIAH_NORMALIZE_MAP[m.lower()] = m
-    HIJRIAH_NORMALIZE_MAP[base_name] = m
-    HIJRIAH_NORMALIZE_MAP[f"{base_name}-{num}"] = m
-    HIJRIAH_NORMALIZE_MAP[f"{base_name} {num}"] = m
-    
-    base_single_w = base_name.replace('awwal', 'awal').replace('syawwal', 'syawal')
-    HIJRIAH_NORMALIZE_MAP[base_single_w] = m
-    HIJRIAH_NORMALIZE_MAP[f"{base_single_w}-{num}"] = m
-    HIJRIAH_NORMALIZE_MAP[f"{base_single_w} {num}"] = m
-
-# KAMUS STANDarisasI KATEGORI BAKU (DENGAN PETIK UNTUK TAMPILAN YAML)
-DISPLAY_KATEGORI_MAP = {
-    "aqidah": "Akidah",
-    "akidah": "Akidah",
-    "bidah": "Bid'ah",
-    "bid'ah": "Bid'ah",
-    "bid’ah": "Bid'ah",
-    "fiqih": "Fikih",
-    "fikih": "Fikih",
-    "shalat": "Sholat",
-    "sholat": "Sholat",
-    "hadits": "Hadits",
-    "dzikir": "Dzikir",
-    "zikir": "Zikir",
+# Kamus pemetaan bulan Hijriah agar format penulisan seragam dan baku
+HIJRIAH_NORMALIZE_MAP = {
+    "muharram": "Muharram (1)",
+    "muharram (1)": "Muharram (1)",
+    "safar": "Safar (2)",
+    "safar (2)": "Safar (2)",
+    "rabi'ul awwal": "Rabi'ul Awwal (3)",
+    "rabiul awwal": "Rabi'ul Awwal (3)",
+    "rabi'ul awal": "Rabi'ul Awwal (3)",
+    "rabiul awal": "Rabi'ul Awwal (3)",
+    "rabi'ul awwal (3)": "Rabi'ul Awwal (3)",
+    "rabi'ul akhir": "Rabi'ul Akhir (4)",
+    "rabiul akhir": "Rabi'ul Akhir (4)",
+    "rabi'ul akhir (4)": "Rabi'ul Akhir (4)",
+    "jumadil awwal": "Jumadil Awwal (5)",
+    "jumadil awal": "Jumadil Awwal (5)",
+    "jumadil awwal (5)": "Jumadil Awwal (5)",
+    "jumadil akhir": "Jumadil Akhir (6)",
+    "jumadil akhir (6)": "Jumadil Akhir (6)",
+    "rajab": "Rajab (7)",
+    "rajab (7)": "Rajab (7)",
+    "sya'ban": "Sya'ban (8)",
+    "syaban": "Sya'ban (8)",
+    "sya'ban (8)": "Sya'ban (8)",
+    "ramadhan": "Ramadhan (9)",
+    "ramadhan (9)": "Ramadhan (9)",
+    "syawwal": "Syawwal (10)",
+    "syawal": "Syawwal (10)",
+    "syawwal (10)": "Syawwal (10)",
+    "dzulqa'dah": "Dzulqa'dah (11)",
+    "dzulqadah": "Dzulqa'dah (11)",
+    "dzulqa'dah (11)": "Dzulqa'dah (11)",
+    "dzulhijjah": "Dzulhijjah (12)",
+    "dzulhijjah (12)": "Dzulhijjah (12)"
 }
 
+# Kamus nama kategori resmi untuk mencegah Do'A atau Bid'Ah menjadi cacat
+DISPLAY_KATEGORI_MAP = {
+    "doa": "Do'a",
+    "do'a": "Do'a",
+    "bidah": "Bid'ah",
+    "bid'ah": "Bid'ah",
+    "dzikir": "Dzikir",
+    "tauhid": "Tauhid",
+    "kitab": "Kitab",
+    "sholat": "Sholat",
+    "adab": "Adab",
+    "akidah": "Akidah",
+    "muamalah": "Muamalah",
+    "hadits shahih & hasan": "Hadits Shahih & Hasan",
+    "hadits dhaif & maudhu": "Hadits Dhaif & Maudhu",
+    "sunnah": "Sunnah",
+    "tafsir": "Tafsir",
+    "syirik": "Syirik",
+    "rumah tangga": "Rumah Tangga",
+    "reminder": "Reminder",
+    "fikih": "Fikih",
+    "puasa": "Puasa",
+    "manhaj salaf": "Manhaj Salaf",
+    "firqah-firqah": "Firqah-Firqah"
+}
+
+# Kamus emoji resmi dakwah
+KATEGORI_EMOJI_MAP = {
+    "dzikir": "🙌",
+    "tauhid": "☝️",
+    "kitab": "📚",
+    "doa": "🤲",
+    "do'a": "🤲",
+    "sholat": "🕌",
+    "bidah": "🚫",
+    "bid'ah": "🚫",
+    "adab": "✨",
+    "akidah": "🛡️",
+    "muamalah": "🤝",
+    "hadits shahih & hasan": "✅",
+    "sunnah": "👤",
+    "tafsir": "📖",
+    "syirik": "⚠️",
+    "rumah tangga": "🏠",
+    "reminder": "📌",
+    "hadits dhaif & maudhu": "❌",
+    "fikih": "🕋",
+    "ramadhan": "🌙",
+    "puasa": "🍽️",
+    "manhaj salaf": "🔥",
+    "firqah-firqah": "‼️"
+}
+
+def smart_capitalize(text):
+    """
+    Kapitalisasi kata yang cerdas:
+    Hanya huruf pertama yang dikapitalisasi, huruf setelah petik tetap kecil (Do'a, bukan Do'A).
+    """
+    if not text:
+        return ""
+    words = text.strip().split()
+    result = []
+    for w in words:
+        if len(w) > 0:
+            result.append(w[0].upper() + w[1:].lower())
+    return " ".join(result)
+
 def get_canonical_kategori(kat_str):
+    """
+    Menghasilkan nama kategori resmi yang konsisten, bersih, dan bebas cacat huruf besar setelah petik.
+    """
     if not kat_str:
         return "Umum"
     clean_str = kat_str.strip().lower().replace("’", "'").replace("‘", "'")
@@ -62,225 +123,130 @@ def get_canonical_kategori(kat_str):
         return HIJRIAH_NORMALIZE_MAP[clean_str]
     if clean_str in DISPLAY_KATEGORI_MAP:
         return DISPLAY_KATEGORI_MAP[clean_str]
-    return kat_str.strip().title()
+    return smart_capitalize(kat_str)
 
-def get_folder_slug(kat_str):
+def parse_frontmatter(md_content):
     """
-    BELAKANG LAYAR: MENGHASILKAN FOLDER SLUG BERSIH TANPA PETIK ATAU SPASI.
-    (Contoh: "Bid'ah" -> "bidah", "Rabi'ul Akhir (4)" -> "rabiul-akhir-4")
+    Mengekstrak frontmatter YAML dari berkas poster.md secara akurat.
     """
-    canonical = get_canonical_kategori(kat_str)
-    slug = canonical.lower().replace("’", "").replace("'", "")
-    slug = re.sub(r'[\(\)]+', '', slug)
-    slug = re.sub(r'\s+', '-', slug)
-    slug = re.sub(r'[^a-z0-9\-]+', '', slug)
-    return slug
-
-def get_padded_number(num):
-    return f"{num:0{max(3, len(str(num)))}d}"
-
-def get_next_sequence(kategori_path):
-    if not os.path.exists(kategori_path):
-        return 1
-    max_num = 0
-    for folder in os.listdir(kategori_path):
-        if os.path.isdir(os.path.join(kategori_path, folder)):
-            parts = folder.split('-')
-            if len(parts) > 1 and parts[-1].isdigit():
-                try:
-                    num = int(parts[-1])
-                    if num > max_num:
-                        max_num = num
-                except ValueError:
-                    pass
-    return max_num + 1
-
-def main():
-    zip_dir = '_uploads'
-    temp_dir = '_temp_extract'
-
-    os.makedirs(zip_dir, exist_ok=True)
-    zip_files = [f for f in os.listdir(zip_dir) if f.endswith('.zip')]
-
-    if zip_files:
-        for zip_filename in zip_files:
-            zip_file_path = os.path.join(zip_dir, zip_filename)
-            print(f"Memproses ZIP baru: {zip_file_path}")
-
-            os.makedirs(temp_dir, exist_ok=True)
-            try:
-                with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-                    zip_ref.extractall(temp_dir)
-            except Exception as e:
-                print(f"Gagal mengekstrak {zip_filename}: {e}")
+    meta = {}
+    content = md_content
+    match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", md_content, re.DOTALL)
+    if match:
+        yaml_text = match.group(1)
+        content = match.group(2).strip()
+        for line in yaml_text.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
                 continue
+            if ":" in line:
+                key, val = line.split(":", 1)
+                key = key.strip()
+                val = val.strip().strip("'").strip('"')
+                meta[key] = val
+    return meta, content
 
-            target_folder = None
-            md_path = os.path.join(temp_dir, 'poster.md')
-            if os.path.exists(md_path):
-                with open(md_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
-                    if yaml_match:
-                        try:
-                            data = yaml.safe_load(yaml_match.group(1))
-                            raw_kategori = data.get('kategori', 'Unknown')
-                            judul = data.get('judul', 'Unknown')
+def extract_all_zips():
+    """
+    Mengekstrak berkas ZIP yang diupload admin dan memindahkannya ke struktur folder posters.
+    """
+    repo_root = os.getcwd()
+    uploads_dir = os.path.join(repo_root, "uploads")
+    posters_dir = os.path.join(repo_root, "posters")
 
-                            canonical_kategori = get_canonical_kategori(raw_kategori)
-                            kat_folder_slug = get_folder_slug(canonical_kategori)
-
-                            slug_base = re.sub(r'[^a-z0-9]+', '-', judul.lower()).strip('-')
-                            if not slug_base: 
-                                slug_base = 'poster'
-
-                            kategori_path = os.path.join('posters', kat_folder_slug)
-                            next_num = get_next_sequence(kategori_path)
-                            num_str = get_padded_number(next_num)
-                            final_slug = f"{slug_base}-{num_str}"
-                            
-                            target_folder = os.path.join('posters', kat_folder_slug, final_slug)
-                        except Exception as e:
-                            print(f"Gagal parsing YAML di poster.md: {e}")
-                    
-            if not target_folder:
-                fallback_name = os.path.splitext(zip_filename)[0]
-                target_folder = os.path.join('posters', 'unknown', fallback_name)
-
-            os.makedirs(target_folder, exist_ok=True)
-            for root, dirs, files in os.walk(temp_dir):
-                for file in files:
-                    src_path = os.path.join(root, file)
-                    dst_path = os.path.join(target_folder, file)
-                    shutil.move(src_path, dst_path)
-
-            shutil.rmtree(temp_dir)
-            os.remove(zip_file_path)
-            print("ZIP berhasil diekstrak dan dipindahkan.")
-
-    # REKONSTRUKSI MENYELURUH (BERSIHKAN FOLDER SLUG & TIMPA ULANG YAML POSTER.MD)
-    scan_and_reconstruct_posters()
-
-def scan_and_reconstruct_posters():
-    print("Memindai & merekonstruksi seluruh folder dan memperbaiki file poster.md...")
-    manifest_path = "manifest.json"
-    existing_emoji_map = {}
-
-    if os.path.exists(manifest_path):
-        try:
-            with open(manifest_path, 'r', encoding='utf-8') as f:
-                old_manifest = json.load(f)
-                existing_emoji_map = old_manifest.get('kategori_emoji', {})
-        except Exception as e:
-            print(f"Gagal membaca manifest.json lama: {e}")
-
-    for month in HIJRIAH_ORDER:
-        if month not in existing_emoji_map:
-            existing_emoji_map[month] = "🌙"
-
-    base_poster_path = "posters"
-    if not os.path.exists(base_poster_path):
-        print("Folder posters belum ada.")
+    if not os.path.exists(uploads_dir):
+        print("Direktori uploads tidak ditemukan, melewati proses ekstraksi ZIP.")
         return
 
-    all_posters_temp = []
-    
-    if os.path.exists(base_poster_path):
-        for kat_folder in os.listdir(base_poster_path):
-            kat_folder_path = os.path.join(base_poster_path, kat_folder)
-            if os.path.isdir(kat_folder_path):
-                for poster_folder in os.listdir(kat_folder_path):
-                    poster_path = os.path.join(kat_folder_path, poster_folder)
-                    if os.path.isdir(poster_path):
-                        md_file_path = os.path.join(poster_path, 'poster.md')
-                        if os.path.exists(md_file_path):
-                            all_posters_temp.append((poster_path, md_file_path))
+    os.makedirs(posters_dir, exist_ok=True)
+    zip_files = [f for f in os.listdir(uploads_dir) if f.lower().endswith(".zip")]
+
+    for zf in zip_files:
+        zip_path = os.path.join(uploads_dir, zf)
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as z:
+                z.extractall(posters_dir)
+            print(f"Berhasil mengekstrak: {zf}")
+            os.remove(zip_path)
+        except Exception as e:
+            print(f"Gagal mengekstrak {zf}: {e}")
+
+def build_manifest():
+    """
+    Memindai folder posters dan menyusun ulang manifest.json dengan data kategori yang rapi.
+    """
+    repo_root = os.getcwd()
+    posters_dir = os.path.join(repo_root, "posters")
+    manifest_path = os.path.join(repo_root, "manifest.json")
+
+    if not os.path.exists(posters_dir):
+        print("Direktori posters tidak ditemukan.")
+        return
+
+    posters_list = []
+    kategori_set = set()
+
+    for root, dirs, files in os.walk(posters_dir):
+        if "poster.md" in files:
+            md_path = os.path.join(root, "poster.md")
+            try:
+                with open(md_path, "r", encoding="utf-8") as f:
+                    meta, content = parse_frontmatter(f.read())
+            except Exception as e:
+                print(f"Gagal membaca {md_path}: {e}")
+                continue
+
+            rel_path = os.path.relpath(root, posters_dir).replace("\\", "/")
+            raw_kategori = meta.get("kategori", "Umum")
+            kategori_baku = get_canonical_kategori(raw_kategori)
+            kategori_set.add(kategori_baku)
+
+            # Temukan semua gambar slide (1.jpg, 2.jpg, dst.)
+            images = [f for f in files if re.match(r"^\d+\.(jpg|jpeg|png|webp)$", f, re.IGNORECASE)]
+            images.sort(key=lambda x: int(re.match(r"^(\d+)", x).group(1)))
+
+            # Cek berkas PDF brosur jika ada
+            has_pdf = "brosur.pdf" if "brosur.pdf" in files else None
+
+            # Normalisasi emoji kategori
+            kategori_clean_key = kategori_baku.strip().lower().replace("’", "'").replace("‘", "'")
+            emoji = KATEGORI_EMOJI_MAP.get(kategori_clean_key, "📂")
+
+            poster_item = {
+                "judul": meta.get("judul", "Poster Dakwah"),
+                "sub_judul": meta.get("sub_judul", ""),
+                "kategori": kategori_baku,
+                "kategori_emoji": emoji,
+                "tags": meta.get("tags", ""),
+                "images": ", ".join(images) if images else "1.jpg",
+                "tidakpakepdf": "brosur.pdf",
+                "pdf": has_pdf,
+                "path": rel_path,
+                "content": content
+            }
+            posters_list.append(poster_item)
+
+    # Urutkan kategori agar bulan Hijriah di urutan awal, lalu alfabetis
+    def sort_key_kategori(k):
+        match = re.search(r"\((\d+)\)", k)
+        if match:
+            return (0, int(match.group(1)), k)
+        return (1, 0, k)
+
+    sorted_kategori = sorted(list(kategori_set), key=sort_key_kategori)
 
     manifest_data = {
-        "kategori_list": [],
-        "kategori_emoji": existing_emoji_map,
-        "total_poster": 0,
-        "posters": []
+        "kategori_list": sorted_kategori,
+        "kategori_emoji": KATEGORI_EMOJI_MAP,
+        "total_poster": len(posters_list),
+        "posters": posters_list
     }
-    
-    kategori_terpakai_set = set()
 
-    for poster_path, md_file_path in all_posters_temp:
-        try:
-            with open(md_file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            yaml_match = re.search(r'---(.*?)---', content, re.DOTALL)
-            if yaml_match:
-                yaml_raw = yaml_match.group(1)
-                data = yaml.safe_load(yaml_raw) or {}
-                
-                raw_kategori = data.get('kategori', 'Umum')
-                canonical_kat = get_canonical_kategori(raw_kategori)
-                
-                # PERBAIKI SECARA PAKSA KATEGORI DI DALAM FILE YAML MENJADI BAKU
-                data['kategori'] = canonical_kat
-                kategori_terpakai_set.add(canonical_kat)
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest_data, f, ensure_ascii=False, indent=2)
 
-                new_emoji = data.get('kategori_emoji')
-                if new_emoji and new_emoji != '📂':
-                    manifest_data['kategori_emoji'][canonical_kat] = new_emoji
-
-                # Tulis ulang file poster.md dengan YAML yang sudah diperbaiki
-                new_yaml_content = yaml.dump(data, allow_unicode=True, sort_keys=False)
-                new_full_content = f"---\n{new_yaml_content}---\n" + content[yaml_match.end():]
-                
-                with open(md_file_path, 'w', encoding='utf-8') as f:
-                    f.write(new_full_content)
-
-                # PINDAHKAN KE FOLDER SLUG FISIK YANG BERSIH TANPA PETIK/SPASI
-                target_kat_slug = get_folder_slug(canonical_kat)
-                target_kat_path = os.path.join(base_poster_path, target_kat_slug)
-                os.makedirs(target_kat_path, exist_ok=True)
-                
-                folder_name = os.path.basename(poster_path)
-                new_destination = os.path.join(target_kat_path, folder_name)
-                
-                correct_poster_dir = poster_path
-                if os.path.abspath(poster_path) != os.path.abspath(new_destination):
-                    if not os.path.exists(new_destination):
-                        shutil.move(poster_path, new_destination)
-                        correct_poster_dir = new_destination
-                    else:
-                        for item in os.listdir(poster_path):
-                            s_item = os.path.join(poster_path, item)
-                            d_item = os.path.join(new_destination, item)
-                            if not os.path.exists(d_item):
-                                shutil.move(s_item, d_item)
-                        shutil.rmtree(poster_path)
-                        correct_poster_dir = new_destination
-
-                # Perbarui path relatif di manifest
-                real_folder_name = os.path.basename(correct_poster_dir)
-                real_kategori_folder = os.path.basename(os.path.dirname(correct_poster_dir))
-                data['path'] = f"{real_kategori_folder}/{real_folder_name}"
-                
-                manifest_data['posters'].append(data)
-                manifest_data['total_poster'] += 1
-
-        except Exception as e:
-            print(f"Gagal merekonstruksi {md_file_path}: {e}")
-
-    # Bersihkan folder kategori lama yang kosong atau salah format
-    for kat_folder in os.listdir(base_poster_path):
-        kat_folder_path = os.path.join(base_poster_path, kat_folder)
-        if os.path.isdir(kat_folder_path) and not os.listdir(kat_folder_path):
-            shutil.rmtree(kat_folder_path)
-
-    hijriah_terpakai = [m for m in HIJRIAH_ORDER if m in kategori_terpakai_set]
-    non_hijriah = sorted(list(kategori_terpakai_set - set(HIJRIAH_ORDER)))
-
-    manifest_data['kategori_list'] = hijriah_terpakai + non_hijriah
-
-    with open(manifest_path, 'w', encoding='utf-8') as f:
-        json.dump(manifest_data, f, indent=2, ensure_ascii=False)
-    
-    print(f"✅ Rekonstruksi Total Selesai! Total Poster Aktif: {manifest_data['total_poster']}")
+    print(f"✅ Sukses membuat manifest.json dengan {len(posters_list)} poster dan {len(sorted_kategori)} kategori!")
 
 if __name__ == "__main__":
-    main()
+    extract_all_zips()
+    build_manifest()
