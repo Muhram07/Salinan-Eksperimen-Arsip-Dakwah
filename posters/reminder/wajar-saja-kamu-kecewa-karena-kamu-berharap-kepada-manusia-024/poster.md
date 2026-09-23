@@ -10,6 +10,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Wajar Saja Kamu Kecewa, Karena Kamu Berharap Kepada Manusia
 
 Semakin besar harapanmu kepada manusia, semakin besar kekecewaan yang akan kamu rasakan

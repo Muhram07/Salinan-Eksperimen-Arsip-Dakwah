@@ -1,12 +1,13 @@
 ---
 judul: Milyaran Pahala Ada Pada Doa Ini
 sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
-kategori: Do'a
+kategori: Do'A
 kategori_emoji: 📂
 tags: doa,doaharian,doaqurani,milyaranpahala,ampunan,muminin,muminah,suratibrahim,bedahkitab,thequranpath,annashihadaily
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 

@@ -22,4 +22,5 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Sebenarnya niat kita dakwah buat apa sih ??? Coba tanyakan di hati kecilmu... karena keridhoan Allah ta'ala atau karena ingin keridhoan manusia dengan kesenangan nya?

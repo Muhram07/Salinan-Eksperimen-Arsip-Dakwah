@@ -1,12 +1,13 @@
 ---
 judul: Salah Satu Doa Sebelum Tidur Yang Jarang Dibaca
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'a
+kategori: Do'A
 kategori_emoji: 📂
 tags: doa,doasebelumtidur,tidur,adabtidur,pengerjaanampunan,addarimi,bedahkitab,reminder,manhajsalaf,sunnah
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 

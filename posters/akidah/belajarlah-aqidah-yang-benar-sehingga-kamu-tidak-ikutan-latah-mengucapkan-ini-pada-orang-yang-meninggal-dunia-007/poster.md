@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Belajarlah Aqidah Yang Benar, Sehingga Kamu Tidak Ikutan Latah Mengucapkan Ini Pada Orang yang Meninggal Dunia
 
 1) Mengucapkan RIP (Rest in Peace) atau "Beristirahatlah dalam Damai", Ini adalah kebiasaan orang-orang kafir. Adapun yang disyari'atkan adalah mengucapkan istirja' (innaa lillahi wa innaa ilaihi rooji'un) dan mendoakan agar si mayit mendapatkan ampunan.

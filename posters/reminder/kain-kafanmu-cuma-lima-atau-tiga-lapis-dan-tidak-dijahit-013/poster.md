@@ -10,6 +10,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 KAIN KAFANMU CUMA LIMA/TIGA LAPIS, DAN TIDAK DIJAHIT. TIDAK ADA KANTONG UNTUK TEMPAT DUITMU.
 
 Trus Ngapain Kamu Mati-matian Cari Harta Sampai Lupa Sholat..?

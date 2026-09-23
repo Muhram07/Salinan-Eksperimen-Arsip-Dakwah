@@ -2,12 +2,13 @@
 judul: Kita Ini Banyak Dosa, Maka Perbanyaklah Membaca Doa Ini, Agar Dimudahkan Hisab
   Kelak Dihadapan Allah
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'a
+kategori: Do'A
 kategori_emoji: 📂
 tags: doa,hisab,hisabyasir,kemudahanhisab,harikiamat,tahiyatakhir,sujud,hrahmad,bedahkitab,annashihadaily,manhajsalaf
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 

@@ -1,12 +1,13 @@
 ---
 judul: Keutamaan Berdoa Dengan Nama Allah seperti Al Hayyu Al Qoyyuum
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'a
+kategori: Do'A
 kategori_emoji: 📂
 tags: doa,keutamaandoa,alhayyu,alqoyyuum,asmaulhusna,ibnulqoyyim,zaadulmaad,kesulitan,annashihadaily,bedahkitab
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 

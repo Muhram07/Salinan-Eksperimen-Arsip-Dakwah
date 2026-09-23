@@ -11,6 +11,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Ada dua orang yang sama-sama berpuasa & sama-sama duduk.
 
 .

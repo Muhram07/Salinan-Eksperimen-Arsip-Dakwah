@@ -1,12 +1,13 @@
 ---
 judul: Amalkan Doa Ini Agar Terhindar Dari Berbagai Penyakit Buruk Dan Mengerikan
 sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily*'
-kategori: Do'a
+kategori: Do'A
 kategori_emoji: 📂
 tags: doa,doakesehatan,perlindungan,terhindardaripenyakit,hrabudaud,thequranpath,bedahkitab,annashihadaily
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 

@@ -1,12 +1,13 @@
 ---
 judul: Doa Penuh Makna Yang Diajarkan Langsung Oleh Nabi Kepada Abu Bakr
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'a
+kategori: Do'A
 kategori_emoji: 🤲
 tags: doa,doamemohonampunan,doasebelumsalam,sholat,sunnah,doadandzikir,manhajsalaf,abubakar
 images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
+
 
 
 

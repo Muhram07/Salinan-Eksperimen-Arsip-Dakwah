@@ -10,6 +10,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 BERSUMPAH DENGAN SELAIN NAMA ALLAH TERMASUK KESYIRIKAN
 
 Contoh :
