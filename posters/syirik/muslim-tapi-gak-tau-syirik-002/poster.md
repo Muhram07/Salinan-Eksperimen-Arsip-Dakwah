@@ -8,6 +8,7 @@ images: 1.jpg, 2.jpg, 3.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Pernahkah kita selama ini berdoa meminta perlindungan dari bahaya kesyirikan? Kesyirikan adalah menyekutukan Allah dalam ibadah dan hak-hak khusus Allah.
 
 .

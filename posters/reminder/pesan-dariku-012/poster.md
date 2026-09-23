@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Pesan Dari-ku
 
 Tolong, seburuk apapun kisahku dimasa lalu, jangan pernah untuk dicari lagi kisahnya, Karena aku sudah tidak berada disana lagi.

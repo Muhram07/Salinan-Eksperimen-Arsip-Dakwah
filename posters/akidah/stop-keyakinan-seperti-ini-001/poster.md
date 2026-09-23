@@ -9,4 +9,5 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Mari sama sama kita pelajari akidah yang benar dalam Islam,agar akidah kita kuat dan tidak bisa dibodoh-bodohi oleh hal hal semacam ini

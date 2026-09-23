@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 SEMUA ORANG PUNYA DOSA
 
 BEDANYA, ADA YANG SADAR DIRI DAN ADA YANG BANGGA DIRI

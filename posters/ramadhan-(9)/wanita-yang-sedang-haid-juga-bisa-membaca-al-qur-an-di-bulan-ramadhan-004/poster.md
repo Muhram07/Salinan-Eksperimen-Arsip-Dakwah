@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 WANITA YANG SEDANG HAID, JUGA BISA MEMBACA AL QUR'AN DI BULAN RAMADHAN
 
 1) Membaca mushaf, namun tidak boleh menyentuhnya secara langsung

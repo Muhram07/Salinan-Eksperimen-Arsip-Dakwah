@@ -9,6 +9,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Sesuatu hal yang paling dicari oleh manusia adalah ketenangan dan kebahagiaan, Tapi kebanyakan mereka mencarinya dalam harta, jabatan dan pujian manusia
 
 .

@@ -8,6 +8,7 @@ images: 1.jpg, 2.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Cek tafsirnya⤵️
 -----
 📚 Zubdatut Tafsir Min Fathil Qadir / Syaikh Dr. Muhammad Sulaiman Al Asyqar, mudarris tafsir Universitas Islam Madinah

@@ -9,4 +9,5 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Pastikan sholawat yang kita baca itu yakni sholawat yang diajarkan nabi shalallahu 'alaihi wa sallam yaa, seperti sholawat Ibrahim di tahiyat akhir sholat,dan sholawat lainnya,bukan sholawat yang viral viral itu...

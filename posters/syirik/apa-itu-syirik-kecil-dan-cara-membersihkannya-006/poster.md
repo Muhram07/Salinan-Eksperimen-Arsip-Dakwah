@@ -10,6 +10,7 @@ images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg, 7.jpg, 8.jpg, 9.jpg, 10.jpg, 1
 tidakpakepdf: brosur.pdf
 ---
 
+
 Jangan hanya takut syirik besar, waspadai juga syirik kecil yang sering menyelinap dalam amal harian.
 
 .

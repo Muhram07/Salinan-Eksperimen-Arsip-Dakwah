@@ -10,6 +10,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 GUNUNG ADALAH "PASAK BUMI"
 
 Dalam Al Quran, Apabila gunung meletus dahsyat dan berterbangan, maka berbagai lapisan tanah akan bergerak.

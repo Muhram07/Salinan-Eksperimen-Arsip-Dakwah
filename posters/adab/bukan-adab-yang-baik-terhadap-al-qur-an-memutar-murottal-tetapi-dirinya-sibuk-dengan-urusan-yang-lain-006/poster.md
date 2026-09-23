@@ -9,6 +9,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 BUKAN ADAB YANG BAIK TERHADAP AL QUR'AN, MEMUTAR MUROTTAL TETAPI DIRINYA SIBUK DENGAN URUSAN YANG LAIN
 
 (Syaikh Al Allamah Al Utsaimin Rahimahullah)

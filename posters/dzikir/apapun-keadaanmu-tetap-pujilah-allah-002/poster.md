@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 APAPUN KEADAANMU, TETAP PUJILAH ALLAH TA'ALA
 
 Apabila Rasulullah ﷺ melihat sesuatu yang beliau sukai, beliau mengucapkan:

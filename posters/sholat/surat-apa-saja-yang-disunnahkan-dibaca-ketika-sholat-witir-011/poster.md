@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 SURAT APA SAJA YANG DISUNNAHKAN DIBACA KETIKA SHOLAT WITIR?
 
 1) Jika shalat witirnya 3 rakaat, membaca surat Al-A'laa pada rakaat pertama, surat Al-Kafirun pada rakaat kedua, surat Al-Ikhlas pada rakaat ketiga.

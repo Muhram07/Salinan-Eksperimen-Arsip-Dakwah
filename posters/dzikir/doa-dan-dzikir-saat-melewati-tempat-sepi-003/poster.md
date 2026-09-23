@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 KETIKA LEWAT DITEMPAT SEPI, JANGAN SAMPAI MELAKUKAN KESYIRIKAN DENGAN BERKATA:
 
 Permisi Kek, Nek, Mbah, Numpang lewat atau Membunyikan klakson 3 kali atau Komat-kamit Baca Sesuatu yang Tidak Ada Dalilnya

@@ -9,4 +9,5 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Nyatanya, orang orang yang makin banyak keberkahan ilmu agama nya yakni semakin ia menyadari bahwa ilmu nya itu baru sedikit sekali serta gak pernah memandang remeh orang lain,selalu menganggap orang lain lebih baik dari nya(ilmu)

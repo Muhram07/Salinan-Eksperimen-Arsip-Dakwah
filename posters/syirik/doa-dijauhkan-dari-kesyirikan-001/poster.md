@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Pernahkah kita berdoa agar dijauhkan dari kesyirikan?
 
 .

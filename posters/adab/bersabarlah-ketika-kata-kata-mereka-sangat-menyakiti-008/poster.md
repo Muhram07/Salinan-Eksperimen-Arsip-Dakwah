@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Bersabarlah, Ketika kata-kata mereka sangat menyakiti perasaan dan menggoreskan luka di hatimu, Jangan kamu balas dengan kata-kata yang lebih menyakitkan...
 
 .

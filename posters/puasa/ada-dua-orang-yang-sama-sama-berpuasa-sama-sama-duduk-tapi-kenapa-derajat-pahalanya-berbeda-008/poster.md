@@ -9,6 +9,7 @@ images: 1.jpg, 2.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Ada dua orang yang sama-sama berpuasa & sama-sama duduk.
 
 .

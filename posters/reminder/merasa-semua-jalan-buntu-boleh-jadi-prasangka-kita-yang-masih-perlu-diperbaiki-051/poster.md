@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Di saat semua jalan rasanya buntu, Sebenarnya yang buntu itu adalah prasangka kita kepada Allah...
 
 .

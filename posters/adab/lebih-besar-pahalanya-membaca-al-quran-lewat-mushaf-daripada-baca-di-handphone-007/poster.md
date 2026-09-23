@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 LEBIH BESAR PAHALANYA MEMBACA AL QURAN LEWAT MUSHAF DARIPADA BACA DI HANDPHONE
 
 .

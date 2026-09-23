@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 RAMADHAN AKAN MENGUNGKAP WATAK ASLI SEORANG MANUSIA
 
 Jika ada seseorang yang masih bermaksiat di bulan Ramadhan, Maka itu menunjukkan watak aslinya (akhlak dan jiwanya yang buruk), Karena di bulan ini syaithan dibelenggu

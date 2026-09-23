@@ -9,6 +9,7 @@ images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg
 pdf: brosur.pdf
 ---
 
+
 Mimin buat versi 5 poster berisi rangkuman,agar lebih mudah dipahami, terutama orang awam untuk memahami kesyirikan dan menjauhinya nya...
 
 .

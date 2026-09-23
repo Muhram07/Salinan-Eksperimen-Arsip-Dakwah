@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Diantara momen menyedihkan ketika lebaran, yakni rumah-rumah ramai dengan orang-orang yang bercengkrama, makan-makan, tertawa, namun masjid begitu sepi ketika sudah masuk waktu shalat.
 
 .

@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Jangan Tanya Sesuatu Yang Belum Ada pada Dirinya, Tapi Do'akan lah Agar Allah Memberikannya Kemudahan
 
 .

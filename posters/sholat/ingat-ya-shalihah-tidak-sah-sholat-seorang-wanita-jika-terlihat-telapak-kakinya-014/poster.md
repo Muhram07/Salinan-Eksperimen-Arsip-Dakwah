@@ -9,6 +9,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 INGAT YA SHALIHAH... TIDAK SAH SHOLAT SEORANG WANITA JIKA TERLIHAT TELAPAK KAKINYA
 
 Tidak sah sholatnya seorang wanita tanpa menutupi kedua telapak kakinya. Jika dia tidak mengetahuinya maka diingatkan. Kemudian jika dia sudah mengetahuinya dan dia masih bermudah mudahan, (membiarkan saja) maka sholatnya tidak sah.

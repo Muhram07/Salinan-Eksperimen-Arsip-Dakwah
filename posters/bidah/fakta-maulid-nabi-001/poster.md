@@ -9,6 +9,7 @@ images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Keterangan Tajuddin al-Fakihani (Ulama Malikiyah wafat 734 H):
 
  .

@@ -8,6 +8,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 Bukan kami tidak bisa berdandan, kami bisa, bahkan kami suka berdandan agar terlihat cantik menawan,
 
 Tapi bukan untuk dipertontonkan, Bukan untuk memuaskan pandangan liar lelaki ajnabi

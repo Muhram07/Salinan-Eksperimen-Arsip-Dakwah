@@ -9,6 +9,7 @@ images: 1.jpg
 tidakpakepdf: brosur.pdf
 ---
 
+
 ANGAN-ANGAN MAYIT TENTANG RAMADHAN
 
 Demi Allah, seandainya ditanyakan kepada penghuni kubur, 'Berangan-anganlah...', niscaya mereka akan berangan-angan untuk mendapatkan satu hari saja di bulan Ramadhan
