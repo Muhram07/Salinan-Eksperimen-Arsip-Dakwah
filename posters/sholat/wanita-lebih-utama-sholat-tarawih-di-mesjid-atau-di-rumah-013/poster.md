@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 WANITA LEBIH UTAMA SHOLAT TARAWIH DI MESJID ATAU DI RUMAH?
 
 Disyariatkan untuk laki-laki apabila luput dari shalat jama'ah tarawih, maka dia menunaikannya sendirian. Adapun shalat tarawih untuk wanita lebih utama dilakukan di rumah daripada di masjid.

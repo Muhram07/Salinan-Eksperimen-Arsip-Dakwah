@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 BACALAH DOA INI SEBELUM KAMU BERANGKAT KERJA
 
 اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ

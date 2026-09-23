@@ -14,6 +14,7 @@ pdf: brosur.pdf
 
 
 
+
 Mimin buat versi 5 poster berisi rangkuman,agar lebih mudah dipahami, terutama orang awam untuk memahami kesyirikan dan menjauhinya nya...
 
 .

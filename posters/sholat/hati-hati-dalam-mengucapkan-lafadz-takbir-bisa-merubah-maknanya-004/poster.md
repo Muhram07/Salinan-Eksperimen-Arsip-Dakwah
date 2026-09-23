@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Hati-hati.. Kesalahan Dalam Mengucapkan Lafadz Takbir, Bisa Merubah Maknanya Menjadi Kalimat Kekufuran.!
 
 Kesalahan Mengucapkan Lafadz Takbir Yang Sering Terjadi:

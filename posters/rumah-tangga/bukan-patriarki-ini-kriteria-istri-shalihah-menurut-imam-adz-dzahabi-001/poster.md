@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Ini Bukan Poin-Poin Patriarki, Tapi Seperti Inilah Seharusnya Sifat Seorang Istri Shalihah....
 
 .

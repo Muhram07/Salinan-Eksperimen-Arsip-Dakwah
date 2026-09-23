@@ -25,6 +25,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Maka kenalilah mana bab ilmu yang prioritas (akidah, tauhid dll) dan mana bab ilmu yang opsional (tambahan/wawasan lain)...
 
 .

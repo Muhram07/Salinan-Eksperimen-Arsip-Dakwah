@@ -15,6 +15,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 “Sesungguhnya Allah tidak memberi petunjuk,” maksudnya, tidak membimbing menuju hidayah pada jalan yang ingkar.” Maksudnya, orang yang karakternya adalah dusta atau kufur, di mana nasihat-nasihat dan ayat-ayat sampai kepadanya, namun apa yang menjadi karakternya tidak pernah hilang darinya. Dan Allah memperlihatkan kepadanya tanda-tanda (mukjizat) namun ia mengingkari, kafir dan mendustakannya. Maka orang yang seperti ini, bagaimana mungkin bisa mendapat petunjuk, karena dia telah menutup pintu rapat-rapat atas dirinya sendiri, dan ia dihukum dengan ditutup oleh Allah akan hatinya, maka dari itu ia tidak beriman.
 
 .

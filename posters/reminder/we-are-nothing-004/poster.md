@@ -14,4 +14,5 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Jangan pernah bangga dengan amalmu ! Khawatir lah dengan amalmu yang sedikit itu,dan minta untuk diterima semua itu...

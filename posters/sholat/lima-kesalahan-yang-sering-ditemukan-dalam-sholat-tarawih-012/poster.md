@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 LIMA KESALAHAN YANG SERING DITEMUKAN DALAM SHOLAT TARAWIH
 
 1) Dzikir berjama'ah di antara sela-sela shalat tarawih dan ba'da witir. Tidak diperbolehkan para jama'ah membaca dzikir secara berjama'ah. Akan tetapi yang tepat adalah setiap orang membaca dzikir sendiri-sendiri tanpa dikomandai oleh yang lain. Karena dzikir secara berjama'ah adalah sesuatu yang tidak ada tuntunannya (Majmu' Fatawa Ibnu Baz, 11:190)

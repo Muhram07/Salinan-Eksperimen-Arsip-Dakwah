@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Bilangnya sih dakwah, tapi gak pernah bahas TAUHID?
 Kontennya hanya bahas quote, nasehat, motivasi, cinta-cintaan, kehidupan rumah tangga, itu-itu aja.
 Padahal inti dakwah para Nabi adalah mengajak manusia mentauhidkan Allah.

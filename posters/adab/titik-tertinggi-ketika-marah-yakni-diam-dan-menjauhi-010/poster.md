@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Titik tertinggi ketika marah itu, bukanlah dengan membentak atau berteriak, Tapi cukup diam dan pelan-pelan menjauhi....
 
 .

@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 KEBAIKAN ITU ADA PADA APA YANG ALLAH PILIHKAN UNTUKMU....
 
 Karena Allah memperlakukan hamba-hamba-Nya dengan Rahmat-Nya yang luas, dengan kelembutan yang tak selalu tampak oleh pandanganmu.

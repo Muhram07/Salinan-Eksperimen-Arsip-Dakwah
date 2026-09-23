@@ -14,6 +14,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Ngapain semua omongan orang dimasukkan ke hati, hanya menambah galau dan sakit hati
 
 Yang harusnya dimasukkan ke hati itu ayat-ayat Al-Quran yang kamu baca dan kamu dengar, Inilah obat paling mujarab untuk ketenangan hati

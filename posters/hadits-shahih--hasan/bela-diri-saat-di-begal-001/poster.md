@@ -15,6 +15,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 ➡️Ternyata membela diri dari tukang begal/perampok, lalu ia mati,maka bisa dicatat syahid. Adapun jika ia membela diri dan ia berhasil membunuh tukang begal tersebut, tukang begal itulah yang masuk neraka. Karena orang yang masih hidup itu cuma membela diri, sedangkan yang mati punya niatan membunuh.
 
 ➖➖➖

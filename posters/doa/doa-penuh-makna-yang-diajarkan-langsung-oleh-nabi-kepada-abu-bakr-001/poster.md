@@ -13,6 +13,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Do'a penuh makna yang diajarkan langsung oleh Nabi ﷺ kepada Abu Bakr As-Siddiq radhiyallahu 'anhu:
 
 اللَّهُمَّ إِنِّي ظَلَمْتُ نَفْسِي ظُلْمًا كَثِيرًا وَلاَ يَغْفِرُ الذُّنُوبَ إِلاَّ أَنْتَ فَاغْفِرْ لِي مَغْفِرَةً مِنْ عِنْدِكَ وَارْحَمْنِي إِنَّكَ أَنْتَ الْغَفُورُ الرَّحِيمُ

@@ -14,6 +14,7 @@ tidakpakepdf: brosur.pdf
 
 
 
+
 Memiliki Circle Yang Beraqidah dan Bertauhid Lurus itu Penting
 
 Memiliki Circle Yang Berada Diatas Manhaj Salaf itu Penting
