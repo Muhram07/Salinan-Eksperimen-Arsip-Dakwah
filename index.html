@@ -57,7 +57,7 @@
             stroke: #D4AF37;
             stroke-dasharray: 628; /* 2 * PI * r (r=100) */
             stroke-dashoffset: 628;
-            transition: stroke-dashoffset 0.2s ease;
+            transition: stroke-dashoffset 0.1s linear;
             filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.9));
         }
 
@@ -697,29 +697,63 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // FUNGSI UNTUK MENGUPDATE PROGRESS LOADING RING DAN PERSENTASE
-        function updateProgress(percent) {
+        // SISTEM SMOOTH & REAL-PROGRESS DRIVER
+        let currentProgress = 0;
+        let targetProgress = 0;
+        let isLoaderFinished = false;
+
+        function renderProgressUI(val) {
             const ring = document.getElementById('loader-ring');
             const percentText = document.getElementById('loader-percent');
             if (ring && percentText) {
                 const circumference = 628;
-                const offset = circumference - (percent / 100) * circumference;
+                const offset = circumference - (val / 100) * circumference;
                 ring.style.strokeDashoffset = offset;
-                percentText.innerText = `${Math.round(percent)}%`;
+                percentText.innerText = `${Math.round(val)}%`;
             }
+        }
+
+        // Loop animasi requestAnimationFrame yang berjalan terus menerus secara halus
+        function animateLoaderLoop() {
+            if (currentProgress < targetProgress) {
+                // Bergerak mendekati target secara halus (lerp)
+                const diff = targetProgress - currentProgress;
+                const step = Math.max(0.4, diff * 0.12);
+                currentProgress = Math.min(targetProgress, currentProgress + step);
+                renderProgressUI(currentProgress);
+            }
+
+            if (!isLoaderFinished || currentProgress < 100) {
+                requestAnimationFrame(animateLoaderLoop);
+            }
+        }
+        requestAnimationFrame(animateLoaderLoop);
+
+        function setTargetProgress(val) {
+            targetProgress = Math.min(100, Math.max(targetProgress, val));
         }
 
         // FUNGSI UNTUK MENUTUP SCREEN LOADING 3D SETELAH DATA SELESAI SIAP
         function hideAppLoader() {
-            updateProgress(100);
-            setTimeout(() => {
-                const loader = document.getElementById('app-loader');
-                if (loader) {
-                    loader.style.opacity = '0';
-                    loader.style.visibility = 'hidden';
-                    setTimeout(() => { loader.remove(); }, 600);
+            setTargetProgress(100);
+            
+            // Cek berkala sampai animasi angka menyentuh 100% secara visual
+            const checkDone = setInterval(() => {
+                if (currentProgress >= 99.5) {
+                    clearInterval(checkDone);
+                    renderProgressUI(100);
+                    isLoaderFinished = true;
+                    
+                    setTimeout(() => {
+                        const loader = document.getElementById('app-loader');
+                        if (loader) {
+                            loader.style.opacity = '0';
+                            loader.style.visibility = 'hidden';
+                            setTimeout(() => { loader.remove(); }, 600);
+                        }
+                    }, 250);
                 }
-            }, 300);
+            }, 30);
         }
 
         let kategoriData = {};
@@ -905,7 +939,7 @@
         }
 
         async function loadPosters() {
-            updateProgress(15);
+            setTargetProgress(15);
             const container = document.getElementById('post-list');
             const kategoriOri = document.getElementById('kategori-wrap-ori');
             const kategoriCompact = document.getElementById('kategori-wrap-compact');
@@ -915,21 +949,20 @@
             const favList = getFavorit();
             let manifestData = { posters: [] };
 
-            // SINKRONISASI 1: Pengambilan manifest.json fleksibel (relatif & absolut)
+            // Mengambil manifest.json
             try {
                 let res = await fetch('manifest.json');
                 if(!res.ok) res = await fetch('/manifest.json');
                 if(res.ok) manifestData = await res.json();
             } catch(e) { console.warn("Gagal mengambil manifest", e); }
 
-            updateProgress(40);
+            setTargetProgress(35);
 
             emojiMapGlobal = manifestData.kategori_emoji || {};
             rawManifestPosters = manifestData.posters || [];
 
             if(rawManifestPosters.length > 0) {
                 const totalItems = rawManifestPosters.length;
-                let loadedItems = 0;
 
                 rawManifestPosters.forEach(p => {
                     const k = p.kategori || "Umum";
@@ -938,28 +971,24 @@
                     semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: k, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content : '') });
                 });
 
-                for (let p of rawManifestPosters) {
+                setTargetProgress(45);
+
+                // Pemrosesan poster dengan pembagian tugas berulang agar progress naik nyata
+                const chunkSize = Math.max(15, Math.floor(totalItems / 10));
+
+                for (let i = 0; i < totalItems; i++) {
+                    const p = rawManifestPosters[i];
                     const folder = `posters/${p.path}`;
                     const judul = p.judul || "Tanpa Judul";
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
                     
-                    // SINKRONISASI 2: Pencocokan emoji fleksibel agar Doa, Bidah, dll. langsung muncul emojinya
                     const katEmoji = p.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori] || '📂';
                     const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
                     let pdfSrc = p.pdf ? `${folder}/brosur.pdf` : null;
                     const hasPdf = !!p.pdf;
 
                     let contentBody = p.content || p.isi_caption || "";
-                    if(!contentBody) {
-                         try {
-                             const resMd = await fetch(`${folder}/poster.md`);
-                             if(resMd.ok) {
-                                 const text = await resMd.text();
-                                 contentBody = text.replace(/---([\s\S]*?)---/, '').trim();
-                             }
-                         } catch(e) {}
-                    }
                     p.compiledContent = contentBody;
 
                     const posterId = p.path.replace(/\//g, '-');
@@ -1026,11 +1055,16 @@
                         </div>
                     `;
 
-                    loadedItems++;
-                    updateProgress(40 + (loadedItems / totalItems) * 50);
+                    // Update persentase riil dari 45% sampai 92%
+                    if (i % chunkSize === 0 || i === totalItems - 1) {
+                        const progress = 45 + Math.round(((i + 1) / totalItems) * 47);
+                        setTargetProgress(progress);
+                        // Beri jeda kecil agar browser merender animasi angka secara bertahap
+                        await new Promise(r => setTimeout(r, 15));
+                    }
                 }
             } else {
-                updateProgress(90);
+                setTargetProgress(90);
             }
 
             container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
@@ -1073,7 +1107,8 @@
             
             filterDisplayPosters();
 
-            // Selesai Memuat
+            setTargetProgress(96);
+            // Selesai Memuat Mulus ke 100%
             hideAppLoader();
         }
 
