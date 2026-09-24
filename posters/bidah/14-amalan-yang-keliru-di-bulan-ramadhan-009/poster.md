@@ -1,7 +1,7 @@
 ---
 judul: 14 Amalan Yang Keliru Di Bulan Ramadhan
 sub_judul: '*@an.nashiha_daily*'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 🚫
 tags: bidah,amalanpalsu,kekeliruanramadhan,ramadhan,fikihramadhan,sunnah,manhajsalaf,ziarahkubur,imsak,tarawih,zakatfithri
 images: 1.jpg, 2.jpg, 3.jpg

@@ -1,7 +1,7 @@
 ---
 judul: 10 bahaya bidah dalam agama
 sub_judul: '*Follow* *untuk* *konten* *bermanfaat* *lainnya* *:* *@an.nashiha_daily*'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 📂
 tags: Membuatsyariat,bidah,amalanbaru
 images: 1.jpg

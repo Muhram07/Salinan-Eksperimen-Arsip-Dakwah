@@ -1,7 +1,7 @@
 ---
 judul: Doa Memohon Akhir Hidup Husnul Khatimah
 sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
-kategori: Do'A
+kategori: Doa
 kategori_emoji: 📂
 tags: doa,doaharian,husnulkhotimah,doahusnulkhotimah,akhirowat,ibnusyaibah,bedahkitab,thequranpath,annashihadaily
 images: 1.jpg

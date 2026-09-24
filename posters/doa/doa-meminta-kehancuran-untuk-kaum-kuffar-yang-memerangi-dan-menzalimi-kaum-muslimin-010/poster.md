@@ -2,7 +2,7 @@
 judul: Doa Meminta Kehancuran Untuk Kaum Kuffar Yang Memerangi Dan Menzalimi Kaum
   Muslimin
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'A
+kategori: Doa
 kategori_emoji: 📂
 tags: doa,doaqunut,doakehancurankafir,doanumuslimin,nataijalafkar,ibnuhajar,annashihadaily,manhajsalaf
 images: 1.jpg

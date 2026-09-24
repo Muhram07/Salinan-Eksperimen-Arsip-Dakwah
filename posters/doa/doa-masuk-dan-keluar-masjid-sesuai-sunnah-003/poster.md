@@ -1,7 +1,7 @@
 ---
 judul: Doa Masuk Dan Keluar Masjid Sesuai Sunnah
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'A
+kategori: Doa
 kategori_emoji: 🤲
 tags: doamasukmasjid,doakeluarjasjid,doa,adabmasjid,sunnah,doadandzikir,manhajsalaf
 images: 1.jpg

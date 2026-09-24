@@ -1,7 +1,7 @@
 ---
 judul: Sering Sering Baca Doa Ini Agar Tidak Disesatkan Setan Menjelang Kematian
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'A
+kategori: Doa
 kategori_emoji: 📂
 tags: doa,doamemohonperlindungan,sakaratulmaut,kematian,fitnahsetan,abudawud,annasai,reminder,manhajsalaf,sunnah
 images: 1.jpg

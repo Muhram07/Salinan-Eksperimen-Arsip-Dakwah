@@ -2,7 +2,7 @@
 judul: Terhalangnya Taubat Para Pelaku Bidah
 sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
   *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 📂
 tags: bidah,terhalangnyataubat,taubat,pelakubidah,penjelasanterhalang,hsiabdullahroy,ustadzabdullahroy,hrthabrani,syaikhalalbani,tauhidsunnahid,annashihadaily,manhajsalaf
 images: 1.jpg

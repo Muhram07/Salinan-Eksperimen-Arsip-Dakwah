@@ -1,7 +1,7 @@
 ---
 judul: Ada Dua Macam Doa/Dzikir Setelah Sholat Witir
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'A
+kategori: Doa
 kategori_emoji: 📂
 tags: dzikir,doa,sholatwitir,doawitir,dzikirwitir,subhaanalmalikilqudduus,abudaud,tirmidzi,rumaysho,manhajsalaf
 images: 1.jpg, 2.jpg

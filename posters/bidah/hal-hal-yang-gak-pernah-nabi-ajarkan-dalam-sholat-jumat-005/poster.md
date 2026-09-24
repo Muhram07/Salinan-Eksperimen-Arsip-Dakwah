@@ -1,7 +1,7 @@
 ---
 judul: Hal hal yang gak pernah nabi ajarkan dalam sholat Jumat
 sub_judul: '@an.nashiha_daily @thequran_path'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 📂
 tags: Sholatjumat,jumat,bidah,sholat, khutbah
 images: 1.jpg

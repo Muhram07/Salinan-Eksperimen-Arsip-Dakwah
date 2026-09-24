@@ -13,7 +13,7 @@ sub_judul: 'Collab dakwah Sunnah
   @thalabulilmi.id
 
   @akun_salafy'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 🚫
 tags: Maulidnabi,maulid,ultah,Sunnah,bidah
 images: 1.jpg

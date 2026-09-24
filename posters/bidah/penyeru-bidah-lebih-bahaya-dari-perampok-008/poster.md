@@ -2,7 +2,7 @@
 judul: Penyeru bidah lebih bahaya dari perampok !
 sub_judul: '*Collab* *dakwah* *Sunnah* *:* *@tauhidsunnah_id* *@an.nashiha_daily*
   *@sunnahstori* *@akun_salafy* *@al.nasiha* *@thalabulilmi.id*'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 📂
 tags: Ahlulbidah,bidah, perampok,Sunnah,Islam,bahayabidah
 images: 1.jpg

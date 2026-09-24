@@ -1,7 +1,7 @@
 ---
 judul: Ucapkan Ini Sebelum Berdoa, Maka Doamu Akan Terkabul
 sub_judul: 'Collab Dakwah Sunnah : *@an.nashiha_daily* *@bedahkitab_* *@thequran_path*'
-kategori: Do'A
+kategori: Doa
 kategori_emoji: 📂
 tags: doa,doamustajab,ismuladham,namaallah,pengabuldoa,doaharian,adabberdoa,ibnumajah,abudaud,annasai,thequranpath,bedahkitab,annashihadaily
 images: 1.jpg

@@ -1,7 +1,7 @@
 ---
 judul: Do'a Setelah Wudhu Dibukakan 8 Pintu Surga Jika Membaca Do'a Ini
 sub_judul: '*@an.nashiha_daily*'
-kategori: Do'A
+kategori: Doa
 kategori_emoji: 📂
 tags: doa,doasetelahwudhu,wudhu,pintusurga,keutamaanwudhu,tirmidzi,alalbani,reminder,manhajsalaf,sunnah
 images: 1.jpg

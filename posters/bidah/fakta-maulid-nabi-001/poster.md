@@ -2,7 +2,7 @@
 judul: Fakta Maulid Nabi
 sub_judul: 👉Unduh poster/video HD,grup telegram dan lainnya... ⬇️⬇️⬇️ Link di bio
   @tauhidsunnah_id
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 🚫
 tags: Maulid,bidah, maulidnabi
 images: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, 6.jpg

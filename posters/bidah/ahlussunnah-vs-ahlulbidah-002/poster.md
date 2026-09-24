@@ -13,7 +13,7 @@ sub_judul: 'Collab dakwah Sunnah
   @studi_islam._id
 
   @akun_salafy'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 🚫
 tags: Ahlulbidah,ahlussunnah,sunnah,bidah,islam
 images: 1.jpg

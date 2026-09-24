@@ -1,7 +1,7 @@
 ---
 judul: Yang pertama kali mengadakan maulid nabi
 sub_judul: '@an.nashiha_daily'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 🚫
 tags: Maulid, maulidnabi,bidah, ultah, Syiah,fakta
 images: 1.jpg

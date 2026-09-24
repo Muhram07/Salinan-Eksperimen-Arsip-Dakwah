@@ -1,7 +1,7 @@
 ---
 judul: Tidak Boleh Memakai Jadwal Imsakiyah Sebagai Patokan Waktu Imsak
 sub_judul: '*@an.nashiha_daily*'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 📂
 tags: imsak,imsakiyah,jadwalimsakiyah,bidah,fatwaulama,binbaz,utsaimin,hukumpuasa,fajarshadiq,manhajsalaf,sunnah
 images: 1.jpg

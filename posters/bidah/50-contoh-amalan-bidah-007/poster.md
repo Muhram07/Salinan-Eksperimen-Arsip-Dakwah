@@ -1,7 +1,7 @@
 ---
 judul: 50 contoh amalan bidah
 sub_judul: '*Akun* *dakwah* *Sunnah* *:* *@an.nashiha_daily*'
-kategori: Bid'ah
+kategori: Bidah
 kategori_emoji: 📂
 tags: Amalanbaru,bidah, masyarakat
 images: 1.jpg, 2.jpg, 3.jpg
