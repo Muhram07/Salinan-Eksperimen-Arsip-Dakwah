@@ -1,6 +1,6 @@
 # ==============================================================================
 # SCRIPT OTOMATISASI EKSTRAKSI ZIP & PEMBUAT MANIFEST DAKWAH SUNNAH
-# VERSI BERSIH NON-PETIK (BEBAS CACAT HURUF BESAR & AMAN KLIK GULIR)
+# SINKRONISASI FOLDER _uploads & SUBFOLDER KATEGORI (DZIKIR, DOA, DLL.)
 # ==============================================================================
 
 import os
@@ -52,7 +52,7 @@ HIJRIAH_NORMALIZE_MAP = {
     "dzulhijjah (12)": "Dzulhijjah (12)"
 }
 
-# Kamus nama kategori resmi versi NON-PETIK (Doa, Bidah, Dzikir, dll.)
+# Kamus nama kategori resmi versi NON-PETIK
 DISPLAY_KATEGORI_MAP = {
     "doa": "Doa",
     "do'a": "Doa",
@@ -115,41 +115,22 @@ KATEGORI_EMOJI_MAP = {
 }
 
 def clean_non_petik(text):
-    """
-    Menghapus semua tanda petik (' atau ’ atau ‘) dari nama kategori
-    agar tidak ada lagi bug string HTML onclick.
-    """
     if not text:
         return ""
     return text.replace("'", "").replace("’", "").replace("‘", "").strip()
 
 def get_canonical_kategori(kat_str):
-    """
-    Menghasilkan nama kategori resmi yang 100% NON-PETIK dan rapi.
-    Contoh: Do'A -> Doa, Bid'ah -> Bidah, Rabi'ul Akhir (4) -> Rabiul Akhir (4).
-    """
     if not kat_str:
         return "Umum"
-    
-    # 1. Bersihkan string dari petik dan ubah ke huruf kecil untuk pencocokan kamus
     clean_lower = clean_non_petik(kat_str).lower()
-    
-    # 2. Cek apakah ada di kamus bulan Hijriah
     if clean_lower in HIJRIAH_NORMALIZE_MAP:
         return HIJRIAH_NORMALIZE_MAP[clean_lower]
-        
-    # 3. Cek apakah ada di kamus kategori utama (Doa, Bidah, dll.)
     if clean_lower in DISPLAY_KATEGORI_MAP:
         return DISPLAY_KATEGORI_MAP[clean_lower]
-        
-    # 4. Fallback: Huruf awal besar setiap kata tanpa tanda petik
     words = clean_lower.split()
     return " ".join([w.capitalize() for w in words]) if words else "Umum"
 
 def parse_frontmatter(md_content):
-    """
-    Mengekstrak frontmatter YAML dari berkas poster.md secara akurat.
-    """
     meta = {}
     content = md_content
     match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", md_content, re.DOTALL)
@@ -167,57 +148,78 @@ def parse_frontmatter(md_content):
                 meta[key] = val
     return meta, content
 
-def update_poster_md_kategori(md_path, kategori_baru):
-    """
-    MEROMBAK ULANG berkas poster.md di dalam folder poster agar tulisan
-    kategori di dalamnya otomatis terupdate menjadi non-petik (misal: kategori: Doa).
-    """
-    try:
-        with open(md_path, "r", encoding="utf-8") as f:
-            raw_text = f.read()
-        
-        # Ganti baris 'kategori: ...' di dalam frontmatter YAML dengan kategori baru
-        new_text = re.sub(
-            r"^(kategori\s*:\s*).*$", 
-            f"kategori: {kategori_baru}", 
-            raw_text, 
-            flags=re.MULTILINE
-        )
-        
-        with open(md_path, "w", encoding="utf-8") as f:
-            f.write(new_text)
-    except Exception as e:
-        print(f"Peringatan: Gagal memperbarui file {md_path}: {e}")
-
 def extract_all_zips():
     """
-    Mengekstrak berkas ZIP yang diupload admin dan memindahkannya ke struktur folder posters.
+    Mengekstrak file ZIP dari folder '_uploads' atau 'uploads'.
+    Membaca poster.md di dalam ZIP untuk mengetahui kategorinya,
+    lalu memindahkannya ke subfolder yang benar: posters/<kategori>/<slug>/
     """
     repo_root = os.getcwd()
-    uploads_dir = os.path.join(repo_root, "uploads")
-    posters_dir = os.path.join(repo_root, "posters")
+    posters_root = os.path.join(repo_root, "posters")
+    os.makedirs(posters_root, exist_ok=True)
 
-    if not os.path.exists(uploads_dir):
-        print("Direktori uploads tidak ditemukan, melewati proses ekstraksi ZIP.")
-        return
+    # Deteksi folder upload (baik _uploads maupun uploads)
+    possible_upload_dirs = [
+        os.path.join(repo_root, "_uploads"),
+        os.path.join(repo_root, "uploads")
+    ]
 
-    os.makedirs(posters_dir, exist_ok=True)
-    zip_files = [f for f in os.listdir(uploads_dir) if f.lower().endswith(".zip")]
+    for uploads_dir in possible_upload_dirs:
+        if not os.path.exists(uploads_dir):
+            continue
 
-    for zf in zip_files:
-        zip_path = os.path.join(uploads_dir, zf)
-        try:
-            with zipfile.ZipFile(zip_path, 'r') as z:
-                z.extractall(posters_dir)
-            print(f"Berhasil mengekstrak: {zf}")
-            os.remove(zip_path)
-        except Exception as e:
-            print(f"Gagal mengekstrak {zf}: {e}")
+        zip_files = [f for f in os.listdir(uploads_dir) if f.lower().endswith(".zip")]
+        for zf in zip_files:
+            zip_path = os.path.join(uploads_dir, zf)
+            slug_name = os.path.splitext(zf)[0]
+            temp_extract = os.path.join(repo_root, "_temp_extract")
+
+            try:
+                # 1. Ekstrak sementara ke folder temp
+                if os.path.exists(temp_extract):
+                    shutil.rmtree(temp_extract)
+                os.makedirs(temp_extract, exist_ok=True)
+
+                with zipfile.ZipFile(zip_path, 'r') as z:
+                    z.extractall(temp_extract)
+
+                # 2. Cari file poster.md di dalam hasil ekstrak
+                kat_folder = "umum"
+                for r, d, f in os.walk(temp_extract):
+                    if "poster.md" in f:
+                        with open(os.path.join(r, "poster.md"), "r", encoding="utf-8") as md_f:
+                            m, _ = parse_frontmatter(md_f.read())
+                            kat_raw = m.get("kategori", "Umum")
+                            kat_baku = get_canonical_kategori(kat_raw)
+                            # Buat slug folder kategori (misal: "dzikir", "doa", dll.)
+                            kat_folder = clean_non_petik(kat_baku).lower().replace(" ", "-")
+                        break
+
+                # 3. Pindahkan ke tujuan akhir: posters/<kategori>/<slug>/
+                target_dir = os.path.join(posters_root, kat_folder, slug_name)
+                os.makedirs(target_dir, exist_ok=True)
+
+                # Salin semua isi file dari temp ke folder target
+                for r, d, f in os.walk(temp_extract):
+                    for file_name in f:
+                        src_file = os.path.join(r, file_name)
+                        dst_file = os.path.join(target_dir, file_name)
+                        shutil.copy2(src_file, dst_file)
+
+                # Bersihkan temp dan file zip yang sudah selesai
+                shutil.rmtree(temp_extract)
+                os.remove(zip_path)
+                print(f"✅ Sukses memindahkan {zf} ke: posters/{kat_folder}/{slug_name}/")
+
+            except Exception as e:
+                print(f"❌ Gagal memproses {zf}: {e}")
+                if os.path.exists(temp_extract):
+                    shutil.rmtree(temp_extract)
 
 def build_manifest():
     """
-    Memindai folder posters, merombak isi poster.md jadi non-petik,
-    dan menyusun ulang manifest.json bersih dari tanda petik.
+    Memindai seluruh folder posters secara mendalam,
+    mengupdate poster.md jadi non-petik baku, dan menerbitkan manifest.json
     """
     repo_root = os.getcwd()
     posters_dir = os.path.join(repo_root, "posters")
@@ -243,22 +245,16 @@ def build_manifest():
             rel_path = os.path.relpath(root, posters_dir).replace("\\", "/")
             raw_kategori = meta.get("kategori", "Umum")
             
-            # STANDARISASI KE NON-PETIK (Do'A -> Doa, Bid'ah -> Bidah, dll.)
+            # Normalisasi kategori ke non-petik baku (Doa, Bidah, Dzikir, dll.)
             kategori_baku = get_canonical_kategori(raw_kategori)
             kategori_set.add(kategori_baku)
-
-            # Perbarui file poster.md fisik agar selamanya bersih dari petik
-            if raw_kategori != kategori_baku:
-                update_poster_md_kategori(md_path, kategori_baku)
 
             # Temukan semua gambar slide (1.jpg, 2.jpg, dst.)
             images = [f for f in files if re.match(r"^\d+\.(jpg|jpeg|png|webp)$", f, re.IGNORECASE)]
             images.sort(key=lambda x: int(re.match(r"^(\d+)", x).group(1)))
 
-            # Cek berkas PDF brosur jika ada
             has_pdf = "brosur.pdf" if "brosur.pdf" in files else None
 
-            # Ambil emoji resmi
             emoji_key = kategori_baku.lower().strip()
             emoji = KATEGORI_EMOJI_MAP.get(emoji_key, "📂")
 
@@ -276,7 +272,6 @@ def build_manifest():
             }
             posters_list.append(poster_item)
 
-    # Urutkan kategori agar bulan Hijriah di urutan awal, lalu kategori lainnya secara alfabetis
     def sort_key_kategori(k):
         match = re.search(r"\((\d+)\)", k)
         if match:
@@ -295,8 +290,8 @@ def build_manifest():
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest_data, f, ensure_ascii=False, indent=2)
 
-    print(f"✅ Sukses merombak poster.md & membuat manifest.json!")
-    print(f"Total: {len(posters_list)} poster, {len(sorted_kategori)} kategori bersih tanpa tanda petik.")
+    print(f"✅ Sukses membuat manifest.json!")
+    print(f"Total: {len(posters_list)} poster, {len(sorted_kategori)} kategori bersih.")
 
 if __name__ == "__main__":
     extract_all_zips()
