@@ -366,7 +366,7 @@
         .view-float-btn{ bottom:25px; left:25px; animation: floatBtn 3s ease-in-out infinite; }
         @keyframes floatBtn {0%{transform:translateY(0px);}50%{transform:translateY(-3px);}100%{transform:translateY(0px);}}
 
-        /* Posisi Tombol Melayang Atas (Menu Samping Kiri Atas & Home Kanan Atas) */
+        /* Posisi Tombol Melayang Atas (Menu Kiri & Home Kanan) */
         .menu-top-btn {
             top: 20px;
             left: 20px;
@@ -378,7 +378,7 @@
             z-index: 1000;
         }
 
-        /* --- SIDEBAR / MENU SAMPING ELEGAN GAYA HIJRAHAPP EMAS-HITAM --- */
+        /* --- SIDEBAR / MENU SAMPING ELEGAN GAYA HIJRAHAPP (EMAS-HITAM) --- */
         .sidebar-overlay {
             position: fixed;
             top: 0;
@@ -419,14 +419,14 @@
             left: 15px;
         }
 
-        /* Bagian Atas Sidebar (Badge Tanggal & Brand mirip HijrahApp) */
+        /* Bagian Atas Sidebar (Kartu Jam Digital & Tanggal HP Realtime) */
         .sidebar-header {
             padding: 24px 20px 18px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
 
-        .sidebar-hijri-card {
+        .sidebar-time-card {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(20, 20, 20, 0.8));
             border: 1px solid rgba(212, 175, 55, 0.4);
             border-radius: 18px;
@@ -437,46 +437,36 @@
             margin-bottom: 14px;
         }
 
-        .sidebar-hijri-card .day-box {
+        .sidebar-time-card .time-box {
             display: flex;
-            align-items: baseline;
-            gap: 10px;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .sidebar-hijri-card .day-number {
-            font-size: 32px;
+        .sidebar-time-card .live-clock {
+            font-size: 26px;
             font-weight: 800;
             color: #D4AF37;
             line-height: 1;
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
         }
 
-        .sidebar-hijri-card .day-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-hijri-card .month-title {
+        .sidebar-time-card .live-date {
             color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .sidebar-hijri-card .year-title {
-            color: #D4AF37;
             font-size: 12px;
             font-weight: 600;
+            margin-top: 4px;
         }
 
-        .sidebar-hijri-card .cal-icon {
-            font-size: 22px;
-            opacity: 0.8;
+        .sidebar-time-card .cal-icon {
+            font-size: 24px;
+            opacity: 0.9;
         }
 
         .sidebar-brand-title {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 2px;
             color: #aaa;
             text-transform: uppercase;
@@ -495,9 +485,7 @@
             padding: 4px;
             transition: 0.2s;
         }
-        .sidebar-close-btn:hover {
-            color: #D4AF37;
-        }
+        .sidebar-close-btn:hover { color: #D4AF37; }
 
         /* Daftar Menu Samping */
         .sidebar-nav {
@@ -531,7 +519,6 @@
             transform: translateX(3px);
         }
 
-        /* Menu 1 (Sedang Aktif) */
         .sidebar-item.active {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.08));
             border-color: #D4AF37;
@@ -792,16 +779,16 @@
     <div class="sidebar-drawer" id="sidebarDrawer">
         <div class="sidebar-header">
             <button class="sidebar-close-btn" onclick="closeSidebar()" title="Tutup Menu">✕</button>
-            <div class="sidebar-hijri-card">
-                <div class="day-box">
-                    <span class="day-number" id="hijriDayNum">12</span>
-                    <div class="day-details">
-                        <span class="month-title" id="hijriMonthTitle">Rabiul Akhir</span>
-                        <span class="year-title" id="hijriYearTitle">1448 H</span>
-                    </div>
+            
+            <!-- KARTU JAM REALTIME & TANGGAL HP (100% SINKRON PERANGKAT PENGGUNA) -->
+            <div class="sidebar-time-card">
+                <div class="time-box">
+                    <div class="live-clock" id="liveClockDisplay">00:00:00</div>
+                    <div class="live-date" id="liveDateDisplay">Memuat tanggal...</div>
                 </div>
-                <div class="cal-icon">🗓️</div>
+                <div class="cal-icon">⏳</div>
             </div>
+
             <div class="sidebar-brand-title">ARSIP DAKWAH MANHAJ SALAF</div>
         </div>
 
@@ -946,6 +933,29 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
+        /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
+        function startLiveClock() {
+            function updateClock() {
+                const now = new Date();
+                
+                // Jam, Menit, Detik HP
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                const clockEl = document.getElementById('liveClockDisplay');
+                if (clockEl) clockEl.innerText = `${h}:${m}:${s}`;
+
+                // Hari & Tanggal HP (Bahasa Indonesia)
+                const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                const dateString = now.toLocaleDateString('id-ID', options);
+                const dateEl = document.getElementById('liveDateDisplay');
+                if (dateEl) dateEl.innerText = dateString;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+        startLiveClock();
+
         /* --- FUNGSI NAVIGASI TOP BUTTONS & SIDEBAR --- */
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -966,8 +976,6 @@
             if (menu === 'arsip') {
                 scrollToTop();
             } else if (menu === 'maker') {
-                // Diarahkan atau dipersiapkan untuk index kedua (maker.html / studio poster)
-                // Jika file maker.html sudah dibuat, tinggal diarahkan: window.location.href = 'maker.html';
                 alert("🎨 Studio Poster Maker (Index Kedua) sedang dalam proses perancangan terpisah!");
             }
         }
