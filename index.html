@@ -915,10 +915,12 @@
             const favList = getFavorit();
             let manifestData = { posters: [] };
 
+            // SINKRONISASI 1: Pengambilan manifest.json fleksibel (relatif & absolut)
             try {
-                const res = await fetch('/manifest.json');
+                let res = await fetch('manifest.json');
+                if(!res.ok) res = await fetch('/manifest.json');
                 if(res.ok) manifestData = await res.json();
-            } catch(e) { console.warn("Gagal mengambil manifest"); }
+            } catch(e) { console.warn("Gagal mengambil manifest", e); }
 
             updateProgress(40);
 
@@ -941,7 +943,9 @@
                     const judul = p.judul || "Tanpa Judul";
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
-                    const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || '📂';
+                    
+                    // SINKRONISASI 2: Pencocokan emoji fleksibel agar Doa, Bidah, dll. langsung muncul emojinya
+                    const katEmoji = p.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori] || '📂';
                     const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
                     let pdfSrc = p.pdf ? `${folder}/brosur.pdf` : null;
                     const hasPdf = !!p.pdf;
@@ -1048,7 +1052,7 @@
                 </div>`;
 
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
-                let icon = emojiMapGlobal[nama.toLowerCase()] || '📂';
+                let icon = emojiMapGlobal[nama.toLowerCase()] || emojiMapGlobal[nama] || '📂';
                 htmlKategoriOri += `
                     <div class="card-kategori" onclick="filterKategori('${nama}', this)">
                         <span class="icon">${icon}</span>
@@ -1172,7 +1176,7 @@
             const judul = rawItem.judul || "Tanpa Judul";
             const subJudul = rawItem.sub_judul || "";
             const kategori = rawItem.kategori || "Umum";
-            const katEmoji = emojiMapGlobal[kategori.toLowerCase()] || '📂';
+            const katEmoji = rawItem.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori] || '📂';
             const tagArray = rawItem.tags ? rawItem.tags.split(',').map(t => t.trim()) : [];
             const pdfSrc = rawItem.pdf ? `${folder}/brosur.pdf` : null;
             const favList = getFavorit();
@@ -1264,7 +1268,7 @@
                 if (hasil.length > 0) {
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = hasil.map(item => {
-                        const katEmoji = emojiMapGlobal[item.kategori.toLowerCase()] || '📂';
+                        const katEmoji = emojiMapGlobal[item.kategori.toLowerCase()] || emojiMapGlobal[item.kategori] || '📂';
                         return `
                             <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
                                 <span>📚 ${item.judul}</span>
