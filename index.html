@@ -34,87 +34,83 @@
             align-items: center;
         }
 
+        /* Ring Indikator Loading Melingkar */
         .loader-svg-ring {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             transform: rotate(-90deg);
+            overflow: visible;
         }
 
-        .ring-bg {
+        .loader-svg-ring circle {
             fill: none;
-            stroke: rgba(212, 175, 55, 0.1);
-            stroke-width: 5;
-        }
-
-        .ring-progress {
-            fill: none;
-            stroke: url(#goldGrad);
-            stroke: #D4AF37;
-            stroke-width: 5;
+            stroke-width: 4;
             stroke-linecap: round;
-            stroke-dasharray: 628;
-            stroke-dashoffset: 628;
-            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
-            transition: stroke-dashoffset 0.15s ease-out;
         }
 
-        /* 3D Scene Viewport */
+        .loader-svg-ring .ring-bg {
+            stroke: rgba(212, 175, 55, 0.1);
+        }
+
+        .loader-svg-ring .ring-progress {
+            stroke: #D4AF37;
+            stroke-dasharray: 628; /* 2 * PI * r (r=100) */
+            stroke-dashoffset: 628;
+            transition: stroke-dashoffset 0.1s linear;
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.9));
+        }
+
         .loader-3d-scene {
-            position: relative;
             width: 100px;
             height: 100px;
             perspective: 800px;
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 2;
         }
 
+        /* CONTAINER LOGO M YANG BERPUTAR SMOOTH SECARA KESELURUHAN */
         .m-logo-3d {
-            width: 60px;
+            width: 70px;
             height: 60px;
             position: relative;
             transform-style: preserve-3d;
-            /* Putaran 3D berjalan secara kontinu & smooth di semua tahap */
             animation: rotate3DM 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
         .m-side {
             position: absolute;
-            background: linear-gradient(135deg, #FFE259 0%, #FFA751 50%, #D4AF37 100%);
-            border-radius: 4px;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.8);
+            background: linear-gradient(135deg, #FFF1B0, #D4AF37, #996515);
+            border-radius: 3px;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
             will-change: transform, opacity;
         }
 
-        /* Batang Kiri Tegak (Tahap 3: Muncul saat atap turun/mereka membentuk M) */
         .m-side.left-bar {
             width: 12px;
             height: 56px;
             left: 2px;
             top: 2px;
+            opacity: 0;
             animation: fadeInOuterBar 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
-        /* Batang Kanan Tegak */
         .m-side.right-bar {
             width: 12px;
             height: 56px;
             right: 2px;
             top: 2px;
+            opacity: 0;
             animation: fadeInOuterBar 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
-        /* 
-           ANIMASI 4 TAHAP DIAGONAL (ATAP BUKU -> MEREKAH TURUN -> BENTUK M -> BERPUTAR)
-        */
         .m-side.diag-left {
             width: 10px;
             height: 38px;
-            left: 17px;
-            top: 10px;
+            left: 12px;
+            top: 2px;
             transform-origin: top left;
             animation: stageDiagLeft 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
@@ -122,71 +118,41 @@
         .m-side.diag-right {
             width: 10px;
             height: 38px;
-            right: 17px;
-            top: 10px;
+            right: 12px;
+            top: 2px;
             transform-origin: top right;
             animation: stageDiagRight 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
-        /* Bayangan 3D Presisi */
         .m-shadow {
             position: absolute;
             width: 60px;
-            height: 14px;
-            background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.45) 0%, rgba(0,0,0,0) 75%);
-            bottom: -15px;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 50%;
+            bottom: 25px;
+            filter: blur(6px);
             animation: shadowPulse 3.5s cubic-bezier(0.45, 0.05, 0.2, 0.95) infinite;
         }
 
-        /* --- KEYFRAMES ANIMASI 4 TAHAP LOGO M --- */
         @keyframes stageDiagLeft {
-            0%, 20% {
-                opacity: 1;
-                transform: translateY(-16px) rotate(35deg) translateZ(10px);
-            }
-            45%, 75% {
-                opacity: 1;
-                transform: translateY(0px) rotate(-32deg) translateZ(10px);
-            }
-            90%, 100% {
-                opacity: 1;
-                transform: translateY(-16px) rotate(35deg) translateZ(10px);
-            }
+            0%, 20% { opacity: 1; transform: translateY(-16px) rotate(35deg) translateZ(10px); }
+            45%, 75% { opacity: 1; transform: translateY(0px) rotate(-32deg) translateZ(10px); }
+            90%, 100% { opacity: 1; transform: translateY(-16px) rotate(35deg) translateZ(10px); }
         }
 
         @keyframes stageDiagRight {
-            0%, 20% {
-                opacity: 1;
-                transform: translateY(-16px) rotate(-35deg) translateZ(10px);
-            }
-            45%, 75% {
-                opacity: 1;
-                transform: translateY(0px) rotate(32deg) translateZ(10px);
-            }
-            90%, 100% {
-                opacity: 1;
-                transform: translateY(-16px) rotate(-35deg) translateZ(10px);
-            }
+            0%, 20% { opacity: 1; transform: translateY(-16px) rotate(-35deg) translateZ(10px); }
+            45%, 75% { opacity: 1; transform: translateY(0px) rotate(32deg) translateZ(10px); }
+            90%, 100% { opacity: 1; transform: translateY(-16px) rotate(-35deg) translateZ(10px); }
         }
 
-        /* Batang Luar Tegak Muncul Ketika Atap Turun Membentuk M */
         @keyframes fadeInOuterBar {
-            0%, 20% { 
-                opacity: 0; 
-                transform: translateZ(0px) scaleY(0.5); 
-            }
-            45%, 75% { 
-                opacity: 1; 
-                transform: translateZ(8px) scaleY(1); 
-            }
-            90%, 100% { 
-                opacity: 0; 
-                transform: translateZ(0px) scaleY(0.5); 
-            }
+            0%, 20% { opacity: 0; transform: translateZ(0px) scaleY(0.5); }
+            45%, 75% { opacity: 1; transform: translateZ(8px) scaleY(1); }
+            90%, 100% { opacity: 0; transform: translateZ(0px) scaleY(0.5); }
         }
 
-        /* Rotasi Continuous 3D dari Tengah Sampai Akhir */
         @keyframes rotate3DM {
             0% { transform: rotateY(0deg) rotateX(10deg); }
             50% { transform: rotateY(180deg) rotateX(-5deg); }
@@ -198,98 +164,117 @@
             50% { transform: scale(0.7); opacity: 0.2; }
         }
 
-        /* Angka Persentase Loading */
         .loader-percentage {
             position: absolute;
             bottom: 38px;
+            color: #FFE082;
             font-size: 13px;
-            font-weight: 700;
-            color: #fff;
+            font-weight: bold;
             letter-spacing: 1px;
-            font-family: monospace;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
             z-index: 2;
         }
 
-        /* Teks Memuat Arsip */
         .loader-text {
             margin-top: 20px;
             color: #D4AF37;
-            font-size: 14px;
+            font-size: 13px;
             letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 600;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+            text-align: center;
+            width: 100%;
             animation: textPulse 1.8s ease-in-out infinite alternate;
         }
 
-        @keyframes textPulse {
-            0% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+        @keyframes textPulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
         /* Top Navigation & Branding */
         .follow-wrapper{text-align:center;margin-bottom:15px;padding:0 10px;}
-        .follow-text{color:#ccc;font-size:13px;margin-bottom:8px;}
-        .sosmed-container{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
-        .btn-sosmed{background:rgba(255, 255, 255, 0.05);border:1px solid rgba(212, 175, 55, 0.3);padding:6px 14px;border-radius:20px;color:#D4AF37;text-decoration:none;font-size:12px;display:flex;align-items:center;gap:6px;backdrop-filter: blur(4px);transition:0.3s;}
-        .btn-sosmed:hover{background:rgba(212, 175, 55, 0.15);border-color:#D4AF37;transform:translateY(-2px);}
-        
-        .header-card{position:relative;background:rgba(20, 20, 20, 0.6);padding:35px 20px;border-radius:24px;text-align:center;border:1px solid rgba(255, 255, 255, 0.08);backdrop-filter: blur(10px);box-shadow:0 20px 40px rgba(0,0,0,0.6);margin-bottom:20px;overflow:hidden;}
-        .header-card::after{content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(212,175,55,0.08),transparent);transform:skewX(-25deg);animation:shine 8s infinite;}
-        @keyframes shine{0%{left:-100%;}20%{left:200%;}100%{left:200%;}}
-        h1{margin:0 0 6px 0;font-size:26px;color:#D4AF37;letter-spacing:1px;}
-        .sub-header{font-size:14px;color:#aaa;}
+        .follow-text{color:#bdbdbd;font-size:14px;margin-bottom:12px;line-height:1.5;letter-spacing:0.5px;}
+        .sosmed-container{ display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 auto; }
+        .btn-sosmed{ display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 25px; text-decoration: none; font-size: 13px; font-weight: bold; color: #D4AF37; background: rgba(212, 175, 55, 0.05); transition: 0.3s; backdrop-filter: blur(4px); position: relative; }
+        .btn-sosmed:hover{background:#D4AF37;color:#111;transform:scale(1.05);}
+        .anim-down { animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards, floatKiri 4s ease-in-out 0.8s infinite; }
+        .anim-up { animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards, floatKanan 4s ease-in-out 0.8s infinite; }
+        @keyframes slideDown { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(20px); } }
+        @keyframes floatKiri { 0% { transform: translateY(-7px); } 50% { transform: translateY(7px); } 100% { transform: translateY(-7px); } }
+        @keyframes floatKanan { 0% { transform: translateY(7px); } 50% { transform: translateY(-7px); } 100% { transform: translateY(7px); } }
 
-        /* --- MODE TAMPILAN SEGMENTED (SEMUA / TERSIMPAN / PDF) --- */
-        .beranda-mode-container {
+        .brand-wrapper{text-align:center;margin-bottom:20px;padding:10px 0 0 0;position:relative;}
+        .circuit-line{display:inline-block;width:40px;height:2px;background:#D4AF37;position:relative;vertical-align:middle;margin:0 10px;}
+        .circuit-line::before{content:'';position:absolute;width:6px;height:6px;background:#D4AF37;border-radius:50%;top:-2px;}
+        .circuit-line.left::before{left:-3px;}
+        .circuit-line.right::before{right:-3px;}
+        .circuit-line::after{content:'';position:absolute;width:2px;height:12px;background:#D4AF37;top:-14px;left:50%;transform:translateX(-50%);}
+        .brand-wrapper .developer-name{color:#D4AF37;font-size:16px;font-weight:bold;letter-spacing:1px;}
+        .brand-wrapper .developer-title{color:#888;font-size:11px;letter-spacing:0.5px;margin-top:2px;}
+        .brand-divider{width:80px;height:1px;background:#D4AF37;margin:10px auto 15px auto;opacity:0.5;}
+
+        /* --- SEGMENTED MODE SWITCHER --- */
+        .mode-switcher-container {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin: 0 auto 20px auto;
-            background: rgba(15, 15, 15, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 5px;
+            align-items: center;
+            margin: 10px auto 25px auto;
+            padding: 0 10px;
+            width: 100%;
+        }
+
+        .mode-switcher-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 30px;
-            max-width: 400px;
-            backdrop-filter: blur(8px);
+            padding: 4px;
+            backdrop-filter: blur(6px);
+            gap: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            max-width: 380px;
+            width: 100%;
         }
 
         .btn-mode-segmented {
             flex: 1;
             background: transparent;
             border: none;
-            color: #888;
-            padding: 8px 12px;
-            border-radius: 20px;
+            color: #ccc;
+            padding: 8px 10px;
+            border-radius: 25px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            outline: none;
+            white-space: nowrap;
             text-align: center;
         }
 
-        .btn-mode-segmented:hover {
-            color: #fff;
-        }
-
+        .btn-mode-segmented:hover { color: #fff; }
         .btn-mode-segmented.active {
             background: #D4AF37;
             color: #111;
-            box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
         }
 
-        /* --- PENCARIAN & AUTOCOMPLETE DROPDOWN --- */
-        .search-wrapper{position:relative;max-width:550px;margin:0 auto 25px auto;z-index:10;padding:0 10px;}
-        .search-container{position:relative;display:flex;align-items:center;}
-        .search-icon{position:absolute;left:18px;color:#888;font-size:16px;pointer-events:none;}
-        .search-box{width:100%;padding:14px 45px;border-radius:50px;border:1px solid rgba(255,255,255,0.1);background:rgba(20, 20, 20, 0.6);color:#fff;font-size:14px;outline:none;backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(0,0,0,0.5);transition:0.3s;}
-        .search-box:focus{border-color:#D4AF37;box-shadow:0 0 15px rgba(212,175,55,0.2);background:rgba(25, 25, 25, 0.8);}
-        .clear-btn{position:absolute;right:15px;background:none;border:none;color:#888;font-size:18px;cursor:pointer;display:none;padding:5px;}
-        .clear-btn:hover{color:#fff;}
+        .header-container{ position:relative; background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.6)); padding:40px 20px 55px 20px; text-align:center; border-radius:24px 24px 0 0; margin-bottom:0; border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); overflow: hidden; z-index: 10; }
+        .header-container::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent); transform: skewX(-25deg); animation: shine 5s infinite; pointer-events: none; }
+        @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+        .header-container h1{color:#D4AF37;font-size:32px;margin-bottom:15px;letter-spacing:1px;text-shadow:0 0 20px rgba(212,175,55,0.2);}
+        .header-container .sub-title{color:#d1d5db;font-size:18px;font-weight:normal;letter-spacing:1px;}
         
-        .search-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:10px;right:10px;background:rgba(20, 20, 20, 0.95);border:1px solid rgba(212, 175, 55, 0.3);border-radius:16px;max-height:280px;overflow-y:auto;box-shadow:0 15px 35px rgba(0,0,0,0.8);z-index:99;backdrop-filter:blur(15px);}
-        .search-item{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:0.2s;gap:10px;}
-        .search-item:last-child{border-bottom:none;}
+        .search-wrapper{position:relative;max-width:550px;margin:-25px auto 25px auto;width:90%;z-index:20;}
+        #search{ width:100%;padding:14px 20px;border:none; border-radius:24px;font-size:16px;outline:none; background:rgba(255, 255, 255, 0.12); color:#fff; box-shadow:0 8px 32px rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; }
+        #search:focus{background:rgba(255, 255, 255, 0.25);border-color:rgba(212, 175, 55, 0.3);}
+        #search-result{ position:absolute;top:calc(100% + 10px);left:0;right:0; background:rgba(21, 21, 21, 0.95); backdrop-filter: blur(10px); border:1px solid rgba(255, 255, 255, 0.1); border-radius:16px; overflow:hidden; max-height:350px; overflow-y:auto; display:none; z-index:9999; }
+        .search-item{padding:12px 16px;border-bottom:1px solid rgba(255, 255, 255, 0.05);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;color:#fff;transition:0.2s;}
         .search-item:hover{background:rgba(212, 175, 55, 0.15);color:#D4AF37;}
         .search-item span{font-size:14px;line-height:1.4;word-break:break-word;flex:1;}
         .search-item small{color:#D4AF37;font-size:12px;white-space:nowrap;background:rgba(212,175,55,0.1);padding:3px 8px;border-radius:12px;border:1px solid rgba(212,175,55,0.2);flex-shrink:0;}
@@ -319,37 +304,44 @@
         #post-list{ display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center; transition: all 0.5s ease; }
         .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative; backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); }
         .poster:hover{border-color:#D4AF37;transform:scale(1.02);box-shadow:0 12px 40px rgba(212,175,55,0.05);}
-        .poster h3{margin-top:0;margin-bottom:6px;font-size:17px;color:#fff;cursor:pointer;}
-        .poster h3:hover{color:#D4AF37;}
-        .poster .sub-title{color:#aaa;font-size:13px;margin-bottom:14px;}
         
-        .carousel-container { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; margin-bottom: 15px; background: #000; box-shadow: 0 5px 20px rgba(0,0,0,0.5); cursor: pointer; }
-        .carousel-slide { display: flex; width: 100%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-        .carousel-slide img { width: 100%; height: 100%; object-fit: contain; flex-shrink: 0; background: #050505; }
-        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.6); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 5; backdrop-filter: blur(4px); transition: 0.2s; }
-        .carousel-btn:hover { background: #D4AF37; color: #000; }
-        .carousel-btn.prev { left: 8px; }
-        .carousel-btn.next { right: 8px; }
-        .carousel-dots { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; z-index: 5; }
-        .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); transition: 0.3s; }
-        .carousel-dot.active { width: 18px; border-radius: 10px; background: #D4AF37; }
-        .poster > img{width:100%;border-radius:16px;margin-bottom:15px;display:block;background:#050505;aspect-ratio: 1 / 1;object-fit: contain;cursor:pointer;}
+        .poster-header-info { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; margin-bottom: 18px; width: 100%; text-align: center; }
+        .poster-badge-kat { display: inline-flex; align-items: center; gap: 6px; background: rgba(212, 175, 55, 0.12); color: #D4AF37; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid rgba(212, 175, 55, 0.3); text-transform: capitalize; line-height: 1.2; }
+        .poster-id-wrapper { text-align: center; width: 100%; margin: 0; }
+        .poster-id { display: inline-block; background: rgba(0,0,0,0.6); color: #888; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.05); }
 
-        .tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-        .tag{background:rgba(212, 175, 55, 0.1);color:#D4AF37;border:1px solid rgba(212, 175, 55, 0.2);padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;}
-        .tag.tag-kategori{background:rgba(255, 255, 255, 0.08);color:#fff;border-color:rgba(255, 255, 255, 0.15);}
-        .tag.tag-pdf{background:rgba(255, 75, 75, 0.15);color:#ff7b7b;border-color:rgba(255, 75, 75, 0.3);}
+        .poster > img { width: 100%; height: auto; max-height: 520px; object-fit: contain; border-radius: 16px; margin-bottom: 5px; background: #000; display: block; }
+        .carousel-container{ position:relative; width:100%; max-height: 520px; aspect-ratio: 9 / 16; overflow:hidden; border-radius:16px; margin-bottom:5px; touch-action:pan-y; box-shadow:0 8px 25px rgba(0,0,0,0.3); background: #000; display: flex; align-items: center; justify-content: center; }
+        .carousel-track{ display:flex; height:100%; width: 100%; transition:transform 0.3s ease; }
+        .carousel-slide{ min-width:100%; height:100%; position:relative; display:flex; justify-content:center; align-items:center; background:#000; }
+        .carousel-slide img{ width:100%; height:100%; border-radius:16px; display:block; object-fit:contain; }
+        .carousel-slide .slide-number{ position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.75); color:#fff; padding:4px 10px; border-radius:12px; font-size:11px; z-index:5; border: 1px solid rgba(255,255,255,0.1); }
+        .carousel-btn{ position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(212,175,55,0.5); border-radius:50%; width:36px; height:36px; font-size:16px; cursor:pointer; z-index:10; backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; }
+        .carousel-btn:hover{ background:#D4AF37; color:#111; }
+        .carousel-btn.prev{ left:8px; }
+        .carousel-btn.next{ right:8px; }
 
-        .poster-content-wrapper{position:relative;margin-bottom:14px;line-height:1.6;font-size:13px;color:#ccc;}
-        .poster-content-preview{max-height:85px;overflow:hidden;position:relative;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
-        .poster-content-preview::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent, rgba(20,20,20,0.95));pointer-events:none;}
-        .read-more-btn{background:none;border:none;color:#D4AF37;font-size:12px;font-weight:600;cursor:pointer;padding:4px 0;display:inline-block;}
-        .read-more-btn:hover{text-decoration:underline;}
+        .poster h3{ color:#D4AF37; font-size:22px; margin-bottom:12px; text-align:center; letter-spacing:0.5px; line-height: 1.3; }
+        .poster .sub-caption{ color:#D4AF37; font-size:15px; margin-bottom:15px; font-style:italic; text-align:center; line-height:1.5; }
+        .poster-content-wrapper{ position:relative; color:#ddd; line-height:1.8; font-size:15px; overflow:hidden; transition:max-height 0.4s ease; text-align:center; }
+        .poster-content-wrapper.collapsed{ max-height:250px; }
+        .poster-content-wrapper.expanded{ max-height:2000px; }
+        .read-more-btn{ display:inline-block; margin-top:10px; background:transparent; color:#D4AF37; border:none; font-weight:bold; cursor:pointer; font-size:14px; padding:5px 0; text-decoration:underline; }
+        .read-more-btn:hover{ color:#fff; }
 
-        .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-        .actions button{background:rgba(255, 255, 255, 0.05);color:#fff;border:1px solid rgba(255, 255, 255, 0.1);padding:10px 8px;border-radius:14px;cursor:pointer;font-size:12px;display:flex;justify-content:center;align-items:center;gap:6px;transition:0.2s;}
-        .actions button:hover{background:rgba(212, 175, 55, 0.15);border-color:#D4AF37;color:#D4AF37;}
-        .btn-save{grid-column: span 2;background:rgba(212, 175, 55, 0.1);color:#D4AF37;border:1px solid rgba(212, 175, 55, 0.3);}
+        .divider{ width:60%; height:1px; background:rgba(212, 175, 55, 0.3); margin:20px auto; opacity:0.5; }
+        .poster .tags-wrapper{ margin-top:15px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+        .poster .tags-label{ color:#bdbdbd; font-size:13px; font-weight:bold; margin-bottom:3px; }
+        .poster .tag-container{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px; }
+        .poster .tag{ background:transparent; color:#D4AF37; border:1px solid #D4AF37; padding:3px 10px; border-radius:18px; font-size:11px; font-weight:bold; }
+        .poster .actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; align-items:center; justify-content:center; }
+        .poster .actions button{ background: linear-gradient(135deg, #D4AF37, #E6B800); color:#111; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer; font-size:13px; box-shadow:0 4px 10px rgba(212,175,55,0.2); transition:0.3s; }
+        .poster .actions button:hover{ transform:scale(1.02); }
+        .poster .sosial-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; align-items:center; justify-content:center; }
+        .poster .sosial-actions button{ background:transparent; color:#D4AF37; border:1px solid #D4AF37; padding:7px 14px; border-radius:25px; font-weight:bold; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; transition:0.3s; }
+        .poster .sosial-actions button:hover{ background:#D4AF37; color:#111; transform:scale(1.02); }
+        .poster .sosial-actions button .icon{ font-size:16px; }
+        .btn-save{ display:flex; align-items:center; gap:5px; background:transparent; border:1px solid #D4AF37; padding:7px 14px; border-radius:25px; color:#D4AF37; font-weight:bold; cursor:pointer; font-size:13px; transition:0.3s; }
         .btn-save:hover{ background:#D4AF37; color:#111; transform:scale(1.02); }
         .btn-save.saved{ background:#D4AF37; color:#111; border-color:#D4AF37; }
         .loading{ text-align:center; color:#888; padding:20px; font-size:18px; }
@@ -357,26 +349,32 @@
         @media(min-width:600px){ #post-list:not(.compact-view){grid-template-columns:repeat(2, 1fr);} }
         @media(min-width:900px){ #post-list:not(.compact-view){grid-template-columns:repeat(3, 1fr);} }
 
-        /* --- FLOATING BUTTONS (AUDIO, VIEW, MENU, HOME) --- */
-        .btn-float-common{ position:fixed; bottom:25px; z-index:100; width:50px; height:50px; border-radius:50%; background:rgba(20, 20, 20, 0.85); border: 2px solid #D4AF37; color:#D4AF37; font-size:22px; box-shadow:0 4px 15px rgba(0,0,0,0.5); cursor:pointer; transition:0.3s; display:flex; justify-content:center; align-items:center; backdrop-filter: blur(4px); animation: floatBtn 3s ease-in-out infinite; }
-        @keyframes floatBtn {0%{transform:translateY(0px);}50%{transform:translateY(-3px);}100%{transform:translateY(0px);}}
-        .btn-float-common:hover{transform:scale(1.05);background:rgba(212, 175, 55, 0.2);}
-        .sound-float-btn{right:25px;}
+        /* --- FLOATING BUTTONS (BAWAH & ATAS) --- */
+        .btn-float-common{ 
+            position:fixed; z-index:100; width:50px; height:50px; border-radius:50%; 
+            background:rgba(20, 20, 20, 0.85); border: 2px solid #D4AF37; color:#D4AF37; 
+            font-size:22px; box-shadow:0 4px 15px rgba(0,0,0,0.5); cursor:pointer; 
+            transition:0.3s; display:flex; justify-content:center; align-items:center; 
+            backdrop-filter: blur(4px); 
+        }
+        .btn-float-common:hover{transform:scale(1.08);background:rgba(212, 175, 55, 0.2);}
+        
+        /* Posisi Tombol Melayang Bawah */
+        .sound-float-btn{ bottom:25px; right:25px; animation: floatBtn 3s ease-in-out infinite; }
         .sound-float-btn.silent{border-color:#555;color:#888;}
         .sound-float-btn.playing{border-color:#D4AF37;color:#D4AF37;}
-        .view-float-btn{left:25px;}
+        .view-float-btn{ bottom:25px; left:25px; animation: floatBtn 3s ease-in-out infinite; }
+        @keyframes floatBtn {0%{transform:translateY(0px);}50%{transform:translateY(-3px);}100%{transform:translateY(0px);}}
 
-        /* --- POSISI TOMBOL MELAYANG ATAS (MENU KIRI & HOME KANAN) --- */
+        /* Posisi Tombol Melayang Atas (Menu Kiri & Home Kanan) */
         .menu-top-btn {
             top: 20px;
             left: 20px;
-            bottom: auto !important;
             z-index: 1000;
         }
         .home-top-btn {
             top: 20px;
             right: 20px;
-            bottom: auto !important;
             z-index: 1000;
         }
 
@@ -389,7 +387,6 @@
             height: 100vh;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
             z-index: 10000;
             opacity: 0;
             visibility: hidden;
@@ -409,6 +406,7 @@
             background: #141414;
             background: radial-gradient(circle at 0% 0%, #1e1e1e 0%, #0d0d0d 100%);
             border: 1px solid rgba(212, 175, 55, 0.35);
+            /* SUDUT TUMPUL ELEGAN */
             border-radius: 26px;
             box-shadow: 10px 0 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.1);
             z-index: 10001;
@@ -421,14 +419,14 @@
             left: 15px;
         }
 
-        /* Header Sidebar */
+        /* Bagian Atas Sidebar (Kartu Jam Digital & Tanggal HP Realtime) */
         .sidebar-header {
             padding: 24px 20px 18px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
 
-        .sidebar-hijri-card {
+        .sidebar-time-card {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(20, 20, 20, 0.8));
             border: 1px solid rgba(212, 175, 55, 0.4);
             border-radius: 18px;
@@ -438,45 +436,43 @@
             justify-content: space-between;
             margin-bottom: 14px;
         }
-        .sidebar-hijri-card .day-box {
+
+        .sidebar-time-card .time-box {
             display: flex;
-            align-items: baseline;
-            gap: 10px;
+            flex-direction: column;
+            gap: 2px;
         }
-        .sidebar-hijri-card .day-number {
-            font-size: 32px;
+
+        .sidebar-time-card .live-clock {
+            font-size: 26px;
             font-weight: 800;
             color: #D4AF37;
             line-height: 1;
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
         }
-        .sidebar-hijri-card .day-details {
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar-hijri-card .month-title {
+
+        .sidebar-time-card .live-date {
             color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .sidebar-hijri-card .year-title {
-            color: #D4AF37;
             font-size: 12px;
             font-weight: 600;
+            margin-top: 4px;
         }
-        .sidebar-hijri-card .cal-icon {
-            font-size: 22px;
-            opacity: 0.8;
+
+        .sidebar-time-card .cal-icon {
+            font-size: 24px;
+            opacity: 0.9;
         }
+
         .sidebar-brand-title {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 2px;
             color: #aaa;
             text-transform: uppercase;
             font-weight: 700;
         }
+
         .sidebar-close-btn {
             position: absolute;
             top: 14px;
@@ -489,11 +485,9 @@
             padding: 4px;
             transition: 0.2s;
         }
-        .sidebar-close-btn:hover {
-            color: #D4AF37;
-        }
+        .sidebar-close-btn:hover { color: #D4AF37; }
 
-        /* Navigasi Menu */
+        /* Daftar Menu Samping */
         .sidebar-nav {
             flex: 1;
             padding: 15px 12px;
@@ -502,6 +496,7 @@
             flex-direction: column;
             gap: 8px;
         }
+
         .sidebar-item {
             display: flex;
             align-items: center;
@@ -516,12 +511,14 @@
             border: 1px solid transparent;
             cursor: pointer;
         }
+
         .sidebar-item:hover {
             background: rgba(212, 175, 55, 0.1);
             color: #fff;
             border-color: rgba(212, 175, 55, 0.2);
             transform: translateX(3px);
         }
+
         .sidebar-item.active {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.08));
             border-color: #D4AF37;
@@ -529,11 +526,13 @@
             font-weight: 700;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
+
         .sidebar-item .item-icon {
             font-size: 18px;
             width: 24px;
             text-align: center;
         }
+
         .sidebar-item .item-badge {
             margin-left: auto;
             font-size: 10px;
@@ -543,11 +542,13 @@
             color: #D4AF37;
             border: 1px solid rgba(212, 175, 55, 0.4);
         }
+
         .sidebar-divider {
             height: 1px;
             background: rgba(255, 255, 255, 0.08);
             margin: 10px 8px;
         }
+
         .sidebar-section-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -556,6 +557,7 @@
             padding: 4px 16px;
             font-weight: 700;
         }
+
         .sidebar-footer {
             padding: 16px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -573,118 +575,108 @@
         #post-list.compact-view .carousel-container { width: 100px !important; height: 100px !important; max-height: 100px !important; aspect-ratio: 1 / 1 !important; border-radius: 12px !important; margin: 0 !important; box-shadow: none !important; flex-shrink: 0; background: #000; }
         #post-list.compact-view .carousel-slide { height: 100px !important; }
         #post-list.compact-view .carousel-slide img { width: 100px !important; height: 100px !important; object-fit: contain !important; border-radius: 12px !important; }
-        #post-list.compact-view .carousel-btn { display: none !important; }
-        #post-list.compact-view .carousel-dots { display: none !important; }
-
-        #post-list.compact-view .poster-info { display: flex; flex-direction: column; justify-content: center; overflow: hidden; width: 100%; }
-        #post-list.compact-view .poster h3 { font-size: 15px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        #post-list.compact-view .poster .sub-title { font-size: 12px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #888; }
-        #post-list.compact-view .poster-content-wrapper { display: none; }
-        #post-list.compact-view .actions { display: none; }
-        #post-list.compact-view .tags { margin-bottom: 0; }
-        #post-list.compact-view .tag { padding: 2px 8px; font-size: 10px; }
-
-        /* --- POPUP MODAL DETAIL POSTER --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-container { background: #181818; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 24px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; position: relative; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.1); border: none; color: #fff; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 10; transition: 0.2s; }
-        .modal-close:hover { background: #D4AF37; color: #000; }
+        #post-list.compact-view .carousel-btn { width: 22px !important; height: 22px !important; font-size: 10px !important; }
+        #post-list.compact-view .carousel-slide .slide-number { font-size: 8px !important; padding: 2px 4px !important; bottom: 3px !important; right: 3px !important; }
         
-        .modal-body h2 { color: #D4AF37; font-size: 22px; margin-bottom: 6px; line-height: 1.3; }
-        .modal-body .m-sub { color: #aaa; font-size: 14px; margin-bottom: 16px; }
-        .modal-body .carousel-container { aspect-ratio: 1 / 1; border-radius: 16px; margin-bottom: 20px; }
-        .modal-body .m-content { font-size: 14px; line-height: 1.7; color: #ddd; margin-bottom: 20px; word-break: break-word; }
-        .modal-body .m-content.preview-mode { max-height: 120px; overflow: hidden; position: relative; }
-        .modal-body .m-content.preview-mode::after { content:''; position:absolute; bottom:0; left:0; right:0; height:50px; background:linear-gradient(transparent, #181818); pointer-events:none; }
-        .m-read-more-btn { background: none; border: none; color: #D4AF37; font-size: 13px; font-weight: 600; cursor: pointer; padding: 5px 0 15px 0; display: block; }
-        .m-read-more-btn:hover { text-decoration: underline; }
-        .modal-body .m-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-        .modal-body .m-tag { background: rgba(212, 175, 55, 0.1); color: #D4AF37; border: 1px solid rgba(212, 175, 55, 0.2); padding: 4px 12px; border-radius: 14px; font-size: 12px; }
-        .modal-body .m-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .modal-body .m-actions button { background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 14px; cursor: pointer; font-size: 13px; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s; }
-        .modal-body .m-actions button:hover { background: rgba(212, 175, 55, 0.2); border-color: #D4AF37; color: #D4AF37; }
-        .modal-body .m-actions .btn-save { grid-column: span 2; background: rgba(212, 175, 55, 0.15); color: #D4AF37; border-color: #D4AF37; }
+        #post-list.compact-view .poster-header-info, 
+        #post-list.compact-view .read-more-btn, 
+        #post-list.compact-view .divider, 
+        #post-list.compact-view .tags-wrapper,
+        #post-list.compact-view .sosial-actions,
+        #post-list.compact-view .poster-content-wrapper { display: none !important; }
+        
+        #post-list.compact-view .compact-right-wrapper { display: flex; flex-direction: column; justify-content: center; gap: 6px; text-align: left; }
+        #post-list.compact-view .compact-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; color: #D4AF37; text-transform: uppercase; letter-spacing: 0.5px; }
+        #post-list.compact-view h3 { font-size: 15px; margin: 0; text-align: left; color: #fff; line-height: 1.3; font-weight: 700; }
+        #post-list.compact-view .sub-caption { font-size: 12px; margin: 0; text-align: left; color: #aaa; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        #post-list.compact-view .actions { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-start; flex-wrap: wrap; }
+        #post-list.compact-view .actions button { font-size: 11px; padding: 4px 10px; background: rgba(212, 175, 55, 0.1); color: #D4AF37; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; font-weight: 600; box-shadow: none; }
+        #post-list.compact-view .actions button:hover { background: #D4AF37; color: #111; }
 
-        .highlight { background-color: rgba(212, 175, 55, 0.3); color: #FFE259; font-weight: bold; border-radius: 2px; padding: 0 2px; }
+        /* --- MODAL DETAIL FULL VIEW --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 99999; padding: 15px; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: #151515; border: 1px solid #D4AF37; border-radius: 20px; max-width: 550px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
+        .modal-close-btn { position: absolute; top: 12px; right: 15px; background: rgba(255,255,255,0.1); border: 1px solid #D4AF37; color: #D4AF37; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 20; transition: 0.3s; }
+        .modal-close-btn:hover { background: #D4AF37; color: #111; }
 
-        /* --- FOLLOW-GATE MODAL (DESAIN BARU ELEGAN) --- */
-        .gate-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.88);
-            backdrop-filter: blur(12px);
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
-        }
+        .modal-card .m-carousel-container { position: relative; width: 100%; max-height: 520px; aspect-ratio: 9 / 16; overflow: hidden; border-radius: 16px; margin-bottom: 15px; background: #000; display: flex; align-items: center; justify-content: center; }
+        .modal-card .m-carousel-container > img { width: 100%; height: 100%; object-fit: contain; border-radius: 16px; display: block; }
+        .modal-card .m-carousel-track { display: flex; height: 100%; transition: transform 0.3s ease; width: 100%; }
+        .modal-card .m-carousel-slide { min-width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; background: #000; }
+        .modal-card .m-carousel-slide img { width: 100%; height: 100%; object-fit: contain; border-radius: 16px; display: block; }
+        .modal-card .m-carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #D4AF37; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .modal-card .m-carousel-btn.prev { left: 8px; }
+        .modal-card .m-carousel-btn.next { right: 8px; }
+        .modal-card .m-slide-number { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; padding: 3px 8px; border-radius: 10px; font-size: 11px; }
 
-        .gate-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .modal-card .m-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(212,175,55,0.15); color: #D4AF37; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 10px; border: 1px solid rgba(212,175,55,0.3); }
+        .modal-card h3 { color: #D4AF37; font-size: 20px; text-align: center; margin-bottom: 10px; }
+        .modal-card .sub-caption { color: #bbb; font-size: 14px; text-align: center; margin-bottom: 15px; font-style: italic; }
+        .modal-card .m-content { color: #ddd; font-size: 14px; line-height: 1.6; text-align: center; overflow: hidden; transition: max-height 0.4s ease; }
+        .modal-card .m-content.collapsed { max-height: 180px; }
+        .modal-card .m-content.expanded { max-height: 3000px; }
+        .modal-card .m-read-more-btn { display: block; margin: 10px auto; background: transparent; color: #D4AF37; border: none; font-weight: bold; cursor: pointer; font-size: 14px; text-decoration: underline; }
+        
+        .modal-card .m-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; }
+        .modal-card .m-actions button { background: rgba(212, 175, 55, 0.1); color: #D4AF37; border: 1px solid #D4AF37; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .modal-card .m-actions button:hover { background: #D4AF37; color: #111; }
+        .modal-card .m-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 15px; }
+        .modal-card .m-tag { background: transparent; color: #888; border: 1px solid #444; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
 
-        .gate-card {
-            background: #161616;
-            background: radial-gradient(circle at 50% 0%, #222 0%, #121212 100%);
+        /* --- STYLE POPUP MODAL FOLLOW GATE (ELEGAN & MEWAH) --- */
+        .follow-gate-card {
+            background: linear-gradient(145deg, #181818, #0e0e0e);
             border: 1px solid rgba(212, 175, 55, 0.4);
-            border-radius: 28px;
-            width: 100%;
+            border-radius: 24px;
             max-width: 440px;
-            padding: 30px 24px;
+            width: 100%;
+            padding: 28px 22px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 25px rgba(212, 175, 55, 0.15);
             position: relative;
-            transform: scale(0.9);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: gatePopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .gate-modal-overlay.active .gate-card {
-            transform: scale(1);
+        @keyframes gatePopIn {
+            0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        .gate-icon-wrapper {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 16px auto;
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(0, 0, 0, 0.4));
-            border: 1px solid #D4AF37;
+        .gate-icon-badge {
+            width: 60px;
+            height: 60px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid #D4AF37;
             border-radius: 50%;
             display: flex;
-            justify-content: center;
             align-items: center;
-            font-size: 32px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            justify-content: center;
+            font-size: 26px;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
         }
 
         .gate-title {
             color: #D4AF37;
             font-size: 20px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             letter-spacing: 0.5px;
         }
 
-        .gate-desc {
-            color: #bbb;
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 22px;
+        .gate-msg {
+            color: #d1d5db;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
         }
 
-        .gate-account-list {
+        .gate-buttons {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 24px;
+            margin-bottom: 18px;
         }
 
         .gate-btn-follow {
@@ -692,70 +684,64 @@
             align-items: center;
             justify-content: space-between;
             padding: 12px 18px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 18px;
-            color: #fff;
+            border-radius: 30px;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #D4AF37;
             text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .gate-btn-follow:hover {
-            background: rgba(212, 175, 55, 0.15);
+            background: rgba(212, 175, 55, 0.2);
             border-color: #D4AF37;
             transform: translateY(-2px);
         }
 
-        .gate-btn-follow.followed {
+        .gate-btn-follow.clicked {
+            background: rgba(76, 175, 80, 0.15);
             border-color: #4CAF50;
-            background: rgba(76, 175, 80, 0.1);
             color: #81C784;
         }
 
-        .gate-btn-follow .status-icon {
-            font-size: 16px;
-        }
+        .gate-btn-follow .status-icon { font-size: 16px; }
 
         .gate-quote {
             font-style: italic;
-            font-size: 12px;
-            color: #888;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding-top: 14px;
-            margin-bottom: 20px;
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 22px;
             line-height: 1.4;
         }
 
         .gate-btn-continue {
             width: 100%;
             padding: 14px;
-            background: #333;
-            color: #666;
+            border-radius: 30px;
             border: none;
-            border-radius: 20px;
+            background: #333;
+            color: #777;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: bold;
             cursor: not-allowed;
             transition: all 0.3s ease;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             gap: 8px;
         }
 
         .gate-btn-continue.active {
-            background: linear-gradient(135deg, #FFE259 0%, #D4AF37 100%);
+            background: linear-gradient(135deg, #D4AF37, #E6B800);
             color: #111;
             cursor: pointer;
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }
 
-        .gate-btn-continue.active:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
-        }
+        .gate-btn-continue.active:hover { transform: scale(1.02); }
     </style>
 </head>
 <body>
@@ -793,16 +779,16 @@
     <div class="sidebar-drawer" id="sidebarDrawer">
         <div class="sidebar-header">
             <button class="sidebar-close-btn" onclick="closeSidebar()" title="Tutup Menu">✕</button>
-            <div class="sidebar-hijri-card">
-                <div class="day-box">
-                    <span class="day-number" id="sidebarDayNum">24</span>
-                    <div class="day-details">
-                        <span class="month-title" id="sidebarMonthTitle">September</span>
-                        <span class="year-title" id="sidebarYearTitle">2026</span>
-                    </div>
+            
+            <!-- KARTU JAM REALTIME & TANGGAL HP (100% SINKRON PERANGKAT PENGGUNA) -->
+            <div class="sidebar-time-card">
+                <div class="time-box">
+                    <div class="live-clock" id="liveClockDisplay">00:00:00</div>
+                    <div class="live-date" id="liveDateDisplay">Memuat tanggal...</div>
                 </div>
-                <div class="cal-icon">🗓️</div>
+                <div class="cal-icon">⏳</div>
             </div>
+
             <div class="sidebar-brand-title">ARSIP DAKWAH MANHAJ SALAF</div>
         </div>
 
@@ -861,109 +847,115 @@
     <div class="follow-wrapper">
         <div class="follow-text">Mari follow akun dakwah kami untuk konten manhaj salaf bermanfaat lainnya</div>
         <div class="sosmed-container">
-            <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" class="btn-sosmed">
-                <span>📸</span> @tauhidsunnah_id
-            </a>
-            <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" class="btn-sosmed">
-                <span>✨</span> @an.nashiha_daily
-            </a>
+            <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" class="btn-sosmed anim-down">➡️ @tauhidsunnah_id</a>
+            <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" class="btn-sosmed anim-up">➡️ @an.nashiha_daily</a>
         </div>
     </div>
-
-    <div class="header-card">
-        <h1>Arsip Dakwah Manhaj Salaf</h1>
-        <div class="sub-header">Menebar Sunnah, Memurnikan Aqidah Sesuai Pemahaman Salafush Shalih</div>
+    <div class="brand-wrapper">
+        <span class="circuit-line left"></span>
+        <span class="developer-name">Muhram Nur Surisma</span>
+        <span class="circuit-line right"></span>
+        <div class="developer-title">Digital Dakwah Developer</div>
+        <div class="brand-divider"></div>
     </div>
-
-    <!-- PENGALIH MODE BERANDA: SEMUA / TERSIMPAN / BROSUR PDF -->
-    <div class="beranda-mode-container">
-        <button class="btn-mode-segmented active" id="btnModeSemua" onclick="switchBerandaMode('all')">Semua</button>
-        <button class="btn-mode-segmented" id="btnModeSimpan" onclick="switchBerandaMode('fav')">Tersimpan</button>
-        <button class="btn-mode-segmented" id="btnModePdf" onclick="switchBerandaMode('pdf')">Brosur PDF</button>
-    </div>
-
-    <!-- FITUR SEARCH PINTAR DROPDOWN -->
-    <div class="search-wrapper">
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search" class="search-box" placeholder="Ketik kata kunci (cth: syirik, tauhid, sholat)..." autocomplete="off">
-            <button class="clear-btn" id="clearBtn" onclick="clearSearch()">&times;</button>
-        </div>
-        <div id="search-result" class="search-dropdown"></div>
-    </div>
-
-    <!-- 1. KATEGORI GRID (TAMPIL DI MODE ORI) -->
-    <div id="category-filter-ori" class="kategori-grid-ori">
-        <!-- Akan digenerate dinamis melalui JavaScript -->
-    </div>
-
-    <!-- 2. KATEGORI HORIZONTAL SCROLL (TAMPIL DI MODE KOMPAK) -->
-    <div id="category-filter-compact" class="kategori-scroll-compact">
-        <div class="kategori-container" id="category-scroll-inner">
-            <!-- Akan digenerate dinamis melalui JavaScript -->
-        </div>
-    </div>
-
-    <!-- CONTAINER DAFTAR POSTER -->
-    <div id="post-list"></div>
-
-    <!-- TOMBOL MELAYANG AUDIO OMBAK -->
-    <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()" title="Nyalakan Suara Relaksasi">
-        🔇
-    </button>
     
-    <!-- TOMBOL MELAYANG PENGALIH TAMPILAN (KOMPAK / GRID) -->
-    <button class="btn-float-common view-float-btn" id="viewBtn" onclick="toggleView()" title="Ubah ke Tampilan Kompak">
-        🔠
-    </button>
-
-    <!-- POPUP MODAL DETAIL POSTER -->
-    <div class="modal-overlay" id="detailModal" onclick="checkCloseModal(event)">
-        <div class="modal-container">
-            <button class="modal-close" onclick="tutupModalDetail()">&times;</button>
-            <div class="modal-body" id="modalDetailBody"></div>
-        </div>
-    </div>
-
-    <!-- ELEMEN AUDIO OMBAK -->
-    <audio id="bgAudio" loop preload="none">
-        <source src="assets/audio/ombak.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- FOLLOW-GATE MODAL (MODAL WAJIB FOLLOW SEBELUM AKSES DOWNLOAD) -->
-    <div class="gate-modal-overlay" id="followGateModal">
-        <div class="gate-card">
-            <div class="gate-icon-wrapper">
-                <span>🎁</span>
-            </div>
-            <div class="gate-title">Dukung Dakwah Kami</div>
-            <div class="gate-desc">
-                File desain ini dibagikan <b>Gratis</b> untuk kaum muslimin. Mohon luangkan waktu 3 detik untuk mem-follow akun dakwah kami agar dakwah sunnah ini menjangkau lebih banyak orang.
-            </div>
-
-            <div class="gate-account-list">
-                <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" class="gate-btn-follow" id="gateBtn1" onclick="catatFollow('gateBtn1')">
-                    <span>📸 Follow @tauhidsunnah_id</span>
-                    <span class="status-icon" id="status-gateBtn1">👉</span>
-                </a>
-                <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" class="gate-btn-follow" id="gateBtn2" onclick="catatFollow('gateBtn2')">
-                    <span>✨ Follow @an.nashiha_daily</span>
-                    <span class="status-icon" id="status-gateBtn2">👉</span>
-                </a>
-            </div>
-
-            <div class="gate-quote">
-                "Barangsiapa yang menunjuki kepada kebaikan maka dia akan mendapatkan pahala seperti pahala orang yang mengerjakannya." (HR. Muslim)
-            </div>
-
-            <button class="gate-btn-continue" id="gateBtnLanjut" onclick="prosesLanjutAksi()">
-                Lanjutkan Download 🚀
+    <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
+    <div class="mode-switcher-container">
+        <div class="mode-switcher-card">
+            <button class="btn-mode-segmented" id="btnModeFav" onclick="switchBerandaMode('fav')">
+                🔖 Disimpan
+            </button>
+            <button class="btn-mode-segmented" id="btnModePdf" onclick="switchBerandaMode('pdf')">
+                📄 PDF Mode
+            </button>
+            <button class="btn-mode-segmented active" id="btnModeAll" onclick="switchBerandaMode('all')">
+                🪧 Semua
             </button>
         </div>
     </div>
 
+    <div class="header-container">
+        <h1>Arsip Dakwah</h1>
+        <div class="sub-title">✨ Manhaj Salaf ✨</div>
+    </div>
+    <div class="search-wrapper">
+        <input type="text" id="search" placeholder="Cari judul, kategori, tag, caption...">
+        <div id="search-result"></div>
+    </div>
+    
+    <!-- Tab Kategori Versi ORI (Grid Utama) -->
+    <div id="kategori-wrap-ori" class="kategori-grid-ori"></div>
+
+    <!-- Tab Kategori Versi Ringkas (Horizontal Scroll) -->
+    <div class="kategori-scroll-compact">
+        <div id="kategori-wrap-compact" class="kategori-container"></div>
+    </div>
+
+    <div id="post-list" class="loading">Memuat arsip...</div>
+
+    <!-- Modal Full View untuk Mode Padat -->
+    <div class="modal-overlay" id="detailModal" onclick="checkCloseModal(event)">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="tutupModalDetail()">✕</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- POPUP MODAL FOLLOW GATE (ELEGAN & MEWAH) -->
+    <div class="modal-overlay" id="followGateModal">
+        <div class="follow-gate-card">
+            <div class="gate-icon-badge">✨</div>
+            <div class="gate-title">Dukungan Dakwah</div>
+            <p class="gate-msg">Untuk meneruskan, silahkan follow dulu 2 akun dakwah kami berikut:</p>
+            
+            <div class="gate-buttons">
+                <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" id="gateBtn1" class="gate-btn-follow" onclick="trackGateFollow(1)">
+                    <span>➡️ @tauhidsunnah_id</span>
+                    <span class="status-icon" id="gateCheck1">🔗</span>
+                </a>
+                <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" id="gateBtn2" class="gate-btn-follow" onclick="trackGateFollow(2)">
+                    <span>➡️ @an.nashiha_daily</span>
+                    <span class="status-icon" id="gateCheck2">🔗</span>
+                </a>
+            </div>
+
+            <p class="gate-quote">"Semoga semua kontennya bermanfaat buat ummat..."</p>
+
+            <button id="gateContinueBtn" class="gate-btn-continue" disabled onclick="executePendingGateAction()">
+                🔒 Klik Kedua Akun Di Atas Untuk Lanjut
+            </button>
+        </div>
+    </div>
+
+    <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()">🔠</button>
+    <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()">🔇</button>
+    <audio id="bgAudio" loop><source src="suara-ombak.mp3" type="audio/mpeg"></audio>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
+        /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
+        function startLiveClock() {
+            function updateClock() {
+                const now = new Date();
+                
+                // Jam, Menit, Detik HP
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                const clockEl = document.getElementById('liveClockDisplay');
+                if (clockEl) clockEl.innerText = `${h}:${m}:${s}`;
+
+                // Hari & Tanggal HP (Bahasa Indonesia)
+                const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                const dateString = now.toLocaleDateString('id-ID', options);
+                const dateEl = document.getElementById('liveDateDisplay');
+                if (dateEl) dateEl.innerText = dateString;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+        startLiveClock();
+
         /* --- FUNGSI NAVIGASI TOP BUTTONS & SIDEBAR --- */
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -972,7 +964,6 @@
         function openSidebar() {
             document.getElementById('sidebarOverlay').classList.add('active');
             document.getElementById('sidebarDrawer').classList.add('active');
-            updateSidebarDate();
         }
 
         function closeSidebar() {
@@ -980,26 +971,12 @@
             document.getElementById('sidebarDrawer').classList.remove('active');
         }
 
-        function updateSidebarDate() {
-            try {
-                const now = new Date();
-                const dayEl = document.getElementById('sidebarDayNum');
-                const monthEl = document.getElementById('sidebarMonthTitle');
-                const yearEl = document.getElementById('sidebarYearTitle');
-                if (dayEl) dayEl.innerText = now.getDate();
-                if (monthEl) monthEl.innerText = now.toLocaleDateString('id-ID', { month: 'long' });
-                if (yearEl) yearEl.innerText = now.getFullYear();
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
         function pilihMenuSidebar(menu) {
             closeSidebar();
             if (menu === 'arsip') {
                 scrollToTop();
             } else if (menu === 'maker') {
-                // Berpindah langsung ke maker.html
+                // Menghubungkan langsung ke file maker.html
                 window.location.href = 'maker.html';
             }
         }
@@ -1020,16 +997,15 @@
             }
         }
 
-        // Loop animasi requestAnimationFrame yang berjalan terus menerus secara halus
         function animateLoaderLoop() {
             if (currentProgress < targetProgress) {
-                // Bergerak mendekati target secara halus (lerp)
                 const diff = targetProgress - currentProgress;
                 const step = Math.max(0.4, diff * 0.12);
                 currentProgress = Math.min(targetProgress, currentProgress + step);
                 renderProgressUI(currentProgress);
             }
-            if (!isLoaderFinished) {
+
+            if (!isLoaderFinished || currentProgress < 100) {
                 requestAnimationFrame(animateLoaderLoop);
             }
         }
@@ -1039,289 +1015,530 @@
             targetProgress = Math.min(100, Math.max(targetProgress, val));
         }
 
-        // FUNGSI UNTUK MENUTUP SCREEN LOADING 3D SETELAH DATA SELESAI SIAP
         function hideAppLoader() {
             setTargetProgress(100);
-            
-            // Cek berkala sampai animasi angka menyentuh 100% secara visual
             const checkDone = setInterval(() => {
                 if (currentProgress >= 99.5) {
                     clearInterval(checkDone);
                     renderProgressUI(100);
                     isLoaderFinished = true;
                     
-                    const loader = document.getElementById('app-loader');
-                    if (loader) {
-                        loader.style.opacity = '0';
-                        setTimeout(() => {
+                    setTimeout(() => {
+                        const loader = document.getElementById('app-loader');
+                        if (loader) {
+                            loader.style.opacity = '0';
                             loader.style.visibility = 'hidden';
-                        }, 600);
-                    }
+                            setTimeout(() => { loader.remove(); }, 600);
+                        }
+                    }, 250);
                 }
-            }, 50);
+            }, 30);
         }
 
-        // Jalankan progress awal
-        setTargetProgress(15);
-
-        /* --- GLOBAL DATABASE & INSTAGRAM GATE --- */
+        let kategoriData = {};
+        let kategoriAktif = null;
+        let berandaModeAktif = 'all'; // 'all', 'pdf', 'fav'
         let semuaPosterCache = [];
-        let rawItemsGlobal = [];
-        let isSelecting = false;
         let isCompactView = false;
-        let activeBerandaMode = 'all'; // 'all', 'fav', 'pdf'
-        let followActionPending = null;
+        let isSelecting = false;
+        let emojiMapGlobal = {};
+        let rawManifestPosters = [];
 
-        const RAW_BASE = "https://raw.githubusercontent.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/main";
+        /* --- SISTEM FOLLOW GATE (PEMBATAS AKSES) --- */
+        let gateFollowed1 = false;
+        let gateFollowed2 = false;
+        let pendingGateAction = null;
 
-        // Normalisasi teks untuk pencarian Do'a vs Doa, Bid'ah vs Bidah
-        function normalisasiTeks(str) {
-            if (!str) return '';
-            return str
-                .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/['`’‘]/g, '')
+        function requireFollowGate(actionCallback) {
+            const hasUnlocked = localStorage.getItem('has_followed_dakwah_accounts');
+            if (hasUnlocked === 'true') {
+                actionCallback();
+            } else {
+                pendingGateAction = actionCallback;
+                document.getElementById('followGateModal').classList.add('active');
+            }
+        }
+
+        function trackGateFollow(accountNum) {
+            if (accountNum === 1) {
+                const check1 = document.getElementById('gateCheck1');
+                const btn1 = document.getElementById('gateBtn1');
+                
+                check1.innerText = "⏳ Memeriksa...";
+                
+                setTimeout(() => {
+                    gateFollowed1 = true;
+                    btn1.classList.add('clicked');
+                    check1.innerText = "✓";
+                    checkGateUnlockState();
+                }, 10000);
+            } else if (accountNum === 2) {
+                const check2 = document.getElementById('gateCheck2');
+                const btn2 = document.getElementById('gateBtn2');
+                
+                check2.innerText = "⏳ Memeriksa...";
+                
+                setTimeout(() => {
+                    gateFollowed2 = true;
+                    btn2.classList.add('clicked');
+                    check2.innerText = "✓";
+                    checkGateUnlockState();
+                }, 10000);
+            }
+        }
+
+        function checkGateUnlockState() {
+            if (gateFollowed1 && gateFollowed2) {
+                const continueBtn = document.getElementById('gateContinueBtn');
+                continueBtn.disabled = false;
+                continueBtn.classList.add('active');
+                continueBtn.innerHTML = "🔓 Lanjutkan Ambil Konten";
+            }
+        }
+
+        function executePendingGateAction() {
+            localStorage.setItem('has_followed_dakwah_accounts', 'true');
+            document.getElementById('followGateModal').classList.remove('active');
+            
+            if (pendingGateAction) {
+                pendingGateAction();
+                pendingGateAction = null;
+            }
+        }
+
+        function getFavorit() {
+            const data = localStorage.getItem('dakwahFavorit');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function toggleFavorit(id, btn) {
+            let fav = getFavorit();
+            if(fav.includes(id)) {
+                fav = fav.filter(f => f !== id);
+                if(btn) { btn.classList.remove('saved'); btn.innerHTML = '👆🏻 Belum Disimpan'; }
+            } else {
+                fav.push(id);
+                if(btn) { btn.classList.add('saved'); btn.innerHTML = '🔖 Sudah Disimpan'; }
+            }
+            localStorage.setItem('dakwahFavorit', JSON.stringify(fav));
+            
+            const allBtns = document.querySelectorAll(`.btn-save-id-${id}`);
+            allBtns.forEach(b => {
+                if(fav.includes(id)) {
+                    b.classList.add('saved');
+                    b.innerHTML = '🔖 Sudah Disimpan';
+                } else {
+                    b.classList.remove('saved');
+                    b.innerHTML = '👆🏻 Belum Disimpan';
+                }
+            });
+
+            if (berandaModeAktif === 'fav') filterDisplayPosters();
+        }
+
+        /* FUNGSI UTAMA SWITCH MODE BERANDA */
+        function switchBerandaMode(mode) {
+            berandaModeAktif = mode;
+
+            document.getElementById('btnModeFav').classList.toggle('active', mode === 'fav');
+            document.getElementById('btnModePdf').classList.toggle('active', mode === 'pdf');
+            document.getElementById('btnModeAll').classList.toggle('active', mode === 'all');
+
+            document.getElementById('search').value = '';
+            document.getElementById('search-result').style.display = 'none';
+
+            filterDisplayPosters();
+            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+        }
+
+        function tampilkanFavorit() { switchBerandaMode('fav'); }
+        function resetSemua() { 
+            kategoriAktif = null;
+            document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.card-kategori-all').forEach(el => el.classList.add('active'));
+            switchBerandaMode('all'); 
+        }
+
+        /* FUNGSI SINKRONISASI FILTER */
+        function filterDisplayPosters() {
+            const fav = getFavorit();
+            const posters = document.querySelectorAll('.poster');
+
+            posters.forEach(p => {
+                const id = p.getAttribute('data-id');
+                const kat = p.getAttribute('data-kategori');
+                const hasPdf = p.getAttribute('data-has-pdf') === 'true';
+
+                let passMode = true;
+                if (berandaModeAktif === 'fav') passMode = fav.includes(id);
+                else if (berandaModeAktif === 'pdf') passMode = hasPdf;
+
+                let passKategori = true;
+                if (kategoriAktif !== null) passKategori = (kat === kategoriAktif);
+
+                if (passMode && passKategori) {
+                    p.style.display = isCompactView ? 'grid' : 'block';
+                } else {
+                    p.style.display = 'none';
+                }
+            });
+        }
+
+        function downloadFile(url, nama) {
+            requireFollowGate(function() {
+                const a = document.createElement('a'); a.href = url; a.download = nama || 'file';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            });
+        }
+
+        function cleanCopyText(text) {
+            if (!text) return '';
+            return text
+                .replace(/\r\n/g, '\n')
+                .replace(/\n{2,}/g, '\n')
+                .replace(/[ \t]+$/gm, '')
                 .trim();
         }
 
-        /* --- LOGIKA FOLLOW GATE --- */
-        function isUserFollowed() {
-            return localStorage.getItem('user_has_followed_ig') === 'true';
-        }
-
-        function jalankanAksiTerproteksi(callback) {
-            if (isUserFollowed()) {
-                callback();
-            } else {
-                followActionPending = callback;
-                bukaFollowGate();
-            }
-        }
-
-        function bukaFollowGate() {
-            const modal = document.getElementById('followGateModal');
-            modal.classList.add('active');
-        }
-
-        function tutupFollowGate() {
-            const modal = document.getElementById('followGateModal');
-            modal.classList.remove('active');
-            followActionPending = null;
-        }
-
-        function catatFollow(btnId) {
-            const btn = document.getElementById(btnId);
-            btn.classList.add('followed');
-            document.getElementById(`status-${btnId}`).innerText = '✅';
-            
-            // Aktifkan tombol Lanjutkan Download
-            const btnLanjut = document.getElementById('gateBtnLanjut');
-            btnLanjut.classList.add('active');
-            btnLanjut.removeAttribute('disabled');
-        }
-
-        function prosesLanjutAksi() {
-            const btnLanjut = document.getElementById('gateBtnLanjut');
-            if (!btnLanjut.classList.contains('active')) return;
-
-            localStorage.setItem('user_has_followed_ig', 'true');
-            const modal = document.getElementById('followGateModal');
-            modal.classList.remove('active');
-
-            if (followActionPending && typeof followActionPending === 'function') {
-                followActionPending();
-                followActionPending = null;
-            }
-        }
-
-        /* --- SISTEM FAVORIT (BOOKMARK) DENGAN LOCALSTORAGE --- */
-        function getFavorit() {
-            try {
-                return JSON.parse(localStorage.getItem('favorit_posters')) || [];
-            } catch(e) {
-                return [];
-            }
-        }
-
-        function simpanFavorit(arr) {
-            localStorage.setItem('favorit_posters', JSON.stringify(arr));
-        }
-
-        function toggleFavorit(id, btnElement) {
-            let favs = getFavorit();
-            const index = favs.indexOf(id);
-            let isSaved = false;
-
-            if (index > -1) {
-                favs.splice(index, 1);
-                isSaved = false;
-            } else {
-                favs.push(id);
-                isSaved = true;
-            }
-
-            simpanFavorit(favs);
-
-            const allRelatedBtns = document.querySelectorAll(`.btn-save-id-${id}`);
-            allRelatedBtns.forEach(btn => {
-                if (isSaved) {
-                    btn.classList.add('saved');
-                    btn.innerText = '🔖 Sudah Disimpan';
-                } else {
-                    btn.classList.remove('saved');
-                    btn.innerText = '👆 Belum Disimpan';
-                }
+        function copyCaptionDariElemen(btn) {
+            requireFollowGate(function() {
+                const poster = btn.closest('.poster') || btn.closest('.modal-card');
+                const judul = poster.querySelector('h3')?.innerText || '';
+                const subElement = poster.querySelector('.sub-caption');
+                let sub = subElement ? (subElement.dataset.raw || subElement.innerText) : '';
+                
+                const contentWrapper = poster.querySelector('.poster-content-wrapper') || poster.querySelector('.m-content');
+                const isi = contentWrapper ? contentWrapper.innerText : '';
+                
+                const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
+                const konten = parts.join('\n\n');
+                
+                navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
             });
-
-            if (activeBerandaMode === 'fav') {
-                filterDisplayPosters();
-            }
         }
 
-        /* --- SWITCH MODE BERANDA (SEMUA / TERSIMPAN / BROSUR PDF) --- */
-        function switchBerandaMode(mode) {
-            activeBerandaMode = mode;
+        async function loadPosters() {
+            setTargetProgress(15);
+            const container = document.getElementById('post-list');
+            const kategoriOri = document.getElementById('kategori-wrap-ori');
+            const kategoriCompact = document.getElementById('kategori-wrap-compact');
+            container.innerHTML = '<div class="loading">📂 Memuat arsip...</div>';
             
-            document.getElementById('btnModeSemua').classList.toggle('active', mode === 'all');
-            document.getElementById('btnModeSimpan').classList.toggle('active', mode === 'fav');
-            document.getElementById('btnModePdf').classList.toggle('active', mode === 'pdf');
-
-            filterDisplayPosters();
-        }
-
-        /* --- FILTER TAMPILAN POSTER BERDASARKAN MODE DAN KATEGORI --- */
-        function filterDisplayPosters() {
-            const posters = document.querySelectorAll('.poster');
-            const activeCategoryEl = document.querySelector('.card-kategori.active');
-            const activeCategory = activeCategoryEl ? activeCategoryEl.getAttribute('data-kategori') : 'semua';
+            let htmlPoster = '';
             const favList = getFavorit();
+            let manifestData = { posters: [] };
 
-            posters.forEach(poster => {
-                const id = poster.getAttribute('data-id');
-                const kategori = poster.getAttribute('data-kategori');
-                const hasPdf = poster.getAttribute('data-has-pdf') === 'true';
+            try {
+                let res = await fetch('manifest.json');
+                if(!res.ok) res = await fetch('/manifest.json');
+                if(res.ok) manifestData = await res.json();
+            } catch(e) { console.warn("Gagal mengambil manifest", e); }
 
-                let cocokMode = true;
-                if (activeBerandaMode === 'fav') {
-                    cocokMode = favList.includes(id);
-                } else if (activeBerandaMode === 'pdf') {
-                    cocokMode = hasPdf;
+            setTargetProgress(35);
+
+            emojiMapGlobal = manifestData.kategori_emoji || {};
+            rawManifestPosters = manifestData.posters || [];
+
+            if(rawManifestPosters.length > 0) {
+                const totalItems = rawManifestPosters.length;
+
+                rawManifestPosters.forEach(p => {
+                    const k = p.kategori || "Umum";
+                    if(!kategoriData[k]) kategoriData[k] = 0;
+                    kategoriData[k]++;
+                    semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: k, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content : '') });
+                });
+
+                setTargetProgress(45);
+
+                const chunkSize = Math.max(15, Math.floor(totalItems / 10));
+
+                for (let i = 0; i < totalItems; i++) {
+                    const p = rawManifestPosters[i];
+                    const folder = `posters/${p.path}`;
+                    const judul = p.judul || "Tanpa Judul";
+                    const subJudul = p.sub_judul || "";
+                    const kategori = p.kategori || "Umum";
+                    
+                    const katEmoji = p.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori] || '📂';
+                    const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
+                    let pdfSrc = p.pdf ? `${folder}/brosur.pdf` : null;
+                    const hasPdf = !!p.pdf;
+
+                    let contentBody = p.content || p.isi_caption || "";
+                    p.compiledContent = contentBody;
+
+                    const posterId = p.path.replace(/\//g, '-');
+                    const isSaved = favList.includes(posterId);
+                    const parsedContent = marked.parse(contentBody || "Konten belum tersedia.");
+                    const imageList = (p.images || "1.jpg").split(',').map(s => s.trim());
+
+                    let carouselHTML = '';
+                    if (imageList.length === 1) {
+                        carouselHTML = `<img src="${folder}/${imageList[0]}" alt="${judul}" onerror="this.style.display='none'">`;
+                    } else {
+                        carouselHTML = `
+                        <div class="carousel-container" id="carousel-${posterId}">
+                            <div class="carousel-track" id="track-${posterId}">
+                                ${imageList.map((img, idx) => `
+                                    <div class="carousel-slide" onclick="event.stopPropagation()">
+                                        <img src="${folder}/${img}" alt="${judul} - Slide${idx+1}" onerror="this.style.display='none'">
+                                        <div class="slide-number">${idx+1} /${imageList.length}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="carousel-btn prev" onclick="event.stopPropagation(); slideCarousel('${posterId}', -1)">❮</button>
+                            <button class="carousel-btn next" onclick="event.stopPropagation(); slideCarousel('${posterId}', 1)">❯</button>
+                        </div>
+                        `;
+                    }
+
+                    const plainSubJudul = subJudul ? subJudul.replace(/\*/g, '').trim() : '';
+                    const parsedSubJudul = subJudul ? marked.parse(subJudul) : '';
+
+                    htmlPoster += `
+                        <div class="poster" data-id="${posterId}" data-kategori="${kategori}" data-has-pdf="${hasPdf}" onclick="handleCardClick(event, '${posterId}')">
+                            ${carouselHTML}
+                            
+                            <div class="poster-header-info">
+                                <div class="poster-badge-kat">${katEmoji} ${kategori}</div>
+                                <div class="poster-id-wrapper">
+                                    <span class="poster-id">${posterId}</span>
+                                </div>
+                            </div>
+
+                            <div class="compact-right-wrapper">
+                                <h3>${judul}</h3>
+                                ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
+                                <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
+                                <button class="read-more-btn" id="btn-${posterId}" onclick="event.stopPropagation(); toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
+                                
+                                <div class="actions">
+                                    <button class="btn-save btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '👆🏻 Belum Disimpan'}</button>
+                                    ${pdfSrc ? `<button onclick="event.stopPropagation(); downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
+                                    <button onclick="event.stopPropagation(); downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">🖼️ Gambar</button>
+                                    <button onclick="event.stopPropagation(); copyCaptionDariElemen(this)">📋 Caption</button>
+                                </div>
+                            </div>
+                            
+                            <hr class="divider">
+                            
+                            <div class="sosial-actions">
+                                <button onclick="event.stopPropagation(); sharePoster('${judul}', '${window.location.href}')"><span class="icon">✈️</span> Kirim ke Teman</button>
+                                <button onclick="event.stopPropagation(); dmInstagram()"><span class="icon">💬</span> DM</button>
+                            </div>
+                            <hr class="divider">
+                            ${tagArray.length > 0 ? `<div class="tags-wrapper"><span class="tags-label">Tagar :</span><div class="tag-container">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div></div>` : ''}
+                        </div>
+                    `;
+
+                    if (i % chunkSize === 0 || i === totalItems - 1) {
+                        const progress = 45 + Math.round(((i + 1) / totalItems) * 47);
+                        setTargetProgress(progress);
+                        await new Promise(r => setTimeout(r, 15));
+                    }
                 }
-
-                let cocokKategori = true;
-                if (activeCategory !== 'semua') {
-                    cocokKategori = (kategori === activeCategory);
-                }
-
-                if (cocokMode && cocokKategori) {
-                    poster.style.display = isCompactView ? 'grid' : 'block';
-                } else {
-                    poster.style.display = 'none';
-                }
-            });
-        }
-
-        /* --- POPUP DETAIL POSTER MODAL --- */
-        function bukaModalDetail(id) {
-            const rawItem = rawItemsGlobal.find(i => (i.id === id || i.folder === id));
-            if (!rawItem) return;
-
-            const judul = rawItem.judul || rawItem.title || rawItem.folder;
-            const sub = rawItem.subJudul || rawItem.subTitle || "";
-            const folder = rawItem.folder;
-            const content = rawItem.content || rawItem.body || "";
-            const pdfSrc = rawItem.pdf ? `${RAW_BASE}/posters/${folder}/${rawItem.pdf}` : null;
-            const tagArray = rawItem.tags ? rawItem.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-            const posterId = rawItem.id || folder;
-            const isSaved = getFavorit().includes(posterId);
-
-            let carouselHTML = '';
-            let imageList = [];
-            if (rawItem.images && Array.isArray(rawItem.images)) {
-                imageList = rawItem.images;
-            } else if (rawItem.images && typeof rawItem.images === 'string') {
-                imageList = rawItem.images.split(',').map(s => s.trim()).filter(Boolean);
             } else {
-                imageList = ["1.jpg"];
+                setTargetProgress(90);
             }
 
-            if (imageList.length > 1) {
-                const slidesHTML = imageList.map(img => `
-                    <img src="${RAW_BASE}/posters/${folder}/${img}" alt="${judul}" loading="lazy">
-                `).join('');
+            container.innerHTML = htmlPoster || '<div class="loading">Belum ada poster.</div>';
 
-                const dotsHTML = imageList.map((_, i) => `
-                    <div class="carousel-dot ${i === 0 ? 'active' : ''}"></div>
-                `).join('');
+            const totalPoster = semuaPosterCache.length;
 
-                carouselHTML = `
-                    <div class="carousel-container" id="modalCarousel">
-                        <div class="carousel-slide" id="modalSlide">
-                            ${slidesHTML}
-                        </div>
-                        <button class="carousel-btn prev" onclick="geserCarouselModal(-1)">&lang;</button>
-                        <button class="carousel-btn next" onclick="geserCarouselModal(1)">&rang;</button>
-                        <div class="carousel-dots" id="modalDots">${dotsHTML}</div>
+            let htmlKategoriOri = `
+                <div class="card-kategori card-kategori-all active" onclick="resetSemua()">
+                    <span class="icon">🪧</span>
+                    <span class="nama">Semua</span>
+                    <span class="jumlah">${totalPoster} Poster</span>
+                </div>`;
+
+            let htmlKategoriCompact = `
+                <div class="card-kategori card-kategori-all active" onclick="resetSemua()">
+                    <span class="icon">🪧</span>
+                    <span class="nama">Semua</span>
+                    <span class="jumlah">${totalPoster}</span>
+                </div>`;
+
+            for(let [nama, jumlah] of Object.entries(kategoriData)) {
+                let icon = emojiMapGlobal[nama.toLowerCase()] || emojiMapGlobal[nama] || '📂';
+                htmlKategoriOri += `
+                    <div class="card-kategori" onclick="filterKategori('${nama}', this)">
+                        <span class="icon">${icon}</span>
+                        <span class="nama">${nama}</span>
+                        <span class="jumlah">${jumlah} Poster</span>
                     </div>
                 `;
-            } else {
-                carouselHTML = `
-                    <img src="${RAW_BASE}/posters/${folder}/${imageList[0]}" alt="${judul}" style="width:100%; border-radius:16px; margin-bottom:15px; aspect-ratio:1/1; object-fit:contain; background:#000;">
+                htmlKategoriCompact += `
+                    <div class="card-kategori" onclick="filterKategori('${nama}', this)">
+                        <span class="icon">${icon}</span>
+                        <span class="nama">${nama}</span>
+                        <span class="jumlah">${jumlah}</span>
+                    </div>
                 `;
             }
+            kategoriOri.innerHTML = htmlKategoriOri;
+            kategoriCompact.innerHTML = htmlKategoriCompact;
+            
+            filterDisplayPosters();
 
-            const parsedContent = marked.parse(content);
+            setTargetProgress(96);
+            hideAppLoader();
+        }
 
-            const modalBody = document.getElementById('modalDetailBody');
-            modalBody.innerHTML = `
-                <h2>${judul}</h2>
-                <div class="m-sub">${sub}</div>
-                ${carouselHTML}
-                <div class="m-content preview-mode" id="modalContentBody">${parsedContent}</div>
-                <button class="m-read-more-btn" id="modalReadMoreBtn" onclick="toggleModalReadMore()">📖 Baca Selengkapnya</button>
-                
-                <div class="m-actions">
-                    <button class="btn-save btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '👆 Belum Disimpan'}</button>
-                    ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
-                    <button onclick="downloadMultiImage('${posterId}', '${folder}', '${rawItem.images || "1.jpg"}')">🖼️ Gambar</button>
-                    <button onclick="copyCaptionDariElemen(this)">📋 Caption</button>
-                </div>
-
-                ${tagArray.length > 0 ? `<div class="m-tags" style="margin-top:20px;">${tagArray.map(t => `<span class="m-tag">#${t}</span>`).join('')}</div>` : ''}
-            `;
-
-            document.getElementById('detailModal').classList.add('active');
-            initModalCarouselData(imageList.length);
+        /* --- CAROUSEL LOGIC --- */
+        let carouselIndex = {};
+        function slideCarousel(id, dir) {
+            if (!carouselIndex[id]) carouselIndex[id] = 0;
+            const track = document.getElementById(`track-${id}`);
+            if (!track) return;
+            const slides = track.querySelectorAll('.carousel-slide');
+            const max = slides.length;
+            carouselIndex[id] = (carouselIndex[id] + dir + max) % max;
+            track.style.transform = `translateX(-${carouselIndex[id] * 100}%)`;
         }
 
         let modalCarouselIndex = 0;
-        let modalCarouselTotal = 0;
-
-        function initModalCarouselData(total) {
-            modalCarouselIndex = 0;
-            modalCarouselTotal = total;
+        function slideModalCarousel(dir, max) {
+            const track = document.getElementById('modalCarouselTrack');
+            const numLabel = document.getElementById('modalSlideNum');
+            if (!track) return;
+            modalCarouselIndex = (modalCarouselIndex + dir + max) % max;
+            track.style.transform = `translateX(-${modalCarouselIndex * 100}%)`;
+            if (numLabel) numLabel.innerText = `${modalCarouselIndex + 1} / ${max}`;
         }
 
-        function geserCarouselModal(dir) {
-            if (modalCarouselTotal <= 1) return;
-            modalCarouselIndex = (modalCarouselIndex + dir + modalCarouselTotal) % modalCarouselTotal;
-            const slide = document.getElementById('modalSlide');
-            const dots = document.querySelectorAll('#modalDots .carousel-dot');
-            if (slide) slide.style.transform = `translateX(-${modalCarouselIndex * 100}%)`;
-            dots.forEach((d, i) => d.classList.toggle('active', i === modalCarouselIndex));
+        async function downloadMultiImage(id, folder, imagesStr) {
+            requireFollowGate(function() {
+                const imageList = imagesStr.split(',').map(s => s.trim());
+                if (imageList.length === 0) return;
+                const choice = prompt(`Pilih slide yang ingin didownload (pisahkan dengan koma), atau ketik "all" untuk semua.\nTersedia: 1 - ${imageList.length}`);
+                if (!choice) return;
+                if (choice.toLowerCase() === 'all') {
+                    for (let i = 0; i < imageList.length; i++) {
+                        const a = document.createElement('a'); a.href = `${folder}/${imageList[i]}`; a.download = `${id}-${i+1}.jpg`;
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    }
+                    alert(`✅ Semua ${imageList.length} gambar sedang didownload.`);
+                } else {
+                    const selected = choice.split(',').map(n => parseInt(n.trim()) - 1).filter(n => n >= 0 && n < imageList.length);
+                    if (selected.length === 0) return alert("Tidak ada slide yang valid.");
+                    for (let i of selected) {
+                        const a = document.createElement('a'); a.href = `${folder}/${imageList[i]}`; a.download = `${id}-${i+1}.jpg`;
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    }
+                    alert(`✅ ${selected.length} gambar sedang didownload.`);
+                }
+            });
+        }
+
+        function toggleReadMore(id) {
+            const content = document.getElementById(`content-${id}`);
+            const btn = document.getElementById(`btn-${id}`);
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed'); content.classList.add('expanded');
+                btn.innerText = '📕 Tutup';
+            } else {
+                content.classList.remove('expanded'); content.classList.add('collapsed');
+                btn.innerText = '📖 Baca Selengkapnya';
+            }
         }
 
         function toggleModalReadMore() {
-            const body = document.getElementById('modalContentBody');
+            const content = document.getElementById('modalContentBody');
             const btn = document.getElementById('modalReadMoreBtn');
-            if (!body || !btn) return;
-            if (body.classList.contains('preview-mode')) {
-                body.classList.remove('preview-mode');
-                btn.innerText = "Tutup Sebagian";
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed'); content.classList.add('expanded');
+                btn.innerText = '📕 Tutup';
             } else {
-                body.classList.add('preview-mode');
-                btn.innerText = "📖 Baca Selengkapnya";
+                content.classList.remove('expanded'); content.classList.add('collapsed');
+                btn.innerText = '📖 Baca Selengkapnya';
             }
+        }
+
+        function filterKategori(nama, element) {
+            kategoriAktif = nama;
+            document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+
+            filterDisplayPosters();
+            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
+            document.getElementById('search-result').style.display = 'none';
+        }
+
+        function sharePoster(judul, url) {
+            const textToCopy = `Cari "${judul}" di situs ini: ${url}`;
+            if (navigator.share) { navigator.share({ title: judul, url: url }); } 
+            else { navigator.clipboard.writeText(textToCopy); alert("✅ Link poster berhasil disalin!"); }
+        }
+
+        function dmInstagram() { window.open('https://www.instagram.com/tauhidsunnah_id', '_blank'); }
+
+        function handleCardClick(event, posterId) {
+            if (!isCompactView) return;
+            if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
+            
+            const rawItem = rawManifestPosters.find(p => p.path.replace(/\//g, '-') === posterId);
+            if (!rawItem) return;
+
+            const folder = `posters/${rawItem.path}`;
+            const judul = rawItem.judul || "Tanpa Judul";
+            const subJudul = rawItem.sub_judul || "";
+            const kategori = rawItem.kategori || "Umum";
+            const katEmoji = rawItem.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori] || '📂';
+            const tagArray = rawItem.tags ? rawItem.tags.split(',').map(t => t.trim()) : [];
+            const pdfSrc = rawItem.pdf ? `${folder}/brosur.pdf` : null;
+            const favList = getFavorit();
+            const isSaved = favList.includes(posterId);
+            const parsedContent = marked.parse(rawItem.compiledContent || "Konten belum tersedia.");
+            const imageList = (rawItem.images || "1.jpg").split(',').map(s => s.trim());
+
+            modalCarouselIndex = 0;
+            let carouselHTML = '';
+            if (imageList.length === 1) {
+                carouselHTML = `<div class="m-carousel-container"><img src="${folder}/${imageList[0]}" alt="${judul}"></div>`;
+            } else {
+                carouselHTML = `
+                <div class="m-carousel-container">
+                    <div class="m-carousel-track" id="modalCarouselTrack">
+                        ${imageList.map((img, idx) => `
+                            <div class="m-carousel-slide">
+                                <img src="${folder}/${img}" alt="${judul}">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="m-carousel-btn prev" onclick="slideModalCarousel(-1, ${imageList.length})">❮</button>
+                    <button class="m-carousel-btn next" onclick="slideModalCarousel(1, ${imageList.length})">❯</button>
+                    <div class="m-slide-number" id="modalSlideNum">1 / ${imageList.length}</div>
+                </div>
+                `;
+            }
+
+            const plainSubJudul = subJudul ? subJudul.replace(/\*/g, '').trim() : '';
+            const parsedSubJudul = subJudul ? marked.parse(subJudul) : '';
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                ${carouselHTML}
+                <div style="text-align:center;">
+                    <div class="m-badge">${katEmoji} ${kategori}</div>
+                    <h3>${judul}</h3>
+                    ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
+                    <div class="m-content collapsed" id="modalContentBody">${parsedContent}</div>
+                    <button class="m-read-more-btn" id="modalReadMoreBtn" onclick="toggleModalReadMore()">📖 Baca Selengkapnya</button>
+                    
+                    <div class="m-actions">
+                        <button class="btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '👆 Belum Disimpan'}</button>
+                        ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
+                        <button onclick="downloadMultiImage('${posterId}', '${folder}', '${rawItem.images || "1.jpg"}')">🖼️ Gambar</button>
+                        <button onclick="copyCaptionDariElemen(this)">📋 Caption</button>
+                    </div>
+
+                    ${tagArray.length > 0 ? `<div class="m-tags">${tagArray.map(t => `<span class="m-tag">#${t}</span>`).join('')}</div>` : ''}
+                </div>
+            `;
+
+            document.getElementById('detailModal').classList.add('active');
         }
 
         function tutupModalDetail() {
@@ -1341,36 +1558,30 @@
 
         searchInput.addEventListener('input', function() {
             if (isSelecting) { return; }
-            clearTimeout(timeoutId);
-            const inputVal = this.value;
-            const key = normalisasiTeks(inputVal);
-            const clearBtn = document.getElementById('clearBtn');
-            clearBtn.style.display = inputVal ? 'block' : 'none';
-
+            clearTimeout(timeoutId); 
             timeoutId = setTimeout(() => {
+                const key = this.value.trim().toLowerCase();
                 if (key === '') {
-                    resultBox.style.display = 'none';
-                    resultBox.innerHTML = '';
+                    resultBox.style.display = 'none'; resultBox.innerHTML = '';
                     filterDisplayPosters();
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
                     return;
                 }
-
                 const hasil = semuaPosterCache.filter(item => 
-                    normalisasiTeks(item.judul).includes(key) ||
-                    normalisasiTeks(item.subJudul).includes(key) ||
-                    normalisasiTeks(item.kategori).includes(key) ||
-                    normalisasiTeks(item.tags).includes(key) ||
-                    normalisasiTeks(item.caption).includes(key)
+                    item.judul.toLowerCase().includes(key) ||
+                    item.subJudul.toLowerCase().includes(key) ||
+                    item.kategori.toLowerCase().includes(key) ||
+                    item.tags.toLowerCase().includes(key) ||
+                    item.caption.toLowerCase().includes(key)
                 );
-
                 if (hasil.length > 0) {
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = hasil.map(item => {
+                        const katEmoji = emojiMapGlobal[item.kategori.toLowerCase()] || emojiMapGlobal[item.kategori] || '📂';
                         return `
                             <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
                                 <span>📚 ${item.judul}</span>
-                                <small>${item.kategori}</small>
+                                <small>${katEmoji} ${item.kategori}</small>
                             </div>
                         `;
                     }).join('');
@@ -1378,476 +1589,87 @@
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = `<div class="search-item" style="cursor:default;color:#888;">Tidak ada hasil.</div>`;
                 }
-
                 const posters = document.querySelectorAll('.poster');
                 posters.forEach(poster => {
-                    const text = normalisasiTeks(poster.innerText);
+                    const text = poster.innerText.toLowerCase();
                     poster.style.display = text.includes(key) ? (isCompactView ? 'grid' : 'block') : 'none';
                 });
-
                 setTimeout(() => {
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
-                    highlightText(inputVal.trim());
+                    highlightText(key);
                 }, 100);
-
             }, 300);
         });
 
-        function clearSearch() {
-            searchInput.value = '';
-            document.getElementById('clearBtn').style.display = 'none';
+        function pilihDariDropdown(id) {
+            isSelecting = true;
+            clearTimeout(timeoutId);
+            const resultBox = document.getElementById('search-result');
+            const searchInput = document.getElementById('search');
             resultBox.style.display = 'none';
-            filterDisplayPosters();
-            document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
+            searchInput.value = '';
             document.activeElement.blur();
+            const searchId = id.replace(/\//g, '-');
+            const posters = document.querySelectorAll('.poster');
+            posters.forEach(p => {
+                const pid = p.getAttribute('data-id');
+                p.style.display = (pid === searchId) ? (isCompactView ? 'grid' : 'block') : 'none';
+            });
+            setTimeout(() => {
+                const target = document.getElementById('post-list');
+                if(target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            }, 500);
+            setTimeout(() => { isSelecting = false; }, 600);
         }
 
         function highlightText(key) {
-            if (!key) return;
-            const normKey = normalisasiTeks(key);
-            const containers = document.querySelectorAll('.poster h3, .poster .sub-title, .poster .poster-content-wrapper');
-
-            containers.forEach(el => {
-                const childNodes = Array.from(el.childNodes);
-                childNodes.forEach(node => {
-                    if (node.nodeType === 3) {
-                        const originalText = node.nodeValue;
-                        const normText = normalisasiTeks(originalText);
-                        const matchIndex = normText.indexOf(normKey);
-
-                        if (matchIndex !== -1) {
-                            const before = originalText.substring(0, matchIndex);
-                            const matched = originalText.substring(matchIndex, matchIndex + key.length);
-                            const after = originalText.substring(matchIndex + key.length);
-
-                            const span = document.createElement('span');
-                            span.className = 'highlight';
-                            span.innerText = matched;
-
-                            const fragment = document.createDocumentFragment();
-                            if (before) fragment.appendChild(document.createTextNode(before));
-                            fragment.appendChild(span);
-                            if (after) fragment.appendChild(document.createTextNode(after));
-
-                            el.replaceChild(fragment, node);
-                        }
-                    }
-                });
-            });
-        }
-
-        function pilihDariDropdown(id) {
-            isSelecting = true;
-            resultBox.style.display = 'none';
-            
+            document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
             const posters = document.querySelectorAll('.poster');
-            posters.forEach(p => {
-                p.style.display = (p.getAttribute('data-id') === id) ? (isCompactView ? 'grid' : 'block') : 'none';
-            });
-
-            const target = document.getElementById(id);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                target.style.borderColor = '#D4AF37';
-                target.style.boxShadow = '0 0 30px rgba(212,175,55,0.4)';
-                setTimeout(() => {
-                    target.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                    target.style.boxShadow = 'none';
-                }, 2000);
-            }
-            setTimeout(() => { isSelecting = false; }, 400);
-        }
-
-        /* --- CAROUSEL SLIDER ENGINE (UNTUK MULTIPLE SLIDES POSTER) --- */
-        const carousels = {};
-
-        function geserCarousel(id, direction) {
-            const c = carousels[id];
-            if (!c || c.total <= 1) return;
-            c.currentIndex = (c.currentIndex + direction + c.total) % c.total;
-            const slide = document.getElementById(`slide-${id}`);
-            const dots = document.querySelectorAll(`#dots-${id} .carousel-dot`);
-            if (slide) slide.style.transform = `translateX(-${c.currentIndex * 100}%)`;
-            dots.forEach((dot, idx) => dot.classList.toggle('active', idx === c.currentIndex));
-        }
-
-        function initCarousel(id, total) {
-            carousels[id] = { currentIndex: 0, total: total };
-        }
-
-        /* --- DOWNLOAD ENGINE (TERINTEGRASI DENGAN FOLLOW GATE) --- */
-        function downloadFile(url, filename) {
-            jalankanAksiTerproteksi(() => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-
-        function downloadMultiImage(posterId, folder, imagesData) {
-            jalankanAksiTerproteksi(() => {
-                let imageList = [];
-                if (Array.isArray(imagesData)) {
-                    imageList = imagesData;
-                } else if (typeof imagesData === 'string') {
-                    imageList = imagesData.split(',').map(s => s.trim()).filter(Boolean);
-                } else {
-                    imageList = ["1.jpg"];
-                }
-
-                if (imageList.length === 1) {
-                    downloadFile(`${RAW_BASE}/posters/${folder}/${imageList[0]}`, `${folder}.jpg`);
-                    return;
-                }
-
-                const pilih = prompt(`Poster ini memiliki ${imageList.length} slide.\nKetik "all" untuk mendownload SEMUA slide, atau ketik nomor slide yang diinginkan (cth: 1,3):`, "all");
-                if (!pilih) return;
-
-                const cleanPilih = pilih.trim().toLowerCase();
-                let indices = [];
-
-                if (cleanPilih === 'all') {
-                    indices = imageList.map((_, i) => i);
-                } else {
-                    const parts = cleanPilih.split(',');
-                    parts.forEach(p => {
-                        const num = parseInt(p.trim(), 10);
-                        if (!isNaN(num) && num >= 1 && num <= imageList.length) {
-                            indices.push(num - 1);
-                        }
-                    });
-                }
-
-                if (indices.length === 0) {
-                    alert("Pilihan nomor slide tidak valid!");
-                    return;
-                }
-
-                indices.forEach((idx, i) => {
-                    setTimeout(() => {
-                        const imgName = imageList[idx];
-                        const url = `${RAW_BASE}/posters/${folder}/${imgName}`;
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${folder}-slide-${idx + 1}.jpg`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                    }, i * 400);
-                });
-            });
-        }
-
-        /* --- COPY CAPTION ENGINE --- */
-        function copyCaptionDariElemen(btn) {
-            const poster = btn.closest('.poster') || btn.closest('.modal-container');
-            const dataEl = poster ? poster.querySelector('.raw-caption-data') : null;
-            const caption = dataEl ? dataEl.innerText : '';
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(caption).then(() => {
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '✅ Tersalin!';
-                    btn.style.color = '#4CAF50';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.color = '';
-                    }, 2000);
-                }).catch(() => { fallbackCopy(caption, btn); });
-            } else { fallbackCopy(caption, btn); }
-        }
-
-        function fallbackCopy(text, btn) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '✅ Tersalin!';
-            btn.style.color = '#4CAF50';
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.color = '';
-            }, 2000);
-        }
-
-        function toggleReadMore(id) {
-            const prev = document.getElementById(`preview-${id}`);
-            const btn = document.getElementById(`btn-rm-${id}`);
-            if (!prev || !btn) return;
-            if (prev.classList.contains('poster-content-preview')) {
-                prev.classList.remove('poster-content-preview');
-                btn.innerText = "Tutup Sebagian";
-            } else {
-                prev.classList.add('poster-content-preview');
-                btn.innerText = "📖 Baca Selengkapnya";
-            }
-        }
-
-        /* --- DATA FETCHING & RENDERING DENGAN REAL TIME PROGRESS --- */
-        async function loadPosters() {
-            setTargetProgress(30);
-
-            const postList = document.getElementById('post-list');
-            const categoryFilterOri = document.getElementById('category-filter-ori');
-            const categoryFilterCompact = document.getElementById('category-scroll-inner');
-            const favList = getFavorit();
-            let manifestData = { posters: [] };
-
-            try {
-                let res = await fetch('manifest.json');
-                if(!res.ok) res = await fetch('/manifest.json');
-                if(!res.ok) res = await fetch(`${RAW_BASE}/manifest.json`);
-                manifestData = await res.json();
-            } catch(e) {
-                console.error("Gagal load manifest lokal, fallback remote:", e);
-                try {
-                    let res = await fetch(`${RAW_BASE}/manifest.json`);
-                    manifestData = await res.json();
-                } catch(err) {
-                    console.error("Gagal memuat manifest total:", err);
-                }
-            }
-
-            const rawItems = manifestData.posters || [];
-            rawItemsGlobal = rawItems;
-            const totalItems = rawItems.length;
-
-            if (totalItems > 0) {
-                setTargetProgress(45);
-
-                const chunkSize = Math.max(15, Math.floor(totalItems / 10));
-
-                for (let i = 0; i < totalItems; i++) {
-                    const item = rawItems[i];
-                    const judul = item.judul || item.title || item.folder;
-                    const subJudul = item.subJudul || item.subTitle || "";
-                    const kategori = item.kategori || "Umum";
-                    const tags = item.tags || "";
-                    const folder = item.folder;
-                    const body = item.content || item.body || "";
-                    const posterId = item.id || folder;
-                    const pdfSrc = item.pdf ? `${RAW_BASE}/posters/${folder}/${item.pdf}` : null;
-                    const isSaved = favList.includes(posterId);
-
-                    semuaPosterCache.push({
-                        id: posterId,
-                        judul: judul,
-                        subJudul: subJudul,
-                        kategori: kategori,
-                        tags: tags,
-                        caption: body
-                    });
-
-                    let mediaHTML = '';
-                    let imageList = [];
-                    if (item.images && Array.isArray(item.images)) {
-                        imageList = item.images;
-                    } else if (item.images && typeof item.images === 'string') {
-                        imageList = item.images.split(',').map(s => s.trim()).filter(Boolean);
-                    } else {
-                        imageList = ["1.jpg"];
+            posters.forEach(poster => {
+                if (poster.style.display !== 'none') {
+                    const judulEl = poster.querySelector('h3');
+                    if (judulEl) {
+                        const judulText = judulEl.innerHTML;
+                        const regex = new RegExp(`(${key})`, 'gi');
+                        judulEl.innerHTML = judulText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
                     }
-
-                    if (imageList.length > 1) {
-                        const slidesHTML = imageList.map(img => `
-                            <img src="${RAW_BASE}/posters/${folder}/${img}" alt="${judul}" loading="lazy">
-                        `).join('');
-
-                        const dotsHTML = imageList.map((_, idx) => `
-                            <div class="carousel-dot ${idx === 0 ? 'active' : ''}"></div>
-                        `).join('');
-
-                        mediaHTML = `
-                            <div class="carousel-container" onclick="bukaModalDetail('${posterId}')">
-                                <div class="carousel-slide" id="slide-${posterId}">
-                                    ${slidesHTML}
-                                </div>
-                                <button class="carousel-btn prev" onclick="event.stopPropagation(); geserCarousel('${posterId}', -1)">&lang;</button>
-                                <button class="carousel-btn next" onclick="event.stopPropagation(); geserCarousel('${posterId}', 1)">&rang;</button>
-                                <div class="carousel-dots" id="dots-${posterId}">${dotsHTML}</div>
-                            </div>
-                        `;
-                    } else {
-                        mediaHTML = `
-                            <img src="${RAW_BASE}/posters/${folder}/${imageList[0]}" alt="${judul}" loading="lazy" onclick="bukaModalDetail('${posterId}')">
-                        `;
-                    }
-
-                    const card = document.createElement('div');
-                    card.className = 'poster';
-                    card.id = posterId;
-                    card.setAttribute('data-id', posterId);
-                    card.setAttribute('data-kategori', kategori.toLowerCase());
-                    card.setAttribute('data-has-pdf', pdfSrc ? 'true' : 'false');
-
-                    const tagArray = tags.split(',').map(t => t.trim()).filter(Boolean);
-                    const parsedBody = marked.parse(body);
-
-                    card.innerHTML = `
-                        ${mediaHTML}
-                        <div class="poster-info">
-                            <h3 onclick="bukaModalDetail('${posterId}')">${judul}</h3>
-                            <div class="sub-title">${subJudul}</div>
-                            <div class="poster-content-wrapper">
-                                <div class="poster-content-preview" id="preview-${posterId}">${parsedBody}</div>
-                                <button class="read-more-btn" id="btn-rm-${posterId}" onclick="toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
-                            </div>
-                            <div class="tags">
-                                <span class="tag tag-kategori">${kategori}</span>
-                                ${pdfSrc ? `<span class="tag tag-pdf">📄 PDF</span>` : ''}
-                                ${tagArray.map(t => `<span class="tag">#${t}</span>`).join('')}
-                            </div>
-                            <div class="actions">
-                                <button class="btn-save btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '👆 Belum Disimpan'}</button>
-                                ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
-                                <button onclick="downloadMultiImage('${posterId}', '${folder}', '${item.images || "1.jpg"}')">🖼️ Gambar</button>
-                                <button onclick="copyCaptionDariElemen(this)">📋 Caption</button>
-                            </div>
-                            <div class="raw-caption-data" style="display:none;">${body}</div>
-                        </div>
-                    `;
-
-                    postList.appendChild(card);
-                    if (imageList.length > 1) {
-                        initCarousel(posterId, imageList.length);
-                    }
-
-                    if (i % chunkSize === 0 || i === totalItems - 1) {
-                        const progress = 45 + Math.round(((i + 1) / totalItems) * 47);
-                        setTargetProgress(progress);
-                        await new Promise(r => setTimeout(r, 15));
+                    const contentWrapper = poster.querySelector('.poster-content-wrapper');
+                    if (contentWrapper) {
+                        const contentText = contentWrapper.innerHTML;
+                        const regex = new RegExp(`(${key})`, 'gi');
+                        contentWrapper.innerHTML = contentText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
                     }
                 }
-            }
-
-            /* --- GENERATE TOMBOL KATEGORI DENGAN EMOJI DINAMIS --- */
-            const emojiMap = {
-                'semua': '✨',
-                'manhaj': '🧭',
-                'aqidah': '🕋',
-                'taubat': '🌧️',
-                'dosa': '⚠️',
-                'amalan': '📿',
-                'tauhid': '☝️',
-                'sholat': '🕌',
-                'sunnah': '📜',
-                'adab': '🌸',
-                'ilmu': '📚',
-                'pdf': '📄',
-                'doa': '🤲',
-                'ramadhan': '🌙',
-                'puasa': '🌓',
-                'zakat': '💰',
-                'sedekah': '🪙',
-                'keluarga': '🏡',
-                'pendidikan': '🎓'
-            };
-
-            const counts = {};
-            semuaPosterCache.forEach(p => {
-                const k = p.kategori.toLowerCase();
-                counts[k] = (counts[k] || 0) + 1;
             });
-
-            const uniqueKategori = Object.keys(counts);
-
-            let htmlOri = `
-                <div class="card-kategori active" data-kategori="semua" onclick="filterKategori('semua', this)">
-                    <span class="icon">✨</span>
-                    <span class="nama">Semua</span>
-                    <span class="jumlah">${semuaPosterCache.length}</span>
-                </div>
-            `;
-
-            let htmlCompact = `
-                <div class="card-kategori active" data-kategori="semua" onclick="filterKategori('semua', this)">
-                    <span class="icon">✨</span>
-                    <span class="nama">Semua</span>
-                    <span class="jumlah">${semuaPosterCache.length}</span>
-                </div>
-            `;
-
-            uniqueKategori.forEach(kat => {
-                const icon = emojiMap[kat] || '📂';
-                const jumlah = counts[kat];
-
-                htmlOri += `
-                    <div class="card-kategori" data-kategori="${kat}" onclick="filterKategori('${kat}', this)">
-                        <span class="icon">${icon}</span>
-                        <span class="nama">${kat}</span>
-                        <span class="jumlah">${jumlah}</span>
-                    </div>
-                `;
-
-                htmlCompact += `
-                    <div class="card-kategori" data-kategori="${kat}" onclick="filterKategori('${kat}', this)">
-                        <span class="icon">${icon}</span>
-                        <span class="nama">${kat}</span>
-                        <span class="jumlah">${jumlah}</span>
-                    </div>
-                `;
-            });
-
-            categoryFilterOri.innerHTML = htmlOri;
-            categoryFilterCompact.innerHTML = htmlCompact;
-
-            filterDisplayPosters();
-
-            setTargetProgress(96);
-            hideAppLoader();
         }
 
-        function filterKategori(kat, element) {
-            document.querySelectorAll('.card-kategori').forEach(c => {
-                c.classList.toggle('active', c.getAttribute('data-kategori') === kat);
-            });
-            filterDisplayPosters();
-        }
-
-        /* --- FITUR TAMPILAN KOMPAK VS GRID UTAMA --- */
         function toggleView() {
             const list = document.getElementById('post-list');
-            const btn = document.getElementById('viewBtn');
+            const btn = document.getElementById('viewToggle');
+            
             isCompactView = !isCompactView;
-
-            if (isCompactView) {
+            
+            if (isCompactView) { 
                 document.body.classList.add('is-compact');
-                list.classList.add('compact-view');
-                btn.innerHTML = '🅰️';
+                list.classList.add('compact-view'); 
+                btn.innerHTML = '🅰️'; 
                 btn.title = "Kembali ke Tampilan Utama";
-            } else {
+            } else { 
                 document.body.classList.remove('is-compact');
-                list.classList.remove('compact-view');
-                btn.innerHTML = '🔠';
-                btn.title = "Ubah ke Tampilan Kompak";
+                list.classList.remove('compact-view'); 
+                btn.innerHTML = '🔠'; 
+                btn.title = "Ubah ke Tampilan Kompak"; 
             }
             filterDisplayPosters();
         }
 
-        /* --- FITUR AUDIO OMBAK RELAKSASI --- */
         const bgAudio = document.getElementById('bgAudio');
         const soundBtn = document.getElementById('soundBtn');
         let suaraMenyala = false;
-
         function toggleSuara() {
             suaraMenyala = !suaraMenyala;
-            if (suaraMenyala) {
-                bgAudio.volume = 0.8;
-                bgAudio.play();
-                soundBtn.innerHTML = '🔊';
-                soundBtn.classList.remove('silent');
-                soundBtn.classList.add('playing');
-            } else {
-                bgAudio.pause();
-                soundBtn.innerHTML = '🔇';
-                soundBtn.classList.remove('playing');
-                soundBtn.classList.add('silent');
-            }
+            if (suaraMenyala) { bgAudio.volume = 0.8; bgAudio.play(); soundBtn.innerHTML = '🔊'; soundBtn.classList.remove('silent'); soundBtn.classList.add('playing'); } 
+            else { bgAudio.pause(); soundBtn.innerHTML = '🔇'; soundBtn.classList.remove('playing'); soundBtn.classList.add('silent'); }
         }
 
         loadPosters();
