@@ -7,7 +7,7 @@
     <!-- Font Lengkap Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Caveat:wght@700&family=Cinzel:wght@700;900&family=Montserrat:ital,wght@0,400;0,700;0,900;1,700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700;1,900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none;}
         html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
@@ -202,6 +202,247 @@
         }
         .btn-del-slide:hover{background:#ff4b4b;color:#fff;}
 
+    
+        /* CANVA STYLE MOVE & ROTATE STALKS */
+        .stalk-container {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            z-index: 110;
+        }
+        .stalk-container.bottom {
+            bottom: -46px;
+        }
+        .canva-stalk-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1e1e1e;
+            border: 2px solid #D4AF37;
+            color: #D4AF37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            cursor: grab;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            touch-action: none;
+            user-select: none;
+        }
+        .canva-stalk-btn:active {
+            cursor: grabbing;
+            background: #D4AF37;
+            color: #111;
+        }
+
+        /* PRECISION STEPPER ROW WITH +/- BUTTONS */
+        .stepper-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .btn-step {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            font-weight: 800;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .btn-step:hover {
+            background: #D4AF37;
+            color: #111;
+            border-color: #D4AF37;
+        }
+        .btn-step:active {
+            transform: scale(0.92);
+        }
+        .btn-reset-tool {
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #bbb;
+            font-size: 11px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .btn-reset-tool:hover {
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        /* EYEDROPPER COLOR PICKER BUTTON */
+        .eyedropper-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(212,175,55,0.12);
+            border: 1px dashed #D4AF37;
+            border-radius: 8px;
+            color: #D4AF37;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .eyedropper-btn:hover {
+            background: #D4AF37;
+            color: #111;
+        }
+
+        /* PROJECT MANAGER MODAL */
+        .project-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .project-modal.active {
+            display: flex;
+        }
+        .project-dialog {
+            background: #181818;
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 16px;
+            max-width: 580px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            overflow: hidden;
+        }
+        .project-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .project-grid {
+            padding: 16px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 14px;
+        }
+        .project-card {
+            background: #222;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .project-card:hover, .project-card.active {
+            border-color: #D4AF37;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.25);
+        }
+        .project-thumb {
+            width: 100%;
+            aspect-ratio: 9/16;
+            background: #111;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .project-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #eee;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .project-meta {
+            font-size: 10px;
+            color: #888;
+        }
+        .project-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .btn-proj-action {
+            flex: 1;
+            padding: 4px 0;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            color: #ddd;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-proj-action:hover {
+            background: #D4AF37;
+            color: #111;
+        }
+
+        /* MULTI-SELECT CHECKBOX LIST FOR GABUNG */
+        .group-select-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .group-select-item.selected {
+            background: rgba(212,175,55,0.15);
+            border-color: #D4AF37;
+        }
+        .group-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #D4AF37;
+        }
+
+        /* LOUPE FOR COLOR SAMPLING */
+        .color-loupe {
+            position: fixed;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #D4AF37;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+            overflow: hidden;
+            background: #000;
+        }
+
     </style>
 <script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
 <body>
@@ -219,6 +460,10 @@
 
         <div class="nav-right">
             <!-- Pilihan Rasio Poster (Tanpa Merusak Posisi Elemen) -->
+                        <!-- PROJEK SAYA (MULTI-PROJEK CACHE BROWSER ALA CANVA) -->
+            <button class="btn-nav" onclick="openProjectModal()" title="Buka Daftar Projek Tersimpan" style="border-color:#D4AF37;color:#D4AF37;">
+                📁 Projek
+            </button>
             <button class="btn-nav" id="btnRatio" onclick="toggleRatioSelector()" title="Ubah Ukuran Poster">
                 📏 <span id="currentRatioLabel">9:16</span>
             </button>
@@ -329,12 +574,12 @@
         };
 
         const FONT_FAMILIES = [
-            { name: 'Plus Jakarta Sans', font: "'Plus Jakarta Sans', sans-serif" },
-            { name: 'Montserrat Bold', font: "'Montserrat', sans-serif" },
-            { name: 'Playfair Serif', font: "'Playfair Display', serif" },
-            { name: 'Caveat Handwrite', font: "'Caveat', cursive" },
-            { name: 'Amiri Arabic / Tajdid', font: "'Amiri', serif" },
-            { name: 'Cinzel Royal', font: "'Cinzel', serif" }
+            { name: 'Plus Jakarta Sans', font: "Plus Jakarta Sans, sans-serif" },
+            { name: 'Montserrat Bold', font: "Montserrat, sans-serif" },
+            { name: 'Playfair Display Serif', font: "Playfair Display, serif" },
+            { name: 'Caveat Handwrite', font: "Caveat, cursive" },
+            { name: 'Amiri Arabic / Tajdid', font: "Amiri, serif" },
+            { name: 'Cinzel Royal Luxury', font: "Cinzel, serif" }
         ];
 
         let currentRatio = '9:16';
@@ -986,38 +1231,16 @@
         }
 
         
-        function getWrappedLines(ctx, text, maxWidth) {
-            if (!maxWidth || maxWidth <= 0) maxWidth = 700;
-            const paragraphs = text.split('\n');
-            const lines = [];
-
-            for (const para of paragraphs) {
-                if (!para) {
-                    lines.push('');
-                    continue;
-                }
-                const words = para.split(' ');
-                let curLine = '';
-                for (let i = 0; i < words.length; i++) {
-                    const testLine = curLine ? curLine + ' ' + words[i] : words[i];
-                    const cleanTest = testLine.replace(/(\*\*|\*|__|==)/g, '');
-                    const metrics = ctx.measureText(cleanTest);
-                    if (metrics.width > maxWidth && curLine) {
-                        lines.push(curLine);
-                        curLine = words[i];
-                    } else {
-                        curLine = testLine;
-                    }
-                }
-                if (curLine) lines.push(curLine);
-            }
-            return lines;
-        }
-
+        // Parse format markdown (**tebal**, *miring*, __garisbawah__, ==stabilo==)
         function parseFormattedRuns(rawText) {
-            const regex = /(\*\*.*?\*\*|\*[^*]+?\*|__.*?__|==.*?==)/g;
+            if (!rawText) return [];
+            // Regex mengenali tag markdown secara utuh
+            const regex = /(\*\*[^*]+?\*\*|\*[^*]+?\*|__[^_]+?__|==[^=]+?==)/g;
             const parts = rawText.split(regex);
-            return parts.filter(p => p.length > 0).map(p => {
+            const runs = [];
+            for (let i = 0; i < parts.length; i++) {
+                const p = parts[i];
+                if (!p) continue;
                 let bold = false, italic = false, underline = false, highlight = false;
                 let clean = p;
                 if (clean.startsWith('**') && clean.endsWith('**') && clean.length >= 4) {
@@ -1029,8 +1252,69 @@
                 } else if (clean.startsWith('==') && clean.endsWith('==') && clean.length >= 4) {
                     highlight = true; clean = clean.slice(2, -2);
                 }
-                return { text: clean, bold, italic, underline, highlight };
-            });
+                runs.push({ text: clean, bold, italic, underline, highlight });
+            }
+            return runs;
+        }
+
+        // Auto-wrap paragraf dengan menjaga keutuhan token format
+        function getWrappedLines(ctx, text, maxWidth, el) {
+            if (!maxWidth || maxWidth <= 0) maxWidth = 750;
+            const paragraphs = text.split('\n');
+            const lines = [];
+
+            for (const para of paragraphs) {
+                if (!para) {
+                    lines.push([{ text: '', bold: false, italic: false, underline: false, highlight: false }]);
+                    continue;
+                }
+
+                // Ambil daftar run terformat
+                const runs = parseFormattedRuns(para);
+                let currentLineRuns = [];
+                let currentLineWidth = 0;
+
+                for (const run of runs) {
+                    const words = run.text.split(' ');
+                    for (let w = 0; w < words.length; w++) {
+                        const word = words[w];
+                        const wordWithSpace = (w < words.length - 1) ? word + ' ' : word;
+
+                        // Tentukan style font untuk mengukur
+                        const fStyle = run.italic ? 'italic' : (el.fontStyle || 'normal');
+                        const fWeight = run.bold ? '900' : (el.fontWeight || 'normal');
+                        ctx.font = `${fStyle} ${fWeight} ${el.fontSize}px ${getCleanFont(el.fontFamily)}`;
+                        const wMetrics = ctx.measureText(wordWithSpace);
+                        const addSpacing = (el.letterSpacing || 0) * wordWithSpace.length;
+                        const wordW = wMetrics.width + addSpacing;
+
+                        if (currentLineWidth + wordW > maxWidth && currentLineRuns.length > 0) {
+                            lines.push(currentLineRuns);
+                            currentLineRuns = [];
+                            currentLineWidth = 0;
+                        }
+
+                        currentLineRuns.push({
+                            text: wordWithSpace,
+                            bold: run.bold,
+                            italic: run.italic,
+                            underline: run.underline,
+                            highlight: run.highlight
+                        });
+                        currentLineWidth += wordW;
+                    }
+                }
+
+                if (currentLineRuns.length > 0) {
+                    lines.push(currentLineRuns);
+                }
+            }
+            return lines;
+        }
+
+        function getCleanFont(font) {
+            if (!font) return 'Plus Jakarta Sans, sans-serif';
+            return font.replace(/^['"]|['"]$/g, '').trim();
         }
 
         function renderTextElement(el) {
@@ -1045,73 +1329,85 @@
 
             const fontSize = el.fontSize;
             const lineHeight = fontSize * (el.lineHeight || 1.3);
-            const baseFont = `${el.fontStyle || 'normal'} ${el.fontWeight || 'normal'} ${fontSize}px "${el.fontFamily}"`;
-            ctx.font = baseFont;
-            ctx.textAlign = el.textAlign || 'center';
-            ctx.textBaseline = 'middle';
-
+            const cleanFont = getCleanFont(el.fontFamily);
             const maxBoxWidth = el.width || 750;
-            const lines = getWrappedLines(ctx, el.text, maxBoxWidth);
-            const totalHeight = lines.length * lineHeight;
+
+            // Dapatkan baris terbungkus
+            const linesOfRuns = getWrappedLines(ctx, el.text, maxBoxWidth, el);
+            const totalHeight = linesOfRuns.length * lineHeight;
             el._calculatedHeight = totalHeight;
 
-            if (el.curveAngle && Math.abs(el.curveAngle) > 2 && lines.length === 1) {
-                renderCurvedTextLine(el, lines[0], baseFont);
+            // Jika mode lengkung busur aktif
+            if (el.curveAngle && Math.abs(el.curveAngle) >= 3) {
+                renderCurvedTextLine(el, linesOfRuns, cleanFont);
                 ctx.restore();
                 return;
             }
 
             let startY = -(totalHeight / 2) + (lineHeight / 2);
+            const letterSpace = el.letterSpacing || 0;
 
-            lines.forEach((lineText, idx) => {
-                let displayLine = lineText;
-                if (el.textTransform === 'uppercase') displayLine = displayLine.toUpperCase();
-                else if (el.textTransform === 'lowercase') displayLine = displayLine.toLowerCase();
-                else if (el.textTransform === 'capitalize') {
-                    displayLine = displayLine.replace(/\b\w/g, l => l.toUpperCase());
-                }
-
+            linesOfRuns.forEach((lineRuns, idx) => {
                 const lineY = startY + (idx * lineHeight);
-                const runs = parseFormattedRuns(displayLine);
 
+                // Hitung total lebar baris
                 let totalLineWidth = 0;
-                runs.forEach(r => {
-                    ctx.font = `${r.italic ? 'italic' : (el.fontStyle || 'normal')} ${r.bold ? '900' : (el.fontWeight || 'normal')} ${fontSize}px "${el.fontFamily}"`;
-                    totalLineWidth += ctx.measureText(r.text).width;
+                lineRuns.forEach(r => {
+                    const fStyle = r.italic ? 'italic' : (el.fontStyle || 'normal');
+                    const fWeight = r.bold ? '900' : (el.fontWeight || 'normal');
+                    ctx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
+                    totalLineWidth += ctx.measureText(r.text).width + (letterSpace * r.text.length);
                 });
 
                 let startX = -(totalLineWidth / 2);
                 if (el.textAlign === 'left') startX = -(maxBoxWidth / 2);
                 else if (el.textAlign === 'right') startX = (maxBoxWidth / 2) - totalLineWidth;
 
+                // Stabilo seluruh baris jika highlightColor diset pada elemen
                 if (el.highlightColor && el.highlightColor !== 'transparent') {
                     ctx.save();
                     ctx.fillStyle = el.highlightColor;
                     ctx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.4);
+                    const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
                     ctx.beginPath();
-                    ctx.roundRect(startX - 12, lineY - (lineHeight / 2) + 2, totalLineWidth + 24, lineHeight - 4, 8);
+                    ctx.roundRect(startX - 8, lineY - (lineHeight / 2) + 2, totalLineWidth + 16, lineHeight - 4, radius);
                     ctx.fill();
                     ctx.restore();
                 }
 
+                // Render tiap potongan kata terformat
                 let curX = startX;
-                runs.forEach(run => {
-                    ctx.save();
-                    ctx.font = `${run.italic ? 'italic' : (el.fontStyle || 'normal')} ${run.bold ? '900' : (el.fontWeight || 'normal')} ${fontSize}px "${el.fontFamily}"`;
-                    ctx.textAlign = 'left';
-                    const runMetrics = ctx.measureText(run.text);
-                    const runW = runMetrics.width;
+                lineRuns.forEach(run => {
+                    if (!run.text) return;
 
+                    ctx.save();
+                    const fStyle = run.italic ? 'italic' : (el.fontStyle || 'normal');
+                    const fWeight = run.bold ? '900' : (el.fontWeight || 'normal');
+                    ctx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+
+                    let displayText = run.text;
+                    if (el.textTransform === 'uppercase') displayText = displayText.toUpperCase();
+                    else if (el.textTransform === 'lowercase') displayText = displayText.toLowerCase();
+                    else if (el.textTransform === 'capitalize') displayText = displayText.replace(/\b[a-z]/g, l => l.toUpperCase());
+
+                    const runMetrics = ctx.measureText(displayText);
+                    const runW = runMetrics.width + (letterSpace * displayText.length);
+
+                    // Stabilo pada kata spesifik yang diblok
                     if (run.highlight) {
                         ctx.save();
-                        ctx.fillStyle = el.highlightColor || '#FFE259';
-                        ctx.globalAlpha = 0.5;
+                        ctx.fillStyle = el.highlightColor && el.highlightColor !== 'transparent' ? el.highlightColor : '#FFE259';
+                        ctx.globalAlpha = 0.55;
+                        const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
                         ctx.beginPath();
-                        ctx.roundRect(curX - 4, lineY - (lineHeight / 2) + 4, runW + 8, lineHeight - 8, 4);
+                        ctx.roundRect(curX - 4, lineY - (lineHeight / 2) + 3, runW + 8, lineHeight - 6, radius);
                         ctx.fill();
                         ctx.restore();
                     }
 
+                    // Shadow bayangan luar
                     if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
                         ctx.shadowColor = el.shadow.color;
                         ctx.shadowBlur = el.shadow.blur || 0;
@@ -1121,21 +1417,34 @@
                         ctx.shadowOffsetY = Math.sin(rad) * dist;
                     }
 
+                    // Skin Foto Teks (Full Coverage)
                     if (el.textSkinImg && el.textSkinImg.complete) {
-                        drawTextWithSkinImage(ctx, run.text, curX, lineY, el);
+                        drawTextWithSkinImageFull(ctx, displayText, curX, lineY, runW, fontSize, el);
                     } else {
                         ctx.fillStyle = el.color || '#fff';
-                        ctx.fillText(run.text, curX, lineY);
+                        if (letterSpace === 0) {
+                            ctx.fillText(displayText, curX, lineY);
+                        } else {
+                            // Gambar dengan spasi antar huruf
+                            let charX = curX;
+                            for (let c = 0; c < displayText.length; c++) {
+                                const ch = displayText[c];
+                                ctx.fillText(ch, charX, lineY);
+                                charX += ctx.measureText(ch).width + letterSpace;
+                            }
+                        }
 
+                        // Garis tepi teks / stroke
                         if (el.borderWidth && el.borderWidth > 0) {
                             ctx.lineWidth = el.borderWidth * 2;
                             ctx.strokeStyle = el.borderColor || '#D4AF37';
                             if (el.borderBlur) ctx.filter = `blur(${el.borderBlur}px)`;
-                            ctx.strokeText(run.text, curX, lineY);
+                            ctx.strokeText(displayText, curX, lineY);
                         }
                     }
 
-                    if (el.underline || run.underline) {
+                    // Garis Bawah (Underline)
+                    if (el.textDecoration === 'underline' || run.underline) {
                         ctx.save();
                         ctx.strokeStyle = el.color || '#fff';
                         ctx.lineWidth = Math.max(2, fontSize * 0.06);
@@ -1154,59 +1463,101 @@
             ctx.restore();
         }
 
-        function renderCurvedTextLine(el, text, font) {
-            const angleRad = (el.curveAngle * Math.PI) / 180;
-            const len = text.length;
-            const radius = Math.max(100, (el.width || 600) / Math.abs(angleRad));
-            const arcDirection = el.curveAngle > 0 ? 1 : -1;
+        // Lengkung busur presisi ala Canva (Tetap di titik koordinat el.x, el.y tanpa keluar kanvas)
+        function renderCurvedTextLine(el, linesOfRuns, cleanFont) {
+            let fullText = '';
+            linesOfRuns.forEach(lineRuns => {
+                lineRuns.forEach(r => fullText += r.text);
+            });
+            if (!fullText) return;
 
-            ctx.save();
-            ctx.font = font;
-            ctx.fillStyle = el.color || '#fff';
+            if (el.textTransform === 'uppercase') fullText = fullText.toUpperCase();
+            else if (el.textTransform === 'lowercase') fullText = fullText.toLowerCase();
+
+            const angleRad = (el.curveAngle * Math.PI) / 180;
+            const len = fullText.length;
+            const fWeight = el.fontWeight || 'bold';
+            const fStyle = el.fontStyle || 'normal';
+            ctx.font = `${fStyle} ${fWeight} ${el.fontSize}px ${cleanFont}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            const startAngle = -angleRad / 2;
+            const totalTextWidth = ctx.measureText(fullText).width + ((el.letterSpacing || 0) * len);
+            const radius = Math.max(120, totalTextWidth / Math.abs(angleRad));
+
+            const isDownward = el.curveAngle > 0;
+            const circleCenterY = isDownward ? radius : -radius;
+
+            const startAngle = isDownward ? (-Math.PI / 2) - (angleRad / 2) : (Math.PI / 2) - (angleRad / 2);
             const stepAngle = angleRad / (len - 1 || 1);
 
             for (let i = 0; i < len; i++) {
-                const ch = text[i];
+                const ch = fullText[i];
                 const curA = startAngle + (i * stepAngle);
+
+                const charX = radius * Math.cos(curA);
+                const charY = circleCenterY + (radius * Math.sin(curA));
+
                 ctx.save();
-                ctx.rotate(curA);
-                ctx.translate(0, -arcDirection * radius);
-                if (arcDirection < 0) ctx.rotate(Math.PI);
+                ctx.translate(charX, charY);
+                const rotA = isDownward ? (curA + Math.PI / 2) : (curA - Math.PI / 2);
+                ctx.rotate(rotA);
+
+                if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
+                    ctx.shadowColor = el.shadow.color;
+                    ctx.shadowBlur = el.shadow.blur || 0;
+                }
+
+                ctx.fillStyle = el.color || '#fff';
                 ctx.fillText(ch, 0, 0);
+
+                if (el.borderWidth && el.borderWidth > 0) {
+                    ctx.lineWidth = el.borderWidth * 2;
+                    ctx.strokeStyle = el.borderColor || '#D4AF37';
+                    ctx.strokeText(ch, 0, 0);
+                }
+
                 ctx.restore();
             }
-            ctx.restore();
         }
 
-        function drawTextWithSkinImage(targetCtx, text, x, y, el) {
+        // Skin foto teks full coverage (CorelDraw style tanpa terpotong 1/4)
+        function drawTextWithSkinImageFull(targetCtx, text, x, y, runW, fontSize, el) {
+            const skin = el.textSkinImg;
+            if (!skin || !skin.complete) {
+                targetCtx.fillStyle = el.color || '#fff';
+                targetCtx.fillText(text, x, y);
+                return;
+            }
+
+            const offW = Math.max(runW + 40, 100);
+            const offH = Math.max(fontSize * 2, 80);
             const offscreen = document.createElement('canvas');
-            offscreen.width = mainCanvas.width;
-            offscreen.height = mainCanvas.height;
+            offscreen.width = offW;
+            offscreen.height = offH;
             const octx = offscreen.getContext('2d');
 
             octx.font = targetCtx.font;
             octx.textAlign = 'left';
             octx.textBaseline = 'middle';
             octx.fillStyle = '#000';
-            octx.fillText(text, x, y);
+            octx.fillText(text, 10, offH / 2);
 
             octx.globalCompositeOperation = 'source-in';
-            const skin = el.textSkinImg;
-            const scale = el.textSkinScale || 1.0;
-            const sw = skin.width * scale;
-            const sh = skin.height * scale;
-            const sx = x + (el.textSkinOffsetX || 0) - (sw / 4);
-            const sy = y + (el.textSkinOffsetY || 0) - (sh / 4);
-            octx.drawImage(skin, sx, sy, sw, sh);
 
-            targetCtx.drawImage(offscreen, 0, 0);
+            const scale = el.textSkinScale || 1.0;
+            const aspect = skin.width / skin.height;
+            let drawW = Math.max(offW, offH * aspect) * scale;
+            let drawH = (drawW / aspect);
+
+            const dx = ((offW - drawW) / 2) + (el.textSkinOffsetX || 0);
+            const dy = ((offH - drawH) / 2) + (el.textSkinOffsetY || 0);
+
+            octx.drawImage(skin, dx, dy, drawW, drawH);
+
+            targetCtx.drawImage(offscreen, x - 10, y - (offH / 2));
         }
 
-        
         function renderImageElement(el) {
             if (!el.img || !el.img.complete) {
                 if (el.src || el.imgSrc) {
@@ -1223,6 +1574,11 @@
 
             if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
             ctx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
+
+            // Efek Blur PNG
+            if (el.blur && el.blur > 0) {
+                ctx.filter = `blur(${el.blur}px)`;
+            }
 
             if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
                 ctx.shadowColor = el.shadow.color;
@@ -1411,26 +1767,64 @@
         /* =========================================================================
            DRAGGING & RESIZE CORNER ENGINE (ANTI MELEYOT / BEBAS DISTORSI)
            ========================================================================= */
-        let dragMode = null; // 'move', 'resize-handle'
+        /* =========================================================================
+           DRAGGING, CANVA STALK HANDLES & TOUCH ENGINE
+           ========================================================================= */
+        let dragMode = null; // 'move', 'resize-handle', 'stalk-move', 'stalk-rotate'
         let activeHandle = null;
         let startPointer = { x: 0, y: 0 };
         let startElementState = {};
+        let rotateCenter = { x: 0, y: 0 };
+        let lastTapTime = 0;
+        let lastTapId = null;
 
         function setupDraggingEngine() {
             artboard.addEventListener('pointerdown', handleArtboardPointerDown);
             window.addEventListener('pointermove', handleWindowPointerMove);
             window.addEventListener('pointerup', handleWindowPointerUp);
-        }
+            window.addEventListener('pointercancel', handleWindowPointerUp);
 
-        function handleViewportClick(e) {
-            if (e.target.id === 'workspaceViewport') {
-                deselectElement();
+            // Stalk Handle Events (Canva Move & Rotate Stalk)
+            const stalkMove = document.getElementById('stalkMove');
+            const stalkRotate = document.getElementById('stalkRotate');
+
+            if (stalkMove) {
+                stalkMove.addEventListener('pointerdown', (e) => {
+                    const el = getActiveElement();
+                    if (!el || el.locked) return;
+                    e.stopPropagation();
+                    dragMode = 'stalk-move';
+                    startPointer = { x: e.clientX, y: e.clientY };
+                    startElementState = { x: el.x, y: el.y };
+                });
+            }
+
+            if (stalkRotate) {
+                stalkRotate.addEventListener('pointerdown', (e) => {
+                    const el = getActiveElement();
+                    if (!el || el.locked) return;
+                    e.stopPropagation();
+                    dragMode = 'stalk-rotate';
+                    startPointer = { x: e.clientX, y: e.clientY };
+                    startElementState = { rotation: el.rotation || 0 };
+                    // Titik pusat elemen di koordinat layar
+                    const rect = artboard.getBoundingClientRect();
+                    rotateCenter = {
+                        x: rect.left + (el.x * canvasScale),
+                        y: rect.top + (el.y * canvasScale)
+                    };
+                });
             }
         }
 
         function handleArtboardPointerDown(e) {
+            // Cek jika klik pada stalk handles
+            if (e.target.closest('#stalkContainer')) {
+                return;
+            }
+
             // Cek jika klik pada handle resize
-            if (e.target.classList.contains('sel-handle') || e.target.classList.contains('sel-handle-edge')) {
+            if (e.target.classList.contains('handle')) {
                 dragMode = 'resize-handle';
                 activeHandle = e.target.dataset.handle;
                 startPointer = { x: e.clientX, y: e.clientY };
@@ -1457,17 +1851,29 @@
             }
 
             if (hitEl) {
-                // Deteksi double tap / klik kedua untuk edit keyboard
-                if (activeElementId === hitEl.id && hitEl.type === 'text') {
+                const now = Date.now();
+                // Deteksi klik ganda sengaja (double-tap dalam 300ms) untuk membuka keyboard
+                if (activeElementId === hitEl.id && hitEl.type === 'text' && (now - lastTapTime < 300) && lastTapId === hitEl.id) {
                     openInlineTextEditor(hitEl);
+                    lastTapTime = 0;
                     return;
                 }
+                lastTapTime = now;
+                lastTapId = hitEl.id;
 
                 selectElement(hitEl.id);
                 if (!hitEl.locked) {
                     dragMode = 'move';
                     startPointer = { x: e.clientX, y: e.clientY };
                     startElementState = { x: hitEl.x, y: hitEl.y };
+                    // Simpan start position grup
+                    if (hitEl.groupId) {
+                        s.elements.forEach(other => {
+                            if (other.groupId === hitEl.groupId) {
+                                other._startGroupPos = { x: other.x, y: other.y };
+                            }
+                        });
+                    }
                 }
             } else {
                 deselectElement();
@@ -1489,20 +1895,29 @@
             const deltaX = (e.clientX - startPointer.x) / canvasScale;
             const deltaY = (e.clientY - startPointer.y) / canvasScale;
 
-            if (dragMode === 'move') {
+            if (dragMode === 'move' || dragMode === 'stalk-move') {
                 el.x = startElementState.x + deltaX;
                 el.y = startElementState.y + deltaY;
 
+                // Jika terhubung dalam grup, geser anggota grup lainnya
                 if (el.groupId) {
                     const s = getCurrentSlide();
                     s.elements.forEach(other => {
-                        if (other.groupId === el.groupId && other.id !== el.id) {
-                            if (!other._startGroupPos) other._startGroupPos = { x: other.x, y: other.y };
+                        if (other.groupId === el.groupId && other.id !== el.id && other._startGroupPos) {
                             other.x = other._startGroupPos.x + deltaX;
                             other.y = other._startGroupPos.y + deltaY;
                         }
                     });
                 }
+                requestRender();
+            } else if (dragMode === 'stalk-rotate') {
+                // Hitung sudut rotasi relatif ke pusat elemen
+                const dx = e.clientX - rotateCenter.x;
+                const dy = e.clientY - rotateCenter.y;
+                let angle = Math.atan2(dy, dx) * (180 / Math.PI) - 90;
+                angle = Math.round(angle);
+                if (angle < 0) angle += 360;
+                el.rotation = angle;
                 requestRender();
             } else if (dragMode === 'resize-handle') {
                 if (['br', 'bl', 'tr', 'tl'].includes(activeHandle)) {
@@ -1548,70 +1963,44 @@
            DYNAMIC BOTTOM TOOLBAR (ALA CANVA)
            ========================================================================= */
         
-        function renderBottomToolbar() {
-            const bar = document.getElementById('bottomToolbar');
-            const el = getActiveElement();
+        /* =========================================================================
+           UPGRADED PANELS WITH STEPPER (+/-), RESET, ROTASI, SPACING, BG REMOVAL, GROUP & EYEDROPPER
+           ========================================================================= */
+        let currentProjectId = 'proj_default';
+        const PROJECTS_KEY = 'MAKER_STUDIO_PROJECTS_LIST_V2';
 
-            if (!el) {
-                bar.innerHTML = `
-                    <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
-                    <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
-                    <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
-                    <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">📑</span><span>Lapisan</span></button>
-                    <button class="tool-btn" onclick="openPanelBleed()"><span class="icon">📐</span><span>Garis Bantu</span></button>
-                `;
-            } else if (el.type === 'text') {
-                bar.innerHTML = `
-                    <button class="tool-btn" onclick="openInlineTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit Teks</span></button>
-                    <button class="tool-btn" onclick="openPanelFontFamily()"><span class="icon">🔤</span><span>Font</span></button>
-                    <button class="tool-btn" onclick="openPanelFontSize()"><span class="icon">📏</span><span>Ukuran</span></button>
-                    <button class="tool-btn" onclick="openPanelTextColor()"><span class="icon">🎨</span><span>Warna</span></button>
-                    <button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Foto</span></button>
-                    <button class="tool-btn" onclick="openPanelCurveAndSlant()"><span class="icon">🌀</span><span>Lengkung & Miring</span></button>
-                    <button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i><u>U</u></span><span>Format</span></button>
-                    <button class="tool-btn" onclick="openPanelHighlight()"><span class="icon">🖍️</span><span>Stabilo</span></button>
-                    <button class="tool-btn" onclick="openPanelShadowAndGlass()"><span class="icon">👥</span><span>Bayangan</span></button>
-                    <button class="tool-btn" onclick="openPanelSpacing()"><span class="icon">↔️</span><span>Jarak Baris</span></button>
-                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi & D-Pad</span></button>
-                    <button class="tool-btn" onclick="openPanelLayerOrder()"><span class="icon">🥞</span><span>Lapisan</span></button>
-                    <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka' : 'Kunci'}</span></button>
-                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
-                    <button class="tool-btn" onclick="toggleGroupElement()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah' : 'Gabung'}</span></button>
-                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
-                `;
-            } else if (el.type === 'image') {
-                bar.innerHTML = `
-                    <button class="tool-btn" onclick="openPanelImageSize()"><span class="icon">📏</span><span>Ukuran/Size</span></button>
-                    <button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon">🪞</span><span>Cermin</span></button>
-                    <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis Tepi & Blur</span></button>
-                    <button class="tool-btn" onclick="openPanelShadowAndGlass()"><span class="icon">👥</span><span>Bayangan</span></button>
-                    <button class="tool-btn" onclick="openPanelImageOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
-                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi & D-Pad</span></button>
-                    <button class="tool-btn" onclick="openPanelLayerOrder()"><span class="icon">🥞</span><span>Lapisan</span></button>
-                    <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka' : 'Kunci'}</span></button>
-                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
-                    <button class="tool-btn" onclick="toggleGroupElement()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah' : 'Gabung'}</span></button>
-                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
-                `;
-            }
+        function stepSliderVal(sliderId, delta, callback) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            const min = parseFloat(slider.min) || 0;
+            const max = parseFloat(slider.max) || 100;
+            let val = parseFloat(slider.value) + delta;
+            val = Math.max(min, Math.min(max, val));
+            slider.value = val;
+            if (callback) callback(val);
         }
 
         function openToolPanel(title, htmlContent) {
-            document.getElementById('panelTitle').innerText = title;
-            document.getElementById('panelContent').innerHTML = htmlContent;
-            document.getElementById('toolPanel').classList.add('active');
+            const titleEl = document.getElementById('panelTitle');
+            const contentEl = document.getElementById('panelContent');
+            const panel = document.getElementById('toolPanel');
+            if (titleEl) titleEl.innerText = title;
+            if (contentEl) contentEl.innerHTML = htmlContent;
+            if (panel) panel.classList.add('active');
         }
 
         function closeToolPanel() {
-            document.getElementById('toolPanel').classList.remove('active');
+            const panel = document.getElementById('toolPanel');
+            if (panel) panel.classList.remove('active');
         }
 
         // 1. PANEL FONT
         function openPanelFontFamily() {
             const el = getActiveElement();
+            if (!el) return;
             let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
             FONT_FAMILIES.forEach(f => {
-                const isAct = el.fontFamily === f.font;
+                const isAct = getCleanFont(el.fontFamily) === getCleanFont(f.font);
                 html += `
                     <div class="layer-item ${isAct ? 'active' : ''}" style="font-family:${f.font};font-size:15px;" onclick="setFontFamily('${f.font}')">
                         <span>${f.name}</span>
@@ -1624,17 +2013,34 @@
         }
         function setFontFamily(font) {
             const el = getActiveElement();
-            if (el) { el.fontFamily = font; renderAll(); pushHistoryState(); openPanelFontFamily(); }
+            if (el) {
+                el.fontFamily = font;
+                requestRender();
+                pushHistoryState();
+                openPanelFontFamily();
+            }
         }
 
-        // 2. PANEL UKURAN TEKS
+        // 2. PANEL UKURAN FONT (DENGAN +/- DAN RESET)
         function openPanelFontSize() {
             const el = getActiveElement();
+            if (!el) return;
             const html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Ukuran Teks:</span>
-                    <input type="range" class="ctrl-slider" min="14" max="220" value="${el.fontSize}" oninput="updateFontSize(this.value)">
                     <span class="ctrl-val" id="valFontSize">${el.fontSize}px</span>
+                    <button class="btn-reset-tool" onclick="updateFontSize(50); document.getElementById('fontSizeSlider').value=50;">↺ Reset (50px)</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('fontSizeSlider', -2, updateFontSize)">-</button>
+                    <input type="range" class="range-slider" id="fontSizeSlider" min="12" max="220" value="${el.fontSize}" oninput="updateFontSize(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('fontSizeSlider', 2, updateFontSize)">+</button>
+                </div>
+                <div class="ctrl-grid-btns" style="margin-top:10px;">
+                    <button class="btn-sub-tool" onclick="updateFontSize(28); document.getElementById('fontSizeSlider').value=28;">Kecil (28px)</button>
+                    <button class="btn-sub-tool" onclick="updateFontSize(48); document.getElementById('fontSizeSlider').value=48;">Sedang (48px)</button>
+                    <button class="btn-sub-tool" onclick="updateFontSize(72); document.getElementById('fontSizeSlider').value=72;">Besar (72px)</button>
+                    <button class="btn-sub-tool" onclick="updateFontSize(110); document.getElementById('fontSizeSlider').value=110;">Judul (110px)</button>
                 </div>
             `;
             openToolPanel('Ukuran Font', html);
@@ -1643,63 +2049,135 @@
             const el = getActiveElement();
             if (el) {
                 el.fontSize = parseInt(val);
-                document.getElementById('valFontSize').innerText = val + 'px';
-                renderAll();
+                const lbl = document.getElementById('valFontSize');
+                if (lbl) lbl.innerText = val + 'px';
+                requestRender();
                 triggerAutoSave();
             }
         }
 
-        // 3. PANEL WARNA
+        // 3. PANEL WARNA & EYEDROPPER SAMPEL BACKGROUND
+        let eyedropperTarget = 'text';
         function openPanelTextColor() {
             const el = getActiveElement();
-            let html = '<div class="color-palette-scroll">';
+            if (!el) return;
+            let html = `
+                <button class="eyedropper-btn" onclick="triggerEyeDropper('text')">
+                    <span>🧪 Ambil Warna dari Background / Kanvas</span>
+                </button>
+                <div class="color-palette-scroll" style="margin-top:10px;">
+            `;
             QUICK_COLORS.forEach(c => {
                 html += `<div class="color-circle ${el.color === c ? 'active' : ''}" style="background:${c};" onclick="setTextColor('${c}')"></div>`;
             });
             html += `</div>
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Warna Custom:</span>
-                    <input type="color" value="${el.color}" onchange="setTextColor(this.value)">
+                <div class="ctrl-row" style="margin-top:12px;">
+                    <span class="ctrl-label">Pilih Warna Custom:</span>
+                    <input type="color" value="${el.color || '#ffffff'}" onchange="setTextColor(this.value)">
                 </div>
             `;
             openToolPanel('Warna Teks', html);
         }
         function setTextColor(c) {
             const el = getActiveElement();
-            if (el) { el.color = c; renderAll(); pushHistoryState(); openPanelTextColor(); }
+            if (el) { el.color = c; requestRender(); pushHistoryState(); openPanelTextColor(); }
         }
 
-        // 4. PANEL FORMAT TEKS (BOLD, ITALIC, UNDERLINE, CAPITALIZE, ALIGNMENT)
+        // EYEDROPPER ENGINE (NATIVE + CANVAS FALLBACK LOUPE)
+        function triggerEyeDropper(targetProp) {
+            eyedropperTarget = targetProp;
+            if (window.EyeDropper) {
+                const dropper = new EyeDropper();
+                dropper.open().then(result => {
+                    applySampledColor(result.sRGBHex);
+                }).catch(() => {});
+            } else {
+                startCanvasLoupeSampling();
+            }
+        }
+
+        function applySampledColor(hex) {
+            const el = getActiveElement();
+            if (!el) return;
+            if (eyedropperTarget === 'text') el.color = hex;
+            else if (eyedropperTarget === 'highlight') el.highlightColor = hex;
+            else if (eyedropperTarget === 'border') el.borderColor = hex;
+            else if (eyedropperTarget === 'shadow') {
+                if (!el.shadow) el.shadow = { color: hex, blur: 15, distance: 8, angle: 45 };
+                else el.shadow.color = hex;
+            }
+            requestRender();
+            pushHistoryState();
+            showToast(`✅ Warna tersampel: ${hex}`);
+            if (eyedropperTarget === 'text') openPanelTextColor();
+            else if (eyedropperTarget === 'highlight') openPanelHighlight();
+            else if (eyedropperTarget === 'shadow') openPanelShadowAndGlass();
+        }
+
+        function startCanvasLoupeSampling() {
+            showToast('🔍 Sentuh / klik di area gambar kanvas untuk mengambil warna');
+            const loupe = document.getElementById('colorLoupe');
+            const preview = document.getElementById('loupeColorPreview');
+            loupe.style.display = 'block';
+
+            function onPointerMove(e) {
+                loupe.style.left = (e.clientX - 35) + 'px';
+                loupe.style.top = (e.clientY - 85) + 'px';
+                const rect = mainCanvas.getBoundingClientRect();
+                const scaleX = mainCanvas.width / rect.width;
+                const scaleY = mainCanvas.height / rect.height;
+                const canvasX = Math.round((e.clientX - rect.left) * scaleX);
+                const canvasY = Math.round((e.clientY - rect.top) * scaleY);
+
+                if (canvasX >= 0 && canvasX < mainCanvas.width && canvasY >= 0 && canvasY < mainCanvas.height) {
+                    const p = ctx.getImageData(canvasX, canvasY, 1, 1).data;
+                    const hex = '#' + ((1 << 24) + (p[0] << 16) + (p[1] << 8) + p[2]).toString(16).slice(1);
+                    loupe.style.background = hex;
+                    preview.innerText = hex;
+                    loupe._currentHex = hex;
+                }
+            }
+
+            function onPointerUp(e) {
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', onPointerUp);
+                loupe.style.display = 'none';
+                if (loupe._currentHex) {
+                    applySampledColor(loupe._currentHex);
+                }
+            }
+
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+        }
+
+        // 4. PANEL FORMAT TEKS & DUAL SYSTEM (KATA BLOK vs SEMUA TEKS)
         function openPanelTextFormat() {
             const el = getActiveElement();
+            if (!el) return;
             const html = `
+                <div style="font-size:11px;color:#aaa;font-weight:700;margin-bottom:8px;">FORMAT SELURUH ELEMEN TEKS</div>
                 <div class="ctrl-grid-btns">
                     <button class="btn-sub-tool ${el.fontWeight === 'bold' || el.fontWeight === '900' ? 'active' : ''}" onclick="toggleFontWeight()">
-                        <span style="font-size:16px;font-weight:900;">B</span><span>Tebal</span>
+                        <span style="font-size:16px;font-weight:900;">B</span><span>Tebal Semua</span>
                     </button>
                     <button class="btn-sub-tool ${el.fontStyle === 'italic' ? 'active' : ''}" onclick="toggleFontStyle()">
-                        <span style="font-size:16px;font-style:italic;">I</span><span>Miring</span>
+                        <span style="font-size:16px;font-style:italic;">I</span><span>Miring Semua</span>
                     </button>
                     <button class="btn-sub-tool ${el.textDecoration === 'underline' ? 'active' : ''}" onclick="toggleTextUnderline()">
                         <span style="font-size:16px;text-decoration:underline;">U</span><span>Garis Bawah</span>
                     </button>
                     <button class="btn-sub-tool ${el.textTransform === 'uppercase' ? 'active' : ''}" onclick="setTextCase('uppercase')">
-                        <span style="font-size:15px;">AA</span><span>KAPITAL</span>
+                        <span style="font-size:14px;">AA</span><span>KAPITAL</span>
                     </button>
                 </div>
-                <div class="ctrl-grid-btns" style="margin-top:8px;">
-                    <button class="btn-sub-tool ${el.textAlign === 'left' ? 'active' : ''}" onclick="setTextAlign('left')">
-                        <span>⬅️ Rata Kiri</span>
-                    </button>
-                    <button class="btn-sub-tool ${el.textAlign === 'center' ? 'active' : ''}" onclick="setTextAlign('center')">
-                        <span>↔️ Tengah</span>
-                    </button>
-                    <button class="btn-sub-tool ${el.textAlign === 'right' ? 'active' : ''}" onclick="setTextAlign('right')">
-                        <span>➡️ Rata Kanan</span>
-                    </button>
-                    <button class="btn-sub-tool ${el.textTransform === 'capitalize' ? 'active' : ''}" onclick="setTextCase('capitalize')">
-                        <span>Aa Judul</span>
-                    </button>
+
+                <div style="font-size:11px;color:#aaa;font-weight:700;margin:12px 0 8px;">PERATAAN (ALIGNMENT)</div>
+                <div class="ctrl-grid-btns">
+                    <button class="btn-sub-tool ${el.textAlign === 'left' ? 'active' : ''}" onclick="setTextAlign('left')">⬅️ Kiri</button>
+                    <button class="btn-sub-tool ${el.textAlign === 'center' ? 'active' : ''}" onclick="setTextAlign('center')">↔️ Tengah</button>
+                    <button class="btn-sub-tool ${el.textAlign === 'right' ? 'active' : ''}" onclick="setTextAlign('right')">➡️ Kanan</button>
+                    <button class="btn-sub-tool" onclick="openInlineTextEditor(getActiveElement())">✏️ Format Kata Tertentu</button>
                 </div>
             `;
             openToolPanel('Format & Perataan Teks', html);
@@ -1730,17 +2208,43 @@
             renderAll(); pushHistoryState(); openPanelTextFormat();
         }
 
-        // 5. STABILO / HIGHLIGHT BOX
+        // 5. STABILO / HIGHLIGHT (SUDUT LANCIP SIKU vs TUMPUL BULAT DENGAN +/-)
         function openPanelHighlight() {
             const el = getActiveElement();
+            if (!el) return;
+            const curRad = el.highlightRadius !== undefined ? el.highlightRadius : 6;
             let html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Transparansi:</span>
-                    <input type="range" class="ctrl-slider" min="0" max="100" value="${Math.round((el.highlightAlpha || 0.4) * 100)}" oninput="updateHighlightAlpha(this.value)">
+                <button class="eyedropper-btn" onclick="triggerEyeDropper('highlight')">
+                    <span>🧪 Ambil Warna Stabilo dari Kanvas</span>
+                </button>
+
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Bentuk Sudut Stabilo (Lancip / Tumpul):</span>
+                    <span class="ctrl-val" id="valHiRad">${curRad}px</span>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('hiRadSlider', -2, updateHighlightRadius)">-</button>
+                    <input type="range" class="range-slider" id="hiRadSlider" min="0" max="24" value="${curRad}" oninput="updateHighlightRadius(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('hiRadSlider', 2, updateHighlightRadius)">+</button>
+                </div>
+                <div class="ctrl-grid-btns" style="margin-top:6px;">
+                    <button class="btn-sub-tool ${curRad === 0 ? 'active' : ''}" onclick="updateHighlightRadius(0); document.getElementById('hiRadSlider').value=0;">📐 Lancip Siku (0px)</button>
+                    <button class="btn-sub-tool ${curRad === 6 ? 'active' : ''}" onclick="updateHighlightRadius(6); document.getElementById('hiRadSlider').value=6;">✨ Standar (6px)</button>
+                    <button class="btn-sub-tool ${curRad === 18 ? 'active' : ''}" onclick="updateHighlightRadius(18); document.getElementById('hiRadSlider').value=18;">💊 Tumpul Pill (18px)</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:12px;">
+                    <span class="ctrl-label">Transparansi Stabilo:</span>
                     <span class="ctrl-val" id="valHiAlpha">${Math.round((el.highlightAlpha || 0.4) * 100)}%</span>
                 </div>
-                <span class="ctrl-label" style="margin-top:6px;display:block;">Warna Stabilo:</span>
-                <div class="color-palette-scroll">
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('hiAlphaSlider', -5, updateHighlightAlpha)">-</button>
+                    <input type="range" class="range-slider" id="hiAlphaSlider" min="0" max="100" value="${Math.round((el.highlightAlpha || 0.4) * 100)}" oninput="updateHighlightAlpha(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('hiAlphaSlider', 5, updateHighlightAlpha)">+</button>
+                </div>
+
+                <span class="ctrl-label" style="margin-top:10px;display:block;">Warna Stabilo:</span>
+                <div class="color-palette-scroll" style="margin-top:6px;">
                     <div class="color-circle ${el.highlightColor === 'transparent' ? 'active' : ''}" style="background:#444;" title="Tanpa Stabilo" onclick="setHighlightColor('transparent')"></div>
             `;
             QUICK_COLORS.forEach(c => {
@@ -1749,113 +2253,519 @@
             html += '</div>';
             openToolPanel('Efek Stabilo Teks', html);
         }
+        function updateHighlightRadius(v) {
+            const el = getActiveElement();
+            if (el) {
+                el.highlightRadius = parseInt(v);
+                const lbl = document.getElementById('valHiRad');
+                if (lbl) lbl.innerText = v + 'px';
+                renderAll(); triggerAutoSave();
+            }
+        }
         function updateHighlightAlpha(v) {
             const el = getActiveElement();
-            el.highlightAlpha = parseInt(v) / 100;
-            document.getElementById('valHiAlpha').innerText = v + '%';
-            renderAll(); triggerAutoSave();
+            if (el) {
+                el.highlightAlpha = parseInt(v) / 100;
+                const lbl = document.getElementById('valHiAlpha');
+                if (lbl) lbl.innerText = v + '%';
+                renderAll(); triggerAutoSave();
+            }
         }
         function setHighlightColor(c) {
             const el = getActiveElement();
-            el.highlightColor = c;
-            renderAll(); pushHistoryState(); openPanelHighlight();
+            if (el) { el.highlightColor = c; renderAll(); pushHistoryState(); openPanelHighlight(); }
         }
 
-        // 6. JARAK BARIS & HURUF
+        // 6. JARAK TEKS: BARIS & SPASI ANTAR HURUF (DENGAN +/- DAN RESET)
         function openPanelSpacing() {
             const el = getActiveElement();
+            if (!el) return;
+            const curLH = el.lineHeight || 1.3;
+            const curLS = el.letterSpacing || 0;
             const html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Jarak Baris:</span>
-                    <input type="range" class="ctrl-slider" min="90" max="250" value="${Math.round((el.lineHeight || 1.3) * 100)}" oninput="updateLineHeight(this.value)">
-                    <span class="ctrl-val" id="valLineHeight">${(el.lineHeight || 1.3).toFixed(1)}</span>
+                    <span class="ctrl-val" id="valLineHeight">${curLH.toFixed(1)}</span>
+                    <button class="btn-reset-tool" onclick="updateLineHeight(130); document.getElementById('lhSlider').value=130;">↺ Reset (1.3)</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('lhSlider', -10, updateLineHeight)">-</button>
+                    <input type="range" class="range-slider" id="lhSlider" min="80" max="250" value="${Math.round(curLH * 100)}" oninput="updateLineHeight(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('lhSlider', 10, updateLineHeight)">+</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:14px;">
+                    <span class="ctrl-label">Jarak Antar Huruf (Letter Spacing):</span>
+                    <span class="ctrl-val" id="valLetterSpacing">${curLS}px</span>
+                    <button class="btn-reset-tool" onclick="updateLetterSpacing(0); document.getElementById('lsSlider').value=0;">↺ Reset (0px)</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('lsSlider', -1, updateLetterSpacing)">-</button>
+                    <input type="range" class="range-slider" id="lsSlider" min="-5" max="30" value="${curLS}" oninput="updateLetterSpacing(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('lsSlider', 1, updateLetterSpacing)">+</button>
                 </div>
             `;
-            openToolPanel('Jarak Antar Baris', html);
+            openToolPanel('Jarak Teks (Baris & Huruf)', html);
         }
         function updateLineHeight(v) {
             const el = getActiveElement();
-            el.lineHeight = parseInt(v) / 100;
-            document.getElementById('valLineHeight').innerText = el.lineHeight.toFixed(1);
-            renderAll(); triggerAutoSave();
+            if (el) {
+                el.lineHeight = parseInt(v) / 100;
+                const lbl = document.getElementById('valLineHeight');
+                if (lbl) lbl.innerText = el.lineHeight.toFixed(1);
+                renderAll(); triggerAutoSave();
+            }
+        }
+        function updateLetterSpacing(v) {
+            const el = getActiveElement();
+            if (el) {
+                el.letterSpacing = parseInt(v);
+                const lbl = document.getElementById('valLetterSpacing');
+                if (lbl) lbl.innerText = el.letterSpacing + 'px';
+                renderAll(); triggerAutoSave();
+            }
         }
 
-        // 7. POSISI PRESISI & ALIGNMENT SUDUT
-        
-        function openPanelImageSize() {
+        // 7. LENGKUNG BUSUR & KEMIRINGAN SLANT (CANVA STYLE DENGAN +/- DAN RESET)
+        function openPanelCurveAndSlant() {
             const el = getActiveElement();
-            if (!el || el.type !== 'image') return;
+            if (!el || el.type !== 'text') return;
 
             const html = `
                 <div class="ctrl-row">
-                    <span class="ctrl-label">Lebar (Width):</span>
-                    <span class="ctrl-val" id="imgWVal">${Math.round(el.width)} px</span>
+                    <span class="ctrl-label">Lengkung Busur (Melingkar):</span>
+                    <span class="ctrl-val" id="curveVal">${el.curveAngle || 0}°</span>
+                    <button class="btn-reset-tool" onclick="updateCurveAngle(0); document.getElementById('curveSlider').value=0;">↺ Reset Datar (0°)</button>
                 </div>
-                <input type="range" class="range-slider" min="50" max="1500" value="${el.width}" oninput="updateImageDim('w', this.value)">
-
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Tinggi (Height):</span>
-                    <span class="ctrl-val" id="imgHVal">${Math.round(el.height)} px</span>
-                </div>
-                <input type="range" class="range-slider" min="50" max="1500" value="${el.height}" oninput="updateImageDim('h', this.value)">
-
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Skala Proporsional (+/-):</span>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('curveSlider', -5, updateCurveAngle)">-</button>
+                    <input type="range" class="range-slider" id="curveSlider" min="-180" max="180" value="${el.curveAngle || 0}" oninput="updateCurveAngle(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('curveSlider', 5, updateCurveAngle)">+</button>
                 </div>
                 <div class="ctrl-grid-btns" style="margin-top:6px;">
-                    <button class="btn-sub-tool" onclick="scaleImageRelative(0.8)">➖ Kecilkan (-20%)</button>
-                    <button class="btn-sub-tool" onclick="scaleImageRelative(1.2)">➕ Besarkan (+20%)</button>
-                    <button class="btn-sub-tool" onclick="fitImageWidth()">📐 Pas Lebar</button>
-                    <button class="btn-sub-tool" onclick="resetImageRatio()">↺ Reset Asli</button>
+                    <button class="btn-sub-tool" onclick="updateCurveAngle(-50); document.getElementById('curveSlider').value=-50;">Cekung Atas (-50°)</button>
+                    <button class="btn-sub-tool" onclick="updateCurveAngle(0); document.getElementById('curveSlider').value=0;">Datar (0°)</button>
+                    <button class="btn-sub-tool" onclick="updateCurveAngle(50); document.getElementById('curveSlider').value=50;">Cembung Bawah (+50°)</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:14px;">
+                    <span class="ctrl-label">Kemiringan Huruf (Italic Slant):</span>
+                    <span class="ctrl-val" id="slantVal">${el.italicSlant || 0}°</span>
+                    <button class="btn-reset-tool" onclick="updateItalicSlant(0); document.getElementById('slantSlider').value=0;">↺ Reset (0°)</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('slantSlider', -2, updateItalicSlant)">-</button>
+                    <input type="range" class="range-slider" id="slantSlider" min="-35" max="35" value="${el.italicSlant || 0}" oninput="updateItalicSlant(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('slantSlider', 2, updateItalicSlant)">+</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:14px;">
+                    <span class="ctrl-label">Derajat Rotasi Posisi:</span>
+                    <span class="ctrl-val" id="rotVal">${el.rotation || 0}°</span>
+                    <button class="btn-reset-tool" onclick="updateRotation(0); document.getElementById('rotSlider').value=0;">↺ Reset (0°)</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('rotSlider', -5, updateRotation)">-</button>
+                    <input type="range" class="range-slider" id="rotSlider" min="0" max="360" value="${el.rotation || 0}" oninput="updateRotation(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('rotSlider', 5, updateRotation)">+</button>
                 </div>
             `;
-            openToolPanel('Ukuran PNG & Foto', html);
+            openToolPanel('Lengkung & Kemiringan Teks', html);
         }
-
-        function updateImageDim(dim, val) {
+        function updateCurveAngle(val) {
             const el = getActiveElement();
             if (!el) return;
-            if (dim === 'w') {
-                el.width = parseInt(val);
-                document.getElementById('imgWVal').innerText = `${val} px`;
-            } else {
-                el.height = parseInt(val);
-                document.getElementById('imgHVal').innerText = `${val} px`;
+            el.curveAngle = parseInt(val);
+            const lbl = document.getElementById('curveVal');
+            if (lbl) lbl.innerText = `${val}°`;
+            requestRender(); pushHistoryState();
+        }
+        function updateItalicSlant(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.italicSlant = parseInt(val);
+            const lbl = document.getElementById('slantVal');
+            if (lbl) lbl.innerText = `${val}°`;
+            requestRender(); pushHistoryState();
+        }
+        function updateRotation(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            let angle = parseInt(val);
+            if (angle < 0) angle += 360;
+            if (angle >= 360) angle -= 360;
+            el.rotation = angle;
+            const lbl = document.getElementById('rotVal');
+            if (lbl) lbl.innerText = `${angle}°`;
+            requestRender(); pushHistoryState();
+        }
+
+        // 8. PANEL ROTASI DEDIKASI
+        function openPanelRotation() {
+            const el = getActiveElement();
+            if (!el) return;
+            const html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Derajat Perputaran (Rotasi):</span>
+                    <span class="ctrl-val" id="rotVal">${el.rotation || 0}°</span>
+                    <button class="btn-reset-tool" onclick="updateRotation(0); document.getElementById('rotSlider').value=0;">↺ Reset 0°</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('rotSlider', -5, updateRotation)">-</button>
+                    <input type="range" class="range-slider" id="rotSlider" min="0" max="360" value="${el.rotation || 0}" oninput="updateRotation(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('rotSlider', 5, updateRotation)">+</button>
+                </div>
+                <div class="ctrl-grid-btns" style="margin-top:10px;">
+                    <button class="btn-sub-tool" onclick="updateRotation(0); document.getElementById('rotSlider').value=0;">0° Tegak</button>
+                    <button class="btn-sub-tool" onclick="updateRotation(90); document.getElementById('rotSlider').value=90;">90° Samping</button>
+                    <button class="btn-sub-tool" onclick="updateRotation(180); document.getElementById('rotSlider').value=180;">180° Terbalik</button>
+                    <button class="btn-sub-tool" onclick="updateRotation(270); document.getElementById('rotSlider').value=270;">270° Samping</button>
+                </div>
+            `;
+            openToolPanel('Derajat Rotasi Elemen', html);
+        }
+
+        // 9. PANEL GAMBAR: BLUR & BORDER (DENGAN +/- DAN RESET)
+        function openPanelImageBorder() {
+            const el = getActiveElement();
+            if (!el || el.type !== 'image') return;
+            let html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Efek Blur PNG / Gambar:</span>
+                    <span class="ctrl-val" id="valImgBlur">${el.blur || 0}px</span>
+                    <button class="btn-reset-tool" onclick="updateImageBlur(0); document.getElementById('blurSlider').value=0;">↺ Reset Blur</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('blurSlider', -1, updateImageBlur)">-</button>
+                    <input type="range" class="range-slider" id="blurSlider" min="0" max="30" value="${el.blur || 0}" oninput="updateImageBlur(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('blurSlider', 1, updateImageBlur)">+</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:14px;">
+                    <span class="ctrl-label">Kelengkungan Sudut (Radius):</span>
+                    <span class="ctrl-val" id="valRadius">${el.cornerRadius || 0}px</span>
+                    <button class="btn-reset-tool" onclick="updateCornerRadius(0); document.getElementById('radSlider').value=0;">↺ Reset</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('radSlider', -5, updateCornerRadius)">-</button>
+                    <input type="range" class="range-slider" id="radSlider" min="0" max="150" value="${el.cornerRadius || 0}" oninput="updateCornerRadius(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('radSlider', 5, updateCornerRadius)">+</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:14px;">
+                    <span class="ctrl-label">Tebal Garis Tepi (Border):</span>
+                    <span class="ctrl-val" id="valBorderW">${el.borderWidth || 0}px</span>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('borderWSlider', -1, updateBorderWidth)">-</button>
+                    <input type="range" class="range-slider" id="borderWSlider" min="0" max="30" value="${el.borderWidth || 0}" oninput="updateBorderWidth(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('borderWSlider', 1, updateBorderWidth)">+</button>
+                </div>
+
+                <span class="ctrl-label" style="margin-top:10px;display:block;">Warna Garis Tepi:</span>
+                <div class="color-palette-scroll" style="margin-top:6px;">
+            `;
+            QUICK_COLORS.forEach(c => {
+                html += `<div class="color-circle ${el.borderColor === c ? 'active' : ''}" style="background:${c};" onclick="setBorderColor('${c}')"></div>`;
+            });
+            html += '</div>';
+            openToolPanel('Garis Tepi & Blur PNG', html);
+        }
+        function updateImageBlur(v) {
+            const el = getActiveElement();
+            if (el) {
+                el.blur = parseInt(v);
+                const lbl = document.getElementById('valImgBlur');
+                if (lbl) lbl.innerText = v + 'px';
+                renderAll(); triggerAutoSave();
             }
-            requestRender();
-            pushHistoryState();
         }
 
-        function scaleImageRelative(factor) {
+        // 10. FITUR HAPUS LATAR BELAKANG PNG / FOTO
+        let bgTol = 35;
+        let bgFeather = 2;
+        function openPanelBgRemoval() {
             const el = getActiveElement();
-            if (!el) return;
-            el.width = Math.round(el.width * factor);
-            el.height = Math.round(el.height * factor);
-            requestRender();
-            pushHistoryState();
-            openPanelImageSize();
-        }
+            if (!el || el.type !== 'image' || !el.img) return;
 
-        function fitImageWidth() {
-            const el = getActiveElement();
-            if (!el) return;
-            const ratio = (el.height || 300) / (el.width || 300);
-            el.width = mainCanvas.width * 0.9;
-            el.height = el.width * ratio;
-            el.x = mainCanvas.width / 2;
-            requestRender();
-            pushHistoryState();
-            openPanelImageSize();
-        }
+            if (!el.origSrc) {
+                el.origSrc = el.img.src;
+            }
 
-        function resetImageRatio() {
+            const html = `
+                <div style="font-size:12px;color:#bbb;line-height:1.5;margin-bottom:12px;">
+                    Hapus warna latar belakang gambar PNG/Foto secara otomatis menjadi transparan:
+                </div>
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Toleransi Warna (Threshold):</span>
+                    <span class="ctrl-val" id="bgThreshVal">${bgTol}</span>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('bgTolSlider', -5, updateBgTol)">-</button>
+                    <input type="range" class="range-slider" id="bgTolSlider" min="5" max="95" value="${bgTol}" oninput="updateBgTol(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('bgTolSlider', 5, updateBgTol)">+</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:12px;">
+                    <span class="ctrl-label">Kehalusan Tepi (Feather):</span>
+                    <span class="ctrl-val" id="bgFeatherVal">${bgFeather}px</span>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('bgFeatherSlider', -1, updateBgFeather)">-</button>
+                    <input type="range" class="range-slider" id="bgFeatherSlider" min="0" max="10" value="${bgFeather}" oninput="updateBgFeather(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('bgFeatherSlider', 1, updateBgFeather)">+</button>
+                </div>
+
+                <div class="ctrl-grid-btns" style="margin-top:16px;">
+                    <button class="btn-sub-tool active" onclick="applyBgRemoval()" style="padding:10px;">
+                        🪄 Terapkan Hapus Background
+                    </button>
+                    <button class="btn-sub-tool" onclick="resetBgRemovalOriginal()" style="padding:10px;">
+                        ↺ Kembalikan Gambar Asli
+                    </button>
+                </div>
+            `;
+            openToolPanel('Hapus Latar Belakang PNG', html);
+        }
+        function updateBgTol(v) {
+            bgTol = parseInt(v);
+            const lbl = document.getElementById('bgThreshVal');
+            if (lbl) lbl.innerText = v;
+        }
+        function updateBgFeather(v) {
+            bgFeather = parseInt(v);
+            const lbl = document.getElementById('bgFeatherVal');
+            if (lbl) lbl.innerText = v + 'px';
+        }
+        function applyBgRemoval() {
             const el = getActiveElement();
             if (!el || !el.img) return;
-            el.width = Math.min(el.img.width, 600);
-            el.height = el.width * (el.img.height / el.img.width);
-            requestRender();
+
+            showToast('Memproses hapus latar belakang...');
+            setTimeout(() => {
+                const off = document.createElement('canvas');
+                off.width = el.img.width;
+                off.height = el.img.height;
+                const octx = off.getContext('2d');
+                octx.drawImage(el.img, 0, 0);
+
+                const imgData = octx.getImageData(0, 0, off.width, off.height);
+                const data = imgData.data;
+
+                // Ambil sampel warna background dari 4 sudut
+                const targetR = data[0];
+                const targetG = data[1];
+                const targetB = data[2];
+
+                const tolDist = (bgTol / 100) * 441; // Max RGB distance ~441
+                const featherDist = (bgFeather * 12);
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i+1];
+                    const b = data[i+2];
+
+                    const dist = Math.sqrt((r - targetR)**2 + (g - targetG)**2 + (b - targetB)**2);
+
+                    if (dist < tolDist) {
+                        data[i+3] = 0; // Transparan
+                    } else if (dist < tolDist + featherDist) {
+                        const alpha = ((dist - tolDist) / featherDist) * data[i+3];
+                        data[i+3] = Math.round(alpha);
+                    }
+                }
+
+                octx.putImageData(imgData, 0, 0);
+                const newImg = new Image();
+                newImg.onload = () => {
+                    el.img = newImg;
+                    el.src = newImg.src;
+                    requestRender();
+                    pushHistoryState();
+                    showToast('✅ Latar belakang berhasil dihapus!');
+                };
+                newImg.src = off.toDataURL();
+            }, 50);
+        }
+        function resetBgRemovalOriginal() {
+            const el = getActiveElement();
+            if (!el || !el.origSrc) return;
+            const img = new Image();
+            img.onload = () => {
+                el.img = img;
+                el.src = el.origSrc;
+                requestRender();
+                pushHistoryState();
+                showToast('✅ Gambar asli berhasil dikembalikan!');
+            };
+            img.src = el.origSrc;
+        }
+
+        // 11. TOOL GABUNG (GROUPING) MULTI-SELECT & PERSISTENSI
+        function openPanelGroup() {
+            const s = getCurrentSlide();
+            const curr = getActiveElement();
+
+            if (curr && curr.groupId) {
+                const groupCount = s.elements.filter(e => e.groupId === curr.groupId).length;
+                const html = `
+                    <div style="padding:12px;background:rgba(212,175,55,0.1);border-radius:10px;border:1px solid #D4AF37;margin-bottom:12px;">
+                        <div style="font-weight:700;color:#D4AF37;">🔗 Terhubung dalam Grup</div>
+                        <div style="font-size:11px;color:#aaa;margin-top:4px;">Elemen ini sedang tergabung bersama ${groupCount} elemen lainnya.</div>
+                    </div>
+                    <button class="btn-sub-tool active" onclick="ungroupCurrentElement()" style="width:100%;padding:12px;color:#ff6b6b;border-color:#ff6b6b;">
+                        ⛓️ Pisahkan dari Grup (Ungroup)
+                    </button>
+                `;
+                openToolPanel('Kelola Grup Elemen', html);
+                return;
+            }
+
+            let html = `
+                <div style="font-size:12px;color:#bbb;margin-bottom:12px;line-height:1.5;">
+                    Pilih 2 atau lebih elemen di bawah ini untuk digabungkan menjadi satu kesatuan:
+                </div>
+                <div style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+            `;
+
+            s.elements.forEach(el => {
+                const isSelf = curr && el.id === curr.id;
+                const name = el.type === 'text' ? (el.text.substring(0, 24) || 'Teks') : 'Foto / PNG';
+                html += `
+                    <label class="group-select-item" id="grpItem_${el.id}">
+                        <input type="checkbox" class="group-checkbox" value="${el.id}" ${isSelf ? 'checked' : ''}>
+                        <span>${el.type === 'text' ? '📝' : '🖼️'} ${name}</span>
+                    </label>
+                `;
+            });
+
+            html += `
+                </div>
+                <button class="btn-sub-tool active" onclick="confirmGroupElements()" style="width:100%;margin-top:14px;padding:12px;font-size:13px;font-weight:700;">
+                    🔗 Konfirmasi Gabungkan Elemen
+                </button>
+            `;
+            openToolPanel('Gabungkan Elemen (Group)', html);
+        }
+
+        function confirmGroupElements() {
+            const s = getCurrentSlide();
+            const checked = Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb => cb.value);
+            if (checked.length < 2) {
+                alert('Pilih minimal 2 elemen untuk digabungkan');
+                return;
+            }
+            const newGid = 'grp_' + Date.now();
+            s.elements.forEach(el => {
+                if (checked.includes(el.id)) {
+                    el.groupId = newGid;
+                }
+            });
             pushHistoryState();
-            openPanelImageSize();
+            renderBottomToolbar();
+            closeToolPanel();
+            showToast(`✅ ${checked.length} Elemen berhasil digabungkan!`);
+        }
+
+        function ungroupCurrentElement() {
+            const el = getActiveElement();
+            if (!el || !el.groupId) return;
+            const s = getCurrentSlide();
+            const gid = el.groupId;
+            s.elements.forEach(e => {
+                if (e.groupId === gid) e.groupId = null;
+            });
+            pushHistoryState();
+            renderBottomToolbar();
+            closeToolPanel();
+            showToast('⛓️ Grup berhasil dipisahkan!');
+        }
+
+        // 12. DAFTAR LAPISAN LAYER: DRAG & DROP / GESER ATAS-BAWAH DITAHAN LAMA KEK CANVA
+        let draggedLayerIdx = null;
+        function openPanelLayers() {
+            const s = getCurrentSlide();
+            let html = '<div class="layer-list-container" id="layerListModal" style="display:flex;flex-direction:column;gap:6px;">';
+            // Tampilkan dari lapisan teratas (index terbesar) ke terbawah (index 0)
+            for (let i = s.elements.length - 1; i >= 0; i--) {
+                const el = s.elements[i];
+                const isAct = el.id === activeElementId;
+                const name = el.type === 'text' ? (el.text.substring(0, 24) || 'Teks') : 'Foto / PNG';
+                html += `
+                    <div class="layer-item ${isAct ? 'active' : ''}" 
+                         draggable="true" 
+                         data-idx="${i}"
+                         ondragstart="onLayerDragStart(event, ${i})"
+                         ondragover="onLayerDragOver(event)"
+                         ondrop="onLayerDrop(event, ${i})"
+                         onclick="selectElement('${el.id}'); openPanelLayers();"
+                         style="cursor:grab;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="color:#D4AF37;cursor:grab;" title="Tahan & Geser Urutan">☰</span>
+                            <span>${el.type === 'text' ? '📝' : '🖼️'} ${name}</span>
+                        </div>
+                        <div class="layer-actions" style="display:flex;gap:6px;align-items:center;">
+                            <button class="layer-btn" onclick="event.stopPropagation(); quickMoveLayer(${i}, 1)" title="Maju 1 Lapis">▲</button>
+                            <button class="layer-btn" onclick="event.stopPropagation(); quickMoveLayer(${i}, -1)" title="Mundur 1 Lapis">▼</button>
+                            <button class="layer-btn" onclick="event.stopPropagation(); toggleElementLockById('${el.id}')">${el.locked ? '🔒' : '🔓'}</button>
+                            <button class="layer-btn" onclick="event.stopPropagation(); deleteElementById('${el.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            openToolPanel('Daftar Lapisan Layer (Tahan & Geser)', html);
+        }
+
+        function onLayerDragStart(e, idx) {
+            draggedLayerIdx = idx;
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        function onLayerDragOver(e) {
+            e.preventDefault();
+        }
+        function onLayerDrop(e, targetIdx) {
+            e.preventDefault();
+            if (draggedLayerIdx === null || draggedLayerIdx === targetIdx) return;
+            const s = getCurrentSlide();
+            const moved = s.elements.splice(draggedLayerIdx, 1)[0];
+            s.elements.splice(targetIdx, 0, moved);
+            draggedLayerIdx = null;
+            renderAll();
+            pushHistoryState();
+            openPanelLayers();
+        }
+        function quickMoveLayer(idx, delta) {
+            const s = getCurrentSlide();
+            const targetIdx = idx + delta;
+            if (targetIdx < 0 || targetIdx >= s.elements.length) return;
+            const temp = s.elements[idx];
+            s.elements[idx] = s.elements[targetIdx];
+            s.elements[targetIdx] = temp;
+            renderAll();
+            pushHistoryState();
+            openPanelLayers();
+        }
+
+        // 13. JOYSTICK GESER D-PAD DENGAN FUNGSI TEKAN LAMA GESER TERUS
+        let dpadInterval = null;
+        let dpadInitialTimeout = null;
+
+        function startDpadContinuous(dx, dy) {
+            stopDpadContinuous();
+            nudgeElement(dx, dy);
+            dpadInitialTimeout = setTimeout(() => {
+                dpadInterval = setInterval(() => {
+                    nudgeElement(dx, dy);
+                }, 45);
+            }, 200);
+        }
+
+        function stopDpadContinuous() {
+            clearTimeout(dpadInitialTimeout);
+            clearInterval(dpadInterval);
+            dpadInitialTimeout = null;
+            dpadInterval = null;
         }
 
         function openPanelPosition() {
@@ -1878,75 +2788,89 @@
                     <button class="btn-pos-cell" onclick="setAlignPosition('bottom-right')">↘️ Kanan Bawah</button>
                 </div>
 
-                <div style="font-size:11px;color:#aaa;font-weight:700;margin:12px 0 6px;">JOYSTICK GESER MANUAL</div>
+                <div style="font-size:11px;color:#aaa;font-weight:700;margin:12px 0 6px;">JOYSTICK GESER (TAHAN UNTUK GESER CEPAT)</div>
                 <div class="dpad-container">
-                    <button class="dpad-btn" onclick="nudgeElement(0, -nudgeStep)">▲</button>
+                    <button class="dpad-btn" onpointerdown="startDpadContinuous(0, -nudgeStep)" onpointerup="stopDpadContinuous()" onpointerleave="stopDpadContinuous()">▲</button>
                     <div class="dpad-row">
-                        <button class="dpad-btn" onclick="nudgeElement(-nudgeStep, 0)">◀</button>
+                        <button class="dpad-btn" onpointerdown="startDpadContinuous(-nudgeStep, 0)" onpointerup="stopDpadContinuous()" onpointerleave="stopDpadContinuous()">◀</button>
                         <div class="dpad-center" id="posCoordLabel">X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}</div>
-                        <button class="dpad-btn" onclick="nudgeElement(nudgeStep, 0)">▶</button>
+                        <button class="dpad-btn" onpointerdown="startDpadContinuous(nudgeStep, 0)" onpointerup="stopDpadContinuous()" onpointerleave="stopDpadContinuous()">▶</button>
                     </div>
-                    <button class="dpad-btn" onclick="nudgeElement(0, nudgeStep)">▼</button>
+                    <button class="dpad-btn" onpointerdown="startDpadContinuous(0, nudgeStep)" onpointerup="stopDpadContinuous()" onpointerleave="stopDpadContinuous()">▼</button>
                 </div>
 
                 <div class="ctrl-row" style="margin-top:10px;">
                     <span class="ctrl-label">Langkah Geser:</span>
                     <span class="ctrl-val" id="nudgeStepLabel">${nudgeStep} px</span>
                 </div>
-                <input type="range" class="range-slider" min="1" max="50" value="${nudgeStep}" oninput="setNudgeStep(this.value)">
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('nudgeSlider', -1, setNudgeStep)">-</button>
+                    <input type="range" class="range-slider" id="nudgeSlider" min="1" max="50" value="${nudgeStep}" oninput="setNudgeStep(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('nudgeSlider', 1, setNudgeStep)">+</button>
+                </div>
                 <div class="ctrl-grid-btns" style="margin-top:6px;">
-                    <button class="btn-sub-tool" onclick="setNudgeStep(1)">1px (Ultra)</button>
-                    <button class="btn-sub-tool" onclick="setNudgeStep(5)">5px</button>
-                    <button class="btn-sub-tool" onclick="setNudgeStep(10)">10px (Normal)</button>
-                    <button class="btn-sub-tool" onclick="setNudgeStep(25)">25px</button>
+                    <button class="btn-sub-tool" onclick="setNudgeStep(1); document.getElementById('nudgeSlider').value=1;">1px (Ultra)</button>
+                    <button class="btn-sub-tool" onclick="setNudgeStep(5); document.getElementById('nudgeSlider').value=5;">5px</button>
+                    <button class="btn-sub-tool" onclick="setNudgeStep(10); document.getElementById('nudgeSlider').value=10;">10px</button>
+                    <button class="btn-sub-tool" onclick="setNudgeStep(25); document.getElementById('nudgeSlider').value=25;">25px</button>
                 </div>
             `;
             openToolPanel('Posisi & Joystick Geser', html);
         }
 
-        function setNudgeStep(v) {
-            nudgeStep = parseInt(v);
-            const lbl = document.getElementById('nudgeStepLabel');
-            if (lbl) lbl.innerText = `${nudgeStep} px`;
-        }
-
-        function nudgeElement(dx, dy) {
-            const el = getActiveElement();
-            if (!el || el.locked) return;
-            el.x += dx;
-            el.y += dy;
-            const coord = document.getElementById('posCoordLabel');
-            if (coord) coord.innerHTML = `X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}`;
-            requestRender();
-            pushHistoryState();
-        }
-
-        function setAlignPosition(pos) {
-            const el = getActiveElement();
-            if (!el || el.locked) return;
-            const W = mainCanvas.width;
-            const H = mainCanvas.height;
-            const elW = el.type === 'text' ? (el.width || 750) : (el.width || 300);
-            const elH = el.type === 'text' ? (el._calculatedHeight || 120) : (el.height || 300);
-            const pad = 60;
-
-            switch (pos) {
-                case 'top-left': el.x = pad + (elW / 2); el.y = pad + (elH / 2); break;
-                case 'top': el.x = W / 2; el.y = pad + (elH / 2); break;
-                case 'top-right': el.x = W - pad - (elW / 2); el.y = pad + (elH / 2); break;
-                case 'left': el.x = pad + (elW / 2); el.y = H / 2; break;
-                case 'center': el.x = W / 2; el.y = H / 2; break;
-                case 'right': el.x = W - pad - (elW / 2); el.y = H / 2; break;
-                case 'bottom-left': el.x = pad + (elW / 2); el.y = H - pad - (elH / 2); break;
-                case 'bottom': el.x = W / 2; el.y = H - pad - (elH / 2); break;
-                case 'bottom-right': el.x = W - pad - (elW / 2); el.y = H - pad - (elH / 2); break;
+        // 14. FITUR MULTI-PROJEK MANAGER ALA CANVA
+        function getProjectsList() {
+            try {
+                const raw = localStorage.getItem(PROJECTS_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                return [];
             }
-
-            requestRender();
-            pushHistoryState();
-            openPanelPosition();
         }
 
+        function saveProjectsList(list) {
+            try {
+                localStorage.setItem(PROJECTS_KEY, JSON.stringify(list));
+            } catch(e) {}
+        }
+
+        function openProjectModal() {
+            renderProjectList();
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('active');
+        }
+
+        function saveCurrentProjectAuto(customName) {
+            let list = getProjectsList();
+            let p = list.find(x => x.id === currentProjectId);
+            const thumb = (mainCanvas && typeof mainCanvas.toDataURL === 'function') ? mainCanvas.toDataURL('image/jpeg', 0.4) : '';
+
+            if (!p) {
+                p = {
+                    id: currentProjectId || ('proj_' + Date.now()),
+                    name: customName || ('Projek Dakwah ' + (list.length + 1)),
+                    ratio: currentRatio,
+                    slideCount: slides.length,
+                    thumb: thumb,
+                    slides: serializeSlides(slides),
+                    updatedAt: Date.now()
+                };
+                list.unshift(p);
+            } else {
+                if (customName) p.name = customName;
+                p.ratio = currentRatio;
+                p.slideCount = slides.length;
+                p.thumb = thumb;
+                p.slides = serializeSlides(slides);
+                p.updatedAt = Date.now();
+            }
+            saveProjectsList(list);
+        }
+
+        // SKIN MOTIF FOTO TEKS (CORELDRAW STYLE)
         function openPanelTextSkin() {
             const el = getActiveElement();
             if (!el || el.type !== 'text') return;
@@ -1965,22 +2889,34 @@
                     </div>
 
                     <div class="ctrl-row" style="margin-top:10px;">
-                        <span class="ctrl-label">Geser Horizontal Foto (X):</span>
+                        <span class="ctrl-label">Geser Horizontal (X):</span>
                         <span class="ctrl-val" id="skinXVal">${el.textSkinOffsetX || 0} px</span>
                     </div>
-                    <input type="range" class="range-slider" min="-500" max="500" value="${el.textSkinOffsetX || 0}" oninput="updateTextSkinOffset('x', this.value)">
+                    <div class="stepper-row">
+                        <button class="btn-step" onclick="stepSliderVal('skinXSlider', -10, (v)=>updateTextSkinOffset('x', v))">-</button>
+                        <input type="range" class="range-slider" id="skinXSlider" min="-500" max="500" value="${el.textSkinOffsetX || 0}" oninput="updateTextSkinOffset('x', this.value)">
+                        <button class="btn-step" onclick="stepSliderVal('skinXSlider', 10, (v)=>updateTextSkinOffset('x', v))">+</button>
+                    </div>
 
                     <div class="ctrl-row" style="margin-top:10px;">
-                        <span class="ctrl-label">Geser Vertikal Foto (Y):</span>
+                        <span class="ctrl-label">Geser Vertikal (Y):</span>
                         <span class="ctrl-val" id="skinYVal">${el.textSkinOffsetY || 0} px</span>
                     </div>
-                    <input type="range" class="range-slider" min="-500" max="500" value="${el.textSkinOffsetY || 0}" oninput="updateTextSkinOffset('y', this.value)">
+                    <div class="stepper-row">
+                        <button class="btn-step" onclick="stepSliderVal('skinYSlider', -10, (v)=>updateTextSkinOffset('y', v))">-</button>
+                        <input type="range" class="range-slider" id="skinYSlider" min="-500" max="500" value="${el.textSkinOffsetY || 0}" oninput="updateTextSkinOffset('y', this.value)">
+                        <button class="btn-step" onclick="stepSliderVal('skinYSlider', 10, (v)=>updateTextSkinOffset('y', v))">+</button>
+                    </div>
 
                     <div class="ctrl-row" style="margin-top:10px;">
                         <span class="ctrl-label">Zoom / Skala Foto Skin:</span>
                         <span class="ctrl-val" id="skinScaleVal">${Math.round((el.textSkinScale || 1.0) * 100)}%</span>
                     </div>
-                    <input type="range" class="range-slider" min="30" max="300" value="${Math.round((el.textSkinScale || 1.0) * 100)}" oninput="updateTextSkinScale(this.value)">
+                    <div class="stepper-row">
+                        <button class="btn-step" onclick="stepSliderVal('skinScaleSlider', -10, updateTextSkinScale)">-</button>
+                        <input type="range" class="range-slider" id="skinScaleSlider" min="30" max="300" value="${Math.round((el.textSkinScale || 1.0) * 100)}" oninput="updateTextSkinScale(this.value)">
+                        <button class="btn-step" onclick="stepSliderVal('skinScaleSlider', 10, updateTextSkinScale)">+</button>
+                    </div>
                 ` : `
                     <div style="font-size:11px;color:#888;margin-top:8px;line-height:1.4;">
                         💡 <b>Tips:</b> Masukkan gambar pola api, emas, awan, atau marmer untuk dijadikan skin tekstur di dalam huruf judul!
@@ -2027,10 +2963,12 @@
             if (!el) return;
             if (axis === 'x') {
                 el.textSkinOffsetX = parseInt(val);
-                document.getElementById('skinXVal').innerText = `${val} px`;
+                const lbl = document.getElementById('skinXVal');
+                if (lbl) lbl.innerText = `${val} px`;
             } else {
                 el.textSkinOffsetY = parseInt(val);
-                document.getElementById('skinYVal').innerText = `${val} px`;
+                const lbl = document.getElementById('skinYVal');
+                if (lbl) lbl.innerText = `${val} px`;
             }
             requestRender();
             pushHistoryState();
@@ -2040,118 +2978,185 @@
             const el = getActiveElement();
             if (!el) return;
             el.textSkinScale = parseInt(val) / 100;
-            document.getElementById('skinScaleVal').innerText = `${val}%`;
+            const lbl = document.getElementById('skinScaleVal');
+            if (lbl) lbl.innerText = `${val}%`;
             requestRender();
             pushHistoryState();
         }
 
-        function openPanelCurveAndSlant() {
-            const el = getActiveElement();
-            if (!el || el.type !== 'text') return;
+        function renderProjectList() {
+            let list = getProjectsList();
+            const container = document.getElementById('projectGridContainer');
+            if (!container) return;
+            container.innerHTML = '';
 
-            const html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Lengkung Busur (-/+ Melingkar):</span>
-                    <span class="ctrl-val" id="curveVal">${el.curveAngle || 0}°</span>
-                </div>
-                <input type="range" class="range-slider" min="-180" max="180" value="${el.curveAngle || 0}" oninput="updateCurveAngle(this.value)">
-                <div class="ctrl-grid-btns" style="margin-top:6px;">
-                    <button class="btn-sub-tool" onclick="updateCurveAngle(-60)">Cekung (-60°)</button>
-                    <button class="btn-sub-tool" onclick="updateCurveAngle(0)">Datar (0°)</button>
-                    <button class="btn-sub-tool" onclick="updateCurveAngle(60)">Cembung (+60°)</button>
-                    <button class="btn-sub-tool" onclick="updateCurveAngle(180)">Setengah Lingkaran</button>
-                </div>
+            if (list.length === 0) {
+                saveCurrentProjectAuto('Projek Dakwah 1');
+                list = getProjectsList();
+                if (list.length === 0) {
+                    list = [{
+                        id: currentProjectId || 'proj_1',
+                        name: 'Projek Dakwah 1',
+                        ratio: currentRatio,
+                        slideCount: (slides ? slides.length : 1),
+                        thumb: '',
+                        updatedAt: Date.now()
+                    }];
+                }
+            }
 
-                <div class="ctrl-row" style="margin-top:12px;">
-                    <span class="ctrl-label">Kemiringan Huruf (Italic Slant):</span>
-                    <span class="ctrl-val" id="slantVal">${el.italicSlant || 0}°</span>
-                </div>
-                <input type="range" class="range-slider" min="-35" max="35" value="${el.italicSlant || 0}" oninput="updateItalicSlant(this.value)">
-
-                <div class="ctrl-row" style="margin-top:12px;">
-                    <span class="ctrl-label">Rotasi Judul Keseluruhan:</span>
-                    <span class="ctrl-val" id="rotVal">${el.rotation || 0}°</span>
-                </div>
-                <input type="range" class="range-slider" min="-180" max="180" value="${el.rotation || 0}" oninput="updateRotation(this.value)">
-            `;
-            openToolPanel('Lengkung & Kemiringan Judul', html);
+            list.forEach(p => {
+                const isCurrent = p.id === currentProjectId;
+                const card = document.createElement('div');
+                card.className = `project-card ${isCurrent ? 'active' : ''}`;
+                card.innerHTML = `
+                    <img class="project-thumb" src="${p.thumb || ''}" onerror="this.style.display='none'">
+                    <div class="project-title" title="${p.name}">${p.name}</div>
+                    <div class="project-meta">Rasio: ${p.ratio || '9:16'} • ${p.slideCount || 1} Slide</div>
+                    <div class="project-meta">${new Date(p.updatedAt || Date.now()).toLocaleDateString('id-ID')}</div>
+                    <div class="project-actions">
+                        <button class="btn-proj-action" onclick="loadProjectById('${p.id}')">Buka</button>
+                        <button class="btn-proj-action" onclick="duplicateProjectById('${p.id}')">Salin</button>
+                        <button class="btn-proj-action" onclick="deleteProjectById('${p.id}')" style="color:#ff6b6b;">Hapus</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
-        function updateCurveAngle(val) {
-            const el = getActiveElement();
-            if (!el) return;
-            el.curveAngle = parseInt(val);
-            const lbl = document.getElementById('curveVal');
-            if (lbl) lbl.innerText = `${val}°`;
-            requestRender();
+        function createNewProjectPrompt() {
+            const name = prompt('Nama projek baru:', 'Projek Dakwah ' + (getProjectsList().length + 1));
+            if (!name) return;
+            // Simpan projek lama dulu
+            saveCurrentProjectAuto();
+
+            // Buat projek baru
+            currentProjectId = 'proj_' + Date.now();
+            slides = [createDefaultSlide()];
+            currentSlideIndex = 0;
+            currentRatio = '9:16';
+            document.getElementById('currentRatioLabel').innerText = '9:16';
+            adjustArtboardSize();
+            renderAll();
+            renderCarouselThumbs();
             pushHistoryState();
+            saveCurrentProjectAuto(name);
+            closeProjectModal();
+            showToast(`✅ Projek "${name}" dibuat!`);
         }
 
-        function updateItalicSlant(val) {
-            const el = getActiveElement();
-            if (!el) return;
-            el.italicSlant = parseInt(val);
-            const lbl = document.getElementById('slantVal');
-            if (lbl) lbl.innerText = `${val}°`;
-            requestRender();
+        function saveAsNewProjectPrompt() {
+            const name = prompt('Nama salinan projek:', 'Salinan ' + (new Date().toLocaleTimeString()));
+            if (!name) return;
+            currentProjectId = 'proj_' + Date.now();
+            saveCurrentProjectAuto(name);
+            renderProjectList();
+            showToast(`✅ Disimpan sebagai projek baru "${name}"!`);
+        }
+
+        function loadProjectById(id) {
+            saveCurrentProjectAuto(); // Simpan yang sekarang dulu
+            const list = getProjectsList();
+            const p = list.find(x => x.id === id);
+            if (!p) return;
+
+            currentProjectId = p.id;
+            currentRatio = p.ratio || '9:16';
+            document.getElementById('currentRatioLabel').innerText = currentRatio;
+            slides = deserializeSlides(p.slides || []);
+            currentSlideIndex = 0;
+            adjustArtboardSize();
+            renderAll();
+            renderCarouselThumbs();
+            renderBottomToolbar();
             pushHistoryState();
+            closeProjectModal();
+            showToast(`✅ Membuka projek: ${p.name}`);
         }
 
-        function updateRotation(val) {
-            const el = getActiveElement();
-            if (!el) return;
-            el.rotation = parseInt(val);
-            const lbl = document.getElementById('rotVal');
-            if (lbl) lbl.innerText = `${val}°`;
-            requestRender();
-            pushHistoryState();
+        function duplicateProjectById(id) {
+            const list = getProjectsList();
+            const p = list.find(x => x.id === id);
+            if (!p) return;
+
+            const copy = JSON.parse(JSON.stringify(p));
+            copy.id = 'proj_' + Date.now();
+            copy.name = 'Salinan ' + p.name;
+            copy.updatedAt = Date.now();
+            list.unshift(copy);
+            saveProjectsList(list);
+            renderProjectList();
+            showToast(`✅ Projek "${p.name}" berhasil diduplikasi!`);
         }
 
-        function openPanelShadowAndGlass() {
+        function deleteProjectById(id) {
+            let list = getProjectsList();
+            if (list.length <= 1) {
+                alert('Minimal harus ada 1 projek.');
+                return;
+            }
+            if (confirm('Hapus projek ini secara permanen dari browser?')) {
+                list = list.filter(x => x.id !== id);
+                saveProjectsList(list);
+                if (currentProjectId === id) {
+                    loadProjectById(list[0].id);
+                } else {
+                    renderProjectList();
+                }
+                showToast('🗑️ Projek dihapus!');
+            }
+        }
+
+        // 15. DYNAMIC BOTTOM TOOLBAR UPDATE (DENGAN NAMA BARU, BLUR, GABUNG & ROTASI)
+        function renderBottomToolbar() {
+            const bar = document.getElementById('bottomToolbar');
             const el = getActiveElement();
-            if (!el) return;
-            if (!el.shadow) el.shadow = { color: 'rgba(0,0,0,0.8)', blur: 15, distance: 8, angle: 45 };
 
-            const html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Bayangan Luar (Drop Shadow):</span>
-                </div>
-                <div class="ctrl-row" style="margin-top:6px;">
-                    <span class="ctrl-label">Ketebalan Blur:</span>
-                    <span class="ctrl-val" id="shadowBlurVal">${el.shadow.blur} px</span>
-                </div>
-                <input type="range" class="range-slider" min="0" max="50" value="${el.shadow.blur}" oninput="updateShadowSetting('blur', this.value)">
-
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Jarak Bayangan:</span>
-                    <span class="ctrl-val" id="shadowDistVal">${el.shadow.distance} px</span>
-                </div>
-                <input type="range" class="range-slider" min="0" max="60" value="${el.shadow.distance}" oninput="updateShadowSetting('distance', this.value)">
-
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Sudut Sinar Sinar (Derajat):</span>
-                    <span class="ctrl-val" id="shadowAngleVal">${el.shadow.angle || 45}°</span>
-                </div>
-                <input type="range" class="range-slider" min="0" max="360" value="${el.shadow.angle || 45}" oninput="updateShadowSetting('angle', this.value)">
-
-                <div class="ctrl-row" style="margin-top:12px;">
-                    <span class="ctrl-label">Efek Glassmorphism (Border Blur):</span>
-                    <span class="ctrl-val" id="borderBlurVal">${el.borderBlur || 0} px</span>
-                </div>
-                <input type="range" class="range-slider" min="0" max="25" value="${el.borderBlur || 0}" oninput="updateBorderBlur(this.value)">
-
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Pilihan Warna Bayangan:</span>
-                </div>
-                <div class="color-palette-scroll" style="margin-top:6px;">
-                    <div class="color-circle" style="background:#000;" onclick="setShadowColor('rgba(0,0,0,0.85)')"></div>
-                    <div class="color-circle" style="background:#D4AF37;" onclick="setShadowColor('rgba(212,175,55,0.7)')"></div>
-                    <div class="color-circle" style="background:#00e5ff;" onclick="setShadowColor('rgba(0,229,255,0.6)')"></div>
-                    <div class="color-circle" style="background:#fff;" onclick="setShadowColor('rgba(255,255,255,0.8)')"></div>
-                    <div class="color-circle" style="background:#ff4757;" onclick="setShadowColor('rgba(255,71,87,0.7)')"></div>
-                </div>
-            `;
-            openToolPanel('Bayangan & Glassmorphism', html);
+            if (!el) {
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
+                    <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
+                    <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
+                    <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">📑</span><span>Lapisan</span></button>
+                    <button class="tool-btn" onclick="openPanelBleed()"><span class="icon">📐</span><span>Garis Bantu</span></button>
+                `;
+            } else if (el.type === 'text') {
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="openInlineTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit Teks</span></button>
+                    <button class="tool-btn" onclick="openPanelFontFamily()"><span class="icon">🔤</span><span>Font</span></button>
+                    <button class="tool-btn" onclick="openPanelFontSize()"><span class="icon">📏</span><span>Ukuran</span></button>
+                    <button class="tool-btn" onclick="openPanelTextColor()"><span class="icon">🎨</span><span>Warna</span></button>
+                    <button class="tool-btn" onclick="openPanelSpacing()"><span class="icon">↔️</span><span>Jarak Teks</span></button>
+                    <button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
+                    <button class="tool-btn" onclick="openPanelCurveAndSlant()"><span class="icon">🌀</span><span>Lengkung</span></button>
+                    <button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i><u>U</u></span><span>Format</span></button>
+                    <button class="tool-btn" onclick="openPanelHighlight()"><span class="icon">🖍️</span><span>Stabilo</span></button>
+                    <button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Foto</span></button>
+                    <button class="tool-btn" onclick="openPanelShadowAndGlass()"><span class="icon">👥</span><span>Bayangan</span></button>
+                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi & D-Pad</span></button>
+                    <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Grup' : 'Gabung'}</span></button>
+                    <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
+                    <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka' : 'Kunci'}</span></button>
+                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
+                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
+                `;
+            } else if (el.type === 'image') {
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="openPanelImageSize()"><span class="icon">📏</span><span>Ukuran</span></button>
+                    <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis & Blur</span></button>
+                    <button class="tool-btn" onclick="openPanelBgRemoval()"><span class="icon">🪄</span><span>Hapus BG</span></button>
+                    <button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
+                    <button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon">🪞</span><span>Cermin</span></button>
+                    <button class="tool-btn" onclick="openPanelShadowAndGlass()"><span class="icon">👥</span><span>Bayangan</span></button>
+                    <button class="tool-btn" onclick="openPanelImageOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
+                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi & D-Pad</span></button>
+                    <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Grup' : 'Gabung'}</span></button>
+                    <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
+                    <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka' : 'Kunci'}</span></button>
+                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
+                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
+                `;
+            }
         }
 
         function updateShadowSetting(prop, val) {
@@ -2636,5 +3641,32 @@
         }
 
     </script>
+
+    <!-- LOUPE UNTUK SAMPLE WARNA DARI BACKGROUND/KANVAS -->
+    <div class="color-loupe" id="colorLoupe">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;border:1px solid #fff;border-radius:50%;box-shadow:0 0 2px #000;"></div>
+        <div id="loupeColorPreview" style="position:absolute;bottom:0;left:0;right:0;height:20px;text-align:center;font-size:9px;color:#fff;font-weight:700;line-height:20px;text-shadow:0 1px 2px #000;">#000000</div>
+    </div>
+
+    <!-- MODAL PROJEK MULTI-PROJEK ALA CANVA -->
+    <div class="project-modal" id="projectModal">
+        <div class="project-dialog">
+            <div class="project-header">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:18px;">📁</span>
+                    <span style="font-weight:800;font-size:15px;color:#D4AF37;">Projek Saya (Tersimpan di Browser)</span>
+                </div>
+                <button class="panel-close" onclick="closeProjectModal()" style="font-size:20px;cursor:pointer;">✕</button>
+            </div>
+            <div style="padding:12px 16px;background:rgba(255,255,255,0.03);display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+                <button class="btn-nav active" onclick="createNewProjectPrompt()" style="flex:1;justify-content:center;">➕ Buat Projek Baru</button>
+                <button class="btn-nav" onclick="saveAsNewProjectPrompt()" style="flex:1;justify-content:center;">💾 Duplikat Jadi Projek Baru</button>
+            </div>
+            <div class="project-grid" id="projectGridContainer">
+                <!-- Diisi dinamis oleh renderProjectList() -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
