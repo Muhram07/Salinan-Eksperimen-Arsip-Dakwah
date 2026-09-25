@@ -3,761 +3,1836 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studio Poster Maker - Dakwah Sunnah</title>
-    <!-- Font Google: Montserrat (Tebal Tegas), Playfair (Serif Elegan), Plus Jakarta Sans (Formal Rapi), Caveat (Aksen Tangan) -->
+    <title>Studio Poster Maker - Canva & PixelLab Style</title>
+    <!-- Font Lengkap Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Montserrat:wght@800;900&family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Caveat:wght@700&family=Cinzel:wght@700;900&family=Montserrat:ital,wght@0,400;0,700;0,900;1,700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-        body{
-            background:#0b0b0b;
-            background:radial-gradient(circle at 50% 0%, #1a1a1a 0%, #080808 80%);
-            color:#fff;
-            font-family:'Plus Jakarta Sans', Arial, sans-serif;
-            min-height:100vh;
-            display:flex;
-            flex-direction:column;
-            overflow-x:hidden;
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none;}
+        html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
+
+        /* TOP HEADER TOOLBAR */
+        .top-navbar{
+            height:50px;background:#141414;border-bottom:1px solid rgba(212,175,55,0.25);
+            display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:200;position:relative;
+        }
+        .nav-left, .nav-right{display:flex;align-items:center;gap:6px;}
+        .btn-nav{
+            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ddd;
+            height:34px;padding:0 10px;border-radius:17px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer;
+        }
+        .btn-nav:hover{background:rgba(212,175,55,0.15);border-color:#D4AF37;color:#D4AF37;}
+        .btn-nav.active{background:#D4AF37;color:#111;border-color:#D4AF37;}
+        .btn-nav:disabled{opacity:0.35;cursor:not-allowed;}
+        .btn-download{background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;border:none;box-shadow:0 2px 10px rgba(212,175,55,0.3);}
+
+        /* AUTO SAVE STATUS */
+        .save-indicator{font-size:10px;color:#888;display:flex;align-items:center;gap:4px;padding:0 4px;}
+        .save-dot{width:7px;height:7px;border-radius:50%;background:#4CAF50;transition:0.3s;}
+        .save-dot.syncing{background:#FFA000;animation:pulseSync 1s infinite;}
+        @keyframes pulseSync{0%,100%{opacity:0.3;}50%{opacity:1;}}
+
+        /* WORKSPACE AREA */
+        .workspace-viewport{
+            position:absolute;top:50px;bottom:120px;left:0;right:0;background:#060606;
+            background-image:radial-gradient(rgba(255,255,255,0.06) 1px, transparent 0);background-size:20px 20px;
+            display:flex;align-items:center;justify-content:center;overflow:hidden;
         }
 
-        /* HEADER STUDIO */
-        .studio-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 18px;
-            background: rgba(18, 18, 18, 0.85);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        /* ARTBOARD STAGE CONTAINER */
+        .artboard-container{
+            position:relative;box-shadow:0 15px 45px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,175,55,0.3);
+            border-radius:6px;overflow:visible;background:#181818;transform-origin:center center;
         }
-        .studio-nav .brand-title {
-            font-size: 15px;
-            font-weight: 800;
-            color: #D4AF37;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        #mainCanvas{display:block;width:100%;height:100%;border-radius:6px;}
+
+        /* BLEED & SAFETY MARGIN LINES (PATOKAN CETAK GARIS TRANSPARAN) */
+        .bleed-guides{
+            position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;display:none;z-index:90;
         }
-        .btn-header-action {
-            background: rgba(212, 175, 55, 0.12);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            color: #D4AF37;
-            padding: 7px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
+        .bleed-guides.visible{display:block;}
+        .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,0.5);}
+        .guide-line-v{position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed rgba(212,175,55,0.5);}
+
+        /* BOUNDING BOX SELECTION (SELEKSI ELEMEN ALA CANVA & PIXELLAB) */
+        .selection-box{
+            position:absolute;border:2px solid #D4AF37;pointer-events:none;display:none;z-index:99;box-shadow:0 0 12px rgba(212,175,55,0.4);
         }
-        .btn-header-action:hover {
-            background: #D4AF37;
-            color: #111;
+        .selection-box.active{display:block;}
+        .sel-handle{
+            position:absolute;width:14px;height:14px;background:#fff;border:2px solid #D4AF37;border-radius:50%;
+            pointer-events:auto;box-shadow:0 2px 6px rgba(0,0,0,0.6);
         }
-        .btn-header-action.export-btn {
-            background: linear-gradient(135deg, #D4AF37, #E6B800);
-            color: #111;
-            border: none;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        .sel-handle.tl{top:-7px;left:-7px;cursor:nwse-resize;}
+        .sel-handle.tr{top:-7px;right:-7px;cursor:nesw-resize;}
+        .sel-handle.bl{bottom:-7px;left:-7px;cursor:nesw-resize;}
+        .sel-handle.br{bottom:-7px;right:-7px;cursor:nwse-resize;}
+        /* Edge handles for width/height resize */
+        .sel-handle-edge{position:absolute;background:#D4AF37;pointer-events:auto;border-radius:3px;}
+        .sel-handle-edge.r{top:50%;right:-6px;transform:translateY(-50%);width:6px;height:24px;cursor:ew-resize;}
+        .sel-handle-edge.l{top:50%;left:-6px;transform:translateY(-50%);width:6px;height:24px;cursor:ew-resize;}
+        .sel-handle-edge.t{left:50%;top:-6px;transform:translateX(-50%);width:24px;height:6px;cursor:ns-resize;}
+        .sel-handle-edge.b{left:50%;bottom:-6px;transform:translateX(-50%);width:24px;height:6px;cursor:ns-resize;}
+
+        /* IN-PLACE DIRECT KEYBOARD INPUT (LANGSUNG KELUAR KEYBOARD DI SATU LAYAR) */
+        #inlineTextInput{
+            position:absolute;display:none;background:rgba(20,20,20,0.92);border:2px solid #D4AF37;color:#fff;
+            padding:10px 12px;border-radius:10px;font-family:inherit;font-size:16px;z-index:150;resize:none;
+            box-shadow:0 10px 30px rgba(0,0,0,0.9);line-height:1.4;
         }
 
-        /* MAIN WORKSPACE */
-        .workspace-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px 12px 100px 12px;
-            max-width: 1000px;
-            margin: 0 auto;
-            width: 100%;
-            gap: 20px;
+        /* SLIDE CAROUSEL THUMBNAILS BAR (MINI BAR BAWAH) */
+        .carousel-bar{
+            position:absolute;bottom:62px;left:0;right:0;height:56px;background:rgba(18,18,18,0.95);
+            border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 10px;gap:8px;
+            overflow-x:auto;z-index:180;scrollbar-width:none;
+        }
+        .carousel-bar::-webkit-scrollbar{display:none;}
+        .slide-thumb{
+            flex-shrink:0;width:38px;height:50px;background:#252525;border:2px solid transparent;border-radius:6px;
+            overflow:hidden;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;
+            font-size:10px;color:#aaa;font-weight:bold;
+        }
+        .slide-thumb.active{border-color:#D4AF37;box-shadow:0 0 8px rgba(212,175,55,0.4);color:#fff;}
+        .slide-thumb canvas{width:100%;height:100%;object-fit:cover;}
+        .btn-add-slide{
+            flex-shrink:0;width:38px;height:50px;background:rgba(212,175,55,0.1);border:1px dashed #D4AF37;
+            border-radius:6px;color:#D4AF37;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+        }
+        .btn-dup-slide{
+            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#bbb;
+            height:32px;padding:0 8px;border-radius:8px;font-size:11px;font-weight:bold;white-space:nowrap;cursor:pointer;
         }
 
-        /* CANVAS STAGE (AREA POSTER) */
-        .canvas-stage-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 360px;
-            aspect-ratio: 9 / 16;
-            background: #000;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.15);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* BOTTOM TOOLBAR ALA CANVA (SCROLL HORIZONTAL & MODULAR) */
+        .bottom-toolbar-container{
+            position:absolute;bottom:0;left:0;right:0;height:62px;background:#141414;
+            border-top:1px solid rgba(212,175,55,0.25);z-index:190;display:flex;align-items:center;padding:0 8px;
+            overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:6px;
         }
-        #posterCanvas {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
+        .bottom-toolbar-container::-webkit-scrollbar{display:none;}
+        .tool-btn{
+            flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:3px;min-width:62px;height:54px;background:transparent;border:none;color:#aaa;
+            font-size:10px;font-weight:700;border-radius:10px;cursor:pointer;transition:0.2s;
         }
+        .tool-btn .icon{font-size:18px;line-height:1;}
+        .tool-btn:hover, .tool-btn.active{background:rgba(212,175,55,0.15);color:#D4AF37;}
 
-        /* PALET WARNA DOMINAN (60 - 30 - 10) */
-        .palette-bar {
-            background: rgba(25, 25, 25, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 10px 14px;
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
+        /* POPUP TOOL DRAWER / PANEL PENGATURAN SPESIFIK */
+        .tool-panel{
+            position:absolute;bottom:62px;left:0;right:0;max-height:270px;background:#181818;
+            border-top:1px solid rgba(212,175,55,0.3);border-radius:18px 18px 0 0;z-index:185;
+            padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,0.8);display:none;flex-direction:column;
+            overflow-y:auto;gap:12px;animation:slideUpPanel 0.25s cubic-bezier(0.16,1,0.3,1);
         }
-        .palette-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #aaa;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .palette-swatches {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .color-swatch {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .color-swatch:hover, .color-swatch.active {
-            transform: scale(1.2);
-            border-color: #D4AF37;
-        }
+        .tool-panel.active{display:flex;}
+        @keyframes slideUpPanel{from{transform:translateY(100%);}to{transform:translateY(0);}}
+        .panel-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;}
+        .panel-title{font-size:13px;font-weight:800;color:#D4AF37;letter-spacing:0.5px;}
+        .panel-close{background:none;border:none;color:#888;font-size:18px;cursor:pointer;}
 
-        /* TAB TOOLBAR KONTROL */
-        .tools-card {
-            background: rgba(22, 22, 22, 0.85);
-            border: 1px solid rgba(212, 175, 55, 0.25);
-            border-radius: 20px;
-            padding: 16px;
-            width: 100%;
-            max-width: 480px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(6px);
+        /* UI CONTROLS DALAM PANEL */
+        .ctrl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+        .ctrl-label{font-size:11px;color:#bbb;font-weight:bold;min-width:70px;}
+        .ctrl-slider{flex:1;accent-color:#D4AF37;cursor:pointer;}
+        .ctrl-val{font-size:11px;color:#D4AF37;font-weight:bold;width:35px;text-align:right;}
+        .ctrl-grid-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+        .btn-sub-tool{
+            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ddd;
+            padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
         }
+        .btn-sub-tool.active{background:#D4AF37;color:#111;border-color:#D4AF37;}
+        .color-palette-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0;}
+        .color-circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);flex-shrink:0;cursor:pointer;}
+        .color-circle.active{border-color:#D4AF37;transform:scale(1.2);}
 
-        .tools-tab-bar {
-            display: flex;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 4px;
-            border-radius: 14px;
-            margin-bottom: 16px;
-            overflow-x: auto;
+        /* MODAL LAYER LIST ALA CANVA */
+        .layer-list-container{display:flex;flex-direction:column;gap:6px;}
+        .layer-item{
+            display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;
         }
-        .tool-tab-btn {
-            flex: 1;
-            padding: 8px 10px;
-            background: transparent;
-            border: none;
-            color: #888;
-            font-size: 12px;
-            font-weight: 700;
-            border-radius: 10px;
-            cursor: pointer;
-            white-space: nowrap;
-            text-align: center;
-            transition: 0.2s;
-        }
-        .tool-tab-btn.active {
-            background: #D4AF37;
-            color: #111;
-        }
-
-        .tool-pane {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .tool-pane.active {
-            display: flex;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .input-group label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #D4AF37;
-        }
-        .input-group input[type="text"], 
-        .input-group textarea, 
-        .input-group select {
-            width: 100%;
-            padding: 10px 14px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 13px;
-            outline: none;
-        }
-        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
-            border-color: #D4AF37;
-            background: rgba(255, 255, 255, 0.12);
-        }
-        .input-group select option { background: #111; }
-        .input-group textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
-
-        /* SLIDER KONTROL */
-        .slider-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-        .slider-row span {
-            font-size: 12px;
-            color: #bbb;
-            min-width: 100px;
-        }
-        .slider-row input[type="range"] {
-            flex: 1;
-            accent-color: #D4AF37;
-            cursor: pointer;
-        }
-        .slider-val {
-            font-size: 11px;
-            color: #D4AF37;
-            font-weight: 700;
-            min-width: 32px;
-            text-align: right;
-        }
-
-        /* TOMBOL CEPAT PRESET DESIGN */
-        .presets-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-        .btn-preset {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ddd;
-            padding: 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: 0.2s;
-        }
-        .btn-preset:hover, .btn-preset.active {
-            background: rgba(212, 175, 55, 0.15);
-            border-color: #D4AF37;
-            color: #D4AF37;
-        }
-
-        .upload-field-custom {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px;
-            border: 1px dashed rgba(212, 175, 55, 0.4);
-            border-radius: 14px;
-            background: rgba(212, 175, 55, 0.04);
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
-            color: #D4AF37;
-            text-align: center;
-            transition: 0.2s;
-        }
-        .upload-field-custom:hover {
-            background: rgba(212, 175, 55, 0.1);
-        }
+        .layer-item.active{border-color:#D4AF37;background:rgba(212,175,55,0.15);color:#D4AF37;font-weight:bold;}
+        .layer-actions{display:flex;gap:6px;}
+        .layer-btn{background:none;border:none;color:#aaa;cursor:pointer;font-size:14px;padding:2px 4px;}
+        .layer-btn:hover{color:#fff;}
     </style>
 </head>
 <body>
-    <!-- HEADER NAVIGASI STUDIO -->
-    <header class="studio-nav">
-        <a href="index.html" class="btn-header-action" title="Kembali ke Arsip">
-            <span>⬅️ Arsip</span>
-        </a>
-        <div class="brand-title">
-            <span>🎨</span>
-            <span>Studio Poster Maker</span>
+    <!-- 1. TOP HEADER TOOLBAR -->
+    <header class="top-navbar">
+        <div class="nav-left">
+            <a href="index.html" class="btn-nav" title="Kembali ke Beranda">⬅️ Arsip</a>
+            <button class="btn-nav" id="btnUndo" onclick="undo()" title="Undo (Kembali)" disabled>↩️</button>
+            <button class="btn-nav" id="btnRedo" onclick="redo()" title="Redo (Maju)" disabled>↪️</button>
+            <div class="save-indicator" title="Status Simpan Otomatis">
+                <span class="save-dot" id="saveDot"></span>
+                <span id="saveText">Tersimpan</span>
+            </div>
         </div>
-        <button class="btn-header-action export-btn" onclick="exportPosterJPG()" title="Download Gambar">
-            <span>💾 Unduh JPG</span>
-        </button>
+
+        <div class="nav-right">
+            <!-- Pilihan Rasio Poster (Tanpa Merusak Posisi Elemen) -->
+            <button class="btn-nav" id="btnRatio" onclick="toggleRatioSelector()" title="Ubah Ukuran Poster">
+                📏 <span id="currentRatioLabel">9:16</span>
+            </button>
+            <button class="btn-nav" onclick="toggleBleedGuides()" title="Garis Bantu Cetak / Margin">
+                📐
+            </button>
+            <button class="btn-nav btn-download" onclick="exportPoster()" title="Unduh Desain">
+                💾 Simpan
+            </button>
+        </div>
     </header>
 
-    <main class="workspace-container">
-        <!-- CANVAS POSTER UTAMA (RESOLUSI TINGGI 1080 x 1920) -->
-        <div class="canvas-stage-wrapper">
-            <canvas id="posterCanvas" width="1080" height="1920"></canvas>
-        </div>
+    <!-- 2. WORKSPACE CANVAS AREA -->
+    <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
+        <div class="artboard-container" id="artboard">
+            <!-- CANVAS HIGH RESOLUTION (1080 Width Base) -->
+            <canvas id="mainCanvas"></canvas>
 
-        <!-- PALET WARNA DOMINAN REKOMENDASI (60 - 30 - 10) -->
-        <div class="palette-bar">
-            <span class="palette-label">Warna Harmonis:</span>
-            <div class="palette-swatches">
-                <div class="color-swatch" id="colorAccent" style="background:#E6B800;" title="Aksen Stabilo" onclick="applyQuickColor('#E6B800')"></div>
-                <div class="color-swatch" id="colorText" style="background:#FFFFFF;" title="Teks Bersih" onclick="applyQuickColor('#FFFFFF')"></div>
-                <div class="color-swatch" id="colorMuted" style="background:#D1D5DB;" title="Teks Redup" onclick="applyQuickColor('#D1D5DB')"></div>
-                <div class="color-swatch" id="colorDark" style="background:#111111;" title="Gelap/Bayangan" onclick="applyQuickColor('#111111')"></div>
-            </div>
-        </div>
-
-        <!-- TOOLBAR KONTROL STUDIO -->
-        <div class="tools-card">
-            <div class="tools-tab-bar">
-                <button class="tool-tab-btn active" onclick="switchToolTab('tabTeks')">📝 Teks & Hadits</button>
-                <button class="tool-tab-btn" onclick="switchToolTab('tabGambar')">🖼️ Foto & Layer</button>
-                <button class="tool-tab-btn" onclick="switchToolTab('tabLayout')">📐 Layout & Box</button>
-                <button class="tool-tab-btn" onclick="switchToolTab('tabEfek')">✨ Bayangan</button>
+            <!-- BLEED & MARGIN GUIDES (GARIS PATOKAN POTONG & AMAN) -->
+            <div class="bleed-guides" id="bleedGuides">
+                <div class="guide-line-h" style="top:5%;"></div>
+                <div class="guide-line-h" style="bottom:5%;"></div>
+                <div class="guide-line-v" style="left:5%;"></div>
+                <div class="guide-line-v" style="right:5%;"></div>
             </div>
 
-            <!-- TAB 1: TEKS & HADITS -->
-            <div class="tool-pane active" id="tabTeks">
-                <div class="input-group">
-                    <label>Aksen Judul (Teks Kecil/Cursive di Atas)</label>
-                    <input type="text" id="inpSubAtas" value="Teman Sejati" oninput="drawPoster()">
-                </div>
-                <div class="input-group">
-                    <label>Judul Utama (Tebal & Dominan)</label>
-                    <input type="text" id="inpJudulUtama" value="HANYALAH\nAMAL" oninput="drawPoster()">
-                </div>
-                <div class="input-group">
-                    <label>Isi Hadits / Penjelasan (Formal & Bersih)</label>
-                    <textarea id="inpIsiHadits" oninput="drawPoster()">“Mayyit diiringi tiga hal, yang dua akan kembali sedang yang satu terus menyertainya, ia diiringi oleh keluarganya, hartanya dan amalnya. Harta dan keluarganya akan kembali, sedang amalnya akan terus tetap bersamanya.”</textarea>
-                </div>
-                <div class="input-group">
-                    <label>Perawi / Riwayat Hadits</label>
-                    <input type="text" id="inpPerawi" value="HR. Bukhari: 6033" oninput="drawPoster()">
-                </div>
-                <div class="input-group">
-                    <label>Watermark / Logo Akun</label>
-                    <input type="text" id="inpWatermark" value="@tauhidsunnah_id" oninput="drawPoster()">
-                </div>
+            <!-- SELECTION BOUNDING BOX DENGAN HANDLE SUDUT & SISI -->
+            <div class="selection-box" id="selBox">
+                <!-- 4 Sudut Lancip (Resize Asli Proporsional Bebas Meleyot) -->
+                <div class="sel-handle tl" data-handle="tl"></div>
+                <div class="sel-handle tr" data-handle="tr"></div>
+                <div class="sel-handle bl" data-handle="bl"></div>
+                <div class="sel-handle br" data-handle="br"></div>
+                <!-- 4 Handle Sisi Meluaskan Lebar / Tinggi -->
+                <div class="sel-handle-edge r" data-handle="r"></div>
+                <div class="sel-handle-edge l" data-handle="l"></div>
+                <div class="sel-handle-edge t" data-handle="t"></div>
+                <div class="sel-handle-edge b" data-handle="b"></div>
             </div>
 
-            <!-- TAB 2: FOTO & LAPISAN OBJEK (LAYERING TOPOGRAFI) -->
-            <div class="tool-pane" id="tabGambar">
-                <div class="input-group">
-                    <label>Foto Background Utama (Lapis 1)</label>
-                    <label class="upload-field-custom">
-                        📁 Pilih Background (Foto Tanah/Pemandangan)
-                        <input type="file" accept="image/*" id="fileBg" style="display:none;" onchange="loadBgImage(event)">
-                    </label>
-                </div>
-
-                <div class="input-group">
-                    <label>Objek Depan / PNG Tembus (Lapis 3: Topografi Teks di Belakang)</label>
-                    <p style="font-size:11px;color:#aaa;">Upload PNG transparan (seperti daun, orang, atau gelas) untuk menutupi sebagian teks judul.</p>
-                    <label class="upload-field-custom">
-                        🍃 Upload Objek Foreground (PNG)
-                        <input type="file" accept="image/*" id="fileFg" style="display:none;" onchange="loadFgImage(event)">
-                    </label>
-                </div>
-
-                <div class="slider-row">
-                    <span>Tingkat Blur Foto:</span>
-                    <input type="range" id="sliderBlur" min="0" max="15" value="0" oninput="updateSliderVal('valBlur', this.value); drawPoster();">
-                    <span class="slider-val" id="valBlur">0px</span>
-                </div>
-                <div class="slider-row">
-                    <span>Keredupan Foto (Darken):</span>
-                    <input type="range" id="sliderDarken" min="0" max="90" value="40" oninput="updateSliderVal('valDarken', this.value); drawPoster();">
-                    <span class="slider-val" id="valDarken">40%</span>
-                </div>
-            </div>
-
-            <!-- TAB 3: LAYOUT & BORDER KOTAK TEKS -->
-            <div class="tool-pane" id="tabLayout">
-                <div class="input-group">
-                    <label>Gaya Layout Poster (Preset Sesuai Contoh):</label>
-                    <div class="presets-row">
-                        <button class="btn-preset active" id="preset1" onclick="applyPresetLayout('full-poster')">🌄 Full Gambar Gelap</button>
-                        <button class="btn-preset" id="preset2" onclick="applyPresetLayout('card-half')">📑 Separuh Kartu Putih</button>
-                        <button class="btn-preset" id="preset3" onclick="applyPresetLayout('center-box')">📦 Kotak Teks di Tengah</button>
-                        <button class="btn-preset" id="preset4" onclick="applyPresetLayout('minimalis')">📜 Minimalis Elegan</button>
-                    </div>
-                </div>
-
-                <div class="slider-row">
-                    <span>Posisi Vertikal Judul:</span>
-                    <input type="range" id="sliderJudulY" min="300" max="1200" value="650" oninput="drawPoster();">
-                </div>
-                <div class="slider-row">
-                    <span>Posisi Vertikal Isi:</span>
-                    <input type="range" id="sliderIsiY" min="800" max="1600" value="1150" oninput="drawPoster();">
-                </div>
-                <div class="slider-row">
-                    <span>Lebar Margin Kotak Teks:</span>
-                    <input type="range" id="sliderBoxMargin" min="40" max="180" value="80" oninput="drawPoster();">
-                </div>
-            </div>
-
-            <!-- TAB 4: BAYANGAN & STABILO TEKS -->
-            <div class="tool-pane" id="tabEfek">
-                <div class="input-group">
-                    <label>Warna Aksen Stabilo / Badge</label>
-                    <select id="selStabiloColor" onchange="drawPoster()">
-                        <option value="#E6B800">Kuning Emas Sunnah (#E6B800)</option>
-                        <option value="#C94A4A">Merah Marun (#C94A4A)</option>
-                        <option value="#3A86FF">Biru Bersih (#3A86FF)</option>
-                        <option value="#38B000">Hijau Zaitun (#38B000)</option>
-                        <option value="#FFFFFF">Putih Terang (#FFFFFF)</option>
-                    </select>
-                </div>
-                <div class="slider-row">
-                    <span>Ketebalan Shadow Teks:</span>
-                    <input type="range" id="sliderShadow" min="0" max="40" value="18" oninput="drawPoster();">
-                </div>
-                <div class="slider-row">
-                    <span>Ukuran Font Judul:</span>
-                    <input type="range" id="sliderFontJudul" min="70" max="180" value="130" oninput="drawPoster();">
-                </div>
-                <div class="slider-row">
-                    <span>Ukuran Font Isi:</span>
-                    <input type="range" id="sliderFontIsi" min="26" max="50" value="34" oninput="drawPoster();">
-                </div>
-            </div>
+            <!-- IN-PLACE DIRECT KEYBOARD INPUT (Ketik langsung di layar) -->
+            <textarea id="inlineTextInput" spellcheck="false" placeholder="Ketik teks di sini (Enter untuk baris baru)..."></textarea>
         </div>
     </main>
 
+    <!-- 3. SLIDE CAROUSEL BAR (MINI THUMBNAIL BAWAH) -->
+    <div class="carousel-bar" id="carouselBar">
+        <div id="slideThumbList" style="display:flex;gap:8px;"></div>
+        <button class="btn-add-slide" onclick="addNewSlide()" title="Tambah Slide Baru">+</button>
+        <button class="btn-dup-slide" onclick="duplicateCurrentSlide()" title="Duplikat Gaya & Elemen Slide Ini">📑 Duplikat Slide</button>
+    </div>
+
+    <!-- 4. BOTTOM DYNAMIC TOOLBAR (ALA CANVA) -->
+    <nav class="bottom-toolbar-container" id="bottomToolbar">
+        <!-- Akan diisi otomatis sesuai elemen yang sedang dipilih (Teks / PNG / Canvas Kosong) -->
+    </nav>
+
+    <!-- 5. MODAL POPUP SUB-PANEL KONTROL SPESIFIK -->
+    <div class="tool-panel" id="toolPanel">
+        <div class="panel-header">
+            <span class="panel-title" id="panelTitle">Pengaturan</span>
+            <button class="panel-close" onclick="closeToolPanel()">&times;</button>
+        </div>
+        <div id="panelContent"></div>
+    </div>
+
+    <!-- FILE INPUT TRANSPARAN (UPLOAD GAMBAR/PNG) -->
+    <input type="file" id="fileImageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+
     <script>
-        // STATE STUDIO MAKER
-        let bgImg = null;
-        let fgImg = null;
-        let currentLayoutPreset = 'full-poster';
-        let accentColor = '#E6B800';
+        /* =========================================================================
+           STUDIO POSTER MAKER - ENGINE CORE & REACTIVE STATE
+           ========================================================================= */
 
-        const canvas = document.getElementById('posterCanvas');
-        const ctx = canvas.getContext('2d');
+        // UKURAN RESOLUSI STANDAR MEDIA SOSIAL (1080 x Height)
+        const RATIO_PRESETS = {
+            '9:16': { width: 1080, height: 1920, label: '9:16 (Story/Reels)' },
+            '4:5':  { width: 1080, height: 1350, label: '4:5 (Feed Portrait)' },
+            '1:1':  { width: 1080, height: 1080, label: '1:1 (Feed Kotak)' }
+        };
 
-        // INISIALISASI GAMBAR STANDAR DENGAN TEKSTUR ELEGAN
-        function initDefaultCanvas() {
-            // Background default: Tekstur tanah/kegelapan estetik
-            const tempBg = new Image();
-            tempBg.crossOrigin = "anonymous";
-            // Pattern gradasi canvas bawaan
-            drawPoster();
-        }
+        // DAFTAR FONT LENGKAP
+        const FONT_FAMILIES = [
+            { name: 'Plus Jakarta Sans', font: "'Plus Jakarta Sans', sans-serif" },
+            { name: 'Montserrat Bold', font: "'Montserrat', sans-serif" },
+            { name: 'Playfair Serif', font: "'Playfair Display', serif" },
+            { name: 'Caveat Handwrite', font: "'Caveat', cursive" },
+            { name: 'Amiri Arabic / Tajdid', font: "'Amiri', serif" },
+            { name: 'Cinzel Royal', font: "'Cinzel', serif" }
+        ];
 
-        function switchToolTab(tabId) {
-            document.querySelectorAll('.tool-tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tool-pane').forEach(p => p.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
+        // DAFTAR WARNA CEPAT
+        const QUICK_COLORS = [
+            '#FFFFFF', '#111111', '#D4AF37', '#E6B800', '#FFE259',
+            '#FF4B4B', '#3B82F6', '#10B981', '#8B5CF6', '#F97316',
+            '#6B7280', '#000000'
+        ];
 
-        function updateSliderVal(labelId, val) {
-            document.getElementById(labelId).innerText = val + (labelId.includes('Blur') ? 'px' : '%');
-        }
+        // STATE APLIKASI
+        let currentRatio = '9:16';
+        let currentSlideIndex = 0;
+        let slides = []; // Menampung tiap slide carousel
+        let activeElementId = null;
+        let isEditingText = false;
+        let bleedGuidesVisible = false;
 
-        function loadBgImage(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const img = new Image();
-                img.onload = function() {
-                    bgImg = img;
-                    extractDominantPalette(img);
-                    drawPoster();
-                };
-                img.src = evt.target.result;
+        // UNDO / REDO HISTORY ENGINE
+        let historyStack = [];
+        let historyIndex = -1;
+        const MAX_HISTORY = 30;
+
+        // AUTO-SAVE TIMER & CACHE KEY
+        const STORAGE_KEY = 'dakwah_maker_project_v2';
+        let autoSaveTimer = null;
+
+        // VIEWPORT ZOOM & SCALE
+        let canvasScale = 1;
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        const artboard = document.getElementById('artboard');
+        const selBox = document.getElementById('selBox');
+        const inlineTextInput = document.getElementById('inlineTextInput');
+
+        /* =========================================================================
+           STRUKTUR DATA ELEMEN (TEKS & GAMBAR/PNG)
+           ========================================================================= */
+        function createDefaultSlide() {
+            return {
+                background: {
+                    type: 'gradient', // 'color', 'gradient', 'image'
+                    color1: '#241a14',
+                    color2: '#0d0a08',
+                    img: null,
+                    blur: 0,
+                    darken: 0.3
+                },
+                elements: [
+                    {
+                        id: 'el_' + Date.now() + '_1',
+                        type: 'text',
+                        text: 'Teman Sejati',
+                        x: 540,
+                        y: 420,
+                        width: 700,
+                        fontFamily: "'Caveat', cursive",
+                        fontSize: 68,
+                        fontWeight: 'bold',
+                        fontStyle: 'normal',
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        textTransform: 'none',
+                        color: '#D4AF37',
+                        lineHeight: 1.2,
+                        letterSpacing: 0,
+                        highlightColor: 'transparent',
+                        highlightAlpha: 0.5,
+                        opacity: 1,
+                        rotation: 0,
+                        locked: false,
+                        groupId: null,
+                        shadow: { color: 'rgba(0,0,0,0.8)', blur: 10, angle: 45, distance: 4 }
+                    },
+                    {
+                        id: 'el_' + Date.now() + '_2',
+                        type: 'text',
+                        text: 'HANYALAH\nAMAL',
+                        x: 540,
+                        y: 560,
+                        width: 860,
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: 120,
+                        fontWeight: '900',
+                        fontStyle: 'normal',
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        textTransform: 'uppercase',
+                        color: '#FFFFFF',
+                        lineHeight: 1.05,
+                        letterSpacing: 2,
+                        highlightColor: 'transparent',
+                        highlightAlpha: 0.5,
+                        opacity: 1,
+                        rotation: 0,
+                        locked: false,
+                        groupId: null,
+                        shadow: { color: 'rgba(0,0,0,0.95)', blur: 20, angle: 45, distance: 6 }
+                    },
+                    {
+                        id: 'el_' + Date.now() + '_3',
+                        type: 'text',
+                        text: '“Mayyit diiringi tiga hal, yang dua akan kembali sedang yang satu terus menyertainya: keluarga, harta dan amalnya. Harta dan keluarganya akan kembali, sedang amalnya akan terus tetap bersamanya.”',
+                        x: 540,
+                        y: 1100,
+                        width: 820,
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        fontSize: 34,
+                        fontWeight: '600',
+                        fontStyle: 'normal',
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        textTransform: 'none',
+                        color: '#E5E7EB',
+                        lineHeight: 1.6,
+                        letterSpacing: 0,
+                        highlightColor: 'transparent',
+                        highlightAlpha: 0.5,
+                        opacity: 1,
+                        rotation: 0,
+                        locked: false,
+                        groupId: null,
+                        shadow: { color: 'rgba(0,0,0,0.8)', blur: 8, angle: 45, distance: 3 }
+                    },
+                    {
+                        id: 'el_' + Date.now() + '_4',
+                        type: 'text',
+                        text: 'HR. Bukhari: 6033',
+                        x: 540,
+                        y: 1350,
+                        width: 600,
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        fontSize: 28,
+                        fontWeight: '700',
+                        fontStyle: 'normal',
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        textTransform: 'none',
+                        color: '#D4AF37',
+                        lineHeight: 1.4,
+                        letterSpacing: 1,
+                        highlightColor: 'rgba(212,175,55,0.15)',
+                        highlightAlpha: 0.2,
+                        opacity: 1,
+                        rotation: 0,
+                        locked: false,
+                        groupId: null,
+                        shadow: { color: 'transparent', blur: 0, angle: 0, distance: 0 }
+                    },
+                    {
+                        id: 'el_' + Date.now() + '_5',
+                        type: 'text',
+                        text: '@tauhidsunnah_id',
+                        x: 540,
+                        y: 1800,
+                        width: 600,
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        fontSize: 26,
+                        fontWeight: '800',
+                        fontStyle: 'normal',
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        textTransform: 'none',
+                        color: '#9CA3AF',
+                        lineHeight: 1.2,
+                        letterSpacing: 1,
+                        highlightColor: 'transparent',
+                        highlightAlpha: 0,
+                        opacity: 1,
+                        rotation: 0,
+                        locked: false,
+                        groupId: null,
+                        shadow: { color: 'transparent', blur: 0, angle: 0, distance: 0 }
+                    }
+                ]
             };
-            reader.readAsDataURL(file);
         }
 
-        function loadFgImage(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const img = new Image();
-                img.onload = function() {
-                    fgImg = img;
-                    drawPoster();
-                };
-                img.src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // EKSTRAKSI PALET WARNA OTOMATIS (60 - 30 - 10)
-        function extractDominantPalette(img) {
-            try {
-                const smallCanvas = document.createElement('canvas');
-                const sCtx = smallCanvas.getContext('2d');
-                smallCanvas.width = 40;
-                smallCanvas.height = 40;
-                sCtx.drawImage(img, 0, 0, 40, 40);
-                const data = sCtx.getImageData(0, 0, 40, 40).data;
-                
-                let r = 0, g = 0, b = 0, count = 0;
-                for (let i = 0; i < data.length; i += 16) {
-                    r += data[i];
-                    g += data[i+1];
-                    b += data[i+2];
-                    count++;
-                }
-                r = Math.round(r / count);
-                g = Math.round(g / count);
-                b = Math.round(b / count);
-
-                const darkTone = `rgb(${Math.max(10, r - 50)}, ${Math.max(10, g - 50)}, ${Math.max(10, b - 50)})`;
-                document.getElementById('colorDark').style.background = darkTone;
-            } catch (e) {}
-        }
-
-        function applyQuickColor(hex) {
-            accentColor = hex;
-            document.getElementById('selStabiloColor').value = hex;
-            drawPoster();
-        }
-
-        function applyPresetLayout(preset) {
-            currentLayoutPreset = preset;
-            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
-            if (event && event.target) event.target.classList.add('active');
-
-            if (preset === 'card-half') {
-                document.getElementById('sliderJudulY').value = 450;
-                document.getElementById('sliderIsiY').value = 950;
-            } else if (preset === 'center-box') {
-                document.getElementById('sliderJudulY').value = 550;
-                document.getElementById('sliderIsiY').value = 1050;
-            } else {
-                document.getElementById('sliderJudulY').value = 650;
-                document.getElementById('sliderIsiY').value = 1150;
+        /* =========================================================================
+           INIT, AUTO-SAVE & CACHE MANAGEMENT
+           ========================================================================= */
+        function initApp() {
+            loadFromStorage();
+            if (!slides || slides.length === 0) {
+                slides = [createDefaultSlide()];
+                currentSlideIndex = 0;
             }
-            drawPoster();
+            adjustArtboardSize();
+            pushHistoryState();
+            renderAll();
+            renderCarouselThumbs();
+            renderBottomToolbar();
+
+            // Pasang resize listener responsif layar HP
+            window.addEventListener('resize', () => {
+                adjustArtboardSize();
+                renderAll();
+            });
+
+            setupInlineTextEvents();
+            setupDraggingEngine();
         }
 
-        // FUNGSI UTAMA MENGGAMBAR POSTER HIGH-RES (1080 x 1920)
-        function drawPoster() {
-            const W = canvas.width;
-            const H = canvas.height;
+        function triggerAutoSave() {
+            setSaveIndicator(false);
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                saveToStorage();
+                setSaveIndicator(true);
+            }, 800); // Simpan 800ms setelah interaksi terakhir
+        }
 
-            // 1. CLEAR CANVAS
+        function setSaveIndicator(isSaved) {
+            const dot = document.getElementById('saveDot');
+            const txt = document.getElementById('saveText');
+            if (isSaved) {
+                dot.className = 'save-dot';
+                txt.innerText = 'Tersimpan';
+            } else {
+                dot.className = 'save-dot syncing';
+                txt.innerText = 'Menyimpan...';
+            }
+        }
+
+        function saveToStorage() {
+            try {
+                // Serialisasi tanpa element object DOM
+                const dataToSave = {
+                    ratio: currentRatio,
+                    slideIndex: currentSlideIndex,
+                    slides: slides.map(s => ({
+                        background: { ...s.background, imgData: s.background.img ? s.background.img.src : null },
+                        elements: s.elements.map(el => {
+                            const copy = { ...el };
+                            if (el.type === 'image' && el.img) {
+                                copy.imgSrc = el.img.src;
+                                delete copy.img;
+                            }
+                            return copy;
+                        })
+                    }))
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            } catch (e) {
+                console.warn("Storage penuh atau tidak tersedia:", e);
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (parsed.ratio && RATIO_PRESETS[parsed.ratio]) {
+                    currentRatio = parsed.ratio;
+                    document.getElementById('currentRatioLabel').innerText = currentRatio;
+                }
+                currentSlideIndex = parsed.slideIndex || 0;
+                slides = parsed.slides.map(s => {
+                    let bgImgObj = null;
+                    if (s.background.imgData) {
+                        bgImgObj = new Image();
+                        bgImgObj.src = s.background.imgData;
+                    }
+                    return {
+                        background: { ...s.background, img: bgImgObj },
+                        elements: s.elements.map(el => {
+                            if (el.type === 'image' && el.imgSrc) {
+                                const imgObj = new Image();
+                                imgObj.src = el.imgSrc;
+                                el.img = imgObj;
+                            }
+                            return el;
+                        })
+                    };
+                });
+            } catch (e) {
+                console.error("Gagal load storage:", e);
+            }
+        }
+
+        /* =========================================================================
+           UNDO / REDO ENGINE
+           ========================================================================= */
+        function pushHistoryState() {
+            // Potong history depan jika berada di tengah stack
+            if (historyIndex < historyStack.length - 1) {
+                historyStack = historyStack.slice(0, historyIndex + 1);
+            }
+            // Deep clone slides
+            const state = JSON.stringify({ ratio: currentRatio, currentSlideIndex, slides });
+            historyStack.push(state);
+            if (historyStack.length > MAX_HISTORY) {
+                historyStack.shift();
+            }
+            historyIndex = historyStack.length - 1;
+            updateUndoRedoButtons();
+            triggerAutoSave();
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                applyHistoryState(historyStack[historyIndex]);
+            }
+        }
+
+        function redo() {
+            if (historyIndex < historyStack.length - 1) {
+                historyIndex++;
+                applyHistoryState(historyStack[historyIndex]);
+            }
+        }
+
+        function applyHistoryState(jsonStr) {
+            const parsed = JSON.parse(jsonStr);
+            currentRatio = parsed.ratio;
+            currentSlideIndex = parsed.currentSlideIndex;
+            document.getElementById('currentRatioLabel').innerText = currentRatio;
+            
+            // Reconstruct images
+            slides = parsed.slides.map(s => {
+                let bgImg = null;
+                if (s.background.img && s.background.img.src) {
+                    bgImg = new Image();
+                    bgImg.src = s.background.img.src;
+                }
+                return {
+                    background: { ...s.background, img: bgImg },
+                    elements: s.elements.map(el => {
+                        if (el.type === 'image' && el.img && el.img.src) {
+                            const im = new Image();
+                            im.src = el.img.src;
+                            el.img = im;
+                        }
+                        return el;
+                    })
+                };
+            });
+
+            adjustArtboardSize();
+            updateUndoRedoButtons();
+            renderAll();
+            renderCarouselThumbs();
+            renderBottomToolbar();
+            triggerAutoSave();
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('btnUndo').disabled = (historyIndex <= 0);
+            document.getElementById('btnRedo').disabled = (historyIndex >= historyStack.length - 1);
+        }
+
+        /* =========================================================================
+           PENGATURAN ASPEK RASIO & RESPONSIF LAYAR
+           ========================================================================= */
+        function toggleRatioSelector() {
+            const ratios = Object.keys(RATIO_PRESETS);
+            const nextIdx = (ratios.indexOf(currentRatio) + 1) % ratios.length;
+            setPosterRatio(ratios[nextIdx]);
+        }
+
+        function setPosterRatio(newRatio) {
+            if (currentRatio === newRatio) return;
+            currentRatio = newRatio;
+            document.getElementById('currentRatioLabel').innerText = currentRatio;
+            adjustArtboardSize();
+            pushHistoryState();
+            renderAll();
+        }
+
+        function adjustArtboardSize() {
+            const preset = RATIO_PRESETS[currentRatio];
+            const targetW = preset.width;
+            const targetH = preset.height;
+
+            mainCanvas.width = targetW;
+            mainCanvas.height = targetH;
+
+            // Hitung skala viewport agar pas di layar HP tanpa lag
+            const vp = document.getElementById('workspaceViewport');
+            const padding = 20;
+            const availW = vp.clientWidth - padding;
+            const availH = vp.clientHeight - padding;
+
+            const scaleW = availW / targetW;
+            const scaleH = availH / targetH;
+            canvasScale = Math.min(scaleW, scaleH);
+
+            artboard.style.width = `${targetW * canvasScale}px`;
+            artboard.style.height = `${targetH * canvasScale}px`;
+
+            updateSelectionBox();
+        }
+
+        function toggleBleedGuides() {
+            bleedGuidesVisible = !bleedGuidesVisible;
+            document.getElementById('bleedGuides').classList.toggle('visible', bleedGuidesVisible);
+        }
+
+        /* =========================================================================
+           CANVAS RENDER ENGINE (PERFORMA RINGAN 60FPS)
+           ========================================================================= */
+        function getCurrentSlide() {
+            return slides[currentSlideIndex] || slides[0];
+        }
+
+        function getActiveElement() {
+            const s = getCurrentSlide();
+            return s.elements.find(el => el.id === activeElementId);
+        }
+
+        function renderAll() {
+            const s = getCurrentSlide();
+            const W = mainCanvas.width;
+            const H = mainCanvas.height;
+
             ctx.clearRect(0, 0, W, H);
 
-            const blurVal = parseInt(document.getElementById('sliderBlur').value) || 0;
-            const darkenVal = (parseInt(document.getElementById('sliderDarken').value) || 40) / 100;
-            accentColor = document.getElementById('selStabiloColor').value || '#E6B800';
+            // 1. Gambar Background
+            renderBackground(s.background, W, H);
 
-            // 2. DRAW BACKGROUND (LAPIS 1)
-            if (bgImg) {
+            // 2. Gambar Elemen Berdasarkan Urutan Lapisan (Layer Index)
+            s.elements.forEach(el => {
                 ctx.save();
-                if (blurVal > 0) {
-                    ctx.filter = `blur(${blurVal * 2}px)`;
+                ctx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+
+                if (el.type === 'text') {
+                    renderTextElement(el);
+                } else if (el.type === 'image') {
+                    renderImageElement(el);
                 }
-                // Gambar dengan aspek rasio cover
-                const hRatio = W / bgImg.width;
-                const vRatio = H / bgImg.height;
-                const ratio = Math.max(hRatio, vRatio);
-                const centerShiftX = (W - bgImg.width * ratio) / 2;
-                const centerShiftY = (H - bgImg.height * ratio) / 2;
-                ctx.drawImage(bgImg, 0, 0, bgImg.width, bgImg.height, centerShiftX, centerShiftY, bgImg.width * ratio, bgImg.height * ratio);
+
+                ctx.restore();
+            });
+
+            updateSelectionBox();
+        }
+
+        function renderBackground(bg, W, H) {
+            if (bg.img && bg.img.complete) {
+                ctx.save();
+                if (bg.blur > 0) ctx.filter = `blur(${bg.blur * 2}px)`;
+                const ratio = Math.max(W / bg.img.width, H / bg.img.height);
+                const x = (W - bg.img.width * ratio) / 2;
+                const y = (H - bg.img.height * ratio) / 2;
+                ctx.drawImage(bg.img, x, y, bg.img.width * ratio, bg.img.height * ratio);
                 ctx.restore();
             } else {
-                // Background default gradasi tanah & atmosfer sunnah
-                const grad = ctx.createRadialGradient(W/2, H*0.35, 100, W/2, H/2, W);
-                grad.addColorStop(0, '#2d221c');
-                grad.addColorStop(0.5, '#191310');
-                grad.addColorStop(1, '#0c0a09');
+                const grad = ctx.createRadialGradient(W / 2, H * 0.35, 100, W / 2, H / 2, W);
+                grad.addColorStop(0, bg.color1 || '#251c16');
+                grad.addColorStop(1, bg.color2 || '#090807');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, W, H);
             }
 
-            // Lapisan Kegelapan (Darken Overlay)
-            ctx.fillStyle = `rgba(0, 0, 0, ${darkenVal})`;
-            ctx.fillRect(0, 0, W, H);
+            if (bg.darken > 0) {
+                ctx.fillStyle = `rgba(0,0,0,${bg.darken})`;
+                ctx.fillRect(0, 0, W, H);
+            }
+        }
 
-            // GAYA PRESET KARTU KHUSUS (Contoh: Separuh Putih atau Box Tengah)
-            const marginBox = parseInt(document.getElementById('sliderBoxMargin').value) || 80;
-            const boxWidth = W - (marginBox * 2);
+        function renderTextElement(el) {
+            const lines = el.text.split('\n');
+            const fontSize = el.fontSize;
+            const lineHeight = fontSize * (el.lineHeight || 1.3);
 
-            if (currentLayoutPreset === 'card-half') {
-                // Kartu Putih Elegan Separuh Kiri
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, W * 0.62, H);
-                // Pembatas halus
-                ctx.fillStyle = 'rgba(0,0,0,0.08)';
-                ctx.fillRect(W * 0.62, 0, 4, H);
-            } else if (currentLayoutPreset === 'center-box') {
-                // Kotak Bersih Melayang di Tengah
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                ctx.beginPath();
-                ctx.roundRect(marginBox, 500, boxWidth, 1050, 30);
-                ctx.fill();
+            ctx.font = `${el.fontStyle || 'normal'} ${el.fontWeight || 'normal'} ${fontSize}px ${el.fontFamily}`;
+            ctx.textAlign = el.textAlign || 'center';
+            ctx.textBaseline = 'top';
+
+            // Hitung bounding tinggi
+            const totalHeight = lines.length * lineHeight;
+            let startY = el.y - (totalHeight / 2);
+
+            // Gambar Shadow
+            if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
+                ctx.shadowColor = el.shadow.color;
+                ctx.shadowBlur = el.shadow.blur || 0;
+                const rad = (el.shadow.angle || 45) * Math.PI / 180;
+                const dist = el.shadow.distance || 0;
+                ctx.shadowOffsetX = Math.cos(rad) * dist;
+                ctx.shadowOffsetY = Math.sin(rad) * dist;
+            } else {
+                ctx.shadowColor = 'transparent';
             }
 
-            // 3. GAMBAR TEKS JUDUL (LAPIS 2 - BISA DITIMPA OBJEK FOREGROUND)
-            const judulY = parseInt(document.getElementById('sliderJudulY').value) || 650;
-            const fontJudulSize = parseInt(document.getElementById('sliderFontJudul').value) || 130;
-            const shadowBlur = parseInt(document.getElementById('sliderShadow').value) || 18;
+            lines.forEach((lineText, idx) => {
+                let displayLine = lineText;
+                if (el.textTransform === 'uppercase') displayLine = displayLine.toUpperCase();
+                else if (el.textTransform === 'lowercase') displayLine = displayLine.toLowerCase();
+                else if (el.textTransform === 'capitalize') {
+                    displayLine = displayLine.replace(/\b\w/g, l => l.toUpperCase());
+                }
 
-            const subAtas = document.getElementById('inpSubAtas').value;
-            const judulUtama = document.getElementById('inpJudulUtama').value;
+                const lineY = startY + (idx * lineHeight);
 
-            // Gambar Sub-Atas Cursive / Script
-            if (subAtas.trim()) {
-                ctx.save();
-                ctx.font = 'bold 56px "Caveat", cursive';
-                ctx.fillStyle = accentColor;
-                ctx.textAlign = 'center';
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 12;
-                ctx.fillText(subAtas, W / 2, judulY - fontJudulSize * 0.8);
-                ctx.restore();
-            }
+                // Stabilo / Highlight Box
+                if (el.highlightColor && el.highlightColor !== 'transparent') {
+                    const textMetrics = ctx.measureText(displayLine);
+                    const padX = 14;
+                    const padY = 4;
+                    let boxX = el.x - (textMetrics.width / 2) - padX;
+                    if (el.textAlign === 'left') boxX = el.x - padX;
+                    if (el.textAlign === 'right') boxX = el.x - textMetrics.width - padX;
 
-            // Gambar Judul Utama Tebal (Support Multiline dengan \n)
-            if (judulUtama.trim()) {
-                ctx.save();
-                ctx.font = `900 ${fontJudulSize}px "Montserrat", sans-serif`;
-                
-                // Warna judul otomatis menyesuaikan jika background kartu putih
-                if (currentLayoutPreset === 'card-half') {
-                    ctx.fillStyle = '#111827';
-                    ctx.textAlign = 'left';
+                    ctx.save();
                     ctx.shadowColor = 'transparent';
-                } else if (currentLayoutPreset === 'center-box') {
-                    ctx.fillStyle = '#111827';
-                    ctx.textAlign = 'center';
-                    ctx.shadowColor = 'transparent';
-                } else {
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.textAlign = 'center';
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-                    ctx.shadowBlur = shadowBlur;
-                    ctx.shadowOffsetX = 3;
-                    ctx.shadowOffsetY = 6;
+                    ctx.fillStyle = el.highlightColor;
+                    ctx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.4);
+                    ctx.beginPath();
+                    ctx.roundRect(boxX, lineY - padY, textMetrics.width + (padX * 2), lineHeight, 8);
+                    ctx.fill();
+                    ctx.restore();
                 }
 
-                const lines = judulUtama.split('\\n');
-                lines.forEach((line, idx) => {
-                    const posX = (currentLayoutPreset === 'card-half') ? 70 : W / 2;
-                    const posY = judulY + (idx * fontJudulSize * 1.05);
-                    ctx.fillText(line.trim(), posX, posY);
-                });
-                ctx.restore();
-            }
+                ctx.fillStyle = el.color || '#fff';
+                ctx.fillText(displayLine, el.x, lineY);
 
-            // 4. GAMBAR FOREGROUND / CUT-OUT OBJEK (LAPIS 3 - EFEK DEPTH TOPOGRAFI)
-            if (fgImg) {
-                ctx.save();
-                // Gambar objek foreground di atas teks judul
-                const hRatio = W / fgImg.width;
-                const vRatio = H / fgImg.height;
-                const ratio = Math.max(hRatio, vRatio);
-                const centerShiftX = (W - fgImg.width * ratio) / 2;
-                const centerShiftY = (H - fgImg.height * ratio) / 2;
-                ctx.drawImage(fgImg, 0, 0, fgImg.width, fgImg.height, centerShiftX, centerShiftY, fgImg.width * ratio, fgImg.height * ratio);
-                ctx.restore();
-            }
+                // Garis Bawah
+                if (el.textDecoration === 'underline') {
+                    const m = ctx.measureText(displayLine);
+                    let lineStartX = el.x - (m.width / 2);
+                    if (el.textAlign === 'left') lineStartX = el.x;
+                    if (el.textAlign === 'right') lineStartX = el.x - m.width;
 
-            // 5. GAMBAR ISI HADITS & PERAWI (LAPIS 4 - PALING ATAS, SELALU JELAS DIBACA)
-            const isiY = parseInt(document.getElementById('sliderIsiY').value) || 1150;
-            const fontIsiSize = parseInt(document.getElementById('sliderFontIsi').value) || 34;
-            const isiHadits = document.getElementById('inpIsiHadits').value;
-            const perawi = document.getElementById('inpPerawi').value;
-            const watermark = document.getElementById('inpWatermark').value;
-
-            if (isiHadits.trim()) {
-                ctx.save();
-                ctx.font = `600 ${fontIsiSize}px "Plus Jakarta Sans", sans-serif`;
-                
-                const isDarkText = (currentLayoutPreset === 'card-half' || currentLayoutPreset === 'center-box');
-                ctx.fillStyle = isDarkText ? '#1F2937' : '#F3F4F6';
-                ctx.textAlign = isDarkText && currentLayoutPreset === 'card-half' ? 'left' : 'center';
-
-                if (!isDarkText) {
-                    ctx.shadowColor = 'rgba(0,0,0,0.9)';
-                    ctx.shadowBlur = 10;
+                    ctx.save();
+                    ctx.lineWidth = Math.max(2, Math.round(fontSize * 0.06));
+                    ctx.strokeStyle = el.color || '#fff';
+                    ctx.beginPath();
+                    ctx.moveTo(lineStartX, lineY + fontSize + 4);
+                    ctx.lineTo(lineStartX + m.width, lineY + fontSize + 4);
+                    ctx.stroke();
+                    ctx.restore();
                 }
+            });
 
-                // Wrap Text Otomatis Sesuai Lebar Box
-                const maxWidth = (currentLayoutPreset === 'card-half') ? (W * 0.62) - 100 : boxWidth;
-                const startX = (currentLayoutPreset === 'card-half') ? 70 : W / 2;
-                
-                const lines = wrapTextLines(ctx, isiHadits, maxWidth);
-                const lineHeight = fontIsiSize * 1.6;
-                
-                lines.forEach((l, i) => {
-                    ctx.fillText(l, startX, isiY + (i * lineHeight));
-                });
+            // Simpan bounding box kalkulasi untuk seleksi
+            el._calculatedHeight = totalHeight;
+        }
 
-                // Gambar Perawi dengan Badge Stabilo
-                if (perawi.trim()) {
-                    const perawiY = isiY + (lines.length * lineHeight) + 35;
-                    ctx.font = `bold ${Math.round(fontIsiSize * 0.95)}px "Plus Jakarta Sans", sans-serif`;
-                    ctx.fillStyle = accentColor;
-                    ctx.fillText(perawi, startX, perawiY);
-                }
-                ctx.restore();
+        function renderImageElement(el) {
+            if (!el.img || !el.img.complete) return;
+
+            const w = el.width;
+            const h = el.height;
+            const x = el.x - (w / 2);
+            const y = el.y - (h / 2);
+
+            ctx.save();
+            ctx.translate(el.x, el.y);
+
+            // Cermin / Flip Horizontal & Vertikal
+            ctx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
+
+            // Bayangan Gambar
+            if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
+                ctx.shadowColor = el.shadow.color;
+                ctx.shadowBlur = el.shadow.blur || 0;
+                const rad = (el.shadow.angle || 45) * Math.PI / 180;
+                const dist = el.shadow.distance || 0;
+                ctx.shadowOffsetX = Math.cos(rad) * dist;
+                ctx.shadowOffsetY = Math.sin(rad) * dist;
             }
 
-            // 6. WATERMARK / LOGO RESMI DAKWAH
-            if (watermark.trim()) {
-                ctx.save();
-                ctx.font = 'bold 28px "Plus Jakarta Sans", sans-serif';
-                ctx.fillStyle = (currentLayoutPreset === 'card-half') ? '#111' : '#D4AF37';
-                ctx.textAlign = 'center';
-                ctx.fillText(watermark, W / 2, H - 70);
-                ctx.restore();
+            // Kelengkungan Sudut (Border Radius) & Border Stroke
+            const radius = el.cornerRadius || 0;
+            ctx.beginPath();
+            ctx.roundRect(-w / 2, -h / 2, w, h, radius);
+            ctx.clip();
+
+            ctx.drawImage(el.img, -w / 2, -h / 2, w, h);
+
+            // Garis Tepi (Stroke Outline)
+            if (el.borderWidth && el.borderWidth > 0 && el.borderColor) {
+                ctx.lineWidth = el.borderWidth * 2;
+                ctx.strokeStyle = el.borderColor;
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        /* =========================================================================
+           SELEKSI & BOUNDING BOX (CANVA & PIXELLAB STYLE)
+           ========================================================================= */
+        function selectElement(elId) {
+            activeElementId = elId;
+            updateSelectionBox();
+            renderBottomToolbar();
+            closeToolPanel();
+        }
+
+        function deselectElement() {
+            activeElementId = null;
+            selBox.classList.remove('active');
+            closeInlineTextEditor();
+            renderBottomToolbar();
+            closeToolPanel();
+        }
+
+        function updateSelectionBox() {
+            const el = getActiveElement();
+            if (!el || isEditingText) {
+                selBox.classList.remove('active');
+                return;
+            }
+
+            let boxW = el.width || 200;
+            let boxH = el.height || 100;
+
+            if (el.type === 'text') {
+                boxH = el._calculatedHeight || (el.fontSize * 1.5);
+            }
+
+            // Konversi ke koordinat DOM artboard yang diskalakan
+            const domW = boxW * canvasScale;
+            const domH = boxH * canvasScale;
+            const domX = (el.x * canvasScale) - (domW / 2);
+            const domY = (el.y * canvasScale) - (domH / 2);
+
+            selBox.style.width = `${domW}px`;
+            selBox.style.height = `${domH}px`;
+            selBox.style.left = `${domX}px`;
+            selBox.style.top = `${domY}px`;
+            selBox.classList.add('active');
+        }
+
+        /* =========================================================================
+           IN-PLACE DIRECT KEYBOARD INPUT (SATU LAYAR HP KELIHATAN LANGSUNG)
+           ========================================================================= */
+        function setupInlineTextEvents() {
+            inlineTextInput.addEventListener('input', () => {
+                const el = getActiveElement();
+                if (el && el.type === 'text') {
+                    el.text = inlineTextInput.value;
+                    renderAll();
+                    triggerAutoSave();
+                }
+            });
+
+            inlineTextInput.addEventListener('blur', () => {
+                closeInlineTextEditor();
+                pushHistoryState();
+            });
+        }
+
+        function openInlineTextEditor(el) {
+            isEditingText = true;
+            selBox.classList.remove('active');
+
+            const domW = Math.max(260, (el.width || 300) * canvasScale);
+            const domH = Math.max(100, ((el._calculatedHeight || 120) * canvasScale) + 30);
+            const domX = Math.max(10, (el.x * canvasScale) - (domW / 2));
+            const domY = Math.max(10, (el.y * canvasScale) - (domH / 2));
+
+            inlineTextInput.style.width = `${domW}px`;
+            inlineTextInput.style.height = `${domH}px`;
+            inlineTextInput.style.left = `${domX}px`;
+            inlineTextInput.style.top = `${domY}px`;
+            inlineTextInput.value = el.text;
+            inlineTextInput.style.display = 'block';
+
+            // Buka keyboard otomatis di HP
+            setTimeout(() => {
+                inlineTextInput.focus();
+                inlineTextInput.setSelectionRange(el.text.length, el.text.length);
+            }, 50);
+        }
+
+        function closeInlineTextEditor() {
+            if (!isEditingText) return;
+            isEditingText = false;
+            inlineTextInput.style.display = 'none';
+            renderAll();
+        }
+
+        /* =========================================================================
+           DRAGGING & RESIZE CORNER ENGINE (ANTI MELEYOT / BEBAS DISTORSI)
+           ========================================================================= */
+        let dragMode = null; // 'move', 'resize-handle'
+        let activeHandle = null;
+        let startPointer = { x: 0, y: 0 };
+        let startElementState = {};
+
+        function setupDraggingEngine() {
+            artboard.addEventListener('pointerdown', handleArtboardPointerDown);
+            window.addEventListener('pointermove', handleWindowPointerMove);
+            window.addEventListener('pointerup', handleWindowPointerUp);
+        }
+
+        function handleViewportClick(e) {
+            if (e.target.id === 'workspaceViewport') {
+                deselectElement();
             }
         }
 
-        // FUNGSI WRAP TEXT CANVAS OTOMATIS
-        function wrapTextLines(context, text, maxWidth) {
-            const words = text.split(' ');
-            const lines = [];
-            let currentLine = words[0];
+        function handleArtboardPointerDown(e) {
+            // Cek jika klik pada handle resize
+            if (e.target.classList.contains('sel-handle') || e.target.classList.contains('sel-handle-edge')) {
+                dragMode = 'resize-handle';
+                activeHandle = e.target.dataset.handle;
+                startPointer = { x: e.clientX, y: e.clientY };
+                const el = getActiveElement();
+                startElementState = { ...el };
+                e.stopPropagation();
+                return;
+            }
 
-            for (let i = 1; i < words.length; i++) {
-                const word = words[i];
-                const width = context.measureText(currentLine + " " + word).width;
-                if (width < maxWidth) {
-                    currentLine += " " + word;
-                } else {
-                    lines.push(currentLine);
-                    currentLine = word;
+            // Koordinat Canvas
+            const rect = artboard.getBoundingClientRect();
+            const clickX = (e.clientX - rect.left) / canvasScale;
+            const clickY = (e.clientY - rect.top) / canvasScale;
+
+            const s = getCurrentSlide();
+            // Cari elemen dari lapisan paling atas ke bawah
+            let hitEl = null;
+            for (let i = s.elements.length - 1; i >= 0; i--) {
+                const el = s.elements[i];
+                if (isPointerInsideElement(clickX, clickY, el)) {
+                    hitEl = el;
+                    break;
                 }
             }
-            lines.push(currentLine);
-            return lines;
+
+            if (hitEl) {
+                // Deteksi double tap / klik kedua untuk edit keyboard
+                if (activeElementId === hitEl.id && hitEl.type === 'text') {
+                    openInlineTextEditor(hitEl);
+                    return;
+                }
+
+                selectElement(hitEl.id);
+                if (!hitEl.locked) {
+                    dragMode = 'move';
+                    startPointer = { x: e.clientX, y: e.clientY };
+                    startElementState = { x: hitEl.x, y: hitEl.y };
+                }
+            } else {
+                deselectElement();
+            }
         }
 
-        // EXPORT POSTER RESOLUSI TINGGI KE JPG
-        function exportPosterJPG() {
-            const link = document.createElement('a');
-            link.download = 'poster-dakwah-' + Date.now() + '.jpg';
-            link.href = canvas.toDataURL('image/jpeg', 0.95);
-            link.click();
+        function isPointerInsideElement(px, py, el) {
+            const halfW = (el.width || 200) / 2;
+            const halfH = (el._calculatedHeight || el.height || 100) / 2;
+            return (px >= el.x - halfW && px <= el.x + halfW &&
+                    py >= el.y - halfH && py <= el.y + halfH);
         }
 
-        window.onload = function() {
-            initDefaultCanvas();
-        };
+        function handleWindowPointerMove(e) {
+            if (!dragMode) return;
+            const el = getActiveElement();
+            if (!el || el.locked) return;
+
+            const deltaX = (e.clientX - startPointer.x) / canvasScale;
+            const deltaY = (e.clientY - startPointer.y) / canvasScale;
+
+            if (dragMode === 'move') {
+                el.x = Math.round(startElementState.x + deltaX);
+                el.y = Math.round(startElementState.y + deltaY);
+
+                // Jika elemen tergabung dalam grup, geser anggota grup lainnya
+                if (el.groupId) {
+                    const s = getCurrentSlide();
+                    s.elements.forEach(other => {
+                        if (other.groupId === el.groupId && other.id !== el.id) {
+                            if (!other._startGroupPos) other._startGroupPos = { x: other.x, y: other.y };
+                            other.x = Math.round(other._startGroupPos.x + deltaX);
+                            other.y = Math.round(other._startGroupPos.y + deltaY);
+                        }
+                    });
+                }
+                renderAll();
+            } else if (dragMode === 'resize-handle') {
+                // RESIZE PROPORSIONAL ASLI (TANPA MELEYOT) JIKA DI TARIK SUDUT
+                if (activeHandle === 'br' || activeHandle === 'bl' || activeHandle === 'tr' || activeHandle === 'tl') {
+                    let factor = 1 + (deltaX / (startElementState.width || 300));
+                    if (activeHandle === 'bl' || activeHandle === 'tl') factor = 1 - (deltaX / (startElementState.width || 300));
+
+                    factor = Math.max(0.2, factor);
+                    if (el.type === 'text') {
+                        el.fontSize = Math.round(startElementState.fontSize * factor);
+                        el.width = Math.round(startElementState.width * factor);
+                    } else if (el.type === 'image') {
+                        el.width = Math.round(startElementState.width * factor);
+                        el.height = Math.round(startElementState.height * factor);
+                    }
+                } else if (activeHandle === 'r' || activeHandle === 'l') {
+                    // Lebarkan teks / PNG ke samping
+                    const sign = activeHandle === 'r' ? 1 : -1;
+                    el.width = Math.max(120, Math.round(startElementState.width + (deltaX * 2 * sign)));
+                } else if (activeHandle === 'b' || activeHandle === 't') {
+                    if (el.type === 'image') {
+                        const sign = activeHandle === 'b' ? 1 : -1;
+                        el.height = Math.max(50, Math.round(startElementState.height + (deltaY * 2 * sign)));
+                    }
+                }
+                renderAll();
+            }
+        }
+
+        function handleWindowPointerUp() {
+            if (dragMode) {
+                dragMode = null;
+                const s = getCurrentSlide();
+                s.elements.forEach(el => delete el._startGroupPos);
+                pushHistoryState();
+            }
+        }
+
+        /* =========================================================================
+           DYNAMIC BOTTOM TOOLBAR (ALA CANVA)
+           ========================================================================= */
+        function renderBottomToolbar() {
+            const bar = document.getElementById('bottomToolbar');
+            const el = getActiveElement();
+
+            if (!el) {
+                // Toolbar Saat Tidak Ada Elemen yang Dipilih (Menu Desain Keseluruhan)
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="addNewText()">
+                        <span class="icon">➕📝</span><span>Teks</span>
+                    </button>
+                    <button class="tool-btn" onclick="triggerImageUpload()">
+                        <span class="icon">➕🖼️</span><span>Foto/PNG</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelBackground()">
+                        <span class="icon">🎨</span><span>Background</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelLayers()">
+                        <span class="icon">📑</span><span>Lapisan</span>
+                    </button>
+                    <button class="tool-btn" onclick="toggleBleedGuides()">
+                        <span class="icon">📐</span><span>Garis Bantu</span>
+                    </button>
+                `;
+            } else if (el.type === 'text') {
+                // Toolbar Khusus Teks
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="openInlineTextEditor(getActiveElement())">
+                        <span class="icon">✏️</span><span>Edit Teks</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelFontFamily()">
+                        <span class="icon">🔤</span><span>Font</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelFontSize()">
+                        <span class="icon">📏</span><span>Ukuran</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelTextColor()">
+                        <span class="icon">🎨</span><span>Warna</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelTextFormat()">
+                        <span class="icon"><b>B</b><i>I</i><u>U</u></span><span>Format</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelHighlight()">
+                        <span class="icon">🖍️</span><span>Stabilo</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelSpacing()">
+                        <span class="icon">↔️</span><span>Jarak Baris</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelPosition()">
+                        <span class="icon">🎯</span><span>Posisi</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelLayerOrder()">
+                        <span class="icon">🥞</span><span>Lapisan</span>
+                    </button>
+                    <button class="tool-btn" onclick="toggleElementLock()">
+                        <span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka Kunci' : 'Kunci'}</span>
+                    </button>
+                    <button class="tool-btn" onclick="duplicateActiveElement()">
+                        <span class="icon">📑</span><span>Duplikat</span>
+                    </button>
+                    <button class="tool-btn" onclick="toggleGroupElement()">
+                        <span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah Grup' : 'Gabung'}</span>
+                    </button>
+                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;">
+                        <span class="icon">🗑️</span><span>Hapus</span>
+                    </button>
+                `;
+            } else if (el.type === 'image') {
+                // Toolbar Khusus Gambar / PNG
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="openPanelImageFlip()">
+                        <span class="icon">🪞</span><span>Cermin</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelImageBorder()">
+                        <span class="icon">🔲</span><span>Garis Tepi</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelImageShadow()">
+                        <span class="icon">👥</span><span>Bayangan</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelImageOpacity()">
+                        <span class="icon">🏁</span><span>Transparansi</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelPosition()">
+                        <span class="icon">🎯</span><span>Posisi</span>
+                    </button>
+                    <button class="tool-btn" onclick="openPanelLayerOrder()">
+                        <span class="icon">🥞</span><span>Lapisan</span>
+                    </button>
+                    <button class="tool-btn" onclick="toggleElementLock()">
+                        <span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka Kunci' : 'Kunci'}</span>
+                    </button>
+                    <button class="tool-btn" onclick="duplicateActiveElement()">
+                        <span class="icon">📑</span><span>Duplikat</span>
+                    </button>
+                    <button class="tool-btn" onclick="toggleGroupElement()">
+                        <span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah Grup' : 'Gabung'}</span>
+                    </button>
+                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;">
+                        <span class="icon">🗑️</span><span>Hapus</span>
+                    </button>
+                `;
+            }
+        }
+
+        /* =========================================================================
+           POPUP PANEL KONTROL MODULAR
+           ========================================================================= */
+        function openToolPanel(title, htmlContent) {
+            document.getElementById('panelTitle').innerText = title;
+            document.getElementById('panelContent').innerHTML = htmlContent;
+            document.getElementById('toolPanel').classList.add('active');
+        }
+
+        function closeToolPanel() {
+            document.getElementById('toolPanel').classList.remove('active');
+        }
+
+        // 1. PANEL FONT
+        function openPanelFontFamily() {
+            const el = getActiveElement();
+            let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
+            FONT_FAMILIES.forEach(f => {
+                const isAct = el.fontFamily === f.font;
+                html += `
+                    <div class="layer-item ${isAct ? 'active' : ''}" style="font-family:${f.font};font-size:15px;" onclick="setFontFamily('${f.font}')">
+                        <span>${f.name}</span>
+                        ${isAct ? '✓' : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            openToolPanel('Pilih Jenis Font', html);
+        }
+        function setFontFamily(font) {
+            const el = getActiveElement();
+            if (el) { el.fontFamily = font; renderAll(); pushHistoryState(); openPanelFontFamily(); }
+        }
+
+        // 2. PANEL UKURAN TEKS
+        function openPanelFontSize() {
+            const el = getActiveElement();
+            const html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Ukuran Teks:</span>
+                    <input type="range" class="ctrl-slider" min="14" max="220" value="${el.fontSize}" oninput="updateFontSize(this.value)">
+                    <span class="ctrl-val" id="valFontSize">${el.fontSize}px</span>
+                </div>
+            `;
+            openToolPanel('Ukuran Font', html);
+        }
+        function updateFontSize(val) {
+            const el = getActiveElement();
+            if (el) {
+                el.fontSize = parseInt(val);
+                document.getElementById('valFontSize').innerText = val + 'px';
+                renderAll();
+                triggerAutoSave();
+            }
+        }
+
+        // 3. PANEL WARNA
+        function openPanelTextColor() {
+            const el = getActiveElement();
+            let html = '<div class="color-palette-scroll">';
+            QUICK_COLORS.forEach(c => {
+                html += `<div class="color-circle ${el.color === c ? 'active' : ''}" style="background:${c};" onclick="setTextColor('${c}')"></div>`;
+            });
+            html += `</div>
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Warna Custom:</span>
+                    <input type="color" value="${el.color}" onchange="setTextColor(this.value)">
+                </div>
+            `;
+            openToolPanel('Warna Teks', html);
+        }
+        function setTextColor(c) {
+            const el = getActiveElement();
+            if (el) { el.color = c; renderAll(); pushHistoryState(); openPanelTextColor(); }
+        }
+
+        // 4. PANEL FORMAT TEKS (BOLD, ITALIC, UNDERLINE, CAPITALIZE, ALIGNMENT)
+        function openPanelTextFormat() {
+            const el = getActiveElement();
+            const html = `
+                <div class="ctrl-grid-btns">
+                    <button class="btn-sub-tool ${el.fontWeight === 'bold' || el.fontWeight === '900' ? 'active' : ''}" onclick="toggleFontWeight()">
+                        <span style="font-size:16px;font-weight:900;">B</span><span>Tebal</span>
+                    </button>
+                    <button class="btn-sub-tool ${el.fontStyle === 'italic' ? 'active' : ''}" onclick="toggleFontStyle()">
+                        <span style="font-size:16px;font-style:italic;">I</span><span>Miring</span>
+                    </button>
+                    <button class="btn-sub-tool ${el.textDecoration === 'underline' ? 'active' : ''}" onclick="toggleTextUnderline()">
+                        <span style="font-size:16px;text-decoration:underline;">U</span><span>Garis Bawah</span>
+                    </button>
+                    <button class="btn-sub-tool ${el.textTransform === 'uppercase' ? 'active' : ''}" onclick="setTextCase('uppercase')">
+                        <span style="font-size:15px;">AA</span><span>KAPITAL</span>
+                    </button>
+                </div>
+                <div class="ctrl-grid-btns" style="margin-top:8px;">
+                    <button class="btn-sub-tool ${el.textAlign === 'left' ? 'active' : ''}" onclick="setTextAlign('left')">
+                        <span>⬅️ Rata Kiri</span>
+                    </button>
+                    <button class="btn-sub-tool ${el.textAlign === 'center' ? 'active' : ''}" onclick="setTextAlign('center')">
+                        <span>↔️ Tengah</span>
+                    </button>
+                    <button class="btn-sub-tool ${el.textAlign === 'right' ? 'active' : ''}" onclick="setTextAlign('right')">
+                        <span>➡️ Rata Kanan</span>
+                    </button>
+                    <button class="btn-sub-tool ${el.textTransform === 'capitalize' ? 'active' : ''}" onclick="setTextCase('capitalize')">
+                        <span>Aa Judul</span>
+                    </button>
+                </div>
+            `;
+            openToolPanel('Format & Perataan Teks', html);
+        }
+        function toggleFontWeight() {
+            const el = getActiveElement();
+            el.fontWeight = (el.fontWeight === 'bold' || el.fontWeight === '900') ? 'normal' : 'bold';
+            renderAll(); pushHistoryState(); openPanelTextFormat();
+        }
+        function toggleFontStyle() {
+            const el = getActiveElement();
+            el.fontStyle = (el.fontStyle === 'italic') ? 'normal' : 'italic';
+            renderAll(); pushHistoryState(); openPanelTextFormat();
+        }
+        function toggleTextUnderline() {
+            const el = getActiveElement();
+            el.textDecoration = (el.textDecoration === 'underline') ? 'none' : 'underline';
+            renderAll(); pushHistoryState(); openPanelTextFormat();
+        }
+        function setTextCase(val) {
+            const el = getActiveElement();
+            el.textTransform = (el.textTransform === val) ? 'none' : val;
+            renderAll(); pushHistoryState(); openPanelTextFormat();
+        }
+        function setTextAlign(val) {
+            const el = getActiveElement();
+            el.textAlign = val;
+            renderAll(); pushHistoryState(); openPanelTextFormat();
+        }
+
+        // 5. STABILO / HIGHLIGHT BOX
+        function openPanelHighlight() {
+            const el = getActiveElement();
+            let html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Transparansi:</span>
+                    <input type="range" class="ctrl-slider" min="0" max="100" value="${Math.round((el.highlightAlpha || 0.4) * 100)}" oninput="updateHighlightAlpha(this.value)">
+                    <span class="ctrl-val" id="valHiAlpha">${Math.round((el.highlightAlpha || 0.4) * 100)}%</span>
+                </div>
+                <span class="ctrl-label" style="margin-top:6px;display:block;">Warna Stabilo:</span>
+                <div class="color-palette-scroll">
+                    <div class="color-circle ${el.highlightColor === 'transparent' ? 'active' : ''}" style="background:#444;" title="Tanpa Stabilo" onclick="setHighlightColor('transparent')"></div>
+            `;
+            QUICK_COLORS.forEach(c => {
+                html += `<div class="color-circle ${el.highlightColor === c ? 'active' : ''}" style="background:${c};" onclick="setHighlightColor('${c}')"></div>`;
+            });
+            html += '</div>';
+            openToolPanel('Efek Stabilo Teks', html);
+        }
+        function updateHighlightAlpha(v) {
+            const el = getActiveElement();
+            el.highlightAlpha = parseInt(v) / 100;
+            document.getElementById('valHiAlpha').innerText = v + '%';
+            renderAll(); triggerAutoSave();
+        }
+        function setHighlightColor(c) {
+            const el = getActiveElement();
+            el.highlightColor = c;
+            renderAll(); pushHistoryState(); openPanelHighlight();
+        }
+
+        // 6. JARAK BARIS & HURUF
+        function openPanelSpacing() {
+            const el = getActiveElement();
+            const html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Jarak Baris:</span>
+                    <input type="range" class="ctrl-slider" min="90" max="250" value="${Math.round((el.lineHeight || 1.3) * 100)}" oninput="updateLineHeight(this.value)">
+                    <span class="ctrl-val" id="valLineHeight">${(el.lineHeight || 1.3).toFixed(1)}</span>
+                </div>
+            `;
+            openToolPanel('Jarak Antar Baris', html);
+        }
+        function updateLineHeight(v) {
+            const el = getActiveElement();
+            el.lineHeight = parseInt(v) / 100;
+            document.getElementById('valLineHeight').innerText = el.lineHeight.toFixed(1);
+            renderAll(); triggerAutoSave();
+        }
+
+        // 7. POSISI PRESISI & ALIGNMENT SUDUT
+        function openPanelPosition() {
+            const el = getActiveElement();
+            const html = `
+                <div class="ctrl-grid-btns">
+                    <button class="btn-sub-tool" onclick="setAlignPosition('top-left')">↖️ Kiri Atas</button>
+                    <button class="btn-sub-tool" onclick="setAlignPosition('top')">⬆️ Atas</button>
+                    <button class="btn-sub-tool" onclick="setAlignPosition('top-right')">↗️ Kanan Atas</button>
+                    <button class="btn-sub-tool" onclick="setAlignPosition('left')">⬅️ Kiri</button>
+                </div>
+                <div class="ctrl-grid-btns" style="margin-top:6px;">
+                    <button class="btn-sub-tool" onclick="setAlignPosition('center')">🎯 Tengah Pas</button>
+                    <button class="btn-sub-tool" onclick="setAlignPosition('right')">➡️ Kanan</button>
+                    <button class="btn-sub-tool" onclick="setAlignPosition('bottom-left')">↙️ Kiri Bawah</button>
+                    <button class="btn-sub-tool" onclick="setAlignPosition('bottom')">⬇️ Bawah</button>
+                </div>
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Geser Manual:</span>
+                    <button class="btn-sub-tool" onclick="nudgeElement(0, -10)">⬆️ -10px</button>
+                    <button class="btn-sub-tool" onclick="nudgeElement(0, 10)">⬇️ +10px</button>
+                    <button class="btn-sub-tool" onclick="nudgeElement(-10, 0)">⬅️ -10px</button>
+                    <button class="btn-sub-tool" onclick="nudgeElement(10, 0)">➡️ +10px</button>
+                </div>
+            `;
+            openToolPanel('Atur Posisi Presisi', html);
+        }
+        function setAlignPosition(pos) {
+            const el = getActiveElement();
+            const W = mainCanvas.width;
+            const H = mainCanvas.height;
+            const halfW = (el.width || 200) / 2;
+            const halfH = ((el._calculatedHeight || el.height || 100)) / 2;
+            const margin = 80;
+
+            if (pos === 'top-left') { el.x = halfW + margin; el.y = halfH + margin; }
+            else if (pos === 'top') { el.x = W / 2; el.y = halfH + margin; }
+            else if (pos === 'top-right') { el.x = W - halfW - margin; el.y = halfH + margin; }
+            else if (pos === 'left') { el.x = halfW + margin; el.y = H / 2; }
+            else if (pos === 'center') { el.x = W / 2; el.y = H / 2; }
+            else if (pos === 'right') { el.x = W - halfW - margin; el.y = H / 2; }
+            else if (pos === 'bottom-left') { el.x = halfW + margin; el.y = H - halfH - margin; }
+            else if (pos === 'bottom') { el.x = W / 2; el.y = H - halfH - margin; }
+
+            renderAll(); pushHistoryState();
+        }
+        function nudgeElement(dx, dy) {
+            const el = getActiveElement();
+            if (el) { el.x += dx; el.y += dy; renderAll(); pushHistoryState(); }
+        }
+
+        // 8. PENGURUTAN LAPISAN LAYER (PALING DEPAN / BELAKANG / PINDAH SATUAN)
+        function openPanelLayerOrder() {
+            const html = `
+                <div class="ctrl-grid-btns">
+                    <button class="btn-sub-tool" onclick="moveLayerTop()">🔝 Paling Depan</button>
+                    <button class="btn-sub-tool" onclick="moveLayerUp()">⬆️ Maju 1 Lapis</button>
+                    <button class="btn-sub-tool" onclick="moveLayerDown()">⬇️ Mundur 1 Lapis</button>
+                    <button class="btn-sub-tool" onclick="moveLayerBottom()">🔚 Paling Belakang</button>
+                </div>
+            `;
+            openToolPanel('Urutan Lapisan', html);
+        }
+        function moveLayerTop() {
+            const s = getCurrentSlide();
+            const idx = s.elements.findIndex(e => e.id === activeElementId);
+            if (idx > -1 && idx < s.elements.length - 1) {
+                const el = s.elements.splice(idx, 1)[0];
+                s.elements.push(el);
+                renderAll(); pushHistoryState();
+            }
+        }
+        function moveLayerBottom() {
+            const s = getCurrentSlide();
+            const idx = s.elements.findIndex(e => e.id === activeElementId);
+            if (idx > 0) {
+                const el = s.elements.splice(idx, 1)[0];
+                s.elements.unshift(el);
+                renderAll(); pushHistoryState();
+            }
+        }
+        function moveLayerUp() {
+            const s = getCurrentSlide();
+            const idx = s.elements.findIndex(e => e.id === activeElementId);
+            if (idx > -1 && idx < s.elements.length - 1) {
+                const el = s.elements[idx];
+                s.elements[idx] = s.elements[idx + 1];
+                s.elements[idx + 1] = el;
+                renderAll(); pushHistoryState();
+            }
+        }
+        function moveLayerDown() {
+            const s = getCurrentSlide();
+            const idx = s.elements.findIndex(e => e.id === activeElementId);
+            if (idx > 0) {
+                const el = s.elements[idx];
+                s.elements[idx] = s.elements[idx - 1];
+                s.elements[idx - 1] = el;
+                renderAll(); pushHistoryState();
+            }
+        }
+
+        // 9. DAFTAR SEMUA LAPISAN (LAYER LIST MODAL ALA CANVA)
+        function openPanelLayers() {
+            const s = getCurrentSlide();
+            let html = '<div class="layer-list-container">';
+            // Tampilkan dari lapisan teratas ke terbawah
+            for (let i = s.elements.length - 1; i >= 0; i--) {
+                const el = s.elements[i];
+                const isAct = el.id === activeElementId;
+                const name = el.type === 'text' ? (el.text.substring(0, 24) || 'Teks') : 'Foto / PNG';
+                html += `
+                    <div class="layer-item ${isAct ? 'active' : ''}" onclick="selectElement('${el.id}'); openPanelLayers();">
+                        <span>${el.type === 'text' ? '📝' : '🖼️'} ${name}</span>
+                        <div class="layer-actions">
+                            <button class="layer-btn" onclick="event.stopPropagation(); toggleElementLockById('${el.id}')">${el.locked ? '🔒' : '🔓'}</button>
+                            <button class="layer-btn" onclick="event.stopPropagation(); deleteElementById('${el.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            openToolPanel('Daftar Lapisan Layer', html);
+        }
+
+        // 10. TOOL GAMBAR / PNG SPESIFIK (CERMIN, BORDER, BAYANGAN, TRANSPARANSI)
+        function openPanelImageFlip() {
+            const el = getActiveElement();
+            const html = `
+                <div class="ctrl-grid-btns">
+                    <button class="btn-sub-tool ${el.flipH ? 'active' : ''}" onclick="toggleFlip('H')">↔️ Cermin Kiri-Kanan</button>
+                    <button class="btn-sub-tool ${el.flipV ? 'active' : ''}" onclick="toggleFlip('V')">↕️ Balik Atas-Bawah</button>
+                </div>
+            `;
+            openToolPanel('Cermin Gambar', html);
+        }
+        function toggleFlip(dir) {
+            const el = getActiveElement();
+            if (dir === 'H') el.flipH = !el.flipH;
+            if (dir === 'V') el.flipV = !el.flipV;
+            renderAll(); pushHistoryState(); openPanelImageFlip();
+        }
+
+        function openPanelImageBorder() {
+            const el = getActiveElement();
+            let html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Kelengkungan Sudut:</span>
+                    <input type="range" class="ctrl-slider" min="0" max="150" value="${el.cornerRadius || 0}" oninput="updateCornerRadius(this.value)">
+                    <span class="ctrl-val" id="valRadius">${el.cornerRadius || 0}px</span>
+                </div>
+                <div class="ctrl-row" style="margin-top:8px;">
+                    <span class="ctrl-label">Tebal Garis Tepi:</span>
+                    <input type="range" class="ctrl-slider" min="0" max="30" value="${el.borderWidth || 0}" oninput="updateBorderWidth(this.value)">
+                    <span class="ctrl-val" id="valBorderW">${el.borderWidth || 0}px</span>
+                </div>
+                <span class="ctrl-label" style="margin-top:6px;display:block;">Warna Garis Tepi:</span>
+                <div class="color-palette-scroll">
+            `;
+            QUICK_COLORS.forEach(c => {
+                html += `<div class="color-circle ${el.borderColor === c ? 'active' : ''}" style="background:${c};" onclick="setBorderColor('${c}')"></div>`;
+            });
+            html += '</div>';
+            openToolPanel('Garis Tepi & Sudut', html);
+        }
+        function updateCornerRadius(v) {
+            const el = getActiveElement();
+            el.cornerRadius = parseInt(v);
+            document.getElementById('valRadius').innerText = v + 'px';
+            renderAll(); triggerAutoSave();
+        }
+        function updateBorderWidth(v) {
+            const el = getActiveElement();
+            el.borderWidth = parseInt(v);
+            if (!el.borderColor) el.borderColor = '#D4AF37';
+            document.getElementById('valBorderW').innerText = v + 'px';
+            renderAll(); triggerAutoSave();
+        }
+        function setBorderColor(c) {
+            const el = getActiveElement();
+            el.borderColor = c;
+            renderAll(); pushHistoryState(); openPanelImageBorder();
+        }
+
+        function openPanelImageShadow() {
+            const el = getActiveElement();
+            if (!el.shadow) el.shadow = { color: 'rgba(0,0,0,0.8)', blur: 15, angle: 45, distance: 8 };
+            let html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Keburaman (Blur):</span>
+                    <input type="range" class="ctrl-slider" min="0" max="50" value="${el.shadow.blur || 0}" oninput="updateShadowBlur(this.value)">
+                    <span class="ctrl-val" id="valShadowB">${el.shadow.blur || 0}</span>
+                </div>
+                <div class="ctrl-row" style="margin-top:6px;">
+                    <span class="ctrl-label">Jarak / Sudut:</span>
+                    <input type="range" class="ctrl-slider" min="0" max="50" value="${el.shadow.distance || 0}" oninput="updateShadowDistance(this.value)">
+                    <span class="ctrl-val" id="valShadowD">${el.shadow.distance || 0}</span>
+                </div>
+                <span class="ctrl-label" style="margin-top:6px;display:block;">Warna Bayangan:</span>
+                <div class="color-palette-scroll">
+                    <div class="color-circle ${el.shadow.color === 'transparent' ? 'active' : ''}" style="background:#444;" title="Tanpa Bayangan" onclick="setShadowColor('transparent')"></div>
+                    <div class="color-circle ${el.shadow.color === 'rgba(0,0,0,0.85)' ? 'active' : ''}" style="background:#000;" onclick="setShadowColor('rgba(0,0,0,0.85)')"></div>
+                    <div class="color-circle ${el.shadow.color === 'rgba(212,175,55,0.7)' ? 'active' : ''}" style="background:#D4AF37;" onclick="setShadowColor('rgba(212,175,55,0.7)')"></div>
+                    <div class="color-circle ${el.shadow.color === 'rgba(255,255,255,0.7)' ? 'active' : ''}" style="background:#fff;" onclick="setShadowColor('rgba(255,255,255,0.7)')"></div>
+                </div>
+            `;
+            openToolPanel('Pengaturan Bayangan', html);
+        }
+        function updateShadowBlur(v) {
+            const el = getActiveElement();
+            el.shadow.blur = parseInt(v);
+            document.getElementById('valShadowB').innerText = v;
+            renderAll(); triggerAutoSave();
+        }
+        function updateShadowDistance(v) {
+            const el = getActiveElement();
+            el.shadow.distance = parseInt(v);
+            document.getElementById('valShadowD').innerText = v;
+            renderAll(); triggerAutoSave();
+        }
+        function setShadowColor(c) {
+            const el = getActiveElement();
+            el.shadow.color = c;
+            renderAll(); pushHistoryState(); openPanelImageShadow();
+        }
+
+        function openPanelImageOpacity() {
+            const el = getActiveElement();
+            const html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Transparansi:</span>
+                    <input type="range" class="ctrl-slider" min="10" max="100" value="${Math.round((el.opacity !== undefined ? el.opacity : 1) * 100)}" oninput="updateOpacity(this.value)">
+                    <span class="ctrl-val" id="valOpacity">${Math.round((el.opacity !== undefined ? el.opacity : 1) * 100)}%</span>
+                </div>
+            `;
+            openToolPanel('Tingkat Transparansi', html);
+        }
+        function updateOpacity(v) {
+            const el = getActiveElement();
+            el.opacity = parseInt(v) / 100;
+            document.getElementById('valOpacity').innerText = v + '%';
+            renderAll(); triggerAutoSave();
+        }
+
+        // 11. TAMBAH ELEMEN BARU
+        function addNewText() {
+            const s = getCurrentSlide();
+            const newEl = {
+                id: 'el_' + Date.now(),
+                type: 'text',
+                text: 'Ketik Teks Baru\nDi Sini',
+                x: mainCanvas.width / 2,
+                y: mainCanvas.height / 2,
+                width: 600,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontSize: 50,
+                fontWeight: 'bold',
+                fontStyle: 'normal',
+                textDecoration: 'none',
+                textAlign: 'center',
+                textTransform: 'none',
+                color: '#FFFFFF',
+                lineHeight: 1.3,
+                letterSpacing: 0,
+                highlightColor: 'transparent',
+                highlightAlpha: 0.5,
+                opacity: 1,
+                rotation: 0,
+                locked: false,
+                groupId: null,
+                shadow: { color: 'rgba(0,0,0,0.8)', blur: 10, angle: 45, distance: 4 }
+            };
+            s.elements.push(newEl);
+            selectElement(newEl.id);
+            renderAll();
+            pushHistoryState();
+            openInlineTextEditor(newEl);
+        }
+
+        function triggerImageUpload() {
+            document.getElementById('fileImageInput').click();
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const s = getCurrentSlide();
+                    // Batasi ukuran awal max 600px proporsional
+                    const maxInit = 600;
+                    let initW = img.width;
+                    let initH = img.height;
+                    if (initW > maxInit || initH > maxInit) {
+                        const ratio = Math.min(maxInit / initW, maxInit / initH);
+                        initW *= ratio;
+                        initH *= ratio;
+                    }
+
+                    const newEl = {
+                        id: 'el_' + Date.now(),
+                        type: 'image',
+                        img: img,
+                        x: mainCanvas.width / 2,
+                        y: mainCanvas.height / 2,
+                        width: Math.round(initW),
+                        height: Math.round(initH),
+                        origWidth: img.width,
+                        origHeight: img.height,
+                        flipH: false,
+                        flipV: false,
+                        cornerRadius: 0,
+                        borderWidth: 0,
+                        borderColor: '#D4AF37',
+                        shadow: { color: 'transparent', blur: 0, angle: 45, distance: 0 },
+                        opacity: 1,
+                        locked: false,
+                        groupId: null
+                    };
+
+                    s.elements.push(newEl);
+                    selectElement(newEl.id);
+                    renderAll();
+                    pushHistoryState();
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = ''; // Reset input
+        }
+
+        function duplicateActiveElement() {
+            const el = getActiveElement();
+            if (!el) return;
+            const s = getCurrentSlide();
+            const copy = JSON.parse(JSON.stringify(el));
+            copy.id = 'el_' + Date.now();
+            copy.x += 40;
+            copy.y += 40;
+            if (el.type === 'image' && el.img) copy.img = el.img;
+
+            s.elements.push(copy);
+            selectElement(copy.id);
+            renderAll();
+            pushHistoryState();
+        }
+
+        function toggleElementLock() {
+            const el = getActiveElement();
+            if (!el) return;
+            el.locked = !el.locked;
+            renderAll();
+            renderBottomToolbar();
+            pushHistoryState();
+        }
+
+        function toggleElementLockById(id) {
+            const s = getCurrentSlide();
+            const el = s.elements.find(e => e.id === id);
+            if (el) { el.locked = !el.locked; renderAll(); renderBottomToolbar(); pushHistoryState(); }
+        }
+
+        function deleteActiveElement() {
+            const el = getActiveElement();
+            if (!el) return;
+            deleteElementById(el.id);
+        }
+
+        function deleteElementById(id) {
+            const s = getCurrentSlide();
+            s.elements = s.elements.filter(e => e.id !== id);
+            deselectElement();
+            renderAll();
+            pushHistoryState();
+        }
+
+        function toggleGroupElement() {
+            const el = getActiveElement();
+            if (!el) return;
+            if (el.groupId) {
+                // Pisahkan dari grup
+                el.groupId = null;
+            } else {
+                // Hubungkan dengan elemen lain terdekat
+                el.groupId = 'grp_' + Date.now();
+                const s = getCurrentSlide();
+                const neighbor = s.elements.find(e => e.id !== el.id && !e.groupId);
+                if (neighbor) neighbor.groupId = el.groupId;
+            }
+            renderBottomToolbar();
+            pushHistoryState();
+        }
+
+        /* =========================================================================
+           SLIDE CAROUSEL ENGINE (DUPLIKAT GAYA & ELEMEN KE SLIDE LAIN)
+           ========================================================================= */
+        function renderCarouselThumbs() {
+            const container = document.getElementById('slideThumbList');
+            container.innerHTML = '';
+
+            slides.forEach((slide, idx) => {
+                const thumb = document.createElement('div');
+                thumb.className = `slide-thumb ${idx === currentSlideIndex ? 'active' : ''}`;
+                thumb.innerText = `${idx + 1}`;
+                thumb.onclick = () => switchSlide(idx);
+                container.appendChild(thumb);
+            });
+        }
+
+        function switchSlide(idx) {
+            if (idx === currentSlideIndex) return;
+            deselectElement();
+            currentSlideIndex = idx;
+            renderCarouselThumbs();
+            renderAll();
+            pushHistoryState();
+        }
+
+        function addNewSlide() {
+            deselectElement();
+            slides.push(createDefaultSlide());
+            currentSlideIndex = slides.length - 1;
+            renderCarouselThumbs();
+            renderAll();
+            pushHistoryState();
+        }
+
+        function duplicateCurrentSlide() {
+            deselectElement();
+            const curr = getCurrentSlide();
+            // Clone deep
+            const cloned = JSON.parse(JSON.stringify(curr));
+            // Reattach images
+            if (curr.background.img) cloned.background.img = curr.background.img;
+            cloned.elements.forEach((el, i) => {
+                if (el.type === 'image' && curr.elements[i].img) {
+                    el.img = curr.elements[i].img;
+                }
+                el.id = 'el_' + Date.now() + '_' + i;
+            });
+
+            slides.push(cloned);
+            currentSlideIndex = slides.length - 1;
+            renderCarouselThumbs();
+            renderAll();
+            pushHistoryState();
+        }
+
+        /* =========================================================================
+           EXPORT ULTRA HIGH-RES POSTER (CANVAS TO IMAGE)
+           ========================================================================= */
+        function exportPoster() {
+            deselectElement();
+            renderAll();
+
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.download = `poster-dakwah-slide-${currentSlideIndex + 1}-${Date.now()}.jpg`;
+                link.href = mainCanvas.toDataURL('image/jpeg', 0.98);
+                link.click();
+            }, 100);
+        }
+
+        // Jalankan saat pertama kali halaman terbuka
+        window.onload = initApp;
     </script>
 </body>
 </html>
