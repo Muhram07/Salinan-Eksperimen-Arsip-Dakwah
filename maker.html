@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studio Poster Maker - Canva & PixelLab Style</title>
-    <!-- Google Fonts -->
+    <title>Studio Poster Maker - Ultimate Canvas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700;1,900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none;}
-        html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
+        html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;touch-action:none;}
 
         /* TOP HEADER TOOLBAR */
         .top-navbar{
@@ -29,11 +28,6 @@
         .btn-nav:disabled{opacity:0.35;cursor:not-allowed;}
         .btn-download{background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;border:none;box-shadow:0 2px 10px rgba(212,175,55,0.3);}
 
-        .export-select{
-            background:#1c1c1c;color:#D4AF37;border:1px solid rgba(212,175,55,0.4);border-radius:17px;
-            height:34px;padding:0 8px;font-size:11px;font-weight:700;cursor:pointer;
-        }
-
         /* AUTO SAVE STATUS */
         .save-indicator{font-size:10px;color:#888;display:flex;align-items:center;gap:4px;padding:0 4px;}
         .save-dot{width:7px;height:7px;border-radius:50%;background:#4CAF50;transition:0.3s;}
@@ -46,48 +40,103 @@
             background-image:radial-gradient(rgba(255,255,255,0.06) 1px, transparent 0);background-size:20px 20px;
             display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;
         }
-
-        /* ARTBOARD STAGE CONTAINER */
         .artboard-container{
             position:relative;box-shadow:0 15px 45px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,175,55,0.3);
             border-radius:6px;overflow:visible;background:#181818;transform-origin:center center;touch-action:none;
+            transition: width 0.3s, height 0.3s;
         }
         #mainCanvas{display:block;width:100%;height:100%;border-radius:6px;touch-action:none;}
+        #offscreenCanvas{display:none;}
 
         /* BLEED & SAFETY MARGIN LINES */
-        .bleed-guides{
-            position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;display:none;z-index:90;
-        }
+        .bleed-guides{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;display:none;z-index:90;}
         .bleed-guides.visible{display:block;}
-        .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,0.6);}
-        .guide-line-v{position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed rgba(212,175,55,0.6);}
+        .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,0.8);box-shadow:0 0 4px rgba(0,0,0,0.8);}
+        .guide-line-v{position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed rgba(212,175,55,0.8);box-shadow:0 0 4px rgba(0,0,0,0.8);}
 
         /* BOUNDING BOX SELECTION */
         .selection-box{
             position:absolute;border:2px solid #D4AF37;pointer-events:none;display:none;z-index:99;box-shadow:0 0 12px rgba(212,175,55,0.4);
         }
         .selection-box.active{display:block;}
+        .selection-box.multi{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,0.4);}
         .sel-handle{
             position:absolute;width:16px;height:16px;background:#fff;border:2px solid #D4AF37;border-radius:50%;
-            pointer-events:auto;box-shadow:0 2px 6px rgba(0,0,0,0.6);z-index:102;
+            pointer-events:auto;box-shadow:0 2px 6px rgba(0,0,0,0.6);
         }
         .sel-handle.tl{top:-8px;left:-8px;cursor:nwse-resize;}
         .sel-handle.tr{top:-8px;right:-8px;cursor:nesw-resize;}
         .sel-handle.bl{bottom:-8px;left:-8px;cursor:nesw-resize;}
         .sel-handle.br{bottom:-8px;right:-8px;cursor:nwse-resize;}
-        
-        .sel-handle-edge{position:absolute;background:#D4AF37;pointer-events:auto;border-radius:3px;z-index:101;}
-        .sel-handle-edge.r{top:50%;right:-6px;transform:translateY(-50%);width:7px;height:26px;cursor:ew-resize;}
-        .sel-handle-edge.l{top:50%;left:-6px;transform:translateY(-50%);width:7px;height:26px;cursor:ew-resize;}
-        .sel-handle-edge.t{left:50%;top:-6px;transform:translateX(-50%);width:26px;height:7px;cursor:ns-resize;}
-        .sel-handle-edge.b{left:50%;bottom:-6px;transform:translateX(-50%);width:26px;height:7px;cursor:ns-resize;}
+        .sel-handle-edge{position:absolute;background:#D4AF37;pointer-events:auto;border-radius:3px;}
+        .sel-handle-edge.r{top:50%;right:-6px;transform:translateY(-50%);width:6px;height:24px;cursor:ew-resize;}
+        .sel-handle-edge.l{top:50%;left:-6px;transform:translateY(-50%);width:6px;height:24px;cursor:ew-resize;}
+        .sel-handle-edge.t{left:50%;top:-6px;transform:translateX(-50%);width:24px;height:6px;cursor:ns-resize;}
+        .sel-handle-edge.b{left:50%;bottom:-6px;transform:translateX(-50%);width:24px;height:6px;cursor:ns-resize;}
 
-        /* IN-PLACE DIRECT KEYBOARD INPUT */
-        #inlineTextInput{
-            position:absolute;display:none;background:rgba(20,20,20,0.95);border:2px solid #D4AF37;color:#fff;
-            padding:10px 12px;border-radius:10px;font-family:inherit;font-size:16px;z-index:150;resize:none;
-            box-shadow:0 10px 30px rgba(0,0,0,0.9);line-height:1.4;
+        .stalk-container{
+            position:absolute;left:50%;transform:translateX(-50%);
+            display:flex;align-items:center;gap:16px;pointer-events:auto;z-index:110;
         }
+        .stalk-container.bottom{bottom:-48px;}
+        .stalk-container.top{top:-48px;}
+        .canva-stalk-btn{
+            width:34px;height:34px;border-radius:50%;background:#1e1e1e;
+            border:2px solid #D4AF37;color:#D4AF37;display:flex;align-items:center;
+            justify-content:center;font-size:16px;cursor:grab;box-shadow:0 4px 12px rgba(0,0,0,0.8);
+            touch-action:none;user-select:none;
+        }
+        .canva-stalk-btn:active{cursor:grabbing;background:#D4AF37;color:#111;}
+
+        /* PIXELLAB STYLE ZOOM WIDGET */
+        .pixellab-zoom-widget{
+            position:absolute;top:60px;right:14px;display:flex;flex-direction:column;align-items:center;gap:4px;
+            background:rgba(20,20,20,0.85);border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:6px;z-index:105;backdrop-filter:blur(8px);
+        }
+        .zoom-row{display:flex;gap:4px;align-items:center;}
+        .zoom-btn{
+            background:rgba(255,255,255,0.06);border:none;color:#eee;font-size:14px;width:30px;height:30px;
+            border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+        }
+        .zoom-btn:hover,.zoom-btn:active{background:#D4AF37;color:#111;}
+        .pan-dpad{display:grid;grid-template-columns:repeat(3,24px);gap:2px;margin-top:4px;}
+        .pan-btn{background:rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+        
+        /* INLINE TEXT EDITOR */
+        .inline-text-toolbar{
+            position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.98);
+            border:1px solid #D4AF37;border-radius:24px;padding:6px 12px;display:none;align-items:center;gap:12px;z-index:260;
+            box-shadow:0 12px 35px rgba(0,0,0,0.9);backdrop-filter:blur(10px);
+        }
+        .inline-text-toolbar.active{display:flex;}
+        .format-hint{font-size:11px;color:#aaa;line-height:1.2;text-align:left;border-right:1px solid #444;padding-right:10px;}
+        .format-hint span{color:#D4AF37;font-weight:bold;}
+        .btn-format-done{
+            background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;border:none;height:32px;
+            padding:0 16px;border-radius:16px;font-size:13px;font-weight:800;cursor:pointer;
+        }
+        
+        /* MULTI PROJECT UI */
+        .project-modal{
+            position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);
+            z-index:999;display:none;align-items:center;justify-content:center;padding:16px;
+        }
+        .project-modal.active{display:flex;}
+        .project-dialog{
+            background:#161616;border:1px solid rgba(212,175,55,0.4);border-radius:16px;
+            width:100%;max-width:600px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,1);
+        }
+        .project-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;}
+        .project-grid{padding:16px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;}
+        .project-card{
+            background:#222;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px;
+            cursor:pointer;position:relative;display:flex;flex-direction:column;gap:8px;
+        }
+        .project-card:hover{border-color:#D4AF37;}
+        .project-thumb{width:100%;height:140px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+        .project-thumb canvas{max-width:100%;max-height:100%;object-fit:contain;}
+        .project-title{font-size:12px;font-weight:bold;color:#fff;text-align:center;}
+        .project-del{position:absolute;top:6px;right:6px;background:rgba(255,0,0,0.8);color:#fff;border:none;border-radius:4px;padding:4px 6px;font-size:10px;cursor:pointer;}
 
         /* SLIDE CAROUSEL THUMBNAILS BAR */
         .carousel-bar{
@@ -97,27 +146,32 @@
         }
         .carousel-bar::-webkit-scrollbar{display:none;}
         .slide-thumb{
-            flex-shrink:0;width:38px;height:48px;background:#252525;border:2px solid transparent;border-radius:6px;
+            flex-shrink:0;width:38px;height:50px;background:#252525;border:2px solid transparent;border-radius:6px;
             overflow:hidden;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;
-            font-size:11px;color:#aaa;font-weight:bold;
+            font-size:10px;color:#aaa;font-weight:bold;
         }
         .slide-thumb.active{border-color:#D4AF37;box-shadow:0 0 8px rgba(212,175,55,0.4);color:#fff;}
+        .slide-thumb canvas{width:100%;height:100%;object-fit:cover;}
         .btn-add-slide{
-            flex-shrink:0;width:38px;height:48px;background:rgba(212,175,55,0.1);border:1px dashed #D4AF37;
+            flex-shrink:0;width:38px;height:50px;background:rgba(212,175,55,0.1);border:1px dashed #D4AF37;
             border-radius:6px;color:#D4AF37;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;
         }
-        .btn-dup-slide, .btn-del-slide{
+        .btn-dup-slide{
             background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#bbb;
-            height:32px;padding:0 8px;border-radius:8px;font-size:11px;font-weight:bold;white-space:nowrap;cursor:pointer;display:flex;align-items:center;gap:4px;
+            height:32px;padding:0 8px;border-radius:8px;font-size:11px;font-weight:bold;white-space:nowrap;cursor:pointer;
         }
-        .btn-del-slide{background:rgba(255,75,75,0.12);border-color:rgba(255,75,75,0.3);color:#ff6b6b;}
+        .btn-del-slide{
+            background:rgba(255,75,75,0.12);border:1px solid rgba(255,75,75,0.3);color:#ff6b6b;
+            height:32px;padding:0 8px;border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;
+        }
 
         /* BOTTOM TOOLBAR */
         .bottom-toolbar-container{
             position:absolute;bottom:0;left:0;right:0;height:62px;background:#141414;
             border-top:1px solid rgba(212,175,55,0.25);z-index:190;display:flex;align-items:center;padding:0 8px;
-            overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:6px;
+            overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:6px;transition:0.3s;
         }
+        .bottom-toolbar-container.transparent{background:rgba(20,20,20,0.4);backdrop-filter:blur(4px);border-top:none;}
         .bottom-toolbar-container::-webkit-scrollbar{display:none;}
         .tool-btn{
             flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -127,252 +181,153 @@
         .tool-btn .icon{font-size:18px;line-height:1;}
         .tool-btn:hover, .tool-btn.active{background:rgba(212,175,55,0.15);color:#D4AF37;}
 
-        /* TOOL PANEL */
+        /* POPUP TOOL DRAWER / PANEL */
         .tool-panel{
-            position:absolute;bottom:62px;left:0;right:0;max-height:280px;background:#181818;
+            position:absolute;bottom:62px;left:0;right:0;max-height:350px;background:#181818;
             border-top:1px solid rgba(212,175,55,0.3);border-radius:18px 18px 0 0;z-index:185;
-            padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,0.8);display:none;flex-direction:column;
+            padding:14px 16px;box-shadow:0 -15px 40px rgba(0,0,0,0.9);display:none;flex-direction:column;
             overflow-y:auto;gap:12px;animation:slideUpPanel 0.25s cubic-bezier(0.16,1,0.3,1);
         }
         .tool-panel.active{display:flex;}
         @keyframes slideUpPanel{from{transform:translateY(100%);}to{transform:translateY(0);}}
-        .panel-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;}
+        .panel-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;margin-bottom:4px;}
         .panel-title{font-size:13px;font-weight:800;color:#D4AF37;letter-spacing:0.5px;}
-        .panel-close{background:none;border:none;color:#888;font-size:18px;cursor:pointer;}
+        .panel-close{background:none;border:none;color:#888;font-size:22px;cursor:pointer;line-height:1;}
 
         /* UI CONTROLS */
         .ctrl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-        .ctrl-label{font-size:11px;color:#bbb;font-weight:bold;min-width:80px;}
-        .range-slider{flex:1;accent-color:#D4AF37;cursor:pointer;}
-        .ctrl-val{font-size:11px;color:#D4AF37;font-weight:bold;width:45px;text-align:right;}
-        .ctrl-grid-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+        .ctrl-col{display:flex;flex-direction:column;gap:8px;}
+        .ctrl-label{font-size:11px;color:#bbb;font-weight:bold;min-width:75px;}
+        .ctrl-slider{flex:1;accent-color:#D4AF37;cursor:pointer;height:4px;}
+        .ctrl-val{font-size:11px;color:#D4AF37;font-weight:bold;width:35px;text-align:right;}
+        
+        .stepper-row{display:flex;align-items:center;gap:6px;}
+        .btn-step{width:28px;height:28px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:6px;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+        .btn-step:active{background:#D4AF37;color:#111;}
+        .btn-reset-tool{padding:4px 8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#aaa;font-size:10px;border-radius:4px;cursor:pointer;margin-left:auto;}
+
         .btn-sub-tool{
             background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ddd;
-            padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+            padding:8px 8px;border-radius:8px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex:1;
         }
         .btn-sub-tool.active{background:#D4AF37;color:#111;border-color:#D4AF37;}
         .color-palette-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0;}
-        .color-circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);flex-shrink:0;cursor:pointer;}
-        .color-circle.active{border-color:#D4AF37;transform:scale(1.2);}
+        .color-circle{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);flex-shrink:0;cursor:pointer;position:relative;}
+        .color-circle.active{border-color:#D4AF37;transform:scale(1.1);box-shadow:0 0 8px rgba(212,175,55,0.6);}
 
-        /* STEPPER ROW */
-        .stepper-row {display: flex;align-items: center;gap: 8px;margin-top: 4px;}
-        .btn-step {
-            width: 32px;height: 32px;border-radius: 8px;background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);color: #fff;font-weight: 800;font-size: 16px;
-            display: flex;align-items: center;justify-content: center;cursor: pointer;flex-shrink: 0;
-        }
-        .btn-step:hover {background: #D4AF37;color: #111;border-color: #D4AF37;}
-        .btn-reset-tool {
-            padding: 4px 8px;border-radius: 6px;background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.12);color: #bbb;font-size: 10px;cursor: pointer;margin-left: auto;
-        }
-
-        /* FLOATING TEXT FORMATTING TOOLBAR */
-        .inline-text-toolbar{
-            position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.95);
-            border:1px solid #D4AF37;border-radius:24px;padding:4px 8px;display:none;align-items:center;gap:6px;z-index:260;
-            box-shadow:0 8px 25px rgba(0,0,0,0.85);backdrop-filter:blur(10px);
-        }
-        .inline-text-toolbar.active{display:flex;}
-        .btn-format-tag{
-            background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;
-            min-width:32px;height:32px;border-radius:16px;font-size:12px;font-weight:bold;cursor:pointer;
-            display:flex;align-items:center;justify-content:center;
-        }
-        .btn-format-tag:hover{background:#D4AF37;color:#111;}
-        .btn-format-done{
-            background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;border:none;height:32px;
-            padding:0 12px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;
-        }
-
-        /* PIXELLAB ZOOM & PAN WIDGET */
-        .pixellab-zoom-widget {
-            position: absolute;top: 60px;right: 12px;display: flex;align-items: center;gap: 4px;
-            background: rgba(20,20,20,0.9);border: 1px solid rgba(212,175,55,0.4);border-radius: 20px;
-            padding: 4px 6px;z-index: 105;backdrop-filter: blur(8px);box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        }
-        .zoom-btn {
-            background: rgba(255,255,255,0.08);border: none;color: #eee;font-size: 11px;
-            padding: 5px 8px;border-radius: 12px;cursor: pointer;
-        }
-        .zoom-btn:hover, .zoom-btn:active {background: #D4AF37;color: #111;}
-        .pan-btn {padding: 4px 6px;font-size: 10px;background: rgba(255,255,255,0.05);color: #bbb;}
-
-        /* POSITION 3x3 & DPAD */
+        /* EYEDROPPER & DPAD */
+        .eyedropper-btn{width:100%;padding:10px;background:rgba(212,175,55,0.1);border:1px dashed #D4AF37;color:#D4AF37;font-weight:bold;border-radius:8px;margin-top:8px;cursor:pointer;}
+        
         .pos-grid-3x3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
         .btn-pos-cell{
             background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ccc;
-            padding:8px 4px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;
+            padding:10px 4px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;
         }
-        .btn-pos-cell:hover, .btn-pos-cell.active{border-color:#D4AF37;color:#D4AF37;background:rgba(212,175,55,0.15);}
-        .dpad-container{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px;}
+        .dpad-container{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:10px;}
         .dpad-row{display:flex;align-items:center;gap:4px;}
-        .dpad-btn{
-            width:42px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
-            color:#fff;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-        }
-        .dpad-btn:hover{background:#D4AF37;color:#111;}
-        .dpad-center{width:70px;height:36px;background:rgba(0,0,0,0.4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#aaa;}
+        .dpad-btn{width:46px;height:42px;background:rgba(255,255,255,0.08);border:1px solid #D4AF37;color:#D4AF37;border-radius:8px;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;touch-action:none;}
+        .dpad-btn:active{background:#D4AF37;color:#111;}
 
-        /* LOUPE & EYEDROPPER TANGKAI */
-        .color-loupe-stalk {
-            position: fixed;display: none;z-index: 10000;pointer-events: auto;touch-action: none;
+        /* LAYER DRAG DROP */
+        .layer-list-container{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
+        .layer-item{
+            display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);padding:10px 12px;border-radius:8px;font-size:12px;cursor:grab;
         }
-        .loupe-glass {
-            width: 76px;height: 76px;border-radius: 50%;border: 3px solid #D4AF37;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.9);overflow: hidden;background: #000;position: relative;
+        .layer-item:active{cursor:grabbing;border-color:#D4AF37;}
+        .layer-item.active{border-color:#D4AF37;background:rgba(212,175,55,0.15);color:#D4AF37;font-weight:bold;}
+        
+        /* FULLSCREEN EYEDROPPER OVERLAY */
+        #eyedropperOverlay{
+            position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;cursor:crosshair;display:none;
+            background:transparent;
         }
-        .loupe-cross {
-            position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);
-            width: 8px;height: 8px;border: 1px solid #fff;border-radius: 50%;
+        #eyedropperPreview{
+            position:absolute;width:60px;height:60px;border-radius:50%;border:4px solid #fff;
+            box-shadow:0 0 15px rgba(0,0,0,0.8);pointer-events:none;transform:translate(-50%, -100%);
+            display:flex;align-items:center;justify-content:center;
         }
-        .loupe-stalk-handle {
-            width: 38px;height: 38px;background: #1e1e1e;border: 2px solid #D4AF37;border-radius: 50%;
-            margin: 10px auto 0;display: flex;align-items: center;justify-content: center;cursor: grab;color: #D4AF37;font-size: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.7);
-        }
-
-        /* PROJECT MODAL */
-        .project-modal {
-            position: fixed;top: 0; left: 0; right: 0; bottom: 0;background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);z-index: 999;display: none;align-items: center;justify-content: center;padding: 16px;
-        }
-        .project-modal.active {display: flex;}
-        .project-dialog {
-            background: #181818;border: 1px solid rgba(212,175,55,0.3);border-radius: 16px;
-            max-width: 580px;width: 100%;max-height: 85vh;display: flex;flex-direction: column;overflow: hidden;
-        }
-        .project-header {padding: 14px 18px;border-bottom: 1px solid rgba(255,255,255,0.1);display: flex;align-items: center;justify-content: space-between;}
-        .project-grid {padding: 16px;overflow-y: auto;display: grid;grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));gap: 12px;}
-        .project-card {background: #222;border: 1px solid rgba(255,255,255,0.1);border-radius: 10px;padding: 10px;cursor: pointer;display: flex;flex-direction: column;}
-        .project-card.active, .project-card:hover {border-color: #D4AF37;}
-        .project-thumb {width: 100%;background: #111;border-radius: 6px;margin-bottom: 8px;object-fit: cover;border: 1px solid rgba(255,255,255,0.06);}
-        .project-thumb.ratio-4-5 {aspect-ratio: 4/5;}
-        .project-thumb.ratio-1-1 {aspect-ratio: 1/1;}
-        .project-thumb.ratio-9-16 {aspect-ratio: 9/16;}
-        .project-title {font-size: 11px;font-weight: 700;color: #eee;margin-bottom: 2px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
-        .project-meta {font-size: 9px;color: #888;}
-        .project-actions {display: flex;gap: 4px;margin-top: 8px;}
-        .btn-proj-action {flex: 1;padding: 4px 0;border-radius: 4px;border: 1px solid rgba(255,255,255,0.1);background: rgba(255,255,255,0.06);color: #ddd;font-size: 10px;cursor: pointer;}
-
-        /* TOAST */
-        #toast{
-            position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#1f1f1f;border:1px solid #D4AF37;
-            color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;
-            box-shadow:0 4px 15px rgba(0,0,0,0.8);display:none;
-        }
-        #toast.show{display:block;animation:fadeToast 0.25s ease;}
-        @keyframes fadeToast{from{opacity:0;transform:translate(-50%, -10px);}to{opacity:1;transform:translate(-50%, 0);}}
+        #eyedropperPreview::after{content:'';width:4px;height:4px;background:red;border-radius:50%;}
     </style>
 </head>
 <body>
-    <div id="toast"></div>
-
-    <!-- 1. TOP HEADER TOOLBAR -->
+    <!-- HEADER -->
     <header class="top-navbar">
         <div class="nav-left">
-            <a href="index.html" class="btn-nav" title="Kembali ke Beranda">⬅️ Arsip</a>
-            <button class="btn-nav" id="btnUndo" onclick="undo()" title="Undo" disabled>↩️</button>
-            <button class="btn-nav" id="btnRedo" onclick="redo()" title="Redo" disabled>↪️</button>
-            <div class="save-indicator">
-                <span class="save-dot" id="saveDot"></span>
-                <span id="saveText">Tersimpan</span>
-            </div>
+            <button class="btn-nav" onclick="openProjectManager()">📁 Projek</button>
+            <button class="btn-nav" id="btnUndo" onclick="undo()" disabled>↩️</button>
+            <button class="btn-nav" id="btnRedo" onclick="redo()" disabled>↪️</button>
+            <div class="save-indicator"><span class="save-dot" id="saveDot"></span><span id="saveText">Tersimpan</span></div>
         </div>
-
         <div class="nav-right">
-            <button class="btn-nav" onclick="openProjectModal()" title="Projek Saya" style="border-color:#D4AF37;color:#D4AF37;">
-                📁 Projek
-            </button>
-            <button class="btn-nav" id="btnRatio" onclick="toggleRatioSelector()" title="Ubah Ukuran Poster">
-                📏 <span id="currentRatioLabel">4:5</span>
-            </button>
-            <button class="btn-nav" onclick="openPanelBleed()" title="Garis Bantu Presisi">
-                📐 Garis Bantu
-            </button>
-            <select class="export-select" id="exportQualitySelect" title="Resolusi Ekspor">
-                <option value="0.7">SD (720p)</option>
-                <option value="1.0">HD (1080p)</option>
-                <option value="2.0" selected>Ultra HD (2K/4K)</option>
-                <option value="3.0">Ultra HD Pro Max</option>
-            </select>
-            <button class="btn-nav btn-download" onclick="exportPoster()" title="Unduh Desain">
-                💾 Simpan
-            </button>
+            <button class="btn-nav" onclick="toggleRatioSelector()">📏 <span id="currentRatioLabel">4:5</span></button>
+            <button class="btn-nav" onclick="openPanel('bleed')">📐 Margin</button>
+            <button class="btn-nav" onclick="openPanel('export')">💾 Simpan HD</button>
         </div>
     </header>
 
-    <!-- 2. WORKSPACE CANVAS AREA -->
-    <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
-        <!-- PIXELLAB ZOOM & PAN WIDGET -->
+    <!-- WORKSPACE -->
+    <main class="workspace-viewport" id="workspaceViewport">
+        <!-- PIXELLAB ZOOM WIDGET -->
         <div class="pixellab-zoom-widget" id="zoomWidget">
-            <button class="zoom-btn" onclick="zoomCanvasManual(-0.2)" title="Perkecil">🔍-</button>
-            <button class="zoom-btn" id="zoomLevelLabel" onclick="resetCanvasZoom()" style="min-width:42px;font-weight:700;">100%</button>
-            <button class="zoom-btn" onclick="zoomCanvasManual(0.2)" title="Perbesar">🔍+</button>
-            <button class="zoom-btn pan-btn" onclick="panCanvas(0, -50)" title="Geser Atas">▲</button>
-            <button class="zoom-btn pan-btn" onclick="panCanvas(0, 50)" title="Geser Bawah">▼</button>
-            <button class="zoom-btn pan-btn" onclick="panCanvas(-50, 0)" title="Geser Kiri">◀</button>
-            <button class="zoom-btn pan-btn" onclick="panCanvas(50, 0)" title="Geser Kanan">▶</button>
-            <button class="zoom-btn" onclick="centerCanvasArtboard()" title="Pusatkan Kanvas">🎯</button>
+            <div class="zoom-row">
+                <button class="zoom-btn" onclick="zoomCanvasManual(-0.25)">-</button>
+                <button class="zoom-btn" id="zoomLevelLabel" onclick="resetCanvasZoom()" style="width:40px;font-size:11px;font-weight:bold;">100%</button>
+                <button class="zoom-btn" onclick="zoomCanvasManual(0.25)">+</button>
+            </div>
+            <div class="pan-dpad">
+                <div></div><button class="pan-btn" onclick="panManual(0, 50)">▲</button><div></div>
+                <button class="pan-btn" onclick="panManual(50, 0)">◀</button><button class="pan-btn" onclick="resetCanvasZoom()">●</button><button class="pan-btn" onclick="panManual(-50, 0)">▶</button>
+                <div></div><button class="pan-btn" onclick="panManual(0, -50)">▼</button><div></div>
+            </div>
         </div>
 
-        <div class="artboard-container" id="artboard">
+        <div class="artboard-container" id="artboard" style="transform: translate(0px, 0px) scale(1);">
             <canvas id="mainCanvas"></canvas>
+            <canvas id="offscreenCanvas"></canvas>
 
-            <!-- BLEED & MARGIN GUIDES (TERMASUK GRID 3X3) -->
             <div class="bleed-guides" id="bleedGuides">
                 <div class="guide-line-h" id="bleedLineTop" style="top:5%;"></div>
                 <div class="guide-line-h" id="bleedLineBottom" style="bottom:5%;"></div>
                 <div class="guide-line-v" id="bleedLineLeft" style="left:5%;"></div>
                 <div class="guide-line-v" id="bleedLineRight" style="right:5%;"></div>
-                <div class="guide-line-h" id="bleedLineMidH" style="top:50%;border-top-color:#00e5ff;display:none;"></div>
-                <div class="guide-line-v" id="bleedLineMidV" style="left:50%;border-left-color:#00e5ff;display:none;"></div>
-                <!-- Grid 3x3 Rule of Thirds -->
-                <div class="guide-line-h" id="grid3x3H1" style="top:33.33%;border-top-color:#FFD700;display:none;"></div>
-                <div class="guide-line-h" id="grid3x3H2" style="top:66.66%;border-top-color:#FFD700;display:none;"></div>
-                <div class="guide-line-v" id="grid3x3V1" style="left:33.33%;border-left-color:#FFD700;display:none;"></div>
-                <div class="guide-line-v" id="grid3x3V2" style="left:66.66%;border-left-color:#FFD700;display:none;"></div>
             </div>
 
-            <!-- SELECTION BOUNDING BOX -->
+            <!-- SELECTION BOX -->
             <div class="selection-box" id="selBox">
-                <div class="sel-handle tl" data-handle="tl"></div>
-                <div class="sel-handle tr" data-handle="tr"></div>
-                <div class="sel-handle bl" data-handle="bl"></div>
-                <div class="sel-handle br" data-handle="br"></div>
-                <div class="sel-handle-edge r" data-handle="r"></div>
-                <div class="sel-handle-edge l" data-handle="l"></div>
-                <div class="sel-handle-edge t" data-handle="t"></div>
-                <div class="sel-handle-edge b" data-handle="b"></div>
+                <div class="sel-handle tl" data-handle="tl"></div><div class="sel-handle tr" data-handle="tr"></div>
+                <div class="sel-handle bl" data-handle="bl"></div><div class="sel-handle br" data-handle="br"></div>
+                <div class="sel-handle-edge r" data-handle="r"></div><div class="sel-handle-edge l" data-handle="l"></div>
+                
+                <div class="stalk-container bottom">
+                    <div class="canva-stalk-btn" data-handle="rotate" title="Rotasi">↻</div>
+                    <div class="canva-stalk-btn" data-handle="move" title="Geser Bebas">✥</div>
+                </div>
             </div>
-
-            <textarea id="inlineTextInput" spellcheck="false" placeholder="Ketik teks di sini..."></textarea>
         </div>
     </main>
 
-    <!-- FLOATING TEXT FORMATTING TOOLBAR -->
+    <!-- INLINE TEXT EDITING TOOLBAR (MARKDOWN HINT) -->
     <div class="inline-text-toolbar" id="inlineTextToolbar">
-        <button type="button" class="btn-format-tag" onpointerdown="event.preventDefault(); applyFormatToSelection('**', '**');"><b>B</b></button>
-        <button type="button" class="btn-format-tag" onpointerdown="event.preventDefault(); applyFormatToSelection('*', '*');"><i>I</i></button>
-        <button type="button" class="btn-format-tag" onpointerdown="event.preventDefault(); applyFormatToSelection('__', '__');"><u>U</u></button>
-        <button type="button" class="btn-format-tag" onpointerdown="event.preventDefault(); applyFormatToSelection('==', '==');">🖍️</button>
-        <button type="button" class="btn-format-tag" onpointerdown="event.preventDefault(); toggleCaseSelection();">aA</button>
-        <button type="button" class="btn-format-done" onclick="closeInlineTextEditor()">✅ Selesai</button>
+        <div class="format-hint">
+            <span>**Tebal**</span> | <span>*Miring*</span><br>
+            <span>==Stabillo==</span> | <span>__Garis__</span>
+        </div>
+        <button type="button" class="btn-format-done" onclick="closeInlineTextEditor()">Selesai ✅</button>
     </div>
 
-    <!-- 3. SLIDE CAROUSEL BAR -->
+    <!-- CAROUSEL -->
     <div class="carousel-bar" id="carouselBar">
         <div id="slideThumbList" style="display:flex;gap:8px;"></div>
-        <button class="btn-add-slide" onclick="addNewSlide()" title="Tambah Slide">+</button>
-        <button class="btn-dup-slide" onclick="duplicateCurrentSlide()" title="Duplikat Slide">📑 Duplikat</button>
-        <button class="btn-del-slide" onclick="deleteCurrentSlide()" title="Hapus Slide">🗑️ Hapus</button>
+        <button class="btn-add-slide" onclick="addNewSlide()">+</button>
+        <button class="btn-dup-slide" onclick="duplicateCurrentSlide()">📑 Duplikat</button>
+        <button class="btn-del-slide" onclick="deleteCurrentSlide()">🗑️ Hapus</button>
     </div>
 
-    <!-- 4. BOTTOM DYNAMIC TOOLBAR -->
+    <!-- BOTTOM TOOLBAR -->
     <nav class="bottom-toolbar-container" id="bottomToolbar"></nav>
 
-    <!-- 5. MODAL POPUP SUB-PANEL -->
+    <!-- TOOL PANEL -->
     <div class="tool-panel" id="toolPanel">
         <div class="panel-header">
             <span class="panel-title" id="panelTitle">Pengaturan</span>
@@ -380,1885 +335,1222 @@
         </div>
         <div id="panelContent"></div>
     </div>
-
-    <!-- LOUPE DENGAN TANGKAI GESER UNTUK EYEDROPPER -->
-    <div class="color-loupe-stalk" id="colorLoupeStalk">
-        <div class="loupe-glass" id="loupeGlass">
-            <div class="loupe-cross"></div>
-            <div id="loupeHexTxt" style="position:absolute;bottom:0;left:0;right:0;height:18px;text-align:center;font-size:9px;color:#fff;font-weight:700;line-height:18px;background:rgba(0,0,0,0.6);">#000000</div>
-        </div>
-        <div class="loupe-stalk-handle" id="loupeHandle" title="Tarik Tangkai Ini">🎯</div>
-    </div>
-
-    <!-- MODAL PROJEK SAYA -->
+    
+    <!-- PROJECT MODAL -->
     <div class="project-modal" id="projectModal">
         <div class="project-dialog">
             <div class="project-header">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">📁</span>
-                    <span style="font-weight:800;font-size:14px;color:#D4AF37;">Projek Saya</span>
-                </div>
-                <button class="panel-close" onclick="closeProjectModal()">✕</button>
+                <h3 style="color:#D4AF37;">Projek Saya</h3>
+                <button class="panel-close" onclick="document.getElementById('projectModal').classList.remove('active')">&times;</button>
             </div>
-            <div style="padding:10px 14px;background:rgba(255,255,255,0.03);display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
-                <button class="btn-nav active" onclick="createNewProjectPrompt()" style="flex:1;justify-content:center;">➕ Buat Projek Baru</button>
-                <button class="btn-nav" onclick="saveAsNewProjectPrompt()" style="flex:1;justify-content:center;">💾 Duplikat Jadi Baru</button>
+            <div class="project-grid" id="projectGrid"></div>
+            <div style="padding:16px;border-top:1px solid #333;">
+                <button class="btn-format-done" style="width:100%;" onclick="createNewProject()">+ Buat Projek Baru</button>
             </div>
-            <div class="project-grid" id="projectGridContainer"></div>
         </div>
     </div>
 
-    <!-- INPUT FILE TERSEMBUNYI -->
+    <!-- EYEDROPPER UI -->
+    <div id="eyedropperOverlay">
+        <div id="eyedropperPreview"></div>
+    </div>
+
+    <!-- HIDDEN INPUTS -->
     <input type="file" id="fileImageInput" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleImageUpload(event)">
     <input type="file" id="fileBgInput" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleBgUpload(event)">
-    <input type="file" id="fileTextSkinInput" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleTextSkinUpload(event)">
+    <input type="file" id="fileSkinInput" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleTextSkinUpload(event)">
 
     <script>
         /* =========================================================================
            CORE ENGINE & STATE
            ========================================================================= */
-        const STORAGE_KEY = 'MAKER_STUDIO_CACHE_V3';
-        const PROJECTS_KEY = 'MAKER_STUDIO_PROJECTS_V3';
-        const QUICK_COLORS = ['#FFFFFF', '#D4AF37', '#FFE259', '#E5E7EB', '#9CA3AF', '#000000', '#1F2937', '#EF4444', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#14B8A6'];
-        
-        // Urutan Rasio Awal: 4:5 -> 1:1 -> 9:16
+        const STORAGE_PROJECTS_KEY = 'MAKER_PROJECTS_V6';
+        let projects = [];
+        let currentProjectId = null;
+
+        const QUICK_COLORS = ['#FFFFFF', '#D4AF37', '#FFE259', '#E5E7EB', '#9CA3AF', '#000000', '#1F2937', '#EF4444', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', 'transparent'];
         const RATIO_PRESETS = {
             '4:5':  { width: 1080, height: 1350, label: '4:5 (Feed Portrait)' },
             '1:1':  { width: 1080, height: 1080, label: '1:1 (Feed Kotak)' },
-            '9:16': { width: 1080, height: 1920, label: '9:16 (Story/Reels)' }
+            '9:16': { width: 1080, height: 1920, label: '9:16 (Story/Reels)' },
+            '16:9': { width: 1920, height: 1080, label: '16:9 (Landscape)' }
         };
-
-        const FONT_FAMILIES = [
-            { name: 'Plus Jakarta Sans', font: "Plus Jakarta Sans, sans-serif" },
-            { name: 'Montserrat Bold', font: "Montserrat, sans-serif" },
-            { name: 'Playfair Display Serif', font: "Playfair Display, serif" },
-            { name: 'Caveat Handwrite', font: "Caveat, cursive" },
-            { name: 'Amiri Arabic / Tajdid', font: "Amiri, serif" },
-            { name: 'Cinzel Royal Luxury', font: "Cinzel, serif" }
+        const FONTS = [
+            { name: 'Plus Jakarta', font: "Plus Jakarta Sans, sans-serif" },
+            { name: 'Montserrat', font: "Montserrat, sans-serif" },
+            { name: 'Playfair', font: "Playfair Display, serif" },
+            { name: 'Caveat', font: "Caveat, cursive" },
+            { name: 'Amiri', font: "Amiri, serif" },
+            { name: 'Cinzel', font: "Cinzel, serif" }
         ];
 
-        let currentRatio = '4:5'; // Default Awal 4:5
+        let currentRatio = '4:5';
         let currentSlideIndex = 0;
         let slides = [];
         let activeElementId = null;
-        let isEditingText = false;
-        let activeGuideMode = 'none';
-        let bleedSettings = { margin: 5, color: '#D4AF37' };
-        let nudgeStep = 10;
-        let currentProjectId = 'proj_default';
+        let multiSelectGroup = []; // Array of IDs for grouping
+        
+        let bleedGuidesVisible = false;
+        let bleedMargin = 5;
 
-        // Zoom & Pan
-        let userZoomScale = 1.0;
-        let viewportPanX = 0;
-        let viewportPanY = 0;
+        // Viewport State
         let canvasScale = 1;
+        let panX = 0, panY = 0;
+        let artboardBaseScale = 1;
 
-        // History
+        // Interaction State
+        let isDragging = false, isPanning = false;
+        let dragAction = null;
+        let pointerStartX, pointerStartY, elStartX, elStartY, elStartW, elStartH, elStartRot, elStartFS;
+        let initialPanState = null;
+        let joyInterval = null;
+
+        // Image Cache (Vital for Undo/Redo performance)
+        const imageCache = new Map();
+
+        // DOM Setup
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        const offCanvas = document.getElementById('offscreenCanvas');
+        const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+        const artboard = document.getElementById('artboard');
+        const selBox = document.getElementById('selBox');
+        
+        // History State
         let historyStack = [];
         let historyIndex = -1;
-        const MAX_HISTORY = 30;
+        const MAX_HISTORY = 40;
         let autoSaveTimer = null;
         let renderPending = false;
 
-        const mainCanvas = document.getElementById('mainCanvas');
-        const ctx = mainCanvas.getContext('2d');
-        const artboard = document.getElementById('artboard');
-        const selBox = document.getElementById('selBox');
-        const inlineTextInput = document.getElementById('inlineTextInput');
-        const inlineTextToolbar = document.getElementById('inlineTextToolbar');
-
-        const imageCache = new Map();
-        function getImageFromCache(src) {
-            if (!src) return null;
-            if (imageCache.has(src)) return imageCache.get(src);
+        /* =========================================================================
+           IMAGE CACHE & HELPERS
+           ========================================================================= */
+        function getImageFromCache(src, callback) {
+            if (!src || src === 'transparent') { if(callback) callback(null); return null; }
+            if (imageCache.has(src)) {
+                if(callback) callback(imageCache.get(src));
+                return imageCache.get(src);
+            }
             const img = new Image();
-            img.src = src;
-            img.onload = () => requestRender();
-            imageCache.set(src, img);
-            return img;
-        }
-
-        function requestRender() {
-            if (!renderPending) {
-                renderPending = true;
-                requestAnimationFrame(() => {
-                    renderPending = false;
-                    renderAll();
-                });
-            }
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            if (!t) return;
-            t.innerText = msg;
-            t.classList.add('show');
-            clearTimeout(t._timer);
-            t._timer = setTimeout(() => t.classList.remove('show'), 2500);
-        }
-
-        function createDefaultSlide() {
-            return {
-                background: {
-                    type: 'gradient',
-                    color1: '#241a14',
-                    color2: '#0d0a08',
-                    img: null,
-                    scale: 1.0,
-                    offsetX: 0,
-                    offsetY: 0,
-                    blur: 0,
-                    darken: 0.3
-                },
-                elements: [
-                    {
-                        id: 'el_' + Date.now() + '_1',
-                        type: 'text',
-                        text: 'Teman Sejati',
-                        x: 540,
-                        y: 300,
-                        width: 700,
-                        fontFamily: "Caveat, cursive",
-                        fontSize: 68,
-                        fontWeight: 'bold',
-                        color: '#D4AF37',
-                        lineHeight: 1.2,
-                        opacity: 1,
-                        rotation: 0,
-                        shadow: { color: 'rgba(0,0,0,0.8)', blur: 10, angle: 45, distance: 4 }
-                    },
-                    {
-                        id: 'el_' + Date.now() + '_2',
-                        type: 'text',
-                        text: 'HANYALAH\nAMAL',
-                        x: 540,
-                        y: 450,
-                        width: 860,
-                        fontFamily: "Montserrat, sans-serif",
-                        fontSize: 105,
-                        fontWeight: '900',
-                        color: '#FFFFFF',
-                        lineHeight: 1.05,
-                        opacity: 1,
-                        rotation: 0,
-                        shadow: { color: 'rgba(0,0,0,0.95)', blur: 20, angle: 45, distance: 6 }
-                    },
-                    {
-                        id: 'el_' + Date.now() + '_3',
-                        type: 'text',
-                        text: '“Mayyit diiringi tiga hal, yang dua akan kembali sedang yang satu terus menyertainya: keluarga, harta dan amalnya. Harta dan keluarganya akan kembali, sedang amalnya akan terus tetap bersamanya.”',
-                        x: 540,
-                        y: 780,
-                        width: 840,
-                        fontFamily: "Plus Jakarta Sans, sans-serif",
-                        fontSize: 32,
-                        fontWeight: '600',
-                        color: '#E5E7EB',
-                        lineHeight: 1.6,
-                        opacity: 1,
-                        rotation: 0,
-                        shadow: { color: 'rgba(0,0,0,0.8)', blur: 8, angle: 45, distance: 3 }
-                    },
-                    {
-                        id: 'el_' + Date.now() + '_4',
-                        type: 'text',
-                        text: 'HR. Bukhari: 6033',
-                        x: 540,
-                        y: 1030,
-                        width: 600,
-                        fontFamily: "Plus Jakarta Sans, sans-serif",
-                        fontSize: 26,
-                        fontWeight: '700',
-                        color: '#D4AF37',
-                        lineHeight: 1.4,
-                        highlightColor: 'rgba(212,175,55,0.15)',
-                        highlightAlpha: 0.25,
-                        opacity: 1,
-                        rotation: 0,
-                        shadow: { color: 'transparent', blur: 0, angle: 0, distance: 0 }
-                    },
-                    {
-                        id: 'el_' + Date.now() + '_5',
-                        type: 'text',
-                        text: '@tauhidsunnah_id',
-                        x: 540,
-                        y: 1260,
-                        width: 600,
-                        fontFamily: "Plus Jakarta Sans, sans-serif",
-                        fontSize: 24,
-                        fontWeight: '800',
-                        color: '#9CA3AF',
-                        lineHeight: 1.2,
-                        opacity: 1,
-                        rotation: 0,
-                        shadow: { color: 'transparent', blur: 0, angle: 0, distance: 0 }
-                    }
-                ]
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                imageCache.set(src, img);
+                requestRender();
+                if(callback) callback(img);
             };
+            img.src = src;
+            return img; 
         }
 
-        function serializeSlides(slidesList) {
-            return slidesList.map(s => ({
-                ...s,
-                background: {
-                    ...s.background,
-                    imgSrc: s.background.img ? s.background.img.src : (s.background.imgSrc || null),
-                    img: undefined
-                },
-                elements: s.elements.map(el => {
-                    const copy = { ...el };
-                    if (el.type === 'image') {
-                        copy.imgSrc = el.src || (el.img ? el.img.src : copy.imgSrc);
-                        delete copy.img;
-                    }
-                    if (el.textSkinImg) {
-                        copy.textSkinSrc = el.textSkinSrc || el.textSkinImg.src;
-                        delete copy.textSkinImg;
-                    }
-                    return copy;
-                })
-            }));
-        }
+        function createId() { return 'el_' + Date.now() + '_' + Math.floor(Math.random()*1000); }
 
-        function deserializeSlides(rawSlides) {
-            return rawSlides.map(s => {
-                const bgSrc = s.background.imgSrc || (s.background.img && s.background.img.src);
+        function getDefaultBg() { return { type: 'color', color1: '#1a1a1a', imgSrc: null, blur: 0, darken: 0 }; }
+        
+        function createDefaultElement(type, preset) {
+            if (type === 'text') {
                 return {
-                    ...s,
-                    background: {
-                        ...s.background,
-                        imgSrc: bgSrc,
-                        img: bgSrc ? getImageFromCache(bgSrc) : null
-                    },
-                    elements: s.elements.map(el => {
-                        const copy = { ...el };
-                        if (copy.type === 'image') {
-                            const src = copy.imgSrc || copy.src;
-                            copy.src = src;
-                            copy.img = src ? getImageFromCache(src) : null;
-                        }
-                        if (copy.textSkinSrc) {
-                            copy.textSkinImg = getImageFromCache(copy.textSkinSrc);
-                        }
-                        return copy;
-                    })
+                    id: createId(), type: 'text', text: 'Judul Utama',
+                    x: preset.width/2, y: preset.height/2, width: preset.width * 0.8,
+                    fontFamily: "Plus Jakarta Sans, sans-serif", fontSize: 120, fontWeight: '800',
+                    color: '#D4AF37', textAlign: 'center', opacity: 1, rotation: 0,
+                    lineHeight: 1.2, letterSpacing: 0, curve: 0, skew: 0,
+                    shadow: { active: false, color: 'rgba(0,0,0,0.8)', blur: 10, ox: 5, oy: 5 },
+                    glow: { active: false, color: '#D4AF37', blur: 15 },
+                    highlight: { radius: 10, color: '#FFE259' },
+                    skinSrc: null, skinOffsetX: 0, skinOffsetY: 0, groupId: null
                 };
-            });
-        }
-
-        function getCurrentSlide() {
-            return slides[currentSlideIndex] || slides[0];
-        }
-
-        function getActiveElement() {
-            if (!activeElementId) return null;
-            const s = getCurrentSlide();
-            return s ? (s.elements.find(e => e.id === activeElementId) || null) : null;
-        }
-
-        function initApp() {
-            loadFromStorage();
-            if (!slides || slides.length === 0) {
-                slides = [createDefaultSlide()];
-                currentSlideIndex = 0;
             }
+        }
+
+        /* =========================================================================
+           PROJECT MANAGEMENT & STORAGE
+           ========================================================================= */
+        function initApp() {
+            loadProjects();
+            if (projects.length === 0) {
+                createNewProject();
+            } else {
+                loadProject(projects[0].id);
+            }
+            setupDraggingEngine();
+            
+            // Allow font loading time
+            setTimeout(() => { requestRender(); }, 500);
+            window.addEventListener('resize', () => { adjustArtboardSize(); applyCanvasTransform(); });
+        }
+
+        function loadProjects() {
+            try {
+                const raw = localStorage.getItem(STORAGE_PROJECTS_KEY);
+                if (raw) projects = JSON.parse(raw);
+            } catch(e) {}
+        }
+        function saveProjectsList() {
+            localStorage.setItem(STORAGE_PROJECTS_KEY, JSON.stringify(projects.map(p => ({id: p.id, title: p.title, thumb: p.thumb}))));
+        }
+
+        function createNewProject() {
+            const newProj = {
+                id: 'proj_' + Date.now(),
+                title: 'Desain ' + (projects.length + 1),
+                ratio: '4:5',
+                slides: [{ background: getDefaultBg(), elements: [createDefaultElement('text', RATIO_PRESETS['4:5'])] }]
+            };
+            projects.unshift(newProj);
+            saveProjectsList();
+            loadProject(newProj.id);
+            document.getElementById('projectModal').classList.remove('active');
+        }
+
+        function loadProject(id) {
+            // Load full project data (could be stored separately, but we simplify here if small)
+            const projKey = 'MAKER_PROJ_DATA_' + id;
+            let projData = null;
+            try { projData = JSON.parse(localStorage.getItem(projKey)); } catch(e){}
+            
+            if (!projData) {
+                // Initial project creation structure
+                const pInfo = projects.find(p => p.id === id);
+                if(!pInfo) return;
+                projData = { ratio: '4:5', slides: [{ background: getDefaultBg(), elements: [] }] };
+            }
+
+            currentProjectId = id;
+            currentRatio = projData.ratio || '4:5';
+            currentSlideIndex = 0;
+            
+            // Restore Image Objects
+            slides = projData.slides.map(s => {
+                if(s.background.imgSrc) getImageFromCache(s.background.imgSrc);
+                s.elements.forEach(e => {
+                    if(e.type === 'image' && e.src) getImageFromCache(e.src);
+                    if(e.type === 'text' && e.skinSrc) getImageFromCache(e.skinSrc);
+                });
+                return s;
+            });
+            
+            document.getElementById('currentRatioLabel').innerText = currentRatio;
+            historyStack = [];
+            pushHistoryState(true);
             adjustArtboardSize();
-            pushHistoryState();
             renderAll();
             renderCarouselThumbs();
             renderBottomToolbar();
-
-            window.addEventListener('resize', () => {
-                adjustArtboardSize();
-                renderAll();
-            });
-
-            setupInlineTextEvents();
-            setupDraggingEngine();
-            setupEyedropperStalk();
+            document.getElementById('projectModal').classList.remove('active');
         }
 
         function triggerAutoSave() {
-            const dot = document.getElementById('saveDot');
-            const txt = document.getElementById('saveText');
-            if (dot) dot.className = 'save-dot syncing';
-            if (txt) txt.innerText = 'Menyimpan...';
-
+            setSaveIndicator(false);
             clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
-                saveToStorage();
-                if (dot) dot.className = 'save-dot';
-                if (txt) txt.innerText = 'Tersimpan';
-            }, 800);
+            autoSaveTimer = setTimeout(() => { 
+                try {
+                    const safeSlides = JSON.parse(JSON.stringify(slides)); 
+                    const projData = { ratio: currentRatio, slides: safeSlides };
+                    localStorage.setItem('MAKER_PROJ_DATA_' + currentProjectId, JSON.stringify(projData));
+                    
+                    // Update Thumbnail for Project Manager
+                    const p = projects.find(p => p.id === currentProjectId);
+                    if(p) {
+                        const scale = 150 / RATIO_PRESETS[currentRatio].width;
+                        const tCanv = document.createElement('canvas');
+                        tCanv.width = 150; tCanv.height = RATIO_PRESETS[currentRatio].height * scale;
+                        renderToContext(tCanv.getContext('2d'), tCanv.width, tCanv.height, slides[0], scale);
+                        p.thumb = tCanv.toDataURL('image/jpeg', 0.5);
+                        saveProjectsList();
+                    }
+                    setSaveIndicator(true);
+                } catch(e) { console.warn("Storage Limit"); }
+            }, 1000);
+        }
+        function setSaveIndicator(isSaved) {
+            document.getElementById('saveDot').className = isSaved ? 'save-dot' : 'save-dot syncing';
+            document.getElementById('saveText').innerText = isSaved ? 'Tersimpan' : 'Menyimpan...';
         }
 
-        function saveToStorage() {
-            try {
-                const dataToSave = {
-                    ratio: currentRatio,
-                    slideIndex: currentSlideIndex,
-                    slides: serializeSlides(slides)
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-                saveCurrentProjectAuto();
-            } catch (e) {}
+        function openProjectManager() {
+            const grid = document.getElementById('projectGrid');
+            grid.innerHTML = projects.map(p => `
+                <div class="project-card" onclick="loadProject('${p.id}')">
+                    <button class="project-del" onclick="event.stopPropagation(); deleteProject('${p.id}')">X</button>
+                    <div class="project-thumb"><img src="${p.thumb || ''}" style="width:100%;height:100%;object-fit:cover;"></div>
+                    <div class="project-title">${p.title}</div>
+                </div>
+            `).join('');
+            document.getElementById('projectModal').classList.add('active');
         }
-
-        function loadFromStorage() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return;
-                const parsed = JSON.parse(raw);
-                if (parsed.ratio && RATIO_PRESETS[parsed.ratio]) {
-                    currentRatio = parsed.ratio;
-                    document.getElementById('currentRatioLabel').innerText = currentRatio;
-                }
-                currentSlideIndex = parsed.slideIndex || 0;
-                slides = deserializeSlides(parsed.slides || []);
-            } catch (e) {}
-        }
-
-        function pushHistoryState() {
-            if (historyIndex < historyStack.length - 1) {
-                historyStack = historyStack.slice(0, historyIndex + 1);
+        function deleteProject(id) {
+            if(projects.length <= 1) return alert("Minimal 1 projek tersisa.");
+            if(confirm("Hapus projek ini?")) {
+                projects = projects.filter(p => p.id !== id);
+                localStorage.removeItem('MAKER_PROJ_DATA_' + id);
+                saveProjectsList();
+                if(currentProjectId === id) loadProject(projects[0].id);
+                else openProjectManager();
             }
-            const state = JSON.stringify({
-                ratio: currentRatio,
-                currentSlideIndex,
-                slides: serializeSlides(slides)
-            });
-            historyStack.push(state);
+        }
+
+        /* HISTORY */
+        function pushHistoryState(initial = false) {
+            if (historyIndex < historyStack.length - 1) historyStack = historyStack.slice(0, historyIndex + 1);
+            historyStack.push(JSON.stringify({ ratio: currentRatio, currentSlideIndex, slides }));
             if (historyStack.length > MAX_HISTORY) historyStack.shift();
             historyIndex = historyStack.length - 1;
-            updateUndoRedoButtons();
-            triggerAutoSave();
+            updateUndoRedoUI();
+            if(!initial) triggerAutoSave();
         }
-
-        function undo() {
-            if (historyIndex > 0) {
-                historyIndex--;
-                applyHistoryState(historyStack[historyIndex]);
-            }
-        }
-
-        function redo() {
-            if (historyIndex < historyStack.length - 1) {
-                historyIndex++;
-                applyHistoryState(historyStack[historyIndex]);
-            }
-        }
-
+        function undo() { if (historyIndex > 0) { historyIndex--; applyHistoryState(historyStack[historyIndex]); } }
+        function redo() { if (historyIndex < historyStack.length - 1) { historyIndex++; applyHistoryState(historyStack[historyIndex]); } }
         function applyHistoryState(jsonStr) {
             const parsed = JSON.parse(jsonStr);
             currentRatio = parsed.ratio;
-            currentSlideIndex = Math.min(parsed.currentSlideIndex, parsed.slides.length - 1);
+            currentSlideIndex = parsed.currentSlideIndex;
             document.getElementById('currentRatioLabel').innerText = currentRatio;
-            slides = deserializeSlides(parsed.slides);
-            adjustArtboardSize();
-            updateUndoRedoButtons();
-            requestRender();
-            renderCarouselThumbs();
-            renderBottomToolbar();
+            
+            // Trigger pre-load of all images
+            parsed.slides.forEach(s => {
+                if(s.background.imgSrc) getImageFromCache(s.background.imgSrc);
+                s.elements.forEach(e => {
+                    if(e.type==='image' && e.src) getImageFromCache(e.src);
+                    if(e.type==='text' && e.skinSrc) getImageFromCache(e.skinSrc);
+                });
+            });
+            slides = parsed.slides;
+            activeElementId = null; multiSelectGroup = [];
+            adjustArtboardSize(); updateUndoRedoUI(); requestRender(); renderCarouselThumbs(); renderBottomToolbar();
             triggerAutoSave();
         }
-
-        function updateUndoRedoButtons() {
+        function updateUndoRedoUI() {
             document.getElementById('btnUndo').disabled = (historyIndex <= 0);
             document.getElementById('btnRedo').disabled = (historyIndex >= historyStack.length - 1);
         }
 
         /* =========================================================================
-           RATIO & ARTBOARD ENGINE
+           VIEWPORT & RENDERING ENGINE
            ========================================================================= */
         function toggleRatioSelector() {
-            const ratios = ['4:5', '1:1', '9:16'];
-            const nextIdx = (ratios.indexOf(currentRatio) + 1) % ratios.length;
-            setPosterRatio(ratios[nextIdx]);
-        }
-
-        function setPosterRatio(newRatio) {
-            if (currentRatio === newRatio) return;
-            currentRatio = newRatio;
+            const ratios = Object.keys(RATIO_PRESETS);
+            currentRatio = ratios[(ratios.indexOf(currentRatio) + 1) % ratios.length];
             document.getElementById('currentRatioLabel').innerText = currentRatio;
-            adjustArtboardSize();
-            pushHistoryState();
-            renderAll();
+            adjustArtboardSize(); pushHistoryState(); renderAll();
         }
-
         function adjustArtboardSize() {
             const preset = RATIO_PRESETS[currentRatio];
-            const targetW = preset.width;
-            const targetH = preset.height;
-
-            mainCanvas.width = targetW;
-            mainCanvas.height = targetH;
-
+            mainCanvas.width = preset.width; mainCanvas.height = preset.height;
             const vp = document.getElementById('workspaceViewport');
-            const padding = 24;
-            const availW = vp.clientWidth - padding;
-            const availH = vp.clientHeight - padding;
-
-            const scaleW = availW / targetW;
-            const scaleH = availH / targetH;
-            canvasScale = Math.min(scaleW, scaleH);
-
-            artboard.style.width = `${targetW * canvasScale}px`;
-            artboard.style.height = `${targetH * canvasScale}px`;
-
-            updateCanvasTransform();
-            updateSelectionBox();
+            const scaleW = (vp.clientWidth - 40) / preset.width;
+            const scaleH = (vp.clientHeight - 40) / preset.height;
+            artboardBaseScale = Math.min(scaleW, scaleH);
+            artboard.style.width = `${preset.width}px`; artboard.style.height = `${preset.height}px`;
+            resetCanvasZoom(); updateSelectionBox(); updateBleedGuides();
+        }
+        function updateBleedGuides() {
+            const m = bleedMargin + '%';
+            document.getElementById('bleedLineTop').style.top = m;
+            document.getElementById('bleedLineBottom').style.bottom = m;
+            document.getElementById('bleedLineLeft').style.left = m;
+            document.getElementById('bleedLineRight').style.right = m;
         }
 
-        function zoomCanvasManual(delta) {
-            userZoomScale = Math.max(0.3, Math.min(5.0, userZoomScale + delta));
-            updateCanvasTransform();
+        function zoomCanvasManual(amount) {
+            canvasScale = Math.max(0.1, Math.min(20.0, canvasScale + amount));
+            applyCanvasTransform();
         }
-
+        function panManual(dx, dy) {
+            panX += dx; panY += dy; applyCanvasTransform();
+        }
         function resetCanvasZoom() {
-            userZoomScale = 1.0;
-            viewportPanX = 0;
-            viewportPanY = 0;
-            updateCanvasTransform();
+            canvasScale = 1; panX = 0; panY = 0; applyCanvasTransform();
+        }
+        function applyCanvasTransform() {
+            artboard.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale * artboardBaseScale})`;
+            document.getElementById('zoomLevelLabel').innerText = Math.round(canvasScale * 100) + '%';
+        }
+        function autoPanToElement(el) {
+            // Auto zoom/pan to text when editing
+            const preset = RATIO_PRESETS[currentRatio];
+            const scale = canvasScale * artboardBaseScale;
+            // Center element to viewport
+            panX = - (el.x - preset.width/2) * scale;
+            panY = - (el.y - preset.height/2) * scale - 50; // offset up slightly for keyboard
+            canvasScale = Math.max(1, 1.2); 
+            applyCanvasTransform();
         }
 
-        function panCanvas(dx, dy) {
-            viewportPanX += dx;
-            viewportPanY += dy;
-            updateCanvasTransform();
-        }
-
-        function centerCanvasArtboard() {
-            viewportPanX = 0;
-            viewportPanY = 0;
-            userZoomScale = 1.0;
-            updateCanvasTransform();
-        }
-
-        function updateCanvasTransform() {
-            const lbl = document.getElementById('zoomLevelLabel');
-            if (lbl) lbl.innerText = `${Math.round(userZoomScale * 100)}%`;
-            artboard.style.transform = `translate(${viewportPanX}px, ${viewportPanY}px) scale(${userZoomScale})`;
-        }
-
-        function handleViewportClick(e) {
-            if (e.target.id === 'workspaceViewport') {
-                deselectElement();
-            }
-        }
-
-        /* =========================================================================
-           GARIS BANTU PRESISI (TERMASUK GRID 3X3)
-           ========================================================================= */
-        function openPanelBleed() {
-            const html = `
-                <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">PILIH TIPE GARIS BANTU:</div>
-                <div class="ctrl-grid-btns">
-                    <button class="btn-sub-tool ${activeGuideMode === 'center' ? 'active' : ''}" onclick="setGuideMode('center')">🎯 Tengah</button>
-                    <button class="btn-sub-tool ${activeGuideMode === 'margin' ? 'active' : ''}" onclick="setGuideMode('margin')">📏 Tepi Margin</button>
-                    <button class="btn-sub-tool ${activeGuideMode === 'grid3x3' ? 'active' : ''}" onclick="setGuideMode('grid3x3')">📐 Grid 3x3</button>
-                    <button class="btn-sub-tool ${activeGuideMode === 'all' ? 'active' : ''}" onclick="setGuideMode('all')">🌟 Semua</button>
-                </div>
-                <button class="btn-sub-tool" onclick="setGuideMode('none')" style="width:100%;margin-top:8px;color:#ff6b6b;">🙈 Matikan Garis Bantu</button>
-
-                <div class="ctrl-row" style="margin-top:14px;">
-                    <span class="ctrl-label">Margin Tepi:</span>
-                    <span class="ctrl-val" id="bleedMarginVal">${bleedSettings.margin}%</span>
-                </div>
-                <div class="stepper-row">
-                    <button class="btn-step" onclick="stepSliderVal('bleedSlider', -1, updateBleedMargin)">-</button>
-                    <input type="range" class="range-slider" id="bleedSlider" min="2" max="15" value="${bleedSettings.margin}" oninput="updateBleedMargin(this.value)">
-                    <button class="btn-step" onclick="stepSliderVal('bleedSlider', 1, updateBleedMargin)">+</button>
-                </div>
-            `;
-            openToolPanel('Garis Bantu & Grid', html);
-        }
-
-        function setGuideMode(mode) {
-            activeGuideMode = mode;
-            applyGuideVisuals();
-            openPanelBleed();
-        }
-
-        function applyGuideVisuals() {
-            const container = document.getElementById('bleedGuides');
-            const topL = document.getElementById('bleedLineTop');
-            const botL = document.getElementById('bleedLineBottom');
-            const leftL = document.getElementById('bleedLineLeft');
-            const rightL = document.getElementById('bleedLineRight');
-            const midH = document.getElementById('bleedLineMidH');
-            const midV = document.getElementById('bleedLineMidV');
-            const gH1 = document.getElementById('grid3x3H1');
-            const gH2 = document.getElementById('grid3x3H2');
-            const gV1 = document.getElementById('grid3x3V1');
-            const gV2 = document.getElementById('grid3x3V2');
-
-            if (activeGuideMode === 'none') {
-                container.classList.remove('visible');
-                return;
-            }
-            container.classList.add('visible');
-
-            const showMargin = (activeGuideMode === 'margin' || activeGuideMode === 'all');
-            const showCenter = (activeGuideMode === 'center' || activeGuideMode === 'all');
-            const showGrid = (activeGuideMode === 'grid3x3' || activeGuideMode === 'all');
-
-            if (topL) topL.style.display = showMargin ? 'block' : 'none';
-            if (botL) botL.style.display = showMargin ? 'block' : 'none';
-            if (leftL) leftL.style.display = showMargin ? 'block' : 'none';
-            if (rightL) rightL.style.display = showMargin ? 'block' : 'none';
-
-            if (midH) midH.style.display = showCenter ? 'block' : 'none';
-            if (midV) midV.style.display = showCenter ? 'block' : 'none';
-
-            if (gH1) gH1.style.display = showGrid ? 'block' : 'none';
-            if (gH2) gH2.style.display = showGrid ? 'block' : 'none';
-            if (gV1) gV1.style.display = showGrid ? 'block' : 'none';
-            if (gV2) gV2.style.display = showGrid ? 'block' : 'none';
-        }
-
-        function updateBleedMargin(val) {
-            bleedSettings.margin = parseInt(val);
-            const lbl = document.getElementById('bleedMarginVal');
-            if (lbl) lbl.innerText = `${val}%`;
-            document.getElementById('bleedLineTop').style.top = `${val}%`;
-            document.getElementById('bleedLineBottom').style.bottom = `${val}%`;
-            document.getElementById('bleedLineLeft').style.left = `${val}%`;
-            document.getElementById('bleedLineRight').style.right = `${val}%`;
-        }
-
-        /* =========================================================================
-           CANVAS RENDER ENGINE
-           ========================================================================= */
-        function getCleanFont(font) {
-            return (font || 'Plus Jakarta Sans, sans-serif').replace(/['"]/g, '').trim();
-        }
-
-        function parseFormattedRuns(rawText) {
-            if (!rawText) return [];
-            const regex = /(\*\*[^*]+?\*\*|\*[^*]+?\*|__[^_]+?__|==[^=]+?==)/g;
-            const parts = rawText.split(regex);
-            const runs = [];
-            for (let i = 0; i < parts.length; i++) {
-                const p = parts[i];
-                if (!p) continue;
-                let bold = false, italic = false, underline = false, highlight = false;
-                let clean = p;
-                if (clean.startsWith('**') && clean.endsWith('**') && clean.length >= 4) {
-                    bold = true; clean = clean.slice(2, -2);
-                } else if (clean.startsWith('*') && clean.endsWith('*') && clean.length >= 2) {
-                    italic = true; clean = clean.slice(1, -1);
-                } else if (clean.startsWith('__') && clean.endsWith('__') && clean.length >= 4) {
-                    underline = true; clean = clean.slice(2, -2);
-                } else if (clean.startsWith('==') && clean.endsWith('==') && clean.length >= 4) {
-                    highlight = true; clean = clean.slice(2, -2);
-                }
-                runs.push({ text: clean, bold, italic, underline, highlight });
-            }
-            return runs;
-        }
-
-        function getWrappedLines(ctx, text, maxWidth, el) {
-            if (!maxWidth || maxWidth <= 0) maxWidth = 750;
-            const paragraphs = text.split('\n');
-            const lines = [];
-
-            for (const para of paragraphs) {
-                if (!para) {
-                    lines.push([{ text: '', bold: false, italic: false, underline: false, highlight: false }]);
-                    continue;
-                }
-                const runs = parseFormattedRuns(para);
-                let currentLineRuns = [];
-                let currentLineWidth = 0;
-
-                for (const run of runs) {
-                    const words = run.text.split(' ');
-                    for (let w = 0; w < words.length; w++) {
-                        const word = words[w];
-                        const wordWithSpace = (w < words.length - 1) ? word + ' ' : word;
-                        const fStyle = run.italic ? 'italic' : (el.fontStyle || 'normal');
-                        const fWeight = run.bold ? '900' : (el.fontWeight || 'normal');
-                        ctx.font = `${fStyle} ${fWeight} ${el.fontSize}px ${getCleanFont(el.fontFamily)}`;
-                        const wMetrics = ctx.measureText(wordWithSpace);
-                        const addSpacing = (el.letterSpacing || 0) * wordWithSpace.length;
-                        const wordW = wMetrics.width + addSpacing;
-
-                        if (currentLineWidth + wordW > maxWidth && currentLineRuns.length > 0) {
-                            lines.push(currentLineRuns);
-                            currentLineRuns = [];
-                            currentLineWidth = 0;
-                        }
-
-                        currentLineRuns.push({
-                            text: wordWithSpace,
-                            bold: run.bold,
-                            italic: run.italic,
-                            underline: run.underline,
-                            highlight: run.highlight
-                        });
-                        currentLineWidth += wordW;
-                    }
-                }
-                if (currentLineRuns.length > 0) lines.push(currentLineRuns);
-            }
-            return lines;
+        function requestRender() {
+            if (!renderPending) { renderPending = true; requestAnimationFrame(() => { renderPending = false; renderAll(); }); }
         }
 
         function renderAll() {
-            const s = getCurrentSlide();
-            if (!s) return;
-            const W = mainCanvas.width;
-            const H = mainCanvas.height;
-            ctx.clearRect(0, 0, W, H);
-
-            renderBackground(s.background, W, H);
-
-            if (s.elements) {
-                s.elements.forEach(el => {
-                    if (el.type === 'text') renderTextElement(el);
-                    else if (el.type === 'image') renderImageElement(el);
-                });
-            }
+            const preset = RATIO_PRESETS[currentRatio];
+            renderToContext(ctx, preset.width, preset.height, getCurrentSlide());
             updateSelectionBox();
         }
 
-        function renderBackground(bg, W, H) {
-            if (!bg) return;
-            if (bg.img && bg.img.complete) {
-                ctx.save();
-                if (bg.blur > 0) ctx.filter = `blur(${bg.blur * 2}px)`;
+        /* CUSTOM RICH TEXT & CORE RENDERER */
+        function renderToContext(context, width, height, slideData, globalScale = 1) {
+            context.clearRect(0, 0, width, height);
+            if (!slideData) return;
+            context.save();
+            context.scale(globalScale, globalScale);
 
-                const baseRatio = Math.max(W / bg.img.width, H / bg.img.height);
-                const scale = (bg.scale || 1.0) * baseRatio;
-
-                const drawW = bg.img.width * scale;
-                const drawH = bg.img.height * scale;
-
-                const x = ((W - drawW) / 2) + (bg.offsetX || 0);
-                const y = ((H - drawH) / 2) + (bg.offsetY || 0);
-
-                ctx.drawImage(bg.img, x, y, drawW, drawH);
-                ctx.restore();
-            } else {
-                const grad = ctx.createRadialGradient(W / 2, H * 0.35, 100, W / 2, H / 2, W);
-                grad.addColorStop(0, bg.color1 || '#241a14');
-                grad.addColorStop(1, bg.color2 || '#0d0a08');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
+            // 1. BG
+            const bg = slideData.background;
+            if (bg.type === 'color') {
+                context.fillStyle = bg.color1; context.fillRect(0,0,width,height);
+            } else if (bg.type === 'gradient') {
+                const grad = context.createLinearGradient(0,0,0,height);
+                grad.addColorStop(0, bg.color1); grad.addColorStop(1, bg.color2 || '#000');
+                context.fillStyle = grad; context.fillRect(0,0,width,height);
+            } else if (bg.type === 'image' && bg.imgSrc) {
+                const img = getImageFromCache(bg.imgSrc);
+                if (img && img.complete) {
+                    const scale = Math.max(width / img.width, height / img.height);
+                    const drawW = img.width * scale, drawH = img.height * scale;
+                    const dx = (width - drawW)/2, dy = (height - drawH)/2;
+                    context.save();
+                    if(bg.blur > 0) context.filter = `blur(${bg.blur}px)`;
+                    context.drawImage(img, dx, dy, drawW, drawH);
+                    context.restore();
+                    if(bg.darken > 0) { context.fillStyle = `rgba(0,0,0,${bg.darken})`; context.fillRect(0,0,width,height); }
+                }
             }
 
-            if (bg.darken > 0) {
-                ctx.fillStyle = `rgba(0,0,0,${bg.darken})`;
-                ctx.fillRect(0, 0, W, H);
-            }
+            // 2. Elements (Layer ordered)
+            slideData.elements.forEach(el => {
+                context.save();
+                context.translate(el.x, el.y);
+                context.rotate(el.rotation * Math.PI / 180);
+                
+                if (el.skew) context.transform(1, 0, Math.tan(el.skew * Math.PI / 180), 1, 0, 0);
+                context.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+
+                // Outer Shadow
+                if (el.shadow && el.shadow.active) {
+                    context.shadowColor = el.shadow.color; context.shadowBlur = el.shadow.blur;
+                    context.shadowOffsetX = el.shadow.ox; context.shadowOffsetY = el.shadow.oy;
+                }
+                // Glow (Simulated by drawing stroke/shadow heavily)
+                if (el.glow && el.glow.active) {
+                    context.shadowColor = el.glow.color; context.shadowBlur = el.glow.blur;
+                    context.shadowOffsetX = 0; context.shadowOffsetY = 0;
+                }
+
+                if (el.type === 'image') {
+                    const img = getImageFromCache(el.src);
+                    if (img && img.complete) {
+                        if (el.blur) context.filter = `blur(${el.blur}px)`;
+                        context.drawImage(img, -el.width/2, -el.height/2, el.width, el.height);
+                        
+                        // Recolor whole image (Color Overlay)
+                        if (el.recolor && el.recolor !== 'transparent') {
+                            context.globalCompositeOperation = 'source-atop';
+                            context.fillStyle = el.recolor;
+                            context.fillRect(-el.width/2, -el.height/2, el.width, el.height);
+                        }
+                        
+                        // Erase BG (Simulated Client-side Chroma Key)
+                        if (el.removeBgColor) {
+                            // Implemented via offscreen canvas if needed, but complex for realtime. 
+                            // Simplification: We apply globalComposite blending to drop out whites/blacks.
+                            if(el.removeBgColor === 'white') context.globalCompositeOperation = 'multiply';
+                            if(el.removeBgColor === 'black') context.globalCompositeOperation = 'screen';
+                        }
+                    }
+                } else if (el.type === 'text') {
+                    const ls = el.letterSpacing || 0;
+                    context.font = `${el.fontStyle || 'normal'} ${el.fontWeight || 'normal'} ${el.fontSize}px ${el.fontFamily}`;
+                    context.fillStyle = el.color;
+                    context.textAlign = el.curve ? 'center' : (el.textAlign || 'center');
+                    context.textBaseline = 'middle';
+
+                    // Prepare Text Skin Pattern
+                    if (el.skinSrc) {
+                        const skinImg = getImageFromCache(el.skinSrc);
+                        if (skinImg && skinImg.complete) {
+                            offCanvas.width = el.width || 800; offCanvas.height = el.fontSize * 3;
+                            const sx = el.skinOffsetX || 0, sy = el.skinOffsetY || 0;
+                            // Scale skin to fill text box width
+                            const sScale = offCanvas.width / skinImg.width;
+                            offCtx.clearRect(0,0,offCanvas.width,offCanvas.height);
+                            offCtx.drawImage(skinImg, sx, sy, skinImg.width * sScale, skinImg.height * sScale);
+                            context.fillStyle = context.createPattern(offCanvas, 'repeat');
+                        }
+                    }
+
+                    // Markdown Parser & Word Wrap Renderer
+                    const lines = el.text.split('\n');
+                    const lh = el.fontSize * (el.lineHeight || 1.2);
+                    let computedLines = [];
+                    
+                    if (el.curve) {
+                        // Curved text doesn't wrap lines normally, just draw char by char
+                        computedLines = [{text: el.text.replace(/\*\*|\*|==|__/g, '')}]; 
+                    } else {
+                        // Word Wrap Logic with Markdown
+                        lines.forEach(rawLine => {
+                            const words = rawLine.split(' ');
+                            let currentLine = ''; let testLine = '';
+                            words.forEach(word => {
+                                testLine = currentLine + word + ' ';
+                                // Measure text removing markdown tokens
+                                const clean = testLine.replace(/\*\*|\*|==|__/g, '');
+                                const metrics = context.measureText(clean);
+                                const tw = metrics.width + (clean.length * ls);
+                                if (tw > el.width && currentLine !== '') {
+                                    computedLines.push({text: currentLine.trim()});
+                                    currentLine = word + ' ';
+                                } else {
+                                    currentLine = testLine;
+                                }
+                            });
+                            computedLines.push({text: currentLine.trim()});
+                        });
+                    }
+
+                    el.height = computedLines.length * lh;
+                    const startY = -el.height/2 + (lh/2);
+
+                    computedLines.forEach((lineObj, i) => {
+                        const y = startY + (i * lh);
+                        
+                        if (el.curve) {
+                            // Curve rendering
+                            const radius = 10000 / el.curve; // -100 to 100
+                            const chars = lineObj.text.split('');
+                            const totalArc = chars.length * (el.fontSize * 0.6 + ls) / radius;
+                            context.save();
+                            context.translate(0, radius);
+                            context.rotate(-totalArc / 2);
+                            chars.forEach(char => {
+                                context.fillText(char, 0, -radius);
+                                context.rotate((context.measureText(char).width + ls) / radius);
+                            });
+                            context.restore();
+                            el.height = Math.abs(radius) * 0.5; // Rough bound
+                        } else {
+                            // Standard Rich Text Render
+                            renderRichTextLine(context, lineObj.text, el, 0, y, ls);
+                        }
+                    });
+                }
+                context.restore();
+            });
+            context.restore();
         }
 
-        function renderTextElement(el) {
-            ctx.save();
-            ctx.translate(el.x, el.y);
-            if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
-            ctx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+        function renderRichTextLine(ctx, text, el, x, y, ls) {
+            // Regex tokenizer
+            const regex = /(\*\*.*?\*\*|\*.*?\*|==.*?==|__.*?__)/g;
+            const parts = text.split(regex).filter(Boolean);
+            
+            // Measure total width first for alignment
+            let totalW = 0;
+            const partObj = parts.map(p => {
+                let txt = p, bold = false, italic = false, hl = false, ul = false;
+                if(p.startsWith('**')){ txt = p.slice(2,-2); bold = true; }
+                else if(p.startsWith('*')){ txt = p.slice(1,-1); italic = true; }
+                else if(p.startsWith('==')){ txt = p.slice(2,-2); hl = true; }
+                else if(p.startsWith('__')){ txt = p.slice(2,-2); ul = true; }
+                
+                const fontStr = `${italic ? 'italic' : (el.fontStyle||'normal')} ${bold ? 'bold' : (el.fontWeight||'normal')} ${el.fontSize}px ${el.fontFamily}`;
+                ctx.font = fontStr;
+                const w = ctx.measureText(txt).width + (txt.length * ls);
+                totalW += w;
+                return { txt, w, bold, italic, hl, ul, fontStr };
+            });
 
-            const fontSize = el.fontSize;
-            const lineHeight = fontSize * (el.lineHeight || 1.3);
-            const cleanFont = getCleanFont(el.fontFamily);
-            const maxBoxWidth = el.width || 750;
+            let currX = 0;
+            if(el.textAlign === 'center') currX = -totalW/2;
+            if(el.textAlign === 'right') currX = -totalW;
+            if(el.textAlign === 'left') currX = -el.width/2; // align left inside box
 
-            const linesOfRuns = getWrappedLines(ctx, el.text, maxBoxWidth, el);
-            const totalHeight = linesOfRuns.length * lineHeight;
-            el._calculatedHeight = totalHeight;
-
-            let startY = -(totalHeight / 2) + (lineHeight / 2);
-            const letterSpace = el.letterSpacing || 0;
-
-            linesOfRuns.forEach((lineRuns, idx) => {
-                const lineY = startY + (idx * lineHeight);
-                let totalLineWidth = 0;
-                lineRuns.forEach(r => {
-                    const fStyle = r.italic ? 'italic' : (el.fontStyle || 'normal');
-                    const fWeight = r.bold ? '900' : (el.fontWeight || 'normal');
-                    ctx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
-                    totalLineWidth += ctx.measureText(r.text).width + (letterSpace * r.text.length);
-                });
-
-                let startX = -(totalLineWidth / 2);
-                if (el.textAlign === 'left') startX = -(maxBoxWidth / 2);
-                else if (el.textAlign === 'right') startX = (maxBoxWidth / 2) - totalLineWidth;
-
-                if (el.highlightColor && el.highlightColor !== 'transparent') {
+            partObj.forEach(p => {
+                ctx.font = p.fontStr;
+                
+                // Highlight Box
+                if(p.hl) {
                     ctx.save();
-                    ctx.fillStyle = el.highlightColor;
-                    ctx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.4);
-                    const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
+                    ctx.fillStyle = el.highlight.color || '#FFE259';
+                    ctx.shadowColor = 'transparent';
+                    const pad = el.fontSize * 0.1;
+                    const r = el.highlight.radius || 0;
+                    // Draw Rounded Rect
                     ctx.beginPath();
-                    ctx.roundRect(startX - 8, lineY - (lineHeight / 2) + 2, totalLineWidth + 16, lineHeight - 4, radius);
+                    ctx.roundRect(currX - pad, y - el.fontSize/2 - pad, p.w + pad*2, el.fontSize + pad*2, r);
                     ctx.fill();
                     ctx.restore();
                 }
 
-                let curX = startX;
-                lineRuns.forEach(run => {
-                    if (!run.text) return;
-                    ctx.save();
-                    const fStyle = run.italic ? 'italic' : (el.fontStyle || 'normal');
-                    const fWeight = run.bold ? '900' : (el.fontWeight || 'normal');
-                    ctx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'middle';
-
-                    let displayText = run.text;
-                    const runMetrics = ctx.measureText(displayText);
-                    const runW = runMetrics.width + (letterSpace * displayText.length);
-
-                    if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                        ctx.shadowColor = el.shadow.color;
-                        ctx.shadowBlur = el.shadow.blur || 0;
-                        const rad = (el.shadow.angle || 45) * Math.PI / 180;
-                        const dist = el.shadow.distance || 0;
-                        ctx.shadowOffsetX = Math.cos(rad) * dist;
-                        ctx.shadowOffsetY = Math.sin(rad) * dist;
+                // Draw Characters with Letter Spacing
+                if (ls > 0) {
+                    let cx = currX;
+                    for(let c of p.txt) {
+                        ctx.fillText(c, cx, y);
+                        cx += ctx.measureText(c).width + ls;
                     }
+                } else {
+                    ctx.fillText(p.txt, currX + p.w/2, y); // fillText at center since textAlign is center generally, wait.
+                    // Actually if we split words, we must draw relative to start.
+                    ctx.textAlign = 'left'; 
+                    ctx.fillText(p.txt, currX, y);
+                }
 
-                    ctx.fillStyle = el.color || '#fff';
-                    if (letterSpace === 0) {
-                        ctx.fillText(displayText, curX, lineY);
-                    } else {
-                        let charX = curX;
-                        for (let c = 0; c < displayText.length; c++) {
-                            const ch = displayText[c];
-                            ctx.fillText(ch, charX, lineY);
-                            charX += ctx.measureText(ch).width + letterSpace;
-                        }
-                    }
+                // Underline
+                if (p.ul || el.textDecoration === 'underline') {
+                    ctx.save(); ctx.beginPath();
+                    ctx.moveTo(currX, y + el.fontSize * 0.4);
+                    ctx.lineTo(currX + p.w, y + el.fontSize * 0.4);
+                    ctx.strokeStyle = el.color; ctx.lineWidth = el.fontSize * 0.08; ctx.stroke();
                     ctx.restore();
-                    curX += runW;
-                });
+                }
+                currX += p.w;
             });
-            ctx.restore();
-        }
-
-        function renderImageElement(el) {
-            if (!el.img || !el.img.complete) {
-                if (el.src || el.imgSrc) el.img = getImageFromCache(el.src || el.imgSrc);
-                if (!el.img || !el.img.complete) return;
-            }
-
-            const w = el.width || 300;
-            const h = el.height || 300;
-
-            ctx.save();
-            ctx.translate(el.x, el.y);
-            if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
-            ctx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
-            ctx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
-
-            if (el.blur && el.blur > 0) ctx.filter = `blur(${el.blur}px)`;
-
-            if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                ctx.shadowColor = el.shadow.color;
-                ctx.shadowBlur = el.shadow.blur || 0;
-                const rad = (el.shadow.angle || 45) * Math.PI / 180;
-                const dist = el.shadow.distance || 0;
-                ctx.shadowOffsetX = Math.cos(rad) * dist;
-                ctx.shadowOffsetY = Math.sin(rad) * dist;
-            }
-
-            const radius = el.cornerRadius || 0;
-            ctx.beginPath();
-            ctx.roundRect(-w / 2, -h / 2, w, h, radius);
-            ctx.clip();
-
-            // Fitur Ganti Warna Full PNG (Color Overlay / Tint)
-            if (el.tintColor && el.tintColor !== 'transparent') {
-                const offCanvas = document.createElement('canvas');
-                offCanvas.width = w;
-                offCanvas.height = h;
-                const offCtx = offCanvas.getContext('2d');
-                offCtx.drawImage(el.img, 0, 0, w, h);
-                offCtx.globalCompositeOperation = 'source-in';
-                offCtx.fillStyle = el.tintColor;
-                offCtx.fillRect(0, 0, w, h);
-                ctx.drawImage(offCanvas, -w / 2, -h / 2);
-            } else {
-                ctx.drawImage(el.img, -w / 2, -h / 2, w, h);
-            }
-
-            if (el.borderWidth && el.borderWidth > 0 && el.borderColor) {
-                ctx.lineWidth = el.borderWidth * 2;
-                ctx.strokeStyle = el.borderColor;
-                ctx.stroke();
-            }
-            ctx.restore();
+            // Reset for next lines
+            ctx.textAlign = el.textAlign === 'center' ? 'center' : el.textAlign;
         }
 
         /* =========================================================================
-           SELECTION BOX & TOUCH DRAGGING ENGINE (MANUAL RESIZE CORNER & EDGES)
+           INTERACTION & SELECTION (BUTTER SMOOTH DRAG)
            ========================================================================= */
-        let dragMode = null; // 'move', 'resize-corner', 'resize-edge'
-        let activeHandle = null;
-        let startPointer = { x: 0, y: 0 };
-        let startElementState = {};
-        let lastTapTime = 0;
-
-        function setupDraggingEngine() {
-            artboard.addEventListener('pointerdown', handleArtboardPointerDown);
-            window.addEventListener('pointermove', handleWindowPointerMove);
-            window.addEventListener('pointerup', handleWindowPointerUp);
-            window.addEventListener('pointercancel', handleWindowPointerUp);
-        }
-
-        function handleArtboardPointerDown(e) {
-            if (e.target.classList.contains('sel-handle')) {
-                dragMode = 'resize-corner';
-                activeHandle = e.target.dataset.handle;
-                startPointer = { x: e.clientX, y: e.clientY };
-                startElementState = { ...getActiveElement() };
-                e.stopPropagation();
-                return;
-            }
-            if (e.target.classList.contains('sel-handle-edge')) {
-                dragMode = 'resize-edge';
-                activeHandle = e.target.dataset.handle;
-                startPointer = { x: e.clientX, y: e.clientY };
-                startElementState = { ...getActiveElement() };
-                e.stopPropagation();
-                return;
-            }
-
-            const rect = mainCanvas.getBoundingClientRect();
-            const clickX = (e.clientX - rect.left) * (mainCanvas.width / rect.width);
-            const clickY = (e.clientY - rect.top) * (mainCanvas.height / rect.height);
-
-            const s = getCurrentSlide();
-            let hitEl = null;
-            for (let i = s.elements.length - 1; i >= 0; i--) {
-                const el = s.elements[i];
-                const halfW = (el.width || 200) / 2;
-                const halfH = (el._calculatedHeight || el.height || 100) / 2;
-                if (clickX >= el.x - halfW && clickX <= el.x + halfW &&
-                    clickY >= el.y - halfH && clickY <= el.y + halfH) {
-                    hitEl = el;
-                    break;
-                }
-            }
-
-            if (hitEl) {
-                const now = Date.now();
-                if (activeElementId === hitEl.id && hitEl.type === 'text' && (now - lastTapTime < 300)) {
-                    openInlineTextEditor(hitEl);
-                    lastTapTime = 0;
-                    return;
-                }
-                lastTapTime = now;
-                selectElement(hitEl.id);
-
-                if (!hitEl.locked) {
-                    dragMode = 'move';
-                    startPointer = { x: e.clientX, y: e.clientY };
-                    startElementState = { x: hitEl.x, y: hitEl.y };
-                    if (hitEl.groupId) {
-                        s.elements.forEach(other => {
-                            if (other.groupId === hitEl.groupId) other._startPos = { x: other.x, y: other.y };
-                        });
-                    }
-                }
-            } else {
-                deselectElement();
-            }
-        }
-
-        function handleWindowPointerMove(e) {
-            if (!dragMode) return;
-            const el = getActiveElement();
-            if (!el || el.locked) return;
-
-            const rect = mainCanvas.getBoundingClientRect();
-            const scale = (mainCanvas.width / rect.width);
-            const deltaX = (e.clientX - startPointer.x) * scale;
-            const deltaY = (e.clientY - startPointer.y) * scale;
-
-            if (dragMode === 'move') {
-                el.x = Math.round(startElementState.x + deltaX);
-                el.y = Math.round(startElementState.y + deltaY);
-                if (el.groupId) {
-                    const s = getCurrentSlide();
-                    s.elements.forEach(other => {
-                        if (other.groupId === el.groupId && other.id !== el.id && other._startPos) {
-                            other.x = Math.round(other._startPos.x + deltaX);
-                            other.y = Math.round(other._startPos.y + deltaY);
-                        }
-                    });
-                }
-                requestRender();
-            } else if (dragMode === 'resize-corner') {
-                let factor = 1 + (deltaX / (startElementState.width || 300));
-                if (activeHandle === 'bl' || activeHandle === 'tl') factor = 1 - (deltaX / (startElementState.width || 300));
-                factor = Math.max(0.1, factor);
-
-                if (el.type === 'text') {
-                    el.fontSize = Math.round(startElementState.fontSize * factor);
-                    el.width = Math.round(startElementState.width * factor);
-                } else if (el.type === 'image') {
-                    el.width = Math.round(startElementState.width * factor);
-                    el.height = Math.round(startElementState.height * factor);
-                }
-                requestRender();
-            } else if (dragMode === 'resize-edge') {
-                if (activeHandle === 'r' || activeHandle === 'l') {
-                    const sign = activeHandle === 'r' ? 1 : -1;
-                    el.width = Math.max(60, Math.round(startElementState.width + (deltaX * 2 * sign)));
-                } else if (activeHandle === 'b' || activeHandle === 't') {
-                    const sign = activeHandle === 'b' ? 1 : -1;
-                    if (el.type === 'image') {
-                        el.height = Math.max(40, Math.round(startElementState.height + (deltaY * 2 * sign)));
-                    }
-                }
-                requestRender();
-            }
-        }
-
-        function handleWindowPointerUp() {
-            if (dragMode) {
-                dragMode = null;
-                const s = getCurrentSlide();
-                s.elements.forEach(e => delete e._startPos);
-                pushHistoryState();
-            }
-        }
-
-        function selectElement(id) {
-            activeElementId = id;
-            updateSelectionBox();
-            renderBottomToolbar();
-            closeToolPanel();
-        }
-
-        function deselectElement() {
-            activeElementId = null;
-            selBox.classList.remove('active');
-            closeInlineTextEditor();
-            renderBottomToolbar();
-            closeToolPanel();
-        }
+        function getActiveElement() { return getCurrentSlide()?.elements.find(e => e.id === activeElementId) || null; }
+        function getCurrentSlide() { return slides[currentSlideIndex]; }
 
         function updateSelectionBox() {
+            if (!activeElementId) { selBox.classList.remove('active'); return; }
             const el = getActiveElement();
-            if (!el || isEditingText) {
-                selBox.classList.remove('active');
-                return;
-            }
+            if (!el) { selBox.classList.remove('active'); return; }
 
-            const boxW = el.width || 200;
-            const boxH = (el.type === 'text') ? (el._calculatedHeight || (el.fontSize * 1.5)) : (el.height || 100);
-
-            const domW = boxW * canvasScale;
-            const domH = boxH * canvasScale;
-            const domX = (el.x * canvasScale) - (domW / 2);
-            const domY = (el.y * canvasScale) - (domH / 2);
-
-            selBox.style.width = `${domW}px`;
-            selBox.style.height = `${domH}px`;
-            selBox.style.left = `${domX}px`;
-            selBox.style.top = `${domY}px`;
+            const h = el.type === 'text' ? (el.height || el.fontSize * 1.2) : el.height;
+            selBox.style.width = `${el.width}px`;
+            selBox.style.height = `${h}px`;
+            selBox.style.left = `${el.x - el.width / 2}px`;
+            selBox.style.top = `${el.y - h / 2}px`;
+            selBox.style.transform = `rotate(${el.rotation}deg)`;
             selBox.classList.add('active');
         }
 
-        /* =========================================================================
-           IN-PLACE DIRECT TEXT EDITOR
-           ========================================================================= */
-        function setupInlineTextEvents() {
-            inlineTextInput.addEventListener('input', () => {
-                const el = getActiveElement();
-                if (el && el.type === 'text') {
-                    el.text = inlineTextInput.value;
-                    renderAll();
-                    triggerAutoSave();
+        function setupDraggingEngine() {
+            const workspace = document.getElementById('workspaceViewport');
+
+            workspace.addEventListener('pointerdown', (e) => {
+                // Ignore UI Clicks
+                if(e.target.closest('.pixellab-zoom-widget') || e.target.closest('.bottom-toolbar-container') || e.target.closest('.tool-panel')) return;
+                
+                // Keyboard interaction
+                if (document.getElementById('inlineTextInput')?.style.display === 'block') {
+                    // Don't blur if tapping handles
+                    if(e.target.closest('.sel-handle') || e.target.closest('.canva-stalk-btn')) return;
                 }
-            });
-            inlineTextInput.addEventListener('blur', () => closeInlineTextEditor());
-        }
 
-        function openInlineTextEditor(el) {
-            isEditingText = true;
-            selBox.classList.remove('active');
+                closeToolPanel();
 
-            const domW = Math.max(280, (el.width || 750) * canvasScale);
-            const domH = Math.max(120, ((el._calculatedHeight || 120) * canvasScale) + 40);
-            const domX = Math.max(10, (el.x * canvasScale) - (domW / 2));
-            const domY = Math.max(10, (el.y * canvasScale) - (domH / 2));
+                // 1. Check Handles (Stalks & Resizers)
+                if (e.target.dataset.handle) {
+                    dragAction = e.target.dataset.handle;
+                    startDrag(e);
+                    return;
+                }
 
-            inlineTextInput.style.width = `${domW}px`;
-            inlineTextInput.style.height = `${domH}px`;
-            inlineTextInput.style.left = `${domX}px`;
-            inlineTextInput.style.top = `${domY}px`;
-            inlineTextInput.value = el.text;
-            inlineTextInput.style.display = 'block';
-            inlineTextToolbar.classList.add('active');
+                // 2. Hit Detection
+                const rect = artboard.getBoundingClientRect();
+                const scale = canvasScale * artboardBaseScale;
+                const cx = (e.clientX - rect.left) / scale;
+                const cy = (e.clientY - rect.top) / scale;
 
-            setTimeout(() => {
-                inlineTextInput.focus();
-                inlineTextInput.setSelectionRange(el.text.length, el.text.length);
-            }, 60);
-        }
+                const slide = getCurrentSlide();
+                let hitId = null;
 
-        function closeInlineTextEditor() {
-            if (!isEditingText) return;
-            isEditingText = false;
-            inlineTextInput.style.display = 'none';
-            inlineTextToolbar.classList.remove('active');
-            requestRender();
-            pushHistoryState();
-        }
+                for (let i = slide.elements.length - 1; i >= 0; i--) {
+                    const el = slide.elements[i];
+                    const h = el.type === 'text' ? (el.height || el.fontSize * 1.2) : el.height;
+                    
+                    const dx = cx - el.x; const dy = cy - el.y;
+                    const cos = Math.cos(-el.rotation * Math.PI / 180);
+                    const sin = Math.sin(-el.rotation * Math.PI / 180);
+                    const rx = dx * cos - dy * sin;
+                    const ry = dx * sin + dy * cos;
 
-        function applyFormatToSelection(tagOpen, tagClose) {
-            const start = inlineTextInput.selectionStart;
-            const end = inlineTextInput.selectionEnd;
-            const val = inlineTextInput.value;
-            if (start === end) return;
+                    if (Math.abs(rx) <= el.width / 2 && Math.abs(ry) <= h / 2) {
+                        hitId = el.id; break;
+                    }
+                }
 
-            const selected = val.substring(start, end);
-            inlineTextInput.value = val.substring(0, start) + tagOpen + selected + tagClose + val.substring(end);
-            inlineTextInput.selectionStart = start + tagOpen.length;
-            inlineTextInput.selectionEnd = end + tagOpen.length;
-
-            const el = getActiveElement();
-            if (el) {
-                el.text = inlineTextInput.value;
+                if (hitId) {
+                    activeElementId = hitId;
+                    // We don't drag immediately on text to prevent accidental move when trying to edit
+                    // The "Stalk" is used for explicit moving. But we can allow slight move.
+                    dragAction = 'move';
+                    startDrag(e);
+                    renderBottomToolbar();
+                } else {
+                    activeElementId = null;
+                    isPanning = true;
+                    initialPanState = { x: panX, y: panY, startX: e.clientX, startY: e.clientY };
+                    renderBottomToolbar();
+                }
                 requestRender();
-            }
-        }
-
-        function toggleCaseSelection() {
-            const start = inlineTextInput.selectionStart;
-            const end = inlineTextInput.selectionEnd;
-            const val = inlineTextInput.value;
-            if (start === end) return;
-            const selected = val.substring(start, end);
-            const transformed = selected === selected.toUpperCase() ? selected.toLowerCase() : selected.toUpperCase();
-            inlineTextInput.value = val.substring(0, start) + transformed + val.substring(end);
-            const el = getActiveElement();
-            if (el) { el.text = inlineTextInput.value; requestRender(); }
-        }
-
-        /* =========================================================================
-           EYEDROPPER DENGAN TANGKAI GESER (CANVA STYLE)
-           ========================================================================= */
-        let eyedropperTarget = 'text';
-        let isDraggingLoupe = false;
-        let loupeCurrentColor = '#ffffff';
-
-        function setupEyedropperStalk() {
-            const handle = document.getElementById('loupeHandle');
-            const loupe = document.getElementById('colorLoupeStalk');
-
-            handle.addEventListener('pointerdown', (e) => {
-                isDraggingLoupe = true;
-                e.stopPropagation();
             });
 
             window.addEventListener('pointermove', (e) => {
-                if (!isDraggingLoupe) return;
-                const loupeX = e.clientX - 38;
-                const loupeY = e.clientY - 120;
-                loupe.style.left = `${loupeX}px`;
-                loupe.style.top = `${loupeY}px`;
-
-                // Sampel warna pada titik crosshair loupe
-                const rect = mainCanvas.getBoundingClientRect();
-                const sampleX = Math.round((e.clientX - rect.left) * (mainCanvas.width / rect.width));
-                const sampleY = Math.round(((e.clientY - 82) - rect.top) * (mainCanvas.height / rect.height));
-
-                if (sampleX >= 0 && sampleX < mainCanvas.width && sampleY >= 0 && sampleY < mainCanvas.height) {
-                    const p = ctx.getImageData(sampleX, sampleY, 1, 1).data;
-                    loupeCurrentColor = '#' + ((1 << 24) + (p[0] << 16) + (p[1] << 8) + p[2]).toString(16).slice(1);
-                    document.getElementById('loupeGlass').style.background = loupeCurrentColor;
-                    document.getElementById('loupeHexTxt').innerText = loupeCurrentColor;
+                if (isPanning) {
+                    panX = initialPanState.x + (e.clientX - initialPanState.startX);
+                    panY = initialPanState.y + (e.clientY - initialPanState.startY);
+                    applyCanvasTransform();
+                    return;
                 }
+
+                if (!isDragging || !activeElementId) return;
+                const el = getActiveElement();
+                if (!el) return;
+
+                const scale = canvasScale * artboardBaseScale;
+                const dx = (e.clientX - pointerStartX) / scale;
+                const dy = (e.clientY - pointerStartY) / scale;
+
+                if (dragAction === 'move') {
+                    // Butter smooth delta application
+                    el.x = elStartX + dx;
+                    el.y = elStartY + dy;
+                } else if (['tl', 'tr', 'bl', 'br'].includes(dragAction)) {
+                    // Proportional scale
+                    const dist = (dx + dy) / 2; // Rough direction
+                    const scaleFactor = 1 + (dist / (elStartW/2));
+                    if (el.type === 'text') {
+                        el.fontSize = Math.max(10, elStartFS * scaleFactor);
+                        el.width = elStartW * scaleFactor;
+                    } else {
+                        el.width = Math.max(20, elStartW * scaleFactor);
+                        el.height = Math.max(20, elStartH * scaleFactor);
+                    }
+                } else if (['l', 'r'].includes(dragAction)) {
+                    el.width = Math.max(50, elStartW + (dx * (dragAction === 'r' ? 2 : -2)));
+                } else if (['t', 'b'].includes(dragAction) && el.type === 'image') {
+                    el.height = Math.max(50, elStartH + (dy * (dragAction === 'b' ? 2 : -2)));
+                } else if (dragAction === 'rotate') {
+                    const rect = artboard.getBoundingClientRect();
+                    const mx = (e.clientX - rect.left) / scale;
+                    const my = (e.clientY - rect.top) / scale;
+                    el.rotation = Math.atan2(my - el.y, mx - el.x) * 180 / Math.PI - 90;
+                }
+                requestRender();
             });
 
             window.addEventListener('pointerup', () => {
-                if (isDraggingLoupe) {
-                    isDraggingLoupe = false;
-                    loupe.style.display = 'none';
-                    applySampledColor(loupeCurrentColor);
+                if (isDragging || isPanning) {
+                    isDragging = false; isPanning = false; dragAction = null;
+                    pushHistoryState();
                 }
             });
         }
 
-        function triggerEyeDropper(targetProp) {
-            eyedropperTarget = targetProp;
-            const loupe = document.getElementById('colorLoupeStalk');
-            loupe.style.left = '50%';
-            loupe.style.top = '40%';
-            loupe.style.display = 'block';
-            showToast('🎯 Tarik tangkai bulat untuk mengarahkan pengambil warna!');
-        }
-
-        function applySampledColor(hex) {
+        function startDrag(e) {
+            isDragging = true;
+            pointerStartX = e.clientX; pointerStartY = e.clientY;
             const el = getActiveElement();
-            if (!el) return;
-            if (eyedropperTarget === 'text') el.color = hex;
-            else if (eyedropperTarget === 'tint') el.tintColor = hex;
-            else if (eyedropperTarget === 'highlight') el.highlightColor = hex;
-            else if (eyedropperTarget === 'border') el.borderColor = hex;
-            requestRender();
-            pushHistoryState();
-            showToast(`✅ Warna dipilih: ${hex}`);
-            if (eyedropperTarget === 'text') openPanelTextColor();
-            else if (eyedropperTarget === 'tint') openPanelImageTint();
-            else if (eyedropperTarget === 'highlight') openPanelHighlight();
+            if(el) {
+                elStartX = el.x; elStartY = el.y; elStartW = el.width; elStartH = el.height;
+                elStartFS = el.fontSize; elStartRot = el.rotation;
+            }
         }
 
         /* =========================================================================
-           TOOLS PANELS & EDITING
+           SLIDES, ADD, DELETE, DUPLICATE
            ========================================================================= */
-        function stepSliderVal(sliderId, delta, callback) {
-            const sl = document.getElementById(sliderId);
-            if (!sl) return;
-            let val = parseFloat(sl.value) + delta;
-            val = Math.max(parseFloat(sl.min), Math.min(parseFloat(sl.max), val));
-            sl.value = val;
-            if (callback) callback(val);
+        function addNewSlide() {
+            slides.push({ background: getDefaultBg(), elements: [createDefaultElement('text', RATIO_PRESETS[currentRatio])] });
+            currentSlideIndex = slides.length - 1; activeElementId = null;
+            pushHistoryState(); requestRender(); renderCarouselThumbs();
+        }
+        function duplicateCurrentSlide() {
+            const current = getCurrentSlide();
+            const copy = JSON.parse(JSON.stringify(current));
+            copy.elements.forEach(e => e.id = createId());
+            slides.splice(currentSlideIndex + 1, 0, copy);
+            currentSlideIndex++; activeElementId = null;
+            pushHistoryState(); requestRender(); renderCarouselThumbs();
+        }
+        function deleteCurrentSlide() {
+            if (slides.length <= 1) return alert("Minimal 1 slide tersisa.");
+            slides.splice(currentSlideIndex, 1);
+            if (currentSlideIndex >= slides.length) currentSlideIndex = slides.length - 1;
+            activeElementId = null;
+            pushHistoryState(); requestRender(); renderCarouselThumbs();
+        }
+        function renderCarouselThumbs() {
+            const container = document.getElementById('slideThumbList');
+            container.innerHTML = slides.map((s, idx) => `<div class="slide-thumb ${idx === currentSlideIndex ? 'active' : ''}" onclick="currentSlideIndex=${idx};activeElementId=null;requestRender();renderCarouselThumbs();renderBottomToolbar();">${idx + 1}</div>`).join('');
         }
 
-        function openToolPanel(title, html) {
-            document.getElementById('panelTitle').innerText = title;
-            document.getElementById('panelContent').innerHTML = html;
-            document.getElementById('toolPanel').classList.add('active');
+        function addText() {
+            const preset = RATIO_PRESETS[currentRatio];
+            const el = createDefaultElement('text', preset);
+            el.text = "Teks Baru";
+            getCurrentSlide().elements.push(el);
+            activeElementId = el.id; pushHistoryState(); requestRender(); renderBottomToolbar();
         }
-
-        function closeToolPanel() {
-            document.getElementById('toolPanel').classList.remove('active');
-        }
-
-        // 1. PANEL BACKGROUND (ZOOM EKSTRA BESAR HINGGA 600%)
-        function openPanelBackground() {
-            const s = getCurrentSlide();
-            const bg = s.background;
-            const hasImg = !!(bg.img || bg.imgSrc);
-
-            const html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Gambar Latar:</span>
-                    <button class="btn-sub-tool active" onclick="document.getElementById('fileBgInput').click()">📁 Unggah Gambar</button>
-                </div>
-                ${hasImg ? `
-                    <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:11px;color:#4CAF50;">✅ Foto Aktif</span>
-                        <button class="btn-sub-tool" onclick="removeBgImage()" style="color:#ff6b6b;">🗑️ Hapus</button>
-                    </div>
-                    <div class="ctrl-row" style="margin-top:10px;">
-                        <span class="ctrl-label">Zoom Latar (Ekstra Besar):</span>
-                        <span class="ctrl-val" id="bgScaleVal">${Math.round((bg.scale || 1.0) * 100)}%</span>
-                        <button class="btn-reset-tool" onclick="updateBgPosition('scale', 100); document.getElementById('bgScaleSlider').value=100;">↺ 100%</button>
-                    </div>
-                    <div class="stepper-row">
-                        <button class="btn-step" onclick="stepSliderVal('bgScaleSlider', -10, (v)=>updateBgPosition('scale', v))">-</button>
-                        <input type="range" class="range-slider" id="bgScaleSlider" min="100" max="600" value="${Math.round((bg.scale || 1.0) * 100)}" oninput="updateBgPosition('scale', this.value)">
-                        <button class="btn-step" onclick="stepSliderVal('bgScaleSlider', 10, (v)=>updateBgPosition('scale', v))">+</button>
-                    </div>
-                    <div class="ctrl-row" style="margin-top:10px;">
-                        <span class="ctrl-label">Geser X:</span>
-                        <span class="ctrl-val" id="bgOffXVal">${bg.offsetX || 0}px</span>
-                    </div>
-                    <div class="stepper-row">
-                        <button class="btn-step" onclick="stepSliderVal('bgOffXSlider', -20, (v)=>updateBgPosition('offsetX', v))">-</button>
-                        <input type="range" class="range-slider" id="bgOffXSlider" min="-2000" max="2000" value="${bg.offsetX || 0}" oninput="updateBgPosition('offsetX', this.value)">
-                        <button class="btn-step" onclick="stepSliderVal('bgOffXSlider', 20, (v)=>updateBgPosition('offsetX', v))">+</button>
-                    </div>
-                    <div class="ctrl-row" style="margin-top:10px;">
-                        <span class="ctrl-label">Geser Y:</span>
-                        <span class="ctrl-val" id="bgOffYVal">${bg.offsetY || 0}px</span>
-                    </div>
-                    <div class="stepper-row">
-                        <button class="btn-step" onclick="stepSliderVal('bgOffYSlider', -20, (v)=>updateBgPosition('offsetY', v))">-</button>
-                        <input type="range" class="range-slider" id="bgOffYSlider" min="-2000" max="2000" value="${bg.offsetY || 0}" oninput="updateBgPosition('offsetY', this.value)">
-                        <button class="btn-step" onclick="stepSliderVal('bgOffYSlider', 20, (v)=>updateBgPosition('offsetY', v))">+</button>
-                    </div>
-                ` : `
-                    <div class="ctrl-row" style="margin-top:10px;">
-                        <span class="ctrl-label">Warna Pusat:</span>
-                        <input type="color" value="${bg.color1 || '#241a14'}" onchange="updateBgColor('color1', this.value)">
-                    </div>
-                    <div class="ctrl-row" style="margin-top:8px;">
-                        <span class="ctrl-label">Warna Luar:</span>
-                        <input type="color" value="${bg.color2 || '#0d0a08'}" onchange="updateBgColor('color2', this.value)">
-                    </div>
-                `}
-            `;
-            openToolPanel('Background Poster', html);
-        }
-
-        function updateBgPosition(prop, val) {
-            const s = getCurrentSlide();
-            if (prop === 'scale') {
-                s.background.scale = parseInt(val) / 100;
-                document.getElementById('bgScaleVal').innerText = `${val}%`;
-            } else if (prop === 'offsetX') {
-                s.background.offsetX = parseInt(val);
-                document.getElementById('bgOffXVal').innerText = `${val}px`;
-            } else if (prop === 'offsetY') {
-                s.background.offsetY = parseInt(val);
-                document.getElementById('bgOffYVal').innerText = `${val}px`;
-            }
-            requestRender();
-            triggerAutoSave();
-        }
-
-        function updateBgColor(prop, val) {
-            getCurrentSlide().background[prop] = val;
-            requestRender();
-            pushHistoryState();
-        }
-
-        function handleBgUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                const s = getCurrentSlide();
-                s.background.imgSrc = evt.target.result;
-                s.background.img = getImageFromCache(evt.target.result);
-                s.background.scale = 1.0;
-                s.background.offsetX = 0;
-                s.background.offsetY = 0;
-                requestRender();
-                pushHistoryState();
-                openPanelBackground();
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        function removeBgImage() {
-            const s = getCurrentSlide();
-            s.background.img = null;
-            s.background.imgSrc = null;
-            requestRender();
-            pushHistoryState();
-            openPanelBackground();
-        }
-
-        // 2. PANEL UKURAN TEKS (HINGGA 600PX)
-        function openPanelFontSize() {
-            const el = getActiveElement();
-            if (!el) return;
-            const html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Ukuran Teks (Ekstra Besar):</span>
-                    <span class="ctrl-val" id="valFontSize">${el.fontSize}px</span>
-                </div>
-                <div class="stepper-row">
-                    <button class="btn-step" onclick="stepSliderVal('fontSizeSlider', -2, updateFontSize)">-</button>
-                    <input type="range" class="range-slider" id="fontSizeSlider" min="12" max="600" value="${el.fontSize}" oninput="updateFontSize(this.value)">
-                    <button class="btn-step" onclick="stepSliderVal('fontSizeSlider', 2, updateFontSize)">+</button>
-                </div>
-            `;
-            openToolPanel('Ukuran Teks', html);
-        }
-        function updateFontSize(val) {
-            const el = getActiveElement();
-            if (el) {
-                el.fontSize = parseInt(val);
-                document.getElementById('valFontSize').innerText = val + 'px';
-                requestRender();
-                triggerAutoSave();
-            }
-        }
-
-        // 3. PANEL UKURAN GAMBAR / PNG (HINGGA 3500PX)
-        function openPanelImageSize() {
-            const el = getActiveElement();
-            if (!el) return;
-            const html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Lebar PNG:</span>
-                    <span class="ctrl-val" id="valImgW">${Math.round(el.width || 300)}px</span>
-                </div>
-                <div class="stepper-row">
-                    <button class="btn-step" onclick="stepSliderVal('imgWSlider', -10, (v)=>updateImageDim('w', v))">-</button>
-                    <input type="range" class="range-slider" id="imgWSlider" min="30" max="3500" value="${Math.round(el.width || 300)}" oninput="updateImageDim('w', this.value)">
-                    <button class="btn-step" onclick="stepSliderVal('imgWSlider', 10, (v)=>updateImageDim('w', v))">+</button>
-                </div>
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Tinggi PNG:</span>
-                    <span class="ctrl-val" id="valImgH">${Math.round(el.height || 300)}px</span>
-                </div>
-                <div class="stepper-row">
-                    <button class="btn-step" onclick="stepSliderVal('imgHSlider', -10, (v)=>updateImageDim('h', v))">-</button>
-                    <input type="range" class="range-slider" id="imgHSlider" min="30" max="3500" value="${Math.round(el.height || 300)}" oninput="updateImageDim('h', this.value)">
-                    <button class="btn-step" onclick="stepSliderVal('imgHSlider', 10, (v)=>updateImageDim('h', v))">+</button>
-                </div>
-            `;
-            openToolPanel('Ukuran Gambar PNG', html);
-        }
-        function updateImageDim(dim, val) {
-            const el = getActiveElement();
-            if (!el) return;
-            if (dim === 'w') el.width = parseInt(val);
-            else el.height = parseInt(val);
-            document.getElementById('valImgW').innerText = Math.round(el.width) + 'px';
-            document.getElementById('valImgH').innerText = Math.round(el.height) + 'px';
-            requestRender();
-            triggerAutoSave();
-        }
-
-        // 4. PANEL WARNA & WARNA FULL PNG/LOGO (COLOR OVERLAY)
-        function openPanelTextColor() {
-            const el = getActiveElement();
-            if (!el) return;
-            let html = `
-                <button class="btn-sub-tool active" onclick="triggerEyeDropper('text')" style="width:100%;margin-bottom:8px;">🎯 Ambil Warna dengan Tangkai</button>
-                <div class="color-palette-scroll">
-            `;
-            QUICK_COLORS.forEach(c => {
-                html += `<div class="color-circle ${el.color === c ? 'active' : ''}" style="background:${c};" onclick="setTextColor('${c}')"></div>`;
-            });
-            html += `</div>
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Custom Warna:</span>
-                    <input type="color" value="${el.color || '#ffffff'}" onchange="setTextColor(this.value)">
-                </div>
-            `;
-            openToolPanel('Warna Teks', html);
-        }
-        function setTextColor(c) {
-            const el = getActiveElement();
-            if (el) { el.color = c; requestRender(); pushHistoryState(); openPanelTextColor(); }
-        }
-
-        function openPanelImageTint() {
-            const el = getActiveElement();
-            if (!el) return;
-            let html = `
-                <div style="font-size:11px;color:#bbb;margin-bottom:8px;">Ubah seluruh warna siluet / logo PNG menjadi 1 warna:</div>
-                <button class="btn-sub-tool active" onclick="triggerEyeDropper('tint')" style="width:100%;margin-bottom:8px;">🎯 Ambil Warna dengan Tangkai</button>
-                <div class="color-palette-scroll">
-                    <div class="color-circle ${!el.tintColor || el.tintColor === 'transparent' ? 'active' : ''}" style="background:#444;" onclick="setImageTint('transparent')">✕</div>
-            `;
-            QUICK_COLORS.forEach(c => {
-                html += `<div class="color-circle ${el.tintColor === c ? 'active' : ''}" style="background:${c};" onclick="setImageTint('${c}')"></div>`;
-            });
-            html += `</div>
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Custom Warna Logo:</span>
-                    <input type="color" value="${el.tintColor || '#D4AF37'}" onchange="setImageTint(this.value)">
-                </div>
-            `;
-            openToolPanel('Ganti Warna Logo PNG', html);
-        }
-        function setImageTint(c) {
-            const el = getActiveElement();
-            if (el) { el.tintColor = c; requestRender(); pushHistoryState(); openPanelImageTint(); }
-        }
-
-        // 5. PANEL BLUR FOTO / PNG
-        function openPanelImageBlur() {
-            const el = getActiveElement();
-            if (!el) return;
-            const html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Efek Blur PNG:</span>
-                    <span class="ctrl-val" id="valImgBlur">${el.blur || 0}px</span>
-                </div>
-                <div class="stepper-row">
-                    <button class="btn-step" onclick="stepSliderVal('imgBlurSlider', -1, updateImageBlur)">-</button>
-                    <input type="range" class="range-slider" id="imgBlurSlider" min="0" max="40" value="${el.blur || 0}" oninput="updateImageBlur(this.value)">
-                    <button class="btn-step" onclick="stepSliderVal('imgBlurSlider', 1, updateImageBlur)">+</button>
-                </div>
-            `;
-            openToolPanel('Blur Foto / PNG', html);
-        }
-        function updateImageBlur(val) {
-            const el = getActiveElement();
-            if (el) {
-                el.blur = parseInt(val);
-                document.getElementById('valImgBlur').innerText = val + 'px';
-                requestRender();
-                triggerAutoSave();
-            }
-        }
-
-        // 6. PANEL TRANSPARANSI
-        function openPanelOpacity() {
-            const el = getActiveElement();
-            if (!el) return;
-            const curOp = Math.round((el.opacity !== undefined ? el.opacity : 1) * 100);
-            const html = `
-                <div class="ctrl-row">
-                    <span class="ctrl-label">Tingkat Transparansi:</span>
-                    <span class="ctrl-val" id="valOpacity">${curOp}%</span>
-                </div>
-                <div class="stepper-row">
-                    <button class="btn-step" onclick="stepSliderVal('opacitySlider', -5, updateOpacity)">-</button>
-                    <input type="range" class="range-slider" id="opacitySlider" min="0" max="100" value="${curOp}" oninput="updateOpacity(this.value)">
-                    <button class="btn-step" onclick="stepSliderVal('opacitySlider', 5, updateOpacity)">+</button>
-                </div>
-            `;
-            openToolPanel('Transparansi Elemen', html);
-        }
-        function updateOpacity(val) {
-            const el = getActiveElement();
-            if (el) {
-                el.opacity = parseInt(val) / 100;
-                document.getElementById('valOpacity').innerText = val + '%';
-                requestRender();
-                triggerAutoSave();
-            }
-        }
-
-        // 7. TOOL GABUNG (GROUPING) MULTI-SELECT
-        function openPanelGroup() {
-            const s = getCurrentSlide();
-            const curr = getActiveElement();
-
-            if (curr && curr.groupId) {
-                const html = `
-                    <div style="padding:10px;background:rgba(212,175,55,0.15);border:1px solid #D4AF37;border-radius:8px;margin-bottom:10px;">
-                        🔗 <b>Tergabung dalam Grup</b>
-                    </div>
-                    <button class="btn-sub-tool active" onclick="ungroupCurrentElement()" style="width:100%;color:#ff6b6b;">⛓️ Pisahkan Grup (Ungroup)</button>
-                `;
-                openToolPanel('Kelola Grup', html);
-                return;
-            }
-
-            let html = `
-                <div style="font-size:11px;color:#bbb;margin-bottom:8px;">Pilih elemen untuk digabungkan bersama:</div>
-                <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;">
-            `;
-            s.elements.forEach(el => {
-                const name = el.type === 'text' ? (el.text.substring(0, 20) || 'Teks') : 'Foto / PNG';
-                const isChecked = curr && el.id === curr.id;
-                html += `
-                    <label style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(255,255,255,0.05);border-radius:6px;cursor:pointer;">
-                        <input type="checkbox" class="chk-group-el" value="${el.id}" ${isChecked ? 'checked' : ''}>
-                        <span style="font-size:11px;">${el.type === 'text' ? '📝' : '🖼️'} ${name}</span>
-                    </label>
-                `;
-            });
-            html += `
-                </div>
-                <button class="btn-sub-tool active" onclick="confirmGroupElements()" style="width:100%;margin-top:10px;padding:10px;">🔗 Konfirmasi Gabungkan</button>
-            `;
-            openToolPanel('Gabung Elemen', html);
-        }
-
-        function confirmGroupElements() {
-            const s = getCurrentSlide();
-            const selected = Array.from(document.querySelectorAll('.chk-group-el:checked')).map(cb => cb.value);
-            if (selected.length < 2) {
-                alert('Pilih minimal 2 elemen!');
-                return;
-            }
-            const gid = 'grp_' + Date.now();
-            s.elements.forEach(el => {
-                if (selected.includes(el.id)) el.groupId = gid;
-            });
-            pushHistoryState();
-            renderBottomToolbar();
-            closeToolPanel();
-            showToast('✅ Elemen berhasil digabungkan!');
-        }
-
-        function ungroupCurrentElement() {
-            const el = getActiveElement();
-            if (!el || !el.groupId) return;
-            const gid = el.groupId;
-            getCurrentSlide().elements.forEach(e => {
-                if (e.groupId === gid) e.groupId = null;
-            });
-            pushHistoryState();
-            renderBottomToolbar();
-            closeToolPanel();
-            showToast('⛓️ Grup dipisahkan!');
-        }
-
-        // 8. PANEL POSISI & DPAD
-        function openPanelPosition() {
-            const el = getActiveElement();
-            if (!el) return;
-            const html = `
-                <div class="pos-grid-3x3">
-                    <button class="btn-pos-cell" onclick="setAlignPosition('top-left')">↖️</button>
-                    <button class="btn-pos-cell" onclick="setAlignPosition('top')">⬆️</button>
-                    <button class="btn-pos-cell" onclick="setAlignPosition('top-right')">↗️</button>
-                    <button class="btn-pos-cell" onclick="setAlignPosition('left')">⬅️</button>
-                    <button class="btn-pos-cell active" onclick="setAlignPosition('center')">🎯</button>
-                    <button class="btn-pos-cell" onclick="setAlignPosition('right')">➡️</button>
-                    <button class="btn-pos-cell" onclick="setAlignPosition('bottom-left')">↙️</button>
-                    <button class="btn-pos-cell" onclick="setAlignPosition('bottom')">⬇️</button>
-                    <button class="btn-pos-cell" onclick="setAlignPosition('bottom-right')">↘️</button>
-                </div>
-                <div class="dpad-container">
-                    <button class="dpad-btn" onclick="nudgeElement(0, -nudgeStep)">▲</button>
-                    <div class="dpad-row">
-                        <button class="dpad-btn" onclick="nudgeElement(-nudgeStep, 0)">◀</button>
-                        <div class="dpad-center" id="posCoordLabel">X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}</div>
-                        <button class="dpad-btn" onclick="nudgeElement(nudgeStep, 0)">▶</button>
-                    </div>
-                    <button class="dpad-btn" onclick="nudgeElement(0, nudgeStep)">▼</button>
-                </div>
-            `;
-            openToolPanel('Posisi Elemen', html);
-        }
-
-        function nudgeElement(dx, dy) {
-            const el = getActiveElement();
-            if (!el) return;
-            el.x += dx;
-            el.y += dy;
-            if (el.groupId) {
-                getCurrentSlide().elements.forEach(other => {
-                    if (other.groupId === el.groupId && other.id !== el.id) {
-                        other.x += dx;
-                        other.y += dy;
-                    }
-                });
-            }
-            const lbl = document.getElementById('posCoordLabel');
-            if (lbl) lbl.innerHTML = `X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}`;
-            requestRender();
-            triggerAutoSave();
-        }
-
-        function setAlignPosition(pos) {
-            const el = getActiveElement();
-            if (!el) return;
-            const W = mainCanvas.width;
-            const H = mainCanvas.height;
-            const elW = el.width || 300;
-            const elH = el._calculatedHeight || el.height || 100;
-
-            if (pos === 'top') { el.x = W/2; el.y = elH/2 + 80; }
-            else if (pos === 'bottom') { el.x = W/2; el.y = H - (elH/2) - 80; }
-            else if (pos === 'left') { el.x = elW/2 + 60; el.y = H/2; }
-            else if (pos === 'right') { el.x = W - (elW/2) - 60; el.y = H/2; }
-            else if (pos === 'center') { el.x = W/2; el.y = H/2; }
-            requestRender();
-            pushHistoryState();
-            openPanelPosition();
-        }
-
-        /* =========================================================================
-           DYNAMIC BOTTOM TOOLBAR (DENGAN TOMBOL BERANDA)
-           ========================================================================= */
-        function renderBottomToolbar() {
-            const bar = document.getElementById('bottomToolbar');
-            const el = getActiveElement();
-
-            if (!el) {
-                bar.innerHTML = `
-                    <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
-                    <button class="tool-btn" onclick="document.getElementById('fileImageInput').click()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
-                    <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
-                    <button class="tool-btn" onclick="openPanelBleed()"><span class="icon">📐</span><span>Garis Bantu</span></button>
-                `;
-            } else if (el.type === 'text') {
-                bar.innerHTML = `
-                    <button class="tool-btn" onclick="deselectElement()" style="color:#FFE259;"><span class="icon">🏠</span><span>Beranda</span></button>
-                    <button class="tool-btn" onclick="openInlineTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit</span></button>
-                    <button class="tool-btn" onclick="openPanelFontSize()"><span class="icon">📏</span><span>Ukuran</span></button>
-                    <button class="tool-btn" onclick="openPanelTextColor()"><span class="icon">🎨</span><span>Warna</span></button>
-                    <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
-                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
-                    <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Grup' : 'Gabung'}</span></button>
-                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
-                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#ff6b6b;"><span class="icon">🗑️</span><span>Hapus</span></button>
-                `;
-            } else if (el.type === 'image') {
-                bar.innerHTML = `
-                    <button class="tool-btn" onclick="deselectElement()" style="color:#FFE259;"><span class="icon">🏠</span><span>Beranda</span></button>
-                    <button class="tool-btn" onclick="openPanelImageSize()"><span class="icon">📏</span><span>Ukuran</span></button>
-                    <button class="tool-btn" onclick="openPanelImageTint()"><span class="icon">🎨</span><span>Warna Logo</span></button>
-                    <button class="tool-btn" onclick="openPanelImageBlur()"><span class="icon">💧</span><span>Blur PNG</span></button>
-                    <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
-                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
-                    <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Grup' : 'Gabung'}</span></button>
-                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
-                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#ff6b6b;"><span class="icon">🗑️</span><span>Hapus</span></button>
-                `;
-            }
-        }
-
-        function addNewText() {
-            const newEl = {
-                id: 'el_' + Date.now(),
-                type: 'text',
-                text: 'Ketik Teks Baru',
-                x: mainCanvas.width / 2,
-                y: mainCanvas.height / 2,
-                width: 600,
-                fontFamily: "Plus Jakarta Sans, sans-serif",
-                fontSize: 48,
-                fontWeight: 'bold',
-                color: '#FFFFFF',
-                opacity: 1,
-                rotation: 0
-            };
-            getCurrentSlide().elements.push(newEl);
-            selectElement(newEl.id);
-            renderAll();
-            pushHistoryState();
-            openInlineTextEditor(newEl);
-        }
-
         function handleImageUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (evt) => {
-                const img = new Image();
-                img.onload = () => {
-                    const newEl = {
-                        id: 'el_' + Date.now(),
-                        type: 'image',
-                        img: img,
-                        src: evt.target.result,
-                        x: mainCanvas.width / 2,
-                        y: mainCanvas.height / 2,
-                        width: Math.min(img.width, 500),
-                        height: Math.min(img.height, 500 * (img.height / img.width)),
-                        opacity: 1,
-                        rotation: 0
+                const src = evt.target.result;
+                const preset = RATIO_PRESETS[currentRatio];
+                getImageFromCache(src, (img) => {
+                    let w = img.width, h = img.height;
+                    const maxW = preset.width * 0.8;
+                    if (w > maxW) { h = h * (maxW / w); w = maxW; }
+                    
+                    const el = {
+                        id: createId(), type: 'image', src: src,
+                        x: preset.width / 2, y: preset.height / 2, width: w, height: h,
+                        rotation: 0, opacity: 1, blur: 0, recolor: 'transparent', removeBgColor: null
                     };
-                    getCurrentSlide().elements.push(newEl);
-                    selectElement(newEl.id);
-                    renderAll();
-                    pushHistoryState();
-                };
-                img.src = evt.target.result;
+                    getCurrentSlide().elements.push(el);
+                    activeElementId = el.id; pushHistoryState(); requestRender(); renderBottomToolbar();
+                });
             };
-            reader.readAsDataURL(file);
-            e.target.value = '';
+            reader.readAsDataURL(file); e.target.value = '';
+        }
+        function handleBgUpload(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const src = evt.target.result;
+                const slide = getCurrentSlide();
+                slide.background.type = 'image'; slide.background.imgSrc = src; slide.background.blur = 0; slide.background.darken = 0;
+                pushHistoryState(); requestRender(); openPanel('background');
+            };
+            reader.readAsDataURL(file); e.target.value = '';
+        }
+        function handleTextSkinUpload(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                updateElProp('skinSrc', evt.target.result);
+                openPanel('textEffects');
+            };
+            reader.readAsDataURL(file); e.target.value = '';
         }
 
-        function duplicateActiveElement() {
-            const el = getActiveElement();
-            if (!el) return;
-            const copy = JSON.parse(JSON.stringify(el));
-            copy.id = 'el_' + Date.now();
-            copy.x += 30; copy.y += 30;
-            if (el.type === 'image' && el.img) copy.img = el.img;
-            getCurrentSlide().elements.push(copy);
-            selectElement(copy.id);
-            renderAll();
-            pushHistoryState();
+        function duplicateActive() {
+            const el = getActiveElement(); if(!el) return;
+            const newEl = JSON.parse(JSON.stringify(el));
+            newEl.id = createId(); newEl.x += 50; newEl.y += 50;
+            getCurrentSlide().elements.push(newEl);
+            activeElementId = newEl.id; pushHistoryState(); requestRender();
         }
-
-        function deleteActiveElement() {
-            const el = getActiveElement();
-            if (!el) return;
-            getCurrentSlide().elements = getCurrentSlide().elements.filter(e => e.id !== el.id);
-            deselectElement();
-            renderAll();
-            pushHistoryState();
-        }
-
-        /* =========================================================================
-           SLIDE CAROUSEL
-           ========================================================================= */
-        function renderCarouselThumbs() {
-            const container = document.getElementById('slideThumbList');
-            container.innerHTML = '';
-            slides.forEach((_, idx) => {
-                const thumb = document.createElement('div');
-                thumb.className = `slide-thumb ${idx === currentSlideIndex ? 'active' : ''}`;
-                thumb.innerText = `${idx + 1}`;
-                thumb.onclick = () => switchSlide(idx);
-                container.appendChild(thumb);
-            });
-        }
-
-        function switchSlide(idx) {
-            deselectElement();
-            currentSlideIndex = idx;
-            renderCarouselThumbs();
-            renderAll();
-            pushHistoryState();
-        }
-
-        function addNewSlide() {
-            deselectElement();
-            slides.push(createDefaultSlide());
-            currentSlideIndex = slides.length - 1;
-            renderCarouselThumbs();
-            renderAll();
-            pushHistoryState();
-        }
-
-        function duplicateCurrentSlide() {
-            deselectElement();
-            const curr = getCurrentSlide();
-            const copy = deserializeSlides([serializeSlides([curr])[0]])[0];
-            slides.push(copy);
-            currentSlideIndex = slides.length - 1;
-            renderCarouselThumbs();
-            renderAll();
-            pushHistoryState();
-        }
-
-        function deleteCurrentSlide() {
-            if (slides.length <= 1) {
-                alert('Minimal harus ada 1 slide!');
-                return;
-            }
-            if (confirm('Hapus slide ini?')) {
-                deselectElement();
-                slides.splice(currentSlideIndex, 1);
-                if (currentSlideIndex >= slides.length) currentSlideIndex = slides.length - 1;
-                renderCarouselThumbs();
-                renderAll();
-                pushHistoryState();
-            }
+        function deleteActive() {
+            const slide = getCurrentSlide();
+            slide.elements = slide.elements.filter(e => e.id !== activeElementId);
+            activeElementId = null; closeToolPanel(); pushHistoryState(); requestRender(); renderBottomToolbar();
         }
 
         /* =========================================================================
-           PROJEK SAYA (DENGAN ASPEK RASIO THUMBNAIL)
+           UI MENUS & PANELS
            ========================================================================= */
-        function getProjectsList() {
-            try {
-                const raw = localStorage.getItem(PROJECTS_KEY);
-                return raw ? JSON.parse(raw) : [];
-            } catch(e) { return []; }
-        }
-
-        function saveProjectsList(list) {
-            try { localStorage.setItem(PROJECTS_KEY, JSON.stringify(list)); } catch(e) {}
-        }
-
-        function openProjectModal() {
-            renderProjectList();
-            document.getElementById('projectModal').classList.add('active');
-        }
-
-        function closeProjectModal() {
-            document.getElementById('projectModal').classList.remove('active');
-        }
-
-        function saveCurrentProjectAuto(customName) {
-            let list = getProjectsList();
-            let p = list.find(x => x.id === currentProjectId);
-            const thumb = mainCanvas.toDataURL('image/jpeg', 0.3);
-
-            if (!p) {
-                p = {
-                    id: currentProjectId || ('proj_' + Date.now()),
-                    name: customName || ('Projek ' + (list.length + 1)),
-                    ratio: currentRatio,
-                    thumb: thumb,
-                    slides: serializeSlides(slides),
-                    updatedAt: Date.now()
-                };
-                list.unshift(p);
-            } else {
-                if (customName) p.name = customName;
-                p.ratio = currentRatio;
-                p.thumb = thumb;
-                p.slides = serializeSlides(slides);
-                p.updatedAt = Date.now();
+        function renderBottomToolbar() {
+            const bar = document.getElementById('bottomToolbar');
+            const el = getActiveElement();
+            bar.className = `bottom-toolbar-container ${el ? 'transparent' : ''}`;
+            
+            if (!el) {
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="addText()"><span class="icon">T</span><span>Teks</span></button>
+                    <button class="tool-btn" onclick="document.getElementById('fileImageInput').click()"><span class="icon">🖼️</span><span>Foto</span></button>
+                    <button class="tool-btn" onclick="openPanel('background')"><span class="icon">🎨</span><span>Latar</span></button>
+                    <button class="tool-btn" onclick="openPanel('layer')"><span class="icon">📚</span><span>Lapisan</span></button>
+                `;
+            } else if (el.type === 'text') {
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="openKeyboardEditor()"><span class="icon">⌨️</span><span>Edit</span></button>
+                    <button class="tool-btn" onclick="openPanel('font')"><span class="icon">Aa</span><span>Font</span></button>
+                    <button class="tool-btn" onclick="openPanel('color')"><span class="icon">🎨</span><span>Warna</span></button>
+                    <button class="tool-btn" onclick="openPanel('style')"><span class="icon">✨</span><span>Gaya</span></button>
+                    <button class="tool-btn" onclick="openPanel('textEffects')"><span class="icon">🔥</span><span>Efek</span></button>
+                    <button class="tool-btn" onclick="openPanel('align')"><span class="icon">📐</span><span>Posisi</span></button>
+                    <button class="tool-btn" onclick="duplicateActive()"><span class="icon">📑</span><span>Copy</span></button>
+                    <button class="tool-btn" onclick="deleteActive()" style="color:#ff4b4b;"><span class="icon">🗑️</span></button>
+                `;
+            } else if (el.type === 'image') {
+                bar.innerHTML = `
+                    <button class="tool-btn" onclick="openPanel('imageAdjust')"><span class="icon">⚙️</span><span>Filter</span></button>
+                    <button class="tool-btn" onclick="openPanel('color')"><span class="icon">🖌️</span><span>Warna</span></button>
+                    <button class="tool-btn" onclick="openPanel('align')"><span class="icon">📐</span><span>Posisi</span></button>
+                    <button class="tool-btn" onclick="duplicateActive()"><span class="icon">📑</span><span>Copy</span></button>
+                    <button class="tool-btn" onclick="deleteActive()" style="color:#ff4b4b;"><span class="icon">🗑️</span></button>
+                `;
             }
-            saveProjectsList(list);
         }
 
-        function renderProjectList() {
-            let list = getProjectsList();
-            const container = document.getElementById('projectGridContainer');
-            container.innerHTML = '';
+        function updateElProp(prop, value, subprop = null) {
+            const el = getActiveElement();
+            if(el) {
+                if(subprop) { if(!el[prop]) el[prop]={}; el[prop][subprop] = value; }
+                else el[prop] = value;
+                requestRender();
+            }
+        }
+        function finishUpdateProp() { pushHistoryState(); } // Called on mouseup/touchend of sliders
 
-            list.forEach(p => {
-                const isCurrent = p.id === currentProjectId;
-                const ratioClass = p.ratio === '1:1' ? 'ratio-1-1' : (p.ratio === '9:16' ? 'ratio-9-16' : 'ratio-4-5');
-                const card = document.createElement('div');
-                card.className = `project-card ${isCurrent ? 'active' : ''}`;
-                card.innerHTML = `
-                    <img class="project-thumb ${ratioClass}" src="${p.thumb || ''}">
-                    <div class="project-title">${p.name}</div>
-                    <div class="project-meta">Rasio ${p.ratio || '4:5'}</div>
-                    <div class="project-actions">
-                        <button class="btn-proj-action" onclick="loadProject('${p.id}')">Buka</button>
-                        <button class="btn-proj-action" onclick="deleteProject('${p.id}')" style="color:#ff6b6b;">Hapus</button>
+        function updateBgProp(prop, value) {
+            const slide = getCurrentSlide();
+            slide.background[prop] = value;
+            requestRender(); pushHistoryState();
+        }
+
+        function openPanel(type) {
+            const panel = document.getElementById('toolPanel');
+            const content = document.getElementById('panelContent');
+            const title = document.getElementById('panelTitle');
+            const el = getActiveElement();
+            const slide = getCurrentSlide();
+            
+            // Auto pan to element to not hide it
+            if(el && ['font','color','style','textEffects','imageAdjust'].includes(type)) {
+                autoPanToElement(el);
+            }
+
+            if (type === 'background') {
+                title.innerText = 'Latar Belakang';
+                const colors = QUICK_COLORS.map(c => `<div class="color-circle" style="background:${c==='transparent'?'repeating-linear-gradient(45deg,#ccc,#ccc 5px,#fff 5px,#fff 10px)':c}" onclick="updateBgProp('type','color'); updateBgProp('color1','${c}');"></div>`).join('');
+                content.innerHTML = `
+                    <div class="ctrl-row" style="margin-bottom:12px;">
+                        <button class="btn-sub-tool" onclick="document.getElementById('fileBgInput').click()">🖼️ Foto</button>
+                        <button class="btn-sub-tool" onclick="updateBgProp('type','gradient'); updateBgProp('color1','#241a14'); updateBgProp('color2','#0d0a08');">Gradien</button>
+                    </div>
+                    <div class="color-palette-scroll">${colors}</div>
+                    <button class="eyedropper-btn" onclick="startEyedropper((c)=>{updateBgProp('type','color'); updateBgProp('color1',c);})">🔍 Ambil Warna dari Kanvas</button>
+                    ${slide.background.type === 'image' ? `
+                    <div class="ctrl-col" style="margin-top:10px;">
+                        <div class="ctrl-row"><span class="ctrl-label">Blur</span><input type="range" class="ctrl-slider" min="0" max="30" value="${slide.background.blur||0}" oninput="updateBgProp('blur', parseInt(this.value))"></div>
+                        <div class="ctrl-row"><span class="ctrl-label">Gelap</span><input type="range" class="ctrl-slider" min="0" max="1" step="0.1" value="${slide.background.darken||0}" oninput="updateBgProp('darken', parseFloat(this.value))"></div>
+                    </div>` : ''}
+                `;
+            } else if (type === 'font' && el) {
+                title.innerText = 'Teks & Font';
+                const fontsHtml = FONTS.map(f => `<button class="btn-sub-tool ${el.fontFamily===f.font?'active':''}" style="font-family:'${f.font}'" onclick="updateElProp('fontFamily','${f.font}');finishUpdateProp();openPanel('font');">${f.name}</button>`).join('');
+                content.innerHTML = `
+                    <div class="stepper-row" style="margin-bottom:12px;">
+                        <span class="ctrl-label" style="flex:1">Ukuran</span>
+                        <button class="btn-step" onclick="updateElProp('fontSize', Math.max(10, ${el.fontSize}-5));finishUpdateProp();openPanel('font')">-</button>
+                        <input type="range" class="ctrl-slider" min="10" max="800" value="${el.fontSize}" oninput="updateElProp('fontSize', parseInt(this.value))" onchange="finishUpdateProp()">
+                        <button class="btn-step" onclick="updateElProp('fontSize', ${el.fontSize}+5);finishUpdateProp();openPanel('font')">+</button>
+                    </div>
+                    <div class="pos-grid-3x3" style="grid-template-columns:1fr 1fr;">${fontsHtml}</div>
+                `;
+            } else if (type === 'color' && el) {
+                title.innerText = 'Warna & Isi';
+                const prop = el.type === 'text' ? 'color' : 'recolor';
+                const colors = QUICK_COLORS.map(c => `<div class="color-circle ${el[prop]===c?'active':''}" style="background:${c==='transparent'?'repeating-linear-gradient(45deg,#ccc,#ccc 5px,#fff 5px,#fff 10px)':c}" onclick="updateElProp('${prop}','${c}');finishUpdateProp();openPanel('color');"></div>`).join('');
+                content.innerHTML = `
+                    <div class="color-palette-scroll">${colors}</div>
+                    <button class="eyedropper-btn" onclick="startEyedropper((c)=>{updateElProp('${prop}',c);finishUpdateProp();openPanel('color')})">🔍 Ambil Warna Pipet</button>
+                    ${el.type === 'text' ? `
+                    <div style="margin-top:12px;border-top:1px solid #333;padding-top:12px;">
+                        <span class="ctrl-label">Gambar dalam Teks (Skin CorelDraw)</span>
+                        <div class="ctrl-row" style="margin-top:6px;">
+                            <button class="btn-sub-tool" onclick="document.getElementById('fileSkinInput').click()">🖼️ Pilih Skin</button>
+                            <button class="btn-sub-tool" onclick="updateElProp('skinSrc', null);finishUpdateProp()">Hapus Skin</button>
+                        </div>
+                        <div class="ctrl-row" style="margin-top:6px;"><span class="ctrl-label">Geser X</span><input type="range" class="ctrl-slider" min="-500" max="500" value="${el.skinOffsetX||0}" oninput="updateElProp('skinOffsetX', parseInt(this.value))"></div>
+                        <div class="ctrl-row" style="margin-top:6px;"><span class="ctrl-label">Geser Y</span><input type="range" class="ctrl-slider" min="-500" max="500" value="${el.skinOffsetY||0}" oninput="updateElProp('skinOffsetY', parseInt(this.value))"></div>
+                    </div>` : ''}
+                `;
+            } else if (type === 'style' && el) {
+                title.innerText = 'Format Paragraf';
+                content.innerHTML = `
+                    <div class="ctrl-row" style="margin-bottom:10px;">
+                        <button class="btn-sub-tool ${el.textAlign==='left'?'active':''}" onclick="updateElProp('textAlign','left');finishUpdateProp();openPanel('style');">Kiri</button>
+                        <button class="btn-sub-tool ${el.textAlign==='center'?'active':''}" onclick="updateElProp('textAlign','center');finishUpdateProp();openPanel('style');">Tengah</button>
+                        <button class="btn-sub-tool ${el.textAlign==='right'?'active':''}" onclick="updateElProp('textAlign','right');finishUpdateProp();openPanel('style');">Kanan</button>
+                    </div>
+                    <div class="stepper-row"><span class="ctrl-label">Jarak Baris</span>
+                        <input type="range" class="ctrl-slider" min="0.5" max="3" step="0.1" value="${el.lineHeight||1.2}" oninput="updateElProp('lineHeight', parseFloat(this.value))" onchange="finishUpdateProp()">
+                    </div>
+                    <div class="stepper-row" style="margin-top:8px;"><span class="ctrl-label">Jarak Huruf</span>
+                        <input type="range" class="ctrl-slider" min="-10" max="50" step="1" value="${el.letterSpacing||0}" oninput="updateElProp('letterSpacing', parseInt(this.value))" onchange="finishUpdateProp()">
                     </div>
                 `;
-                container.appendChild(card);
-            });
+            } else if (type === 'textEffects' && el) {
+                title.innerText = 'Efek Spesial (Lengkung, Shadow, Skew)';
+                const s = el.shadow||{}, g = el.glow||{}, h = el.highlight||{};
+                content.innerHTML = `
+                    <div class="ctrl-col">
+                        <div class="stepper-row">
+                            <span class="ctrl-label">Lengkung</span>
+                            <input type="range" class="ctrl-slider" min="-100" max="100" value="${el.curve||0}" oninput="updateElProp('curve', parseInt(this.value))" onchange="finishUpdateProp()">
+                            <button class="btn-reset-tool" onclick="updateElProp('curve',0);finishUpdateProp();openPanel('textEffects')">Reset</button>
+                        </div>
+                        <div class="stepper-row">
+                            <span class="ctrl-label">Kemiringan (Skew)</span>
+                            <input type="range" class="ctrl-slider" min="-60" max="60" value="${el.skew||0}" oninput="updateElProp('skew', parseInt(this.value))" onchange="finishUpdateProp()">
+                            <button class="btn-reset-tool" onclick="updateElProp('skew',0);finishUpdateProp();openPanel('textEffects')">Reset</button>
+                        </div>
+                        <hr style="border:0;border-top:1px solid #333;margin:4px 0;">
+                        <div class="ctrl-row"><span class="ctrl-label">Bayangan (Shadow)</span><input type="checkbox" ${s.active?'checked':''} onchange="updateElProp('shadow', this.checked, 'active');finishUpdateProp();openPanel('textEffects')"></div>
+                        ${s.active ? `
+                        <div class="ctrl-row"><span class="ctrl-label">Warna</span><input type="color" value="${s.color}" onchange="updateElProp('shadow', this.value, 'color');finishUpdateProp()"></div>
+                        <div class="ctrl-row"><span class="ctrl-label">Blur</span><input type="range" class="ctrl-slider" min="0" max="50" value="${s.blur}" oninput="updateElProp('shadow', parseInt(this.value), 'blur')"></div>
+                        <div class="ctrl-row"><span class="ctrl-label">Jarak X/Y</span><input type="range" class="ctrl-slider" min="-30" max="30" value="${s.ox}" oninput="updateElProp('shadow', parseInt(this.value), 'ox');updateElProp('shadow', parseInt(this.value), 'oy')"></div>
+                        ` : ''}
+                        <hr style="border:0;border-top:1px solid #333;margin:4px 0;">
+                        <div class="ctrl-row"><span class="ctrl-label">Glow Tepi</span><input type="checkbox" ${g.active?'checked':''} onchange="updateElProp('glow', this.checked, 'active');finishUpdateProp();openPanel('textEffects')"></div>
+                        ${g.active ? `<div class="ctrl-row"><span class="ctrl-label">Blur</span><input type="range" class="ctrl-slider" min="0" max="50" value="${g.blur}" oninput="updateElProp('glow', parseInt(this.value), 'blur')"></div>` : ''}
+                        <hr style="border:0;border-top:1px solid #333;margin:4px 0;">
+                        <div class="ctrl-row"><span class="ctrl-label">Sudut Stabillo (Tumpul)</span><input type="range" class="ctrl-slider" min="0" max="30" value="${h.radius||0}" oninput="updateElProp('highlight', parseInt(this.value), 'radius')"></div>
+                    </div>
+                `;
+            } else if (type === 'imageAdjust' && el) {
+                title.innerText = 'Filter & Ukuran PNG';
+                content.innerHTML = `
+                    <div class="ctrl-col">
+                        <div class="stepper-row"><span class="ctrl-label">Lebar</span><input type="range" class="ctrl-slider" min="50" max="3000" value="${el.width}" oninput="updateElProp('width', parseInt(this.value))" onchange="finishUpdateProp()"></div>
+                        <div class="stepper-row"><span class="ctrl-label">Tinggi</span><input type="range" class="ctrl-slider" min="50" max="3000" value="${el.height}" oninput="updateElProp('height', parseInt(this.value))" onchange="finishUpdateProp()"></div>
+                        <hr style="border:0;border-top:1px solid #333;margin:4px 0;">
+                        <div class="stepper-row"><span class="ctrl-label">Blur</span><input type="range" class="ctrl-slider" min="0" max="50" value="${el.blur||0}" oninput="updateElProp('blur', parseInt(this.value))" onchange="finishUpdateProp()"></div>
+                        <div class="stepper-row"><span class="ctrl-label">Transparan</span><input type="range" class="ctrl-slider" min="0" max="1" step="0.05" value="${el.opacity!==undefined?el.opacity:1}" oninput="updateElProp('opacity', parseFloat(this.value))" onchange="finishUpdateProp()"></div>
+                        <hr style="border:0;border-top:1px solid #333;margin:4px 0;">
+                        <div class="ctrl-row">
+                            <span class="ctrl-label">Hapus Latar Belakang (Warna)</span>
+                            <button class="btn-sub-tool ${el.removeBgColor==='white'?'active':''}" onclick="updateElProp('removeBgColor','white');finishUpdateProp();openPanel('imageAdjust')">Putih</button>
+                            <button class="btn-sub-tool ${el.removeBgColor==='black'?'active':''}" onclick="updateElProp('removeBgColor','black');finishUpdateProp();openPanel('imageAdjust')">Hitam</button>
+                            <button class="btn-reset-tool" onclick="updateElProp('removeBgColor',null);finishUpdateProp();openPanel('imageAdjust')">Reset</button>
+                        </div>
+                        <span style="font-size:9px;color:#888;">*Efek Hapus BG adalah mode blending (Screen/Multiply) khusus untuk hitam/putih.</span>
+                    </div>
+                `;
+            } else if (type === 'align') {
+                title.innerText = 'Posisi Presisi & D-Pad';
+                const spdId = 'joySpeed';
+                content.innerHTML = `
+                    <div class="pos-grid-3x3">
+                        <button class="btn-pos-cell" onclick="alignActive('tl')">Kiri Atas</button><button class="btn-pos-cell" onclick="alignActive('tc')">Tengah Atas</button><button class="btn-pos-cell" onclick="alignActive('tr')">Kanan Atas</button>
+                        <button class="btn-pos-cell" onclick="alignActive('ml')">Kiri Tgh</button><button class="btn-pos-cell" onclick="alignActive('mc')">Tengah</button><button class="btn-pos-cell" onclick="alignActive('mr')">Kanan Tgh</button>
+                        <button class="btn-pos-cell" onclick="alignActive('bl')">Kiri Bwh</button><button class="btn-pos-cell" onclick="alignActive('bc')">Tengah Bwh</button><button class="btn-pos-cell" onclick="alignActive('br')">Kanan Bwh</button>
+                    </div>
+                    <div style="margin-top:16px;text-align:center;font-weight:bold;color:#D4AF37;">Manual Geser (Joystick)</div>
+                    <div class="ctrl-row" style="margin-top:4px;"><span class="ctrl-label">Kecepatan (Px)</span><input type="range" id="${spdId}" class="ctrl-slider" min="1" max="50" value="5"></div>
+                    <div class="dpad-container">
+                        <div class="dpad-row"><button class="dpad-btn" onpointerdown="startJoy(0,-1)" onpointerup="stopJoy()" onpointerleave="stopJoy()">▲</button></div>
+                        <div class="dpad-row">
+                            <button class="dpad-btn" onpointerdown="startJoy(-1,0)" onpointerup="stopJoy()" onpointerleave="stopJoy()">◀</button>
+                            <button class="dpad-btn" onpointerdown="startJoy(1,0)" onpointerup="stopJoy()" onpointerleave="stopJoy()">▶</button>
+                        </div>
+                        <div class="dpad-row"><button class="dpad-btn" onpointerdown="startJoy(0,1)" onpointerup="stopJoy()" onpointerleave="stopJoy()">▼</button></div>
+                    </div>
+                    <div class="stepper-row" style="margin-top:12px;">
+                        <span class="ctrl-label">Rotasi (Derajat)</span>
+                        <input type="range" class="ctrl-slider" min="-180" max="180" value="${el?el.rotation:0}" oninput="updateElProp('rotation', parseInt(this.value))" onchange="finishUpdateProp()">
+                    </div>
+                `;
+            } else if (type === 'layer') {
+                title.innerText = 'Susunan Lapisan';
+                let html = '<div class="layer-list-container">';
+                for (let i = slide.elements.length - 1; i >= 0; i--) {
+                    const layer = slide.elements[i];
+                    const label = layer.type === 'text' ? (layer.text.substring(0,15) + '...') : 'Gambar/PNG';
+                    html += `
+                        <div class="layer-item ${layer.id === activeElementId ? 'active':''}" onclick="activeElementId='${layer.id}'; requestRender(); openPanel('layer');" draggable="true" ondragstart="event.dataTransfer.setData('id','${layer.id}')" ondragover="event.preventDefault()" ondrop="dropLayer(event, '${layer.id}')">
+                            <span>☰ ${label}</span>
+                            <div class="layer-actions">
+                                <button class="layer-btn" onclick="event.stopPropagation(); moveLayer('${layer.id}', 1)">⬆️</button>
+                                <button class="layer-btn" onclick="event.stopPropagation(); moveLayer('${layer.id}', -1)">⬇️</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                html += '</div><div style="font-size:10px;color:#888;margin-top:6px;">*Tahan dan geser (drag & drop) untuk memindah urutan</div>';
+                content.innerHTML = html;
+            } else if (type === 'bleed') {
+                title.innerText = 'Pengaturan Garis Cetak / Margin';
+                content.innerHTML = `
+                    <div class="ctrl-row">
+                        <span class="ctrl-label">Tampilkan</span>
+                        <input type="checkbox" ${bleedGuidesVisible?'checked':''} onchange="toggleBleedGuides()">
+                    </div>
+                    <div class="stepper-row" style="margin-top:12px;">
+                        <span class="ctrl-label">Margin (%)</span>
+                        <input type="range" class="ctrl-slider" min="0" max="25" value="${bleedMargin}" oninput="bleedMargin=parseInt(this.value); updateBleedGuides();">
+                    </div>
+                `;
+            } else if (type === 'export') {
+                title.innerText = 'Unduh Resolusi Tinggi';
+                content.innerHTML = `
+                    <div class="ctrl-col">
+                        <button class="btn-sub-tool" onclick="exportPoster(1)">Standar (SD) - 1x</button>
+                        <button class="btn-sub-tool active" onclick="exportPoster(2)">Tinggi (HD) - 2x</button>
+                        <button class="btn-sub-tool" onclick="exportPoster(3)" style="background:rgba(212,175,55,0.2);border-color:#D4AF37;color:#D4AF37;">Ultra (UHD) - 3x</button>
+                        <button class="btn-sub-tool" onclick="exportPoster(4)" style="background:linear-gradient(45deg,#D4AF37,#ff4b4b);color:#fff;">PRO MAX - 4x</button>
+                    </div>
+                `;
+            }
+            panel.classList.add('active');
         }
 
-        function createNewProjectPrompt() {
-            const name = prompt('Nama projek baru:', 'Projek ' + (getProjectsList().length + 1));
-            if (!name) return;
-            currentProjectId = 'proj_' + Date.now();
-            slides = [createDefaultSlide()];
-            currentSlideIndex = 0;
-            currentRatio = '4:5';
-            document.getElementById('currentRatioLabel').innerText = '4:5';
-            adjustArtboardSize();
-            renderAll();
-            renderCarouselThumbs();
-            pushHistoryState();
-            saveCurrentProjectAuto(name);
-            closeProjectModal();
+        function closeToolPanel() { document.getElementById('toolPanel').classList.remove('active'); }
+
+        // JOYSTICK ENGINE
+        function startJoy(dx, dy) {
+            if(joyInterval) clearInterval(joyInterval);
+            const speed = parseInt(document.getElementById('joySpeed')?.value) || 5;
+            joyInterval = setInterval(() => {
+                const el = getActiveElement();
+                if(el) { el.x += dx*speed; el.y += dy*speed; requestRender(); }
+            }, 30); // 30ms smooth tick
+        }
+        function stopJoy() { clearInterval(joyInterval); finishUpdateProp(); }
+
+        // ALIGN ENGINE
+        function alignActive(pos) {
+            const el = getActiveElement(); if(!el) return;
+            const preset = RATIO_PRESETS[currentRatio];
+            const cw = preset.width, ch = preset.height;
+            const w = el.width, h = el.type === 'text' ? (el.height || el.fontSize*1.2) : el.height;
+            switch(pos) {
+                case 'tl': el.x = w/2; el.y = h/2; break;
+                case 'tc': el.x = cw/2; el.y = h/2; break;
+                case 'tr': el.x = cw - w/2; el.y = h/2; break;
+                case 'ml': el.x = w/2; el.y = ch/2; break;
+                case 'mc': el.x = cw/2; el.y = ch/2; break;
+                case 'mr': el.x = cw - w/2; el.y = ch/2; break;
+                case 'bl': el.x = w/2; el.y = ch - h/2; break;
+                case 'bc': el.x = cw/2; el.y = ch - h/2; break;
+                case 'br': el.x = cw - w/2; el.y = ch - h/2; break;
+            }
+            finishUpdateProp(); requestRender();
         }
 
-        function saveAsNewProjectPrompt() {
-            const name = prompt('Nama salinan projek:', 'Salinan ' + (new Date().toLocaleTimeString()));
-            if (!name) return;
-            currentProjectId = 'proj_' + Date.now();
-            saveCurrentProjectAuto(name);
-            renderProjectList();
+        // LAYER ENGINE
+        function moveLayer(id, dir) {
+            const slide = getCurrentSlide();
+            const idx = slide.elements.findIndex(e => e.id === id);
+            if (idx < 0) return;
+            if (dir === 1 && idx < slide.elements.length - 1) { 
+                [slide.elements[idx], slide.elements[idx+1]] = [slide.elements[idx+1], slide.elements[idx]];
+            } else if (dir === -1 && idx > 0) {
+                [slide.elements[idx], slide.elements[idx-1]] = [slide.elements[idx-1], slide.elements[idx]];
+            }
+            finishUpdateProp(); requestRender(); openPanel('layer');
         }
-
-        function loadProject(id) {
-            const p = getProjectsList().find(x => x.id === id);
-            if (!p) return;
-            currentProjectId = p.id;
-            currentRatio = p.ratio || '4:5';
-            document.getElementById('currentRatioLabel').innerText = currentRatio;
-            slides = deserializeSlides(p.slides || []);
-            currentSlideIndex = 0;
-            adjustArtboardSize();
-            renderAll();
-            renderCarouselThumbs();
-            renderBottomToolbar();
-            pushHistoryState();
-            closeProjectModal();
-        }
-
-        function deleteProject(id) {
-            let list = getProjectsList();
-            if (list.length <= 1) { alert('Minimal harus ada 1 projek!'); return; }
-            if (confirm('Hapus projek ini?')) {
-                list = list.filter(x => x.id !== id);
-                saveProjectsList(list);
-                if (currentProjectId === id) loadProject(list[0].id);
-                else renderProjectList();
+        function dropLayer(e, targetId) {
+            const dragId = e.dataTransfer.getData('id');
+            const slide = getCurrentSlide();
+            const dragIdx = slide.elements.findIndex(el => el.id === dragId);
+            const targetIdx = slide.elements.findIndex(el => el.id === targetId);
+            if(dragIdx > -1 && targetIdx > -1 && dragIdx !== targetIdx) {
+                const el = slide.elements.splice(dragIdx, 1)[0];
+                slide.elements.splice(targetIdx, 0, el);
+                finishUpdateProp(); requestRender(); openPanel('layer');
             }
         }
 
-        /* =========================================================================
-           EKSPOR DENGAN PILIHAN RESOLUSI TINGGI
-           ========================================================================= */
-        function exportPoster() {
-            deselectElement();
-            renderAll();
-
-            const scaleMultiplier = parseFloat(document.getElementById('exportQualitySelect').value) || 2.0;
-            const expCanvas = document.createElement('canvas');
-            expCanvas.width = mainCanvas.width * scaleMultiplier;
-            expCanvas.height = mainCanvas.height * scaleMultiplier;
-            const expCtx = expCanvas.getContext('2d');
-            expCtx.imageSmoothingEnabled = true;
-            expCtx.imageSmoothingQuality = 'high';
-            expCtx.drawImage(mainCanvas, 0, 0, expCanvas.width, expCanvas.height);
-
-            setTimeout(() => {
-                const link = document.createElement('a');
-                link.download = `poster-dakwah-${currentRatio}-${Date.now()}.jpg`;
-                link.href = expCanvas.toDataURL('image/jpeg', 0.98);
-                link.click();
-            }, 80);
+        function toggleBleedGuides() {
+            bleedGuidesVisible = !bleedGuidesVisible;
+            document.getElementById('bleedGuides').className = bleedGuidesVisible ? 'bleed-guides visible' : 'bleed-guides';
+            openPanel('bleed');
         }
 
+        /* =========================================================================
+           EYEDROPPER
+           ========================================================================= */
+        let eyedropperCallback = null;
+        function startEyedropper(callback) {
+            closeToolPanel();
+            eyedropperCallback = callback;
+            const overlay = document.getElementById('eyedropperOverlay');
+            overlay.style.display = 'block';
+            
+            overlay.onpointermove = (e) => {
+                const prev = document.getElementById('eyedropperPreview');
+                prev.style.left = e.clientX + 'px';
+                prev.style.top = e.clientY + 'px';
+                
+                // Read exact pixel from canvas
+                const rect = artboard.getBoundingClientRect();
+                const scale = canvasScale * artboardBaseScale;
+                const cx = (e.clientX - rect.left) / scale;
+                const cy = (e.clientY - rect.top) / scale;
+                
+                // Draw current render to offscreen 1x1 to read color
+                offCanvas.width = 1; offCanvas.height = 1;
+                // Render with offset
+                offCtx.save();
+                offCtx.translate(-cx, -cy);
+                renderToContext(offCtx, RATIO_PRESETS[currentRatio].width, RATIO_PRESETS[currentRatio].height, getCurrentSlide(), 1);
+                offCtx.restore();
+                
+                const data = offCtx.getImageData(0,0,1,1).data;
+                const hex = "#" + ((1 << 24) + (data[0] << 16) + (data[1] << 8) + data[2]).toString(16).slice(1).toUpperCase();
+                prev.style.borderColor = hex;
+            };
+
+            overlay.onpointerup = (e) => {
+                overlay.style.display = 'none';
+                const prev = document.getElementById('eyedropperPreview');
+                if(eyedropperCallback) eyedropperCallback(prev.style.borderColor);
+            };
+        }
+
+        /* =========================================================================
+           INLINE TEXT EDITING (NATIVE PROMPT AVOIDANCE)
+           ========================================================================= */
+        function openKeyboardEditor() {
+            const el = getActiveElement();
+            if(!el || el.type !== 'text') return;
+            
+            closeToolPanel();
+            
+            // Native PROMPT is best for absolute stability in preventing canvas jumps 
+            // BUT user wants inline styling tags. We will use a floating textarea overlaid.
+            // To prevent keyboard dropping, we focus once and keep it.
+            const input = document.createElement('textarea');
+            input.id = 'tempTextEdit';
+            input.style.position = 'fixed';
+            input.style.top = '10%'; input.style.left = '5%'; input.style.width = '90%'; input.style.height = '30%';
+            input.style.zIndex = '9999'; input.style.fontSize = '20px'; input.style.padding = '15px';
+            input.style.borderRadius = '12px'; input.style.background = '#111'; input.style.color = '#fff';
+            input.style.border = '2px solid #D4AF37'; input.style.boxShadow = '0 20px 50px rgba(0,0,0,0.9)';
+            input.value = el.text;
+            
+            document.body.appendChild(input);
+            document.getElementById('inlineTextToolbar').classList.add('active');
+            
+            input.focus();
+            
+            input.addEventListener('input', () => { el.text = input.value; requestRender(); });
+        }
+
+        function closeInlineTextEditor() {
+            const input = document.getElementById('tempTextEdit');
+            if(input) {
+                input.blur();
+                input.remove();
+                finishUpdateProp();
+            }
+            document.getElementById('inlineTextToolbar').classList.remove('active');
+        }
+
+        /* =========================================================================
+           EXPORT
+           ========================================================================= */
+        function exportPoster(scaleMulti) {
+            closeToolPanel();
+            const preset = RATIO_PRESETS[currentRatio];
+            const expCanvas = document.createElement('canvas');
+            expCanvas.width = preset.width * scaleMulti;
+            expCanvas.height = preset.height * scaleMulti;
+            const expCtx = expCanvas.getContext('2d');
+            
+            renderToContext(expCtx, expCanvas.width, expCanvas.height, getCurrentSlide(), scaleMulti);
+            
+            const link = document.createElement('a');
+            link.download = `Studio-Poster-${Date.now()}-${scaleMulti}x.png`;
+            link.href = expCanvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+
+        // INIT
         window.onload = initApp;
     </script>
 </body>
