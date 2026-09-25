@@ -15,12 +15,14 @@
         /* TOP HEADER TOOLBAR */
         .top-navbar{
             height:50px;background:#141414;border-bottom:1px solid rgba(212,175,55,0.25);
-            display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:200;position:relative;
+            display:flex;align-items:center;justify-content:flex-start;padding:0 10px;gap:8px;z-index:200;position:relative;
+            overflow-x:auto;overflow-y:hidden;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;
         }
-        .nav-left, .nav-right{display:flex;align-items:center;gap:6px;}
+        .top-navbar::-webkit-scrollbar{display:none;}
+        .nav-left, .nav-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
         .btn-nav{
             background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ddd;
-            height:34px;padding:0 10px;border-radius:17px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer;
+            height:34px;padding:0 10px;border-radius:17px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;
         }
         .btn-nav:hover{background:rgba(212,175,55,0.15);border-color:#D4AF37;color:#D4AF37;}
         .btn-nav.active{background:#D4AF37;color:#111;border-color:#D4AF37;}
@@ -28,139 +30,170 @@
         .btn-download{background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;border:none;box-shadow:0 2px 10px rgba(212,175,55,0.3);}
 
         /* AUTO SAVE STATUS */
-        .save-indicator{font-size:10px;color:#888;display:flex;align-items:center;gap:4px;padding:0 4px;}
-        .save-dot{width:7px;height:7px;border-radius:50%;background:#4CAF50;transition:0.3s;}
-        .save-dot.syncing{background:#FFA000;animation:pulseSync 1s infinite;}
-        @keyframes pulseSync{0%,100%{opacity:0.3;}50%{opacity:1;}}
+        .save-indicator{
+            font-size:10px;color:#888;display:flex;align-items:center;gap:4px;padding:4px 8px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.06);
+        }
+        .save-dot{width:6px;height:6px;border-radius:50%;background:#4CAF50;}
+        .save-dot.saving{background:#FFC107;animation:pulse 1s infinite;}
+        .save-dot.error{background:#f44336;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
 
-        /* WORKSPACE AREA */
-        .workspace-viewport{
-            position:absolute;top:50px;bottom:120px;left:0;right:0;background:#060606;
-            background-image:radial-gradient(rgba(255,255,255,0.06) 1px, transparent 0);background-size:20px 20px;
-            display:flex;align-items:center;justify-content:center;overflow:hidden;
+        /* WORKSPACE CANVAS WRAPPER */
+        .workspace{
+            position:absolute;top:50px;bottom:140px;left:0;right:0;
+            display:flex;align-items:center;justify-content:center;
+            background:#0d0d0d;background-image:radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size:20px 20px;overflow:hidden;
         }
 
-        /* ARTBOARD STAGE CONTAINER */
+        /* ARTBOARD CONTAINER */
         .artboard-container{
-            position:relative;box-shadow:0 15px 45px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,175,55,0.3);
-            border-radius:6px;overflow:visible;background:#181818;transform-origin:center center;
+            position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.8),0 0 0 1px rgba(212,175,55,0.2);
+            background:#111;overflow:hidden;transform-origin:center center;
         }
-        #mainCanvas{display:block;width:100%;height:100%;border-radius:6px;}
+        #mainCanvas{display:block;width:100%;height:100%;}
 
-        /* BLEED & SAFETY MARGIN LINES (PATOKAN CETAK GARIS TRANSPARAN) */
-        .bleed-guides{
-            position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;display:none;z-index:90;
+        /* BLEED GUIDE OVERLAY */
+        .bleed-guide{
+            position:absolute;pointer-events:none;z-index:90;display:none;
         }
-        .bleed-guides.visible{display:block;}
-        .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,0.5);}
-        .guide-line-v{position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed rgba(212,175,55,0.5);}
+        .bleed-guide.active{display:block;}
+        .bleed-line-v{position:absolute;top:0;bottom:0;border-left:1px dashed rgba(212,175,55,0.45);}
+        .bleed-line-h{position:absolute;left:0;right:0;border-top:1px dashed rgba(212,175,55,0.45);}
+        .bleed-center-v{position:absolute;top:0;bottom:0;left:50%;border-left:1px dotted rgba(76,175,80,0.4);}
+        .bleed-center-h{position:absolute;left:0;right:0;top:50%;border-top:1px dotted rgba(76,175,80,0.4);}
 
-        /* BOUNDING BOX SELECTION (SELEKSI ELEMEN ALA CANVA & PIXELLAB) */
-        .selection-box{
-            position:absolute;border:2px solid #D4AF37;pointer-events:none;display:none;z-index:99;box-shadow:0 0 12px rgba(212,175,55,0.4);
+        /* BOUNDING BOX & HANDLES */
+        .element-box{
+            position:absolute;pointer-events:none;z-index:100;display:none;
+            border:1.5px solid #2196F3;
         }
-        .selection-box.active{display:block;}
-        .sel-handle{
-            position:absolute;width:14px;height:14px;background:#fff;border:2px solid #D4AF37;border-radius:50%;
-            pointer-events:auto;box-shadow:0 2px 6px rgba(0,0,0,0.6);
+        .element-box.active{display:block;}
+        .handle{
+            position:absolute;width:14px;height:14px;background:#fff;border:2px solid #2196F3;
+            border-radius:50%;pointer-events:auto;box-shadow:0 2px 6px rgba(0,0,0,0.5);
         }
-        .sel-handle.tl{top:-7px;left:-7px;cursor:nwse-resize;}
-        .sel-handle.tr{top:-7px;right:-7px;cursor:nesw-resize;}
-        .sel-handle.bl{bottom:-7px;left:-7px;cursor:nesw-resize;}
-        .sel-handle.br{bottom:-7px;right:-7px;cursor:nwse-resize;}
-        /* Edge handles for width/height resize */
-        .sel-handle-edge{position:absolute;background:#D4AF37;pointer-events:auto;border-radius:3px;}
-        .sel-handle-edge.r{top:50%;right:-6px;transform:translateY(-50%);width:6px;height:24px;cursor:ew-resize;}
-        .sel-handle-edge.l{top:50%;left:-6px;transform:translateY(-50%);width:6px;height:24px;cursor:ew-resize;}
-        .sel-handle-edge.t{left:50%;top:-6px;transform:translateX(-50%);width:24px;height:6px;cursor:ns-resize;}
-        .sel-handle-edge.b{left:50%;bottom:-6px;transform:translateX(-50%);width:24px;height:6px;cursor:ns-resize;}
+        .handle-tl{top:-7px;left:-7px;cursor:nwse-resize;}
+        .handle-tr{top:-7px;right:-7px;cursor:nesw-resize;}
+        .handle-bl{bottom:-7px;left:-7px;cursor:nesw-resize;}
+        .handle-br{bottom:-7px;right:-7px;cursor:nwse-resize;}
+        .handle-r{top:50%;right:-7px;transform:translateY(-50%);cursor:ew-resize;border-radius:3px;height:20px;width:8px;}
+        .handle-l{top:50%;left:-7px;transform:translateY(-50%);cursor:ew-resize;border-radius:3px;height:20px;width:8px;}
 
-        /* IN-PLACE DIRECT KEYBOARD INPUT (LANGSUNG KELUAR KEYBOARD DI SATU LAYAR) */
-        #inlineTextInput{
-            position:absolute;display:none;background:rgba(20,20,20,0.92);border:2px solid #D4AF37;color:#fff;
-            padding:10px 12px;border-radius:10px;font-family:inherit;font-size:16px;z-index:150;resize:none;
-            box-shadow:0 10px 30px rgba(0,0,0,0.9);line-height:1.4;
-        }
-
-        /* SLIDE CAROUSEL THUMBNAILS BAR (MINI BAR BAWAH) */
+        /* CAROUSEL SLIDES BAR */
         .carousel-bar{
-            position:absolute;bottom:62px;left:0;right:0;height:56px;background:rgba(18,18,18,0.95);
-            border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 10px;gap:8px;
-            overflow-x:auto;z-index:180;scrollbar-width:none;
+            position:absolute;bottom:70px;left:0;right:0;height:70px;
+            background:#141414;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);
+            display:flex;align-items:center;padding:0 12px;gap:10px;z-index:150;overflow-x:auto;scrollbar-width:none;
         }
         .carousel-bar::-webkit-scrollbar{display:none;}
         .slide-thumb{
-            flex-shrink:0;width:38px;height:50px;background:#252525;border:2px solid transparent;border-radius:6px;
-            overflow:hidden;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;
-            font-size:10px;color:#aaa;font-weight:bold;
+            width:42px;height:56px;border-radius:5px;background:#222;border:2px solid rgba(255,255,255,0.15);
+            flex-shrink:0;position:relative;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;
+            font-size:10px;color:#aaa;transition:all 0.2s;
         }
-        .slide-thumb.active{border-color:#D4AF37;box-shadow:0 0 8px rgba(212,175,55,0.4);color:#fff;}
-        .slide-thumb canvas{width:100%;height:100%;object-fit:cover;}
-        .btn-add-slide{
-            flex-shrink:0;width:38px;height:50px;background:rgba(212,175,55,0.1);border:1px dashed #D4AF37;
-            border-radius:6px;color:#D4AF37;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;
-        }
-        .btn-dup-slide{
-            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#bbb;
-            height:32px;padding:0 8px;border-radius:8px;font-size:11px;font-weight:bold;white-space:nowrap;cursor:pointer;
-        }
-
-        /* BOTTOM TOOLBAR ALA CANVA (SCROLL HORIZONTAL & MODULAR) */
-        .bottom-toolbar-container{
-            position:absolute;bottom:0;left:0;right:0;height:62px;background:#141414;
-            border-top:1px solid rgba(212,175,55,0.25);z-index:190;display:flex;align-items:center;padding:0 8px;
-            overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:6px;
-        }
-        .bottom-toolbar-container::-webkit-scrollbar{display:none;}
-        .tool-btn{
+        .slide-thumb.active{border-color:#D4AF37;box-shadow:0 0 10px rgba(212,175,55,0.4);}
+        .slide-thumb img{width:100%;height:100%;object-fit:cover;}
+        .slide-add-btn{
+            width:42px;height:56px;border-radius:5px;background:rgba(212,175,55,0.1);border:1.5px dashed #D4AF37;
             flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-            gap:3px;min-width:62px;height:54px;background:transparent;border:none;color:#aaa;
-            font-size:10px;font-weight:700;border-radius:10px;cursor:pointer;transition:0.2s;
+            color:#D4AF37;font-size:18px;cursor:pointer;font-weight:700;
         }
-        .tool-btn .icon{font-size:18px;line-height:1;}
-        .tool-btn:hover, .tool-btn.active{background:rgba(212,175,55,0.15);color:#D4AF37;}
+        .slide-action-btn{
+            padding:6px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+            border-radius:8px;font-size:11px;color:#eee;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;
+        }
 
-        /* POPUP TOOL DRAWER / PANEL PENGATURAN SPESIFIK */
-        .tool-panel{
-            position:absolute;bottom:62px;left:0;right:0;max-height:270px;background:#181818;
-            border-top:1px solid rgba(212,175,55,0.3);border-radius:18px 18px 0 0;z-index:185;
-            padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,0.8);display:none;flex-direction:column;
-            overflow-y:auto;gap:12px;animation:slideUpPanel 0.25s cubic-bezier(0.16,1,0.3,1);
+        /* BOTTOM CANVA-STYLE TOOLBAR */
+        .bottom-toolbar{
+            position:absolute;bottom:0;left:0;right:0;height:70px;background:#181818;
+            border-top:1px solid rgba(212,175,55,0.2);display:flex;align-items:center;
+            padding:0 10px;gap:6px;overflow-x:auto;z-index:180;scrollbar-width:none;
         }
-        .tool-panel.active{display:flex;}
-        @keyframes slideUpPanel{from{transform:translateY(100%);}to{transform:translateY(0);}}
-        .panel-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;}
-        .panel-title{font-size:13px;font-weight:800;color:#D4AF37;letter-spacing:0.5px;}
-        .panel-close{background:none;border:none;color:#888;font-size:18px;cursor:pointer;}
+        .bottom-toolbar::-webkit-scrollbar{display:none;}
+        .tool-btn{
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            min-width:58px;height:58px;background:transparent;border:none;color:#bbb;
+            font-size:10px;font-weight:600;border-radius:8px;cursor:pointer;padding:4px;flex-shrink:0;gap:3px;
+        }
+        .tool-btn:hover, .tool-btn.active{background:rgba(212,175,55,0.12);color:#D4AF37;}
+        .tool-btn .icon{font-size:20px;}
 
-        /* UI CONTROLS DALAM PANEL */
-        .ctrl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-        .ctrl-label{font-size:11px;color:#bbb;font-weight:bold;min-width:70px;}
-        .ctrl-slider{flex:1;accent-color:#D4AF37;cursor:pointer;}
-        .ctrl-val{font-size:11px;color:#D4AF37;font-weight:bold;width:35px;text-align:right;}
-        .ctrl-grid-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-        .btn-sub-tool{
-            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ddd;
-            padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+        /* FLOATING PROPERTY SHEET / POPUP PANEL */
+        .prop-panel{
+            position:absolute;bottom:70px;left:0;right:0;background:#1c1c1c;border-top:1px solid rgba(212,175,55,0.3);
+            border-radius:16px 16px 0 0;padding:16px;z-index:190;max-height:65vh;overflow-y:auto;display:none;
+            box-shadow:0 -10px 30px rgba(0,0,0,0.7);
         }
-        .btn-sub-tool.active{background:#D4AF37;color:#111;border-color:#D4AF37;}
-        .color-palette-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0;}
-        .color-circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);flex-shrink:0;cursor:pointer;}
-        .color-circle.active{border-color:#D4AF37;transform:scale(1.2);}
+        .prop-panel.active{display:block;}
+        .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;}
+        .panel-title{font-size:14px;font-weight:700;color:#D4AF37;display:flex;align-items:center;gap:6px;}
+        .panel-close{background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:4px;}
+        
+        .prop-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;}
+        .prop-label{font-size:12px;color:#aaa;flex-shrink:0;min-width:80px;}
+        .prop-control{flex:1;display:flex;align-items:center;gap:8px;}
+        .prop-slider{flex:1;accent-color:#D4AF37;height:5px;}
+        .prop-val{font-size:11px;color:#ddd;min-width:36px;text-align:right;font-variant-numeric:tabular-nums;}
+        
+        /* 3x3 GEOMETRIC POSITION GRID */
+        .position-grid-3x3{
+            display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;max-width:240px;margin:10px auto;
+        }
+        .pos-grid-btn{
+            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+            color:#eee;padding:10px 4px;border-radius:8px;font-size:11px;font-weight:600;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;
+        }
+        .pos-grid-btn:hover{background:rgba(212,175,55,0.2);border-color:#D4AF37;color:#D4AF37;}
 
-        /* MODAL LAYER LIST ALA CANVA */
-        .layer-list-container{display:flex;flex-direction:column;gap:6px;}
-        .layer-item{
-            display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);
-            border:1px solid rgba(255,255,255,0.08);padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;
+        /* JOYSTICK D-PAD NUDGE */
+        .dpad-container{
+            display:grid;grid-template-areas:". up ." "left center right" ". down .";
+            grid-template-columns:50px 50px 50px;grid-template-rows:45px 45px 45px;
+            gap:6px;justify-content:center;margin:10px auto;
         }
-        .layer-item.active{border-color:#D4AF37;background:rgba(212,175,55,0.15);color:#D4AF37;font-weight:bold;}
-        .layer-actions{display:flex;gap:6px;}
-        .layer-btn{background:none;border:none;color:#aaa;cursor:pointer;font-size:14px;padding:2px 4px;}
-        .layer-btn:hover{color:#fff;}
+        .dpad-up{grid-area:up;} .dpad-down{grid-area:down;} .dpad-left{grid-area:left;} .dpad-right{grid-area:right;} .dpad-center{grid-area:center;}
+        .dpad-btn{
+            background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+            color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;
+            font-size:16px;cursor:pointer;
+        }
+        .dpad-btn:hover{background:#D4AF37;color:#111;}
+
+        /* INLINE DIRECT TEXT EDITOR */
+        .inline-text-editor{
+            position:absolute;display:none;z-index:120;background:rgba(20,20,20,0.92);
+            border:1.5px solid #D4AF37;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.8);
+            padding:6px;
+        }
+        .inline-text-editor.active{display:block;}
+        .inline-textarea{
+            width:100%;height:100%;background:transparent;border:none;color:#fff;
+            font-family:inherit;font-size:14px;resize:none;outline:none;
+        }
+        .inline-editor-toolbar{
+            display:flex;align-items:center;gap:6px;padding-bottom:6px;margin-bottom:6px;
+            border-bottom:1px solid rgba(255,255,255,0.1);overflow-x:auto;
+        }
+        .inline-tag-btn{
+            background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);
+            color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:700;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast{
+            position:fixed;bottom:150px;left:50%;transform:translateX(-50%);
+            background:rgba(20,20,20,0.95);border:1px solid #D4AF37;color:#fff;
+            padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;
+            z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.8);pointer-events:none;
+            opacity:0;transition:opacity 0.3s;
+        }
+        .toast.show{opacity:1;}
     </style>
 </head>
 <body>
+
     <!-- 1. TOP HEADER TOOLBAR -->
     <header class="top-navbar">
         <div class="nav-left">
@@ -178,85 +211,96 @@
             <button class="btn-nav" id="btnRatio" onclick="toggleRatioSelector()" title="Ubah Ukuran Poster">
                 📏 <span id="currentRatioLabel">9:16</span>
             </button>
-            <button class="btn-nav" onclick="toggleBleedGuides()" title="Garis Bantu Cetak / Margin">
-                📐
+            <button class="btn-nav" onclick="openPanelBleed()" title="Garis Bantu Cetak / Margin">
+                📐 Garis Bantu
             </button>
             <button class="btn-nav btn-download" onclick="exportPoster()" title="Unduh Desain">
                 💾 Simpan
+            </button>
+            <button class="btn-nav" onclick="copyFullSourceCode()" title="Salin Seluruh Kode maker.html untuk GitHub" style="border-color:#4CAF50;color:#81C784;">
+                📋 Salin Kode
+            </button>
+            <button class="btn-nav" onclick="downloadSourceCodeFile()" title="Unduh File maker.html Utuh untuk GitHub" style="border-color:#2196F3;color:#64B5F6;">
+                📥 Unduh HTML
             </button>
         </div>
     </header>
 
     <!-- 2. WORKSPACE CANVAS AREA -->
-    <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
-        <div class="artboard-container" id="artboard">
-            <!-- CANVAS HIGH RESOLUTION (1080 Width Base) -->
+    <main class="workspace" id="workspace">
+        <div class="artboard-container" id="artboardContainer">
             <canvas id="mainCanvas"></canvas>
 
-            <!-- BLEED & MARGIN GUIDES (GARIS PATOKAN POTONG & AMAN) -->
-            <div class="bleed-guides" id="bleedGuides">
-                <div class="guide-line-h" style="top:5%;"></div>
-                <div class="guide-line-h" style="bottom:5%;"></div>
-                <div class="guide-line-v" style="left:5%;"></div>
-                <div class="guide-line-v" style="right:5%;"></div>
+            <!-- Bleed & Safe Margin Guide -->
+            <div class="bleed-guide" id="bleedGuide">
+                <div class="bleed-line-v" id="bleedGuideL"></div>
+                <div class="bleed-line-v" id="bleedGuideR"></div>
+                <div class="bleed-line-h" id="bleedGuideT"></div>
+                <div class="bleed-line-h" id="bleedGuideB"></div>
+                <div class="bleed-center-v" id="bleedCenterV"></div>
+                <div class="bleed-center-h" id="bleedCenterH"></div>
             </div>
 
-            <!-- SELECTION BOUNDING BOX DENGAN HANDLE SUDUT & SISI -->
-            <div class="selection-box" id="selBox">
-                <!-- 4 Sudut Lancip (Resize Asli Proporsional Bebas Meleyot) -->
-                <div class="sel-handle tl" data-handle="tl"></div>
-                <div class="sel-handle tr" data-handle="tr"></div>
-                <div class="sel-handle bl" data-handle="bl"></div>
-                <div class="sel-handle br" data-handle="br"></div>
-                <!-- 4 Handle Sisi Meluaskan Lebar / Tinggi -->
-                <div class="sel-handle-edge r" data-handle="r"></div>
-                <div class="sel-handle-edge l" data-handle="l"></div>
-                <div class="sel-handle-edge t" data-handle="t"></div>
-                <div class="sel-handle-edge b" data-handle="b"></div>
+            <!-- Bounding Box Seleksi & Handle Transformasi Lancip -->
+            <div class="element-box" id="elementBox">
+                <div class="handle handle-tl" data-handle="tl"></div>
+                <div class="handle handle-tr" data-handle="tr"></div>
+                <div class="handle handle-bl" data-handle="bl"></div>
+                <div class="handle handle-br" data-handle="br"></div>
+                <div class="handle handle-l" data-handle="l"></div>
+                <div class="handle handle-r" data-handle="r"></div>
             </div>
 
-            <!-- IN-PLACE DIRECT KEYBOARD INPUT (Ketik langsung di layar) -->
-            <textarea id="inlineTextInput" spellcheck="false" placeholder="Ketik teks di sini (Enter untuk baris baru)..."></textarea>
+            <!-- Inline Direct Text Editor (Memunculkan Keyboard Tanpa Tertutup) -->
+            <div class="inline-text-editor" id="inlineTextEditor">
+                <div class="inline-editor-toolbar">
+                    <button type="button" class="inline-tag-btn" onpointerdown="event.preventDefault(); applyFormatTag('b')"><b>B</b></button>
+                    <button type="button" class="inline-tag-btn" onpointerdown="event.preventDefault(); applyFormatTag('i')"><i>I</i></button>
+                    <button type="button" class="inline-tag-btn" onpointerdown="event.preventDefault(); applyFormatTag('u')"><u>U</u></button>
+                    <button type="button" class="inline-tag-btn" onpointerdown="event.preventDefault(); applyFormatTag('mark')" style="background:#ffeb3b;color:#111;">Stabilo</button>
+                    <button type="button" class="inline-tag-btn" onpointerdown="event.preventDefault(); closeInlineEditor()" style="margin-left:auto;background:#D4AF37;color:#111;">Selesai</button>
+                </div>
+                <textarea class="inline-textarea" id="inlineTextarea" placeholder="Ketik teks di sini (tekan Enter untuk baris baru)..."></textarea>
+            </div>
         </div>
     </main>
 
-    <!-- 3. SLIDE CAROUSEL BAR (MINI THUMBNAIL BAWAH) -->
-    <div class="carousel-bar" id="carouselBar">
-        <div id="slideThumbList" style="display:flex;gap:8px;"></div>
-        <button class="btn-add-slide" onclick="addNewSlide()" title="Tambah Slide Baru">+</button>
-        <button class="btn-dup-slide" onclick="duplicateCurrentSlide()" title="Duplikat Gaya & Elemen Slide Ini">📑 Duplikat Slide</button>
-    </div>
+    <!-- 3. CAROUSEL MULTI-SLIDE BAR (Instagram Slide / Feed) -->
+    <section class="carousel-bar" id="carouselBar">
+        <button class="slide-action-btn" onclick="duplicateCurrentSlide()" title="Duplikat Slide">📋 Duplikat</button>
+        <button class="slide-action-btn" onclick="deleteCurrentSlide()" title="Hapus Slide Ini" style="color:#ff6b6b;border-color:rgba(255,107,107,0.3);">🗑️ Hapus</button>
+        <div id="slideThumbList" style="display:flex;gap:8px;align-items:center;"></div>
+        <button class="slide-add-btn" onclick="addNewSlide()" title="Tambah Slide Baru">+</button>
+    </section>
 
-    <!-- 4. BOTTOM DYNAMIC TOOLBAR (ALA CANVA) -->
-    <nav class="bottom-toolbar-container" id="bottomToolbar">
-        <!-- Akan diisi otomatis sesuai elemen yang sedang dipilih (Teks / PNG / Canvas Kosong) -->
+    <!-- 4. BOTTOM TOOLBAR (Canva-Style Contextual) -->
+    <nav class="bottom-toolbar" id="bottomToolbar">
+        <!-- Akan di-render secara dinamis oleh renderBottomToolbar() sesuai elemen yang aktif -->
     </nav>
 
-    <!-- 5. MODAL POPUP SUB-PANEL KONTROL SPESIFIK -->
-    <div class="tool-panel" id="toolPanel">
-        <div class="panel-header">
-            <span class="panel-title" id="panelTitle">Pengaturan</span>
-            <button class="panel-close" onclick="closeToolPanel()">&times;</button>
-        </div>
-        <div id="panelContent"></div>
+    <!-- 5. FLOATING PROPERTY PANELS (Penyesuaian Font, Ukuran, Posisi, Layer, Efek, dll.) -->
+    <div class="prop-panel" id="propPanel">
+        <!-- Konten panel dibuka dinamis lewat openPanel() -->
     </div>
 
-    <!-- FILE INPUT TRANSPARAN (UPLOAD GAMBAR/PNG) -->
-    <input type="file" id="fileImageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+    <!-- Hidden Input File untuk Unggah Foto/PNG & Skin Teks -->
+    <input type="file" id="fileInputImage" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleImageUpload(event)">
+    <input type="file" id="fileInputSkin" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleSkinUpload(event)">
 
-    <script>
-        /* =========================================================================
-           STUDIO POSTER MAKER - ENGINE CORE & REACTIVE STATE
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- JAVASCRIPT LOGIC ENGINE -->
+    <script> /* =========================================================================
+           STUDIO POSTER MAKER - ENGINE CORE & CACHE STORAGE
            ========================================================================= */
-
-        // UKURAN RESOLUSI STANDAR MEDIA SOSIAL (1080 x Height)
+        const STORAGE_KEY = 'MAKER_STUDIO_CACHE_V2';
         const RATIO_PRESETS = {
             '9:16': { width: 1080, height: 1920, label: '9:16 (Story/Reels)' },
             '4:5':  { width: 1080, height: 1350, label: '4:5 (Feed Portrait)' },
             '1:1':  { width: 1080, height: 1080, label: '1:1 (Feed Kotak)' }
         };
 
-        // DAFTAR FONT LENGKAP
         const FONT_FAMILIES = [
             { name: 'Plus Jakarta Sans', font: "'Plus Jakarta Sans', sans-serif" },
             { name: 'Montserrat Bold', font: "'Montserrat', sans-serif" },
@@ -266,41 +310,104 @@
             { name: 'Cinzel Royal', font: "'Cinzel', serif" }
         ];
 
-        // DAFTAR WARNA CEPAT
-        const QUICK_COLORS = [
-            '#FFFFFF', '#111111', '#D4AF37', '#E6B800', '#FFE259',
-            '#FF4B4B', '#3B82F6', '#10B981', '#8B5CF6', '#F97316',
-            '#6B7280', '#000000'
-        ];
-
-        // STATE APLIKASI
         let currentRatio = '9:16';
         let currentSlideIndex = 0;
-        let slides = []; // Menampung tiap slide carousel
+        let slides = [];
         let activeElementId = null;
         let isEditingText = false;
         let bleedGuidesVisible = false;
+        let bleedSettings = { margin: 5, mode: 'margin', color: '#D4AF37', opacity: 0.5 };
+        let nudgeStep = 10;
 
-        // UNDO / REDO HISTORY ENGINE
+        // Image Memory Cache (Mencegah PNG Hilang Saat Undo/Redo)
+        const imageCache = new Map();
+        function getImageFromCache(src) {
+            if (!src) return null;
+            if (imageCache.has(src)) return imageCache.get(src);
+            const img = new Image();
+            img.src = src;
+            img.onload = () => requestRender();
+            imageCache.set(src, img);
+            return img;
+        }
+
+        // Canvas & Artboard DOM
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        const artboard = document.getElementById('artboardContainer');
+        const selBox = document.getElementById('elementBox');
+        const inlineTextInput = document.getElementById('inlineTextarea');
+        const inlineTextToolbar = document.querySelector('.inline-editor-toolbar');
+
+        // History Undo/Redo Engine
         let historyStack = [];
         let historyIndex = -1;
         const MAX_HISTORY = 30;
 
-        // AUTO-SAVE TIMER & CACHE KEY
-        const STORAGE_KEY = 'dakwah_maker_project_v2';
+        // Auto Save Timer & Render Throttle
         let autoSaveTimer = null;
-
-        // VIEWPORT ZOOM & SCALE
         let canvasScale = 1;
-        const mainCanvas = document.getElementById('mainCanvas');
-        const ctx = mainCanvas.getContext('2d');
-        const artboard = document.getElementById('artboard');
-        const selBox = document.getElementById('selBox');
-        const inlineTextInput = document.getElementById('inlineTextInput');
+        let renderPending = false;
 
-        /* =========================================================================
-           STRUKTUR DATA ELEMEN (TEKS & GAMBAR/PNG)
-           ========================================================================= */
+        function requestRender() {
+            if (!renderPending) {
+                renderPending = true;
+                requestAnimationFrame(() => {
+                    renderPending = false;
+                    renderAll();
+                });
+            }
+        }
+
+        function serializeSlides(slidesList) {
+            return slidesList.map(s => ({
+                ...s,
+                background: {
+                    ...s.background,
+                    imgSrc: s.background.img ? s.background.img.src : (s.background.imgSrc || null),
+                    img: undefined
+                },
+                elements: s.elements.map(el => {
+                    const copy = { ...el };
+                    if (el.type === 'image') {
+                        copy.imgSrc = el.src || (el.img ? el.img.src : copy.imgSrc);
+                        delete copy.img;
+                    }
+                    if (el.textSkinImg) {
+                        copy.textSkinSrc = el.textSkinSrc || el.textSkinImg.src;
+                        delete copy.textSkinImg;
+                    }
+                    return copy;
+                })
+            }));
+        }
+
+        function deserializeSlides(rawSlides) {
+            return rawSlides.map(s => {
+                const bgSrc = s.background.imgSrc || (s.background.img && s.background.img.src);
+                return {
+                    ...s,
+                    background: {
+                        ...s.background,
+                        imgSrc: bgSrc,
+                        img: bgSrc ? getImageFromCache(bgSrc) : null
+                    },
+                    elements: s.elements.map(el => {
+                        const copy = { ...el };
+                        if (copy.type === 'image') {
+                            const src = copy.imgSrc || copy.src;
+                            copy.src = src;
+                            copy.img = src ? getImageFromCache(src) : null;
+                        }
+                        if (copy.textSkinSrc) {
+                            copy.textSkinImg = getImageFromCache(copy.textSkinSrc);
+                        }
+                        return copy;
+                    })
+                };
+            });
+        }
+
         function createDefaultSlide() {
             return {
                 background: {
@@ -482,32 +589,21 @@
                 dot.className = 'save-dot';
                 txt.innerText = 'Tersimpan';
             } else {
-                dot.className = 'save-dot syncing';
+                dot.className = 'save-dot saving';
                 txt.innerText = 'Menyimpan...';
             }
         }
 
         function saveToStorage() {
             try {
-                // Serialisasi tanpa element object DOM
                 const dataToSave = {
                     ratio: currentRatio,
                     slideIndex: currentSlideIndex,
-                    slides: slides.map(s => ({
-                        background: { ...s.background, imgData: s.background.img ? s.background.img.src : null },
-                        elements: s.elements.map(el => {
-                            const copy = { ...el };
-                            if (el.type === 'image' && el.img) {
-                                copy.imgSrc = el.img.src;
-                                delete copy.img;
-                            }
-                            return copy;
-                        })
-                    }))
+                    slides: serializeSlides(slides)
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
             } catch (e) {
-                console.warn("Storage penuh atau tidak tersedia:", e);
+                console.warn("Storage penuh:", e);
             }
         }
 
@@ -521,39 +617,21 @@
                     document.getElementById('currentRatioLabel').innerText = currentRatio;
                 }
                 currentSlideIndex = parsed.slideIndex || 0;
-                slides = parsed.slides.map(s => {
-                    let bgImgObj = null;
-                    if (s.background.imgData) {
-                        bgImgObj = new Image();
-                        bgImgObj.src = s.background.imgData;
-                    }
-                    return {
-                        background: { ...s.background, img: bgImgObj },
-                        elements: s.elements.map(el => {
-                            if (el.type === 'image' && el.imgSrc) {
-                                const imgObj = new Image();
-                                imgObj.src = el.imgSrc;
-                                el.img = imgObj;
-                            }
-                            return el;
-                        })
-                    };
-                });
+                slides = deserializeSlides(parsed.slides || []);
             } catch (e) {
                 console.error("Gagal load storage:", e);
             }
         }
 
-        /* =========================================================================
-           UNDO / REDO ENGINE
-           ========================================================================= */
         function pushHistoryState() {
-            // Potong history depan jika berada di tengah stack
             if (historyIndex < historyStack.length - 1) {
                 historyStack = historyStack.slice(0, historyIndex + 1);
             }
-            // Deep clone slides
-            const state = JSON.stringify({ ratio: currentRatio, currentSlideIndex, slides });
+            const state = JSON.stringify({
+                ratio: currentRatio,
+                currentSlideIndex,
+                slides: serializeSlides(slides)
+            });
             historyStack.push(state);
             if (historyStack.length > MAX_HISTORY) {
                 historyStack.shift();
@@ -580,32 +658,14 @@
         function applyHistoryState(jsonStr) {
             const parsed = JSON.parse(jsonStr);
             currentRatio = parsed.ratio;
-            currentSlideIndex = parsed.currentSlideIndex;
+            currentSlideIndex = Math.min(parsed.currentSlideIndex, parsed.slides.length - 1);
             document.getElementById('currentRatioLabel').innerText = currentRatio;
-            
-            // Reconstruct images
-            slides = parsed.slides.map(s => {
-                let bgImg = null;
-                if (s.background.img && s.background.img.src) {
-                    bgImg = new Image();
-                    bgImg.src = s.background.img.src;
-                }
-                return {
-                    background: { ...s.background, img: bgImg },
-                    elements: s.elements.map(el => {
-                        if (el.type === 'image' && el.img && el.img.src) {
-                            const im = new Image();
-                            im.src = el.img.src;
-                            el.img = im;
-                        }
-                        return el;
-                    })
-                };
-            });
+
+            slides = deserializeSlides(parsed.slides);
 
             adjustArtboardSize();
             updateUndoRedoButtons();
-            renderAll();
+            requestRender();
             renderCarouselThumbs();
             renderBottomToolbar();
             triggerAutoSave();
@@ -643,7 +703,7 @@
             mainCanvas.height = targetH;
 
             // Hitung skala viewport agar pas di layar HP tanpa lag
-            const vp = document.getElementById('workspaceViewport');
+            const vp = document.getElementById('workspace');
             const padding = 20;
             const availW = vp.clientWidth - padding;
             const availH = vp.clientHeight - padding;
@@ -658,14 +718,72 @@
             updateSelectionBox();
         }
 
-        function toggleBleedGuides() {
-            bleedGuidesVisible = !bleedGuidesVisible;
-            document.getElementById('bleedGuides').classList.toggle('visible', bleedGuidesVisible);
+        function openPanelBleed() {
+            bleedGuidesVisible = true;
+            document.getElementById('bleedGuide').classList.add('active');
+            const html = `
+                <div class="prop-row">
+                    <span class="prop-label">Status Garis Bantu:</span>
+                    <button class="btn-nav active" onclick="toggleBleedGuides()">${bleedGuidesVisible ? '👁️ Tampilkan' : '🙈 Sembunyikan'}</button>
+                </div>
+                <div class="prop-row" style="margin-top:10px;">
+                    <span class="prop-label">Margin Tepi (Bleed):</span>
+                    <span class="prop-val" id="bleedMarginVal">${bleedSettings.margin}%</span>
+                </div>
+                <input type="range" class="prop-slider" min="2" max="15" value="${bleedSettings.margin}" oninput="updateBleedMargin(this.value)">
+                
+                <div class="prop-row" style="margin-top:10px;">
+                    <span class="prop-label">Gaya Garis:</span>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:6px;">
+                    <button class="btn-nav ${bleedSettings.mode === 'margin' ? 'active' : ''}" onclick="setBleedMode('margin')">📐 Tepi Aman</button>
+                    <button class="btn-nav ${bleedSettings.mode === 'cross' ? 'active' : ''}" onclick="setBleedMode('cross')">➕ Tengah (50%)</button>
+                    <button class="btn-nav ${bleedSettings.mode === 'both' ? 'active' : ''}" onclick="setBleedMode('both')">✨ Lengkap</button>
+                </div>
+
+                <div class="prop-row" style="margin-top:10px;">
+                    <span class="prop-label">Transparansi Garis:</span>
+                    <span class="prop-val" id="bleedAlphaVal">${Math.round(bleedSettings.opacity * 100)}%</span>
+                </div>
+                <input type="range" class="prop-slider" min="10" max="100" value="${bleedSettings.opacity * 100}" oninput="updateBleedOpacity(this.value)">
+            `;
+            openToolPanel('Garis Bantu & Bleed Cetak', html);
         }
 
-        /* =========================================================================
-           CANVAS RENDER ENGINE (PERFORMA RINGAN 60FPS)
-           ========================================================================= */
+        function toggleBleedGuides() {
+            bleedGuidesVisible = !bleedGuidesVisible;
+            document.getElementById('bleedGuide').classList.toggle('active', bleedGuidesVisible);
+        }
+
+        function updateBleedMargin(val) {
+            bleedSettings.margin = parseInt(val);
+            document.getElementById('bleedMarginVal').innerText = `${val}%`;
+            document.getElementById('bleedGuideT').style.top = `${val}%`;
+            document.getElementById('bleedGuideB').style.bottom = `${val}%`;
+            document.getElementById('bleedGuideL').style.left = `${val}%`;
+            document.getElementById('bleedGuideR').style.right = `${val}%`;
+        }
+
+        function setBleedMode(mode) {
+            bleedSettings.mode = mode;
+            const midH = document.getElementById('bleedCenterH');
+            const midV = document.getElementById('bleedCenterV');
+            if (mode === 'cross' || mode === 'both') {
+                midH.style.display = 'block';
+                midV.style.display = 'block';
+            } else {
+                midH.style.display = 'none';
+                midV.style.display = 'none';
+            }
+            openPanelBleed();
+        }
+
+        function updateBleedOpacity(val) {
+            bleedSettings.opacity = val / 100;
+            document.getElementById('bleedAlphaVal').innerText = `${val}%`;
+            document.getElementById('bleedGuide').style.opacity = bleedSettings.opacity;
+        }
+
         function getCurrentSlide() {
             return slides[currentSlideIndex] || slides[0];
         }
@@ -700,9 +818,7 @@
             });
 
             updateSelectionBox();
-        }
-
-        function renderBackground(bg, W, H) {
+        } function renderBackground(bg, W, H) {
             if (bg.img && bg.img.complete) {
                 ctx.save();
                 if (bg.blur > 0) ctx.filter = `blur(${bg.blur * 2}px)`;
@@ -725,30 +841,83 @@
             }
         }
 
+        // Auto-wrap paragraf mengikuti batas lebar kotak teks
+        function getWrappedLines(ctx, text, maxWidth) {
+            if (!maxWidth || maxWidth <= 0) maxWidth = 700;
+            const paragraphs = text.split('\n');
+            const lines = [];
+
+            for (const para of paragraphs) {
+                if (!para) {
+                    lines.push('');
+                    continue;
+                }
+                const words = para.split(' ');
+                let curLine = '';
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = curLine ? curLine + ' ' + words[i] : words[i];
+                    const cleanTest = testLine.replace(/(\*\*|\*|__|==)/g, '');
+                    const metrics = ctx.measureText(cleanTest);
+                    if (metrics.width > maxWidth && curLine) {
+                        lines.push(curLine);
+                        curLine = words[i];
+                    } else {
+                        curLine = testLine;
+                    }
+                }
+                if (curLine) lines.push(curLine);
+            }
+            return lines;
+        }
+
+        function parseFormattedRuns(rawText) {
+            const regex = /(\*\*.*?\*\*|\*[^*]+?\*|__.*?__|==.*?==)/g;
+            const parts = rawText.split(regex);
+            return parts.filter(p => p.length > 0).map(p => {
+                let bold = false, italic = false, underline = false, highlight = false;
+                let clean = p;
+                if (clean.startsWith('**') && clean.endsWith('**') && clean.length >= 4) {
+                    bold = true; clean = clean.slice(2, -2);
+                } else if (clean.startsWith('*') && clean.endsWith('*') && clean.length >= 2) {
+                    italic = true; clean = clean.slice(1, -1);
+                } else if (clean.startsWith('__') && clean.endsWith('__') && clean.length >= 4) {
+                    underline = true; clean = clean.slice(2, -2);
+                } else if (clean.startsWith('==') && clean.endsWith('==') && clean.length >= 4) {
+                    highlight = true; clean = clean.slice(2, -2);
+                }
+                return { text: clean, bold, italic, underline, highlight };
+            });
+        }
+
         function renderTextElement(el) {
-            const lines = el.text.split('\n');
+            ctx.save();
+            ctx.translate(el.x, el.y);
+
+            if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
+            if (el.italicSlant) {
+                const rad = (el.italicSlant * Math.PI) / 180;
+                ctx.transform(1, 0, Math.tan(rad), 1, 0, 0);
+            }
+
             const fontSize = el.fontSize;
             const lineHeight = fontSize * (el.lineHeight || 1.3);
-
-            ctx.font = `${el.fontStyle || 'normal'} ${el.fontWeight || 'normal'} ${fontSize}px ${el.fontFamily}`;
+            const baseFont = `${el.fontStyle || 'normal'} ${el.fontWeight || 'normal'} ${fontSize}px "${el.fontFamily}"`;
+            ctx.font = baseFont;
             ctx.textAlign = el.textAlign || 'center';
-            ctx.textBaseline = 'top';
+            ctx.textBaseline = 'middle';
 
-            // Hitung bounding tinggi
+            const maxBoxWidth = el.width || 750;
+            const lines = getWrappedLines(ctx, el.text, maxBoxWidth);
             const totalHeight = lines.length * lineHeight;
-            let startY = el.y - (totalHeight / 2);
+            el._calculatedHeight = totalHeight;
 
-            // Gambar Shadow
-            if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                ctx.shadowColor = el.shadow.color;
-                ctx.shadowBlur = el.shadow.blur || 0;
-                const rad = (el.shadow.angle || 45) * Math.PI / 180;
-                const dist = el.shadow.distance || 0;
-                ctx.shadowOffsetX = Math.cos(rad) * dist;
-                ctx.shadowOffsetY = Math.sin(rad) * dist;
-            } else {
-                ctx.shadowColor = 'transparent';
+            if (el.curveAngle && Math.abs(el.curveAngle) > 2 && lines.length === 1) {
+                renderCurvedTextLine(el, lines[0], baseFont);
+                ctx.restore();
+                return;
             }
+
+            let startY = -(totalHeight / 2) + (lineHeight / 2);
 
             lines.forEach((lineText, idx) => {
                 let displayLine = lineText;
@@ -759,66 +928,159 @@
                 }
 
                 const lineY = startY + (idx * lineHeight);
+                const runs = parseFormattedRuns(displayLine);
 
-                // Stabilo / Highlight Box
+                let totalLineWidth = 0;
+                runs.forEach(r => {
+                    ctx.font = `${r.italic ? 'italic' : (el.fontStyle || 'normal')} ${r.bold ? '900' : (el.fontWeight || 'normal')} ${fontSize}px "${el.fontFamily}"`;
+                    totalLineWidth += ctx.measureText(r.text).width;
+                });
+
+                let startX = -(totalLineWidth / 2);
+                if (el.textAlign === 'left') startX = -(maxBoxWidth / 2);
+                else if (el.textAlign === 'right') startX = (maxBoxWidth / 2) - totalLineWidth;
+
                 if (el.highlightColor && el.highlightColor !== 'transparent') {
-                    const textMetrics = ctx.measureText(displayLine);
-                    const padX = 14;
-                    const padY = 4;
-                    let boxX = el.x - (textMetrics.width / 2) - padX;
-                    if (el.textAlign === 'left') boxX = el.x - padX;
-                    if (el.textAlign === 'right') boxX = el.x - textMetrics.width - padX;
-
                     ctx.save();
-                    ctx.shadowColor = 'transparent';
                     ctx.fillStyle = el.highlightColor;
                     ctx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.4);
                     ctx.beginPath();
-                    ctx.roundRect(boxX, lineY - padY, textMetrics.width + (padX * 2), lineHeight, 8);
+                    ctx.roundRect(startX - 12, lineY - (lineHeight / 2) + 2, totalLineWidth + 24, lineHeight - 4, 8);
                     ctx.fill();
                     ctx.restore();
                 }
 
-                ctx.fillStyle = el.color || '#fff';
-                ctx.fillText(displayLine, el.x, lineY);
-
-                // Garis Bawah
-                if (el.textDecoration === 'underline') {
-                    const m = ctx.measureText(displayLine);
-                    let lineStartX = el.x - (m.width / 2);
-                    if (el.textAlign === 'left') lineStartX = el.x;
-                    if (el.textAlign === 'right') lineStartX = el.x - m.width;
-
+                let curX = startX;
+                runs.forEach(run => {
                     ctx.save();
-                    ctx.lineWidth = Math.max(2, Math.round(fontSize * 0.06));
-                    ctx.strokeStyle = el.color || '#fff';
-                    ctx.beginPath();
-                    ctx.moveTo(lineStartX, lineY + fontSize + 4);
-                    ctx.lineTo(lineStartX + m.width, lineY + fontSize + 4);
-                    ctx.stroke();
+                    ctx.font = `${run.italic ? 'italic' : (el.fontStyle || 'normal')} ${run.bold ? '900' : (el.fontWeight || 'normal')} ${fontSize}px "${el.fontFamily}"`;
+                    ctx.textAlign = 'left';
+                    const runMetrics = ctx.measureText(run.text);
+                    const runW = runMetrics.width;
+
+                    if (run.highlight) {
+                        ctx.save();
+                        ctx.fillStyle = el.highlightColor || '#FFE259';
+                        ctx.globalAlpha = 0.5;
+                        ctx.beginPath();
+                        ctx.roundRect(curX - 4, lineY - (lineHeight / 2) + 4, runW + 8, lineHeight - 8, 4);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
+                        ctx.shadowColor = el.shadow.color;
+                        ctx.shadowBlur = el.shadow.blur || 0;
+                        const rad = (el.shadow.angle || 45) * Math.PI / 180;
+                        const dist = el.shadow.distance || 0;
+                        ctx.shadowOffsetX = Math.cos(rad) * dist;
+                        ctx.shadowOffsetY = Math.sin(rad) * dist;
+                    }
+
+                    if (el.textSkinImg && el.textSkinImg.complete) {
+                        drawTextWithSkinImage(ctx, run.text, curX, lineY, el);
+                    } else {
+                        ctx.fillStyle = el.color || '#fff';
+                        ctx.fillText(run.text, curX, lineY);
+
+                        if (el.borderWidth && el.borderWidth > 0) {
+                            ctx.lineWidth = el.borderWidth * 2;
+                            ctx.strokeStyle = el.borderColor || '#D4AF37';
+                            if (el.borderBlur) ctx.filter = `blur(${el.borderBlur}px)`;
+                            ctx.strokeText(run.text, curX, lineY);
+                        }
+                    }
+
+                    if (el.underline || run.underline) {
+                        ctx.save();
+                        ctx.strokeStyle = el.color || '#fff';
+                        ctx.lineWidth = Math.max(2, fontSize * 0.06);
+                        ctx.beginPath();
+                        ctx.moveTo(curX, lineY + (fontSize * 0.45));
+                        ctx.lineTo(curX + runW, lineY + (fontSize * 0.45));
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
                     ctx.restore();
-                }
+                    curX += runW;
+                });
             });
 
-            // Simpan bounding box kalkulasi untuk seleksi
-            el._calculatedHeight = totalHeight;
+            ctx.restore();
+        }
+
+        // Teks melengkung keluar / ke dalam
+        function renderCurvedTextLine(el, text, font) {
+            const angleRad = (el.curveAngle * Math.PI) / 180;
+            const len = text.length;
+            const radius = Math.max(100, (el.width || 600) / Math.abs(angleRad));
+            const arcDirection = el.curveAngle > 0 ? 1 : -1;
+
+            ctx.save();
+            ctx.font = font;
+            ctx.fillStyle = el.color || '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const startAngle = -angleRad / 2;
+            const stepAngle = angleRad / (len - 1 || 1);
+
+            for (let i = 0; i < len; i++) {
+                const ch = text[i];
+                const curA = startAngle + (i * stepAngle);
+                ctx.save();
+                ctx.rotate(curA);
+                ctx.translate(0, -arcDirection * radius);
+                if (arcDirection < 0) ctx.rotate(Math.PI);
+                ctx.fillText(ch, 0, 0);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        // Teks motif gambar/api CorelDraw style
+        function drawTextWithSkinImage(targetCtx, text, x, y, el) {
+            const offscreen = document.createElement('canvas');
+            offscreen.width = mainCanvas.width;
+            offscreen.height = mainCanvas.height;
+            const octx = offscreen.getContext('2d');
+
+            octx.font = targetCtx.font;
+            octx.textAlign = 'left';
+            octx.textBaseline = 'middle';
+            octx.fillStyle = '#000';
+            octx.fillText(text, x, y);
+
+            octx.globalCompositeOperation = 'source-in';
+            const skin = el.textSkinImg;
+            const scale = el.textSkinScale || 1.0;
+            const sw = skin.width * scale;
+            const sh = skin.height * scale;
+            const sx = x + (el.textSkinOffsetX || 0) - (sw / 4);
+            const sy = y + (el.textSkinOffsetY || 0) - (sh / 4);
+            octx.drawImage(skin, sx, sy, sw, sh);
+
+            targetCtx.drawImage(offscreen, 0, 0);
         }
 
         function renderImageElement(el) {
-            if (!el.img || !el.img.complete) return;
+            if (!el.img || !el.img.complete) {
+                if (el.src || el.imgSrc) {
+                    el.img = getImageFromCache(el.src || el.imgSrc);
+                }
+                if (!el.img || !el.img.complete) return;
+            }
 
-            const w = el.width;
-            const h = el.height;
-            const x = el.x - (w / 2);
-            const y = el.y - (h / 2);
+            const w = el.width || 300;
+            const h = el.height || 300;
 
             ctx.save();
             ctx.translate(el.x, el.y);
 
-            // Cermin / Flip Horizontal & Vertikal
+            if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
             ctx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
 
-            // Bayangan Gambar
             if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
                 ctx.shadowColor = el.shadow.color;
                 ctx.shadowBlur = el.shadow.blur || 0;
@@ -828,7 +1090,6 @@
                 ctx.shadowOffsetY = Math.sin(rad) * dist;
             }
 
-            // Kelengkungan Sudut (Border Radius) & Border Stroke
             const radius = el.cornerRadius || 0;
             ctx.beginPath();
             ctx.roundRect(-w / 2, -h / 2, w, h, radius);
@@ -836,19 +1097,16 @@
 
             ctx.drawImage(el.img, -w / 2, -h / 2, w, h);
 
-            // Garis Tepi (Stroke Outline)
             if (el.borderWidth && el.borderWidth > 0 && el.borderColor) {
                 ctx.lineWidth = el.borderWidth * 2;
                 ctx.strokeStyle = el.borderColor;
+                if (el.borderBlur) ctx.filter = `blur(${el.borderBlur}px)`;
                 ctx.stroke();
             }
 
             ctx.restore();
         }
 
-        /* =========================================================================
-           SELEKSI & BOUNDING BOX (CANVA & PIXELLAB STYLE)
-           ========================================================================= */
         function selectElement(elId) {
             activeElementId = elId;
             updateSelectionBox();
@@ -914,8 +1172,8 @@
             isEditingText = true;
             selBox.classList.remove('active');
 
-            const domW = Math.max(260, (el.width || 300) * canvasScale);
-            const domH = Math.max(100, ((el._calculatedHeight || 120) * canvasScale) + 30);
+            const domW = Math.max(280, (el.width || 750) * canvasScale);
+            const domH = Math.max(120, ((el._calculatedHeight || 120) * canvasScale) + 40);
             const domX = Math.max(10, (el.x * canvasScale) - (domW / 2));
             const domY = Math.max(10, (el.y * canvasScale) - (domH / 2));
 
@@ -925,19 +1183,60 @@
             inlineTextInput.style.top = `${domY}px`;
             inlineTextInput.value = el.text;
             inlineTextInput.style.display = 'block';
+            inlineTextToolbar.classList.add('active');
 
-            // Buka keyboard otomatis di HP
             setTimeout(() => {
                 inlineTextInput.focus();
                 inlineTextInput.setSelectionRange(el.text.length, el.text.length);
-            }, 50);
+            }, 60);
         }
 
         function closeInlineTextEditor() {
             if (!isEditingText) return;
             isEditingText = false;
             inlineTextInput.style.display = 'none';
-            renderAll();
+            inlineTextToolbar.classList.remove('active');
+            requestRender();
+            pushHistoryState();
+        }
+
+        function applyFormatToSelection(tagOpen, tagClose) {
+            const start = inlineTextInput.selectionStart;
+            const end = inlineTextInput.selectionEnd;
+            const val = inlineTextInput.value;
+            if (start === end) return;
+
+            const selected = val.substring(start, end);
+            const before = val.substring(0, start);
+            const after = val.substring(end);
+            inlineTextInput.value = before + tagOpen + selected + tagClose + after;
+            inlineTextInput.selectionStart = start + tagOpen.length;
+            inlineTextInput.selectionEnd = end + tagOpen.length;
+
+            const el = getActiveElement();
+            if (el) {
+                el.text = inlineTextInput.value;
+                requestRender();
+            }
+        }
+
+        function toggleCaseSelection() {
+            const start = inlineTextInput.selectionStart;
+            const end = inlineTextInput.selectionEnd;
+            const val = inlineTextInput.value;
+            if (start === end) return;
+
+            const selected = val.substring(start, end);
+            const transformed = selected === selected.toUpperCase() ? selected.toLowerCase() : selected.toUpperCase();
+            inlineTextInput.value = val.substring(0, start) + transformed + val.substring(end);
+            inlineTextInput.selectionStart = start;
+            inlineTextInput.selectionEnd = end;
+
+            const el = getActiveElement();
+            if (el) {
+                el.text = inlineTextInput.value;
+                requestRender();
+            }
         }
 
         /* =========================================================================
@@ -955,14 +1254,14 @@
         }
 
         function handleViewportClick(e) {
-            if (e.target.id === 'workspaceViewport') {
+            if (e.target.id === 'workspace') {
                 deselectElement();
             }
         }
 
         function handleArtboardPointerDown(e) {
             // Cek jika klik pada handle resize
-            if (e.target.classList.contains('sel-handle') || e.target.classList.contains('sel-handle-edge')) {
+            if (e.target.classList.contains('handle')) {
                 dragMode = 'resize-handle';
                 activeHandle = e.target.dataset.handle;
                 startPointer = { x: e.clientX, y: e.clientY };
@@ -989,7 +1288,7 @@
             }
 
             if (hitEl) {
-                // Deteksi double tap / klik kedua untuk edit keyboard
+                // Deteksi klik kedua untuk edit keyboard
                 if (activeElementId === hitEl.id && hitEl.type === 'text') {
                     openInlineTextEditor(hitEl);
                     return;
@@ -1022,28 +1321,26 @@
             const deltaY = (e.clientY - startPointer.y) / canvasScale;
 
             if (dragMode === 'move') {
-                el.x = Math.round(startElementState.x + deltaX);
-                el.y = Math.round(startElementState.y + deltaY);
+                el.x = startElementState.x + deltaX;
+                el.y = startElementState.y + deltaY;
 
-                // Jika elemen tergabung dalam grup, geser anggota grup lainnya
                 if (el.groupId) {
                     const s = getCurrentSlide();
                     s.elements.forEach(other => {
                         if (other.groupId === el.groupId && other.id !== el.id) {
                             if (!other._startGroupPos) other._startGroupPos = { x: other.x, y: other.y };
-                            other.x = Math.round(other._startGroupPos.x + deltaX);
-                            other.y = Math.round(other._startGroupPos.y + deltaY);
+                            other.x = other._startGroupPos.x + deltaX;
+                            other.y = other._startGroupPos.y + deltaY;
                         }
                     });
                 }
-                renderAll();
+                requestRender();
             } else if (dragMode === 'resize-handle') {
-                // RESIZE PROPORSIONAL ASLI (TANPA MELEYOT) JIKA DI TARIK SUDUT
-                if (activeHandle === 'br' || activeHandle === 'bl' || activeHandle === 'tr' || activeHandle === 'tl') {
+                if (['br', 'bl', 'tr', 'tl'].includes(activeHandle)) {
                     let factor = 1 + (deltaX / (startElementState.width || 300));
                     if (activeHandle === 'bl' || activeHandle === 'tl') factor = 1 - (deltaX / (startElementState.width || 300));
-
                     factor = Math.max(0.2, factor);
+
                     if (el.type === 'text') {
                         el.fontSize = Math.round(startElementState.fontSize * factor);
                         el.width = Math.round(startElementState.width * factor);
@@ -1052,29 +1349,31 @@
                         el.height = Math.round(startElementState.height * factor);
                     }
                 } else if (activeHandle === 'r' || activeHandle === 'l') {
-                    // Lebarkan teks / PNG ke samping
                     const sign = activeHandle === 'r' ? 1 : -1;
                     el.width = Math.max(120, Math.round(startElementState.width + (deltaX * 2 * sign)));
                 } else if (activeHandle === 'b' || activeHandle === 't') {
+                    const sign = activeHandle === 'b' ? 1 : -1;
                     if (el.type === 'image') {
-                        const sign = activeHandle === 'b' ? 1 : -1;
-                        el.height = Math.max(50, Math.round(startElementState.height + (deltaY * 2 * sign)));
+                        el.height = Math.max(40, Math.round(startElementState.height + (deltaY * 2 * sign)));
                     }
                 }
-                renderAll();
+                requestRender();
             }
         }
 
         function handleWindowPointerUp() {
             if (dragMode) {
                 dragMode = null;
+                const el = getActiveElement();
+                if (el) {
+                    el.x = Math.round(el.x);
+                    el.y = Math.round(el.y);
+                }
                 const s = getCurrentSlide();
-                s.elements.forEach(el => delete el._startGroupPos);
+                s.elements.forEach(other => delete other._startGroupPos);
                 pushHistoryState();
             }
-        }
-
-        /* =========================================================================
+        } /* =========================================================================
            DYNAMIC BOTTOM TOOLBAR (ALA CANVA)
            ========================================================================= */
         function renderBottomToolbar() {
@@ -1082,107 +1381,49 @@
             const el = getActiveElement();
 
             if (!el) {
-                // Toolbar Saat Tidak Ada Elemen yang Dipilih (Menu Desain Keseluruhan)
                 bar.innerHTML = `
-                    <button class="tool-btn" onclick="addNewText()">
-                        <span class="icon">➕📝</span><span>Teks</span>
-                    </button>
-                    <button class="tool-btn" onclick="triggerImageUpload()">
-                        <span class="icon">➕🖼️</span><span>Foto/PNG</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelBackground()">
-                        <span class="icon">🎨</span><span>Background</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelLayers()">
-                        <span class="icon">📑</span><span>Lapisan</span>
-                    </button>
-                    <button class="tool-btn" onclick="toggleBleedGuides()">
-                        <span class="icon">📐</span><span>Garis Bantu</span>
-                    </button>
+                    <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
+                    <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
+                    <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
+                    <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">📑</span><span>Lapisan</span></button>
+                    <button class="tool-btn" onclick="openPanelBleed()"><span class="icon">📐</span><span>Garis Bantu</span></button>
                 `;
             } else if (el.type === 'text') {
-                // Toolbar Khusus Teks
                 bar.innerHTML = `
-                    <button class="tool-btn" onclick="openInlineTextEditor(getActiveElement())">
-                        <span class="icon">✏️</span><span>Edit Teks</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelFontFamily()">
-                        <span class="icon">🔤</span><span>Font</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelFontSize()">
-                        <span class="icon">📏</span><span>Ukuran</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelTextColor()">
-                        <span class="icon">🎨</span><span>Warna</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelTextFormat()">
-                        <span class="icon"><b>B</b><i>I</i><u>U</u></span><span>Format</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelHighlight()">
-                        <span class="icon">🖍️</span><span>Stabilo</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelSpacing()">
-                        <span class="icon">↔️</span><span>Jarak Baris</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelPosition()">
-                        <span class="icon">🎯</span><span>Posisi</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelLayerOrder()">
-                        <span class="icon">🥞</span><span>Lapisan</span>
-                    </button>
-                    <button class="tool-btn" onclick="toggleElementLock()">
-                        <span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka Kunci' : 'Kunci'}</span>
-                    </button>
-                    <button class="tool-btn" onclick="duplicateActiveElement()">
-                        <span class="icon">📑</span><span>Duplikat</span>
-                    </button>
-                    <button class="tool-btn" onclick="toggleGroupElement()">
-                        <span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah Grup' : 'Gabung'}</span>
-                    </button>
-                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;">
-                        <span class="icon">🗑️</span><span>Hapus</span>
-                    </button>
+                    <button class="tool-btn" onclick="openInlineTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit Teks</span></button>
+                    <button class="tool-btn" onclick="openPanelFontFamily()"><span class="icon">🔤</span><span>Font</span></button>
+                    <button class="tool-btn" onclick="openPanelFontSize()"><span class="icon">📏</span><span>Ukuran</span></button>
+                    <button class="tool-btn" onclick="openPanelTextColor()"><span class="icon">🎨</span><span>Warna</span></button>
+                    <button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Foto</span></button>
+                    <button class="tool-btn" onclick="openPanelCurveAndSlant()"><span class="icon">🌀</span><span>Lengkung & Miring</span></button>
+                    <button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i><u>U</u></span><span>Format</span></button>
+                    <button class="tool-btn" onclick="openPanelHighlight()"><span class="icon">🖍️</span><span>Stabilo</span></button>
+                    <button class="tool-btn" onclick="openPanelShadowAndGlass()"><span class="icon">👥</span><span>Bayangan</span></button>
+                    <button class="tool-btn" onclick="openPanelSpacing()"><span class="icon">↔️</span><span>Jarak Baris</span></button>
+                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi & D-Pad</span></button>
+                    <button class="tool-btn" onclick="openPanelLayerOrder()"><span class="icon">🥞</span><span>Lapisan</span></button>
+                    <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka' : 'Kunci'}</span></button>
+                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
+                    <button class="tool-btn" onclick="toggleGroupElement()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah' : 'Gabung'}</span></button>
+                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
                 `;
             } else if (el.type === 'image') {
-                // Toolbar Khusus Gambar / PNG
                 bar.innerHTML = `
-                    <button class="tool-btn" onclick="openPanelImageFlip()">
-                        <span class="icon">🪞</span><span>Cermin</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelImageBorder()">
-                        <span class="icon">🔲</span><span>Garis Tepi</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelImageShadow()">
-                        <span class="icon">👥</span><span>Bayangan</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelImageOpacity()">
-                        <span class="icon">🏁</span><span>Transparansi</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelPosition()">
-                        <span class="icon">🎯</span><span>Posisi</span>
-                    </button>
-                    <button class="tool-btn" onclick="openPanelLayerOrder()">
-                        <span class="icon">🥞</span><span>Lapisan</span>
-                    </button>
-                    <button class="tool-btn" onclick="toggleElementLock()">
-                        <span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka Kunci' : 'Kunci'}</span>
-                    </button>
-                    <button class="tool-btn" onclick="duplicateActiveElement()">
-                        <span class="icon">📑</span><span>Duplikat</span>
-                    </button>
-                    <button class="tool-btn" onclick="toggleGroupElement()">
-                        <span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah Grup' : 'Gabung'}</span>
-                    </button>
-                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;">
-                        <span class="icon">🗑️</span><span>Hapus</span>
-                    </button>
+                    <button class="tool-btn" onclick="openPanelImageSize()"><span class="icon">📏</span><span>Ukuran/Size</span></button>
+                    <button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon">🪞</span><span>Cermin</span></button>
+                    <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis Tepi & Blur</span></button>
+                    <button class="tool-btn" onclick="openPanelShadowAndGlass()"><span class="icon">👥</span><span>Bayangan</span></button>
+                    <button class="tool-btn" onclick="openPanelImageOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
+                    <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi & D-Pad</span></button>
+                    <button class="tool-btn" onclick="openPanelLayerOrder()"><span class="icon">🥞</span><span>Lapisan</span></button>
+                    <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked ? '🔒' : '🔓'}</span><span>${el.locked ? 'Buka' : 'Kunci'}</span></button>
+                    <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
+                    <button class="tool-btn" onclick="toggleGroupElement()"><span class="icon">${el.groupId ? '🔗' : '⛓️'}</span><span>${el.groupId ? 'Pisah' : 'Gabung'}</span></button>
+                    <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
                 `;
             }
         }
 
-        /* =========================================================================
-           POPUP PANEL KONTROL MODULAR
-           ========================================================================= */
         function openToolPanel(title, htmlContent) {
             document.getElementById('panelTitle').innerText = title;
             document.getElementById('panelContent').innerHTML = htmlContent;
@@ -1220,7 +1461,7 @@
             const html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Ukuran Teks:</span>
-                    <input type="range" class="ctrl-slider" min="14" max="220" value="${el.fontSize}" oninput="updateFontSize(this.value)">
+                    <input type="range" class="range-slider" min="14" max="220" value="${el.fontSize}" oninput="updateFontSize(this.value)">
                     <span class="ctrl-val" id="valFontSize">${el.fontSize}px</span>
                 </div>
             `;
@@ -1323,7 +1564,7 @@
             let html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Transparansi:</span>
-                    <input type="range" class="ctrl-slider" min="0" max="100" value="${Math.round((el.highlightAlpha || 0.4) * 100)}" oninput="updateHighlightAlpha(this.value)">
+                    <input type="range" class="range-slider" min="0" max="100" value="${Math.round((el.highlightAlpha || 0.4) * 100)}" oninput="updateHighlightAlpha(this.value)">
                     <span class="ctrl-val" id="valHiAlpha">${Math.round((el.highlightAlpha || 0.4) * 100)}%</span>
                 </div>
                 <span class="ctrl-label" style="margin-top:6px;display:block;">Warna Stabilo:</span>
@@ -1354,7 +1595,7 @@
             const html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Jarak Baris:</span>
-                    <input type="range" class="ctrl-slider" min="90" max="250" value="${Math.round((el.lineHeight || 1.3) * 100)}" oninput="updateLineHeight(this.value)">
+                    <input type="range" class="range-slider" min="90" max="250" value="${Math.round((el.lineHeight || 1.3) * 100)}" oninput="updateLineHeight(this.value)">
                     <span class="ctrl-val" id="valLineHeight">${(el.lineHeight || 1.3).toFixed(1)}</span>
                 </div>
             `;
@@ -1367,58 +1608,410 @@
             renderAll(); triggerAutoSave();
         }
 
-        // 7. POSISI PRESISI & ALIGNMENT SUDUT
-        function openPanelPosition() {
+        // 7. UKURAN GAMBAR / PNG
+        function openPanelImageSize() {
             const el = getActiveElement();
+            if (!el || el.type !== 'image') return;
+
             const html = `
-                <div class="ctrl-grid-btns">
-                    <button class="btn-sub-tool" onclick="setAlignPosition('top-left')">↖️ Kiri Atas</button>
-                    <button class="btn-sub-tool" onclick="setAlignPosition('top')">⬆️ Atas</button>
-                    <button class="btn-sub-tool" onclick="setAlignPosition('top-right')">↗️ Kanan Atas</button>
-                    <button class="btn-sub-tool" onclick="setAlignPosition('left')">⬅️ Kiri</button>
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Lebar (Width):</span>
+                    <span class="ctrl-val" id="imgWVal">${Math.round(el.width)} px</span>
+                </div>
+                <input type="range" class="range-slider" min="50" max="1500" value="${el.width}" oninput="updateImageDim('w', this.value)">
+
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Tinggi (Height):</span>
+                    <span class="ctrl-val" id="imgHVal">${Math.round(el.height)} px</span>
+                </div>
+                <input type="range" class="range-slider" min="50" max="1500" value="${el.height}" oninput="updateImageDim('h', this.value)">
+
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Skala Proporsional (+/-):</span>
                 </div>
                 <div class="ctrl-grid-btns" style="margin-top:6px;">
-                    <button class="btn-sub-tool" onclick="setAlignPosition('center')">🎯 Tengah Pas</button>
-                    <button class="btn-sub-tool" onclick="setAlignPosition('right')">➡️ Kanan</button>
-                    <button class="btn-sub-tool" onclick="setAlignPosition('bottom-left')">↙️ Kiri Bawah</button>
-                    <button class="btn-sub-tool" onclick="setAlignPosition('bottom')">⬇️ Bawah</button>
-                </div>
-                <div class="ctrl-row" style="margin-top:10px;">
-                    <span class="ctrl-label">Geser Manual:</span>
-                    <button class="btn-sub-tool" onclick="nudgeElement(0, -10)">⬆️ -10px</button>
-                    <button class="btn-sub-tool" onclick="nudgeElement(0, 10)">⬇️ +10px</button>
-                    <button class="btn-sub-tool" onclick="nudgeElement(-10, 0)">⬅️ -10px</button>
-                    <button class="btn-sub-tool" onclick="nudgeElement(10, 0)">➡️ +10px</button>
+                    <button class="btn-sub-tool" onclick="scaleImageRelative(0.8)">➖ Kecilkan (-20%)</button>
+                    <button class="btn-sub-tool" onclick="scaleImageRelative(1.2)">➕ Besarkan (+20%)</button>
+                    <button class="btn-sub-tool" onclick="fitImageWidth()">📐 Pas Lebar</button>
+                    <button class="btn-sub-tool" onclick="resetImageRatio()">↺ Reset Asli</button>
                 </div>
             `;
-            openToolPanel('Atur Posisi Presisi', html);
+            openToolPanel('Ukuran PNG & Foto', html);
         }
-        function setAlignPosition(pos) {
+
+        function updateImageDim(dim, val) {
             const el = getActiveElement();
-            const W = mainCanvas.width;
-            const H = mainCanvas.height;
-            const halfW = (el.width || 200) / 2;
-            const halfH = ((el._calculatedHeight || el.height || 100)) / 2;
-            const margin = 80;
-
-            if (pos === 'top-left') { el.x = halfW + margin; el.y = halfH + margin; }
-            else if (pos === 'top') { el.x = W / 2; el.y = halfH + margin; }
-            else if (pos === 'top-right') { el.x = W - halfW - margin; el.y = halfH + margin; }
-            else if (pos === 'left') { el.x = halfW + margin; el.y = H / 2; }
-            else if (pos === 'center') { el.x = W / 2; el.y = H / 2; }
-            else if (pos === 'right') { el.x = W - halfW - margin; el.y = H / 2; }
-            else if (pos === 'bottom-left') { el.x = halfW + margin; el.y = H - halfH - margin; }
-            else if (pos === 'bottom') { el.x = W / 2; el.y = H - halfH - margin; }
-
-            renderAll(); pushHistoryState();
+            if (!el) return;
+            if (dim === 'w') {
+                el.width = parseInt(val);
+                document.getElementById('imgWVal').innerText = `${val} px`;
+            } else {
+                el.height = parseInt(val);
+                document.getElementById('imgHVal').innerText = `${val} px`;
+            }
+            requestRender();
+            pushHistoryState();
         }
+
+        function scaleImageRelative(factor) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.width = Math.round(el.width * factor);
+            el.height = Math.round(el.height * factor);
+            requestRender();
+            pushHistoryState();
+            openPanelImageSize();
+        }
+
+        function fitImageWidth() {
+            const el = getActiveElement();
+            if (!el) return;
+            const ratio = (el.height || 300) / (el.width || 300);
+            el.width = mainCanvas.width * 0.9;
+            el.height = el.width * ratio;
+            el.x = mainCanvas.width / 2;
+            requestRender();
+            pushHistoryState();
+            openPanelImageSize();
+        }
+
+        function resetImageRatio() {
+            const el = getActiveElement();
+            if (!el || !el.img) return;
+            el.width = Math.min(el.img.width, 600);
+            el.height = el.width * (el.img.height / el.img.width);
+            requestRender();
+            pushHistoryState();
+            openPanelImageSize();
+        }
+
+        // 8. POSISI PRESISI 3x3 & JOYSTICK D-PAD
+        function openPanelPosition() {
+            const el = getActiveElement();
+            if (!el) return;
+
+            const html = `
+                <div style="font-size:11px;color:#aaa;font-weight:700;margin-bottom:6px;">TITIK ALIGN PRESISI</div>
+                <div class="pos-grid-3x3">
+                    <button class="btn-pos-cell" onclick="setAlignPosition('top-left')">↖️ Kiri Atas</button>
+                    <button class="btn-pos-cell" onclick="setAlignPosition('top')">⬆️ Atas</button>
+                    <button class="btn-pos-cell" onclick="setAlignPosition('top-right')">↗️ Kanan Atas</button>
+
+                    <button class="btn-pos-cell" onclick="setAlignPosition('left')">⬅️ Kiri</button>
+                    <button class="btn-pos-cell active" onclick="setAlignPosition('center')">🎯 Tengah</button>
+                    <button class="btn-pos-cell" onclick="setAlignPosition('right')">➡️ Kanan</button>
+
+                    <button class="btn-pos-cell" onclick="setAlignPosition('bottom-left')">↙️ Kiri Bawah</button>
+                    <button class="btn-pos-cell" onclick="setAlignPosition('bottom')">⬇️ Bawah</button>
+                    <button class="btn-pos-cell" onclick="setAlignPosition('bottom-right')">↘️ Kanan Bawah</button>
+                </div>
+
+                <div style="font-size:11px;color:#aaa;font-weight:700;margin:12px 0 6px;">JOYSTICK GESER MANUAL</div>
+                <div class="dpad-container">
+                    <button class="dpad-btn" onclick="nudgeElement(0, -nudgeStep)">▲</button>
+                    <div class="dpad-row">
+                        <button class="dpad-btn" onclick="nudgeElement(-nudgeStep, 0)">◀</button>
+                        <div class="dpad-center" id="posCoordLabel">X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}</div>
+                        <button class="dpad-btn" onclick="nudgeElement(nudgeStep, 0)">▶</button>
+                    </div>
+                    <button class="dpad-btn" onclick="nudgeElement(0, nudgeStep)">▼</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Langkah Geser:</span>
+                    <span class="ctrl-val" id="nudgeStepLabel">${nudgeStep} px</span>
+                </div>
+                <input type="range" class="range-slider" min="1" max="50" value="${nudgeStep}" oninput="setNudgeStep(this.value)">
+                <div class="ctrl-grid-btns" style="margin-top:6px;">
+                    <button class="btn-sub-tool" onclick="setNudgeStep(1)">1px (Ultra)</button>
+                    <button class="btn-sub-tool" onclick="setNudgeStep(5)">5px</button>
+                    <button class="btn-sub-tool" onclick="setNudgeStep(10)">10px (Normal)</button>
+                    <button class="btn-sub-tool" onclick="setNudgeStep(25)">25px</button>
+                </div>
+            `;
+            openToolPanel('Posisi & Joystick Geser', html);
+        }
+
+        function setNudgeStep(v) {
+            nudgeStep = parseInt(v);
+            const lbl = document.getElementById('nudgeStepLabel');
+            if (lbl) lbl.innerText = `${nudgeStep} px`;
+        }
+
         function nudgeElement(dx, dy) {
             const el = getActiveElement();
-            if (el) { el.x += dx; el.y += dy; renderAll(); pushHistoryState(); }
+            if (!el || el.locked) return;
+            el.x += dx;
+            el.y += dy;
+            const coord = document.getElementById('posCoordLabel');
+            if (coord) coord.innerHTML = `X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}`;
+            requestRender();
+            pushHistoryState();
         }
 
-        // 8. PENGURUTAN LAPISAN LAYER (PALING DEPAN / BELAKANG / PINDAH SATUAN)
-        function openPanelLayerOrder() {
+        function setAlignPosition(pos) {
+            const el = getActiveElement();
+            if (!el || el.locked) return;
+            const W = mainCanvas.width;
+            const H = mainCanvas.height;
+            const elW = el.type === 'text' ? (el.width || 750) : (el.width || 300);
+            const elH = el.type === 'text' ? (el._calculatedHeight || 120) : (el.height || 300);
+            const pad = 60;
+
+            switch (pos) {
+                case 'top-left': el.x = pad + (elW / 2); el.y = pad + (elH / 2); break;
+                case 'top': el.x = W / 2; el.y = pad + (elH / 2); break;
+                case 'top-right': el.x = W - pad - (elW / 2); el.y = pad + (elH / 2); break;
+                case 'left': el.x = pad + (elW / 2); el.y = H / 2; break;
+                case 'center': el.x = W / 2; el.y = H / 2; break;
+                case 'right': el.x = W - pad - (elW / 2); el.y = H / 2; break;
+                case 'bottom-left': el.x = pad + (elW / 2); el.y = H - pad - (elH / 2); break;
+                case 'bottom': el.x = W / 2; el.y = H - pad - (elH / 2); break;
+                case 'bottom-right': el.x = W - pad - (elW / 2); el.y = H - pad - (elH / 2); break;
+            }
+
+            requestRender();
+            pushHistoryState();
+            openPanelPosition();
+        }
+
+        // 9. SKIN MOTIF FOTO TEKS (CORELDRAW STYLE)
+        function openPanelTextSkin() {
+            const el = getActiveElement();
+            if (!el || el.type !== 'text') return;
+
+            const hasSkin = !!el.textSkinImg;
+            const html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Tekstur Skin Foto:</span>
+                    <button class="btn-sub-tool active" onclick="document.getElementById('fileTextSkinInput').click()">📁 Unggah Foto Skin</button>
+                </div>
+
+                ${hasSkin ? `
+                    <div style="margin-top:10px;padding:8px;background:rgba(255,255,255,0.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:11px;color:#4CAF50;">✅ Skin Foto Aktif</span>
+                        <button class="btn-sub-tool" onclick="removeTextSkin()" style="color:#ff6b6b;">🗑️ Hapus Skin</button>
+                    </div>
+
+                    <div class="ctrl-row" style="margin-top:10px;">
+                        <span class="ctrl-label">Geser Horizontal Foto (X):</span>
+                        <span class="ctrl-val" id="skinXVal">${el.textSkinOffsetX || 0} px</span>
+                    </div>
+                    <input type="range" class="range-slider" min="-500" max="500" value="${el.textSkinOffsetX || 0}" oninput="updateTextSkinOffset('x', this.value)">
+
+                    <div class="ctrl-row" style="margin-top:10px;">
+                        <span class="ctrl-label">Geser Vertikal Foto (Y):</span>
+                        <span class="ctrl-val" id="skinYVal">${el.textSkinOffsetY || 0} px</span>
+                    </div>
+                    <input type="range" class="range-slider" min="-500" max="500" value="${el.textSkinOffsetY || 0}" oninput="updateTextSkinOffset('y', this.value)">
+
+                    <div class="ctrl-row" style="margin-top:10px;">
+                        <span class="ctrl-label">Zoom / Skala Foto Skin:</span>
+                        <span class="ctrl-val" id="skinScaleVal">${Math.round((el.textSkinScale || 1.0) * 100)}%</span>
+                    </div>
+                    <input type="range" class="range-slider" min="30" max="300" value="${Math.round((el.textSkinScale || 1.0) * 100)}" oninput="updateTextSkinScale(this.value)">
+                ` : `
+                    <div style="font-size:11px;color:#888;margin-top:8px;line-height:1.4;">
+                        💡 <b>Tips:</b> Masukkan gambar pola api, emas, awan, atau marmer untuk dijadikan skin tekstur di dalam huruf judul!
+                    </div>
+                `}
+            `;
+            openToolPanel('Skin Foto Teks (CorelDraw Style)', html);
+        }
+
+        function handleTextSkinUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const src = event.target.result;
+                const el = getActiveElement();
+                if (el && el.type === 'text') {
+                    el.textSkinSrc = src;
+                    el.textSkinImg = getImageFromCache(src);
+                    el.textSkinOffsetX = 0;
+                    el.textSkinOffsetY = 0;
+                    el.textSkinScale = 1.0;
+                    requestRender();
+                    pushHistoryState();
+                    openPanelTextSkin();
+                }
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        function removeTextSkin() {
+            const el = getActiveElement();
+            if (!el) return;
+            el.textSkinSrc = null;
+            el.textSkinImg = null;
+            requestRender();
+            pushHistoryState();
+            openPanelTextSkin();
+        }
+
+        function updateTextSkinOffset(axis, val) {
+            const el = getActiveElement();
+            if (!el) return;
+            if (axis === 'x') {
+                el.textSkinOffsetX = parseInt(val);
+                document.getElementById('skinXVal').innerText = `${val} px`;
+            } else {
+                el.textSkinOffsetY = parseInt(val);
+                document.getElementById('skinYVal').innerText = `${val} px`;
+            }
+            requestRender();
+            pushHistoryState();
+        }
+
+        function updateTextSkinScale(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.textSkinScale = parseInt(val) / 100;
+            document.getElementById('skinScaleVal').innerText = `${val}%`;
+            requestRender();
+            pushHistoryState();
+        }
+
+        // 10. LENGKUNG BUSUR CURVE & KEMIRINGAN SLANT
+        function openPanelCurveAndSlant() {
+            const el = getActiveElement();
+            if (!el || el.type !== 'text') return;
+
+            const html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Lengkung Busur (-/+ Melingkar):</span>
+                    <span class="ctrl-val" id="curveVal">${el.curveAngle || 0}°</span>
+                </div>
+                <input type="range" class="range-slider" min="-180" max="180" value="${el.curveAngle || 0}" oninput="updateCurveAngle(this.value)">
+                <div class="ctrl-grid-btns" style="margin-top:6px;">
+                    <button class="btn-sub-tool" onclick="updateCurveAngle(-60)">Cekung (-60°)</button>
+                    <button class="btn-sub-tool" onclick="updateCurveAngle(0)">Datar (0°)</button>
+                    <button class="btn-sub-tool" onclick="updateCurveAngle(60)">Cembung (+60°)</button>
+                    <button class="btn-sub-tool" onclick="updateCurveAngle(180)">Setengah Lingkaran</button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:12px;">
+                    <span class="ctrl-label">Kemiringan Huruf (Italic Slant):</span>
+                    <span class="ctrl-val" id="slantVal">${el.italicSlant || 0}°</span>
+                </div>
+                <input type="range" class="range-slider" min="-35" max="35" value="${el.italicSlant || 0}" oninput="updateItalicSlant(this.value)">
+
+                <div class="ctrl-row" style="margin-top:12px;">
+                    <span class="ctrl-label">Rotasi Judul Keseluruhan:</span>
+                    <span class="ctrl-val" id="rotVal">${el.rotation || 0}°</span>
+                </div>
+                <input type="range" class="range-slider" min="-180" max="180" value="${el.rotation || 0}" oninput="updateRotation(this.value)">
+            `;
+            openToolPanel('Lengkung & Kemiringan Judul', html);
+        }
+
+        function updateCurveAngle(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.curveAngle = parseInt(val);
+            const lbl = document.getElementById('curveVal');
+            if (lbl) lbl.innerText = `${val}°`;
+            requestRender();
+            pushHistoryState();
+        }
+
+        function updateItalicSlant(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.italicSlant = parseInt(val);
+            const lbl = document.getElementById('slantVal');
+            if (lbl) lbl.innerText = `${val}°`;
+            requestRender();
+            pushHistoryState();
+        }
+
+        function updateRotation(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.rotation = parseInt(val);
+            const lbl = document.getElementById('rotVal');
+            if (lbl) lbl.innerText = `${val}°`;
+            requestRender();
+            pushHistoryState();
+        }
+
+        // 11. SHADOW & GLASSMORPHISM
+        function openPanelShadowAndGlass() {
+            const el = getActiveElement();
+            if (!el) return;
+            if (!el.shadow) el.shadow = { color: 'rgba(0,0,0,0.8)', blur: 15, distance: 8, angle: 45 };
+
+            const html = `
+                <div class="ctrl-row">
+                    <span class="ctrl-label">Bayangan Luar (Drop Shadow):</span>
+                </div>
+                <div class="ctrl-row" style="margin-top:6px;">
+                    <span class="ctrl-label">Ketebalan Blur:</span>
+                    <span class="ctrl-val" id="shadowBlurVal">${el.shadow.blur} px</span>
+                </div>
+                <input type="range" class="range-slider" min="0" max="50" value="${el.shadow.blur}" oninput="updateShadowSetting('blur', this.value)">
+
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Jarak Bayangan:</span>
+                    <span class="ctrl-val" id="shadowDistVal">${el.shadow.distance} px</span>
+                </div>
+                <input type="range" class="range-slider" min="0" max="60" value="${el.shadow.distance}" oninput="updateShadowSetting('distance', this.value)">
+
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Sudut Sinar Sinar (Derajat):</span>
+                    <span class="ctrl-val" id="shadowAngleVal">${el.shadow.angle || 45}°</span>
+                </div>
+                <input type="range" class="range-slider" min="0" max="360" value="${el.shadow.angle || 45}" oninput="updateShadowSetting('angle', this.value)">
+
+                <div class="ctrl-row" style="margin-top:12px;">
+                    <span class="ctrl-label">Efek Glassmorphism (Border Blur):</span>
+                    <span class="ctrl-val" id="borderBlurVal">${el.borderBlur || 0} px</span>
+                </div>
+                <input type="range" class="range-slider" min="0" max="25" value="${el.borderBlur || 0}" oninput="updateBorderBlur(this.value)">
+
+                <div class="ctrl-row" style="margin-top:10px;">
+                    <span class="ctrl-label">Pilihan Warna Bayangan:</span>
+                </div>
+                <div class="color-palette-scroll" style="margin-top:6px;">
+                    <div class="color-circle" style="background:#000;" onclick="setShadowColor('rgba(0,0,0,0.85)')"></div>
+                    <div class="color-circle" style="background:#D4AF37;" onclick="setShadowColor('rgba(212,175,55,0.7)')"></div>
+                    <div class="color-circle" style="background:#00e5ff;" onclick="setShadowColor('rgba(0,229,255,0.6)')"></div>
+                    <div class="color-circle" style="background:#fff;" onclick="setShadowColor('rgba(255,255,255,0.8)')"></div>
+                    <div class="color-circle" style="background:#ff4757;" onclick="setShadowColor('rgba(255,71,87,0.7)')"></div>
+                </div>
+            `;
+            openToolPanel('Bayangan & Glassmorphism', html);
+        }
+
+        function updateShadowSetting(prop, val) {
+            const el = getActiveElement();
+            if (!el || !el.shadow) return;
+            el.shadow[prop] = parseInt(val);
+            if (prop === 'blur') document.getElementById('shadowBlurVal').innerText = `${val} px`;
+            if (prop === 'distance') document.getElementById('shadowDistVal').innerText = `${val} px`;
+            if (prop === 'angle') document.getElementById('shadowAngleVal').innerText = `${val}°`;
+            requestRender();
+            pushHistoryState();
+        }
+
+        function updateBorderBlur(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.borderBlur = parseInt(val);
+            document.getElementById('borderBlurVal').innerText = `${val} px`;
+            requestRender();
+            pushHistoryState();
+        }
+
+        function setShadowColor(c) {
+            const el = getActiveElement();
+            if (!el || !el.shadow) return;
+            el.shadow.color = c;
+            requestRender();
+            pushHistoryState();
+        } function openPanelLayerOrder() {
             const html = `
                 <div class="ctrl-grid-btns">
                     <button class="btn-sub-tool" onclick="moveLayerTop()">🔝 Paling Depan</button>
@@ -1429,6 +2022,7 @@
             `;
             openToolPanel('Urutan Lapisan', html);
         }
+
         function moveLayerTop() {
             const s = getCurrentSlide();
             const idx = s.elements.findIndex(e => e.id === activeElementId);
@@ -1438,6 +2032,7 @@
                 renderAll(); pushHistoryState();
             }
         }
+
         function moveLayerBottom() {
             const s = getCurrentSlide();
             const idx = s.elements.findIndex(e => e.id === activeElementId);
@@ -1447,6 +2042,7 @@
                 renderAll(); pushHistoryState();
             }
         }
+
         function moveLayerUp() {
             const s = getCurrentSlide();
             const idx = s.elements.findIndex(e => e.id === activeElementId);
@@ -1457,6 +2053,7 @@
                 renderAll(); pushHistoryState();
             }
         }
+
         function moveLayerDown() {
             const s = getCurrentSlide();
             const idx = s.elements.findIndex(e => e.id === activeElementId);
@@ -1502,6 +2099,7 @@
             `;
             openToolPanel('Cermin Gambar', html);
         }
+
         function toggleFlip(dir) {
             const el = getActiveElement();
             if (dir === 'H') el.flipH = !el.flipH;
@@ -1514,12 +2112,12 @@
             let html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Kelengkungan Sudut:</span>
-                    <input type="range" class="ctrl-slider" min="0" max="150" value="${el.cornerRadius || 0}" oninput="updateCornerRadius(this.value)">
+                    <input type="range" class="range-slider" min="0" max="150" value="${el.cornerRadius || 0}" oninput="updateCornerRadius(this.value)">
                     <span class="ctrl-val" id="valRadius">${el.cornerRadius || 0}px</span>
                 </div>
                 <div class="ctrl-row" style="margin-top:8px;">
                     <span class="ctrl-label">Tebal Garis Tepi:</span>
-                    <input type="range" class="ctrl-slider" min="0" max="30" value="${el.borderWidth || 0}" oninput="updateBorderWidth(this.value)">
+                    <input type="range" class="range-slider" min="0" max="30" value="${el.borderWidth || 0}" oninput="updateBorderWidth(this.value)">
                     <span class="ctrl-val" id="valBorderW">${el.borderWidth || 0}px</span>
                 </div>
                 <span class="ctrl-label" style="margin-top:6px;display:block;">Warna Garis Tepi:</span>
@@ -1531,12 +2129,14 @@
             html += '</div>';
             openToolPanel('Garis Tepi & Sudut', html);
         }
+
         function updateCornerRadius(v) {
             const el = getActiveElement();
             el.cornerRadius = parseInt(v);
             document.getElementById('valRadius').innerText = v + 'px';
             renderAll(); triggerAutoSave();
         }
+
         function updateBorderWidth(v) {
             const el = getActiveElement();
             el.borderWidth = parseInt(v);
@@ -1544,6 +2144,7 @@
             document.getElementById('valBorderW').innerText = v + 'px';
             renderAll(); triggerAutoSave();
         }
+
         function setBorderColor(c) {
             const el = getActiveElement();
             el.borderColor = c;
@@ -1556,12 +2157,12 @@
             let html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Keburaman (Blur):</span>
-                    <input type="range" class="ctrl-slider" min="0" max="50" value="${el.shadow.blur || 0}" oninput="updateShadowBlur(this.value)">
+                    <input type="range" class="range-slider" min="0" max="50" value="${el.shadow.blur || 0}" oninput="updateShadowBlur(this.value)">
                     <span class="ctrl-val" id="valShadowB">${el.shadow.blur || 0}</span>
                 </div>
                 <div class="ctrl-row" style="margin-top:6px;">
                     <span class="ctrl-label">Jarak / Sudut:</span>
-                    <input type="range" class="ctrl-slider" min="0" max="50" value="${el.shadow.distance || 0}" oninput="updateShadowDistance(this.value)">
+                    <input type="range" class="range-slider" min="0" max="50" value="${el.shadow.distance || 0}" oninput="updateShadowDistance(this.value)">
                     <span class="ctrl-val" id="valShadowD">${el.shadow.distance || 0}</span>
                 </div>
                 <span class="ctrl-label" style="margin-top:6px;display:block;">Warna Bayangan:</span>
@@ -1574,22 +2175,19 @@
             `;
             openToolPanel('Pengaturan Bayangan', html);
         }
+
         function updateShadowBlur(v) {
             const el = getActiveElement();
             el.shadow.blur = parseInt(v);
             document.getElementById('valShadowB').innerText = v;
             renderAll(); triggerAutoSave();
         }
+
         function updateShadowDistance(v) {
             const el = getActiveElement();
             el.shadow.distance = parseInt(v);
             document.getElementById('valShadowD').innerText = v;
             renderAll(); triggerAutoSave();
-        }
-        function setShadowColor(c) {
-            const el = getActiveElement();
-            el.shadow.color = c;
-            renderAll(); pushHistoryState(); openPanelImageShadow();
         }
 
         function openPanelImageOpacity() {
@@ -1597,12 +2195,13 @@
             const html = `
                 <div class="ctrl-row">
                     <span class="ctrl-label">Transparansi:</span>
-                    <input type="range" class="ctrl-slider" min="10" max="100" value="${Math.round((el.opacity !== undefined ? el.opacity : 1) * 100)}" oninput="updateOpacity(this.value)">
+                    <input type="range" class="range-slider" min="10" max="100" value="${Math.round((el.opacity !== undefined ? el.opacity : 1) * 100)}" oninput="updateOpacity(this.value)">
                     <span class="ctrl-val" id="valOpacity">${Math.round((el.opacity !== undefined ? el.opacity : 1) * 100)}%</span>
                 </div>
             `;
             openToolPanel('Tingkat Transparansi', html);
         }
+
         function updateOpacity(v) {
             const el = getActiveElement();
             el.opacity = parseInt(v) / 100;
@@ -1798,27 +2397,32 @@
         function duplicateCurrentSlide() {
             deselectElement();
             const curr = getCurrentSlide();
-            // Clone deep
-            const cloned = JSON.parse(JSON.stringify(curr));
-            // Reattach images
-            if (curr.background.img) cloned.background.img = curr.background.img;
-            cloned.elements.forEach((el, i) => {
-                if (el.type === 'image' && curr.elements[i].img) {
-                    el.img = curr.elements[i].img;
-                }
-                el.id = 'el_' + Date.now() + '_' + i;
-            });
-
-            slides.push(cloned);
+            const serialized = serializeSlides([curr])[0];
+            const deserialized = deserializeSlides([serialized])[0];
+            slides.push(deserialized);
             currentSlideIndex = slides.length - 1;
             renderCarouselThumbs();
-            renderAll();
+            requestRender();
             pushHistoryState();
         }
 
-        /* =========================================================================
-           EXPORT ULTRA HIGH-RES POSTER (CANVAS TO IMAGE)
-           ========================================================================= */
+        function deleteCurrentSlide() {
+            if (slides.length <= 1) {
+                alert('Minimal harus ada 1 slide poster');
+                return;
+            }
+            if (confirm(`Hapus Slide ${currentSlideIndex + 1}?`)) {
+                deselectElement();
+                slides.splice(currentSlideIndex, 1);
+                if (currentSlideIndex >= slides.length) {
+                    currentSlideIndex = slides.length - 1;
+                }
+                renderCarouselThumbs();
+                requestRender();
+                pushHistoryState();
+            }
+        }
+
         function exportPoster() {
             deselectElement();
             renderAll();
@@ -1833,6 +2437,37 @@
 
         // Jalankan saat pertama kali halaman terbuka
         window.onload = initApp;
+
+        // Fitur Salin & Unduh Kode Sumber maker.html untuk GitHub
+        function copyFullSourceCode() {
+            fetch('/maker.html?t=' + Date.now())
+                .then(res => res.text())
+                .then(text => {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showToast('✅ Berhasil menyalin 100% kode maker.html ke clipboard! Siap dipaste ke GitHub.');
+                    }).catch(() => {
+                        downloadSourceCodeFile();
+                    });
+                }).catch(err => {
+                    showToast('Gagal memuat kode: ' + err);
+                });
+        }
+
+        function downloadSourceCodeFile() {
+            fetch('/maker.html?t=' + Date.now())
+                .then(res => res.text())
+                .then(text => {
+                    const blob = new Blob([text], {type: 'text/html'});
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'maker.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    showToast('📥 File maker.html berhasil diunduh utuh!');
+                });
+        }
+
     </script>
 </body>
 </html>
