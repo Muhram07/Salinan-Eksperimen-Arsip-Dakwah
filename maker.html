@@ -1,32 +1,27 @@
-<!-- Berikut adalah kode lengkap yang telah diperbarui. Semua fitur unggulan
-sebelumnya tetap dipertahankan, dan seluruh masalah serta penambahan fitur baru
-telah diperbaiki dan diimplementasikan:
+<!-- Berikut adalah kode lengkap yang telah diperbarui. Fitur Blend Mode / Efek
+Pencampuran Transparansi ala CorelDRAW telah ditambahkan secara menyeluruh
+dengan kontrol presisi (+/-), performa tinggi, dan tetap menjaga seluruh fitur
+yang sudah ada sebelumnya.
 
-Rangkuman Pembaruan:
+Rangkuman Penambahan Fitur:
 
-1.  Perbaikan Masalah Teks Macet & Tertukar: Mengunci target elemen yang sedang
-    diedit (editingElementId) agar tidak berebut fokus dengan elemen lain dan
-    tidak memicu reset kursor/spasi saat mengetik.
-2.  Editor Teks Langsung di Atas Poster (In-Place Transparan): Kotak hitam tebal
-    dihilangkan. Sekarang kolom ketik transparan, menyatu tepat di atas posisi
-    teks poster dengan font, perataan (align), dan ukuran yang persis sama
-    sehingga Anda langsung tahu posisi baris dan paragraf baru secara real-time.
-3.  Perbaikan Teks Melengkung Saat Diunduh: Fungsi curved text kini mendukung
-    parameter kanvas dinamis sehingga saat diekspor ke resolusi Ultra HD / 4K,
-    kelengkungan teks tetap terjaga presisi dan tidak kembali lurus.
-4.  Perbaikan Sistem Manajemen Projek: Setiap kali menambah atau berpindah
-    projek, seluruh data tersimpan rapi dan terisolasi di penyimpanan lokal
-    (local storage) tanpa me-reset projek lama ke default.
-5.  Pencarian Elemen PNG Transparan & Foto Gratis (Ala Canva): Ditambahkan menu
-    pencarian elemen dan foto online (stiker islami, kaligrafi, ornamen emas,
-    lencana, foto HD) yang bisa langsung dimasukkan ke kanvas dengan sekali klik
-    tanpa perlu buka tab lain.
-6.  Koleksi Font Baru: Ditambahkan font tebal bersudut tumpul (Fredoka, Nunito,
-    Outfit, Bebas Neue) untuk judul, serta font formal yang elegan dan mudah
-    dibaca (Lora, Inter, Space Mono).
-7.  Bar Zoom & Navigasi Lebih Ramping & Semi-Transparan: Tampilan floating zoom
-    widget dibuat berlatar kaca transparan (frosted glass) sehingga tidak
-    menghalangi logo atau desain di belakangnya. -->
+1.  Fitur Transparency Blend Mode (CorelDRAW Style):
+      - Screen: Otomatis menyaring dan menghilangkan warna latar hitam
+        pekat 100% pada tekstur api, debu, percikan bintang, atau lens flare,
+        menyisakan kobaran api/cahaya yang menyatu natural di atas
+        ilustrasi/foto di bawahnya.
+      - Add / Lighter: Efek api dan partikel cahaya menyala lebih terang
+        berkilau (glow intense).
+      - Multiply, Overlay, Color Dodge, Soft Light: Untuk efek pencampuran
+        bayangan, penggelap, kontras, dan cahaya neon.
+2.  Pengatur Intensitas (+ / - Stepper): Dilengkapi slider dan tombol langkah +
+    / - untuk mengatur kekuatan transparansi efek blend secara halus dan
+    presisi.
+3.  Pencarian Cepat Aset Api & Partikel: Pada menu pencarian online ditambahkan
+    tag cepat untuk langsung menemukan tekstur api, partikel, dan light overlay
+    berlatar hitam.
+4.  Dukungan Penuh Ekspor Ultra HD / 4K: Efek blend mode dirender identik pada
+    kanvas editor maupun saat diunduh dengan resolusi tinggi. -->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -181,7 +176,7 @@ Rangkuman Pembaruan:
 
         /* POPUP TOOL DRAWER / PANEL */
         .tool-panel{
-            position:absolute;bottom:62px;left:0;right:0;max-height:320px;background:#181818;
+            position:absolute;bottom:62px;left:0;right:0;max-height:330px;background:#181818;
             border-top:1px solid rgba(212,175,55,0.3);border-radius:18px 18px 0 0;z-index:185;
             padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,0.85);display:none;flex-direction:column;
             overflow-y:auto;gap:12px;animation:slideUpPanel 0.25s cubic-bezier(0.16,1,0.3,1);
@@ -450,7 +445,7 @@ Rangkuman Pembaruan:
                 </div>
             </div>
 
-            <!-- IN-PLACE DIRECT TRANSPARENT TEXT EDITOR (LANGSUNG DI ATAS POSTER) -->
+            <!-- IN-PLACE DIRECT TRANSPARENT TEXT EDITOR -->
             <textarea id="inlineTextInput" spellcheck="false" placeholder="Ketik teks di sini..."></textarea>
         </div>
     </main>
@@ -532,24 +527,18 @@ Rangkuman Pembaruan:
             '9:16': { width: 1080, height: 1920, label: '9:16 (Story/Reels)' }
         };
 
-        // KOLEKSI FONT: Ditambah Font Judul Lebar & Bulat (Rounded Bold) serta Font Isi Formal & Keren
         const FONT_FAMILIES = [
-            // Kategori: Judul Bold & Rounded
             { name: 'Fredoka Rounded (Judul Bulat)', font: "Fredoka, sans-serif" },
             { name: 'Baloo 2 Extra Bold (Tebal Lebar)', font: "Baloo 2, cursive" },
             { name: 'Nunito Black (Rounded Modern)', font: "Nunito, sans-serif" },
             { name: 'Outfit Extra Bold (Lebar Modern)', font: "Outfit, sans-serif" },
             { name: 'Bebas Neue (Kapital Jangkung)', font: "Bebas Neue, sans-serif" },
             { name: 'Montserrat Bold (Kokoh)', font: "Montserrat, sans-serif" },
-            
-            // Kategori: Teks Isi Formal & Elegan
             { name: 'Plus Jakarta Sans (Formal Bersih)', font: "Plus Jakarta Sans, sans-serif" },
             { name: 'Inter (Standar Editorial)', font: "Inter, sans-serif" },
             { name: 'Lora Serif (Buku / Formal Elegan)', font: "Lora, serif" },
             { name: 'Playfair Display (Serif Mewah)', font: "Playfair Display, serif" },
             { name: 'Space Mono (Ketikan Mesin Keren)', font: "Space Mono, monospace" },
-            
-            // Kategori: Kaligrafi & Tulisan Tangan
             { name: 'Caveat (Tulisan Tangan Santai)', font: "Caveat, cursive" },
             { name: 'Amiri Arabic (Klasik Islami)', font: "Amiri, serif" },
             { name: 'Cinzel Royal (Gaya Kerajaan)', font: "Cinzel, serif" }
@@ -559,7 +548,7 @@ Rangkuman Pembaruan:
         let currentSlideIndex = 0;
         let slides = [];
         let activeElementId = null;
-        let editingElementId = null; // Terkunci agar ketikan tidak tertukar
+        let editingElementId = null;
         let isEditingText = false;
         let currentProjectId = 'proj_default';
         let bleedSettings = { margin: 5, color: '#D4AF37' };
@@ -1496,7 +1485,6 @@ Rangkuman Pembaruan:
             const totalHeight = linesOfRuns.length * lineHeight;
             el._calculatedHeight = totalHeight;
 
-            // Pastikan teks melengkung dirender baik di layar maupun saat diekspor
             if (el.curveAngle && Math.abs(el.curveAngle) >= 3) {
                 renderCurvedTextLine(targetCtx, el, linesOfRuns, cleanFont);
                 targetCtx.restore();
@@ -1613,7 +1601,6 @@ Rangkuman Pembaruan:
             targetCtx.restore();
         }
 
-        // FUNGSI LENGKUNG TEKS BEKERJA DI KANVAS EDITOR MAUPUN EXPORT
         function renderCurvedTextLine(targetCtx, el, linesOfRuns, cleanFont) {
             let fullText = '';
             linesOfRuns.forEach(lineRuns => lineRuns.forEach(r => fullText += r.text));
@@ -1704,6 +1691,9 @@ Rangkuman Pembaruan:
             targetCtx.drawImage(offscreen, x - 10, y - (offH / 2));
         }
 
+        /* =========================================================================
+           RENDER IMAGE ELEMENT - DENGAN DUKUNGAN BLEND MODE CORELDRAW (SCREEN/ADD/DLL)
+           ========================================================================= */
         function renderImageElement(targetCtx, el) {
             if (!el.img || !el.img.complete) {
                 if (el.src || el.imgSrc) {
@@ -1721,6 +1711,13 @@ Rangkuman Pembaruan:
             if (el.rotation) targetCtx.rotate((el.rotation * Math.PI) / 180);
             targetCtx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
             targetCtx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+
+            // FITUR CORELDRAW: BLEND MODE TRANSPARENCY (SCREEN, ADD / LIGHTER, MULTIPLY, OVERLAY)
+            if (el.blendMode && el.blendMode !== 'normal') {
+                targetCtx.globalCompositeOperation = el.blendMode;
+            } else {
+                targetCtx.globalCompositeOperation = 'source-over';
+            }
 
             if (el.blur && el.blur > 0) {
                 targetCtx.filter = `blur(${el.blur}px)`;
@@ -1816,10 +1813,9 @@ Rangkuman Pembaruan:
         }
 
         /* =========================================================================
-           IN-PLACE DIRECT TRANSPARENT TEXT EDITOR (LANGSUNG DI ATAS POSTER)
+           IN-PLACE DIRECT TRANSPARENT TEXT EDITOR
            ========================================================================= */
         function setupInlineTextEvents() {
-            // Mencegah teks tertukar dengan selalu merujuk editingElementId
             inlineTextInput.addEventListener('input', () => {
                 if (!editingElementId) return;
                 const s = getCurrentSlide();
@@ -2157,6 +2153,7 @@ Rangkuman Pembaruan:
             } else if (el.type === 'image') {
                 bar.innerHTML = `
                     <button class="tool-btn home-btn" onclick="deselectElement()" title="Tutup Seleksi / Beranda"><span class="icon">🏠</span><span>Beranda</span></button>
+                    <button class="tool-btn" onclick="openPanelBlendMode()" style="color:#FFE259;"><span class="icon">✨</span><span>Blend Mode</span></button>
                     <button class="tool-btn" onclick="openPanelImageSize()"><span class="icon">📏</span><span>Ukuran</span></button>
                     <button class="tool-btn" onclick="openPanelPngColorOverlay()"><span class="icon">🎨</span><span>Ubah Warna</span></button>
                     <button class="tool-btn" onclick="openPanelImageBlur()"><span class="icon">💧</span><span>Blur PNG</span></button>
@@ -2186,15 +2183,99 @@ Rangkuman Pembaruan:
         }
 
         /* =========================================================================
-           FITUR BARU: CARI ELEMEN PNG & FOTO GRATIS (ALA CANVA)
+           FITUR BARU COREL DRAW: TRANSPARENCY BLEND MODE (SCREEN, ADD / LIGHTER, DLL)
+           ========================================================================= */
+        function openPanelBlendMode() {
+            const el = getActiveElement();
+            if (!el || el.type !== 'image') return;
+
+            const curBlend = el.blendMode || 'normal';
+            const curOp = Math.round((el.opacity !== undefined ? el.opacity : 1) * 100);
+
+            const html = `
+                <div style="padding:10px;background:rgba(212,175,55,0.08);border-left:3px solid #D4AF37;border-radius:6px;font-size:11px;color:#ddd;line-height:1.4;">
+                    🔥 <b>Mode CorelDRAW (Hilangkan Latar Hitam):</b><br>
+                    Pilih <b>Screen</b> atau <b>Add</b> untuk menghilangkan warna hitam pada gambar api, kilau, atau partikel agar menyatu berkilau di atas desain!
+                </div>
+
+                <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-top:10px;">PILIH MODE PENCAMPURAN (BLEND MODE):</div>
+                <div class="ctrl-grid-btns">
+                    <button class="btn-sub-tool ${curBlend === 'screen' ? 'active' : ''}" onclick="setImageBlendMode('screen')">
+                        🔥 Screen
+                        <span style="font-size:9px;color:#ccc;">Hilang Hitam</span>
+                    </button>
+                    <button class="btn-sub-tool ${curBlend === 'lighter' ? 'active' : ''}" onclick="setImageBlendMode('lighter')">
+                        ⚡ Add / Glow
+                        <span style="font-size:9px;color:#ccc;">Menyala Terang</span>
+                    </button>
+                    <button class="btn-sub-tool ${curBlend === 'multiply' ? 'active' : ''}" onclick="setImageBlendMode('multiply')">
+                        🌑 Multiply
+                        <span style="font-size:9px;color:#ccc;">Hilang Putih</span>
+                    </button>
+                    <button class="btn-sub-tool ${curBlend === 'overlay' ? 'active' : ''}" onclick="setImageBlendMode('overlay')">
+                        🌈 Overlay
+                        <span style="font-size:9px;color:#ccc;">Kontras Alami</span>
+                    </button>
+                    <button class="btn-sub-tool ${curBlend === 'color-dodge' ? 'active' : ''}" onclick="setImageBlendMode('color-dodge')">
+                        💡 Dodge
+                        <span style="font-size:9px;color:#ccc;">Neon Menyala</span>
+                    </button>
+                    <button class="btn-sub-tool ${curBlend === 'soft-light' ? 'active' : ''}" onclick="setImageBlendMode('soft-light')">
+                        ☁️ Soft Light
+                        <span style="font-size:9px;color:#ccc;">Halus Lembut</span>
+                    </button>
+                    <button class="btn-sub-tool ${curBlend === 'normal' || curBlend === 'source-over' ? 'active' : ''}" onclick="setImageBlendMode('normal')">
+                        ⚪ Normal
+                        <span style="font-size:9px;color:#ccc;">Standar</span>
+                    </button>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:14px;">
+                    <span class="ctrl-label">Kekuatan Efek / Opacity:</span>
+                    <span class="ctrl-val" id="valBlendOpacity">${curOp}%</span>
+                    <button class="btn-reset-tool" onclick="updateBlendOpacity(100); document.getElementById('blendOpSlider').value=100;">↺ 100%</button>
+                </div>
+                <div class="stepper-row">
+                    <button class="btn-step" onclick="stepSliderVal('blendOpSlider', -5, updateBlendOpacity)">-</button>
+                    <input type="range" class="ctrl-slider" id="blendOpSlider" min="5" max="100" value="${curOp}" oninput="updateBlendOpacity(this.value)">
+                    <button class="btn-step" onclick="stepSliderVal('blendOpSlider', 5, updateBlendOpacity)">+</button>
+                </div>
+            `;
+            openToolPanel('Blend Mode Efek Cahaya / Api', html);
+        }
+
+        function setImageBlendMode(mode) {
+            const el = getActiveElement();
+            if (!el || el.type !== 'image') return;
+            el.blendMode = mode;
+            requestRender();
+            pushHistoryState();
+            openPanelBlendMode();
+            showToast(`✨ Blend mode: ${mode.toUpperCase()}`);
+        }
+
+        function updateBlendOpacity(val) {
+            const el = getActiveElement();
+            if (!el) return;
+            el.opacity = parseInt(val) / 100;
+            const lbl = document.getElementById('valBlendOpacity');
+            if (lbl) lbl.innerText = `${val}%`;
+            requestRender();
+            triggerAutoSave();
+        }
+
+        /* =========================================================================
+           FITUR CARI ELEMEN PNG & FOTO GRATIS (ALA CANVA)
            ========================================================================= */
         function openPanelOnlineAssets() {
             const html = `
                 <div style="display:flex;gap:8px;margin-bottom:8px;">
-                    <input type="text" id="assetSearchInput" class="asset-search-input" placeholder="Cari elemen PNG, ornamen, masjid, bingkai..." onkeydown="if(event.key==='Enter') executeAssetSearch()">
+                    <input type="text" id="assetSearchInput" class="asset-search-input" placeholder="Cari elemen PNG, ornamen, api, partikel..." onkeydown="if(event.key==='Enter') executeAssetSearch()">
                     <button class="btn-nav active" onclick="executeAssetSearch()" style="border-radius:19px;padding:0 14px;">Cari</button>
                 </div>
                 <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none;">
+                    <span class="tag-pill" onclick="quickSearchAsset('fire sparks black background')">🔥 Api & Percikan</span>
+                    <span class="tag-pill" onclick="quickSearchAsset('lens flare black background')">✨ Cahaya / Flare</span>
                     <span class="tag-pill" onclick="quickSearchAsset('islamic ornament')">🕌 Ornamen Islami</span>
                     <span class="tag-pill" onclick="quickSearchAsset('gold frame')">🖼️ Bingkai Emas</span>
                     <span class="tag-pill" onclick="quickSearchAsset('bismillah calligraphic')">📜 Kaligrafi</span>
@@ -2204,7 +2285,7 @@ Rangkuman Pembaruan:
                 </div>
                 <div class="asset-grid" id="assetResultsContainer">
                     <div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#888;">
-                        Ketik kata kunci atau pilih tag di atas untuk mencari elemen grafis gratis.
+                        Ketik kata kunci atau pilih tag di atas untuk mencari elemen grafis & tekstur api.
                     </div>
                 </div>
             `;
@@ -2226,13 +2307,12 @@ Rangkuman Pembaruan:
             grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#D4AF37;">🔍 Sedang mencari elemen...</div>';
 
             try {
-                // Menggunakan API Wikimedia Commons (Mendukung CORS penuh, bebas royalti & tanpa API Key)
                 const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q + ' filetype:bitmap OR filetype:drawing')}&gsrlimit=24&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=250&format=json&origin=*`;
                 const res = await fetch(url);
                 const data = await res.json();
 
                 if (!data.query || !data.query.pages) {
-                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#aaa;">Tidak ditemukan elemen. Coba kata kunci bahasa Inggris (misal: "islamic", "gold badge").</div>';
+                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#aaa;">Tidak ditemukan elemen. Coba kata kunci lain (misal: "fire texture", "gold badge").</div>';
                     return;
                 }
 
@@ -2287,6 +2367,7 @@ Rangkuman Pembaruan:
                     borderColor: '#D4AF37',
                     colorOverlay: 'none',
                     blur: 0,
+                    blendMode: 'normal',
                     shadow: { color: 'transparent', blur: 0, angle: 45, distance: 0 },
                     opacity: 1,
                     locked: false,
@@ -2305,7 +2386,7 @@ Rangkuman Pembaruan:
         }
 
         /* =========================================================================
-           PANEL DETAIL & PENGATURAN
+           PANEL DETAIL & PENGATURAN LAINNYA
            ========================================================================= */
         function openPanelFontSize() {
             const el = getActiveElement();
@@ -3325,6 +3406,7 @@ Rangkuman Pembaruan:
                         borderColor: '#D4AF37',
                         colorOverlay: 'none',
                         blur: 0,
+                        blendMode: 'normal',
                         shadow: { color: 'transparent', blur: 0, angle: 45, distance: 0 },
                         opacity: 1,
                         locked: false,
@@ -3617,7 +3699,7 @@ Rangkuman Pembaruan:
         }
 
         /* =========================================================================
-           EKSPOR RESOLUSI ULTRA HD & PRO MAX 4K (DENGAN FIX TEKS MELENGKUNG)
+           EKSPOR RESOLUSI ULTRA HD & PRO MAX 4K (DENGAN FIX BLEND MODE & LENGKUNG)
            ========================================================================= */
         function exportPoster() {
             deselectElement();
