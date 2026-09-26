@@ -1,13 +1,43 @@
+<!-- Berikut adalah kode lengkap yang telah diperbarui. Semua fitur unggulan
+sebelumnya tetap dipertahankan, dan seluruh masalah serta penambahan fitur baru
+telah diperbaiki dan diimplementasikan:
+
+Rangkuman Pembaruan:
+
+1.  Perbaikan Masalah Teks Macet & Tertukar: Mengunci target elemen yang sedang
+    diedit (editingElementId) agar tidak berebut fokus dengan elemen lain dan
+    tidak memicu reset kursor/spasi saat mengetik.
+2.  Editor Teks Langsung di Atas Poster (In-Place Transparan): Kotak hitam tebal
+    dihilangkan. Sekarang kolom ketik transparan, menyatu tepat di atas posisi
+    teks poster dengan font, perataan (align), dan ukuran yang persis sama
+    sehingga Anda langsung tahu posisi baris dan paragraf baru secara real-time.
+3.  Perbaikan Teks Melengkung Saat Diunduh: Fungsi curved text kini mendukung
+    parameter kanvas dinamis sehingga saat diekspor ke resolusi Ultra HD / 4K,
+    kelengkungan teks tetap terjaga presisi dan tidak kembali lurus.
+4.  Perbaikan Sistem Manajemen Projek: Setiap kali menambah atau berpindah
+    projek, seluruh data tersimpan rapi dan terisolasi di penyimpanan lokal
+    (local storage) tanpa me-reset projek lama ke default.
+5.  Pencarian Elemen PNG Transparan & Foto Gratis (Ala Canva): Ditambahkan menu
+    pencarian elemen dan foto online (stiker islami, kaligrafi, ornamen emas,
+    lencana, foto HD) yang bisa langsung dimasukkan ke kanvas dengan sekali klik
+    tanpa perlu buka tab lain.
+6.  Koleksi Font Baru: Ditambahkan font tebal bersudut tumpul (Fredoka, Nunito,
+    Outfit, Bebas Neue) untuk judul, serta font formal yang elegan dan mudah
+    dibaca (Lora, Inter, Space Mono).
+7.  Bar Zoom & Navigasi Lebih Ramping & Semi-Transparan: Tampilan floating zoom
+    widget dibuat berlatar kaca transparan (frosted glass) sehingga tidak
+    menghalangi logo atau desain di belakangnya. -->
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Studio Poster Maker - Canva & PixelLab Style</title>
-    <!-- Font Lengkap Google Fonts -->
+    <!-- Google Fonts Lengkap: Font Judul Rounded Bold, Formal Elegan, Handwrite & Arabic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700;1,900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Baloo+2:wght@600;800&family=Bebas+Neue&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Fredoka:wght@600;700&family=Inter:wght@400;600;700;800&family=Lora:ital,wght@0,500;0,700;1,400&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700;1,900&family=Nunito:wght@700;900&family=Outfit:wght@600;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none;}
         html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
@@ -24,7 +54,6 @@
             background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#ddd;
             height:34px;padding:0 10px;border-radius:17px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;
         }
-
         .btn-nav:hover{background:rgba(212,175,55,0.15);border-color:#D4AF37;color:#D4AF37;}
         .btn-nav.active{background:#D4AF37;color:#111;border-color:#D4AF37;}
         .btn-nav:disabled{opacity:0.35;cursor:not-allowed;}
@@ -98,11 +127,13 @@
         }
         .canva-stalk-btn:active{cursor:grabbing;background:#D4AF37;color:#111;}
 
-        /* IN-PLACE DIRECT KEYBOARD INPUT */
+        /* IN-PLACE DIRECT TRANSPARENT TEXT EDITING */
         #inlineTextInput{
-            position:absolute;display:none;background:rgba(20,20,20,0.95);border:2px solid #D4AF37;color:#fff;
-            padding:10px 12px;border-radius:10px;font-family:inherit;font-size:16px;z-index:150;resize:none;
-            box-shadow:0 10px 30px rgba(0,0,0,0.9);line-height:1.4;
+            position:absolute;display:none;background:rgba(0,0,0,0.45);border:1.5px dashed #D4AF37;
+            color:#fff;padding:4px 8px;border-radius:6px;font-family:inherit;font-size:16px;
+            z-index:150;resize:none;outline:none;line-height:1.2;box-sizing:border-box;
+            backdrop-filter:blur(3px);box-shadow:0 0 15px rgba(212,175,55,0.4);
+            white-space:pre-wrap;word-break:break-word;
         }
 
         /* SLIDE CAROUSEL THUMBNAILS BAR */
@@ -150,7 +181,7 @@
 
         /* POPUP TOOL DRAWER / PANEL */
         .tool-panel{
-            position:absolute;bottom:62px;left:0;right:0;max-height:280px;background:#181818;
+            position:absolute;bottom:62px;left:0;right:0;max-height:320px;background:#181818;
             border-top:1px solid rgba(212,175,55,0.3);border-radius:18px 18px 0 0;z-index:185;
             padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,0.85);display:none;flex-direction:column;
             overflow-y:auto;gap:12px;animation:slideUpPanel 0.25s cubic-bezier(0.16,1,0.3,1);
@@ -187,7 +218,6 @@
             padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
             color:#bbb;font-size:11px;cursor:pointer;margin-left:auto;
         }
-        .btn-reset-tool:hover{color:#ff6b6b;border-color:#ff6b6b;}
 
         /* FLOATING TEXT FORMATTING TOOLBAR */
         .inline-text-toolbar{
@@ -223,12 +253,14 @@
         .dpad-btn:hover{background:#D4AF37;color:#111;}
         .dpad-center{width:70px;height:38px;background:rgba(0,0,0,0.4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#aaa;}
 
-        /* PIXELLAB STYLE FLOATING ZOOM & PAN WIDGET */
+        /* PIXELLAB STYLE FLOATING ZOOM WIDGET - TRANSPARAN HALUS */
         .pixellab-zoom-widget{
             position:absolute;top:60px;right:14px;display:flex;align-items:center;gap:4px;
-            background:rgba(20,20,20,0.88);border:1px solid rgba(212,175,55,0.4);border-radius:20px;
-            padding:4px 6px;z-index:105;backdrop-filter:blur(8px);box-shadow:0 4px 15px rgba(0,0,0,0.6);
+            background:rgba(20,20,20,0.45);border:1px solid rgba(212,175,55,0.25);border-radius:20px;
+            padding:4px 6px;z-index:105;backdrop-filter:blur(8px);box-shadow:0 4px 15px rgba(0,0,0,0.4);
+            transition:opacity 0.2s;
         }
+        .pixellab-zoom-widget:hover{background:rgba(20,20,20,0.85);border-color:rgba(212,175,55,0.6);}
         .zoom-btn{
             background:rgba(255,255,255,0.06);border:none;color:#eee;font-size:11px;
             padding:5px 7px;border-radius:10px;cursor:pointer;transition:all 0.15s;
@@ -236,7 +268,7 @@
         .zoom-btn:hover, .zoom-btn:active{background:#D4AF37;color:#111;}
         .pan-group{display:flex;gap:2px;border-left:1px solid rgba(255,255,255,0.12);padding-left:4px;margin-left:2px;}
 
-        /* EYEDROPPER COLOR SAMPLING LOUPE WITH OFFSET STALK */
+        /* EYEDROPPER COLOR LOUPE */
         .color-loupe{
             position:fixed;width:80px;height:80px;border-radius:50%;border:3px solid #D4AF37;
             box-shadow:0 4px 20px rgba(0,0,0,0.85);pointer-events:none;z-index:10000;display:none;
@@ -277,6 +309,28 @@
             background:rgba(255,255,255,0.06);color:#ddd;font-size:10px;font-weight:600;cursor:pointer;
         }
         .btn-proj-action:hover{background:#D4AF37;color:#111;}
+
+        /* ONLINE ELEMENT / ASSET SEARCH MODAL */
+        .asset-search-input{
+            width:100%;height:38px;background:#242424;border:1px solid rgba(212,175,55,0.4);
+            border-radius:19px;color:#fff;padding:0 14px;font-size:12px;font-family:inherit;
+        }
+        .tag-pill{
+            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:14px;
+            padding:3px 10px;font-size:10px;color:#ddd;cursor:pointer;white-space:nowrap;
+        }
+        .tag-pill:hover, .tag-pill.active{background:#D4AF37;color:#111;border-color:#D4AF37;font-weight:bold;}
+        .asset-grid{
+            display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;
+            max-height:220px;overflow-y:auto;padding-right:4px;
+        }
+        .asset-item{
+            background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;
+            aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;cursor:pointer;
+            transition:0.2s;overflow:hidden;padding:6px;
+        }
+        .asset-item:hover{border-color:#D4AF37;background:rgba(212,175,55,0.15);transform:scale(1.05);}
+        .asset-item img, .asset-item svg{max-width:100%;max-height:100%;object-fit:contain;}
 
         /* LAYER & GROUP SELECTION */
         .layer-list-container{display:flex;flex-direction:column;gap:6px;}
@@ -346,7 +400,7 @@
     <!-- 2. WORKSPACE CANVAS AREA -->
     <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
         
-        <!-- WIDGET ZOOM & PAN KANVAS ALA PIXELLAB -->
+        <!-- WIDGET ZOOM & PAN KANVAS ALA PIXELLAB (SEMI-TRANSPARAN) -->
         <div class="pixellab-zoom-widget" id="zoomWidget">
             <button class="zoom-btn" onclick="zoomCanvasManual(-0.25)" title="Perkecil Kanvas">🔍-</button>
             <button class="zoom-btn" id="zoomLevelLabel" onclick="resetCanvasZoom()" style="min-width:44px;font-weight:700;">100%</button>
@@ -365,7 +419,7 @@
             <!-- CANVAS HIGH RESOLUTION -->
             <canvas id="mainCanvas"></canvas>
 
-            <!-- BLEED & MARGIN GUIDES (GARIS PATOKAN POTONG, TENGAH & GRID 3x3) -->
+            <!-- BLEED & MARGIN GUIDES -->
             <div class="bleed-guides" id="bleedGuides">
                 <div class="guide-line-h" id="bleedLineTop" style="top:5%;"></div>
                 <div class="guide-line-h" id="bleedLineBottom" style="bottom:5%;"></div>
@@ -373,39 +427,35 @@
                 <div class="guide-line-v" id="bleedLineRight" style="right:5%;"></div>
                 <div class="guide-line-h" id="bleedLineMidH" style="top:50%;border-top-color:#00e5ff;display:none;"></div>
                 <div class="guide-line-v" id="bleedLineMidV" style="left:50%;border-left-color:#00e5ff;display:none;"></div>
-                <!-- GRID 3x3 RULE OF THIRDS -->
                 <div class="guide-line-h" id="bleedGridH1" style="top:33.333%;border-top-color:rgba(212,175,55,0.7);display:none;"></div>
                 <div class="guide-line-h" id="bleedGridH2" style="top:66.666%;border-top-color:rgba(212,175,55,0.7);display:none;"></div>
                 <div class="guide-line-v" id="bleedGridV1" style="left:33.333%;border-left-color:rgba(212,175,55,0.7);display:none;"></div>
                 <div class="guide-line-v" id="bleedGridV2" style="left:66.666%;border-left-color:rgba(212,175,55,0.7);display:none;"></div>
             </div>
 
-            <!-- SELECTION BOUNDING BOX DENGAN HANDLE SUDUT, SISI & STALK -->
+            <!-- SELECTION BOUNDING BOX -->
             <div class="selection-box" id="selBox">
-                <!-- 4 Sudut Lancip (Resize Asli Proporsional Bebas Distorsi) -->
                 <div class="sel-handle tl" data-handle="tl"></div>
                 <div class="sel-handle tr" data-handle="tr"></div>
                 <div class="sel-handle bl" data-handle="bl"></div>
                 <div class="sel-handle br" data-handle="br"></div>
-                <!-- 4 Handle Sisi Meluaskan Lebar / Tinggi -->
                 <div class="sel-handle-edge r" data-handle="r"></div>
                 <div class="sel-handle-edge l" data-handle="l"></div>
                 <div class="sel-handle-edge t" data-handle="t"></div>
                 <div class="sel-handle-edge b" data-handle="b"></div>
 
-                <!-- TANGKAI GESER & ROTASI ALA CANVA -->
                 <div class="stalk-container" id="stalkContainer">
                     <button type="button" class="canva-stalk-btn" id="stalkMove" title="Tahan & Geser Posisi Elemen">✥</button>
                     <button type="button" class="canva-stalk-btn" id="stalkRotate" title="Tahan & Putar Rotasi Elemen">🔄</button>
                 </div>
             </div>
 
-            <!-- IN-PLACE DIRECT KEYBOARD INPUT -->
-            <textarea id="inlineTextInput" spellcheck="false" placeholder="Ketik teks di sini (Enter untuk baris baru)..."></textarea>
+            <!-- IN-PLACE DIRECT TRANSPARENT TEXT EDITOR (LANGSUNG DI ATAS POSTER) -->
+            <textarea id="inlineTextInput" spellcheck="false" placeholder="Ketik teks di sini..."></textarea>
         </div>
     </main>
 
-    <!-- FLOATING TEXT FORMATTING TOOLBAR SAAT EDIT TEKS -->
+    <!-- FLOATING TEXT FORMATTING TOOLBAR -->
     <div class="inline-text-toolbar" id="inlineTextToolbar">
         <button type="button" class="btn-format-tag" onpointerdown="event.preventDefault(); applyFormatToSelection('**', '**');" title="Tebal"><b>B</b></button>
         <button type="button" class="btn-format-tag" onpointerdown="event.preventDefault(); applyFormatToSelection('*', '*');" title="Miring"><i>I</i></button>
@@ -426,7 +476,7 @@
     <!-- 4. BOTTOM DYNAMIC TOOLBAR -->
     <nav class="bottom-toolbar-container" id="bottomToolbar"></nav>
 
-    <!-- 5. MODAL POPUP SUB-PANEL KONTROL SPESIFIK -->
+    <!-- 5. POPUP SUB-PANEL KONTROL -->
     <div class="tool-panel" id="toolPanel">
         <div class="panel-header">
             <span class="panel-title" id="panelTitle">Pengaturan</span>
@@ -440,13 +490,13 @@
     <input type="file" id="fileTextSkinInput" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleTextSkinUpload(event)">
     <input type="file" id="fileBgInput" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="handleBgUpload(event)">
 
-    <!-- LOUPE UNTUK SAMPLE WARNA BERTANGKAI TINGGI -->
+    <!-- LOUPE UNTUK SAMPLE WARNA -->
     <div class="color-loupe" id="colorLoupe">
         <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border:1.5px solid #fff;border-radius:50%;box-shadow:0 0 2px #000;"></div>
         <div id="loupeColorPreview" style="position:absolute;bottom:0;left:0;right:0;height:22px;text-align:center;font-size:10px;color:#fff;font-weight:800;line-height:22px;background:rgba(0,0,0,0.65);">#000000</div>
     </div>
 
-    <!-- MODAL PROJEK MULTI-PROJEK ALA CANVA -->
+    <!-- MODAL PROJEK MULTI-PROJEK -->
     <div class="project-modal" id="projectModal">
         <div class="project-dialog">
             <div class="project-header">
@@ -471,49 +521,65 @@
         /* =========================================================================
            STUDIO POSTER MAKER - CORE ENGINE
            ========================================================================= */
-        const STORAGE_KEY = 'MAKER_STUDIO_CACHE_V3';
-        const PROJECTS_KEY = 'MAKER_STUDIO_PROJECTS_LIST_V3';
+        const STORAGE_KEY = 'MAKER_STUDIO_ACTIVE_PROJ_V4';
+        const PROJECTS_KEY = 'MAKER_STUDIO_ALL_PROJECTS_V4';
+        const CURRENT_PROJ_ID_KEY = 'MAKER_STUDIO_CURRENT_ID_V4';
         const QUICK_COLORS = ['#FFFFFF', '#D4AF37', '#FFE259', '#E5E7EB', '#9CA3AF', '#000000', '#1F2937', '#EF4444', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#14B8A6', '#6366F1'];
         
-        // DEFAULT RATIO AWAL: 4:5 (FEED PORTRAIT)
         const RATIO_PRESETS = {
             '4:5':  { width: 1080, height: 1350, label: '4:5 (Feed Portrait)' },
             '1:1':  { width: 1080, height: 1080, label: '1:1 (Feed Kotak)' },
             '9:16': { width: 1080, height: 1920, label: '9:16 (Story/Reels)' }
         };
 
+        // KOLEKSI FONT: Ditambah Font Judul Lebar & Bulat (Rounded Bold) serta Font Isi Formal & Keren
         const FONT_FAMILIES = [
-            { name: 'Plus Jakarta Sans', font: "Plus Jakarta Sans, sans-serif" },
-            { name: 'Montserrat Bold', font: "Montserrat, sans-serif" },
-            { name: 'Playfair Display Serif', font: "Playfair Display, serif" },
-            { name: 'Caveat Handwrite', font: "Caveat, cursive" },
-            { name: 'Amiri Arabic / Tajdid', font: "Amiri, serif" },
-            { name: 'Cinzel Royal Luxury', font: "Cinzel, serif" }
+            // Kategori: Judul Bold & Rounded
+            { name: 'Fredoka Rounded (Judul Bulat)', font: "Fredoka, sans-serif" },
+            { name: 'Baloo 2 Extra Bold (Tebal Lebar)', font: "Baloo 2, cursive" },
+            { name: 'Nunito Black (Rounded Modern)', font: "Nunito, sans-serif" },
+            { name: 'Outfit Extra Bold (Lebar Modern)', font: "Outfit, sans-serif" },
+            { name: 'Bebas Neue (Kapital Jangkung)', font: "Bebas Neue, sans-serif" },
+            { name: 'Montserrat Bold (Kokoh)', font: "Montserrat, sans-serif" },
+            
+            // Kategori: Teks Isi Formal & Elegan
+            { name: 'Plus Jakarta Sans (Formal Bersih)', font: "Plus Jakarta Sans, sans-serif" },
+            { name: 'Inter (Standar Editorial)', font: "Inter, sans-serif" },
+            { name: 'Lora Serif (Buku / Formal Elegan)', font: "Lora, serif" },
+            { name: 'Playfair Display (Serif Mewah)', font: "Playfair Display, serif" },
+            { name: 'Space Mono (Ketikan Mesin Keren)', font: "Space Mono, monospace" },
+            
+            // Kategori: Kaligrafi & Tulisan Tangan
+            { name: 'Caveat (Tulisan Tangan Santai)', font: "Caveat, cursive" },
+            { name: 'Amiri Arabic (Klasik Islami)', font: "Amiri, serif" },
+            { name: 'Cinzel Royal (Gaya Kerajaan)', font: "Cinzel, serif" }
         ];
 
         let currentRatio = '4:5';
         let currentSlideIndex = 0;
         let slides = [];
         let activeElementId = null;
+        let editingElementId = null; // Terkunci agar ketikan tidak tertukar
         let isEditingText = false;
         let currentProjectId = 'proj_default';
         let bleedSettings = { margin: 5, color: '#D4AF37' };
-        let activeGuideMode = 'none'; // 'center', 'margin', 'grid3x3', 'all', 'none'
+        let activeGuideMode = 'none';
         let nudgeStep = 10;
 
-        // Image Memory Cache
+        // Image Cache
         const imageCache = new Map();
         function getImageFromCache(src) {
             if (!src) return null;
             if (imageCache.has(src)) return imageCache.get(src);
             const img = new Image();
+            img.crossOrigin = "anonymous";
             img.src = src;
             img.onload = () => requestRender();
             imageCache.set(src, img);
             return img;
         }
 
-        // Canvas & Artboard DOM
+        // DOM Elements
         const mainCanvas = document.getElementById('mainCanvas');
         const ctx = mainCanvas.getContext('2d');
         const artboard = document.getElementById('artboard');
@@ -521,17 +587,15 @@
         const inlineTextInput = document.getElementById('inlineTextInput');
         const inlineTextToolbar = document.getElementById('inlineTextToolbar');
 
-        // History Undo/Redo Engine
+        // History
         let historyStack = [];
         let historyIndex = -1;
         const MAX_HISTORY = 35;
 
-        // Auto Save Timer & Render Throttle
         let autoSaveTimer = null;
         let canvasScale = 1;
         let renderPending = false;
 
-        // Zoom & Pan System
         let userZoomScale = 1.0;
         let viewportPanX = 0;
         let viewportPanY = 0;
@@ -604,7 +668,6 @@
             });
         }
 
-        // DEFAULT SLIDE TERTATA RAPI PADA RASIO 4:5
         function createDefaultSlide() {
             return {
                 background: {
@@ -626,9 +689,9 @@
                         x: 540,
                         y: 310,
                         width: 700,
-                        fontFamily: "Caveat, cursive",
-                        fontSize: 62,
-                        fontWeight: 'bold',
+                        fontFamily: "Fredoka, sans-serif",
+                        fontSize: 68,
+                        fontWeight: '700',
                         fontStyle: 'normal',
                         textDecoration: 'none',
                         textAlign: 'center',
@@ -640,6 +703,7 @@
                         highlightAlpha: 0.5,
                         opacity: 1,
                         rotation: 0,
+                        curveAngle: 0,
                         locked: false,
                         groupId: null,
                         shadow: { color: 'rgba(0,0,0,0.8)', blur: 10, angle: 45, distance: 4 }
@@ -649,9 +713,9 @@
                         type: 'text',
                         text: 'HANYALAH\nAMAL',
                         x: 540,
-                        y: 450,
+                        y: 470,
                         width: 860,
-                        fontFamily: "Montserrat, sans-serif",
+                        fontFamily: "Outfit, sans-serif",
                         fontSize: 100,
                         fontWeight: '900',
                         fontStyle: 'normal',
@@ -665,6 +729,7 @@
                         highlightAlpha: 0.5,
                         opacity: 1,
                         rotation: 0,
+                        curveAngle: 0,
                         locked: false,
                         groupId: null,
                         shadow: { color: 'rgba(0,0,0,0.95)', blur: 20, angle: 45, distance: 6 }
@@ -676,20 +741,21 @@
                         x: 540,
                         y: 840,
                         width: 840,
-                        fontFamily: "Plus Jakarta Sans, sans-serif",
+                        fontFamily: "Lora, serif",
                         fontSize: 32,
-                        fontWeight: '600',
+                        fontWeight: '500',
                         fontStyle: 'normal',
                         textDecoration: 'none',
                         textAlign: 'center',
                         textTransform: 'none',
                         color: '#E5E7EB',
-                        lineHeight: 1.55,
+                        lineHeight: 1.6,
                         letterSpacing: 0,
                         highlightColor: 'transparent',
                         highlightAlpha: 0.5,
                         opacity: 1,
                         rotation: 0,
+                        curveAngle: 0,
                         locked: false,
                         groupId: null,
                         shadow: { color: 'rgba(0,0,0,0.8)', blur: 8, angle: 45, distance: 3 }
@@ -701,7 +767,7 @@
                         x: 540,
                         y: 1070,
                         width: 600,
-                        fontFamily: "Plus Jakarta Sans, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         fontSize: 26,
                         fontWeight: '700',
                         fontStyle: 'normal',
@@ -715,6 +781,7 @@
                         highlightAlpha: 0.2,
                         opacity: 1,
                         rotation: 0,
+                        curveAngle: 0,
                         locked: false,
                         groupId: null,
                         shadow: { color: 'transparent', blur: 0, angle: 0, distance: 0 }
@@ -740,6 +807,7 @@
                         highlightAlpha: 0,
                         opacity: 1,
                         rotation: 0,
+                        curveAngle: 0,
                         locked: false,
                         groupId: null,
                         shadow: { color: 'transparent', blur: 0, angle: 0, distance: 0 }
@@ -786,7 +854,7 @@
             autoSaveTimer = setTimeout(() => {
                 saveToStorage();
                 setSaveIndicator(true);
-            }, 600);
+            }, 500);
         }
 
         function setSaveIndicator(isSaved) {
@@ -805,11 +873,13 @@
         function saveToStorage() {
             try {
                 const dataToSave = {
+                    id: currentProjectId,
                     ratio: currentRatio,
                     slideIndex: currentSlideIndex,
                     slides: serializeSlides(slides)
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+                localStorage.setItem(CURRENT_PROJ_ID_KEY, currentProjectId);
                 saveCurrentProjectAuto();
             } catch (e) {
                 console.warn("Storage penuh:", e);
@@ -818,6 +888,9 @@
 
         function loadFromStorage() {
             try {
+                const storedId = localStorage.getItem(CURRENT_PROJ_ID_KEY);
+                if (storedId) currentProjectId = storedId;
+
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (!raw) return;
                 const parsed = JSON.parse(raw);
@@ -973,7 +1046,7 @@
         }
 
         /* =========================================================================
-           GARIS BANTU PRESISI (DENGAN GRID 3X3 RULE OF THIRDS)
+           GARIS BANTU PRESISI
            ========================================================================= */
         function openPanelBleed() {
             const html = `
@@ -1069,7 +1142,7 @@
         }
 
         /* =========================================================================
-           LATAR BELAKANG POSTER (ZOOM EKSTRA & GESER BESAR)
+           LATAR BELAKANG POSTER
            ========================================================================= */
         function openPanelBackground() {
             const s = getCurrentSlide();
@@ -1087,10 +1160,10 @@
                         <button class="btn-sub-tool" onclick="removeBgImage()" style="color:#ff6b6b;">🗑️ Hapus Foto</button>
                     </div>
 
-                    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin:14px 0 6px;">📐 PENGATURAN POSISI & ZOOM EKSTRA:</div>
+                    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin:14px 0 6px;">📐 POSISI & ZOOM:</div>
 
                     <div class="ctrl-row">
-                        <span class="ctrl-label">Zoom Latar (Hingga 500%):</span>
+                        <span class="ctrl-label">Zoom Latar:</span>
                         <span class="ctrl-val" id="bgScaleVal">${Math.round((bg.scale || 1.0) * 100)}%</span>
                         <button class="btn-reset-tool" onclick="updateBgPosition('scale', 100); document.getElementById('bgScaleSlider').value=100;">↺ 100%</button>
                     </div>
@@ -1121,10 +1194,10 @@
                     </div>
 
                     <div class="ctrl-grid-btns" style="margin-top:8px;">
-                        <button class="btn-sub-tool" onclick="setBgPresetPosition('center')">🎯 Pusat Tengah</button>
+                        <button class="btn-sub-tool" onclick="setBgPresetPosition('center')">🎯 Tengah</button>
                         <button class="btn-sub-tool" onclick="setBgPresetPosition('top')">⬆️ Atas</button>
                         <button class="btn-sub-tool" onclick="setBgPresetPosition('bottom')">⬇️ Bawah</button>
-                        <button class="btn-sub-tool" onclick="setBgPresetPosition('reset')">↺ Reset Posisi</button>
+                        <button class="btn-sub-tool" onclick="setBgPresetPosition('reset')">↺ Reset</button>
                     </div>
 
                     <div style="font-size:11px;font-weight:700;color:#aaa;margin:14px 0 6px;">EFEK OVERLAY & BLUR:</div>
@@ -1157,7 +1230,7 @@
                         <input type="color" value="${bg.color2 || '#090807'}" onchange="updateBgColor('color2', this.value)">
                     </div>
                     <div class="ctrl-row" style="margin-top:10px;">
-                        <span class="ctrl-label">Preset Gradasi Elegan:</span>
+                        <span class="ctrl-label">Preset Gradasi:</span>
                     </div>
                     <div class="ctrl-grid-btns" style="margin-top:6px;">
                         <button class="btn-sub-tool" onclick="setBgPreset('#241a14', '#0d0a08')">☕ Kopi Emas</button>
@@ -1297,7 +1370,7 @@
             return font.replace(/['"]/g, '').trim();
         }
 
-        function getWrappedLines(ctx, text, maxWidth, el) {
+        function getWrappedLines(targetCtx, text, maxWidth, el) {
             if (!maxWidth || maxWidth <= 0) maxWidth = 750;
             const paragraphs = text.split('\n');
             const lines = [];
@@ -1320,8 +1393,8 @@
 
                         const fStyle = run.italic ? 'italic' : (el.fontStyle || 'normal');
                         const fWeight = run.bold ? '900' : (el.fontWeight || 'normal');
-                        ctx.font = `${fStyle} ${fWeight} ${el.fontSize}px ${getCleanFont(el.fontFamily)}`;
-                        const wMetrics = ctx.measureText(wordWithSpace);
+                        targetCtx.font = `${fStyle} ${fWeight} ${el.fontSize}px ${getCleanFont(el.fontFamily)}`;
+                        const wMetrics = targetCtx.measureText(wordWithSpace);
                         const addSpacing = (el.letterSpacing || 0) * wordWithSpace.length;
                         const wordW = wMetrics.width + addSpacing;
 
@@ -1363,8 +1436,8 @@
 
             if (s.elements) {
                 s.elements.forEach(el => {
-                    if (el.type === 'text') renderTextElement(el);
-                    else if (el.type === 'image') renderImageElement(el);
+                    if (el.type === 'text') renderTextElement(ctx, el);
+                    else if (el.type === 'image') renderImageElement(ctx, el);
                 });
             }
 
@@ -1402,30 +1475,31 @@
             }
         }
 
-        function renderTextElement(el) {
-            ctx.save();
-            ctx.translate(el.x, el.y);
+        function renderTextElement(targetCtx, el) {
+            targetCtx.save();
+            targetCtx.translate(el.x, el.y);
 
-            if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
+            if (el.rotation) targetCtx.rotate((el.rotation * Math.PI) / 180);
             if (el.italicSlant) {
                 const rad = (el.italicSlant * Math.PI) / 180;
-                ctx.transform(1, 0, Math.tan(rad), 1, 0, 0);
+                targetCtx.transform(1, 0, Math.tan(rad), 1, 0, 0);
             }
 
-            ctx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+            targetCtx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
 
             const fontSize = el.fontSize;
             const lineHeight = fontSize * (el.lineHeight || 1.3);
             const cleanFont = getCleanFont(el.fontFamily);
             const maxBoxWidth = el.width || 750;
 
-            const linesOfRuns = getWrappedLines(ctx, el.text, maxBoxWidth, el);
+            const linesOfRuns = getWrappedLines(targetCtx, el.text, maxBoxWidth, el);
             const totalHeight = linesOfRuns.length * lineHeight;
             el._calculatedHeight = totalHeight;
 
+            // Pastikan teks melengkung dirender baik di layar maupun saat diekspor
             if (el.curveAngle && Math.abs(el.curveAngle) >= 3) {
-                renderCurvedTextLine(el, linesOfRuns, cleanFont);
-                ctx.restore();
+                renderCurvedTextLine(targetCtx, el, linesOfRuns, cleanFont);
+                targetCtx.restore();
                 return;
             }
 
@@ -1439,8 +1513,8 @@
                 lineRuns.forEach(r => {
                     const fStyle = r.italic ? 'italic' : (el.fontStyle || 'normal');
                     const fWeight = r.bold ? '900' : (el.fontWeight || 'normal');
-                    ctx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
-                    totalLineWidth += ctx.measureText(r.text).width + (letterSpace * r.text.length);
+                    targetCtx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
+                    totalLineWidth += targetCtx.measureText(r.text).width + (letterSpace * r.text.length);
                 });
 
                 let startX = -(totalLineWidth / 2);
@@ -1448,98 +1522,99 @@
                 else if (el.textAlign === 'right') startX = (maxBoxWidth / 2) - totalLineWidth;
 
                 if (el.highlightColor && el.highlightColor !== 'transparent') {
-                    ctx.save();
-                    ctx.fillStyle = el.highlightColor;
-                    ctx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.4);
+                    targetCtx.save();
+                    targetCtx.fillStyle = el.highlightColor;
+                    targetCtx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.4);
                     const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
-                    ctx.beginPath();
-                    ctx.roundRect(startX - 8, lineY - (lineHeight / 2) + 2, totalLineWidth + 16, lineHeight - 4, radius);
-                    ctx.fill();
-                    ctx.restore();
+                    targetCtx.beginPath();
+                    targetCtx.roundRect(startX - 8, lineY - (lineHeight / 2) + 2, totalLineWidth + 16, lineHeight - 4, radius);
+                    targetCtx.fill();
+                    targetCtx.restore();
                 }
 
                 let curX = startX;
                 lineRuns.forEach(run => {
                     if (!run.text) return;
 
-                    ctx.save();
+                    targetCtx.save();
                     const fStyle = run.italic ? 'italic' : (el.fontStyle || 'normal');
                     const fWeight = run.bold ? '900' : (el.fontWeight || 'normal');
-                    ctx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'middle';
+                    targetCtx.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
+                    targetCtx.textAlign = 'left';
+                    targetCtx.textBaseline = 'middle';
 
                     let displayText = run.text;
                     if (el.textTransform === 'uppercase') displayText = displayText.toUpperCase();
                     else if (el.textTransform === 'lowercase') displayText = displayText.toLowerCase();
                     else if (el.textTransform === 'capitalize') displayText = displayText.replace(/\b[a-z]/g, l => l.toUpperCase());
 
-                    const runMetrics = ctx.measureText(displayText);
+                    const runMetrics = targetCtx.measureText(displayText);
                     const runW = runMetrics.width + (letterSpace * displayText.length);
 
                     if (run.highlight) {
-                        ctx.save();
-                        ctx.fillStyle = el.highlightColor && el.highlightColor !== 'transparent' ? el.highlightColor : '#FFE259';
-                        ctx.globalAlpha = 0.55;
+                        targetCtx.save();
+                        targetCtx.fillStyle = el.highlightColor && el.highlightColor !== 'transparent' ? el.highlightColor : '#FFE259';
+                        targetCtx.globalAlpha = 0.55;
                         const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
-                        ctx.beginPath();
-                        ctx.roundRect(curX - 4, lineY - (lineHeight / 2) + 3, runW + 8, lineHeight - 6, radius);
-                        ctx.fill();
-                        ctx.restore();
+                        targetCtx.beginPath();
+                        targetCtx.roundRect(curX - 4, lineY - (lineHeight / 2) + 3, runW + 8, lineHeight - 6, radius);
+                        targetCtx.fill();
+                        targetCtx.restore();
                     }
 
                     if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                        ctx.shadowColor = el.shadow.color;
-                        ctx.shadowBlur = el.shadow.blur || 0;
+                        targetCtx.shadowColor = el.shadow.color;
+                        targetCtx.shadowBlur = el.shadow.blur || 0;
                         const rad = (el.shadow.angle || 45) * Math.PI / 180;
                         const dist = el.shadow.distance || 0;
-                        ctx.shadowOffsetX = Math.cos(rad) * dist;
-                        ctx.shadowOffsetY = Math.sin(rad) * dist;
+                        targetCtx.shadowOffsetX = Math.cos(rad) * dist;
+                        targetCtx.shadowOffsetY = Math.sin(rad) * dist;
                     }
 
                     if (el.textSkinImg && el.textSkinImg.complete) {
-                        drawTextWithSkinImageFull(ctx, displayText, curX, lineY, runW, fontSize, el);
+                        drawTextWithSkinImageFull(targetCtx, displayText, curX, lineY, runW, fontSize, el);
                     } else {
-                        ctx.fillStyle = el.color || '#fff';
+                        targetCtx.fillStyle = el.color || '#fff';
                         if (letterSpace === 0) {
-                            ctx.fillText(displayText, curX, lineY);
+                            targetCtx.fillText(displayText, curX, lineY);
                         } else {
                             let charX = curX;
                             for (let c = 0; c < displayText.length; c++) {
                                 const ch = displayText[c];
-                                ctx.fillText(ch, charX, lineY);
-                                charX += ctx.measureText(ch).width + letterSpace;
+                                targetCtx.fillText(ch, charX, lineY);
+                                charX += targetCtx.measureText(ch).width + letterSpace;
                             }
                         }
 
                         if (el.borderWidth && el.borderWidth > 0) {
-                            ctx.lineWidth = el.borderWidth * 2;
-                            ctx.strokeStyle = el.borderColor || '#D4AF37';
-                            if (el.borderBlur) ctx.filter = `blur(${el.borderBlur}px)`;
-                            ctx.strokeText(displayText, curX, lineY);
+                            targetCtx.lineWidth = el.borderWidth * 2;
+                            targetCtx.strokeStyle = el.borderColor || '#D4AF37';
+                            if (el.borderBlur) targetCtx.filter = `blur(${el.borderBlur}px)`;
+                            targetCtx.strokeText(displayText, curX, lineY);
                         }
                     }
 
                     if (el.textDecoration === 'underline' || run.underline) {
-                        ctx.save();
-                        ctx.strokeStyle = el.color || '#fff';
-                        ctx.lineWidth = Math.max(2, fontSize * 0.06);
-                        ctx.beginPath();
-                        ctx.moveTo(curX, lineY + (fontSize * 0.45));
-                        ctx.lineTo(curX + runW, lineY + (fontSize * 0.45));
-                        ctx.stroke();
-                        ctx.restore();
+                        targetCtx.save();
+                        targetCtx.strokeStyle = el.color || '#fff';
+                        targetCtx.lineWidth = Math.max(2, fontSize * 0.06);
+                        targetCtx.beginPath();
+                        targetCtx.moveTo(curX, lineY + (fontSize * 0.45));
+                        targetCtx.lineTo(curX + runW, lineY + (fontSize * 0.45));
+                        targetCtx.stroke();
+                        targetCtx.restore();
                     }
 
-                    ctx.restore();
+                    targetCtx.restore();
                     curX += runW;
                 });
             });
 
-            ctx.restore();
+            targetCtx.restore();
         }
 
-        function renderCurvedTextLine(el, linesOfRuns, cleanFont) {
+        // FUNGSI LENGKUNG TEKS BEKERJA DI KANVAS EDITOR MAUPUN EXPORT
+        function renderCurvedTextLine(targetCtx, el, linesOfRuns, cleanFont) {
             let fullText = '';
             linesOfRuns.forEach(lineRuns => lineRuns.forEach(r => fullText += r.text));
             if (!fullText) return;
@@ -1551,11 +1626,11 @@
             const len = fullText.length;
             const fWeight = el.fontWeight || 'bold';
             const fStyle = el.fontStyle || 'normal';
-            ctx.font = `${fStyle} ${fWeight} ${el.fontSize}px ${cleanFont}`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            targetCtx.font = `${fStyle} ${fWeight} ${el.fontSize}px ${cleanFont}`;
+            targetCtx.textAlign = 'center';
+            targetCtx.textBaseline = 'middle';
 
-            const totalTextWidth = ctx.measureText(fullText).width + ((el.letterSpacing || 0) * len);
+            const totalTextWidth = targetCtx.measureText(fullText).width + ((el.letterSpacing || 0) * len);
             const radius = Math.max(120, totalTextWidth / Math.abs(angleRad));
 
             const isDownward = el.curveAngle > 0;
@@ -1571,26 +1646,26 @@
                 const charX = radius * Math.cos(curA);
                 const charY = circleCenterY + (radius * Math.sin(curA));
 
-                ctx.save();
-                ctx.translate(charX, charY);
+                targetCtx.save();
+                targetCtx.translate(charX, charY);
                 const rotA = isDownward ? (curA + Math.PI / 2) : (curA - Math.PI / 2);
-                ctx.rotate(rotA);
+                targetCtx.rotate(rotA);
 
                 if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                    ctx.shadowColor = el.shadow.color;
-                    ctx.shadowBlur = el.shadow.blur || 0;
+                    targetCtx.shadowColor = el.shadow.color;
+                    targetCtx.shadowBlur = el.shadow.blur || 0;
                 }
 
-                ctx.fillStyle = el.color || '#fff';
-                ctx.fillText(ch, 0, 0);
+                targetCtx.fillStyle = el.color || '#fff';
+                targetCtx.fillText(ch, 0, 0);
 
                 if (el.borderWidth && el.borderWidth > 0) {
-                    ctx.lineWidth = el.borderWidth * 2;
-                    ctx.strokeStyle = el.borderColor || '#D4AF37';
-                    ctx.strokeText(ch, 0, 0);
+                    targetCtx.lineWidth = el.borderWidth * 2;
+                    targetCtx.strokeStyle = el.borderColor || '#D4AF37';
+                    targetCtx.strokeText(ch, 0, 0);
                 }
 
-                ctx.restore();
+                targetCtx.restore();
             }
         }
 
@@ -1629,7 +1704,7 @@
             targetCtx.drawImage(offscreen, x - 10, y - (offH / 2));
         }
 
-        function renderImageElement(el) {
+        function renderImageElement(targetCtx, el) {
             if (!el.img || !el.img.complete) {
                 if (el.src || el.imgSrc) {
                     el.img = getImageFromCache(el.src || el.imgSrc);
@@ -1640,32 +1715,31 @@
             const w = el.width || 300;
             const h = el.height || 300;
 
-            ctx.save();
-            ctx.translate(el.x, el.y);
+            targetCtx.save();
+            targetCtx.translate(el.x, el.y);
 
-            if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
-            ctx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
-            ctx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+            if (el.rotation) targetCtx.rotate((el.rotation * Math.PI) / 180);
+            targetCtx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
+            targetCtx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
 
             if (el.blur && el.blur > 0) {
-                ctx.filter = `blur(${el.blur}px)`;
+                targetCtx.filter = `blur(${el.blur}px)`;
             }
 
             if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                ctx.shadowColor = el.shadow.color;
-                ctx.shadowBlur = el.shadow.blur || 0;
+                targetCtx.shadowColor = el.shadow.color;
+                targetCtx.shadowBlur = el.shadow.blur || 0;
                 const rad = (el.shadow.angle || 45) * Math.PI / 180;
                 const dist = el.shadow.distance || 0;
-                ctx.shadowOffsetX = Math.cos(rad) * dist;
-                ctx.shadowOffsetY = Math.sin(rad) * dist;
+                targetCtx.shadowOffsetX = Math.cos(rad) * dist;
+                targetCtx.shadowOffsetY = Math.sin(rad) * dist;
             }
 
             const radius = el.cornerRadius || 0;
-            ctx.beginPath();
-            ctx.roundRect(-w / 2, -h / 2, w, h, radius);
-            ctx.clip();
+            targetCtx.beginPath();
+            targetCtx.roundRect(-w / 2, -h / 2, w, h, radius);
+            targetCtx.clip();
 
-            // FITUR WARNA FULL PNG / TINT OVERLAY (LOGO JADI PUTIH, EMAS, DLL)
             if (el.colorOverlay && el.colorOverlay !== 'none') {
                 const offscreen = document.createElement('canvas');
                 offscreen.width = w;
@@ -1675,23 +1749,23 @@
                 octx.globalCompositeOperation = 'source-in';
                 octx.fillStyle = el.colorOverlay;
                 octx.fillRect(0, 0, w, h);
-                ctx.drawImage(offscreen, -w / 2, -h / 2, w, h);
+                targetCtx.drawImage(offscreen, -w / 2, -h / 2, w, h);
             } else {
-                ctx.drawImage(el.img, -w / 2, -h / 2, w, h);
+                targetCtx.drawImage(el.img, -w / 2, -h / 2, w, h);
             }
 
             if (el.borderWidth && el.borderWidth > 0 && el.borderColor) {
-                ctx.lineWidth = el.borderWidth * 2;
-                ctx.strokeStyle = el.borderColor;
-                if (el.borderBlur) ctx.filter = `blur(${el.borderBlur}px)`;
-                ctx.stroke();
+                targetCtx.lineWidth = el.borderWidth * 2;
+                targetCtx.strokeStyle = el.borderColor;
+                if (el.borderBlur) targetCtx.filter = `blur(${el.borderBlur}px)`;
+                targetCtx.stroke();
             }
 
-            ctx.restore();
+            targetCtx.restore();
         }
 
         /* =========================================================================
-           SELECTION & DIRECT INTERACTION ENGINE
+           SELECTION & DIRECT INTERACTION
            ========================================================================= */
         function selectElement(elId) {
             activeElementId = elId;
@@ -1702,6 +1776,7 @@
 
         function deselectElement() {
             activeElementId = null;
+            editingElementId = null;
             selBox.classList.remove('active');
             closeInlineTextEditor();
             renderBottomToolbar();
@@ -1741,11 +1816,14 @@
         }
 
         /* =========================================================================
-           IN-PLACE DIRECT KEYBOARD INPUT
+           IN-PLACE DIRECT TRANSPARENT TEXT EDITOR (LANGSUNG DI ATAS POSTER)
            ========================================================================= */
         function setupInlineTextEvents() {
+            // Mencegah teks tertukar dengan selalu merujuk editingElementId
             inlineTextInput.addEventListener('input', () => {
-                const el = getActiveElement();
+                if (!editingElementId) return;
+                const s = getCurrentSlide();
+                const el = s.elements.find(e => e.id === editingElementId);
                 if (el && el.type === 'text') {
                     el.text = inlineTextInput.value;
                     renderAll();
@@ -1760,31 +1838,40 @@
         }
 
         function openInlineTextEditor(el) {
+            if (!el || el.type !== 'text') return;
             isEditingText = true;
+            editingElementId = el.id;
             selBox.classList.remove('active');
 
-            const domW = Math.max(300, (el.width || 750) * canvasScale);
-            const domH = Math.max(130, ((el._calculatedHeight || 120) * canvasScale) + 50);
-            const domX = Math.max(10, (el.x * canvasScale) - (domW / 2));
-            const domY = Math.max(10, (el.y * canvasScale) - (domH / 2));
+            const domW = (el.width || 750) * canvasScale;
+            const domH = Math.max(80, ((el._calculatedHeight || 100) * canvasScale) + 30);
+            const domX = (el.x * canvasScale) - (domW / 2);
+            const domY = (el.y * canvasScale) - (domH / 2);
 
             inlineTextInput.style.width = `${domW}px`;
             inlineTextInput.style.height = `${domH}px`;
             inlineTextInput.style.left = `${domX}px`;
             inlineTextInput.style.top = `${domY}px`;
+            inlineTextInput.style.fontFamily = getCleanFont(el.fontFamily);
+            inlineTextInput.style.fontSize = `${Math.max(14, el.fontSize * canvasScale)}px`;
+            inlineTextInput.style.textAlign = el.textAlign || 'center';
+            inlineTextInput.style.color = el.color || '#fff';
             inlineTextInput.value = el.text;
             inlineTextInput.style.display = 'block';
             inlineTextToolbar.classList.add('active');
 
             setTimeout(() => {
                 if (inlineTextInput && inlineTextInput.focus) inlineTextInput.focus();
-                if (inlineTextInput && inlineTextInput.setSelectionRange) inlineTextInput.setSelectionRange(el.text.length, el.text.length);
-            }, 60);
+                if (inlineTextInput && inlineTextInput.setSelectionRange) {
+                    inlineTextInput.setSelectionRange(el.text.length, el.text.length);
+                }
+            }, 50);
         }
 
         function closeInlineTextEditor() {
             if (!isEditingText) return;
             isEditingText = false;
+            editingElementId = null;
             inlineTextInput.style.display = 'none';
             inlineTextToolbar.classList.remove('active');
             requestRender();
@@ -1804,7 +1891,8 @@
             inlineTextInput.selectionStart = start + tagOpen.length;
             inlineTextInput.selectionEnd = end + tagOpen.length;
 
-            const el = getActiveElement();
+            const s = getCurrentSlide();
+            const el = s.elements.find(e => e.id === editingElementId);
             if (el) {
                 el.text = inlineTextInput.value;
                 requestRender();
@@ -1823,7 +1911,8 @@
             inlineTextInput.selectionStart = start;
             inlineTextInput.selectionEnd = end;
 
-            const el = getActiveElement();
+            const s = getCurrentSlide();
+            const el = s.elements.find(e => e.id === editingElementId);
             if (el) {
                 el.text = inlineTextInput.value;
                 requestRender();
@@ -1833,7 +1922,7 @@
         /* =========================================================================
            DRAGGING, CORNER RESIZE & CANVA STALK ENGINE
            ========================================================================= */
-        let dragMode = null; // 'move', 'resize-handle', 'stalk-move', 'stalk-rotate'
+        let dragMode = null;
         let activeHandle = null;
         let startPointer = { x: 0, y: 0 };
         let startElementState = {};
@@ -1878,7 +1967,6 @@
                 });
             }
 
-            // Direct Handle Resizing (Corners & Edges)
             document.querySelectorAll('.sel-handle, .sel-handle-edge').forEach(h => {
                 h.addEventListener('pointerdown', (e) => {
                     const el = getActiveElement();
@@ -2038,6 +2126,7 @@
             if (!el) {
                 bar.innerHTML = `
                     <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
+                    <button class="tool-btn" onclick="openPanelOnlineAssets()"><span class="icon">🔍✨</span><span>Cari Elemen</span></button>
                     <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
                     <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
                     <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
@@ -2097,9 +2186,127 @@
         }
 
         /* =========================================================================
-           PANEL-PANEL FITUR & SETTINGS DETAIL
+           FITUR BARU: CARI ELEMEN PNG & FOTO GRATIS (ALA CANVA)
            ========================================================================= */
-        // 1. UKURAN TEKS HINGGA 500px
+        function openPanelOnlineAssets() {
+            const html = `
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <input type="text" id="assetSearchInput" class="asset-search-input" placeholder="Cari elemen PNG, ornamen, masjid, bingkai..." onkeydown="if(event.key==='Enter') executeAssetSearch()">
+                    <button class="btn-nav active" onclick="executeAssetSearch()" style="border-radius:19px;padding:0 14px;">Cari</button>
+                </div>
+                <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none;">
+                    <span class="tag-pill" onclick="quickSearchAsset('islamic ornament')">🕌 Ornamen Islami</span>
+                    <span class="tag-pill" onclick="quickSearchAsset('gold frame')">🖼️ Bingkai Emas</span>
+                    <span class="tag-pill" onclick="quickSearchAsset('bismillah calligraphic')">📜 Kaligrafi</span>
+                    <span class="tag-pill" onclick="quickSearchAsset('gold star')">⭐ Bintang Emas</span>
+                    <span class="tag-pill" onclick="quickSearchAsset('arabic lantern')">🏮 Lentera</span>
+                    <span class="tag-pill" onclick="quickSearchAsset('kaaba')">🕋 Ka'bah</span>
+                </div>
+                <div class="asset-grid" id="assetResultsContainer">
+                    <div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#888;">
+                        Ketik kata kunci atau pilih tag di atas untuk mencari elemen grafis gratis.
+                    </div>
+                </div>
+            `;
+            openToolPanel('Pencarian Elemen & Foto Gratis', html);
+        }
+
+        function quickSearchAsset(query) {
+            const inp = document.getElementById('assetSearchInput');
+            if (inp) inp.value = query;
+            executeAssetSearch();
+        }
+
+        async function executeAssetSearch() {
+            const inp = document.getElementById('assetSearchInput');
+            const q = inp ? inp.value.trim() : '';
+            if (!q) return;
+
+            const grid = document.getElementById('assetResultsContainer');
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#D4AF37;">🔍 Sedang mencari elemen...</div>';
+
+            try {
+                // Menggunakan API Wikimedia Commons (Mendukung CORS penuh, bebas royalti & tanpa API Key)
+                const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q + ' filetype:bitmap OR filetype:drawing')}&gsrlimit=24&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=250&format=json&origin=*`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.query || !data.query.pages) {
+                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#aaa;">Tidak ditemukan elemen. Coba kata kunci bahasa Inggris (misal: "islamic", "gold badge").</div>';
+                    return;
+                }
+
+                const pages = Object.values(data.query.pages);
+                grid.innerHTML = '';
+                pages.forEach(p => {
+                    if (p.imageinfo && p.imageinfo[0]) {
+                        const thumb = p.imageinfo[0].thumburl || p.imageinfo[0].url;
+                        const full = p.imageinfo[0].url;
+                        const item = document.createElement('div');
+                        item.className = 'asset-item';
+                        item.innerHTML = `<img src="${thumb}" loading="lazy" alt="Asset">`;
+                        item.onclick = () => insertOnlineAssetToPoster(full);
+                        grid.appendChild(item);
+                    }
+                });
+            } catch (err) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#ff6b6b;">Gagal memuat elemen. Pastikan koneksi internet aktif.</div>';
+            }
+        }
+
+        function insertOnlineAssetToPoster(imageUrl) {
+            showToast('⏳ Memasukkan elemen ke poster...');
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const s = getCurrentSlide();
+                const maxInit = 500;
+                let initW = img.width;
+                let initH = img.height;
+                if (initW > maxInit || initH > maxInit) {
+                    const ratio = Math.min(maxInit / initW, maxInit / initH);
+                    initW *= ratio;
+                    initH *= ratio;
+                }
+
+                const newEl = {
+                    id: 'el_' + Date.now(),
+                    type: 'image',
+                    img: img,
+                    src: imageUrl,
+                    x: mainCanvas.width / 2,
+                    y: mainCanvas.height / 2,
+                    width: Math.round(initW),
+                    height: Math.round(initH),
+                    origWidth: img.width,
+                    origHeight: img.height,
+                    flipH: false,
+                    flipV: false,
+                    cornerRadius: 0,
+                    borderWidth: 0,
+                    borderColor: '#D4AF37',
+                    colorOverlay: 'none',
+                    blur: 0,
+                    shadow: { color: 'transparent', blur: 0, angle: 45, distance: 0 },
+                    opacity: 1,
+                    locked: false,
+                    groupId: null
+                };
+
+                s.elements.push(newEl);
+                selectElement(newEl.id);
+                renderAll();
+                pushHistoryState();
+                closeToolPanel();
+                showToast('✅ Elemen berhasil ditambahkan!');
+            };
+            img.onerror = () => showToast('⚠️ Gagal mengunduh gambar ini karena proteksi domain.');
+            img.src = imageUrl;
+        }
+
+        /* =========================================================================
+           PANEL DETAIL & PENGATURAN
+           ========================================================================= */
         function openPanelFontSize() {
             const el = getActiveElement();
             if (!el) return;
@@ -2133,7 +2340,6 @@
             }
         }
 
-        // 2. UKURAN PNG HINGGA 2500px
         let lockImageAspect = true;
         function openPanelImageSize() {
             const el = getActiveElement();
@@ -2225,7 +2431,6 @@
             openPanelImageSize();
         }
 
-        // 3. FITUR UBAH WARNA FULL PNG / LOGO (COLOR TINT OVERLAY)
         function openPanelPngColorOverlay() {
             const el = getActiveElement();
             if (!el || el.type !== 'image') return;
@@ -2261,7 +2466,6 @@
             openPanelPngColorOverlay();
         }
 
-        // 4. FITUR BLUR KHUSUS PNG / FOTO
         function openPanelImageBlur() {
             const el = getActiveElement();
             if (!el || el.type !== 'image') return;
@@ -2288,7 +2492,6 @@
             }
         }
 
-        // 5. TRANSPARANSI ELEMEN (NORMAL & BEKERJA PENUH)
         function openPanelOpacity() {
             const el = getActiveElement();
             if (!el) return;
@@ -2316,7 +2519,6 @@
             }
         }
 
-        // 6. EYEDROPPER BERTANGKAI TINGGI (TANGAN TIDAK MENUTUPI AREA)
         let eyedropperTarget = 'text';
         function triggerEyeDropper(targetProp) {
             eyedropperTarget = targetProp;
@@ -2334,7 +2536,6 @@
             loupe.style.display = 'block';
 
             function onPointerMove(e) {
-                // Geser loupe 90px di atas posisi jari agar tidak tertutup jempol
                 loupe.style.left = (e.clientX - 40) + 'px';
                 loupe.style.top = (e.clientY - 110) + 'px';
 
@@ -2383,7 +2584,6 @@
             else if (eyedropperTarget === 'pngOverlay') openPanelPngColorOverlay();
         }
 
-        // 7. TOOL GABUNG (GROUPING) MULTI-SELECT & PERSISTENSI
         function openPanelGroup() {
             const s = getCurrentSlide();
             const curr = getActiveElement();
@@ -2463,7 +2663,6 @@
             showToast('⛓️ Grup berhasil dipisahkan!');
         }
 
-        // 8. POSISI PRESISI 9-TITIK & DPAD JOYSTICK
         function openPanelPosition() {
             const el = getActiveElement();
             if (!el) return;
@@ -2484,7 +2683,7 @@
                     <button class="btn-pos-cell" onclick="setAlignPosition('bottom-right')">↘️ Kanan Bawah</button>
                 </div>
 
-                <div style="font-size:11px;color:#aaa;font-weight:700;margin:12px 0 6px;">JOYSTICK GESER (TAHAN UNTUK GESER CEPAT)</div>
+                <div style="font-size:11px;color:#aaa;font-weight:700;margin:12px 0 6px;">JOYSTICK GESER</div>
                 <div class="dpad-container">
                     <button class="dpad-btn" onpointerdown="startDpadContinuous(0, -nudgeStep)" onpointerup="stopDpadContinuous()" onpointerleave="stopDpadContinuous()">▲</button>
                     <div class="dpad-row">
@@ -2580,7 +2779,6 @@
             document.getElementById('nudgeStepLabel').innerText = `${nudgeStep} px`;
         }
 
-        // 9. PANEL WARNA TEKS
         function openPanelTextColor() {
             const el = getActiveElement();
             if (!el) return;
@@ -2606,7 +2804,6 @@
             if (el) { el.color = c; requestRender(); pushHistoryState(); openPanelTextColor(); }
         }
 
-        // 10. PANEL FONT FAMILY
         function openPanelFontFamily() {
             const el = getActiveElement();
             if (!el) return;
@@ -2633,7 +2830,6 @@
             }
         }
 
-        // 11. PANEL ROTASI DEDIKASI
         function openPanelRotation() {
             const el = getActiveElement();
             if (!el) return;
@@ -2668,7 +2864,6 @@
             requestRender(); pushHistoryState();
         }
 
-        // 12. PANEL JARAK TEKS
         function openPanelSpacing() {
             const el = getActiveElement();
             if (!el) return;
@@ -2716,7 +2911,6 @@
             }
         }
 
-        // 13. PANEL LENGKUNG BUSUR & KEMIRINGAN SLANT
         function openPanelCurveAndSlant() {
             const el = getActiveElement();
             if (!el || el.type !== 'text') return;
@@ -2760,7 +2954,6 @@
             requestRender(); pushHistoryState();
         }
 
-        // 14. PANEL FORMAT TEKS & ALIGNMENT
         function openPanelTextFormat() {
             const el = getActiveElement();
             if (!el) return;
@@ -2806,7 +2999,6 @@
             renderAll(); pushHistoryState(); openPanelTextFormat();
         }
 
-        // 15. PANEL STABILO
         function openPanelHighlight() {
             const el = getActiveElement();
             if (!el) return;
@@ -2843,7 +3035,6 @@
             if (el) { el.highlightColor = c; renderAll(); pushHistoryState(); openPanelHighlight(); }
         }
 
-        // 16. PANEL SKIN FOTO TEKS
         function openPanelTextSkin() {
             const el = getActiveElement();
             if (!el || el.type !== 'text') return;
@@ -2867,7 +3058,7 @@
                         <input type="range" class="ctrl-slider" min="-500" max="500" value="${el.textSkinOffsetY || 0}" oninput="updateTextSkinOffset('y', this.value)">
                     </div>
                 ` : `
-                    <div style="font-size:11px;color:#888;margin-top:8px;">💡 Masukkan gambar pola api, emas, atau marmer untuk dijadikan skin tekstur di dalam huruf!</div>
+                    <div style="font-size:11px;color:#888;margin-top:8px;">💡 Masukkan pola emas, marmer, atau api sebagai isi font.</div>
                 `}
             `;
             openToolPanel('Skin Foto Teks', html);
@@ -2911,7 +3102,6 @@
             pushHistoryState();
         }
 
-        // 17. PANEL BAYANGAN (SHADOW & GLOW)
         function openPanelShadowAndGlass() {
             const el = getActiveElement();
             if (!el) return;
@@ -2967,7 +3157,6 @@
             requestRender(); pushHistoryState(); openPanelShadowAndGlass();
         }
 
-        // 18. PANEL CERMIN & GARIS TEPI GAMBAR
         function openPanelImageFlip() {
             const el = getActiveElement();
             const html = `
@@ -3025,7 +3214,6 @@
             renderAll(); pushHistoryState(); openPanelImageBorder();
         }
 
-        // 19. DAFTAR LAPISAN LAYER (TOMBOL PINDAH URUTAN & DRAG)
         function openPanelLayers() {
             const s = getCurrentSlide();
             let html = '<div class="layer-list-container">';
@@ -3063,7 +3251,6 @@
             openPanelLayers();
         }
 
-        // 20. ELEMEN TAMBAHAN (TEXT & IMAGE)
         function addNewText() {
             const s = getCurrentSlide();
             const newEl = {
@@ -3073,9 +3260,9 @@
                 x: mainCanvas.width / 2,
                 y: mainCanvas.height / 2,
                 width: 600,
-                fontFamily: "Plus Jakarta Sans, sans-serif",
-                fontSize: 52,
-                fontWeight: 'bold',
+                fontFamily: "Outfit, sans-serif",
+                fontSize: 56,
+                fontWeight: '800',
                 fontStyle: 'normal',
                 textDecoration: 'none',
                 textAlign: 'center',
@@ -3087,6 +3274,7 @@
                 highlightAlpha: 0.5,
                 opacity: 1,
                 rotation: 0,
+                curveAngle: 0,
                 locked: false,
                 groupId: null,
                 shadow: { color: 'rgba(0,0,0,0.8)', blur: 10, angle: 45, distance: 4 }
@@ -3262,7 +3450,7 @@
         }
 
         /* =========================================================================
-           PROJEK MANAGER (BERVARIASI RASIO PADA THUMBNAIL)
+           PROJECT MANAGER (TERISOLASI & TIDAK MERESET DATA LAIN)
            ========================================================================= */
         function getProjectsList() {
             try {
@@ -3278,6 +3466,7 @@
         }
 
         function openProjectModal() {
+            saveCurrentProjectAuto();
             renderProjectList();
             document.getElementById('projectModal').classList.add('active');
         }
@@ -3294,7 +3483,7 @@
             if (!p) {
                 p = {
                     id: currentProjectId || ('proj_' + Date.now()),
-                    name: customName || ('Projek Dakwah ' + (list.length + 1)),
+                    name: customName || ('Projek ' + (list.length + 1)),
                     ratio: currentRatio,
                     slideCount: slides.length,
                     thumb: thumb,
@@ -3320,7 +3509,7 @@
             container.innerHTML = '';
 
             if (list.length === 0) {
-                saveCurrentProjectAuto('Projek Dakwah 1');
+                saveCurrentProjectAuto('Projek 1');
                 list = getProjectsList();
             }
 
@@ -3345,14 +3534,17 @@
         }
 
         function createNewProjectPrompt() {
-            const name = prompt('Nama projek baru:', 'Projek Dakwah ' + (getProjectsList().length + 1));
+            const name = prompt('Nama projek baru:', 'Projek Baru ' + (getProjectsList().length + 1));
             if (!name) return;
             saveCurrentProjectAuto();
             currentProjectId = 'proj_' + Date.now();
+            localStorage.setItem(CURRENT_PROJ_ID_KEY, currentProjectId);
+
             slides = [createDefaultSlide()];
             currentSlideIndex = 0;
             currentRatio = '4:5';
             document.getElementById('currentRatioLabel').innerText = '4:5';
+
             adjustArtboardSize();
             renderAll();
             renderCarouselThumbs();
@@ -3366,6 +3558,7 @@
             const name = prompt('Nama salinan projek:', 'Salinan ' + (new Date().toLocaleTimeString()));
             if (!name) return;
             currentProjectId = 'proj_' + Date.now();
+            localStorage.setItem(CURRENT_PROJ_ID_KEY, currentProjectId);
             saveCurrentProjectAuto(name);
             renderProjectList();
             showToast(`✅ Disimpan sebagai projek baru!`);
@@ -3378,10 +3571,13 @@
             if (!p) return;
 
             currentProjectId = p.id;
+            localStorage.setItem(CURRENT_PROJ_ID_KEY, currentProjectId);
+
             currentRatio = p.ratio || '4:5';
             document.getElementById('currentRatioLabel').innerText = currentRatio;
             slides = deserializeSlides(p.slides || []);
             currentSlideIndex = 0;
+
             adjustArtboardSize();
             renderAll();
             renderCarouselThumbs();
@@ -3421,7 +3617,7 @@
         }
 
         /* =========================================================================
-           EKSPOR RESOLUSI ULTRA HD & PRO MAX
+           EKSPOR RESOLUSI ULTRA HD & PRO MAX 4K (DENGAN FIX TEKS MELENGKUNG)
            ========================================================================= */
         function exportPoster() {
             deselectElement();
@@ -3442,14 +3638,14 @@
 
             if (s.elements) {
                 s.elements.forEach(el => {
-                    if (el.type === 'text') renderTextElementOnCtx(ectx, el);
-                    else if (el.type === 'image') renderImageElementOnCtx(ectx, el);
+                    if (el.type === 'text') renderTextElement(ectx, el);
+                    else if (el.type === 'image') renderImageElement(ectx, el);
                 });
             }
 
             setTimeout(() => {
                 const link = document.createElement('a');
-                link.download = `poster-dakwah-${currentRatio.replace(':', '-')}-${Date.now()}.jpg`;
+                link.download = `poster-desain-${currentRatio.replace(':', '-')}-${Date.now()}.jpg`;
                 link.href = exportCanvas.toDataURL('image/jpeg', 0.98);
                 link.click();
                 showToast('✅ Berhasil diunduh dengan kualitas terbaik!');
@@ -3480,141 +3676,6 @@
                 c.fillStyle = `rgba(0,0,0,${bg.darken})`;
                 c.fillRect(0, 0, W, H);
             }
-        }
-
-        function renderTextElementOnCtx(c, el) {
-            c.save();
-            c.translate(el.x, el.y);
-            if (el.rotation) c.rotate((el.rotation * Math.PI) / 180);
-            if (el.italicSlant) {
-                const rad = (el.italicSlant * Math.PI) / 180;
-                c.transform(1, 0, Math.tan(rad), 1, 0, 0);
-            }
-            c.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
-            const fontSize = el.fontSize;
-            const lineHeight = fontSize * (el.lineHeight || 1.3);
-            const cleanFont = getCleanFont(el.fontFamily);
-            const maxBoxWidth = el.width || 750;
-            const linesOfRuns = getWrappedLines(c, el.text, maxBoxWidth, el);
-            const totalHeight = linesOfRuns.length * lineHeight;
-
-            let startY = -(totalHeight / 2) + (lineHeight / 2);
-            const letterSpace = el.letterSpacing || 0;
-
-            linesOfRuns.forEach((lineRuns, idx) => {
-                const lineY = startY + (idx * lineHeight);
-                let totalLineWidth = 0;
-                lineRuns.forEach(r => {
-                    const fStyle = r.italic ? 'italic' : (el.fontStyle || 'normal');
-                    const fWeight = r.bold ? '900' : (el.fontWeight || 'normal');
-                    c.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
-                    totalLineWidth += c.measureText(r.text).width + (letterSpace * r.text.length);
-                });
-
-                let startX = -(totalLineWidth / 2);
-                if (el.textAlign === 'left') startX = -(maxBoxWidth / 2);
-                else if (el.textAlign === 'right') startX = (maxBoxWidth / 2) - totalLineWidth;
-
-                if (el.highlightColor && el.highlightColor !== 'transparent') {
-                    c.save();
-                    c.fillStyle = el.highlightColor;
-                    c.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.4);
-                    const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
-                    c.beginPath();
-                    c.roundRect(startX - 8, lineY - (lineHeight / 2) + 2, totalLineWidth + 16, lineHeight - 4, radius);
-                    c.fill();
-                    c.restore();
-                }
-
-                let curX = startX;
-                lineRuns.forEach(run => {
-                    if (!run.text) return;
-                    c.save();
-                    const fStyle = run.italic ? 'italic' : (el.fontStyle || 'normal');
-                    const fWeight = run.bold ? '900' : (el.fontWeight || 'normal');
-                    c.font = `${fStyle} ${fWeight} ${fontSize}px ${cleanFont}`;
-                    c.textAlign = 'left';
-                    c.textBaseline = 'middle';
-
-                    let displayText = run.text;
-                    if (el.textTransform === 'uppercase') displayText = displayText.toUpperCase();
-                    else if (el.textTransform === 'lowercase') displayText = displayText.toLowerCase();
-                    else if (el.textTransform === 'capitalize') displayText = displayText.replace(/\b[a-z]/g, l => l.toUpperCase());
-
-                    const runMetrics = c.measureText(displayText);
-                    const runW = runMetrics.width + (letterSpace * displayText.length);
-
-                    if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                        c.shadowColor = el.shadow.color;
-                        c.shadowBlur = el.shadow.blur || 0;
-                        const rad = (el.shadow.angle || 45) * Math.PI / 180;
-                        const dist = el.shadow.distance || 0;
-                        c.shadowOffsetX = Math.cos(rad) * dist;
-                        c.shadowOffsetY = Math.sin(rad) * dist;
-                    }
-
-                    if (el.textSkinImg && el.textSkinImg.complete) {
-                        drawTextWithSkinImageFull(c, displayText, curX, lineY, runW, fontSize, el);
-                    } else {
-                        c.fillStyle = el.color || '#fff';
-                        if (letterSpace === 0) {
-                            c.fillText(displayText, curX, lineY);
-                        } else {
-                            let charX = curX;
-                            for (let chIdx = 0; chIdx < displayText.length; chIdx++) {
-                                const ch = displayText[chIdx];
-                                c.fillText(ch, charX, lineY);
-                                charX += c.measureText(ch).width + letterSpace;
-                            }
-                        }
-                    }
-                    c.restore();
-                    curX += runW;
-                });
-            });
-            c.restore();
-        }
-
-        function renderImageElementOnCtx(c, el) {
-            if (!el.img || !el.img.complete) return;
-            const w = el.width || 300;
-            const h = el.height || 300;
-            c.save();
-            c.translate(el.x, el.y);
-            if (el.rotation) c.rotate((el.rotation * Math.PI) / 180);
-            c.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
-            c.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
-
-            if (el.blur && el.blur > 0) c.filter = `blur(${el.blur}px)`;
-
-            if (el.shadow && el.shadow.color && el.shadow.color !== 'transparent') {
-                c.shadowColor = el.shadow.color;
-                c.shadowBlur = el.shadow.blur || 0;
-                const rad = (el.shadow.angle || 45) * Math.PI / 180;
-                const dist = el.shadow.distance || 0;
-                c.shadowOffsetX = Math.cos(rad) * dist;
-                c.shadowOffsetY = Math.sin(rad) * dist;
-            }
-
-            const radius = el.cornerRadius || 0;
-            c.beginPath();
-            c.roundRect(-w / 2, -h / 2, w, h, radius);
-            c.clip();
-
-            if (el.colorOverlay && el.colorOverlay !== 'none') {
-                const offscreen = document.createElement('canvas');
-                offscreen.width = w;
-                offscreen.height = h;
-                const octx = offscreen.getContext('2d');
-                octx.drawImage(el.img, 0, 0, w, h);
-                octx.globalCompositeOperation = 'source-in';
-                octx.fillStyle = el.colorOverlay;
-                octx.fillRect(0, 0, w, h);
-                c.drawImage(offscreen, -w / 2, -h / 2, w, h);
-            } else {
-                c.drawImage(el.img, -w / 2, -h / 2, w, h);
-            }
-            c.restore();
         }
 
         window.onload = initApp;
