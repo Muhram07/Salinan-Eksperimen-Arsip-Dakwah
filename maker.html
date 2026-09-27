@@ -1,46 +1,41 @@
-<!-- Berikut adalah kode program lengkap dan ter-update dari Studio Poster Maker.
+<!-- Berikut adalah file kode HTML lengkap dan ter-update dari Studio Poster Maker.
 
-Seluruh fitur sebelumnya yang sudah pas tetap dipertahankan 100%, dan seluruh
-poin permintaan baru telah diimplementasikan secara komprehensif:
+Semua bug yang Anda sebutkan telah diperbaiki tuntas, dan seluruh fitur telah
+disempurnakan sesuai standar PixelLab & Canva:
 
-1.  Crop Bebas Distorsi (Canva & PixelLab Model): Pemotongan gambar kini
-    proporsional murni berdasarkan rasio piksel asli, sehingga foto tidak akan
-    gepeng ataupun meregang.
-2.  Skin/Tekstur Overlay untuk Foto & PNG: Semua foto/PNG kini bisa dipasangi
-    tekstur kulit (emas, marmer, api, motif) dengan pengaturan Blend Mode
-    (Overlay, Multiply, Screen, Soft Light) serta skala & opasitas.
-3.  Sistem Bayangan Mutakhir (PixelLab Style):
-      - Outer Shadow (bayangan luar dengan sudut, blur, dan jarak presisi).
-      - Inner Shadow (bayangan ke dalam bentuk teks atau siluet PNG).
-      - Emboss / 3D Bevel (efek timbul/pencahayaan bevel logam tiga dimensi).
-4.  Alat Perspektif 3D (PixelLab Style): Dilengkapi modal 4 pin sudut (Top-Left,
-    Top-Right, Bottom-Right, Bottom-Left) untuk membuat efek kemiringan ruang 3D
-    pada foto/grafis.
-5.  Ukuran Relatif, Posisi Relatif & Magnet Snapping (Canva & PixelLab):
-      - Ukuran Relatif: Mengatur lebar/tinggi gambar dalam satuan persentase (%)
-        terhadap kanvas secara instan.
-      - Posisi Relatif: Tombol perataan kilat ke tengah horizontal, tengah
-        vertikal, dan sudut-sudut kanvas.
-      - Magnet Snapping: Garis bantu magnetik aktif otomatis (cyan glow) saat
-        elemen ditarik mendekati sumbu tengah kanvas atau tepi batas poster.
-6.  Teks Rata Rapi Padat Kanan-Kiri (Justify ala Canva): Algoritma tipografi
-    perataan spasi kata presisi, menghasilkan blok teks padat kotak yang sangat
-    rapi seperti majalah/editorial Canva.
-7.  Penghapus Latar Otomatis (Auto Background Remover): Ekstraksi latar belakang
-    pintar (menghilangkan background putih, hitam, atau warna dominan menjadi
-    PNG transparan rapi) dengan kontrol toleransi dan kehalusan tepi
-    (feathering).
-8.  Fokus Lensa / DSLR Tilt-Shift Bokeh: Efek fokus fotografer profesional
-    (Radial / Lingkaran atau Linear / Garis) dengan bokeh latar belakang
-    bertransisi mulus.
-9.  Tangkap Ajaib (Canva Magic Grab): Kuas pintar interaktif untuk menyeleksi
-    subjek/orang pada foto dan mengekstraknya langsung menjadi elemen PNG
-    transparan terpisah.
-10. Peningkatan Resolusi Alami (Smart HD Enhancer): Peningkatan ketajaman
-    resolusi berbasis edge-preserving unsharp mask dan kontras mikro natural
-    tanpa membuat gambar pecah atau bergerigi.
+Rangkuman Perbaikan & Penambahan:
 
-Simpan seluruh kode di bawah ini ke dalam satu file (misalnya index.html): -->
+1.  Perbaikan Masif Semua Alat Toolbar (Font, Ukuran, Warna, Spasi,
+    Transparansi, Rotasi, Cermin, Garis Tepi, Blur):
+      - Mengatasi akar masalah hilangnya respon tombol toolbar akibat variable
+        scope pada event inline HTML. Kini ganti font, warna teks, ukuran
+        slider, jarak baris/huruf, dan transparansi kembali berfungsi lancar
+        seketika.
+2.  Bayangan Dalam (Inner Shadow) & Emboss 3D Nyata untuk Gambar / PNG
+    Transparan:
+      - Algoritma alpha-inversion mask dan directional contour highlight
+        diterapkan langsung pada kontur siluet transparan PNG (bukan lagi pada
+        kotak kanvas), sehingga foto potongan orang, kaligrafi, atau logo
+        memiliki efek kedalaman ruang dan timbul logam 3D seperti PixelLab.
+3.  Perspektif 3D Nyata (PixelLab Homography/Bilinear Mesh Warp):
+      - Fitur perspektif kini dilengkapi mesin bilinear mesh warp 16×16 murni.
+        Menarik 4 pin sudut (kiri, kanan, atas, bawah) langsung melengkungkan
+        dan memutar objek menghadap ke arah lain secara real-time.
+4.  Pencarian Elemen (PNG & Foto) Multi-Sumber (Wikimedia Commons + Curated
+    Library):
+      - Diperbarui menggunakan API Wikimedia Commons & Unsplash yang bebas
+        pemblokiran CORS, lengkap dengan tab instan elemen populer (Api,
+        Kaligrafi Emas, Cahaya/Lens Flare, Bintang, Bingkai, dsb) sehingga
+        gambar dijamin muncul dan langsung bisa ditambahkan ke poster.
+5.  Ukuran Relatif & Posisi Relatif Disempurnakan (PixelLab Style):
+      - Tinggi & Lebar Relatif: Sekarang bagian tinggi berfungsi penuh.
+      - Kunci Rasio (Lock Aspect Ratio): Ada tombol pengunci agar gambar bisa
+        diubah ukurannya secara proporsional bebas distorsi atau bebas
+        didistorsikan sesuai kebutuhan.
+      - Penuhi Layar: Menyediakan opsi Cover (rasio terjaga) dan Stretch
+        (distorsi memenuhi kanvas).
+      - Tata Letak Posisi Relatif: Tombol perataan kilat disusun secara spasial
+        (Atas, Bawah, Kiri, Kanan, Pas Tengah, dsb). -->
 
 <!DOCTYPE html>
 <html lang="id">
@@ -105,7 +100,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .tool-btn .icon{font-size:18px;line-height:1;}
 .tool-btn:hover,.tool-btn.active{background:rgba(212,175,55,.15);color:#D4AF37;}
 .tool-btn.home-btn{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;}
-.tool-panel{position:absolute;bottom:62px;left:0;right:0;max-height:350px;background:#181818;border-top:1px solid rgba(212,175,55,.3);border-radius:18px 18px 0 0;z-index:185;padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,.85);display:none;flex-direction:column;overflow-y:auto;gap:12px;animation:slideUpPanel .25s cubic-bezier(.16,1,.3,1);}
+.tool-panel{position:absolute;bottom:62px;left:0;right:0;max-height:360px;background:#181818;border-top:1px solid rgba(212,175,55,.3);border-radius:18px 18px 0 0;z-index:185;padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,.85);display:none;flex-direction:column;overflow-y:auto;gap:12px;animation:slideUpPanel .25s cubic-bezier(.16,1,.3,1);}
 .tool-panel.active{display:flex;}
 @keyframes slideUpPanel{from{transform:translateY(100%);}to{transform:translateY(0);}}
 .panel-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:8px;}
@@ -157,12 +152,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .btn-proj-action{flex:1;padding:4px 0;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#ddd;font-size:10px;cursor:pointer;}
 .btn-proj-action:hover{background:#D4AF37;color:#111;}
 .asset-search-input{width:100%;height:38px;background:#242424;border:1px solid rgba(212,175,55,.4);border-radius:19px;color:#fff;padding:0 14px;font-size:12px;}
-.tag-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:3px 10px;font-size:10px;color:#ddd;cursor:pointer;white-space:nowrap;}
-.tag-pill:hover{background:#D4AF37;color:#111;font-weight:bold;}
-.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;}
-.asset-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;padding:6px;position:relative;}
-.asset-item:hover{border-color:#D4AF37;transform:scale(1.05);}
-.asset-item img,.asset-item svg{max-width:100%;max-height:100%;object-fit:contain;}
+.tag-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:4px 10px;font-size:11px;color:#ddd;cursor:pointer;white-space:nowrap;}
+.tag-pill:hover,.tag-pill.active{background:#D4AF37;color:#111;font-weight:bold;}
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;}
+.asset-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;padding:4px;position:relative;}
+.asset-item:hover{border-color:#D4AF37;transform:scale(1.04);}
+.asset-item img{max-width:100%;max-height:100%;object-fit:contain;}
 .layer-list-container{display:flex;flex-direction:column;gap:6px;}
 .layer-item{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;}
 .layer-item.active{border-color:#D4AF37;color:#D4AF37;font-weight:bold;}
@@ -173,13 +168,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .group-checkbox{width:18px;height:18px;accent-color:#D4AF37;}
 .toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(20,20,20,.92);border:1px solid #D4AF37;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;pointer-events:none;opacity:0;transition:.25s;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-/* Fullscreen Interactive Modals for Magic Grab & Perspective */
 .feature-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);z-index:9999;display:none;flex-direction:column;}
 .feature-modal.active{display:flex;}
 .fmodal-header{height:54px;border-bottom:1px solid rgba(212,175,55,.3);display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#141414;}
 .fmodal-body{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;}
 .fmodal-footer{height:66px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#141414;}
-.persp-pin{position:absolute;width:26px;height:26px;border-radius:50%;background:#D4AF37;border:3px solid #fff;box-shadow:0 0 10px rgba(0,0,0,.8);cursor:pointer;touch-action:none;transform:translate(-50%,-50%);z-index:10;}
+.persp-pin{position:absolute;width:28px;height:28px;border-radius:50%;background:#D4AF37;border:3px solid #fff;box-shadow:0 0 10px rgba(0,0,0,.8);cursor:pointer;touch-action:none;transform:translate(-50%,-50%);z-index:10;}
 </style>
 </head>
 <body>
@@ -309,21 +303,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 </div>
 
-<!-- MODAL PERSPEKTIF 3D PIXELLAB -->
+<!-- MODAL PERSPEKTIF 3D PIXELLAB (4 PIN BILINEAR MESH) -->
 <div class="feature-modal" id="perspectiveModal">
 <div class="fmodal-header">
-<div style="font-weight:800;color:#D4AF37;font-size:13px;">📐 Perspektif 3D (Tarik 4 Sudut)</div>
+<div style="font-weight:800;color:#D4AF37;font-size:13px;">📐 Perspektif 3D (Tarik Sudut Bebas)</div>
 <button class="panel-close" onclick="closePerspectiveModal()">✕</button>
 </div>
 <div class="fmodal-body" id="perspectiveBody">
-<canvas id="perspectiveCanvas"></canvas>
+<canvas id="perspectiveCanvas" style="max-width:85%;max-height:80%;box-shadow:0 0 25px rgba(0,0,0,.9);border-radius:6px;"></canvas>
 <div class="persp-pin" id="pinTL"></div>
 <div class="persp-pin" id="pinTR"></div>
 <div class="persp-pin" id="pinBR"></div>
 <div class="persp-pin" id="pinBL"></div>
 </div>
 <div class="fmodal-footer">
-<button class="btn-nav" onclick="resetPerspectivePins()">↺ Reset</button>
+<button class="btn-nav" onclick="resetPerspectivePins()">↺ Reset Posisi</button>
 <button class="btn-nav btn-download" onclick="applyPerspectiveWarp()">✅ Terapkan Perspektif</button>
 </div>
 </div>
@@ -335,7 +329,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="panel-close" onclick="closeMagicGrabModal()">✕</button>
 </div>
 <div class="fmodal-body" id="magicGrabBody">
-<canvas id="magicGrabCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;"></canvas>
+<canvas id="magicGrabCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
 </div>
 <div class="fmodal-footer">
 <div style="display:flex;align-items:center;gap:10px;">
@@ -351,9 +345,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* ========== CORE STATE ========== */
-const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V6';
-const PROJECTS_KEY='MAKER_STUDIO_ALL_PROJECTS_V6';
-const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V6';
+const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V7';
+const PROJECTS_KEY='MAKER_STUDIO_ALL_PROJECTS_V7';
+const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V7';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
 
 const RATIO_PRESETS={
@@ -402,6 +396,7 @@ let currentProjectId='proj_default';
 let bleedSettings={margin:5,color:'#D4AF37'};
 let activeGuideMode='none';
 let nudgeStep=10;
+let lockRelativeRatio=true;
 
 const imageCache=new Map();
 function getImageFromCache(src){
@@ -840,7 +835,6 @@ return trimmed;
 return parts.join(', ');
 }
 
-// Algoritma Pengukur Baris dengan Deteksi Akhir Paragraf untuk Text Justify
 function getWrappedLines(targetCtx,text,maxWidth,el){
 if(!maxWidth||maxWidth<=0)maxWidth=750;
 const paragraphs=text.split('\n');
@@ -921,7 +915,7 @@ ctx.fillRect(0,0,W,H);
 if(bg.darken>0){ctx.fillStyle=`rgba(0,0,0,${bg.darken})`;ctx.fillRect(0,0,W,H);}
 }
 
-/* ========== RENDER TEKS (DENGAN JUSTIFY + EMBOSS) ========== */
+/* ========== RENDER TEKS (JUSTIFY + EMBOSS + INNER SHADOW) ========== */
 function renderTextElement(targetCtx,el){
 targetCtx.save();
 targetCtx.translate(el.x,el.y);
@@ -1001,7 +995,6 @@ else if(el.textTransform==='lowercase')displayText=displayText.toLowerCase();
 const runMetrics=targetCtx.measureText(displayText);
 const runW=runMetrics.width+(letterSpace*displayText.length);
 
-// Stabilo Kata
 if(run.highlight){
 targetCtx.save();
 targetCtx.fillStyle=el.highlightColor&&el.highlightColor!=='transparent'?el.highlightColor:'#FFE259';
@@ -1013,7 +1006,6 @@ targetCtx.fill();
 targetCtx.restore();
 }
 
-// Outer Shadow
 if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
 targetCtx.shadowColor=el.shadow.color;
 targetCtx.shadowBlur=el.shadow.blur||0;
@@ -1023,7 +1015,6 @@ targetCtx.shadowOffsetX=Math.cos(rad)*dist;
 targetCtx.shadowOffsetY=Math.sin(rad)*dist;
 }
 
-// Emboss 3D Light Pass
 if(el.emboss&&el.emboss.active){
 targetCtx.save();
 targetCtx.fillStyle=el.emboss.highlightColor||'rgba(255,255,255,0.7)';
@@ -1053,7 +1044,6 @@ targetCtx.strokeText(displayText,curX,lineY);
 }
 }
 
-// Inner Shadow Text Simulation
 if(el.innerShadow&&el.innerShadow.color&&el.innerShadow.color!=='transparent'){
 targetCtx.save();
 targetCtx.lineWidth=el.innerShadow.blur||4;
@@ -1141,14 +1131,13 @@ octx.drawImage(skin,dx,dy,drawW,drawH);
 targetCtx.drawImage(offscreen,x-10,y-(offH/2));
 }
 
-/* ========== RENDER IMAGE LENGKAP: CROP TANPA DISTORSI + SKIN OVERLAY + FOCUS BLUR ========== */
+/* ========== RENDER IMAGE LENGKAP: CROP, INNER SHADOW, EMBOSS 3D ========== */
 function renderImageElement(targetCtx,el){
 if(!el.img||!el.img.complete){
 if(el.src||el.imgSrc){el.img=getImageFromCache(el.src||el.imgSrc);}
 if(!el.img||!el.img.complete)return;
 }
 
-// 1. HITUNG CROP BEBAS DISTORSI (CANVA & PIXELLAB MODEL)
 const cropL=el.cropL||0;
 const cropR=el.cropR||0;
 const cropT=el.cropT||0;
@@ -1161,7 +1150,6 @@ const sy=el.img.height*(cropT/100);
 const sWidth=el.img.width*visWFrac;
 const sHeight=el.img.height*visHFrac;
 
-// Dimensi gambar proporsional terhadap porsi terpotong (Mencegah Distorsi)
 const baseW=el.width||300;
 const baseH=el.height||300;
 const finalDrawW=Math.round(baseW*visWFrac);
@@ -1186,13 +1174,11 @@ targetCtx.shadowOffsetX=Math.cos(rad)*dist;
 targetCtx.shadowOffsetY=Math.sin(rad)*dist;
 }
 
-// Kanvas Offscreen Gambar Utama
 const off=document.createElement('canvas');
 off.width=finalDrawW;
 off.height=finalDrawH;
 const octx=off.getContext('2d');
 
-// Sudut Lengkung
 const radius=Math.min(el.cornerRadius||0,Math.min(finalDrawW,finalDrawH)/2);
 if(radius>0){
 octx.beginPath();
@@ -1200,7 +1186,6 @@ octx.roundRect(0,0,finalDrawW,finalDrawH,radius);
 octx.clip();
 }
 
-// 2. FOKUS OTOMATIS / TILT-SHIFT DSLR DEPTH OF FIELD
 if(el.depthFocus&&el.depthFocus.active){
 renderTiltShiftDepthBlur(octx,el.img,sx,sy,sWidth,sHeight,finalDrawW,finalDrawH,el.depthFocus);
 }else{
@@ -1209,14 +1194,13 @@ octx.drawImage(el.img,sx,sy,sWidth,sHeight,0,0,finalDrawW,finalDrawH);
 octx.filter='none';
 }
 
-// 3. SILUET WARNA FULL (PNG COLOR OVERLAY)
 if(el.colorOverlay&&el.colorOverlay!=='none'){
 octx.globalCompositeOperation='source-in';
 octx.fillStyle=el.colorOverlay;
 octx.fillRect(0,0,finalDrawW,finalDrawH);
 }
 
-// 4. FITUR SKIN OVERLAY TEKSTUR KHUSUS GAMBAR/PNG (SEPERTI SKIN TEKS)
+// SKIN OVERLAY PADA FOTO / PNG
 if(el.imageSkinImg&&el.imageSkinImg.complete){
 const sOff=document.createElement('canvas');
 sOff.width=finalDrawW;
@@ -1238,35 +1222,18 @@ octx.drawImage(sOff,0,0);
 octx.restore();
 }
 
-// 5. EMBOSS 3D BEVEL UNTUK GAMBAR
-if(el.emboss&&el.emboss.active){
-octx.save();
-octx.globalCompositeOperation='source-atop';
-octx.lineWidth=3;
-octx.strokeStyle=el.emboss.highlightColor||'rgba(255,255,255,0.7)';
-octx.strokeRect(-1,-1,finalDrawW,finalDrawH);
-octx.strokeStyle=el.emboss.shadowColor||'rgba(0,0,0,0.8)';
-octx.strokeRect(1,1,finalDrawW,finalDrawH);
-octx.restore();
-}
-
-// 6. INNER SHADOW GAMBAR (PIXELLAB MODEL)
+// INNER SHADOW SEJATI PADA SILUET TRANSPARAN PNG
 if(el.innerShadow&&el.innerShadow.color&&el.innerShadow.color!=='transparent'){
-octx.save();
-octx.globalCompositeOperation='source-atop';
-octx.lineWidth=el.innerShadow.blur||10;
-octx.shadowColor=el.innerShadow.color;
-octx.shadowBlur=el.innerShadow.blur||10;
-octx.shadowOffsetX=el.innerShadow.offsetX||3;
-octx.shadowOffsetY=el.innerShadow.offsetY||3;
-octx.strokeRect(-5,-5,finalDrawW+10,finalDrawH+10);
-octx.restore();
+applySilhouetteInnerShadow(octx,finalDrawW,finalDrawH,el.innerShadow);
 }
 
-// Draw Offscreen to Main Canvas
+// EMBOSS 3D NYATA PADA KONTUR TRANSPARAN PNG
+if(el.emboss&&el.emboss.active){
+applySilhouetteEmboss(octx,finalDrawW,finalDrawH,el.emboss);
+}
+
 targetCtx.drawImage(off,-finalDrawW/2,-finalDrawH/2,finalDrawW,finalDrawH);
 
-// Border Garis Tepi
 if(el.borderWidth&&el.borderWidth>0&&el.borderColor){
 targetCtx.beginPath();
 targetCtx.roundRect(-finalDrawW/2,-finalDrawH/2,finalDrawW,finalDrawH,radius);
@@ -1278,23 +1245,74 @@ targetCtx.stroke();
 targetCtx.restore();
 }
 
+/* Helper Inner Shadow Siluet Transparan PNG */
+function applySilhouetteInnerShadow(targetCtx,w,h,ish){
+const blur=ish.blur||8;
+const ox=ish.offsetX||3;
+const oy=ish.offsetY||3;
+const temp=document.createElement('canvas');
+temp.width=w;temp.height=h;
+const tctx=temp.getContext('2d');
+tctx.fillStyle='#000';
+tctx.fillRect(0,0,w,h);
+tctx.globalCompositeOperation='destination-out';
+tctx.drawImage(targetCtx.canvas,0,0);
+
+targetCtx.save();
+targetCtx.globalCompositeOperation='source-atop';
+targetCtx.shadowColor=ish.color||'rgba(0,0,0,0.85)';
+targetCtx.shadowBlur=blur;
+targetCtx.shadowOffsetX=ox;
+targetCtx.shadowOffsetY=oy;
+targetCtx.drawImage(temp,0,0);
+targetCtx.restore();
+}
+
+/* Helper Emboss 3D Siluet Transparan PNG */
+function applySilhouetteEmboss(targetCtx,w,h,em){
+const depth=em.depth||2.5;
+const hl=document.createElement('canvas');
+hl.width=w;hl.height=h;
+const hctx=hl.getContext('2d');
+hctx.drawImage(targetCtx.canvas,0,0);
+hctx.globalCompositeOperation='source-out';
+hctx.drawImage(targetCtx.canvas,depth,depth);
+
+const sh=document.createElement('canvas');
+sh.width=w;sh.height=h;
+const sctx=sh.getContext('2d');
+sctx.drawImage(targetCtx.canvas,0,0);
+sctx.globalCompositeOperation='source-out';
+sctx.drawImage(targetCtx.canvas,-depth,-depth);
+
+targetCtx.save();
+targetCtx.globalCompositeOperation='source-atop';
+hctx.globalCompositeOperation='source-in';
+hctx.fillStyle=em.highlightColor||'rgba(255,255,255,0.85)';
+hctx.fillRect(0,0,w,h);
+targetCtx.drawImage(hl,0,0);
+
+sctx.globalCompositeOperation='source-in';
+sctx.fillStyle=em.shadowColor||'rgba(0,0,0,0.85)';
+sctx.fillRect(0,0,w,h);
+targetCtx.drawImage(sh,0,0);
+targetCtx.restore();
+}
+
 /* ========== FOKUS LENSA DSLR / TILT-SHIFT ENGINE ========== */
 function renderTiltShiftDepthBlur(targetCtx,img,sx,sy,sw,sh,dw,dh,focusData){
 const sharpCanvas=document.createElement('canvas');
-sharpCanvas.width=dw;
-sharpCanvas.height=dh;
+sharpCanvas.width=dw;sharpCanvas.height=dh;
 sharpCanvas.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,dw,dh);
 
 const blurCanvas=document.createElement('canvas');
-blurCanvas.width=dw;
-blurCanvas.height=dh;
+blurCanvas.width=dw;blurCanvas.height=dh;
 const bctx=blurCanvas.getContext('2d');
 bctx.filter=`blur(${focusData.blurAmount||14}px)`;
 bctx.drawImage(img,sx,sy,sw,sh,0,0,dw,dh);
 
 const maskCanvas=document.createElement('canvas');
-maskCanvas.width=dw;
-maskCanvas.height=dh;
+maskCanvas.width=dw;maskCanvas.height=dh;
 const mctx=maskCanvas.getContext('2d');
 
 if(focusData.mode==='linear'){
@@ -1317,9 +1335,7 @@ mctx.fillStyle=grad;
 mctx.fillRect(0,0,dw,dh);
 }
 
-// Gambar dasar tajam
 targetCtx.drawImage(sharpCanvas,0,0);
-// Gabungkan blur menggunakan mask transisi
 bctx.globalCompositeOperation='destination-in';
 bctx.drawImage(maskCanvas,0,0);
 targetCtx.drawImage(blurCanvas,0,0);
@@ -1534,7 +1550,6 @@ if(dragMode==='move'||dragMode==='stalk-move'){
 let targetX=Math.round(startElementState.x+deltaX);
 let targetY=Math.round(startElementState.y+deltaY);
 
-// FITUR MAGNET CANVA (MAGNETIC SNAPPING KE TENGAH & TEPI)
 const snapThreshold=12;
 const W=mainCanvas.width;
 const H=mainCanvas.height;
@@ -1649,7 +1664,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelCropImage()" style="color:#4CAF50;"><span class="icon">✂️</span><span>Crop Presisi</span></button>
 <button class="tool-btn" onclick="openPanelImageSkinOverlay()" style="color:#FFE259;"><span class="icon">🎭</span><span>Skin Foto</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
-<button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif</span></button>
+<button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">⚖️</span><span>Ukuran Relatif</span></button>
 <button class="tool-btn" onclick="openPanelAutoBgRemover()"><span class="icon">🪄</span><span>Hapus BG</span></button>
 <button class="tool-btn" onclick="openMagicGrabModal()"><span class="icon">✨</span><span>Tangkap Ajaib</span></button>
@@ -1679,7 +1694,7 @@ document.getElementById('toolPanel').classList.add('active');
 }
 function closeToolPanel(){document.getElementById('toolPanel').classList.remove('active');}
 
-/* ========== 1. CROP PRESI BEBAS DISTORSI (CANVA/PIXELLAB) ========== */
+/* ========== 1. CROP PRESI BEBAS DISTORSI ========== */
 function openPanelCropImage(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -1687,7 +1702,7 @@ const cl=el.cropL||0,cr=el.cropR||0,ct=el.cropT||0,cb=el.cropB||0;
 const html=`
 <div style="padding:10px;background:rgba(76,175,80,.08);border-left:3px solid #4CAF50;border-radius:6px;font-size:11px;color:#ddd;line-height:1.4;">
 ✂️ <b>Potong Gambar (Tanpa Distorsi):</b><br>
-Gambar dipotong secara proporsional sesuai rasio piksel aslinya tanpa ketarik ataupun meregang.
+Gambar dipotong proporsional sesuai rasio piksel aslinya tanpa gepeng ataupun meregang.
 </div>
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Potong Kiri:</span><span class="ctrl-val" id="valCropL">${cl}%</span></div>
 <div class="stepper-row">
@@ -1717,7 +1732,6 @@ Gambar dipotong secara proporsional sesuai rasio piksel aslinya tanpa ketarik at
 `;
 openToolPanel('✂️ Potong Presisi (Crop)',html);
 }
-
 function updateCropNoDistort(side,val){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -1842,7 +1856,7 @@ const el=getActiveElement();
 if(!el)return;
 if(!el.shadow)el.shadow={color:'rgba(0,0,0,0.8)',blur:15,distance:8,angle:45};
 if(!el.innerShadow)el.innerShadow={color:'transparent',blur:8,offsetX:3,offsetY:3};
-if(!el.emboss)el.emboss={active:false,highlightColor:'rgba(255,255,255,0.7)',shadowColor:'rgba(0,0,0,0.85)'};
+if(!el.emboss)el.emboss={active:false,depth:2.5,highlightColor:'rgba(255,255,255,0.7)',shadowColor:'rgba(0,0,0,0.85)'};
 
 const html=`
 <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">PILIH EFEK RUANG:</div>
@@ -1851,7 +1865,6 @@ const html=`
 <button class="btn-sub-tool" onclick="switchShadowSubTab('inner')">🕳️ Dalam (Inner)</button>
 <button class="btn-sub-tool" onclick="switchShadowSubTab('emboss')">✨ Emboss 3D</button>
 </div>
-
 <div id="shadowSubContent" style="margin-top:12px;"></div>
 `;
 openToolPanel('👥 Bayangan & Efek 3D',html);
@@ -1911,7 +1924,13 @@ container.innerHTML=`
 <span style="font-size:12px;font-weight:700;">Status Emboss 3D</span>
 <button class="btn-sub-tool ${em.active?'active':''}" onclick="toggleEmbossStatus()">${em.active?'Aktif':'Mati'}</button>
 </div>
-<div style="font-size:11px;color:#888;margin-top:10px;">Memberikan lekukan bayangan cahaya specular seperti cetakan emas & logam mulia timbul PixelLab.</div>
+<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kedalaman Bevel:</span><span class="ctrl-val" id="valEmDepth">${em.depth||2.5}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('emDepthSlider',-0.5,updateEmbossDepth)">-</button>
+<input type="range" class="ctrl-slider" id="emDepthSlider" min="1" max="10" step="0.5" value="${em.depth||2.5}" oninput="updateEmbossDepth(this.value)">
+<button class="btn-step" onclick="stepSliderVal('emDepthSlider',0.5,updateEmbossDepth)">+</button>
+</div>
+<div style="font-size:11px;color:#888;margin-top:10px;">Memberikan lekukan bayangan cahaya specular seperti cetakan logam mulia timbul PixelLab pada siluet PNG Anda.</div>
 `;
 }
 }
@@ -1938,7 +1957,7 @@ function updateInnerShadowBlur(v){
 const el=getActiveElement();
 if(!el)return;
 el.innerShadow.blur=parseInt(v);
-if(!el.innerShadow.color||el.innerShadow.color==='transparent')el.innerShadow.color='rgba(0,0,0,0.8)';
+if(!el.innerShadow.color||el.innerShadow.color==='transparent')el.innerShadow.color='rgba(0,0,0,0.85)';
 document.getElementById('valIShBlur').innerText=v+'px';
 requestRender();
 debouncedPushHistory();
@@ -1959,10 +1978,19 @@ requestRender();
 pushHistoryState();
 switchShadowSubTab('emboss');
 }
+function updateEmbossDepth(v){
+const el=getActiveElement();
+if(!el)return;
+el.emboss.depth=parseFloat(v);
+document.getElementById('valEmDepth').innerText=v+'px';
+requestRender();
+debouncedPushHistory();
+}
 
-/* ========== 4. PERSPEKTIF 3D PIXELLAB (4 CORNER WARPING) ========== */
+/* ========== 4. PERSPEKTIF 3D NYATA (BILINEAR MESH WARP PIXELLAB) ========== */
 let perspPins={tl:{x:0,y:0},tr:{x:0,y:0},br:{x:0,y:0},bl:{x:0,y:0}};
 let activePerspPin=null;
+let perspCanvasOffscreen=null;
 
 function openPerspectiveModal(){
 const el=getActiveElement();
@@ -1971,14 +1999,17 @@ const modal=document.getElementById('perspectiveModal');
 modal.classList.add('active');
 
 const canvas=document.getElementById('perspectiveCanvas');
-const pctx=canvas.getContext('2d');
-const baseW=Math.min(window.innerWidth*0.8,400);
-const aspect=el.img.height/el.img.width;
-canvas.width=baseW;
-canvas.height=baseW*aspect;
+const maxDim=Math.min(window.innerWidth*0.8,420);
+const aspect=(el.img.height||300)/(el.img.width||300);
+canvas.width=maxDim;
+canvas.height=Math.round(maxDim*aspect);
+
+perspCanvasOffscreen=document.createElement('canvas');
+perspCanvasOffscreen.width=canvas.width;
+perspCanvasOffscreen.height=canvas.height;
+perspCanvasOffscreen.getContext('2d').drawImage(el.img,0,0,canvas.width,canvas.height);
 
 resetPerspectivePins();
-renderPerspectiveModalView();
 setupPerspectivePinDragging();
 }
 
@@ -1988,14 +2019,15 @@ document.getElementById('perspectiveModal').classList.remove('active');
 
 function resetPerspectivePins(){
 const canvas=document.getElementById('perspectiveCanvas');
+const rect=canvas.getBoundingClientRect();
 perspPins={
-tl:{x:canvas.offsetLeft,y:canvas.offsetTop},
-tr:{x:canvas.offsetLeft+canvas.width,y:canvas.offsetTop},
-br:{x:canvas.offsetLeft+canvas.width,y:canvas.offsetTop+canvas.height},
-bl:{x:canvas.offsetLeft,y:canvas.offsetTop+canvas.height}
+tl:{x:rect.left,y:rect.top},
+tr:{x:rect.left+rect.width,y:rect.top},
+br:{x:rect.left+rect.width,y:rect.top+rect.height},
+bl:{x:rect.left,y:rect.top+rect.height}
 };
 updatePinDOM();
-renderPerspectiveModalView();
+renderPerspectiveModalWarp();
 }
 
 function updatePinDOM(){
@@ -2028,40 +2060,94 @@ if(!activePerspPin)return;
 perspPins[activePerspPin].x=e.clientX;
 perspPins[activePerspPin].y=e.clientY;
 updatePinDOM();
-renderPerspectiveModalView();
+renderPerspectiveModalWarp();
 });
 window.addEventListener('pointerup',()=>{activePerspPin=null;});
 }
 
-function renderPerspectiveModalView(){
-const el=getActiveElement();
+function renderPerspectiveModalWarp(){
 const canvas=document.getElementById('perspectiveCanvas');
-if(!canvas||!el)return;
+if(!canvas||!perspCanvasOffscreen)return;
 const pctx=canvas.getContext('2d');
 pctx.clearRect(0,0,canvas.width,canvas.height);
-pctx.drawImage(el.img,0,0,canvas.width,canvas.height);
+
+const rect=canvas.getBoundingClientRect();
+const p0={x:perspPins.tl.x-rect.left,y:perspPins.tl.y-rect.top};
+const p1={x:perspPins.tr.x-rect.left,y:perspPins.tr.y-rect.top};
+const p2={x:perspPins.br.x-rect.left,y:perspPins.br.y-rect.top};
+const p3={x:perspPins.bl.x-rect.left,y:perspPins.bl.y-rect.top};
+
+warpCanvasBilinear(perspCanvasOffscreen,pctx,p0,p1,p2,p3,16);
+}
+
+function warpCanvasBilinear(srcCanvas,dstCtx,p0,p1,p2,p3,grid=16){
+const w=srcCanvas.width;
+const h=srcCanvas.height;
+for(let y=0;y<grid;y++){
+const v0=y/grid;
+const v1=(y+1)/grid;
+for(let x=0;x<grid;x++){
+const u0=x/grid;
+const u1=(x+1)/grid;
+const q00=lerpPoint(p0,p1,p2,p3,u0,v0);
+const q10=lerpPoint(p0,p1,p2,p3,u1,v0);
+const q11=lerpPoint(p0,p1,p2,p3,u1,v1);
+const q01=lerpPoint(p0,p1,p2,p3,u0,v1);
+
+drawAffineTriangle(dstCtx,srcCanvas,
+u0*w,v0*h,u1*w,v0*h,u0*w,v1*h,
+q00.x,q00.y,q10.x,q10.y,q01.x,q01.y
+);
+drawAffineTriangle(dstCtx,srcCanvas,
+u1*w,v0*h,u1*w,v1*h,u0*w,v1*h,
+q10.x,q10.y,q11.x,q11.y,q01.x,q01.y
+);
+}
+}
+}
+
+function lerpPoint(p0,p1,p2,p3,u,v){
+const x=(1-u)*(1-v)*p0.x + u*(1-v)*p1.x + u*v*p2.x + (1-u)*v*p3.x;
+const y=(1-u)*(1-v)*p0.y + u*(1-v)*p1.y + u*v*p2.y + (1-u)*v*p3.y;
+return {x,y};
+}
+
+function drawAffineTriangle(ctx,im,x0,y0,x1,y1,x2,y2,u0,v0,u1,v1,u2,v2){
+ctx.save();
+ctx.beginPath();
+ctx.moveTo(u0,v0);
+ctx.lineTo(u1,v1);
+ctx.lineTo(u2,v2);
+ctx.closePath();
+ctx.clip();
+
+const delta=x0*(y1-y2) + x1*(y2-y0) + x2*(y0-y1);
+if(Math.abs(delta)>0.001){
+const a=(u0*(y1-y2) + u1*(y2-y0) + u2*(y0-y1))/delta;
+const c=(u0*(x2-x1) + u1*(x0-x2) + u2*(x1-x0))/delta;
+const e=(u0*(x1*y2 - x2*y1) + u1*(x2*y0 - x0*y2) + u2*(x0*y1 - x1*y0))/delta;
+const b=(v0*(y1-y2) + v1*(y2-y0) + v2*(y0-y1))/delta;
+const d=(v0*(x2-x1) + v1*(x0-x2) + v2*(x1-x0))/delta;
+const f=(v0*(x1*y2 - x2*y1) + v1*(x2*y0 - x0*y2) + v2*(x0*y1 - x1*y0))/delta;
+ctx.transform(a,b,c,d,e,f);
+ctx.drawImage(im,0,0);
+}
+ctx.restore();
 }
 
 function applyPerspectiveWarp(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
-// Terapkan warp ke offscreen canvas dan perbarui citra sumber elemen
 const canvas=document.getElementById('perspectiveCanvas');
-const off=document.createElement('canvas');
-off.width=canvas.width;
-off.height=canvas.height;
-const octx=off.getContext('2d');
-octx.drawImage(canvas,0,0);
-
-el.src=off.toDataURL();
+el.src=canvas.toDataURL('image/png');
 el.img=getImageFromCache(el.src);
 requestRender();
 pushHistoryState();
 closePerspectiveModal();
-showToast('✅ Perspektif diterapkan!');
+showToast('✅ Perspektif 3D diterapkan!');
 }
 
-/* ========== 5. RELATIF SIZE & RELATIF POSITION (PIXELLAB SUITE) ========== */
+/* ========== 5. RELATIF SIZE & RELATIF POSITION SPASIAL ========== */
 function openPanelRelativeSizeAndPos(){
 const el=getActiveElement();
 if(!el)return;
@@ -2071,33 +2157,53 @@ const curWPercent=Math.round(((el._renderedW||el.width)/W)*100);
 const curHPercent=Math.round(((el._renderedH||el.height||el._calculatedHeight)/H)*100);
 
 const html=`
-<div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:6px;">UKURAN RELATIF (% KANVAS):</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+<span style="font-size:11px;font-weight:700;color:#D4AF37;">UKURAN RELATIF (% KANVAS):</span>
+<button class="btn-sub-tool ${lockRelativeRatio?'active':''}" onclick="toggleRelativeAspectLock()" style="padding:4px 8px;flex-direction:row;">${lockRelativeRatio?'🔒 Rasio Terkunci':'🔓 Bebas Distorsi'}</button>
+</div>
 <div class="ctrl-row"><span class="ctrl-label">Lebar:</span><span class="ctrl-val" id="valRelW">${curWPercent}%</span></div>
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('relWSlider',-2,(v)=>updateRelativeDimension('w',v))">-</button>
-<input type="range" class="ctrl-slider" id="relWSlider" min="5" max="100" value="${curWPercent}" oninput="updateRelativeDimension('w',this.value)">
+<input type="range" class="ctrl-slider" id="relWSlider" min="5" max="150" value="${curWPercent}" oninput="updateRelativeDimension('w',this.value)">
 <button class="btn-step" onclick="stepSliderVal('relWSlider',2,(v)=>updateRelativeDimension('w',v))">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Tinggi:</span><span class="ctrl-val" id="valRelH">${curHPercent}%</span></div>
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('relHSlider',-2,(v)=>updateRelativeDimension('h',v))">-</button>
-<input type="range" class="ctrl-slider" id="relHSlider" min="5" max="100" value="${curHPercent}" oninput="updateRelativeDimension('h',this.value)">
+<input type="range" class="ctrl-slider" id="relHSlider" min="5" max="150" value="${curHPercent}" oninput="updateRelativeDimension('h',this.value)">
 <button class="btn-step" onclick="stepSliderVal('relHSlider',2,(v)=>updateRelativeDimension('h',v))">+</button>
 </div>
 
-<div style="font-size:11px;font-weight:700;color:#D4AF37;margin:14px 0 6px;">POSISI RELATIF KILAT (PIXELLAB):</div>
+<div style="font-size:11px;font-weight:700;color:#D4AF37;margin:12px 0 6px;">PENUHI LAYAR:</div>
 <div class="ctrl-grid-btns">
-<button class="btn-sub-tool" onclick="setRelativeAlign('center-h')">↔️ Tengah H</button>
-<button class="btn-sub-tool" onclick="setRelativeAlign('center-v')">↕️ Tengah V</button>
-<button class="btn-sub-tool active" onclick="setRelativeAlign('center-both')">🎯 Pas Tengah</button>
-<button class="btn-sub-tool" onclick="setRelativeAlign('top')">⬆️ Tepi Atas</button>
-<button class="btn-sub-tool" onclick="setRelativeAlign('bottom')">⬇️ Tepi Bawah</button>
-<button class="btn-sub-tool" onclick="setRelativeAlign('left')">⬅️ Tepi Kiri</button>
-<button class="btn-sub-tool" onclick="setRelativeAlign('right')">➡️ Tepi Kanan</button>
-<button class="btn-sub-tool" onclick="setRelativeAlign('fill')">🖼️ Penuhi Layar</button>
+<button class="btn-sub-tool active" onclick="fitScreenCover()">🖼️ Penuhi (Rasio Terjaga)</button>
+<button class="btn-sub-tool" onclick="fitScreenStretch()">📐 Penuhi (Distorsi Penuh)</button>
+</div>
+
+<div style="font-size:11px;font-weight:700;color:#D4AF37;margin:14px 0 6px;">POSISI RELATIF KILAT (SPASIAL PIXELLAB):</div>
+<div class="pos-grid-3x3">
+<button class="btn-pos-cell" onclick="setRelativeAlign('top-left')">↖️ Kiri Atas</button>
+<button class="btn-pos-cell" onclick="setRelativeAlign('top')">⬆️ Tepi Atas</button>
+<button class="btn-pos-cell" onclick="setRelativeAlign('top-right')">↗️ Kanan Atas</button>
+<button class="btn-pos-cell" onclick="setRelativeAlign('left')">⬅️ Tepi Kiri</button>
+<button class="btn-pos-cell active" onclick="setRelativeAlign('center-both')">🎯 Pas Tengah</button>
+<button class="btn-pos-cell" onclick="setRelativeAlign('right')">➡️ Tepi Kanan</button>
+<button class="btn-pos-cell" onclick="setRelativeAlign('bottom-left')">↙️ Kiri Bawah</button>
+<button class="btn-pos-cell" onclick="setRelativeAlign('bottom')">⬇️ Tepi Bawah</button>
+<button class="btn-pos-cell" onclick="setRelativeAlign('bottom-right')">↘️ Kanan Bawah</button>
+</div>
+<div class="ctrl-grid-btns" style="margin-top:6px;">
+<button class="btn-sub-tool" onclick="setRelativeAlign('center-h')">↔️ Tengah Horisontal</button>
+<button class="btn-sub-tool" onclick="setRelativeAlign('center-v')">↕️ Tengah Vertikal</button>
 </div>
 `;
 openToolPanel('⚖️ Ukuran & Posisi Relatif',html);
+}
+
+function toggleRelativeAspectLock(){
+lockRelativeRatio=!lockRelativeRatio;
+openPanelRelativeSizeAndPos();
+showToast(lockRelativeRatio?'🔒 Rasio Terkunci (Proporsional)':'🔓 Bebas Distorsi');
 }
 
 function updateRelativeDimension(dim,percent){
@@ -2106,15 +2212,71 @@ if(!el)return;
 const W=mainCanvas.width;
 const H=mainCanvas.height;
 const num=parseInt(percent);
+const aspect=(el.img&&el.img.width)?(el.img.width/el.img.height):(el.width/(el.height||el._calculatedHeight||300));
+
 if(dim==='w'){
 el.width=Math.round((num/100)*W);
 document.getElementById('valRelW').innerText=num+'%';
+if(lockRelativeRatio&&el.type==='image'){
+el.height=Math.round(el.width/aspect);
+const curHPercent=Math.round((el.height/H)*100);
+document.getElementById('valRelH').innerText=curHPercent+'%';
+const hSlider=document.getElementById('relHSlider');
+if(hSlider)hSlider.value=curHPercent;
+}
 }else{
-if(el.type==='image')el.height=Math.round((num/100)*H);
+const newH=Math.round((num/100)*H);
+if(el.type==='image'){
+el.height=newH;
+}else{
+el.fontSize=Math.round(newH*0.25);
+}
 document.getElementById('valRelH').innerText=num+'%';
+if(lockRelativeRatio&&el.type==='image'){
+el.width=Math.round(newH*aspect);
+const curWPercent=Math.round((el.width/W)*100);
+document.getElementById('valRelW').innerText=curWPercent+'%';
+const wSlider=document.getElementById('relWSlider');
+if(wSlider)wSlider.value=curWPercent;
+}
 }
 requestRender();
 debouncedPushHistory();
+}
+
+function fitScreenCover(){
+const el=getActiveElement();
+if(!el)return;
+const W=mainCanvas.width;
+const H=mainCanvas.height;
+el.x=W/2;
+el.y=H/2;
+if(el.type==='image'&&el.img){
+const scale=Math.max(W/el.img.width,H/el.img.height);
+el.width=Math.round(el.img.width*scale);
+el.height=Math.round(el.img.height*scale);
+}else{
+el.width=W;
+}
+requestRender();
+pushHistoryState();
+openPanelRelativeSizeAndPos();
+showToast('🖼️ Penuh Layar (Proporsional)');
+}
+
+function fitScreenStretch(){
+const el=getActiveElement();
+if(!el)return;
+const W=mainCanvas.width;
+const H=mainCanvas.height;
+el.x=W/2;
+el.y=H/2;
+el.width=W;
+if(el.type==='image')el.height=H;
+requestRender();
+pushHistoryState();
+openPanelRelativeSizeAndPos();
+showToast('📐 Penuh Layar (Distorsi)');
 }
 
 function setRelativeAlign(action){
@@ -2133,14 +2295,17 @@ case 'top':el.y=elH/2;break;
 case 'bottom':el.y=H-(elH/2);break;
 case 'left':el.x=elW/2;break;
 case 'right':el.x=W-(elW/2);break;
-case 'fill':el.x=W/2;el.y=H/2;el.width=W;if(el.type==='image')el.height=H;break;
+case 'top-left':el.x=elW/2;el.y=elH/2;break;
+case 'top-right':el.x=W-(elW/2);el.y=elH/2;break;
+case 'bottom-left':el.x=elW/2;el.y=H-(elH/2);break;
+case 'bottom-right':el.x=W-(elW/2);el.y=H-(elH/2);break;
 }
 requestRender();
 pushHistoryState();
-showToast('🎯 Posisi disesuaikan');
+showToast('🎯 Posisi pas disesuaikan');
 }
 
-/* ========== 6. AUTO BACKGROUND REMOVER (CANVA STYLE) ========== */
+/* ========== 6. AUTO BACKGROUND REMOVER ========== */
 function openPanelAutoBgRemover(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -2175,7 +2340,6 @@ cctx.drawImage(el.img,0,0);
 const imgData=cctx.getImageData(0,0,c.width,c.height);
 const data=imgData.data;
 
-// Ambil sampel warna latar dari 4 sudut (Top-Left, Top-Right, Bottom-Left, Bottom-Right)
 const bgR=data[0],bgG=data[1],bgB=data[2];
 const tol=parseFloat(document.getElementById('tolSlider').value||25)*2.55;
 
@@ -2183,9 +2347,8 @@ for(let i=0;i<data.length;i+=4){
 const r=data[i],g=data[i+1],b=data[i+2];
 const dist=Math.sqrt((r-bgR)**2+(g-bgG)**2+(b-bgB)**2);
 if(dist<=tol){
-data[i+3]=0; // Transparan penuh
+data[i+3]=0;
 }else if(dist<=tol+18){
-// Feathering kehalusan tepi
 data[i+3]=Math.round(((dist-tol)/18)*255);
 }
 }
@@ -2199,7 +2362,7 @@ showToast('✅ Latar belakang berhasil dihilangkan!');
 },100);
 }
 
-/* ========== 7. FOKUS LENSA DSLR / TILT-SHIFT (CANVA PRO) ========== */
+/* ========== 7. FOKUS LENSA DSLR / TILT-SHIFT ========== */
 function openPanelDepthFocus(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -2354,7 +2517,6 @@ octx.drawImage(el.img,0,0,off.width,off.height);
 octx.globalCompositeOperation='destination-in';
 octx.drawImage(grabMaskCanvas,0,0);
 
-// Tambahkan subjek baru sebagai layer di depan
 const s=getCurrentSlide();
 const newEl={
 id:'el_'+Date.now(),
@@ -2367,26 +2529,14 @@ width:el.width,
 height:el.height,
 origWidth:off.width,
 origHeight:off.height,
-flipH:false,
-flipV:false,
-cornerRadius:0,
-borderWidth:0,
-borderColor:'#D4AF37',
-colorOverlay:'none',
-blur:0,
-blendMode:'normal',
-cropL:0,cropR:0,cropT:0,cropB:0,
-shadow:{color:'rgba(0,0,0,0.8)',blur:15,angle:45,distance:8},
-opacity:1,
-locked:false,
-groupId:null
+flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'rgba(0,0,0,0.8)',blur:15,angle:45,distance:8},opacity:1,locked:false,groupId:null
 };
 s.elements.push(newEl);
 selectElement(newEl.id);
 renderAll();
 pushHistoryState();
 closeMagicGrabModal();
-showToast('✅ Subjek orang/objek berhasil dipisahkan!');
+showToast('✅ Subjek berhasil dipisahkan!');
 }
 
 /* ========== 9. PENINGKATAN RESOLUSI ALAMI (SMART HD ENHANCER) ========== */
@@ -2396,7 +2546,7 @@ if(!el||el.type!=='image')return;
 const html=`
 <div style="padding:10px;background:rgba(212,175,55,.1);border-left:3px solid #D4AF37;border-radius:6px;font-size:11px;color:#ddd;line-height:1.4;">
 💎 <b>Peningkatan Resolusi Alami:</b><br>
-Memperjelas detail gambar dan meningkatkan kontras mikro tepi tanpa membuat foto terlihat kasar, over-sharp, atau bergaris kaku.
+Memperjelas detail gambar dan meningkatkan kontras mikro tepi tanpa membuat foto terlihat kasar atau bergaris kaku.
 </div>
 <button class="btn-sub-tool active" onclick="executeNaturalEnhance()" style="width:100%;margin-top:14px;padding:12px;font-size:12px;">💎 Tingkatkan Resolusi & Ketajaman Alami</button>
 `;
@@ -2409,7 +2559,6 @@ if(!el||el.type!=='image'||!el.img)return;
 showToast('⏳ Menyempurnakan kejernihan gambar...');
 
 setTimeout(()=>{
-// Resample 2X Bicubic + Unsharp Mask Alami
 const c=document.createElement('canvas');
 const scaleFactor=1.8;
 c.width=Math.round(el.img.width*scaleFactor);
@@ -2422,9 +2571,7 @@ cctx.drawImage(el.img,0,0,c.width,c.height);
 const imgData=cctx.getImageData(0,0,c.width,c.height);
 const d=imgData.data;
 
-// Peningkatan Kejernihan Mikro Tanpa Garis Kasar (Natural Clarity Boost)
 for(let i=0;i<d.length;i+=4){
-// Kurva S Lembut pada Kontras
 d[i]=Math.min(255,d[i]>128?d[i]+((255-d[i])*0.08):d[i]*0.94);
 d[i+1]=Math.min(255,d[i+1]>128?d[i+1]+((255-d[i+1])*0.08):d[i+1]*0.94);
 d[i+2]=Math.min(255,d[i+2]>128?d[i+2]+((255-d[i+2])*0.08):d[i+2]*0.94);
@@ -2439,7 +2586,186 @@ showToast('✅ Gambar lebih jernih dan beresolusi tinggi!');
 },100);
 }
 
-/* ========== TEXT FORMAT (DENGAN JUSTIFY PADAT KANAN-KIRI) ========== */
+/* ========== FONT, UKURAN, WARNA & FORMAT TEKS ========== */
+function openPanelFontFamily(){
+const el=getActiveElement();
+if(!el)return;
+let html='<div style="display:flex;flex-direction:column;gap:6px;">';
+FONT_FAMILIES.forEach(f=>{
+const isAct=getCleanFont(el.fontFamily)===getCleanFont(f.font);
+html+=`<div class="layer-item ${isAct?'active':''}" style="font-family:${f.font};font-size:15px;" onclick="setFontFamily('${f.font.replace(/'/g,"\\'")}')"><span>${f.name}</span>${isAct?'✓':''}</div>`;
+});
+html+='</div>';
+openToolPanel('Pilih Font',html);
+}
+function setFontFamily(font){
+const el=getActiveElement();
+if(!el)return;
+el.fontFamily=font;
+renderAll();
+pushHistoryState();
+openPanelFontFamily();
+}
+
+function openPanelFontSize(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Ukuran Teks:</span><span class="ctrl-val" id="valFontSize">${el.fontSize}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('fsSlider',-2,updateFontSize)">-</button>
+<input type="range" class="ctrl-slider" id="fsSlider" min="12" max="500" value="${el.fontSize}" oninput="updateFontSize(this.value)">
+<button class="btn-step" onclick="stepSliderVal('fsSlider',2,updateFontSize)">+</button>
+</div>`;
+openToolPanel('Ukuran Font',html);
+}
+function updateFontSize(val){
+const el=getActiveElement();
+if(!el)return;
+el.fontSize=parseInt(val);
+const lbl=document.getElementById('valFontSize');
+if(lbl)lbl.innerText=val+'px';
+renderAll();
+debouncedPushHistory();
+}
+
+function openPanelTextColor(){
+const el=getActiveElement();
+if(!el)return;
+let html=`<button class="btn-sub-tool active" onclick="triggerEyeDropper('text')" style="width:100%;margin-bottom:10px;">🧪 Ambil Warna</button>
+<div class="color-palette-scroll">`;
+QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.color===c?'active':''}" style="background:${c};" onclick="setTextColor('${c}')"></div>`;});
+html+=`</div><div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kustom:</span><input type="color" value="${el.color||'#ffffff'}" onchange="setTextColor(this.value)"></div>`;
+openToolPanel('Warna Teks',html);
+}
+function setTextColor(color){
+const el=getActiveElement();
+if(!el)return;
+el.color=color;
+renderAll();
+pushHistoryState();
+openPanelTextColor();
+}
+
+function openPanelSpacing(){
+const el=getActiveElement();
+if(!el)return;
+const curLH=el.lineHeight||1.3;
+const curLS=el.letterSpacing||0;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Jarak Baris:</span><span class="ctrl-val" id="valLineHeight">${curLH.toFixed(1)}</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('lhSlider',-10,updateLineHeight)">-</button>
+<input type="range" class="ctrl-slider" id="lhSlider" min="80" max="250" value="${Math.round(curLH*100)}" oninput="updateLineHeight(this.value)">
+<button class="btn-step" onclick="stepSliderVal('lhSlider',10,updateLineHeight)">+</button>
+</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Jarak Huruf:</span><span class="ctrl-val" id="valLetterSpacing">${curLS}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('lsSlider',-1,updateLetterSpacing)">-</button>
+<input type="range" class="ctrl-slider" id="lsSlider" min="-5" max="30" value="${curLS}" oninput="updateLetterSpacing(this.value)">
+<button class="btn-step" onclick="stepSliderVal('lsSlider',1,updateLetterSpacing)">+</button>
+</div>`;
+openToolPanel('Jarak Baris & Huruf',html);
+}
+function updateLineHeight(val){
+const el=getActiveElement();
+if(!el)return;
+el.lineHeight=parseInt(val)/100;
+document.getElementById('valLineHeight').innerText=el.lineHeight.toFixed(1);
+renderAll();
+debouncedPushHistory();
+}
+function updateLetterSpacing(val){
+const el=getActiveElement();
+if(!el)return;
+el.letterSpacing=parseInt(val);
+document.getElementById('valLetterSpacing').innerText=el.letterSpacing+'px';
+renderAll();
+debouncedPushHistory();
+}
+
+function openPanelCurveAndSlant(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Lengkung:</span><span class="ctrl-val" id="valCurve">${el.curveAngle||0}°</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('cSlider',-5,updateCurveAngle)">-</button>
+<input type="range" class="ctrl-slider" id="cSlider" min="-180" max="180" value="${el.curveAngle||0}" oninput="updateCurveAngle(this.value)">
+<button class="btn-step" onclick="stepSliderVal('cSlider',5,updateCurveAngle)">+</button>
+</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Miring:</span><span class="ctrl-val" id="valSlant">${el.italicSlant||0}°</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('slSlider',-2,updateItalicSlant)">-</button>
+<input type="range" class="ctrl-slider" id="slSlider" min="-35" max="35" value="${el.italicSlant||0}" oninput="updateItalicSlant(this.value)">
+<button class="btn-step" onclick="stepSliderVal('slSlider',2,updateItalicSlant)">+</button>
+</div>`;
+openToolPanel('Lengkung & Kemiringan',html);
+}
+function updateCurveAngle(val){
+const el=getActiveElement();
+if(!el)return;
+el.curveAngle=parseInt(val);
+document.getElementById('valCurve').innerText=val+'°';
+renderAll();
+debouncedPushHistory();
+}
+function updateItalicSlant(val){
+const el=getActiveElement();
+if(!el)return;
+el.italicSlant=parseInt(val);
+document.getElementById('valSlant').innerText=val+'°';
+renderAll();
+debouncedPushHistory();
+}
+
+function openPanelHighlight(){
+const el=getActiveElement();
+if(!el)return;
+let html=`<div class="color-palette-scroll"><div class="color-circle" style="background:#444;" onclick="setHighlightColor('transparent')">✕</div>`;
+QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.highlightColor===c?'active':''}" style="background:${c};" onclick="setHighlightColor('${c}')"></div>`;});
+html+='</div>';
+openToolPanel('Efek Stabilo',html);
+}
+function setHighlightColor(color){
+const el=getActiveElement();
+if(!el)return;
+el.highlightColor=color;
+renderAll();
+pushHistoryState();
+openPanelHighlight();
+}
+
+function openPanelTextSkin(){
+const el=getActiveElement();
+if(!el)return;
+const hasSkin=!!el.textSkinImg;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Skin Foto:</span><button class="btn-sub-tool active" onclick="document.getElementById('fileTextSkinInput').click()">📁 Unggah</button></div>
+${hasSkin?`<button class="btn-sub-tool" onclick="removeTextSkin()" style="width:100%;margin-top:8px;color:#ff6b6b;">🗑️ Hapus Skin</button>`:''}`;
+openToolPanel('Skin Foto Teks',html);
+}
+function removeTextSkin(){
+const el=getActiveElement();
+if(!el)return;
+el.textSkinImg=null;
+el.textSkinSrc=null;
+renderAll();
+pushHistoryState();
+openPanelTextSkin();
+}
+function handleTextSkinUpload(e){
+const file=e.target.files[0];
+if(!file)return;
+const reader=new FileReader();
+reader.onload=(event)=>{
+const el=getActiveElement();
+if(el&&el.type==='text'){
+el.textSkinSrc=event.target.result;
+el.textSkinImg=getImageFromCache(el.textSkinSrc);
+renderAll();pushHistoryState();openPanelTextSkin();
+}
+};
+reader.readAsDataURL(file);
+e.target.value='';
+}
+
 function openPanelTextFormat(){
 const el=getActiveElement();
 if(!el)return;
@@ -2455,18 +2781,145 @@ const html=`
 <button class="btn-sub-tool ${el.textAlign==='left'?'active':''}" onclick="setTextAlign('left')">⬅️ Kiri</button>
 <button class="btn-sub-tool ${el.textAlign==='center'?'active':''}" onclick="setTextAlign('center')">↔️ Tengah</button>
 <button class="btn-sub-tool ${el.textAlign==='right'?'active':''}" onclick="setTextAlign('right')">➡️ Kanan</button>
-<button class="btn-sub-tool ${el.textAlign==='justify'?'active':''}" onclick="setTextAlign('justify')" style="color:#FFE259;">📑 Padat (Rata Kiri-Kanan)</button>
+<button class="btn-sub-tool ${el.textAlign==='justify'?'active':''}" onclick="setTextAlign('justify')" style="color:#FFE259;">📑 Padat (Kiri-Kanan)</button>
 </div>
 `;
 openToolPanel('Format & Perataan Teks',html);
 }
-function toggleFontWeight(){const el=getActiveElement();el.fontWeight=(el.fontWeight==='bold'||el.fontWeight==='900')?'normal':'bold';renderAll();pushHistoryState();openPanelTextFormat();}
-function toggleFontStyle(){const el=getActiveElement();el.fontStyle=(el.fontStyle==='italic')?'normal':'italic';renderAll();pushHistoryState();openPanelTextFormat();}
-function toggleTextUnderline(){const el=getActiveElement();el.textDecoration=(el.textDecoration==='underline')?'none':'underline';renderAll();pushHistoryState();openPanelTextFormat();}
-function setTextCase(val){const el=getActiveElement();el.textTransform=(el.textTransform===val)?'none':val;renderAll();pushHistoryState();openPanelTextFormat();}
-function setTextAlign(val){const el=getActiveElement();el.textAlign=val;renderAll();pushHistoryState();openPanelTextFormat();}
+function toggleFontWeight(){const el=getActiveElement();if(!el)return;el.fontWeight=(el.fontWeight==='bold'||el.fontWeight==='900')?'normal':'bold';renderAll();pushHistoryState();openPanelTextFormat();}
+function toggleFontStyle(){const el=getActiveElement();if(!el)return;el.fontStyle=(el.fontStyle==='italic')?'normal':'italic';renderAll();pushHistoryState();openPanelTextFormat();}
+function toggleTextUnderline(){const el=getActiveElement();if(!el)return;el.textDecoration=(el.textDecoration==='underline')?'none':'underline';renderAll();pushHistoryState();openPanelTextFormat();}
+function setTextCase(val){const el=getActiveElement();if(!el)return;el.textTransform=(el.textTransform===val)?'none':val;renderAll();pushHistoryState();openPanelTextFormat();}
+function setTextAlign(val){const el=getActiveElement();if(!el)return;el.textAlign=val;renderAll();pushHistoryState();openPanelTextFormat();}
 
-/* ========== FITUR PENDUKUNG LAINNYA ========== */
+/* ========== ALAT GAMBAR: ROTASI, BLUR, CERMIN, OPASITAS, BORDER ========== */
+function openPanelRotation(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Rotasi:</span><span class="ctrl-val" id="valRot">${el.rotation||0}°</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('rSlider',-5,updateRotation)">-</button>
+<input type="range" class="ctrl-slider" id="rSlider" min="0" max="360" value="${el.rotation||0}" oninput="updateRotation(this.value)">
+<button class="btn-step" onclick="stepSliderVal('rSlider',5,updateRotation)">+</button>
+</div>`;
+openToolPanel('Rotasi Elemen',html);
+}
+function updateRotation(val){
+const el=getActiveElement();
+if(!el)return;
+el.rotation=parseInt(val);
+const lbl=document.getElementById('valRot');
+if(lbl)lbl.innerText=val+'°';
+requestRender();
+debouncedPushHistory();
+}
+
+function openPanelImageFlip(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-grid-btns">
+<button class="btn-sub-tool ${el.flipH?'active':''}" onclick="toggleFlip('H')">↔️ Cermin H</button>
+<button class="btn-sub-tool ${el.flipV?'active':''}" onclick="toggleFlip('V')">↕️ Cermin V</button>
+</div>`;
+openToolPanel('Cermin Gambar',html);
+}
+function toggleFlip(dir){
+const el=getActiveElement();
+if(!el)return;
+if(dir==='H')el.flipH=!el.flipH;
+if(dir==='V')el.flipV=!el.flipV;
+renderAll();
+pushHistoryState();
+openPanelImageFlip();
+}
+
+function openPanelOpacity(){
+const el=getActiveElement();
+if(!el)return;
+const curVal=Math.round((el.opacity!==undefined?el.opacity:1)*100);
+const html=`<div class="ctrl-row"><span class="ctrl-label">Transparansi:</span><span class="ctrl-val" id="valOp">${curVal}%</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('opSlider',-5,updateElemOpacity)">-</button>
+<input type="range" class="ctrl-slider" id="opSlider" min="5" max="100" value="${curVal}" oninput="updateElemOpacity(this.value)">
+<button class="btn-step" onclick="stepSliderVal('opSlider',5,updateElemOpacity)">+</button>
+</div>`;
+openToolPanel('Transparansi Elemen',html);
+}
+function updateElemOpacity(v){
+const el=getActiveElement();
+if(!el)return;
+el.opacity=parseInt(v)/100;
+document.getElementById('valOp').innerText=v+'%';
+renderAll();
+debouncedPushHistory();
+}
+
+function openPanelImageBlur(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Blur:</span><span class="ctrl-val" id="valImgBlurOnly">${el.blur||0}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('blurOnlySlider',-1,updateImageBlur)">-</button>
+<input type="range" class="ctrl-slider" id="blurOnlySlider" min="0" max="40" value="${el.blur||0}" oninput="updateImageBlur(this.value)">
+<button class="btn-step" onclick="stepSliderVal('blurOnlySlider',1,updateImageBlur)">+</button>
+</div>`;
+openToolPanel('Efek Blur Foto',html);
+}
+function updateImageBlur(v){
+const el=getActiveElement();
+if(!el)return;
+el.blur=parseInt(v);
+document.getElementById('valImgBlurOnly').innerText=v+'px';
+renderAll();
+debouncedPushHistory();
+}
+
+function openPanelImageBorder(){
+const el=getActiveElement();
+if(!el)return;
+let html=`<div class="ctrl-row"><span class="ctrl-label">Kelengkungan:</span><span class="ctrl-val" id="valRadius">${el.cornerRadius||0}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('radSlider',-5,updateCornerRadius)">-</button>
+<input type="range" class="ctrl-slider" id="radSlider" min="0" max="150" value="${el.cornerRadius||0}" oninput="updateCornerRadius(this.value)">
+<button class="btn-step" onclick="stepSliderVal('radSlider',5,updateCornerRadius)">+</button>
+</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Garis Tepi:</span><span class="ctrl-val" id="valBorderW">${el.borderWidth||0}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('bwSlider',-1,updateBorderWidth)">-</button>
+<input type="range" class="ctrl-slider" id="bwSlider" min="0" max="30" value="${el.borderWidth||0}" oninput="updateBorderWidth(this.value)">
+<button class="btn-step" onclick="stepSliderVal('bwSlider',1,updateBorderWidth)">+</button>
+</div>
+<div class="color-palette-scroll" style="margin-top:10px;">`;
+QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.borderColor===c?'active':''}" style="background:${c};" onclick="setBorderColor('${c}')"></div>`;});
+html+='</div>';
+openToolPanel('Garis Tepi & Sudut',html);
+}
+function updateCornerRadius(v){
+const el=getActiveElement();
+if(!el)return;
+el.cornerRadius=parseInt(v);
+document.getElementById('valRadius').innerText=v+'px';
+renderAll();
+debouncedPushHistory();
+}
+function updateBorderWidth(v){
+const el=getActiveElement();
+if(!el)return;
+el.borderWidth=parseInt(v);
+if(!el.borderColor)el.borderColor='#D4AF37';
+document.getElementById('valBorderW').innerText=v+'px';
+renderAll();
+debouncedPushHistory();
+}
+function setBorderColor(c){
+const el=getActiveElement();
+if(!el)return;
+el.borderColor=c;
+renderAll();
+pushHistoryState();
+openPanelImageBorder();
+}
+
 function openPanelBlendMode(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -2483,62 +2936,36 @@ const html=`
 </div>`;
 openToolPanel('Blend Mode Efek Cahaya / Api',html);
 }
-function setImageBlendMode(m){const el=getActiveElement();el.blendMode=m;renderAll();pushHistoryState();openPanelBlendMode();}
+function setImageBlendMode(m){
+const el=getActiveElement();
+if(!el)return;
+el.blendMode=m;
+renderAll();
+pushHistoryState();
+openPanelBlendMode();
+}
 
 function openPanelPngColorOverlay(){
 const el=getActiveElement();
+if(!el)return;
 let html=`<button class="btn-sub-tool active" onclick="triggerEyeDropper('pngOverlay')" style="width:100%;margin-bottom:10px;">🧪 Ambil Warna</button>
 <div class="color-palette-scroll"><div class="color-circle" style="background:#333;color:#aaa;display:flex;align-items:center;justify-content:center;font-size:10px;" onclick="setPngColorOverlay('none')">✕</div>`;
 QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.colorOverlay===c?'active':''}" style="background:${c};" onclick="setPngColorOverlay('${c}')"></div>`;});
 html+=`</div><div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kustom:</span><input type="color" value="${el.colorOverlay&&el.colorOverlay!=='none'?el.colorOverlay:'#FFFFFF'}" onchange="setPngColorOverlay(this.value)"></div>`;
 openToolPanel('Warna Siluet Full PNG',html);
 }
-function setPngColorOverlay(c){const el=getActiveElement();el.colorOverlay=c;renderAll();pushHistoryState();openPanelPngColorOverlay();}
-
-function openPanelImageBlur(){
+function setPngColorOverlay(c){
 const el=getActiveElement();
-const html=`<div class="ctrl-row"><span class="ctrl-label">Blur:</span><span class="ctrl-val" id="valImgBlurOnly">${el.blur||0}px</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('blurOnlySlider',-1,(v)=>{el.blur=parseInt(v);document.getElementById('valImgBlurOnly').innerText=v+'px';renderAll();debouncedPushHistory();})">-</button>
-<input type="range" class="ctrl-slider" id="blurOnlySlider" min="0" max="40" value="${el.blur||0}" oninput="el.blur=parseInt(this.value);document.getElementById('valImgBlurOnly').innerText=this.value+'px';renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('blurOnlySlider',1,(v)=>{el.blur=parseInt(v);document.getElementById('valImgBlurOnly').innerText=v+'px';renderAll();debouncedPushHistory();})">+</button>
-</div>`;
-openToolPanel('Efek Blur Foto',html);
-}
-
-function openPanelImageFlip(){
-const el=getActiveElement();
-const html=`<div class="ctrl-grid-btns">
-<button class="btn-sub-tool ${el.flipH?'active':''}" onclick="el.flipH=!el.flipH;renderAll();pushHistoryState();openPanelImageFlip();">↔️ Cermin H</button>
-<button class="btn-sub-tool ${el.flipV?'active':''}" onclick="el.flipV=!el.flipV;renderAll();pushHistoryState();openPanelImageFlip();">↕️ Cermin V</button>
-</div>`;
-openToolPanel('Cermin Gambar',html);
-}
-
-function openPanelImageBorder(){
-const el=getActiveElement();
-let html=`<div class="ctrl-row"><span class="ctrl-label">Kelengkungan:</span><input type="range" class="ctrl-slider" min="0" max="150" value="${el.cornerRadius||0}" oninput="el.cornerRadius=parseInt(this.value);renderAll();debouncedPushHistory();"></div>
-<div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Garis Tepi:</span><input type="range" class="ctrl-slider" min="0" max="30" value="${el.borderWidth||0}" oninput="el.borderWidth=parseInt(this.value);if(!el.borderColor)el.borderColor='#D4AF37';renderAll();debouncedPushHistory();"></div>
-<div class="color-palette-scroll" style="margin-top:10px;">`;
-QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.borderColor===c?'active':''}" style="background:${c};" onclick="el.borderColor='${c}';renderAll();pushHistoryState();openPanelImageBorder();"></div>`;});
-html+='</div>';
-openToolPanel('Garis Tepi & Sudut',html);
-}
-
-function openPanelOpacity(){
-const el=getActiveElement();
-const curVal=Math.round((el.opacity!==undefined?el.opacity:1)*100);
-const html=`<div class="ctrl-row"><span class="ctrl-label">Transparansi:</span><span class="ctrl-val" id="valOp">${curVal}%</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('opSlider',-5,(v)=>{el.opacity=parseInt(v)/100;document.getElementById('valOp').innerText=v+'%';renderAll();debouncedPushHistory();})">-</button>
-<input type="range" class="ctrl-slider" id="opSlider" min="5" max="100" value="${curVal}" oninput="el.opacity=parseInt(this.value)/100;document.getElementById('valOp').innerText=this.value+'%';renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('opSlider',5,(v)=>{el.opacity=parseInt(v)/100;document.getElementById('valOp').innerText=v+'%';renderAll();debouncedPushHistory();})">+</button>
-</div>`;
-openToolPanel('Transparansi Elemen',html);
+if(!el)return;
+el.colorOverlay=c;
+renderAll();
+pushHistoryState();
+openPanelPngColorOverlay();
 }
 
 function openPanelPosition(){
 const el=getActiveElement();
+if(!el)return;
 const html=`
 <div class="pos-grid-3x3">
 <button class="btn-pos-cell" onclick="setAlignPosition('top-left')">↖️</button>
@@ -2563,7 +2990,6 @@ const html=`
 `;
 openToolPanel('Posisi Presisi',html);
 }
-
 function nudgeElement(dx,dy){
 const el=getActiveElement();
 if(!el||el.locked)return;
@@ -2572,7 +2998,6 @@ requestRender();
 debouncedPushHistory();
 openPanelPosition();
 }
-
 function setAlignPosition(pos){
 const el=getActiveElement();
 if(!el||el.locked)return;
@@ -2596,222 +3021,122 @@ pushHistoryState();
 openPanelPosition();
 }
 
-function openPanelTextColor(){
-const el=getActiveElement();
-let html=`<button class="btn-sub-tool active" onclick="triggerEyeDropper('text')" style="width:100%;margin-bottom:10px;">🧪 Ambil Warna</button>
-<div class="color-palette-scroll">`;
-QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.color===c?'active':''}" style="background:${c};" onclick="el.color='${c}';renderAll();pushHistoryState();openPanelTextColor();"></div>`;});
-html+=`</div><div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kustom:</span><input type="color" value="${el.color||'#ffffff'}" onchange="el.color=this.value;renderAll();pushHistoryState();"></div>`;
-openToolPanel('Warna Teks',html);
-}
-
-function openPanelFontFamily(){
-const el=getActiveElement();
-let html='<div style="display:flex;flex-direction:column;gap:6px;">';
-FONT_FAMILIES.forEach(f=>{
-const isAct=getCleanFont(el.fontFamily)===getCleanFont(f.font);
-html+=`<div class="layer-item ${isAct?'active':''}" style="font-family:${f.font};font-size:15px;" onclick="el.fontFamily='${f.font.replace(/'/g,"\\'")}';renderAll();pushHistoryState();openPanelFontFamily();"><span>${f.name}</span>${isAct?'✓':''}</div>`;
-});
-html+='</div>';
-openToolPanel('Pilih Font',html);
-}
-
-function openPanelFontSize(){
-const el=getActiveElement();
-const html=`<div class="ctrl-row"><span class="ctrl-label">Ukuran Teks:</span><span class="ctrl-val">${el.fontSize}px</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('fsSlider',-2,(v)=>{el.fontSize=parseInt(v);renderAll();debouncedPushHistory();openPanelFontSize();})">-</button>
-<input type="range" class="ctrl-slider" id="fsSlider" min="12" max="500" value="${el.fontSize}" oninput="el.fontSize=parseInt(this.value);renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('fsSlider',2,(v)=>{el.fontSize=parseInt(v);renderAll();debouncedPushHistory();openPanelFontSize();})">+</button>
-</div>`;
-openToolPanel('Ukuran Font',html);
-}
-
-function openPanelRotation(){
-const el=getActiveElement();
-const html=`<div class="ctrl-row"><span class="ctrl-label">Rotasi:</span><span class="ctrl-val">${el.rotation||0}°</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('rSlider',-5,(v)=>{el.rotation=parseInt(v);renderAll();debouncedPushHistory();openPanelRotation();})">-</button>
-<input type="range" class="ctrl-slider" id="rSlider" min="0" max="360" value="${el.rotation||0}" oninput="el.rotation=parseInt(this.value);renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('rSlider',5,(v)=>{el.rotation=parseInt(v);renderAll();debouncedPushHistory();openPanelRotation();})">+</button>
-</div>`;
-openToolPanel('Rotasi Elemen',html);
-}
-
-function openPanelSpacing(){
-const el=getActiveElement();
-const html=`<div class="ctrl-row"><span class="ctrl-label">Jarak Baris:</span><span class="ctrl-val">${(el.lineHeight||1.3).toFixed(1)}</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('lhSlider',-10,(v)=>{el.lineHeight=parseInt(v)/100;renderAll();debouncedPushHistory();openPanelSpacing();})">-</button>
-<input type="range" class="ctrl-slider" id="lhSlider" min="80" max="250" value="${Math.round((el.lineHeight||1.3)*100)}" oninput="el.lineHeight=parseInt(this.value)/100;renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('lhSlider',10,(v)=>{el.lineHeight=parseInt(v)/100;renderAll();debouncedPushHistory();openPanelSpacing();})">+</button>
-</div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Jarak Huruf:</span><span class="ctrl-val">${el.letterSpacing||0}px</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('lsSlider',-1,(v)=>{el.letterSpacing=parseInt(v);renderAll();debouncedPushHistory();openPanelSpacing();})">-</button>
-<input type="range" class="ctrl-slider" id="lsSlider" min="-5" max="30" value="${el.letterSpacing||0}" oninput="el.letterSpacing=parseInt(this.value);renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('lsSlider',1,(v)=>{el.letterSpacing=parseInt(v);renderAll();debouncedPushHistory();openPanelSpacing();})">+</button>
-</div>`;
-openToolPanel('Jarak Baris & Huruf',html);
-}
-
-function openPanelCurveAndSlant(){
-const el=getActiveElement();
-const html=`<div class="ctrl-row"><span class="ctrl-label">Lengkung:</span><span class="ctrl-val">${el.curveAngle||0}°</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('cSlider',-5,(v)=>{el.curveAngle=parseInt(v);renderAll();debouncedPushHistory();openPanelCurveAndSlant();})">-</button>
-<input type="range" class="ctrl-slider" id="cSlider" min="-180" max="180" value="${el.curveAngle||0}" oninput="el.curveAngle=parseInt(this.value);renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('cSlider',5,(v)=>{el.curveAngle=parseInt(v);renderAll();debouncedPushHistory();openPanelCurveAndSlant();})">+</button>
-</div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Miring:</span><span class="ctrl-val">${el.italicSlant||0}°</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('slSlider',-2,(v)=>{el.italicSlant=parseInt(v);renderAll();debouncedPushHistory();openPanelCurveAndSlant();})">-</button>
-<input type="range" class="ctrl-slider" id="slSlider" min="-35" max="35" value="${el.italicSlant||0}" oninput="el.italicSlant=parseInt(this.value);renderAll();debouncedPushHistory();">
-<button class="btn-step" onclick="stepSliderVal('slSlider',2,(v)=>{el.italicSlant=parseInt(v);renderAll();debouncedPushHistory();openPanelCurveAndSlant();})">+</button>
-</div>`;
-openToolPanel('Lengkung & Kemiringan',html);
-}
-
-function openPanelHighlight(){
-const el=getActiveElement();
-let html=`<div class="color-palette-scroll"><div class="color-circle" style="background:#444;" onclick="el.highlightColor='transparent';renderAll();pushHistoryState();openPanelHighlight();">✕</div>`;
-QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.highlightColor===c?'active':''}" style="background:${c};" onclick="el.highlightColor='${c}';renderAll();pushHistoryState();openPanelHighlight();"></div>`;});
-html+='</div>';
-openToolPanel('Efek Stabilo',html);
-}
-
-function openPanelTextSkin(){
-const el=getActiveElement();
-const hasSkin=!!el.textSkinImg;
-const html=`<div class="ctrl-row"><span class="ctrl-label">Skin Foto:</span><button class="btn-sub-tool active" onclick="document.getElementById('fileTextSkinInput').click()">📁 Unggah</button></div>
-${hasSkin?`<button class="btn-sub-tool" onclick="el.textSkinImg=null;el.textSkinSrc=null;renderAll();pushHistoryState();openPanelTextSkin();" style="width:100%;margin-top:8px;color:#ff6b6b;">🗑️ Hapus Skin</button>`:''}`;
-openToolPanel('Skin Foto Teks',html);
-}
-function handleTextSkinUpload(e){
-const file=e.target.files[0];
-if(!file)return;
-const reader=new FileReader();
-reader.onload=(event)=>{
-const el=getActiveElement();
-if(el&&el.type==='text'){
-el.textSkinSrc=event.target.result;
-el.textSkinImg=getImageFromCache(el.textSkinSrc);
-renderAll();pushHistoryState();openPanelTextSkin();
-}
-};
-reader.readAsDataURL(file);
-e.target.value='';
-}
-
-/* ========== GROUPING, LAYERS & ONLINE ASSETS ========== */
-function openPanelGroup(){
-const s=getCurrentSlide();
-const curr=getActiveElement();
-if(curr&&curr.groupId){
-const count=s.elements.filter(e=>e.groupId===curr.groupId).length;
-const html=`<div style="padding:10px;background:rgba(212,175,55,.1);border-radius:8px;">🔗 Terhubung dalam Grup (${count} elemen)</div>
-<button class="btn-sub-tool active" onclick="ungroupCurrentElement()" style="width:100%;margin-top:10px;color:#ff6b6b;">⛓️ Pisahkan (Ungroup)</button>`;
-openToolPanel('Kelola Grup',html);
-return;
-}
-let html='<div style="font-size:12px;margin-bottom:8px;">Pilih elemen:</div>';
-s.elements.forEach(el=>{
-html+=`<label class="group-select-item"><input type="checkbox" class="group-checkbox" value="${el.id}"><span>${el.type==='text'?'📝':'🖼️'} ${el.text?el.text.substring(0,20):'Gambar'}</span></label>`;
-});
-html+='<button class="btn-sub-tool active" onclick="confirmGroupElements()" style="width:100%;margin-top:10px;">🔗 Gabungkan</button>';
-openToolPanel('Gabungkan Elemen',html);
-}
-function confirmGroupElements(){
-const s=getCurrentSlide();
-const checked=Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb=>cb.value);
-if(checked.length<2){alert('Pilih minimal 2');return;}
-const gid='grp_'+Date.now();
-s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=gid;});
-pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('✅ Elemen digabung!');
-}
-function ungroupCurrentElement(){
-const el=getActiveElement();
-if(!el||!el.groupId)return;
-const s=getCurrentSlide();
-const gid=el.groupId;
-s.elements.forEach(e=>{if(e.groupId===gid)e.groupId=null;});
-pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('⛓️ Grup dipisahkan!');
-}
-
-function openPanelLayers(){
-const s=getCurrentSlide();
-let html='<div class="layer-list-container">';
-for(let i=s.elements.length-1;i>=0;i--){
-const el=s.elements[i];
-html+=`<div class="layer-item ${el.id===activeElementId?'active':''}" onclick="selectElement('${el.id}');openPanelLayers();">
-<span>${el.type==='text'?'📝':'🖼️'} ${el.text?el.text.substring(0,22):'Foto'}</span>
-<div class="layer-actions">
-<button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},1)">▲</button>
-<button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},-1)">▼</button>
-<button class="layer-btn" onclick="event.stopPropagation();toggleElementLockById('${el.id}')">${el.locked?'🔒':'🔓'}</button>
-<button class="layer-btn" onclick="event.stopPropagation();deleteElementById('${el.id}')">🗑️</button>
-</div></div>`;
-}
-html+='</div>';
-openToolPanel('Daftar Lapisan',html);
-}
-function moveLayer(idx,d){
-const s=getCurrentSlide();
-const target=idx+d;
-if(target<0||target>=s.elements.length)return;
-const tmp=s.elements[idx];
-s.elements[idx]=s.elements[target];
-s.elements[target]=tmp;
-renderAll();pushHistoryState();openPanelLayers();
-}
+/* ========== PENCARIAN ELEMEN ONLINE RELIABLE ========== */
+const POPULAR_ELEMENTS=[
+{name:'🔥 Api Membara',url:'https://images.unsplash.com/photo-1542385151-efd9000785a0?w=600&auto=format&fit=crop&q=80'},
+{name:'✨ Cahaya Kilau',url:'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80'},
+{name:'🕌 Ornamen Emas',url:'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=600&auto=format&fit=crop&q=80'},
+{name:'⭐ Bintang Emas',url:'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'},
+{name:'🕋 Ka\'bah Mekkah',url:'https://images.unsplash.com/photo-1565552645632-d725f8bfc19a?w=600&auto=format&fit=crop&q=80'},
+{name:'🏮 Lentera Ramadhan',url:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80'}
+];
 
 function openPanelOnlineAssets(){
 const html=`
 <div style="display:flex;gap:8px;margin-bottom:8px;">
-<input type="text" id="assetSearchInput" class="asset-search-input" placeholder="Cari: api, partikel, kaligrafi, bingkai emas..." onkeydown="if(event.key==='Enter')executeAssetSearch()">
+<input type="text" id="assetSearchInput" class="asset-search-input" placeholder="Cari: api, kaligrafi, bingkai, partikel, emas..." onkeydown="if(event.key==='Enter')executeAssetSearch()">
 <button class="btn-nav active" onclick="executeAssetSearch()" style="border-radius:19px;padding:0 14px;">Cari</button>
 </div>
 <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none;">
-<span class="tag-pill" onclick="quickSearchAsset('fire flames')">🔥 Api</span>
-<span class="tag-pill" onclick="quickSearchAsset('sparkle star')">✨ Kilau</span>
-<span class="tag-pill" onclick="quickSearchAsset('islamic ornament')">🕌 Ornamen Islami</span>
-<span class="tag-pill" onclick="quickSearchAsset('gold frame')">🖼️ Bingkai Emas</span>
-<span class="tag-pill" onclick="quickSearchAsset('bismillah calligraphy')">📜 Kaligrafi</span>
-<span class="tag-pill" onclick="quickSearchAsset('gold star')">⭐ Bintang</span>
-<span class="tag-pill" onclick="quickSearchAsset('arabic lantern')">🏮 Lentera</span>
-<span class="tag-pill" onclick="quickSearchAsset('kaaba mecca')">🕋 Ka'bah</span>
-<span class="tag-pill" onclick="quickSearchAsset('mosque')">🕌 Masjid</span>
+<span class="tag-pill active" onclick="loadCuratedAssets()">🌟 Populer</span>
+<span class="tag-pill" onclick="quickSearchAsset('fire flames png')">🔥 Api</span>
+<span class="tag-pill" onclick="quickSearchAsset('gold ornament frame')">🖼️ Bingkai Emas</span>
+<span class="tag-pill" onclick="quickSearchAsset('calligraphy bismillah')">📜 Kaligrafi</span>
+<span class="tag-pill" onclick="quickSearchAsset('light flare effect')">💡 Kilau Cahaya</span>
+<span class="tag-pill" onclick="quickSearchAsset('islamic pattern')">🕌 Islami</span>
+<span class="tag-pill" onclick="quickSearchAsset('smoke png')">💨 Asap</span>
 </div>
-<div class="asset-grid" id="assetResultsContainer"><div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#888;">🔍 Ketik kata kunci atau pilih tag di atas</div></div>
+<div class="asset-grid" id="assetResultsContainer"></div>
 `;
-openToolPanel('Pencarian Elemen & Foto Gratis',html);
+openToolPanel('Pencarian Elemen & Foto (PNG + JPG)',html);
+loadCuratedAssets();
 }
-function quickSearchAsset(q){const inp=document.getElementById('assetSearchInput');if(inp)inp.value=q;executeAssetSearch();}
+
+function loadCuratedAssets(){
+const grid=document.getElementById('assetResultsContainer');
+if(!grid)return;
+grid.innerHTML='';
+POPULAR_ELEMENTS.forEach(item=>{
+const wrap=document.createElement('div');
+wrap.className='asset-item';
+wrap.title=item.name;
+wrap.innerHTML=`<img src="${item.url}" loading="lazy">`;
+wrap.onclick=()=>insertOnlineAsset(item.url);
+grid.appendChild(wrap);
+});
+}
+
+function quickSearchAsset(q){
+const inp=document.getElementById('assetSearchInput');
+if(inp)inp.value=q;
+executeAssetSearch();
+}
+
 async function executeAssetSearch(){
 const inp=document.getElementById('assetSearchInput');
 const q=inp?inp.value.trim():'';
 if(!q)return;
 const grid=document.getElementById('assetResultsContainer');
-grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#D4AF37;">🔍 Sedang mencari...</div>';
+grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#D4AF37;">🔍 Sedang mencari gambar...</div>';
+
 try{
-const res=await fetch(`https://api.openverse.org/v1/images/?q=${encodeURIComponent(q)}&page_size=28&license_type=all`);
+// 1. Wikimedia Commons API
+const url=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=30&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=280&format=json&origin=*`;
+const res=await fetch(url);
 const data=await res.json();
+if(data.query&&data.query.pages){
+const pages=Object.values(data.query.pages);
 grid.innerHTML='';
-(data.results||[]).forEach(item=>{
+pages.forEach(p=>{
+if(p.imageinfo&&p.imageinfo[0]){
+const thumb=p.imageinfo[0].thumburl||p.imageinfo[0].url;
+const full=p.imageinfo[0].url;
 const wrap=document.createElement('div');
 wrap.className='asset-item';
-wrap.innerHTML=`<img src="${item.thumbnail||item.url}" loading="lazy">`;
-wrap.onclick=()=>insertOnlineAsset(item.url||item.thumbnail);
+wrap.innerHTML=`<img src="${thumb}" loading="lazy">`;
+wrap.onclick=()=>insertOnlineAsset(full);
+grid.appendChild(wrap);
+}
+});
+if(pages.length>0)return;
+}
+throw new Error('Fallback needed');
+}catch(e){
+// 2. Openverse API Fallback
+try{
+const res2=await fetch(`https://api.openverse.org/v1/images/?q=${encodeURIComponent(q)}&page_size=30&license_type=all`);
+const data2=await res2.json();
+const items=data2.results||[];
+if(items.length>0){
+grid.innerHTML='';
+items.forEach(it=>{
+const wrap=document.createElement('div');
+wrap.className='asset-item';
+wrap.innerHTML=`<img src="${it.thumbnail||it.url}" loading="lazy">`;
+wrap.onclick=()=>insertOnlineAsset(it.url||it.thumbnail);
 grid.appendChild(wrap);
 });
-}catch(e){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#ff6b6b;">Gagal memuat elemen online.</div>';}
+return;
 }
+}catch(e2){}
+grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#ff6b6b;">Tidak ditemukan atau koneksi bermasalah. Klik tombol "Populer" di atas.</div>';
+}
+}
+
 function insertOnlineAsset(url){
-showToast('⏳ Memuat elemen...');
+showToast('⏳ Memasukkan gambar ke poster...');
 const img=new Image();
 img.crossOrigin="anonymous";
 img.onload=()=>{
 const s=getCurrentSlide();
+const maxInit=500;
+let initW=img.width;
+let initH=img.height;
+if(initW>maxInit||initH>maxInit){
+const ratio=Math.min(maxInit/initW,maxInit/initH);
+initW*=ratio;
+initH*=ratio;
+}
 const newEl={
 id:'el_'+Date.now(),
 type:'image',
@@ -2819,19 +3144,26 @@ img:img,
 src:url,
 x:mainCanvas.width/2,
 y:mainCanvas.height/2,
-width:Math.min(500,img.width),
-height:Math.round(Math.min(500,img.width)*(img.height/img.width)),
+width:Math.round(initW),
+height:Math.round(initH),
 origWidth:img.width,
 origHeight:img.height,
 flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'transparent',blur:0,angle:45,distance:0},opacity:1,locked:false,groupId:null
 };
 s.elements.push(newEl);
 selectElement(newEl.id);
-renderAll();pushHistoryState();closeToolPanel();showToast('✅ Elemen ditambahkan!');
+renderAll();
+pushHistoryState();
+closeToolPanel();
+showToast('✅ Elemen berhasil ditambahkan!');
+};
+img.onerror=()=>{
+showToast('⚠️ Gambar dilindungi domain, coba elemen lain.');
 };
 img.src=url;
 }
 
+/* ========== UPLOAD ELEMEN & GAMBAR ========== */
 function triggerImageUpload(){document.getElementById('fileImageInput').click();}
 function handleImageUpload(e){
 const file=e.target.files[0];
@@ -2841,6 +3173,14 @@ reader.onload=(evt)=>{
 const img=new Image();
 img.onload=()=>{
 const s=getCurrentSlide();
+const maxInit=550;
+let initW=img.width;
+let initH=img.height;
+if(initW>maxInit||initH>maxInit){
+const ratio=Math.min(maxInit/initW,maxInit/initH);
+initW*=ratio;
+initH*=ratio;
+}
 const newEl={
 id:'el_'+Date.now(),
 type:'image',
@@ -2848,15 +3188,16 @@ img:img,
 src:evt.target.result,
 x:mainCanvas.width/2,
 y:mainCanvas.height/2,
-width:Math.min(550,img.width),
-height:Math.round(Math.min(550,img.width)*(img.height/img.width)),
+width:Math.round(initW),
+height:Math.round(initH),
 origWidth:img.width,
 origHeight:img.height,
 flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'transparent',blur:0,angle:45,distance:0},opacity:1,locked:false,groupId:null
 };
 s.elements.push(newEl);
 selectElement(newEl.id);
-renderAll();pushHistoryState();
+renderAll();
+pushHistoryState();
 };
 img.src=evt.target.result;
 };
@@ -2922,7 +3263,68 @@ renderAll();
 pushHistoryState();
 }
 
-/* ========== SLIDES & CAROUSEL ========== */
+/* ========== GROUPING, LAPISAN & CAROUSEL ========== */
+function openPanelGroup(){
+const s=getCurrentSlide();
+const curr=getActiveElement();
+if(curr&&curr.groupId){
+const count=s.elements.filter(e=>e.groupId===curr.groupId).length;
+const html=`<div style="padding:10px;background:rgba(212,175,55,.1);border-radius:8px;">🔗 Terhubung dalam Grup (${count} elemen)</div>
+<button class="btn-sub-tool active" onclick="ungroupCurrentElement()" style="width:100%;margin-top:10px;color:#ff6b6b;">⛓️ Pisahkan (Ungroup)</button>`;
+openToolPanel('Kelola Grup',html);
+return;
+}
+let html='<div style="font-size:12px;margin-bottom:8px;">Pilih 2+ elemen untuk digabung:</div>';
+s.elements.forEach(el=>{
+html+=`<label class="group-select-item"><input type="checkbox" class="group-checkbox" value="${el.id}"><span>${el.type==='text'?'📝':'🖼️'} ${el.text?el.text.substring(0,20):'Gambar'}</span></label>`;
+});
+html+='<button class="btn-sub-tool active" onclick="confirmGroupElements()" style="width:100%;margin-top:10px;">🔗 Gabungkan</button>';
+openToolPanel('Gabungkan Elemen',html);
+}
+function confirmGroupElements(){
+const s=getCurrentSlide();
+const checked=Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb=>cb.value);
+if(checked.length<2){alert('Pilih minimal 2');return;}
+const gid='grp_'+Date.now();
+s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=gid;});
+pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('✅ Elemen digabung!');
+}
+function ungroupCurrentElement(){
+const el=getActiveElement();
+if(!el||!el.groupId)return;
+const s=getCurrentSlide();
+const gid=el.groupId;
+s.elements.forEach(e=>{if(e.groupId===gid)e.groupId=null;});
+pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('⛓️ Grup dipisahkan!');
+}
+
+function openPanelLayers(){
+const s=getCurrentSlide();
+let html='<div class="layer-list-container">';
+for(let i=s.elements.length-1;i>=0;i--){
+const el=s.elements[i];
+html+=`<div class="layer-item ${el.id===activeElementId?'active':''}" onclick="selectElement('${el.id}');openPanelLayers();">
+<span>${el.type==='text'?'📝':'🖼️'} ${el.text?el.text.substring(0,22):'Foto'}</span>
+<div class="layer-actions">
+<button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},1)">▲</button>
+<button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},-1)">▼</button>
+<button class="layer-btn" onclick="event.stopPropagation();toggleElementLockById('${el.id}')">${el.locked?'🔒':'🔓'}</button>
+<button class="layer-btn" onclick="event.stopPropagation();deleteElementById('${el.id}')">🗑️</button>
+</div></div>`;
+}
+html+='</div>';
+openToolPanel('Daftar Lapisan',html);
+}
+function moveLayer(idx,d){
+const s=getCurrentSlide();
+const target=idx+d;
+if(target<0||target>=s.elements.length)return;
+const tmp=s.elements[idx];
+s.elements[idx]=s.elements[target];
+s.elements[target]=tmp;
+renderAll();pushHistoryState();openPanelLayers();
+}
+
 function renderCarouselThumbs(){
 const container=document.getElementById('slideThumbList');
 container.innerHTML='';
@@ -3012,6 +3414,8 @@ if(!el)return;
 if(eyedropperTarget==='text')el.color=hex;
 else if(eyedropperTarget==='pngOverlay')el.colorOverlay=hex;
 renderAll();pushHistoryState();showToast(`✅ Warna: ${hex}`);
+if(eyedropperTarget==='text')openPanelTextColor();
+else if(eyedropperTarget==='pngOverlay')openPanelPngColorOverlay();
 }
 
 function getProjectsList(){try{const raw=localStorage.getItem(PROJECTS_KEY);return raw?JSON.parse(raw):[];}catch(e){return[];}}
