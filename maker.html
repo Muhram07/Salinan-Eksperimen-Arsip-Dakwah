@@ -1,17 +1,13 @@
-<!-- Berikut adalah kode lengkap yang telah diperbaiki secara menyeluruh sesuai dengan instruksi Anda. 
+<!--Berikut adalah kode lengkap yang telah diperbaiki secara menyeluruh sesuai dengan instruksi Anda. 
 
 **Perbaikan Utama yang Dilakukan:**
-1. **Perspektif 3D (Garis Seam Fix):** Bug garis retakan/segitiga pada hasil perspektif telah dihilangkan dengan menambahkan *overlap padding* saat merender mesh, sehingga gambar menyatu sempurna tanpa garis.
-2. **Hapus BG (2 Mode Baru):** 
-   - **Warna Dominan:** Otomatis men-scan warna yang paling banyak muncul (misal background putih pada logo) dan menghapusnya sekaligus.
-   - **Kuas Cerdas (Smart Edge Eraser):** Menghapus secara manual dengan jari, namun kuas ini pintar. Ia hanya akan menghapus warna yang mirip dengan titik tengah kuas, sehingga batas antara kulit/baju dan background akan terpotong dengan halus dan rapi.
-3. **Tangkap Ajaib (Magic Grab):** Tangkai sekarang bisa digeser dengan lancar. Ditambahkan tombol "Mode Geser" dan "Mode Kuas", serta indikator lingkaran kuas yang akurat mengikuti pergerakan.
-4. **Blend Mode:** Slider Opasitas dan Blur di dalam panel Blend Mode sekarang berfungsi normal secara *real-time*. Emote juga telah diganti agar unik.
-5. **Grup Tool:** Ditambahkan *thumbnail* gambar kecil dan ikon teks pada list elemen. Grup sekarang diberi label otomatis seperti "Grup 1", "Grup 2", dst.
-6. **Mini Browser (Cari Elemen):** Fitur pencarian dirombak menjadi Mini Browser sungguhan dengan Iframe. Anda bisa mengetik URL (misal `pixabay.com`), web akan terbuka. Jika web memblokir tampilan, Anda tetap bisa menekan tombol **"Tarik Gambar"** untuk mengekstrak paksa semua gambar dari link tersebut ke dalam panel, lalu *long-press* untuk memasukkannya ke kanvas.
-7. **Bug Download & Save Indicator:** 
-   - Hasil download yang tadinya putih/abu-abu telah diperbaiki dengan memberikan *base fill* putih murni sebelum dirender ke JPEG resolusi tinggi.
-   - Indikator simpan sekarang mendeteksi koneksi internet. Jika mode pesawat/offline, ia akan menampilkan "Tersimpan Lokal 📴".
+1. **Hapus BG (Magic Wand):** Fitur "Hapus Background Otomatis" sekarang menggunakan algoritma *Flood Fill (Magic Wand)* bawaan. Anda cukup menekan area background pada foto, dan sistem akan menghapus warna yang serupa secara otomatis (mirip remove.bg versi manual presisi). Terdapat slider toleransi warna.
+2. **Tangkap Ajaib (Magic Grab):** Ditambahkan "Tangkai" (Stalk) seperti pada kaca pembesar. Anda bisa memegang tangkai tersebut untuk menggeser kuas tanpa jari menutupi area yang sedang diusap.
+3. **Fokus DSLR (Tilt-Shift):** 
+   - Tombol Horizontal dan Vertikal sekarang menyala kuning saat aktif.
+   - Efek blur telah ditingkatkan menggunakan *multi-stop gradient* sehingga blurnya menyebar secara halus dan realistis (gradual falloff) tergantung jarak dari titik fokus, persis seperti lensa kamera asli.
+4. **Perspektif 3D (Garis Seam Fix):** Bug "garis perspektif" (sebenarnya adalah celah *anti-aliasing* antar segitiga mesh) telah diperbaiki dengan menambahkan *overlap* 0.5 pixel pada setiap sisi segitiga saat dirender, sehingga gambar menyatu sempurna tanpa garis retakan.
+5. **Mini Browser (Cari Elemen):** Fitur pencarian dirombak menjadi Mini Browser sungguhan. Anda bisa mengetik URL web apa saja (misal: `pixabay.com/id/`), sistem akan men-scan seluruh gambar di web tersebut. Tekan tahan (long-press) pada gambar untuk langsung mendownload dan memasukkannya ke kanvas.
 
 --- START OF FILE maker.html ---
 
@@ -39,7 +35,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .save-indicator{font-size:10px;color:#888;display:flex;align-items:center;gap:4px;padding:0 4px;}
 .save-dot{width:7px;height:7px;border-radius:50%;background:#4CAF50;transition:.3s;}
 .save-dot.syncing{background:#FFA000;animation:pulseSync 1s infinite;}
-.save-dot.offline{background:#9E9E9E;}
 @keyframes pulseSync{0%,100%{opacity:.3;}50%{opacity:1;}}
 .workspace-viewport{position:absolute;top:50px;bottom:120px;left:0;right:0;background:#060606;background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 0);background-size:20px 20px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;}
 .artboard-container{position:relative;box-shadow:0 15px 45px rgba(0,0,0,.9),0 0 0 1px rgba(212,175,55,.3);border-radius:6px;overflow:visible;background:#181818;transform-origin:center center;touch-action:none;transition:transform .05s ease-out;}
@@ -329,63 +324,33 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 <div class="fmodal-body" id="magicGrabBody">
 <canvas id="magicGrabCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
-<div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:40px; height:40px; border-radius:50%; font-size:20px;">✋</div>
+<div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100;">✋ Geser Kuas</div>
 </div>
 <div class="fmodal-footer">
 <div style="display:flex;align-items:center;gap:10px;">
-<button class="btn-nav" id="btnToggleGrabMode" onclick="toggleMagicGrabMode()" style="border-color:#00ff88;color:#00ff88;">🖌️ Mode Kuas</button>
-<input type="range" class="ctrl-slider" id="magicBrushSize" min="10" max="90" value="35" style="width:70px;" oninput="updateBrushMonitorPreview(this.value)">
-<button class="btn-nav" onclick="clearMagicGrabMask()">Reset</button>
+<span style="font-size:11px;color:#aaa;">Kuas:</span>
+<input type="range" class="ctrl-slider" id="magicBrushSize" min="10" max="90" value="35" style="width:90px;" oninput="updateBrushMonitorPreview(this.value)">
+<button class="btn-nav" onclick="clearMagicGrabMask()">Bersihkan</button>
 </div>
-<button class="btn-nav btn-download" onclick="applyMagicGrabExtraction()">✂️ Pisahkan</button>
+<button class="btn-nav btn-download" onclick="applyMagicGrabExtraction()">✂️ Pisahkan Subjek</button>
 </div>
 </div>
 
 <div class="feature-modal" id="magicWandModal">
 <div class="fmodal-header">
-<div style="font-weight:800;color:#D4AF37;font-size:13px;">🪄 Hapus BG (Magic Wand & Smart Eraser)</div>
+<div style="font-weight:800;color:#D4AF37;font-size:13px;">🪄 Hapus BG (Magic Wand)</div>
 <button class="panel-close" onclick="closeMagicWandModal()">✕</button>
 </div>
-<div style="padding:8px 16px; background:#141414; display:flex; gap:8px; border-bottom:1px solid rgba(255,255,255,.1);">
-<button class="btn-nav active" id="tabWandDominant" onclick="setWandMode('dominant')" style="flex:1;justify-content:center;">🎨 Warna Dominan</button>
-<button class="btn-nav" id="tabWandSmart" onclick="setWandMode('smart')" style="flex:1;justify-content:center;">🖌️ Kuas Cerdas (Tepi)</button>
-</div>
 <div class="fmodal-body" id="magicWandBody">
-<canvas id="magicWandCanvas" style="max-width:90%;max-height:75%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
+<canvas id="magicWandCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
 </div>
 <div class="fmodal-footer">
-<div style="display:flex;align-items:center;gap:10px; width:100%;">
-<span style="font-size:11px;color:#aaa;" id="wandTolLabel">Toleransi:</span>
-<input type="range" class="ctrl-slider" id="wandTolerance" min="0" max="100" value="30" style="flex:1;">
+<div style="display:flex;align-items:center;gap:10px;">
+<span style="font-size:11px;color:#aaa;">Toleransi:</span>
+<input type="range" class="ctrl-slider" id="wandTolerance" min="0" max="100" value="30" style="width:90px;">
 <button class="btn-nav" onclick="resetMagicWand()">Reset</button>
-<button class="btn-nav btn-download" id="btnApplyWand" onclick="applyMagicWandDominant()">Hapus Dominan</button>
 </div>
-</div>
-</div>
-
-<div class="feature-modal" id="browserModal">
-<div class="fmodal-header" style="gap:8px;">
-<input type="text" id="browserUrlInput" class="asset-search-input" placeholder="Ketik URL web (misal: pixabay.com/id/)" style="flex:1;" onkeydown="if(event.key==='Enter')loadBrowserUrl()">
-<button class="btn-nav active" onclick="loadBrowserUrl()">Go</button>
-<button class="panel-close" onclick="closeBrowserModal()">✕</button>
-</div>
-<div class="fmodal-body" style="flex-direction:column; background:#fff;">
-<iframe id="browserIframe" style="width:100%; height:100%; border:none; background:#fff;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-</div>
-<div class="fmodal-footer" style="flex-direction:column; height:auto; padding:10px 16px; gap:10px;">
-<div style="font-size:10px; color:#aaa; text-align:center;">💡 Jika web menolak dimuat, gunakan tombol Tarik Gambar untuk mengekstrak paksa gambar dari URL di atas.</div>
-<button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px; font-size:14px;" onclick="extractImagesFromBrowser()">⬇️ Tarik Gambar dari Web Ini</button>
-</div>
-</div>
-
-<div class="feature-modal" id="extractedImagesModal" style="z-index:10001;">
-<div class="fmodal-header">
-<div style="font-weight:800;color:#D4AF37;font-size:13px;">🖼️ Hasil Ekstrak Gambar</div>
-<button class="panel-close" onclick="document.getElementById('extractedImagesModal').classList.remove('active')">✕</button>
-</div>
-<div class="fmodal-body" style="align-items:flex-start; padding:16px; overflow-y:auto;">
-<div style="font-size:11px; color:#aaa; margin-bottom:12px; width:100%; text-align:center;">💡 Tekan tahan (long-press) pada gambar selama 1 detik untuk memasukkannya ke kanvas.</div>
-<div class="asset-grid" id="extractedImagesGrid" style="width:100%; max-height:none; overflow:visible;"></div>
+<button class="btn-nav btn-download" onclick="applyMagicWand()">✅ Terapkan</button>
 </div>
 </div>
 
@@ -571,52 +536,33 @@ renderAll();
 renderCarouselThumbs();
 renderBottomToolbar();
 window.addEventListener('resize',()=>{adjustArtboardSize();renderAll();});
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
 setupDirectCanvasTextEvents();
 setupDraggingEngine();
 setupMagicGrabEvents();
 setupFreeCropEvents();
 setupHandledLoupeEvents();
 setupMagicWandEvents();
-updateOnlineStatus();
-}
-
-function updateOnlineStatus() {
-    const dot = document.getElementById('saveDot');
-    const txt = document.getElementById('saveText');
-    if(!dot || !txt) return;
-    if(!navigator.onLine) {
-        dot.className = 'save-dot offline';
-        txt.innerText = 'Tersimpan Lokal 📴';
-    } else {
-        dot.className = 'save-dot';
-        txt.innerText = 'Tersimpan';
-    }
 }
 
 function triggerAutoSave(){
-if(navigator.onLine) {
-    const dot = document.getElementById('saveDot');
-    const txt = document.getElementById('saveText');
-    if(dot) dot.className = 'save-dot syncing';
-    if(txt) txt.innerText = 'Menyimpan...';
-}
+setSaveIndicator(false);
 clearTimeout(autoSaveTimer);
-autoSaveTimer=setTimeout(()=>{
-    saveToStorage();
-    updateOnlineStatus();
-},500);
+autoSaveTimer=setTimeout(()=>{saveToStorage();setSaveIndicator(true);},500);
 }
 
 let historyDebounceTimer=null;
 function debouncedPushHistory(){
-if(navigator.onLine) {
-    const dot = document.getElementById('saveDot');
-    if(dot) dot.className = 'save-dot syncing';
-}
+setSaveIndicator(false);
 clearTimeout(historyDebounceTimer);
 historyDebounceTimer=setTimeout(()=>{pushHistoryState();},400);
+}
+
+function setSaveIndicator(isSaved){
+const dot=document.getElementById('saveDot');
+const txt=document.getElementById('saveText');
+if(!dot||!txt)return;
+if(isSaved){dot.className='save-dot';txt.innerText='Tersimpan';}
+else{dot.className='save-dot syncing';txt.innerText='Menyimpan...';}
 }
 
 function saveToStorage(){
@@ -2619,7 +2565,6 @@ openPanelPosition();
 }
 
 /* ========== PANEL GRUP & PENANDA ELEMEN AKTIF ========== */
-let groupCounter = 1;
 function openPanelGroup(){
 const s=getCurrentSlide();
 const curr=getActiveElement();
@@ -2634,19 +2579,10 @@ s.elements.forEach(e => {
 let html=`<div style="font-size:12px;margin-bottom:8px;">Pilih elemen untuk digabung:</div>`;
 s.elements.forEach(el=>{
 const isCurrent=curr&&el.id===curr.id;
-let groupBadge = '';
-if(el.groupId) {
-    let gName = el.groupId.replace('grp_', 'Grup ');
-    groupBadge = `<span style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:4px;font-size:9px;margin-left:4px;font-weight:bold;">${gName}</span>`;
-}
-let thumbHtml = el.type==='text' ? `<span style="font-size:16px;">🔤</span>` : `<img src="${el.src||el.imgSrc}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;">`;
-
+const groupBadge = el.groupId ? `<span style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:4px;font-size:9px;margin-left:4px;">${el.groupId}</span>` : '';
 html+=`<label class="group-select-item ${isCurrent?'current-item':''}">
 <input type="checkbox" class="group-checkbox" value="${el.id}" ${isCurrent?'checked':''}>
-<div style="display:flex;align-items:center;gap:8px;">
-${thumbHtml}
-<span>${el.text?el.text.substring(0,15):'Gambar'} ${groupBadge}</span>
-</div>
+<span>${el.type==='text'?'📝':'🖼️'} ${el.text?el.text.substring(0,15):'Gambar'} ${groupBadge}</span>
 </label>`;
 });
 html+=`
@@ -2662,7 +2598,7 @@ function confirmGroupElements(){
 const s=getCurrentSlide();
 const checked=Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb=>cb.value);
 if(checked.length<2){alert('Pilih minimal 2 elemen');return;}
-const gid='grp_'+(groupCounter++);
+const gid='grp_'+Date.now();
 s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=gid;});
 pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('✅ Grup baru dibuat!');
 }
@@ -3034,7 +2970,6 @@ showToast('✅ Perspektif 3D berhasil diterapkan!');
 /* ========== TANGKAP AJAIB DENGAN INDIKATOR KUAS CANVA ========== */
 let isPaintingGrab=false;
 let grabMaskCanvas=null;
-let magicGrabMode='brush'; // 'brush' or 'move'
 
 function openMagicGrabModal(){
 const el=getActiveElement();
@@ -3052,11 +2987,6 @@ grabMaskCanvas=document.createElement('canvas');
 grabMaskCanvas.width=canvas.width;
 grabMaskCanvas.height=canvas.height;
 
-magicGrabMode='brush';
-document.getElementById('btnToggleGrabMode').innerText = '🖌️ Mode Kuas';
-document.getElementById('btnToggleGrabMode').style.borderColor = '#00ff88';
-document.getElementById('btnToggleGrabMode').style.color = '#00ff88';
-
 renderMagicGrabDisplay();
 }
 
@@ -3069,21 +2999,6 @@ function clearMagicGrabMask(){
 if(!grabMaskCanvas)return;
 grabMaskCanvas.getContext('2d').clearRect(0,0,grabMaskCanvas.width,grabMaskCanvas.height);
 renderMagicGrabDisplay();
-}
-
-function toggleMagicGrabMode() {
-    const btn = document.getElementById('btnToggleGrabMode');
-    if(magicGrabMode === 'brush') {
-        magicGrabMode = 'move';
-        btn.innerText = '✋ Mode Geser';
-        btn.style.borderColor = '#D4AF37';
-        btn.style.color = '#D4AF37';
-    } else {
-        magicGrabMode = 'brush';
-        btn.innerText = '🖌️ Mode Kuas';
-        btn.style.borderColor = '#00ff88';
-        btn.style.color = '#00ff88';
-    }
 }
 
 function updateBrushMonitorPreview(size){
@@ -3116,25 +3031,23 @@ if(isDraggingStalk){
     const rect=canvas.getBoundingClientRect();
     const x=e.clientX-rect.left;
     const y=e.clientY-rect.top - 60; // Offset kuas di atas tangkai
-    if(magicGrabMode === 'brush') paintGrabAtCoords(x, y);
-} else if(isPaintingGrab && magicGrabMode === 'brush'){
+    paintGrabAtCoords(x, y);
+} else if(isPaintingGrab){
     const rect=canvas.getBoundingClientRect();
     paintGrabAtCoords(e.clientX-rect.left, e.clientY-rect.top);
 }
 });
 
 window.addEventListener('pointerup',()=>{
+isPaintingStalk=false;
 isDraggingStalk=false;
 isPaintingGrab=false;
-document.getElementById('brushMonitor').style.display='none';
 });
 
 canvas.addEventListener('pointerdown',(e)=>{
-if(magicGrabMode === 'brush') {
-    isPaintingGrab=true;
-    const rect=canvas.getBoundingClientRect();
-    paintGrabAtCoords(e.clientX-rect.left, e.clientY-rect.top);
-}
+isPaintingGrab=true;
+const rect=canvas.getBoundingClientRect();
+paintGrabAtCoords(e.clientX-rect.left, e.clientY-rect.top);
 });
 }
 
@@ -3209,10 +3122,7 @@ closeMagicGrabModal();
 showToast('✅ Subjek berhasil dipisahkan!');
 }
 
-/* ========== HAPUS BG (MAGIC WAND / SMART ERASER) ========== */
-let wandMode = 'dominant'; // 'dominant' or 'smart'
-let isSmartErasing = false;
-
+/* ========== HAPUS BG (MAGIC WAND / FLOOD FILL) ========== */
 function openMagicWandModal(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -3225,28 +3135,13 @@ const aspect=(el.img.height||300)/(el.img.width||300);
 canvas.width=maxW;
 canvas.height=Math.round(maxW*aspect);
 
-setWandMode('dominant');
-resetMagicWand();
+const ctxW=canvas.getContext('2d');
+ctxW.clearRect(0,0,canvas.width,canvas.height);
+ctxW.drawImage(el.img,0,0,canvas.width,canvas.height);
 }
 
 function closeMagicWandModal(){
 document.getElementById('magicWandModal').classList.remove('active');
-}
-
-function setWandMode(mode) {
-    wandMode = mode;
-    document.getElementById('tabWandDominant').classList.remove('active');
-    document.getElementById('tabWandSmart').classList.remove('active');
-    
-    if(mode === 'dominant') {
-        document.getElementById('tabWandDominant').classList.add('active');
-        document.getElementById('btnApplyWand').innerText = 'Hapus Dominan';
-        document.getElementById('wandTolLabel').innerText = 'Toleransi:';
-    } else {
-        document.getElementById('tabWandSmart').classList.add('active');
-        document.getElementById('btnApplyWand').innerText = 'Terapkan Kuas';
-        document.getElementById('wandTolLabel').innerText = 'Ukuran Kuas:';
-    }
 }
 
 function resetMagicWand(){
@@ -3260,115 +3155,59 @@ ctxW.drawImage(el.img,0,0,canvas.width,canvas.height);
 
 function setupMagicWandEvents(){
 const canvas=document.getElementById('magicWandCanvas');
-let startColor = null;
-
 canvas.addEventListener('pointerdown',(e)=>{
-    if(wandMode === 'smart') {
-        isSmartErasing = true;
-        const rect=canvas.getBoundingClientRect();
-        const x=Math.round(e.clientX-rect.left);
-        const y=Math.round(e.clientY-rect.top);
-        const ctx = canvas.getContext('2d');
-        const p = ctx.getImageData(x, y, 1, 1).data;
-        startColor = {r:p[0], g:p[1], b:p[2], a:p[3]};
-        applySmartEraser(ctx, x, y, startColor);
-    }
-});
-
-window.addEventListener('pointermove',(e)=>{
-    if(isSmartErasing && wandMode === 'smart') {
-        const rect=canvas.getBoundingClientRect();
-        const x=Math.round(e.clientX-rect.left);
-        const y=Math.round(e.clientY-rect.top);
-        applySmartEraser(canvas.getContext('2d'), x, y, startColor);
-    }
-});
-
-window.addEventListener('pointerup',()=>{
-    isSmartErasing = false;
-    startColor = null;
+const rect=canvas.getBoundingClientRect();
+const x=Math.round(e.clientX-rect.left);
+const y=Math.round(e.clientY-rect.top);
+const tol=parseInt(document.getElementById('wandTolerance').value||30);
+applyFloodFill(canvas.getContext('2d'), x, y, tol);
 });
 }
 
-function applySmartEraser(ctx, cx, cy, targetColor) {
-    if(!targetColor || targetColor.a === 0) return;
-    const radius = parseInt(document.getElementById('wandTolerance').value||30) / 2;
-    const w = ctx.canvas.width;
-    const h = ctx.canvas.height;
+function applyFloodFill(ctx, startX, startY, tolerance) {
+const w = ctx.canvas.width;
+const h = ctx.canvas.height;
+const imgData = ctx.getImageData(0, 0, w, h);
+const data = imgData.data;
+const startIndex = (startY * w + startX) * 4;
+const sr = data[startIndex], sg = data[startIndex+1], sb = data[startIndex+2], sa = data[startIndex+3];
+
+if(sa === 0) return;
+
+const tolSq = (tolerance * 2.55) ** 2 * 3;
+const pixelStack = [startX, startY];
+const visited = new Uint8Array(w * h);
+
+while(pixelStack.length > 0) {
+    const y = pixelStack.pop();
+    const x = pixelStack.pop();
+    const idx = (y * w + x) * 4;
     
-    const minX = Math.max(0, Math.floor(cx - radius));
-    const maxX = Math.min(w, Math.ceil(cx + radius));
-    const minY = Math.max(0, Math.floor(cy - radius));
-    const maxY = Math.min(h, Math.ceil(cy + radius));
+    data[idx+3] = 0; // Set transparent
     
-    const imgData = ctx.getImageData(minX, minY, maxX - minX, maxY - minY);
-    const data = imgData.data;
-    const tolSq = (30 * 2.55) ** 2 * 3; // Fixed tolerance for smart edge
-    
-    for(let y = 0; y < maxY - minY; y++) {
-        for(let x = 0; x < maxX - minX; x++) {
-            const dx = (minX + x) - cx;
-            const dy = (minY + y) - cy;
-            if(dx*dx + dy*dy <= radius*radius) {
-                const idx = (y * (maxX - minX) + x) * 4;
-                if(data[idx+3] > 0) {
-                    const distSq = (data[idx]-targetColor.r)**2 + (data[idx+1]-targetColor.g)**2 + (data[idx+2]-targetColor.b)**2;
-                    if(distSq <= tolSq) {
-                        data[idx+3] = 0; // Erase
+    const neighbors = [[x+1, y], [x-1, y], [x, y+1], [x, y-1]];
+    for(let i=0; i<neighbors.length; i++){
+        const nx = neighbors[i][0];
+        const ny = neighbors[i][1];
+        if(nx >= 0 && nx < w && ny >= 0 && ny < h){
+            const nIdx = ny * w + nx;
+            if(!visited[nIdx]){
+                const pIdx = nIdx * 4;
+                if(data[pIdx+3] > 0){
+                    const distSq = (data[pIdx]-sr)**2 + (data[pIdx+1]-sg)**2 + (data[pIdx+2]-sb)**2;
+                    if(distSq <= tolSq){
+                        visited[nIdx] = 1;
+                        pixelStack.push(nx, ny);
                     }
                 }
             }
         }
     }
-    ctx.putImageData(imgData, minX, minY);
+}
+ctx.putImageData(imgData, 0, 0);
 }
 
-function applyMagicWandDominant() {
-    if(wandMode === 'smart') {
-        applyMagicWandFinal();
-        return;
-    }
-    
-    const canvas=document.getElementById('magicWandCanvas');
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-    const imgData = ctx.getImageData(0, 0, w, h);
-    const data = imgData.data;
-    
-    // Find dominant color (simple sampling)
-    const colorCounts = {};
-    let maxCount = 0;
-    let domColor = null;
-    
-    for(let i=0; i<data.length; i+=16) { // Sample every 4th pixel
-        if(data[i+3] > 0) {
-            const rgb = `${Math.round(data[i]/10)*10},${Math.round(data[i+1]/10)*10},${Math.round(data[i+2]/10)*10}`;
-            colorCounts[rgb] = (colorCounts[rgb] || 0) + 1;
-            if(colorCounts[rgb] > maxCount) {
-                maxCount = colorCounts[rgb];
-                domColor = {r:data[i], g:data[i+1], b:data[i+2]};
-            }
-        }
-    }
-    
-    if(domColor) {
-        const tolerance = parseInt(document.getElementById('wandTolerance').value||30);
-        const tolSq = (tolerance * 2.55) ** 2 * 3;
-        for(let i=0; i<data.length; i+=4) {
-            if(data[i+3] > 0) {
-                const distSq = (data[i]-domColor.r)**2 + (data[i+1]-domColor.g)**2 + (data[i+2]-domColor.b)**2;
-                if(distSq <= tolSq) {
-                    data[i+3] = 0;
-                }
-            }
-        }
-        ctx.putImageData(imgData, 0, 0);
-        applyMagicWandFinal();
-    }
-}
-
-function applyMagicWandFinal(){
+function applyMagicWand(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
 showToast('⏳ Menerapkan penghapusan background...');
@@ -3383,6 +3222,444 @@ closeMagicWandModal();
 showToast('✅ Background berhasil dihapus!');
 }
 
+/* ========== DUPLIKAT MENDALAM (DEEP CLONE) ========== */
+function duplicateActiveElement(){
+const el=getActiveElement();
+if(!el)return;
+const s=getCurrentSlide();
+const copy=JSON.parse(JSON.stringify(el));
+copy.id='el_'+Date.now();
+copy.x+=35;
+copy.y+=35;
+if(el.type==='image'&&el.img)copy.img=el.img;
+if(el.textSkinImg)copy.textSkinImg=el.textSkinImg;
+if(el.imageSkinImg)copy.imageSkinImg=el.imageSkinImg;
+s.elements.push(copy);
+selectElement(copy.id);
+renderAll();
+pushHistoryState();
+showToast('📑 Berhasil diduplikasi!');
+}
+
+/* ========== FONT, UKURAN, DAN ROTASI DASAR ========== */
+function openPanelFontFamily(){
+const el=getActiveElement();
+if(!el)return;
+let html='<div style="display:flex;flex-direction:column;gap:6px;">';
+FONT_FAMILIES.forEach(f=>{
+const isAct=getCleanFont(el.fontFamily)===getCleanFont(f.font);
+html+=`<div class="layer-item ${isAct?'active':''}" style="font-family:${f.font};font-size:15px;" onclick="setFontFamily('${f.font.replace(/'/g,"\\'")}')"><span>${f.name}</span>${isAct?'✓':''}</div>`;
+});
+html+='</div>';
+openToolPanel('Pilih Font',html);
+}
+function setFontFamily(font){const el=getActiveElement();if(!el)return;el.fontFamily=font;renderAll();pushHistoryState();openPanelFontFamily();}
+
+function openPanelTextColor(){
+const el=getActiveElement();
+if(!el)return;
+let html=`
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+<span style="font-size:11px;font-weight:700;color:#D4AF37;">WARNA TEKS:</span>
+<label style="font-size:10px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;">
+<input type="checkbox" id="chkWordOnlyColor" ${formatWordOnlyMode?'checked':''} onchange="formatWordOnlyMode=this.checked; openPanelTextColor();">
+<span>Blok Kata Terpilih</span>
+</label>
+</div>
+${formatWordOnlyMode ? `
+<div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk diwarnai:</div>
+<div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; scrollbar-width:none;">
+${renderWordSelectionUI()}
+</div>
+` : ''}
+<div class="ctrl-row">
+<span class="ctrl-label">Pilih Warna:</span>
+<button class="btn-sub-tool active" onclick="openHandledLoupe(setTextColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
+</div>
+<div class="color-palette-scroll" style="margin-top:8px;">`;
+QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.color===c?'active':''}" style="background:${c};" onclick="setTextColor('${c}')"></div>`;});
+html+=`</div><div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kustom:</span><input type="color" value="${el.color||'#ffffff'}" onchange="setTextColor(this.value)"></div>`;
+openToolPanel('Warna Teks',html);
+}
+function setTextColor(color){
+    const el=getActiveElement();if(!el)return;
+    if (formatWordOnlyMode && selectedWordIndices.length > 0) {
+        if (!el.wordStyles) el.wordStyles = {};
+        selectedWordIndices.forEach(i => {
+            if (!el.wordStyles[i]) el.wordStyles[i] = {};
+            el.wordStyles[i].color = color;
+        });
+    } else {
+        el.color=color;
+    }
+    renderAll();pushHistoryState();openPanelTextColor();
+}
+
+function openPanelSpacing(){
+const el=getActiveElement();
+if(!el)return;
+const curLH=el.lineHeight||1.3;
+const curLS=el.letterSpacing||0;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Jarak Baris:</span><span class="ctrl-val" id="valLineHeight">${curLH.toFixed(1)}</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('lhSlider',-10,updateLineHeight)">-</button>
+<input type="range" class="ctrl-slider" id="lhSlider" min="80" max="250" value="${Math.round(curLH*100)}" oninput="updateLineHeight(this.value)">
+<button class="btn-step" onclick="stepSliderVal('lhSlider',10,updateLineHeight)">+</button>
+</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Jarak Huruf:</span><span class="ctrl-val" id="valLetterSpacing">${curLS}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('lsSlider',-1,updateLetterSpacing)">-</button>
+<input type="range" class="ctrl-slider" id="lsSlider" min="-5" max="30" value="${curLS}" oninput="updateLetterSpacing(this.value)">
+<button class="btn-step" onclick="stepSliderVal('lsSlider',1,updateLetterSpacing)">+</button>
+</div>`;
+openToolPanel('Jarak Baris & Huruf',html);
+}
+function updateLineHeight(val){const el=getActiveElement();if(!el)return;el.lineHeight=parseInt(val)/100;document.getElementById('valLineHeight').innerText=el.lineHeight.toFixed(1);renderAll();debouncedPushHistory();}
+function updateLetterSpacing(val){const el=getActiveElement();if(!el)return;el.letterSpacing=parseInt(val);document.getElementById('valLetterSpacing').innerText=el.letterSpacing+'px';renderAll();debouncedPushHistory();}
+
+function openPanelCurveAndSlant(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-row">
+<span class="ctrl-label">Lengkung:</span>
+<span class="ctrl-val" id="valCurve">${el.curveAngle||0}°</span>
+<button class="btn-reset-tool" onclick="resetCurveAndSlant()">↺ Reset</button>
+</div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('cSlider',-1,updateCurveAngle)">-</button>
+<input type="range" class="ctrl-slider" id="cSlider" min="-180" max="180" value="${el.curveAngle||0}" oninput="updateCurveAngle(this.value)">
+<button class="btn-step" onclick="stepSliderVal('cSlider',1,updateCurveAngle)">+</button>
+</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Miring:</span><span class="ctrl-val" id="valSlant">${el.italicSlant||0}°</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('slSlider',-1,updateItalicSlant)">-</button>
+<input type="range" class="ctrl-slider" id="slSlider" min="-35" max="35" value="${el.italicSlant||0}" oninput="updateItalicSlant(this.value)">
+<button class="btn-step" onclick="stepSliderVal('slSlider',1,updateItalicSlant)">+</button>
+</div>`;
+openToolPanel('Lengkung & Kemiringan',html);
+}
+function updateCurveAngle(val){const el=getActiveElement();if(!el)return;el.curveAngle=parseInt(val);document.getElementById('valCurve').innerText=val+'°';renderAll();debouncedPushHistory();}
+function updateItalicSlant(val){const el=getActiveElement();if(!el)return;el.italicSlant=parseInt(val);document.getElementById('valSlant').innerText=val+'°';renderAll();debouncedPushHistory();}
+function resetCurveAndSlant(){
+    const el=getActiveElement();if(!el)return;
+    el.curveAngle=0;
+    el.italicSlant=0;
+    document.getElementById('cSlider').value=0;
+    document.getElementById('valCurve').innerText='0°';
+    document.getElementById('slSlider').value=0;
+    document.getElementById('valSlant').innerText='0°';
+    renderAll();
+    pushHistoryState();
+}
+
+function openPanelRotation(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Rotasi:</span><span class="ctrl-val" id="valRot">${el.rotation||0}°</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('rSlider',-5,updateRotation)">-</button>
+<input type="range" class="ctrl-slider" id="rSlider" min="0" max="360" value="${el.rotation||0}" oninput="updateRotation(this.value)">
+<button class="btn-step" onclick="stepSliderVal('rSlider',5,updateRotation)">+</button>
+</div>`;
+openToolPanel('Rotasi Elemen',html);
+}
+function updateRotation(val){const el=getActiveElement();if(!el)return;el.rotation=parseInt(val);document.getElementById('valRot').innerText=val+'°';renderAll();debouncedPushHistory();}
+
+function openPanelImageFlip(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-grid-btns">
+<button class="btn-sub-tool ${el.flipH?'active':''}" onclick="toggleFlip('H')">↔️ Cermin H</button>
+<button class="btn-sub-tool ${el.flipV?'active':''}" onclick="toggleFlip('V')">↕️ Cermin V</button>
+</div>`;
+openToolPanel('Cermin Gambar',html);
+}
+function toggleFlip(dir){const el=getActiveElement();if(!el)return;if(dir==='H')el.flipH=!el.flipH;if(dir==='V')el.flipV=!el.flipV;renderAll();pushHistoryState();openPanelImageFlip();}
+
+function openPanelOpacity(){
+const el=getActiveElement();
+if(!el)return;
+const curVal=Math.round((el.opacity!==undefined?el.opacity:1)*100);
+const html=`<div class="ctrl-row"><span class="ctrl-label">Transparansi:</span><span class="ctrl-val" id="valOp">${curVal}%</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('opSlider',-5,updateElemOpacity)">-</button>
+<input type="range" class="ctrl-slider" id="opSlider" min="5" max="100" value="${curVal}" oninput="updateElemOpacity(this.value)">
+<button class="btn-step" onclick="stepSliderVal('opSlider',5,updateElemOpacity)">+</button>
+</div>`;
+openToolPanel('Transparansi Elemen',html);
+}
+function updateElemOpacity(v){const el=getActiveElement();if(!el)return;el.opacity=parseInt(v)/100;document.getElementById('valOp').innerText=v+'%';renderAll();debouncedPushHistory();}
+
+function openPanelImageBlur(){
+const el=getActiveElement();
+if(!el)return;
+const html=`<div class="ctrl-row"><span class="ctrl-label">Blur:</span><span class="ctrl-val" id="valImgBlurOnly">${el.blur||0}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('blurOnlySlider',-1,updateImageBlur)">-</button>
+<input type="range" class="ctrl-slider" id="blurOnlySlider" min="0" max="40" value="${el.blur||0}" oninput="updateImageBlur(this.value)">
+<button class="btn-step" onclick="stepSliderVal('blurOnlySlider',1,updateImageBlur)">+</button>
+</div>`;
+openToolPanel('Efek Blur Foto',html);
+}
+function updateImageBlur(v){const el=getActiveElement();if(!el)return;el.blur=parseInt(v);document.getElementById('valImgBlurOnly').innerText=v+'px';renderAll();debouncedPushHistory();}
+
+function openPanelImageBorder(){
+const el=getActiveElement();
+if(!el)return;
+let html=`
+<div class="ctrl-row">
+<span class="ctrl-label">Warna Garis:</span>
+<button class="btn-sub-tool active" onclick="openHandledLoupe(setBorderColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
+<button class="btn-reset-tool" onclick="updateBorderWidth(0)">Matikan</button>
+</div>
+<div class="color-palette-scroll" style="margin-top:8px;">`;
+QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.borderColor===c?'active':''}" style="background:${c};" onclick="setBorderColor('${c}')"></div>`;});
+html+=`</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Garis Tepi:</span><span class="ctrl-val" id="valBorderW">${el.borderWidth||0}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('bwSlider',-1,updateBorderWidth)">-</button>
+<input type="range" class="ctrl-slider" id="bwSlider" min="0" max="30" value="${el.borderWidth||0}" oninput="updateBorderWidth(this.value)">
+<button class="btn-step" onclick="stepSliderVal('bwSlider',1,updateBorderWidth)">+</button>
+</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Efek Neon/Blur:</span><span class="ctrl-val" id="valBorderBlur">${el.borderBlur||0}px</span></div>
+<input type="range" class="ctrl-slider" min="0" max="25" value="${el.borderBlur||0}" oninput="updateBorderBlur(this.value)">
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Kelengkungan (Kotak):</span><span class="ctrl-val" id="valRadius">${el.cornerRadius||0}px</span></div>
+<input type="range" class="ctrl-slider" min="0" max="150" value="${el.cornerRadius||0}" oninput="updateCornerRadius(this.value)">
+<div style="font-size:10px;color:#888;margin-top:8px;">💡 Pada foto potongan PNG transparan, garis otomatis membentuk stiker rapi mengikuti kontur siluet objek.</div>
+`;
+openToolPanel('🔲 Garis Tepi & Stiker Siluet',html);
+}
+function updateBorderWidth(v){const el=getActiveElement();if(!el)return;el.borderWidth=parseInt(v);if(!el.borderColor)el.borderColor='#D4AF37';document.getElementById('valBorderW').innerText=v+'px';renderAll();debouncedPushHistory();}
+function updateBorderBlur(v){const el=getActiveElement();if(!el)return;el.borderBlur=parseInt(v);renderAll();debouncedPushHistory();}
+function updateCornerRadius(v){const el=getActiveElement();if(!el)return;el.cornerRadius=parseInt(v);document.getElementById('valRadius').innerText=v+'px';renderAll();debouncedPushHistory();}
+function setBorderColor(c){const el=getActiveElement();if(!el)return;el.borderColor=c;renderAll();pushHistoryState();openPanelImageBorder();}
+
+function openPanelBlendMode(){
+const el=getActiveElement();
+if(!el||el.type!=='image')return;
+const curBlend=el.blendMode||'normal';
+const curOp=Math.round((el.opacity!==undefined?el.opacity:1)*100);
+const curBlur=el.blur||0;
+const html=`
+<div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:6px;">MODE PENCAMPURAN (BLEND):</div>
+<div class="ctrl-grid-btns">
+<button class="btn-sub-tool ${curBlend==='screen'?'active':''}" onclick="setImageBlendMode('screen')">🔥 Screen<span style="font-size:8px;color:#bbb;">Hilang Hitam</span></button>
+<button class="btn-sub-tool ${curBlend==='lighter'?'active':''}" onclick="setImageBlendMode('lighter')">⚡ Add<span style="font-size:8px;color:#bbb;">Menyala</span></button>
+<button class="btn-sub-tool ${curBlend==='multiply'?'active':''}" onclick="setImageBlendMode('multiply')">🌑 Multiply<span style="font-size:8px;color:#bbb;">Hilang Putih</span></button>
+<button class="btn-sub-tool ${curBlend==='overlay'?'active':''}" onclick="setImageBlendMode('overlay')">🌈 Overlay<span style="font-size:8px;color:#bbb;">Dramatis</span></button>
+<button class="btn-sub-tool ${curBlend==='color-dodge'?'active':''}" onclick="setImageBlendMode('color-dodge')">💡 Dodge<span style="font-size:8px;color:#bbb;">Neon</span></button>
+<button class="btn-sub-tool ${curBlend==='soft-light'?'active':''}" onclick="setImageBlendMode('soft-light')">☁️ Soft Light<span style="font-size:8px;color:#bbb;">Lembut</span></button>
+<button class="btn-sub-tool ${curBlend==='hard-light'?'active':''}" onclick="setImageBlendMode('hard-light')">💥 Hard Light<span style="font-size:8px;color:#bbb;">Kuat</span></button>
+<button class="btn-sub-tool ${curBlend==='normal'?'active':''}" onclick="setImageBlendMode('normal')">⚪ Normal<span style="font-size:8px;color:#bbb;">Standar</span></button>
+</div>
+<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kekuatan (Opasitas):</span><span class="ctrl-val" id="valBlendOp">${curOp}%</span></div>
+<input type="range" class="ctrl-slider" min="5" max="100" value="${curOp}" oninput="updateElemOpacity(this.value); document.getElementById('valBlendOp').innerText=this.value+'%';">
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Blur Efek:</span><span class="ctrl-val" id="valBlendBlur">${curBlur}px</span></div>
+<input type="range" class="ctrl-slider" min="0" max="40" value="${curBlur}" oninput="updateImageBlur(this.value); document.getElementById('valBlendBlur').innerText=this.value+'px';">
+<button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="setImageBlendMode('normal'); updateElemOpacity(100); updateImageBlur(0); openPanelBlendMode();">↺ Reset Blend Mode</button>
+`;
+openToolPanel('✨ Blend Mode Efek Cahaya',html);
+}
+function setImageBlendMode(m){const el=getActiveElement();if(!el)return;el.blendMode=m;renderAll();pushHistoryState();openPanelBlendMode();}
+
+function openPanelPngColorOverlay(){
+const el=getActiveElement();
+if(!el)return;
+let html=`
+<div class="ctrl-row">
+<span class="ctrl-label">Warna Siluet:</span>
+<button class="btn-sub-tool active" onclick="openHandledLoupe(setPngColorOverlay)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
+<button class="btn-reset-tool" onclick="setPngColorOverlay('none')">Matikan</button>
+</div>
+<div class="color-palette-scroll" style="margin-top:8px;">
+<div class="color-circle" style="background:#333;color:#aaa;display:flex;align-items:center;justify-content:center;font-size:10px;" onclick="setPngColorOverlay('none')">✕</div>
+${QUICK_COLORS.map(c=>`<div class="color-circle ${el.colorOverlay===c?'active':''}" style="background:${c};" onclick="setPngColorOverlay('${c}')"></div>`).join('')}
+</div>
+<button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="setPngColorOverlay('none')">↺ Reset Warna Siluet</button>
+`;
+openToolPanel('🎨 Warna Siluet Full PNG',html);
+}
+function setPngColorOverlay(c){const el=getActiveElement();if(!el)return;el.colorOverlay=c;renderAll();pushHistoryState();openPanelPngColorOverlay();}
+
+function openPanelCropImage() {
+    const el = getActiveElement();
+    if(!el || el.type !== 'image') return;
+    const html = `
+    <div class="ctrl-row"><span class="ctrl-label">Potong Kiri:</span><span class="ctrl-val" id="valCropL">${el.cropL||0}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="90" value="${el.cropL||0}" oninput="updateCrop('cropL', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Potong Kanan:</span><span class="ctrl-val" id="valCropR">${el.cropR||0}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="90" value="${el.cropR||0}" oninput="updateCrop('cropR', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Potong Atas:</span><span class="ctrl-val" id="valCropT">${el.cropT||0}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="90" value="${el.cropT||0}" oninput="updateCrop('cropT', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Potong Bawah:</span><span class="ctrl-val" id="valCropB">${el.cropB||0}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="90" value="${el.cropB||0}" oninput="updateCrop('cropB', this.value)">
+    <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="resetCrop()">↺ Reset Potongan</button>
+    `;
+    openToolPanel('✂️ Crop Presisi', html);
+}
+function updateCrop(prop, val) {
+    const el = getActiveElement();
+    if(!el) return;
+    el[prop] = parseInt(val);
+    document.getElementById('val' + prop.charAt(0).toUpperCase() + prop.slice(1)).innerText = val + '%';
+    renderAll();
+    debouncedPushHistory();
+}
+function resetCrop() {
+    const el = getActiveElement();
+    if(!el) return;
+    el.cropL = 0; el.cropR = 0; el.cropT = 0; el.cropB = 0;
+    renderAll(); pushHistoryState(); openPanelCropImage();
+}
+
+function openPanelImageSkinOverlay() {
+    const el = getActiveElement();
+    if(!el || el.type !== 'image') return;
+    const hasSkin = !!el.imageSkinImg;
+    const curScale = Math.round((el.imageSkinScale||1.0)*100);
+    const html = `
+    <div class="ctrl-row">
+        <span class="ctrl-label">Skin Gambar:</span>
+        <button class="btn-sub-tool active" onclick="document.getElementById('fileImageSkinInput').click()">📁 Unggah</button>
+        ${hasSkin ? `<button class="btn-reset-tool" onclick="removeImageSkin()">🗑️ Hapus</button>` : ''}
+    </div>
+    ${hasSkin ? `
+    <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Zoom:</span><span class="ctrl-val" id="valImgSkinScale">${curScale}%</span></div>
+    <input type="range" class="ctrl-slider" min="20" max="400" value="${curScale}" oninput="updateImageSkin('imageSkinScale', this.value/100)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="valImgSkinOffX">${el.imageSkinOffsetX||0}px</span></div>
+    <input type="range" class="ctrl-slider" min="-500" max="500" value="${el.imageSkinOffsetX||0}" oninput="updateImageSkin('imageSkinOffsetX', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="valImgSkinOffY">${el.imageSkinOffsetY||0}px</span></div>
+    <input type="range" class="ctrl-slider" min="-500" max="500" value="${el.imageSkinOffsetY||0}" oninput="updateImageSkin('imageSkinOffsetY', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Opasitas:</span><span class="ctrl-val" id="valImgSkinOp">${Math.round((el.imageSkinOpacity!==undefined?el.imageSkinOpacity:1)*100)}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="100" value="${Math.round((el.imageSkinOpacity!==undefined?el.imageSkinOpacity:1)*100)}" oninput="updateImageSkin('imageSkinOpacity', this.value/100)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Blend Mode:</span>
+    <select onchange="updateImageSkin('imageSkinBlend', this.value)" style="background:#222;color:#fff;border:1px solid #D4AF37;border-radius:4px;padding:2px;font-size:11px;">
+        <option value="source-in" ${el.imageSkinBlend==='source-in'?'selected':''}>Normal (Mask)</option>
+        <option value="multiply" ${el.imageSkinBlend==='multiply'?'selected':''}>Multiply</option>
+        <option value="screen" ${el.imageSkinBlend==='screen'?'selected':''}>Screen</option>
+        <option value="overlay" ${el.imageSkinBlend==='overlay'?'selected':''}>Overlay</option>
+    </select>
+    </div>
+    <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="removeImageSkin()">↺ Reset Skin</button>
+    ` : `<div style="font-size:11px;color:#888;margin-top:10px;">💡 Unggah tekstur (seperti emas, marmer, atau pola) untuk melapisi gambar ini.</div>`}
+    `;
+    openToolPanel('🎭 Skin Foto Overlay', html);
+}
+
+function updateImageSkin(prop, val) {
+    const el = getActiveElement(); if(!el) return;
+    el[prop] = (prop === 'imageSkinBlend') ? val : parseFloat(val);
+    if(prop === 'imageSkinScale') document.getElementById('valImgSkinScale').innerText = Math.round(val*100)+'%';
+    if(prop === 'imageSkinOffsetX') document.getElementById('valImgSkinOffX').innerText = val+'px';
+    if(prop === 'imageSkinOffsetY') document.getElementById('valImgSkinOffY').innerText = val+'px';
+    if(prop === 'imageSkinOpacity') document.getElementById('valImgSkinOp').innerText = Math.round(val*100)+'%';
+    renderAll(); debouncedPushHistory();
+}
+
+function removeImageSkin() {
+    const el = getActiveElement(); if(!el) return;
+    el.imageSkinImg = null; el.imageSkinSrc = null;
+    renderAll(); pushHistoryState(); openPanelImageSkinOverlay();
+}
+
+function handleImageSkinUpload(e) {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const el = getActiveElement();
+        if(el && el.type === 'image') {
+            el.imageSkinSrc = event.target.result;
+            el.imageSkinImg = getImageFromCache(el.imageSkinSrc);
+            renderAll(); pushHistoryState(); openPanelImageSkinOverlay();
+        }
+    };
+    reader.readAsDataURL(file); e.target.value = '';
+}
+
+function openPanelRelativeSizeAndPos() {
+    const el = getActiveElement(); if(!el) return;
+    const W = mainCanvas.width;
+    const curPct = Math.round((el.width / W) * 100);
+    const html = `
+    <div class="ctrl-row"><span class="ctrl-label">Lebar Relatif:</span><span class="ctrl-val" id="valRelW">${curPct}%</span></div>
+    <input type="range" class="ctrl-slider" min="10" max="100" value="${curPct}" oninput="updateRelativeSize(this.value)">
+    <div class="ctrl-grid-btns" style="margin-top:12px;">
+        <button class="btn-sub-tool" onclick="updateRelativeSize(25)">25%</button>
+        <button class="btn-sub-tool" onclick="updateRelativeSize(50)">50%</button>
+        <button class="btn-sub-tool" onclick="updateRelativeSize(75)">75%</button>
+        <button class="btn-sub-tool" onclick="updateRelativeSize(100)">100%</button>
+    </div>
+    <div style="font-size:10px;color:#888;margin-top:12px;">💡 Mengubah ukuran elemen berdasarkan persentase lebar kanvas poster.</div>
+    `;
+    openToolPanel('⚖️ Ukuran Relatif Kanvas', html);
+}
+
+function updateRelativeSize(pct) {
+    const el = getActiveElement(); if(!el) return;
+    const W = mainCanvas.width;
+    const newW = Math.round(W * (parseInt(pct) / 100));
+    if(el.type === 'image') {
+        const aspect = el.height / el.width;
+        el.width = newW;
+        el.height = Math.round(newW * aspect);
+    } else {
+        el.width = newW;
+    }
+    const lbl = document.getElementById('valRelW');
+    if(lbl) lbl.innerText = pct + '%';
+    renderAll(); debouncedPushHistory();
+}
+
+function openPanelDepthFocus() {
+    const el = getActiveElement(); if(!el || el.type !== 'image') return;
+    if(!el.depthFocus) el.depthFocus = {active:false, mode:'radial', blurAmount:14, centerX:50, centerY:50, radius:35};
+    const df = el.depthFocus;
+    const html = `
+    <div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;font-weight:700;">Status Fokus DSLR</span>
+        <button class="btn-sub-tool ${df.active?'active':''}" onclick="toggleDepthFocus()">${df.active?'Aktif':'Mati'}</button>
+    </div>
+    <div class="ctrl-grid-btns" style="margin-top:12px;">
+        <button class="btn-sub-tool ${df.mode==='radial'?'active':''}" onclick="updateDepthFocus('mode', 'radial')">⭕ Radial</button>
+        <button class="btn-sub-tool ${df.mode==='linear'?'active':''}" onclick="updateDepthFocus('mode', 'linear')">➖ Horizontal</button>
+        <button class="btn-sub-tool ${df.mode==='vertical'?'active':''}" onclick="updateDepthFocus('mode', 'vertical')">| Vertikal</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Intensitas Blur:</span><span class="ctrl-val" id="valDfBlur">${df.blurAmount}px</span></div>
+    <input type="range" class="ctrl-slider" min="2" max="40" value="${df.blurAmount}" oninput="updateDepthFocus('blurAmount', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Ukuran Area Fokus:</span><span class="ctrl-val" id="valDfRad">${df.radius}%</span></div>
+    <input type="range" class="ctrl-slider" min="10" max="100" value="${df.radius}" oninput="updateDepthFocus('radius', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="valDfX">${df.centerX}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="100" value="${df.centerX}" oninput="updateDepthFocus('centerX', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="valDfY">${df.centerY}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="100" value="${df.centerY}" oninput="updateDepthFocus('centerY', this.value)">
+    <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="resetDepthFocus()">↺ Reset Fokus</button>
+    `;
+    openToolPanel('📷 Fokus Lensa DSLR (Tilt-Shift)', html);
+}
+
+function toggleDepthFocus() {
+    const el = getActiveElement(); if(!el) return;
+    el.depthFocus.active = !el.depthFocus.active;
+    renderAll(); pushHistoryState(); openPanelDepthFocus();
+}
+
+function updateDepthFocus(prop, val) {
+    const el = getActiveElement(); if(!el) return;
+    el.depthFocus[prop] = (prop === 'mode') ? val : parseInt(val);
+    if(prop === 'blurAmount') document.getElementById('valDfBlur').innerText = val+'px';
+    if(prop === 'radius') document.getElementById('valDfRad').innerText = val+'%';
+    if(prop === 'centerX') document.getElementById('valDfX').innerText = val+'%';
+    if(prop === 'centerY') document.getElementById('valDfY').innerText = val+'%';
+    renderAll(); debouncedPushHistory(); 
+    if(prop === 'mode') openPanelDepthFocus(); // Re-render panel to update active button states
+}
+
+function resetDepthFocus() {
+    const el = getActiveElement(); if(!el) return;
+    el.depthFocus = {active:false, mode:'radial', blurAmount:14, centerX:50, centerY:50, radius:35};
+    renderAll(); pushHistoryState(); openPanelDepthFocus();
+}
+
 /* ========== PENCARIAN ELEMEN MULTI-SUMBER (BROWSER-LIKE) ========== */
 const POPULAR_ELEMENTS=[
 {name:'🔥 Api Membara',url:'https://images.unsplash.com/photo-1542385151-efd9000785a0?w=600&auto=format&fit=crop&q=80'},
@@ -3395,14 +3672,20 @@ const POPULAR_ELEMENTS=[
 
 function openPanelOnlineAssets(){
 const html=`
-<div style="font-size:10px;color:#aaa;margin-bottom:8px;text-align:center;background:rgba(255,255,255,0.05);padding:6px;border-radius:6px;">💡 Petunjuk: Buka Mini Browser untuk mencari gambar dari web mana saja.</div>
-<button class="btn-nav active" style="width:100%; justify-content:center; height:40px; font-size:14px; margin-bottom:12px;" onclick="openBrowserModal()">🌐 Buka Mini Browser</button>
+<div style="font-size:10px;color:#aaa;margin-bottom:8px;text-align:center;background:rgba(255,255,255,0.05);padding:6px;border-radius:6px;">💡 Petunjuk: Masukkan URL web (misal: pixabay.com) atau kata kunci. Tekan tahan gambar 1 detik untuk memasukkan ke kanvas.</div>
+<div style="display:flex;gap:8px;margin-bottom:8px;">
+<input type="text" id="assetSearchInput" class="asset-search-input" placeholder="Cari kata kunci atau ketik URL web..." onkeydown="if(event.key==='Enter')executeAssetSearch()">
+<button class="btn-nav active" onclick="executeAssetSearch()" style="border-radius:19px;padding:0 14px;">Cari/Buka</button>
+</div>
 <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none;">
 <span class="tag-pill active" onclick="loadCuratedAssets()">🌟 Populer</span>
+<span class="tag-pill" onclick="quickSearchAsset('https://pixabay.com/images/search/fire/')">🔥 Api (Pixabay)</span>
+<span class="tag-pill" onclick="quickSearchAsset('https://unsplash.com/s/photos/gold-frame')">🖼️ Bingkai (Unsplash)</span>
+<span class="tag-pill" onclick="quickSearchAsset('https://www.pexels.com/search/islamic/')">🕌 Islami (Pexels)</span>
 </div>
 <div class="asset-grid" id="assetResultsContainer"></div>
 `;
-openToolPanel('🌐 Pencari Elemen',html);
+openToolPanel('🌐 Mini Browser & Pencari Elemen',html);
 loadCuratedAssets();
 }
 
@@ -3420,41 +3703,30 @@ grid.appendChild(wrap);
 });
 }
 
-function openBrowserModal() {
-    document.getElementById('browserModal').classList.add('active');
-    document.getElementById('browserUrlInput').value = 'https://pixabay.com/id/';
-    loadBrowserUrl();
+function quickSearchAsset(q){
+const inp=document.getElementById('assetSearchInput');
+if(inp)inp.value=q;
+executeAssetSearch();
 }
 
-function closeBrowserModal() {
-    document.getElementById('browserModal').classList.remove('active');
-}
+async function executeAssetSearch(){
+const inp=document.getElementById('assetSearchInput');
+let q=inp?inp.value.trim():'';
+if(!q)return;
+const grid=document.getElementById('assetResultsContainer');
+grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#D4AF37;">🔍 Sedang memuat gambar...</div>';
 
-function loadBrowserUrl() {
-    let url = document.getElementById('browserUrlInput').value.trim();
-    if(!url) return;
-    if(!url.startsWith('http')) url = 'https://' + url;
-    document.getElementById('browserIframe').src = url;
-}
-
-async function extractImagesFromBrowser() {
-    let url = document.getElementById('browserUrlInput').value.trim();
-    if(!url) return;
-    if(!url.startsWith('http')) url = 'https://' + url;
-    
-    showToast('⏳ Mengekstrak gambar dari halaman...');
-    const grid = document.getElementById('extractedImagesGrid');
-    grid.innerHTML = '<div style="width:100%;text-align:center;padding:20px;color:#D4AF37;">Memproses...</div>';
-    document.getElementById('extractedImagesModal').classList.add('active');
-    
+const isUrl = q.match(/^(http:\/\/|https:\/\/|www\.|[a-zA-Z0-9-]+\.[a-z]{2,})/i);
+if(isUrl){
+    if(!q.startsWith('http')) q = 'https://' + q;
     try {
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(q)}`;
         const res = await fetch(proxyUrl);
         const data = await res.json();
         const parser = new DOMParser();
         const doc = parser.parseFromString(data.contents, "text/html");
+        const images = Array.from(doc.querySelectorAll('img')).map(img => img.src || img.dataset.src).filter(src => src && src.startsWith('http'));
         
-        let images = Array.from(doc.querySelectorAll('img')).map(img => img.src || img.dataset.src).filter(src => src && src.startsWith('http'));
         const ogImage = doc.querySelector('meta[property="og:image"]');
         if(ogImage && ogImage.content) images.unshift(ogImage.content);
 
@@ -3462,22 +3734,47 @@ async function extractImagesFromBrowser() {
         
         grid.innerHTML='';
         if(uniqueImages.length === 0){
-            grid.innerHTML='<div style="width:100%;text-align:center;padding:20px;color:#ff6b6b;">Tidak ada gambar ditemukan.</div>';
+            grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#ff6b6b;">Tidak ada gambar ditemukan di halaman ini.</div>';
             return;
         }
         
         uniqueImages.forEach(src => {
             const wrap=document.createElement('div');
             wrap.className='asset-item';
-            wrap.style.width = '80px';
-            wrap.style.height = '80px';
             wrap.innerHTML=`<img src="${src}" loading="lazy" crossorigin="anonymous">`;
             setupLongPressInsert(wrap, src);
             grid.appendChild(wrap);
         });
     } catch(e) {
-        grid.innerHTML='<div style="width:100%;text-align:center;padding:20px;color:#ff6b6b;">Gagal mengekstrak. Web mungkin dilindungi.</div>';
+        grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#ff6b6b;">Gagal memuat situs. Coba URL lain.</div>';
     }
+} else {
+    try{
+        const url=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=30&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=280&format=json&origin=*`;
+        const res=await fetch(url);
+        const data=await res.json();
+        if(data.query&&data.query.pages){
+            const pages=Object.values(data.query.pages);
+            grid.innerHTML='';
+            pages.forEach(p=>{
+                if(p.imageinfo&&p.imageinfo[0]){
+                    const thumb=p.imageinfo[0].thumburl||p.imageinfo[0].url;
+                    const full=p.imageinfo[0].url;
+                    const wrap=document.createElement('div');
+                    wrap.className='asset-item';
+                    wrap.innerHTML=`<img src="${thumb}" loading="lazy" crossorigin="anonymous">`;
+                    setupLongPressInsert(wrap, full);
+                    grid.appendChild(wrap);
+                }
+            });
+            if(pages.length>0)return;
+        }
+        throw new Error('Fallback needed');
+    }catch(e){
+        loadCuratedAssets();
+        showToast('Menampilkan koleksi rekomendasi');
+    }
+}
 }
 
 function setupLongPressInsert(element, url) {
@@ -3526,8 +3823,6 @@ s.elements.push(newEl);
 selectElement(newEl.id);
 renderAll();
 pushHistoryState();
-document.getElementById('extractedImagesModal').classList.remove('active');
-closeBrowserModal();
 closeToolPanel();
 showToast('✅ Elemen berhasil ditambahkan!');
 };
@@ -3763,11 +4058,6 @@ const expC=document.createElement('canvas');
 expC.width=mainCanvas.width*mult;
 expC.height=mainCanvas.height*mult;
 const ectx=expC.getContext('2d');
-
-// Fix bug putih abu-abu: Beri base fill putih murni sebelum render
-ectx.fillStyle = '#ffffff';
-ectx.fillRect(0, 0, expC.width, expC.height);
-
 ectx.scale(mult,mult);
 const s=getCurrentSlide();
 
