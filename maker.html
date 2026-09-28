@@ -150,6 +150,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .pixabay-card .pb-badge{background:rgba(212,175,55,.9);color:#111;font-weight:800;padding:1px 5px;border-radius:6px;font-size:8px;}
 .pixabay-loader{width:100%;text-align:center;padding:30px 10px;color:#D4AF37;font-size:12px;font-weight:700;}
 .pixabay-empty{width:100%;text-align:center;padding:30px 10px;color:#ff6b6b;font-size:12px;font-weight:700;}
+.pixabay-debug{width:100%;text-align:center;padding:8px 10px;color:#888;font-size:9px;font-family:monospace;word-break:break-all;}
+.pixabay-attr{width:100%;text-align:center;padding:10px;font-size:10px;color:#666;border-top:1px solid rgba(255,255,255,.05);margin-top:10px;}
+.pixabay-attr a{color:#D4AF37;text-decoration:none;font-weight:700;}
+.pixabay-retry{display:inline-block;margin-top:8px;background:rgba(212,175,55,.15);border:1px solid #D4AF37;color:#D4AF37;padding:6px 14px;border-radius:14px;font-size:11px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -353,7 +357,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 </div>
 
-<!-- ============ MINI BROWSER DIGANTI DENGAN PIXABAY API MODAL ============ -->
 <div class="feature-modal" id="pixabayModal">
 <div class="fmodal-header" style="gap:8px;">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;">🔍 Pixabay</div>
@@ -376,6 +379,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="fmodal-body" style="align-items:flex-start; padding:12px; overflow-y:auto; flex-direction:column;">
 <div style="font-size:10px; color:#aaa; margin-bottom:10px; width:100%; text-align:center; padding:6px; background:rgba(255,255,255,.04); border-radius:8px;">💡 Ketuk sekali atau tekan tahan (long-press) gambar untuk memasukkannya ke kanvas.</div>
 <div class="pixabay-results" id="pixabayResultsGrid"></div>
+<div id="pixabayDebugInfo" class="pixabay-debug" style="display:none;"></div>
+<div class="pixabay-attr">Powered by <a href="https://pixabay.com/" target="_blank" rel="noopener">Pixabay</a> — Gratis untuk komersial</div>
 </div>
 </div>
 
@@ -400,10 +405,43 @@ const PROJECTS_KEY='MAKER_STUDIO_ALL_PROJECTS_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
 
-/* ========== PIXABAY API CONFIG ========== */
+/* ========== PIXABAY API CONFIG (DIPERBAIKI) ========== */
 const PIXABAY_API_KEY = '33508229-cf01577ab87b4947ab094faaa';
 const PIXABAY_ENDPOINT = 'https://pixabay.com/api/';
-const PIXABAY_CACHE = new Map(); // Cache hasil pencarian per query
+const PIXABAY_CACHE = new Map();
+const PIXABAY_LS_CACHE_KEY = 'PIXABAY_CACHE_V1';
+const PIXABAY_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 jam (wajib sesuai docs)
+
+/* Proxy chain — urutan: langsung → allorigins → corsproxy → thingproxy */
+const PIXABAY_PROXIES = [
+    { name: 'Direct',   build: (u) => u },
+    { name: 'AllOrigins', build: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
+    { name: 'CorsProxy',  build: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}` },
+    { name: 'ThingProxy', build: (u) => `https://thingproxy.freeboard.io/fetch/${u}` }
+];
+
+/* Muat cache dari localStorage saat startup */
+(function loadPixabayLSCache(){
+    try{
+        const raw = localStorage.getItem(PIXABAY_LS_CACHE_KEY);
+        if(!raw) return;
+        const parsed = JSON.parse(raw);
+        const now = Date.now();
+        Object.keys(parsed).forEach(k => {
+            if(now - parsed[k].ts < PIXABAY_CACHE_TTL){
+                PIXABAY_CACHE.set(k, parsed[k].data);
+            }
+        });
+    }catch(e){ console.warn('Pixabay LS cache load failed:', e); }
+})();
+
+function savePixabayLSCache(){
+    try{
+        const obj = {};
+        PIXABAY_CACHE.forEach((v,k) => { obj[k] = { data: v, ts: Date.now() }; });
+        localStorage.setItem(PIXABAY_LS_CACHE_KEY, JSON.stringify(obj));
+    }catch(e){ console.warn('Pixabay LS cache save failed:', e); }
+}
 
 const RATIO_PRESETS={
 '4:5':{width:1080,height:1350,label:'4:5 Feed'},
@@ -1047,7 +1085,6 @@ return;
 let startY=-(totalHeight/2)+(lineHeight/2);
 const letterSpace=el.letterSpacing||0;
 
-// Outer Shadow Teks
 if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
 targetCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
 targetCtx.shadowBlur=el.shadow.blur||0;
@@ -1133,10 +1170,8 @@ const padX = el.highlightPaddingX !== undefined ? el.highlightPaddingX : 12;
 const padY = el.highlightPaddingY !== undefined ? el.highlightPaddingY : 4;
 const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
 
-// Collect Highlights
 const rectsByColor = {};
 
-// Base highlight
 if (el.highlightColor && el.highlightColor !== 'transparent') {
     rectsByColor[el.highlightColor] = [];
     linesInfo.forEach(line => {
@@ -1150,7 +1185,6 @@ if (el.highlightColor && el.highlightColor !== 'transparent') {
     });
 }
 
-// Word highlights
 linesInfo.forEach(line => {
     line.wordsInfo.forEach(wInfo => {
         if (wInfo.wHighlightColor && wInfo.wHighlightColor !== 'transparent') {
@@ -1166,7 +1200,6 @@ linesInfo.forEach(line => {
     });
 });
 
-// Draw Highlights
 targetCtx.save();
 targetCtx.shadowColor = 'transparent';
 for (const color in rectsByColor) {
@@ -1180,7 +1213,6 @@ for (const color in rectsByColor) {
 }
 targetCtx.restore();
 
-// Draw Text
 targetCtx.textAlign = 'left';
 targetCtx.textBaseline = 'middle';
 
@@ -1306,7 +1338,7 @@ targetCtx.restore();
 }
 }
 
-/* ========== RENDER IMAGE LENGKAP (CROP, CONTOUR BORDER STICKER, INNER SHADOW, EMBOSS) ========== */
+/* ========== RENDER IMAGE LENGKAP ========== */
 function renderImageElement(targetCtx,el){
 if(!el.img||!el.img.complete){
 if(el.src||el.imgSrc){el.img=getImageFromCache(el.src||el.imgSrc);}
@@ -1339,7 +1371,6 @@ targetCtx.scale(el.flipH?-1:1,el.flipV?-1:1);
 targetCtx.globalAlpha=el.opacity!==undefined?el.opacity:1;
 if(el.blendMode&&el.blendMode!=='normal'){targetCtx.globalCompositeOperation=el.blendMode;}
 
-// Outer Shadow dengan Alpha
 if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
 targetCtx.save();
 targetCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
@@ -1377,7 +1408,6 @@ octx.fillStyle=el.colorOverlay;
 octx.fillRect(0,0,off.width,off.height);
 }
 
-// Skin Texture Overlay pada Foto
 if(el.imageSkinImg&&el.imageSkinImg.complete){
 const sOff=document.createElement('canvas');
 sOff.width=off.width;
@@ -1399,17 +1429,14 @@ octx.drawImage(sOff,0,0);
 octx.restore();
 }
 
-// Inner Shadow pada Siluet PNG
 if(el.innerShadow&&el.innerShadow.color&&el.innerShadow.color!=='transparent'){
 applySilhouetteInnerShadow(octx,off.width,off.height,el.innerShadow);
 }
 
-// Emboss 3D pada Siluet PNG
 if(el.emboss&&el.emboss.active){
 applySilhouetteEmboss(octx,off.width,off.height,el.emboss);
 }
 
-// Garis Tepi Siluet Orang / PNG Transparan (Contour Sticker Stroke)
 if(el.borderWidth&&el.borderWidth>0&&el.borderColor){
 renderContourStrokePNG(targetCtx,off,finalDrawW,finalDrawH,el, pad);
 }else{
@@ -1422,7 +1449,6 @@ targetCtx.restore();
 targetCtx.restore();
 }
 
-/* Helper Contour Sticker Stroke untuk PNG Transparan & Foto Kotak */
 function renderContourStrokePNG(targetCtx,imgCanvas,w,h,el, pad){
 const bw=el.borderWidth||4;
 const bcolor=el.borderColor||'#D4AF37';
@@ -1518,7 +1544,6 @@ targetCtx.drawImage(sh,0,0);
 targetCtx.restore();
 }
 
-/* ========== FOKUS LENSA DSLR / TILT-SHIFT ENGINE ========== */
 function renderTiltShiftDepthBlur(targetCtx,img,sx,sy,sw,sh,dw,dh,focusData, pad){
 const sharpCanvas=document.createElement('canvas');
 sharpCanvas.width=dw;sharpCanvas.height=dh;
@@ -1600,7 +1625,7 @@ snapGuideH.style.display='none';
 snapGuideV.style.display='none';
 }
 
-/* ========== EDITOR TEKS LANGSUNG DI POSTER (CANVA STYLE) ========== */
+/* ========== EDITOR TEKS LANGSUNG DI POSTER ========== */
 function setupDirectCanvasTextEvents(){
 canvasDirectTextEditor.addEventListener('input',()=>{
 if(!editingElementId)return;
@@ -1813,7 +1838,7 @@ other.x=Math.round(other._startGroupPos.x+deltaX);
 other.y=Math.round(other._startGroupPos.y+deltaY);
 }
 });
-}
+    } 
 requestRender();
 }else if(dragMode==='stalk-rotate'){
 const dx=e.clientX-rotateCenter.x;
@@ -2175,7 +2200,6 @@ function setBlendMode(m){const el=getActiveElement();if(!el)return;el.blendMode=
 
 function openPanelPngColorOverlay(){
 const el=getActiveElement(); if(!el)return;
-const cur=el.colorOverlay||'none';
 const html=`
 <div class="ctrl-row"><span class="ctrl-label">Warna Siluet:</span><button class="btn-sub-tool active" onclick="openHandledLoupe(setColorOverlay)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button></div>
 <div class="color-palette-scroll" style="margin-top:10px;flex-wrap:wrap;">
@@ -2253,7 +2277,7 @@ renderAll();pushHistoryState();
 showToast('📑 Elemen diduplikat');
 }
 
-/* ========== KACA PEMBESAR BERTANGKAI (HANDLED EYEDROPPER) ========== */
+/* ========== KACA PEMBESAR BERTANGKAI ========== */
 let eyedropperCallback=null;
 let loupeCurrentHex='#FFFFFF';
 
@@ -2681,7 +2705,7 @@ reader.readAsDataURL(file);
 e.target.value='';
 }
 
-/* ========== BAYANGAN 3D, BAYANGAN DALAM & EMBOSS (TEKS & GAMBAR) ========== */
+/* ========== BAYANGAN 3D, BAYANGAN DALAM & EMBOSS ========== */
 let activeShadowTab = 'outer';
 function openPanelAdvancedShadow(){
 const el=getActiveElement();
@@ -3709,13 +3733,15 @@ showToast('✅ Background berhasil dihapus!');
 }
 
 /* ============================================================
-   ============ PENCARIAN ELEMEN PIXABAY API (FIX) =============
+   ============ PENCARIAN ELEMEN PIXABAY API (FIXED) ==========
    ============================================================
-   Mengganti mini-browser sebelumnya dengan integrasi API resmi
-   Pixabay. Keuntungan:
-   - Tidak diblokir bot/anti-iframe seperti sebelumnya
-   - Response JSON cepat & ringan
-   - Kualitas gambar HD dari CDN resmi Pixabay
+   Perbaikan utama:
+   1. Proxy chain otomatis (Direct → AllOrigins → CorsProxy →
+      ThingProxy) agar tetap jalan meski CORS memblokir.
+   2. Timeout 8 detik per percobaan supaya tidak menggantung.
+   3. Cache 24 jam (localStorage + memory) sesuai instruksi
+      resmi Pixabay API docs.
+   4. Pesan error informatif per skenario (429/403/CORS/timeout).
    ============================================================ */
 
 function openPanelOnlineAssets(){
@@ -3738,11 +3764,11 @@ function loadCuratedAssets(){
 const grid=document.getElementById('assetResultsContainer');
 if(!grid)return;
 grid.innerHTML='<div class="pixabay-loader" style="grid-column:1/-1;">⏳ Memuat rekomendasi...</div>';
-// Ambil dari cache jika sudah pernah, kalau belum panggil API dengan keyword populer
 fetchPixabayData('islamic gold',1,'photo',(hits)=>{
+if(!grid)return;
 grid.innerHTML='';
 if(!hits||hits.length===0){
-    grid.innerHTML='<div class="pixabay-empty" style="grid-column:1/-1;">Gagal memuat rekomendasi.</div>';
+    grid.innerHTML='<div class="pixabay-empty" style="grid-column:1/-1;">Gagal memuat rekomendasi. Coba buka Pixabay langsung.</div>';
     return;
 }
 hits.slice(0,12).forEach(hit=>{
@@ -3759,7 +3785,6 @@ hits.slice(0,12).forEach(hit=>{
 function openPixabayModal(){
 document.getElementById('pixabayModal').classList.add('active');
 const inp=document.getElementById('pixabayQueryInput');
-// Jika belum ada query, langsung muat rekomendasi
 if(!inp.value) {
     searchPixabayQuick('bunga');
 }
@@ -3783,23 +3808,29 @@ if(!query){
     return;
 }
 renderPixabayLoading();
-fetchPixabayData(query,1,'photo',(hits)=>{
-    renderPixabayResults(hits);
+fetchPixabayData(query,1,'photo',(hits, errMsg)=>{
+    renderPixabayResults(hits, errMsg, query);
 });
 }
 
 function renderPixabayLoading(){
 const grid=document.getElementById('pixabayResultsGrid');
-if(grid) grid.innerHTML='<div class="pixabay-loader" style="grid-column:1/-1;">⏳ Mencari di Pixabay...</div>';
+const debug=document.getElementById('pixabayDebugInfo');
+if(debug){debug.style.display='none';debug.innerText='';}
+if(grid) grid.innerHTML='<div class="pixabay-loader" style="grid-column:1/-1;">⏳ Menghubungi Pixabay...</div>';
 }
 
-function renderPixabayResults(hits){
+function renderPixabayResults(hits, errMsg, query){
 const grid=document.getElementById('pixabayResultsGrid');
 if(!grid) return;
 grid.innerHTML='';
 
 if(!hits || hits.length===0){
-    grid.innerHTML='<div class="pixabay-empty" style="grid-column:1/-1;">😕 Tidak ada gambar ditemukan.<br>Coba kata kunci lain.</div>';
+    const msg = errMsg || 'Tidak ada gambar ditemukan. Coba kata kunci lain.';
+    grid.innerHTML=`<div class="pixabay-empty" style="grid-column:1/-1;">
+        😕 ${msg}<br>
+        <button class="pixabay-retry" onclick="searchPixabayQuick('${(query||'').replace(/'/g,"\\'")}')">🔄 Coba Lagi</button>
+    </div>`;
     return;
 }
 
@@ -3822,24 +3853,23 @@ hits.forEach(hit=>{
 }
 
 /**
- * Fungsi utama fetch data dari Pixabay API.
- * @param {string} query - Kata kunci pencarian
- * @param {number} page - Halaman (default 1)
- * @param {string} imageType - Tipe gambar: 'all' | 'photo' | 'illustration' | 'vector'
- * @param {function} callback - Callback dengan parameter (hits array)
+ * Fetch data Pixabay dengan proxy-chain dan cache 24 jam.
+ * @param {string} query
+ * @param {number} page
+ * @param {string} imageType
+ * @param {function} callback - (hits, errMsg)
  */
 async function fetchPixabayData(query, page, imageType, callback){
     const cacheKey = `${query}__${page}__${imageType}`;
-    
-    // Cek cache dulu
+
+    // Cek cache memori
     if(PIXABAY_CACHE.has(cacheKey)){
-        callback(PIXABAY_CACHE.get(cacheKey));
+        callback(PIXABAY_CACHE.get(cacheKey), null);
         return;
     }
-    
-    // Batasi query maksimal 100 karakter
+
     const safeQuery = query.substring(0, 100);
-    
+
     const params = new URLSearchParams({
         key: PIXABAY_API_KEY,
         q: safeQuery,
@@ -3851,40 +3881,93 @@ async function fetchPixabayData(query, page, imageType, callback){
         page: page || 1,
         per_page: 30
     });
-    
-    const url = `${PIXABAY_ENDPOINT}?${params.toString()}`;
-    
-    try {
-        const res = await fetch(url, { method: 'GET' });
-        
-        if(!res.ok){
-            if(res.status === 429){
-                showToast('⚠️ Terlalu banyak permintaan, coba lagi nanti');
-            } else {
-                showToast('⚠️ Gagal memuat dari Pixabay');
+
+    const apiUrl = `${PIXABAY_ENDPOINT}?${params.toString()}`;
+
+    const debugEl = document.getElementById('pixabayDebugInfo');
+    let lastErrMsg = 'Koneksi ke Pixabay gagal. Periksa jaringan Anda.';
+
+    // Iterasi seluruh proxy chain
+    for(let i = 0; i < PIXABAY_PROXIES.length; i++){
+        const proxy = PIXABAY_PROXIES[i];
+        const targetUrl = proxy.build(apiUrl);
+        try{
+            if(debugEl){
+                debugEl.style.display='block';
+                debugEl.innerText = `🔌 Mencoba: ${proxy.name}...`;
             }
-            callback([]);
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+            const res = await fetch(targetUrl, { method: 'GET', signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if(!res.ok){
+                if(res.status === 429){
+                    lastErrMsg = 'Batas kuota API tercapai (429). Coba lagi beberapa menit lagi.';
+                } else if(res.status === 403){
+                    lastErrMsg = 'Akses API ditolak (403). API key mungkin belum aktif.';
+                } else if(res.status === 400){
+                    lastErrMsg = 'Permintaan tidak valid (400). Coba kata kunci lain.';
+                } else {
+                    lastErrMsg = `Server error (${res.status}). Mencoba proxy berikutnya...`;
+                }
+                console.warn(`[Pixabay] ${proxy.name} → HTTP ${res.status}`);
+                continue;
+            }
+
+            const rawText = await res.text();
+
+            // allorigins "raw" sudah JSON murni; kalau ada wrapper tinggal parse
+            let data;
+            try{
+                data = JSON.parse(rawText);
+                // allorigins /get returns {contents: "..."} — fallback handle
+                if(data && typeof data.contents === 'string'){
+                    data = JSON.parse(data.contents);
+                }
+            }catch(parseErr){
+                console.warn(`[Pixabay] ${proxy.name} → JSON parse error`);
+                lastErrMsg = 'Respon bukan JSON valid. Mencoba proxy berikutnya...';
+                continue;
+            }
+
+            if(!data || !Array.isArray(data.hits)){
+                lastErrMsg = 'Format respon tidak dikenali. Mencoba proxy berikutnya...';
+                continue;
+            }
+
+            if(debugEl){
+                debugEl.innerText = `✅ Berhasil via ${proxy.name} (total: ${data.totalHits||0} gambar)`;
+                setTimeout(()=>{ if(debugEl) debugEl.style.display='none'; }, 4000);
+            }
+
+            // Simpan cache
+            PIXABAY_CACHE.set(cacheKey, data.hits);
+            if(PIXABAY_CACHE.size > 50){
+                const firstKey = PIXABAY_CACHE.keys().next().value;
+                PIXABAY_CACHE.delete(firstKey);
+            }
+            savePixabayLSCache();
+
+            callback(data.hits, null);
             return;
+
+        } catch(err){
+            const reason = err && err.name === 'AbortError'
+                ? `timeout (>8s) via ${proxy.name}`
+                : `error via ${proxy.name}: ${err.message||err}`;
+            console.warn(`[Pixabay] ${reason}`);
+            lastErrMsg = `Semua server gagal. Terakhir: ${proxy.name} tidak merespon.`;
         }
-        
-        const data = await res.json();
-        const hits = data.hits || [];
-        
-        // Simpan ke cache
-        PIXABAY_CACHE.set(cacheKey, hits);
-        
-        // Batasi ukuran cache agar tidak memory leak (maksimal 50 entry)
-        if(PIXABAY_CACHE.size > 50){
-            const firstKey = PIXABAY_CACHE.keys().next().value;
-            PIXABAY_CACHE.delete(firstKey);
-        }
-        
-        callback(hits);
-    } catch(err){
-        console.error('Pixabay fetch error:', err);
-        showToast('⚠️ Koneksi bermasalah saat mengambil data');
-        callback([]);
     }
+
+    if(debugEl){
+        debugEl.style.display='block';
+        debugEl.innerText = `❌ Semua proxy gagal: ${lastErrMsg}`;
+    }
+    callback([], lastErrMsg);
 }
 
 /* ========== UPLOAD ELEMEN & GAMBAR ========== */
