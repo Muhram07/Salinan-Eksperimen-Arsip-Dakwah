@@ -1,17 +1,4 @@
-<!--Berikut adalah kode lengkap yang telah diperbaiki secara menyeluruh sesuai dengan instruksi Anda. 
-
-**Perbaikan Utama yang Dilakukan:**
-1. **Hapus BG (Magic Wand):** Fitur "Hapus Background Otomatis" sekarang menggunakan algoritma *Flood Fill (Magic Wand)* bawaan. Anda cukup menekan area background pada foto, dan sistem akan menghapus warna yang serupa secara otomatis (mirip remove.bg versi manual presisi). Terdapat slider toleransi warna.
-2. **Tangkap Ajaib (Magic Grab):** Ditambahkan "Tangkai" (Stalk) seperti pada kaca pembesar. Anda bisa memegang tangkai tersebut untuk menggeser kuas tanpa jari menutupi area yang sedang diusap.
-3. **Fokus DSLR (Tilt-Shift):** 
-   - Tombol Horizontal dan Vertikal sekarang menyala kuning saat aktif.
-   - Efek blur telah ditingkatkan menggunakan *multi-stop gradient* sehingga blurnya menyebar secara halus dan realistis (gradual falloff) tergantung jarak dari titik fokus, persis seperti lensa kamera asli.
-4. **Perspektif 3D (Garis Seam Fix):** Bug "garis perspektif" (sebenarnya adalah celah *anti-aliasing* antar segitiga mesh) telah diperbaiki dengan menambahkan *overlap* 0.5 pixel pada setiap sisi segitiga saat dirender, sehingga gambar menyatu sempurna tanpa garis retakan.
-5. **Mini Browser (Cari Elemen):** Fitur pencarian dirombak menjadi Mini Browser sungguhan. Anda bisa mengetik URL web apa saja (misal: `pixabay.com/id/`), sistem akan men-scan seluruh gambar di web tersebut. Tekan tahan (long-press) pada gambar untuk langsung mendownload dan memasukkannya ke kanvas.
-
---- START OF FILE maker.html ---
-
--->
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -130,13 +117,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .project-actions{display:flex;gap:6px;margin-top:8px;}
 .btn-proj-action{flex:1;padding:4px 0;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#ddd;font-size:10px;cursor:pointer;}
 .btn-proj-action:hover{background:#D4AF37;color:#111;}
-.asset-search-input{width:100%;height:38px;background:#242424;border:1px solid rgba(212,175,55,.4);border-radius:19px;color:#fff;padding:0 14px;font-size:12px;}
-.tag-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:4px 10px;font-size:11px;color:#ddd;cursor:pointer;white-space:nowrap;}
-.tag-pill:hover,.tag-pill.active{background:#D4AF37;color:#111;font-weight:bold;}
-.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;}
-.asset-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;padding:4px;position:relative;}
-.asset-item:hover{border-color:#D4AF37;transform:scale(1.04);}
-.asset-item img{max-width:100%;max-height:100%;object-fit:contain;}
 .layer-list-container{display:flex;flex-direction:column;gap:6px;}
 .layer-item{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;}
 .layer-item.active{border-color:#D4AF37;color:#D4AF37;font-weight:bold;background:rgba(212,175,55,.12);}
@@ -171,10 +151,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" onclick="toggleRatioSelector()">📏 <span id="currentRatioLabel">4:5</span></button>
 <button class="btn-nav" onclick="openPanelBleed()">📐 Garis Bantu</button>
 <select class="select-quality" id="exportQualitySelect">
-<option value="0.75">SD (810p)</option>
-<option value="1.0">HD (1080p)</option>
-<option value="1.5" selected>Ultra HD (1620p)</option>
-<option value="2.0">Ultra HD Pro Max 4K (2160p)</option>
+<option value="1.0">SD (Standar)</option>
+<option value="2.0">HD (High Definition)</option>
+<option value="3.0" selected>FHD (Full HD)</option>
+<option value="4.0">4K (Ultra HD)</option>
 </select>
 <button class="btn-nav btn-download" onclick="exportPoster()">💾 Simpan</button>
 </div>
@@ -324,7 +304,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 <div class="fmodal-body" id="magicGrabBody">
 <canvas id="magicGrabCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
-<div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100;">✋ Geser Kuas</div>
+<div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:40px; height:40px; border-radius:50%; font-size:20px;">✋</div>
 </div>
 <div class="fmodal-footer">
 <div style="display:flex;align-items:center;gap:10px;">
@@ -344,13 +324,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="fmodal-body" id="magicWandBody">
 <canvas id="magicWandCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
 </div>
-<div class="fmodal-footer">
+<div class="fmodal-footer" style="flex-direction:column; height:auto; padding:10px 16px; gap:10px;">
+<div class="ctrl-grid-btns" style="width:100%;">
+<button class="btn-sub-tool active" id="btnWandAuto" onclick="setWandMode('auto')">🤖 Auto Dominan</button>
+<button class="btn-sub-tool" id="btnWandManual" onclick="setWandMode('manual')">👆 Manual Garis</button>
+<button class="btn-sub-tool" id="btnWandGlobal" onclick="setWandMode('global')">🌍 Global Warna</button>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
 <div style="display:flex;align-items:center;gap:10px;">
 <span style="font-size:11px;color:#aaa;">Toleransi:</span>
 <input type="range" class="ctrl-slider" id="wandTolerance" min="0" max="100" value="30" style="width:90px;">
 <button class="btn-nav" onclick="resetMagicWand()">Reset</button>
 </div>
 <button class="btn-nav btn-download" onclick="applyMagicWand()">✅ Terapkan</button>
+</div>
 </div>
 </div>
 
@@ -415,11 +402,18 @@ let lockTextAspect=false;
 let formatWordOnlyMode=false;
 let selectedWordIndices=[];
 let currentActivePanel='';
+let wandMode='auto';
 
+// Optimasi Cache Gambar agar tidak memory leak
 const imageCache=new Map();
+const MAX_CACHE_SIZE = 30;
 function getImageFromCache(src){
 if(!src)return null;
 if(imageCache.has(src))return imageCache.get(src);
+if(imageCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = imageCache.keys().next().value;
+    imageCache.delete(firstKey);
+}
 const img=new Image();
 img.crossOrigin="anonymous";
 img.src=src;
@@ -438,7 +432,7 @@ const snapGuideV=document.getElementById('snapGuideV');
 
 let historyStack=[];
 let historyIndex=-1;
-const MAX_HISTORY=40;
+const MAX_HISTORY=15; // Dikurangi agar tidak lag/freeze
 
 let autoSaveTimer=null;
 let canvasScale=1;
@@ -547,7 +541,14 @@ setupMagicWandEvents();
 function triggerAutoSave(){
 setSaveIndicator(false);
 clearTimeout(autoSaveTimer);
-autoSaveTimer=setTimeout(()=>{saveToStorage();setSaveIndicator(true);},500);
+autoSaveTimer=setTimeout(()=>{
+    // Gunakan requestIdleCallback jika tersedia agar tidak freeze
+    if(window.requestIdleCallback) {
+        window.requestIdleCallback(() => saveToStorage());
+    } else {
+        saveToStorage();
+    }
+}, 800);
 }
 
 let historyDebounceTimer=null;
@@ -557,12 +558,23 @@ clearTimeout(historyDebounceTimer);
 historyDebounceTimer=setTimeout(()=>{pushHistoryState();},400);
 }
 
-function setSaveIndicator(isSaved){
+function setSaveIndicator(isSaved, isError=false){
 const dot=document.getElementById('saveDot');
 const txt=document.getElementById('saveText');
 if(!dot||!txt)return;
-if(isSaved){dot.className='save-dot';txt.innerText='Tersimpan';}
-else{dot.className='save-dot syncing';txt.innerText='Menyimpan...';}
+if(isError){
+    dot.className='save-dot';
+    dot.style.background='#ff6b6b';
+    txt.innerText='Gagal Simpan';
+} else if(isSaved){
+    dot.className='save-dot';
+    dot.style.background='#4CAF50';
+    txt.innerText='Tersimpan';
+} else {
+    dot.className='save-dot syncing';
+    dot.style.background='#FFA000';
+    txt.innerText='Menyimpan...';
+}
 }
 
 function saveToStorage(){
@@ -571,7 +583,12 @@ const dataToSave={id:currentProjectId,ratio:currentRatio,slideIndex:currentSlide
 localStorage.setItem(STORAGE_KEY,JSON.stringify(dataToSave));
 localStorage.setItem(CURRENT_PROJ_ID_KEY,currentProjectId);
 saveCurrentProjectAuto();
-}catch(e){console.warn("Storage penuh:",e);}
+setSaveIndicator(true);
+}catch(e){
+console.warn("Storage penuh:",e);
+setSaveIndicator(false, true);
+showToast("⚠️ Memori browser penuh! Hapus projek lama.");
+}
 }
 
 function loadFromStorage(){
@@ -1276,6 +1293,8 @@ targetCtx.save();
 targetCtx.translate(el.x,el.y);
 if(el.rotation)targetCtx.rotate((el.rotation*Math.PI)/180);
 targetCtx.scale(el.flipH?-1:1,el.flipV?-1:1);
+
+// Terapkan Opacity dan Blend Mode di targetCtx
 targetCtx.globalAlpha=el.opacity!==undefined?el.opacity:1;
 if(el.blendMode&&el.blendMode!=='normal'){targetCtx.globalCompositeOperation=el.blendMode;}
 
@@ -1805,7 +1824,6 @@ const el=getActiveElement();
 if(!el){
 bar.innerHTML=`
 <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
-<button class="tool-btn" onclick="openPanelOnlineAssets()"><span class="icon">🔍✨</span><span>Cari Elemen</span></button>
 <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
 <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
@@ -1846,7 +1864,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openMagicWandModal()"><span class="icon">🪄</span><span>Hapus BG</span></button>
 <button class="tool-btn" onclick="openMagicGrabModal()"><span class="icon">✨</span><span>Tangkap Ajaib</span></button>
 <button class="tool-btn" onclick="openPanelDepthFocus()"><span class="icon">📷</span><span>Fokus DSLR</span></button>
-<button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">✨</span><span>Blend Mode</span></button>
+<button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
 <button class="tool-btn" onclick="openPanelPngColorOverlay()"><span class="icon">🎨</span><span>Warna Siluet</span></button>
 <button class="tool-btn" onclick="openPanelImageBlur()"><span class="icon">💧</span><span>Blur</span></button>
 <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis Tepi</span></button>
@@ -2580,9 +2598,10 @@ let html=`<div style="font-size:12px;margin-bottom:8px;">Pilih elemen untuk diga
 s.elements.forEach(el=>{
 const isCurrent=curr&&el.id===curr.id;
 const groupBadge = el.groupId ? `<span style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:4px;font-size:9px;margin-left:4px;">${el.groupId}</span>` : '';
+const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:16px;height:16px;object-fit:cover;border-radius:3px;display:inline-block;vertical-align:middle;">` : '📝';
 html+=`<label class="group-select-item ${isCurrent?'current-item':''}">
 <input type="checkbox" class="group-checkbox" value="${el.id}" ${isCurrent?'checked':''}>
-<span>${el.type==='text'?'📝':'🖼️'} ${el.text?el.text.substring(0,15):'Gambar'} ${groupBadge}</span>
+<span>${thumb} ${el.text?el.text.substring(0,15):'Gambar'} ${groupBadge}</span>
 </label>`;
 });
 html+=`
@@ -2594,11 +2613,12 @@ html+=`
 openToolPanel('Kelola Multi-Grup',html);
 }
 
+let groupCounter = 1;
 function confirmGroupElements(){
 const s=getCurrentSlide();
 const checked=Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb=>cb.value);
 if(checked.length<2){alert('Pilih minimal 2 elemen');return;}
-const gid='grp_'+Date.now();
+const gid='Grup '+groupCounter++;
 s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=gid;});
 pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('✅ Grup baru dibuat!');
 }
@@ -2616,8 +2636,9 @@ const s=getCurrentSlide();
 let html='<div class="layer-list-container">';
 for(let i=s.elements.length-1;i>=0;i--){
 const el=s.elements[i];
+const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:20px;height:20px;object-fit:cover;border-radius:4px;display:inline-block;vertical-align:middle;">` : '📝';
 html+=`<div class="layer-item ${el.id===activeElementId?'active':''}" onclick="selectElement('${el.id}');openPanelLayers();">
-<span>${el.type==='text'?'📝':'🖼️'} ${el.text?el.text.substring(0,18):'Foto'}</span>
+<span>${thumb} ${el.text?el.text.substring(0,18):'Foto'}</span>
 <div class="layer-actions">
 <button class="layer-btn" onclick="event.stopPropagation();moveLayerToExtreme(${i},'top')" title="Paling Depan">⏫</button>
 <button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},1)">▲</button>
@@ -3021,17 +3042,26 @@ let stalkOffset={x:0,y:0};
 stalk.addEventListener('pointerdown',(e)=>{
 isDraggingStalk=true;
 stalk.setPointerCapture(e.pointerId);
-const rect=canvas.getBoundingClientRect();
+const rect=stalk.getBoundingClientRect();
 stalkOffset={x:e.clientX-rect.left,y:e.clientY-rect.top};
 e.stopPropagation();
 });
 
 window.addEventListener('pointermove',(e)=>{
 if(isDraggingStalk){
-    const rect=canvas.getBoundingClientRect();
-    const x=e.clientX-rect.left;
-    const y=e.clientY-rect.top - 60; // Offset kuas di atas tangkai
-    paintGrabAtCoords(x, y);
+    const canvasRect=canvas.getBoundingClientRect();
+    const stalkX = e.clientX - stalkOffset.x;
+    const stalkY = e.clientY - stalkOffset.y;
+    
+    // Pindahkan tangkai
+    stalk.style.left = stalkX + 'px';
+    stalk.style.top = stalkY + 'px';
+    stalk.style.transform = 'none'; // Hapus translateX(-50%) saat digeser
+    
+    // Kuas berada tepat di atas tangkai
+    const brushX = stalkX - canvasRect.left + (stalk.offsetWidth/2);
+    const brushY = stalkY - canvasRect.top - 20;
+    paintGrabAtCoords(brushX, brushY);
 } else if(isPaintingGrab){
     const rect=canvas.getBoundingClientRect();
     paintGrabAtCoords(e.clientX-rect.left, e.clientY-rect.top);
@@ -3039,9 +3069,9 @@ if(isDraggingStalk){
 });
 
 window.addEventListener('pointerup',()=>{
-isPaintingStalk=false;
 isDraggingStalk=false;
 isPaintingGrab=false;
+document.getElementById('brushMonitor').style.display='none';
 });
 
 canvas.addEventListener('pointerdown',(e)=>{
@@ -3135,9 +3165,8 @@ const aspect=(el.img.height||300)/(el.img.width||300);
 canvas.width=maxW;
 canvas.height=Math.round(maxW*aspect);
 
-const ctxW=canvas.getContext('2d');
-ctxW.clearRect(0,0,canvas.width,canvas.height);
-ctxW.drawImage(el.img,0,0,canvas.width,canvas.height);
+resetMagicWand();
+setWandMode('auto');
 }
 
 function closeMagicWandModal(){
@@ -3153,15 +3182,64 @@ ctxW.clearRect(0,0,canvas.width,canvas.height);
 ctxW.drawImage(el.img,0,0,canvas.width,canvas.height);
 }
 
+function setWandMode(mode){
+wandMode = mode;
+document.getElementById('btnWandAuto').classList.remove('active');
+document.getElementById('btnWandManual').classList.remove('active');
+document.getElementById('btnWandGlobal').classList.remove('active');
+if(mode==='auto') document.getElementById('btnWandAuto').classList.add('active');
+if(mode==='manual') document.getElementById('btnWandManual').classList.add('active');
+if(mode==='global') document.getElementById('btnWandGlobal').classList.add('active');
+
+if(mode==='auto'){
+    // Langsung eksekusi auto hapus dominan dari pojok
+    const canvas=document.getElementById('magicWandCanvas');
+    const tol=parseInt(document.getElementById('wandTolerance').value||30);
+    applyFloodFill(canvas.getContext('2d'), 0, 0, tol);
+    applyFloodFill(canvas.getContext('2d'), canvas.width-1, 0, tol);
+    applyFloodFill(canvas.getContext('2d'), 0, canvas.height-1, tol);
+    applyFloodFill(canvas.getContext('2d'), canvas.width-1, canvas.height-1, tol);
+    showToast('🤖 Background dominan dihapus otomatis');
+}
+}
+
 function setupMagicWandEvents(){
 const canvas=document.getElementById('magicWandCanvas');
 canvas.addEventListener('pointerdown',(e)=>{
+if(wandMode === 'auto') return; // Auto sudah dieksekusi saat tombol ditekan
 const rect=canvas.getBoundingClientRect();
 const x=Math.round(e.clientX-rect.left);
 const y=Math.round(e.clientY-rect.top);
 const tol=parseInt(document.getElementById('wandTolerance').value||30);
-applyFloodFill(canvas.getContext('2d'), x, y, tol);
+
+if(wandMode === 'manual'){
+    applyFloodFill(canvas.getContext('2d'), x, y, tol);
+} else if(wandMode === 'global'){
+    applyGlobalColorRemoval(canvas.getContext('2d'), x, y, tol);
+}
 });
+}
+
+function applyGlobalColorRemoval(ctx, startX, startY, tolerance) {
+const w = ctx.canvas.width;
+const h = ctx.canvas.height;
+const imgData = ctx.getImageData(0, 0, w, h);
+const data = imgData.data;
+const startIndex = (startY * w + startX) * 4;
+const sr = data[startIndex], sg = data[startIndex+1], sb = data[startIndex+2], sa = data[startIndex+3];
+
+if(sa === 0) return;
+const tolSq = (tolerance * 2.55) ** 2 * 3;
+
+for(let i=0; i<data.length; i+=4){
+    if(data[i+3] > 0){
+        const distSq = (data[i]-sr)**2 + (data[i+1]-sg)**2 + (data[i+2]-sb)**2;
+        if(distSq <= tolSq){
+            data[i+3] = 0;
+        }
+    }
+}
+ctx.putImageData(imgData, 0, 0);
 }
 
 function applyFloodFill(ctx, startX, startY, tolerance) {
@@ -3458,7 +3536,7 @@ const html=`
 <input type="range" class="ctrl-slider" min="0" max="40" value="${curBlur}" oninput="updateImageBlur(this.value); document.getElementById('valBlendBlur').innerText=this.value+'px';">
 <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="setImageBlendMode('normal'); updateElemOpacity(100); updateImageBlur(0); openPanelBlendMode();">↺ Reset Blend Mode</button>
 `;
-openToolPanel('✨ Blend Mode Efek Cahaya',html);
+openToolPanel('🔂 Blend Mode Efek Cahaya',html);
 }
 function setImageBlendMode(m){const el=getActiveElement();if(!el)return;el.blendMode=m;renderAll();pushHistoryState();openPanelBlendMode();}
 
@@ -3658,178 +3736,6 @@ function resetDepthFocus() {
     const el = getActiveElement(); if(!el) return;
     el.depthFocus = {active:false, mode:'radial', blurAmount:14, centerX:50, centerY:50, radius:35};
     renderAll(); pushHistoryState(); openPanelDepthFocus();
-}
-
-/* ========== PENCARIAN ELEMEN MULTI-SUMBER (BROWSER-LIKE) ========== */
-const POPULAR_ELEMENTS=[
-{name:'🔥 Api Membara',url:'https://images.unsplash.com/photo-1542385151-efd9000785a0?w=600&auto=format&fit=crop&q=80'},
-{name:'✨ Cahaya Kilau',url:'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80'},
-{name:'🕌 Ornamen Emas',url:'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=600&auto=format&fit=crop&q=80'},
-{name:'⭐ Bintang Emas',url:'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'},
-{name:'🕋 Ka\'bah Mekkah',url:'https://images.unsplash.com/photo-1565552645632-d725f8bfc19a?w=600&auto=format&fit=crop&q=80'},
-{name:'🏮 Lentera Ramadhan',url:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80'}
-];
-
-function openPanelOnlineAssets(){
-const html=`
-<div style="font-size:10px;color:#aaa;margin-bottom:8px;text-align:center;background:rgba(255,255,255,0.05);padding:6px;border-radius:6px;">💡 Petunjuk: Masukkan URL web (misal: pixabay.com) atau kata kunci. Tekan tahan gambar 1 detik untuk memasukkan ke kanvas.</div>
-<div style="display:flex;gap:8px;margin-bottom:8px;">
-<input type="text" id="assetSearchInput" class="asset-search-input" placeholder="Cari kata kunci atau ketik URL web..." onkeydown="if(event.key==='Enter')executeAssetSearch()">
-<button class="btn-nav active" onclick="executeAssetSearch()" style="border-radius:19px;padding:0 14px;">Cari/Buka</button>
-</div>
-<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:none;">
-<span class="tag-pill active" onclick="loadCuratedAssets()">🌟 Populer</span>
-<span class="tag-pill" onclick="quickSearchAsset('https://pixabay.com/images/search/fire/')">🔥 Api (Pixabay)</span>
-<span class="tag-pill" onclick="quickSearchAsset('https://unsplash.com/s/photos/gold-frame')">🖼️ Bingkai (Unsplash)</span>
-<span class="tag-pill" onclick="quickSearchAsset('https://www.pexels.com/search/islamic/')">🕌 Islami (Pexels)</span>
-</div>
-<div class="asset-grid" id="assetResultsContainer"></div>
-`;
-openToolPanel('🌐 Mini Browser & Pencari Elemen',html);
-loadCuratedAssets();
-}
-
-function loadCuratedAssets(){
-const grid=document.getElementById('assetResultsContainer');
-if(!grid)return;
-grid.innerHTML='';
-POPULAR_ELEMENTS.forEach(item=>{
-const wrap=document.createElement('div');
-wrap.className='asset-item';
-wrap.title=item.name;
-wrap.innerHTML=`<img src="${item.url}" loading="lazy" crossorigin="anonymous">`;
-setupLongPressInsert(wrap, item.url);
-grid.appendChild(wrap);
-});
-}
-
-function quickSearchAsset(q){
-const inp=document.getElementById('assetSearchInput');
-if(inp)inp.value=q;
-executeAssetSearch();
-}
-
-async function executeAssetSearch(){
-const inp=document.getElementById('assetSearchInput');
-let q=inp?inp.value.trim():'';
-if(!q)return;
-const grid=document.getElementById('assetResultsContainer');
-grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#D4AF37;">🔍 Sedang memuat gambar...</div>';
-
-const isUrl = q.match(/^(http:\/\/|https:\/\/|www\.|[a-zA-Z0-9-]+\.[a-z]{2,})/i);
-if(isUrl){
-    if(!q.startsWith('http')) q = 'https://' + q;
-    try {
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(q)}`;
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data.contents, "text/html");
-        const images = Array.from(doc.querySelectorAll('img')).map(img => img.src || img.dataset.src).filter(src => src && src.startsWith('http'));
-        
-        const ogImage = doc.querySelector('meta[property="og:image"]');
-        if(ogImage && ogImage.content) images.unshift(ogImage.content);
-
-        const uniqueImages = [...new Set(images)];
-        
-        grid.innerHTML='';
-        if(uniqueImages.length === 0){
-            grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#ff6b6b;">Tidak ada gambar ditemukan di halaman ini.</div>';
-            return;
-        }
-        
-        uniqueImages.forEach(src => {
-            const wrap=document.createElement('div');
-            wrap.className='asset-item';
-            wrap.innerHTML=`<img src="${src}" loading="lazy" crossorigin="anonymous">`;
-            setupLongPressInsert(wrap, src);
-            grid.appendChild(wrap);
-        });
-    } catch(e) {
-        grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:25px;font-size:11px;color:#ff6b6b;">Gagal memuat situs. Coba URL lain.</div>';
-    }
-} else {
-    try{
-        const url=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=30&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=280&format=json&origin=*`;
-        const res=await fetch(url);
-        const data=await res.json();
-        if(data.query&&data.query.pages){
-            const pages=Object.values(data.query.pages);
-            grid.innerHTML='';
-            pages.forEach(p=>{
-                if(p.imageinfo&&p.imageinfo[0]){
-                    const thumb=p.imageinfo[0].thumburl||p.imageinfo[0].url;
-                    const full=p.imageinfo[0].url;
-                    const wrap=document.createElement('div');
-                    wrap.className='asset-item';
-                    wrap.innerHTML=`<img src="${thumb}" loading="lazy" crossorigin="anonymous">`;
-                    setupLongPressInsert(wrap, full);
-                    grid.appendChild(wrap);
-                }
-            });
-            if(pages.length>0)return;
-        }
-        throw new Error('Fallback needed');
-    }catch(e){
-        loadCuratedAssets();
-        showToast('Menampilkan koleksi rekomendasi');
-    }
-}
-}
-
-function setupLongPressInsert(element, url) {
-    let pressTimer;
-    element.onpointerdown = (e) => {
-        pressTimer = setTimeout(() => {
-            insertOnlineAsset(url);
-        }, 800);
-    };
-    element.onpointerup = () => clearTimeout(pressTimer);
-    element.onpointerleave = () => clearTimeout(pressTimer);
-    element.onclick = () => {
-        clearTimeout(pressTimer);
-        insertOnlineAsset(url);
-    };
-}
-
-function insertOnlineAsset(url){
-showToast('⏳ Memasukkan gambar ke poster...');
-const img=new Image();
-img.crossOrigin="anonymous";
-img.onload=()=>{
-const s=getCurrentSlide();
-const maxInit=500;
-let initW=img.width;
-let initH=img.height;
-if(initW>maxInit||initH>maxInit){
-const ratio=Math.min(maxInit/initW,maxInit/initH);
-initW*=ratio;
-initH*=ratio;
-}
-const newEl={
-id:'el_'+Date.now(),
-type:'image',
-img:img,
-src:url,
-x:mainCanvas.width/2,
-y:mainCanvas.height/2,
-width:Math.round(initW),
-height:Math.round(initH),
-origWidth:img.width,
-origHeight:img.height,
-flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'transparent',blur:0,angle:45,distance:0},opacity:1,locked:false,groupId:null
-};
-s.elements.push(newEl);
-selectElement(newEl.id);
-renderAll();
-pushHistoryState();
-closeToolPanel();
-showToast('✅ Elemen berhasil ditambahkan!');
-};
-img.onerror=()=>{
-showToast('⚠️ Gambar dilindungi domain, coba elemen lain.');
-};
-img.src=url;
 }
 
 /* ========== UPLOAD ELEMEN & GAMBAR ========== */
@@ -4052,14 +3958,29 @@ showToast('🗑️ Projek dihapus');
 /* ========== EXPORT ULTRA HD PRO ========== */
 function exportPoster(){
 deselectElement();
-showToast('Menyiapkan gambar resolusi tinggi...');
-const mult=parseFloat(document.getElementById('exportQualitySelect').value)||1.5;
+showToast('⏳ Menyiapkan gambar resolusi tinggi...');
+
+// Pastikan semua gambar sudah termuat sebelum export
+const s=getCurrentSlide();
+let allLoaded = true;
+if(s.background.img && !s.background.img.complete) allLoaded = false;
+s.elements.forEach(el => {
+    if(el.type === 'image' && el.img && !el.img.complete) allLoaded = false;
+    if(el.textSkinImg && !el.textSkinImg.complete) allLoaded = false;
+    if(el.imageSkinImg && !el.imageSkinImg.complete) allLoaded = false;
+});
+
+if(!allLoaded) {
+    setTimeout(exportPoster, 500);
+    return;
+}
+
+const mult=parseFloat(document.getElementById('exportQualitySelect').value)||3.0;
 const expC=document.createElement('canvas');
 expC.width=mainCanvas.width*mult;
 expC.height=mainCanvas.height*mult;
 const ectx=expC.getContext('2d');
 ectx.scale(mult,mult);
-const s=getCurrentSlide();
 
 renderBackground(s.background,mainCanvas.width,mainCanvas.height);
 ectx.drawImage(mainCanvas,0,0);
@@ -4067,7 +3988,7 @@ ectx.drawImage(mainCanvas,0,0);
 setTimeout(()=>{
 const a=document.createElement('a');
 a.download=`poster-${currentRatio.replace(':','-')}-${Date.now()}.jpg`;
-a.href=expC.toDataURL('image/jpeg',0.98);
+a.href=expC.toDataURL('image/jpeg',1.0);
 a.click();
 showToast('✅ Berhasil diunduh!');
 },150);
@@ -4077,4 +3998,3 @@ window.onload=initApp;
 </script>
 </body>
 </html>
-```
