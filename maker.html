@@ -1,18 +1,3 @@
-<!-- 
-Berikut adalah kode lengkap (HTML, CSS, dan JavaScript) dari **Studio Poster Maker Pro** yang telah diperbaiki dan ditambahkan fitur barunya sesuai dengan permintaan Anda. 
-
-Semua perbaikan telah diterapkan dengan mematuhi **Zero Regression Protocol** (tidak merusak fitur yang sudah ada) dan **tanpa ada kode yang dipotong/disingkat**.
-
-### Perbaikan yang diterapkan:
-1. **Ekspor & Impor Projek (.poster)**: Ditambahkan di menu Projek beserta tombol Info (ℹ️) yang menjelaskan mekanisme penyimpanan file di HP.
-2. **Mode Transparan UI**: Ditambahkan tombol "👁️ Transparan" di bar bawah (saat tidak ada elemen yang dipilih) untuk membuat semua bar menjadi transparan agar poster terlihat penuh.
-3. **Tangkap Ajaib (Magic Grab)**: Tangkai diubah menjadi vertikal (seperti pensil), indikator kuas selalu mengikuti kursor/tangkai, dan hasil potongan diekstrak dalam resolusi HD asli.
-4. **Blend Mode Real-time**: Slider Opasitas dan Blur di panel Blend Mode sekarang langsung merespon saat digeser, dan tombol Reset mengembalikan semua nilai ke normal.
-5. **Perspektif 3D**: Garis-garis jahitan (seam lines) segitiga telah dihilangkan sepenuhnya dengan teknik *multi-pass rendering*.
-6. **Crop Gambar Presisi**: Saat nilai crop diubah, gambar tidak lagi bergeser posisinya. Titik tengah visual tetap dipertahankan di tempat semula.
-7. **Upload Font Lokal**: Ditambahkan fitur "Tambah Font Lokal" di panel Font. Font akan disimpan di dalam file projek dan ada keterangan info mengenai sifat penyimpanannya.
-8. **Posisi Widget Zoom**: Widget Zoom/Pan dipindahkan ke tengah atas agar lebih simetris dan enak dilihat.
--->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -21,7 +6,7 @@ Semua perbaikan telah diterapkan dengan mematuhi **Zero Regression Protocol** (t
 <title>Studio Poster Maker Pro - Canva , PixelLab & CorelDraw Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Amiri:wght@400;700&family=Anton&family=Archivo+Black&family=Baloo+2:wght@600;800&family=Bebas+Neue&family=Big+Shoulders+Display:wght@700;900&family=Bungee&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Fredoka:wght@600;700&family=Inter:wght@400;600;700;800&family=Lora:wght@500;700&family=Montserrat:wght@400;700;800;900&family=Nunito:wght@700;900&family=Orbitron:wght@700;900&family=Oswald:wght@700&family=Outfit:wght@600;800;900&family=Passion+One:wght@700&family=Playfair+Display:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Righteous&family=Rubik:wght@700;900&family=Space+Mono:wght@400;700&family=Staatliches&family=Teko:wght@700&family=Titan+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Amiri:wght@400;700&family=Lateef&family=Scheherazade+New&family=Aref+Ruqaa&family=Cairo:wght@700&family=Tajawal:wght@700&family=Changa:wght@700&family=Reem+Kufi:wght@700&family=Anton&family=Archivo+Black&family=Baloo+2:wght@600;800&family=Bebas+Neue&family=Big+Shoulders+Display:wght@700;900&family=Bungee&family=Caveat:wght@400;700&family=Cinzel:wght@400;700;900&family=Fredoka:wght@600;700&family=Inter:wght@400;600;700;800&family=Lora:wght@500;700&family=Montserrat:wght@400;700;800;900&family=Nunito:wght@700;900&family=Orbitron:wght@700;900&family=Oswald:wght@700&family=Outfit:wght@600;800;900&family=Passion+One:wght@700&family=Playfair+Display:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Righteous&family=Rubik:wght@700;900&family=Space+Mono:wght@400;700&family=Staatliches&family=Teko:wght@700&family=Titan+One&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none;}
 html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
@@ -38,6 +23,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ui-transparent-mode .bottom-toolbar-container:hover,
 .ui-transparent-mode .carousel-bar:hover,
 .ui-transparent-mode .pixellab-zoom-widget:hover {
+    opacity: 1;
+}
+.ui-transparent-mode .tool-panel {
+    opacity: 0.35;
+    transition: opacity 0.3s ease;
+}
+.ui-transparent-mode .tool-panel:hover {
     opacity: 1;
 }
 
@@ -81,11 +73,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 #canvasDirectTextEditor{position:absolute;display:none;background:transparent;border:2px solid #D4AF37;color:#fff;outline:none;line-height:1.2;z-index:160;caret-color:#FFE259;box-shadow:0 0 15px rgba(212,175,55,.6);word-break:break-word;user-select:text;}
 
-.carousel-bar{position:absolute;bottom:62px;left:0;right:0;height:56px;background:rgba(18,18,18,.95);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 10px;gap:8px;overflow-x:auto;z-index:180;scrollbar-width:none;}
+.carousel-bar{position:absolute;bottom:62px;left:0;right:0;height:70px;background:rgba(18,18,18,.95);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 10px;gap:8px;overflow-x:auto;z-index:180;scrollbar-width:none;}
 .carousel-bar::-webkit-scrollbar{display:none;}
-.slide-thumb{flex-shrink:0;width:38px;height:50px;background:#252525;border:2px solid transparent;border-radius:6px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;font-weight:bold;}
+.slide-thumb{flex-shrink:0;width:44px;height:54px;background:#252525;border:2px solid transparent;border-radius:6px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;font-weight:bold;}
 .slide-thumb.active{border-color:#D4AF37;color:#fff;}
-.btn-add-slide{flex-shrink:0;width:38px;height:50px;background:rgba(212,175,55,.1);border:1px dashed #D4AF37;border-radius:6px;color:#D4AF37;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.btn-add-slide{flex-shrink:0;width:44px;height:54px;background:rgba(212,175,55,.1);border:1px dashed #D4AF37;border-radius:6px;color:#D4AF37;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .btn-dup-slide{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#bbb;height:32px;padding:0 8px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;}
 .btn-del-slide{background:rgba(255,75,75,.12);border:1px solid rgba(255,75,75,.3);color:#ff6b6b;height:32px;padding:0 8px;border-radius:8px;font-size:11px;cursor:pointer;}
 .bottom-toolbar-container{position:absolute;bottom:0;left:0;right:0;height:62px;background:#141414;border-top:1px solid rgba(212,175,55,.25);z-index:190;display:flex;align-items:center;padding:0 8px;overflow-x:auto;scrollbar-width:none;gap:6px;}
@@ -123,8 +115,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .dpad-btn:active{background:#D4AF37;color:#111;}
 .dpad-center{width:76px;height:40px;background:rgba(0,0,0,.4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#aaa;}
 
-/* Posisi Widget Zoom Diperbarui ke Tengah Atas */
-.pixellab-zoom-widget{position:absolute;top:15px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:rgba(20,20,20,.65);border:1px solid rgba(212,175,55,.35);border-radius:20px;padding:4px 6px;z-index:105;backdrop-filter:blur(8px);}
+.pixellab-zoom-widget{position:absolute;top:65px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:rgba(20,20,20,.65);border:1px solid rgba(212,175,55,.35);border-radius:20px;padding:4px 6px;z-index:105;backdrop-filter:blur(8px);flex-wrap:wrap;justify-content:center;}
 .zoom-btn{background:rgba(255,255,255,.06);border:none;color:#eee;font-size:11px;padding:5px 7px;border-radius:10px;cursor:pointer;}
 .zoom-btn:hover{background:#D4AF37;color:#111;}
 .pan-group{display:flex;gap:2px;border-left:1px solid rgba(255,255,255,.12);padding-left:4px;margin-left:2px;}
@@ -169,6 +160,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .brush-monitor-circle{position:fixed;border:2px dashed #00ff88;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;z-index:10010;background:rgba(0,255,136,.1);}
 .tag-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:4px 10px;font-size:11px;color:#ddd;cursor:pointer;white-space:nowrap;}
 .tag-pill:hover,.tag-pill.active{background:#D4AF37;color:#111;font-weight:bold;}
+
+@keyframes floatAnim {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
 </style>
 </head>
 <body>
@@ -184,21 +180,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" onclick="openProjectModal()" style="border-color:#D4AF37;color:#D4AF37;">📁 Projek</button>
 <button class="btn-nav" onclick="toggleRatioSelector()">📏 <span id="currentRatioLabel">4:5</span></button>
 <button class="btn-nav" onclick="openPanelBleed()">📐 Garis Bantu</button>
-<select class="select-quality" id="exportQualitySelect">
-<option value="0.75">SD (Standar)</option>
-<option value="1.0">HD (High Definition)</option>
-<option value="1.5" selected>FHD (Full HD)</option>
-<option value="2.0">4K (Ultra HD)</option>
-</select>
-<button class="btn-nav btn-download" onclick="exportPoster()">💾 Simpan</button>
+<button class="btn-nav btn-download" onclick="openDownloadModal()">⬇️ Download</button>
 </div>
 </header>
 
 <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
 <div class="pixellab-zoom-widget">
-<button class="zoom-btn" onclick="zoomCanvasManual(-0.25)">🔍-</button>
+<button class="zoom-btn" onclick="zoomCanvasManual(-0.25)">➖</button>
 <button class="zoom-btn" id="zoomLevelLabel" onclick="resetCanvasZoom()" style="min-width:44px;font-weight:700;">100%</button>
-<button class="zoom-btn" onclick="zoomCanvasManual(0.25)">🔍+</button>
+<button class="zoom-btn" onclick="zoomCanvasManual(0.25)">➕</button>
 <button class="zoom-btn" onclick="centerCanvasArtboard()">🎯</button>
 <div class="pan-group">
 <button class="zoom-btn" onclick="panCanvas(0,-40)">▲</button>
@@ -247,7 +237,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </main>
 
 <div class="carousel-bar">
-<div id="slideThumbList" style="display:flex;gap:8px;"></div>
+<div id="slideThumbList" style="display:flex;gap:8px;align-items:center;"></div>
 <button class="btn-add-slide" onclick="addNewSlide()">+</button>
 <button class="btn-dup-slide" onclick="duplicateCurrentSlide()">📑 Duplikat</button>
 <button class="btn-del-slide" onclick="deleteCurrentSlide()">🗑️ Hapus</button>
@@ -292,12 +282,78 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div style="padding:12px 16px;background:rgba(255,255,255,.03);display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);">
 <button class="btn-nav" onclick="createNewProjectPrompt()" style="flex:1;justify-content:center;">➕ Baru</button>
 <button class="btn-nav" onclick="saveAsNewProjectPrompt()" style="flex:1;justify-content:center;">💾 Duplikat</button>
-<button class="btn-nav" onclick="exportProjectToFile()" style="flex:1;justify-content:center;color:#00ff88;border-color:#00ff88;">📤 Ekspor</button>
+<button class="btn-nav" onclick="openProjectExportModal()" style="flex:1;justify-content:center;color:#00ff88;border-color:#00ff88;">📤 Ekspor</button>
 <button class="btn-nav" onclick="document.getElementById('fileProjectInput').click()" style="flex:1;justify-content:center;color:#FFE259;border-color:#FFE259;">📥 Impor</button>
 <button class="btn-nav" onclick="showProjectInfo()" style="width:34px;justify-content:center;">ℹ️</button>
 </div>
 <div class="project-grid" id="projectGridContainer"></div>
 </div>
+</div>
+
+<div class="feature-modal" id="projectExportModal">
+    <div class="fmodal-header">
+        <div style="font-weight:800;color:#D4AF37;font-size:13px;">📤 Ekspor Projek (.poster)</div>
+        <button class="panel-close" onclick="closeProjectExportModal()">✕</button>
+    </div>
+    <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto;">
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button class="btn-nav" onclick="toggleAllExportProjects(true)">Pilih Semua</button>
+            <button class="btn-nav" onclick="toggleAllExportProjects(false)">Inversi</button>
+        </div>
+        <div id="exportProjectList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;"></div>
+    </div>
+    <div class="fmodal-footer">
+        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="executeProjectExport()">📤 Ekspor Terpilih</button>
+    </div>
+</div>
+
+<div class="feature-modal" id="downloadModal">
+    <div class="fmodal-header">
+        <div style="font-weight:800;color:#D4AF37;font-size:13px;">📥 Download Poster</div>
+        <button class="panel-close" onclick="closeDownloadModal()">✕</button>
+    </div>
+    <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto;">
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button class="btn-nav" onclick="toggleAllDownloadSlides(true)">Pilih Semua</button>
+            <button class="btn-nav" onclick="toggleAllDownloadSlides(false)">Inversi</button>
+        </div>
+        <div id="downloadSlideList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;"></div>
+        
+        <div class="ctrl-row" style="margin-bottom:10px;">
+            <span class="ctrl-label">Format:</span>
+            <select id="downloadFormat" class="select-quality" style="flex:1;">
+                <option value="jpg">JPG (Background Normal)</option>
+                <option value="png">PNG (Transparan / Tanpa Background)</option>
+            </select>
+        </div>
+        <div class="ctrl-row">
+            <span class="ctrl-label">Kualitas:</span>
+            <select id="downloadQuality" class="select-quality" style="flex:1;">
+                <option value="0.75">SD (Standar)</option>
+                <option value="1.0">HD (High Definition)</option>
+                <option value="1.5" selected>FHD (Full HD)</option>
+                <option value="2.0">4K (Ultra HD)</option>
+            </select>
+        </div>
+    </div>
+    <div class="fmodal-footer">
+        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="executeDownload()">⬇️ Download Terpilih</button>
+    </div>
+</div>
+
+<div class="feature-modal" id="previewModal">
+    <div class="fmodal-header">
+        <div style="font-weight:800;color:#D4AF37;font-size:13px;">👁️ Preview Layar Penuh</div>
+        <button class="panel-close" onclick="closePreviewModal()">✕</button>
+    </div>
+    <div class="fmodal-body" id="previewBody" style="overflow:auto; touch-action:pan-x pan-y; background:#000;">
+        <canvas id="previewCanvas" style="transform-origin:center center; transition:transform 0.1s;"></canvas>
+    </div>
+    <div class="fmodal-footer" style="justify-content:center; gap:15px;">
+        <button class="btn-nav" onclick="zoomPreview(-0.25)">🔍-</button>
+        <button class="btn-nav" onclick="resetPreviewZoom()">100%</button>
+        <button class="btn-nav" onclick="zoomPreview(0.25)">🔍+</button>
+    </div>
 </div>
 
 <div class="feature-modal" id="perspectiveModal">
@@ -387,6 +443,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="brush-monitor-circle" id="brushMonitor"></div>
 <div class="toast" id="toast"></div>
 
+<div id="floatingFeedback" style="position:fixed; bottom:140px; right:15px; z-index:9999; display:flex; align-items:center; gap:5px; animation: floatAnim 3s ease-in-out infinite;">
+    <a href="https://ig.me/m/tauhidsunnah_id" target="_blank" style="background:linear-gradient(135deg, #ff007f, #7928ca); color:#fff; padding:8px 12px; border-radius:20px; font-size:11px; font-weight:bold; text-decoration:none; box-shadow:0 4px 15px rgba(0,0,0,0.5); display:flex; align-items:center; gap:5px;">
+        💬 Kirim Saran / Lapor Bug
+    </a>
+    <button onclick="document.getElementById('floatingFeedback').style.display='none'" style="background:#222; color:#fff; border:1px solid #555; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+</div>
+
 <script>
 /* ========== CORE STATE & INDEXED DB ========== */
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -425,7 +488,14 @@ const FONT_FAMILIES=[
 {name:'👑 Playfair Display (Mewah)',font:"Playfair Display, serif"},
 {name:'💻 Space Mono (Mesin)',font:"Space Mono, monospace"},
 {name:'✍️ Caveat (Tulisan Tangan)',font:"Caveat, cursive"},
-{name:'🕌 Amiri (Klasik Islami)',font:"Amiri, serif"},
+{name:'🕌 Amiri (Klasik Arab)',font:"Amiri, serif"},
+{name:'🕌 Lateef (Arab Elegan)',font:"Lateef, serif"},
+{name:'🕌 Scheherazade New (Arab Standar)',font:"'Scheherazade New', serif"},
+{name:'🕌 Aref Ruqaa (Arab Kaligrafi)',font:"'Aref Ruqaa', serif"},
+{name:'🕌 Cairo Bold (Arab Modern)',font:"Cairo, sans-serif"},
+{name:'🕌 Tajawal Bold (Arab Bersih)',font:"Tajawal, sans-serif"},
+{name:'🕌 Changa Bold (Arab Kotak)',font:"Changa, sans-serif"},
+{name:'🕌 Reem Kufi (Arab Kufi)',font:"'Reem Kufi', sans-serif"},
 {name:'🏰 Cinzel Royal',font:"Cinzel, serif"}
 ];
 
@@ -448,6 +518,7 @@ let selectedWordIndices=[];
 let currentActivePanel='';
 let wandMode='auto';
 let uiTransparent=false;
+let copiedElement=null;
 
 // Optimasi Cache Gambar agar tidak memory leak
 const imageCache=new Map();
@@ -821,6 +892,7 @@ document.getElementById('currentRatioLabel').innerText=currentRatio;
 adjustArtboardSize();
 pushHistoryState();
 renderAll();
+renderCarouselThumbs();
 }
 function adjustArtboardSize(){
 const preset=RATIO_PRESETS[currentRatio];
@@ -2024,7 +2096,9 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
 <button class="tool-btn" onclick="openPanelBleed()"><span class="icon">📐</span><span>Garis Bantu</span></button>
-<button class="tool-btn" onclick="toggleUITransparency()"><span class="icon">👁️</span><span>Transparan</span></button>
+<button class="tool-btn" onclick="openPasteModal()"><span class="icon">📋</span><span>Tempel</span></button>
+<button class="tool-btn" onclick="openPreviewModal()"><span class="icon">👁️</span><span>Preview</span></button>
+<button class="tool-btn" onclick="toggleUITransparency()"><span class="icon">👻</span><span>Transparan</span></button>
 `;
 }else if(el.type==='text'){
 bar.innerHTML=`
@@ -2046,6 +2120,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'🔗':'⛓️'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
 <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
+<button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
 `;
@@ -2072,6 +2147,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'🔗':'⛓️'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
 <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
+<button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
 `;
@@ -3252,6 +3328,8 @@ setTimeout(() => {
 let isPaintingGrab=false;
 let grabMaskCanvas=null;
 let grabPaintMode=true;
+let lastGrabX = null;
+let lastGrabY = null;
 
 function openMagicGrabModal(){
 const el=getActiveElement();
@@ -3306,9 +3384,11 @@ function toggleGrabPaintMode() {
     grabPaintMode = !grabPaintMode;
     const btn = document.getElementById('grabPaintToggle');
     if(grabPaintMode) {
+        btn.innerText = '✏️';
         btn.style.color = '#00ff88';
     } else {
-        btn.style.color = '#aaa';
+        btn.innerText = '🚫';
+        btn.style.color = '#ff6b6b';
     }
 }
 
@@ -3351,6 +3431,8 @@ if(isDraggingStalk){
 window.addEventListener('pointerup',()=>{
 isDraggingStalk=false;
 isPaintingGrab=false;
+lastGrabX = null;
+lastGrabY = null;
 document.getElementById('brushMonitor').style.display='none';
 });
 
@@ -3366,11 +3448,26 @@ function paintGrabAtCoords(x, y){
 const bSize=parseInt(document.getElementById('magicBrushSize').value||35);
 const mctx=grabMaskCanvas.getContext('2d');
 mctx.save();
-mctx.beginPath();
-mctx.arc(x,y,bSize/2,0,Math.PI*2);
-mctx.fillStyle='#00ff88';
-mctx.fill();
+mctx.lineCap = 'round';
+mctx.lineJoin = 'round';
+mctx.lineWidth = bSize;
+mctx.strokeStyle = '#00ff88';
+
+if(lastGrabX !== null && lastGrabY !== null) {
+    mctx.beginPath();
+    mctx.moveTo(lastGrabX, lastGrabY);
+    mctx.lineTo(x, y);
+    mctx.stroke();
+} else {
+    mctx.beginPath();
+    mctx.arc(x,y,bSize/2,0,Math.PI*2);
+    mctx.fillStyle='#00ff88';
+    mctx.fill();
+}
 mctx.restore();
+
+lastGrabX = x;
+lastGrabY = y;
 
 updateBrushMonitorPreview(bSize, x, y);
 renderMagicGrabDisplay();
@@ -3589,6 +3686,51 @@ selectElement(copy.id);
 renderAll();
 pushHistoryState();
 showToast('📑 Berhasil diduplikasi!');
+}
+
+function copyActiveElement() {
+    const el = getActiveElement();
+    if(!el) return;
+    copiedElement = JSON.parse(JSON.stringify(el));
+    if(el.type==='image'&&el.img) copiedElement.img=el.img;
+    if(el.textSkinImg) copiedElement.textSkinImg=el.textSkinImg;
+    if(el.imageSkinImg) copiedElement.imageSkinImg=el.imageSkinImg;
+    showToast('📋 Elemen disalin!');
+    renderBottomToolbar();
+}
+
+function openPasteModal() {
+    if(!copiedElement) {
+        showToast('⚠️ Belum ada elemen yang disalin!');
+        return;
+    }
+    let html = `<div style="font-size:12px;margin-bottom:10px;">Pilih slide untuk menempelkan elemen:</div>`;
+    slides.forEach((s, i) => {
+        html += `<label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; background:rgba(255,255,255,0.05); padding:8px; border-radius:6px;">
+            <input type="checkbox" class="paste-slide-cb" value="${i}" ${i===currentSlideIndex?'checked':''}>
+            Slide ${i+1}
+        </label>`;
+    });
+    html += `<button class="btn-download" style="width:100%; padding:8px; margin-top:10px; border-radius:6px; border:none; font-weight:bold;" onclick="executePaste()">📋 Tempel Sekarang</button>`;
+    openToolPanel('Tempel Elemen', html);
+}
+
+function executePaste() {
+    const cbs = document.querySelectorAll('.paste-slide-cb:checked');
+    if(cbs.length === 0) return;
+    cbs.forEach(cb => {
+        const idx = parseInt(cb.value);
+        const clone = JSON.parse(JSON.stringify(copiedElement));
+        clone.id = 'el_' + Date.now() + Math.random();
+        if(copiedElement.img) clone.img = copiedElement.img;
+        if(copiedElement.textSkinImg) clone.textSkinImg = copiedElement.textSkinImg;
+        if(copiedElement.imageSkinImg) clone.imageSkinImg = copiedElement.imageSkinImg;
+        slides[idx].elements.push(clone);
+    });
+    renderAll();
+    pushHistoryState();
+    closeToolPanel();
+    showToast('✅ Elemen berhasil ditempel!');
 }
 
 /* ========== FONT, UKURAN, DAN ROTASI DASAR ========== */
@@ -3967,12 +4109,12 @@ function openPanelRelativeSizeAndPos() {
     const curPct = Math.round((el.width / W) * 100);
     const html = `
     <div class="ctrl-row"><span class="ctrl-label">Lebar Relatif:</span><span class="ctrl-val" id="valRelW">${curPct}%</span></div>
-    <input type="range" class="ctrl-slider" min="10" max="100" value="${curPct}" oninput="updateRelativeSize(this.value)">
+    <input type="range" class="ctrl-slider" min="10" max="500" value="${curPct}" oninput="updateRelativeSize(this.value)">
     <div class="ctrl-grid-btns" style="margin-top:12px;">
         <button class="btn-sub-tool" onclick="updateRelativeSize(25)">25%</button>
         <button class="btn-sub-tool" onclick="updateRelativeSize(50)">50%</button>
-        <button class="btn-sub-tool" onclick="updateRelativeSize(75)">75%</button>
         <button class="btn-sub-tool" onclick="updateRelativeSize(100)">100%</button>
+        <button class="btn-sub-tool" onclick="updateRelativeSize(200)">200%</button>
     </div>
     <div style="font-size:10px;color:#888;margin-top:12px;">💡 Mengubah ukuran elemen berdasarkan persentase lebar kanvas poster.</div>
     `;
@@ -3992,6 +4134,8 @@ function updateRelativeSize(pct) {
     }
     const lbl = document.getElementById('valRelW');
     if(lbl) lbl.innerText = pct + '%';
+    const slider = document.querySelector('#toolPanel input[type="range"]');
+    if(slider) slider.value = pct;
     renderAll(); debouncedPushHistory();
 }
 
@@ -4139,13 +4283,61 @@ function renderCarouselThumbs(){
 const container=document.getElementById('slideThumbList');
 container.innerHTML='';
 slides.forEach((slide,idx)=>{
+const wrapper = document.createElement('div');
+wrapper.style.display = 'flex';
+wrapper.style.flexDirection = 'column';
+wrapper.style.alignItems = 'center';
+wrapper.style.gap = '2px';
+
 const thumb=document.createElement('div');
 thumb.className=`slide-thumb ${idx===currentSlideIndex?'active':''}`;
 thumb.innerText=`${idx+1}`;
+thumb.draggable = true;
+thumb.ondragstart = (e) => { e.dataTransfer.setData('text/plain', idx); };
+thumb.ondragover = (e) => { e.preventDefault(); };
+thumb.ondrop = (e) => {
+    e.preventDefault();
+    const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+    const toIdx = idx;
+    if(fromIdx !== toIdx) {
+        const moved = slides.splice(fromIdx, 1)[0];
+        slides.splice(toIdx, 0, moved);
+        if(currentSlideIndex === fromIdx) currentSlideIndex = toIdx;
+        else if(currentSlideIndex > fromIdx && currentSlideIndex <= toIdx) currentSlideIndex--;
+        else if(currentSlideIndex < fromIdx && currentSlideIndex >= toIdx) currentSlideIndex++;
+        renderCarouselThumbs();
+        renderAll();
+        pushHistoryState();
+    }
+};
 thumb.onclick=()=>switchSlide(idx);
-container.appendChild(thumb);
+
+const moveBtns = document.createElement('div');
+moveBtns.style.display = 'flex';
+moveBtns.style.gap = '2px';
+moveBtns.innerHTML = `
+    <button style="background:none;border:none;color:#aaa;font-size:10px;cursor:pointer;padding:2px;" onclick="moveSlide(${idx}, -1)">◀</button>
+    <button style="background:none;border:none;color:#aaa;font-size:10px;cursor:pointer;padding:2px;" onclick="moveSlide(${idx}, 1)">▶</button>
+`;
+
+wrapper.appendChild(thumb);
+wrapper.appendChild(moveBtns);
+container.appendChild(wrapper);
 });
 }
+
+function moveSlide(idx, dir) {
+    const toIdx = idx + dir;
+    if(toIdx < 0 || toIdx >= slides.length) return;
+    const moved = slides.splice(idx, 1)[0];
+    slides.splice(toIdx, 0, moved);
+    if(currentSlideIndex === idx) currentSlideIndex = toIdx;
+    else if(currentSlideIndex === toIdx) currentSlideIndex = idx;
+    renderCarouselThumbs();
+    renderAll();
+    pushHistoryState();
+}
+
 function switchSlide(idx){
 if(idx===currentSlideIndex)return;
 deselectElement();
@@ -4300,24 +4492,59 @@ function showProjectInfo() {
     alert("ℹ️ INFO PENYIMPANAN PROJEK:\n\n1. Projek disimpan di memori browser (IndexedDB).\n2. Jika Anda menghapus Cache/Data Browser, projek akan HILANG.\n3. Gunakan fitur 'Ekspor' untuk mengunduh file mentah (.poster) ke penyimpanan HP Anda (Folder Download).\n4. File .poster ini bisa Anda bagikan ke teman atau di-Impor kembali jika browser terhapus.\n5. Font lokal yang Anda tambahkan akan ikut tersimpan di dalam file .poster tersebut.");
 }
 
-async function exportProjectToFile() {
-    await saveCurrentProjectAuto();
-    const p = await getProjectFromDB(currentProjectId);
-    if(!p) return;
+async function openProjectExportModal() {
+    const list = await getAllProjectsMetaFromDB();
+    const container = document.getElementById('exportProjectList');
+    container.innerHTML = '';
+    list.forEach(p => {
+        container.innerHTML += `
+        <label style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; cursor:pointer;">
+            <input type="checkbox" class="export-proj-cb" value="${p.id}" checked style="width:18px;height:18px;accent-color:#D4AF37;">
+            <img src="${p.thumb||''}" style="width:30px;height:40px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none'">
+            <span style="font-size:12px;font-weight:bold;">${p.name}</span>
+        </label>
+        `;
+    });
+    document.getElementById('projectExportModal').classList.add('active');
+}
+
+function closeProjectExportModal() {
+    document.getElementById('projectExportModal').classList.remove('active');
+}
+
+function toggleAllExportProjects(selectAll) {
+    const cbs = document.querySelectorAll('.export-proj-cb');
+    cbs.forEach(cb => {
+        cb.checked = selectAll ? true : !cb.checked;
+    });
+}
+
+async function executeProjectExport() {
+    const cbs = document.querySelectorAll('.export-proj-cb:checked');
+    if(cbs.length === 0) {
+        showToast('⚠️ Pilih minimal 1 projek!');
+        return;
+    }
+    showToast('⏳ Menyiapkan file ekspor...');
     
-    const dataStr = JSON.stringify(p);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `PosterMaker_Studio_${p.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.poster`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showToast('📤 File .poster berhasil diunduh!');
+    for(let cb of cbs) {
+        const p = await getProjectFromDB(cb.value);
+        if(p) {
+            const dataStr = JSON.stringify(p);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `PosterMaker_Studio_${p.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.poster`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            await new Promise(r => setTimeout(r, 300));
+        }
+    }
+    closeProjectExportModal();
+    showToast('📤 Ekspor selesai!');
 }
 
 function handleProjectImport(e) {
@@ -4349,46 +4576,147 @@ function handleProjectImport(e) {
 }
 
 /* ========== EXPORT ULTRA HD PRO ========== */
-function exportPoster(){
-deselectElement();
-showToast('⏳ Menyiapkan gambar resolusi tinggi...');
-
-// Pastikan semua gambar sudah termuat sebelum export
-const s=getCurrentSlide();
-let allLoaded = true;
-if(s.background.img && !s.background.img.complete) allLoaded = false;
-s.elements.forEach(el => {
-    if(el.type === 'image' && el.img && !el.img.complete) allLoaded = false;
-    if(el.textSkinImg && !el.textSkinImg.complete) allLoaded = false;
-    if(el.imageSkinImg && !el.imageSkinImg.complete) allLoaded = false;
-});
-
-if(!allLoaded) {
-    setTimeout(exportPoster, 500);
-    return;
+function openDownloadModal() {
+    deselectElement();
+    const container = document.getElementById('downloadSlideList');
+    container.innerHTML = '';
+    slides.forEach((s, i) => {
+        container.innerHTML += `
+        <label style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; cursor:pointer;">
+            <input type="checkbox" class="download-slide-cb" value="${i}" ${i===currentSlideIndex?'checked':''} style="width:18px;height:18px;accent-color:#D4AF37;">
+            <span style="font-size:12px;font-weight:bold;">Slide ${i+1}</span>
+        </label>
+        `;
+    });
+    document.getElementById('downloadModal').classList.add('active');
 }
 
-const mult=parseFloat(document.getElementById('exportQualitySelect').value)||3.0;
-const expC=document.createElement('canvas');
-expC.width=mainCanvas.width*mult;
-expC.height=mainCanvas.height*mult;
-const ectx=expC.getContext('2d');
-ectx.scale(mult,mult);
+function closeDownloadModal() {
+    document.getElementById('downloadModal').classList.remove('active');
+}
 
-// Render ulang semua elemen ke canvas resolusi tinggi
-renderBackground(s.background,mainCanvas.width,mainCanvas.height,ectx);
-s.elements.forEach(el=>{
-    if(el.type==='text')renderTextElement(ectx,el);
-    else if(el.type==='image')renderImageElement(ectx,el);
-});
+function toggleAllDownloadSlides(selectAll) {
+    const cbs = document.querySelectorAll('.download-slide-cb');
+    cbs.forEach(cb => {
+        cb.checked = selectAll ? true : !cb.checked;
+    });
+}
 
-setTimeout(()=>{
-const a=document.createElement('a');
-a.download=`poster-${currentRatio.replace(':','-')}-${Date.now()}.jpg`;
-a.href=expC.toDataURL('image/jpeg',1.0);
-a.click();
-showToast('✅ Berhasil diunduh!');
-},150);
+async function executeDownload() {
+    const cbs = document.querySelectorAll('.download-slide-cb:checked');
+    if(cbs.length === 0) {
+        showToast('⚠️ Pilih minimal 1 slide!');
+        return;
+    }
+    
+    const format = document.getElementById('downloadFormat').value;
+    const mult = parseFloat(document.getElementById('downloadQuality').value) || 1.5;
+    
+    showToast('⏳ Menyiapkan gambar resolusi tinggi...');
+    
+    for(let cb of cbs) {
+        const idx = parseInt(cb.value);
+        const s = slides[idx];
+        
+        const expC = document.createElement('canvas');
+        expC.width = mainCanvas.width * mult;
+        expC.height = mainCanvas.height * mult;
+        const ectx = expC.getContext('2d');
+        ectx.scale(mult, mult);
+        
+        if(format === 'jpg') {
+            renderBackground(s.background, mainCanvas.width, mainCanvas.height, ectx);
+        } else {
+            ectx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+        }
+        
+        s.elements.forEach(el => {
+            if(el.type === 'text') renderTextElement(ectx, el);
+            else if(el.type === 'image') renderImageElement(ectx, el);
+        });
+        
+        const a = document.createElement('a');
+        a.download = `poster-slide${idx+1}-${currentRatio.replace(':','-')}-${Date.now()}.${format}`;
+        a.href = expC.toDataURL(`image/${format}`, format === 'jpg' ? 1.0 : undefined);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        await new Promise(r => setTimeout(r, 400));
+    }
+    
+    closeDownloadModal();
+    showToast('✅ Berhasil diunduh!');
+}
+
+/* ========== PREVIEW MODAL ========== */
+let previewZoom = 1.0;
+let previewPanX = 0;
+let previewPanY = 0;
+let isDraggingPreview = false;
+let previewStart = {x:0, y:0};
+
+function openPreviewModal() {
+    deselectElement();
+    const modal = document.getElementById('previewModal');
+    modal.classList.add('active');
+    
+    const pCanvas = document.getElementById('previewCanvas');
+    pCanvas.width = mainCanvas.width;
+    pCanvas.height = mainCanvas.height;
+    
+    const pctx = pCanvas.getContext('2d');
+    const s = getCurrentSlide();
+    renderBackground(s.background, pCanvas.width, pCanvas.height, pctx);
+    s.elements.forEach(el => {
+        if(el.type === 'text') renderTextElement(pctx, el);
+        else if(el.type === 'image') renderImageElement(pctx, el);
+    });
+    
+    resetPreviewZoom();
+    setupPreviewDrag();
+}
+
+function closePreviewModal() {
+    document.getElementById('previewModal').classList.remove('active');
+}
+
+function zoomPreview(delta) {
+    previewZoom = Math.max(0.2, Math.min(5.0, previewZoom + delta));
+    updatePreviewTransform();
+}
+
+function resetPreviewZoom() {
+    const pCanvas = document.getElementById('previewCanvas');
+    const body = document.getElementById('previewBody');
+    const scaleW = (body.clientWidth - 40) / pCanvas.width;
+    const scaleH = (body.clientHeight - 40) / pCanvas.height;
+    previewZoom = Math.min(scaleW, scaleH);
+    previewPanX = 0;
+    previewPanY = 0;
+    updatePreviewTransform();
+}
+
+function updatePreviewTransform() {
+    const pCanvas = document.getElementById('previewCanvas');
+    pCanvas.style.transform = `translate(${previewPanX}px, ${previewPanY}px) scale(${previewZoom})`;
+}
+
+function setupPreviewDrag() {
+    const body = document.getElementById('previewBody');
+    body.onpointerdown = (e) => {
+        isDraggingPreview = true;
+        previewStart = {x: e.clientX - previewPanX, y: e.clientY - previewPanY};
+        body.setPointerCapture(e.pointerId);
+    };
+    body.onpointermove = (e) => {
+        if(!isDraggingPreview) return;
+        previewPanX = e.clientX - previewStart.x;
+        previewPanY = e.clientY - previewStart.y;
+        updatePreviewTransform();
+    };
+    body.onpointerup = () => { isDraggingPreview = false; };
+    body.onpointercancel = () => { isDraggingPreview = false; };
 }
 
 window.onload=initApp;
