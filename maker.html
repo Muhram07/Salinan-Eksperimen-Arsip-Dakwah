@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -134,6 +135,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .fmodal-footer{height:66px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#141414;}
 .persp-pin{position:absolute;width:28px;height:28px;border-radius:50%;background:#D4AF37;border:3px solid #fff;box-shadow:0 0 10px rgba(0,0,0,.8);cursor:pointer;touch-action:none;transform:translate(-50%,-50%);z-index:10;}
 .brush-monitor-circle{position:fixed;border:2px dashed #00ff88;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;z-index:10010;background:rgba(0,255,136,.1);}
+.tag-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:4px 10px;font-size:11px;color:#ddd;cursor:pointer;white-space:nowrap;}
+.tag-pill:hover,.tag-pill.active{background:#D4AF37;color:#111;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -150,10 +153,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" onclick="toggleRatioSelector()">📏 <span id="currentRatioLabel">4:5</span></button>
 <button class="btn-nav" onclick="openPanelBleed()">📐 Garis Bantu</button>
 <select class="select-quality" id="exportQualitySelect">
-<option value="1.0">SD (Standar)</option>
-<option value="2.0">HD (High Definition)</option>
-<option value="3.0" selected>FHD (Full HD)</option>
-<option value="4.0">4K (Ultra HD)</option>
+<option value="0.75">SD (Standar)</option>
+<option value="1.0">HD (High Definition)</option>
+<option value="1.5" selected>FHD (Full HD)</option>
+<option value="2.0">4K (Ultra HD)</option>
 </select>
 <button class="btn-nav btn-download" onclick="exportPoster()">💾 Simpan</button>
 </div>
@@ -303,7 +306,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 <div class="fmodal-body" id="magicGrabBody">
 <canvas id="magicGrabCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
-<div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:40px; height:40px; border-radius:50%; font-size:20px;">✋</div>
+<div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:auto; padding:0 15px; height:40px; border-radius:20px; font-size:14px; gap:8px; display:flex; align-items:center; cursor:grab;">
+    <span id="grabDragHandle" style="padding:5px;">✋ Geser</span>
+    <div style="width:1px; height:20px; background:#D4AF37;"></div>
+    <span id="grabPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer;" onclick="toggleGrabPaintMode()">✏️ Kuas: ON</span>
+</div>
 </div>
 <div class="fmodal-footer">
 <div style="display:flex;align-items:center;gap:10px;">
@@ -344,9 +351,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="toast" id="toast"></div>
 
 <script>
-/* ========== CORE STATE ========== */
+/* ========== CORE STATE & INDEXED DB ========== */
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
-const PROJECTS_KEY='MAKER_STUDIO_ALL_PROJECTS_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
 
@@ -393,6 +399,7 @@ let activeElementId=null;
 let editingElementId=null;
 let isEditingText=false;
 let currentProjectId='proj_default';
+let currentProjectName='Projek 1';
 let bleedSettings={margin:5,color:'#D4AF37'};
 let activeGuideMode='none';
 let nudgeStep=10;
@@ -431,7 +438,7 @@ const snapGuideV=document.getElementById('snapGuideV');
 
 let historyStack=[];
 let historyIndex=-1;
-const MAX_HISTORY=15; // Dikurangi agar tidak lag/freeze
+const MAX_HISTORY=15;
 
 let autoSaveTimer=null;
 let canvasScale=1;
@@ -439,6 +446,73 @@ let renderPending=false;
 let userZoomScale=1.0;
 let viewportPanX=0;
 let viewportPanY=0;
+
+/* ========== INDEXED DB STORAGE ========== */
+const DB_NAME = 'StudioPosterDB_v2';
+const STORE_NAME = 'projects';
+let db;
+
+function initDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            }
+        };
+        req.onsuccess = (e) => { db = e.target.result; resolve(); };
+        req.onerror = (e) => reject(e);
+    });
+}
+
+async function saveProjectToDB(project) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(project);
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e);
+    });
+}
+
+async function getProjectFromDB(id) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).get(id);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = (e) => reject(e);
+    });
+}
+
+async function getAllProjectsMetaFromDB() {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = () => {
+            const list = req.result || [];
+            const metaList = list.map(p => ({
+                id: p.id,
+                name: p.name,
+                ratio: p.ratio,
+                slideCount: p.slideCount,
+                thumb: p.thumb,
+                updatedAt: p.updatedAt
+            }));
+            metaList.sort((a,b) => b.updatedAt - a.updatedAt);
+            resolve(metaList);
+        };
+        req.onerror = (e) => reject(e);
+    });
+}
+
+async function deleteProjectFromDB(id) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e);
+    });
+}
 
 function showToast(msg){
 const t=document.getElementById('toast');
@@ -520,8 +594,9 @@ if(!s||!s.elements)return null;
 return s.elements.find(e=>e.id===activeElementId)||null;
 }
 
-function initApp(){
-loadFromStorage();
+async function initApp(){
+try { await initDB(); } catch(e) { console.warn("IndexedDB gagal", e); }
+await loadFromStorage();
 if(!slides||slides.length===0){slides=[createDefaultSlide()];currentSlideIndex=0;}
 adjustArtboardSize();
 pushHistoryState();
@@ -541,7 +616,6 @@ function triggerAutoSave(){
 setSaveIndicator(false);
 clearTimeout(autoSaveTimer);
 autoSaveTimer=setTimeout(()=>{
-    // Gunakan requestIdleCallback jika tersedia agar tidak freeze
     if(window.requestIdleCallback) {
         window.requestIdleCallback(() => saveToStorage());
     } else {
@@ -576,31 +650,48 @@ if(isError){
 }
 }
 
-function saveToStorage(){
+async function saveToStorage(){
 try{
-const dataToSave={id:currentProjectId,ratio:currentRatio,slideIndex:currentSlideIndex,slides:serializeSlides(slides)};
-localStorage.setItem(STORAGE_KEY,JSON.stringify(dataToSave));
-localStorage.setItem(CURRENT_PROJ_ID_KEY,currentProjectId);
-saveCurrentProjectAuto();
-setSaveIndicator(true);
+    const dataToSave={
+        id: currentProjectId,
+        name: currentProjectName || 'Projek Tanpa Nama',
+        ratio: currentRatio,
+        slideIndex: currentSlideIndex,
+        slides: serializeSlides(slides),
+        slideCount: slides.length,
+        thumb: (mainCanvas && typeof mainCanvas.toDataURL==='function') ? mainCanvas.toDataURL('image/jpeg',0.2) : '',
+        updatedAt: Date.now()
+    };
+    await saveProjectToDB(dataToSave);
+    localStorage.setItem(CURRENT_PROJ_ID_KEY, currentProjectId);
+    setSaveIndicator(true);
 }catch(e){
-console.warn("Storage penuh:",e);
-setSaveIndicator(false, true);
-showToast("⚠️ Memori browser penuh! Hapus projek lama.");
+    console.warn("Gagal simpan ke DB:",e);
+    setSaveIndicator(false, true);
+    showToast("⚠️ Gagal menyimpan! Memori penuh.");
 }
 }
 
-function loadFromStorage(){
+async function loadFromStorage(){
 try{
-const storedId=localStorage.getItem(CURRENT_PROJ_ID_KEY);
-if(storedId)currentProjectId=storedId;
-const raw=localStorage.getItem(STORAGE_KEY);
-if(!raw)return;
-const parsed=JSON.parse(raw);
-if(parsed.ratio&&RATIO_PRESETS[parsed.ratio]){currentRatio=parsed.ratio;document.getElementById('currentRatioLabel').innerText=currentRatio;}
-currentSlideIndex=parsed.slideIndex||0;
-slides=deserializeSlides(parsed.slides||[]);
+    const storedId = localStorage.getItem(CURRENT_PROJ_ID_KEY);
+    if(storedId) {
+        const p = await getProjectFromDB(storedId);
+        if(p) {
+            currentProjectId = p.id;
+            currentProjectName = p.name || 'Projek 1';
+            if(p.ratio && RATIO_PRESETS[p.ratio]){
+                currentRatio = p.ratio;
+                document.getElementById('currentRatioLabel').innerText = currentRatio;
+            }
+            currentSlideIndex = p.slideIndex || 0;
+            slides = deserializeSlides(p.slides || []);
+            return;
+        }
+    }
 }catch(e){console.error("Gagal load storage:",e);}
+slides = [createDefaultSlide()];
+currentSlideIndex = 0;
 }
 
 function pushHistoryState(){
@@ -941,7 +1032,7 @@ if(!s)return;
 const W=mainCanvas.width;
 const H=mainCanvas.height;
 ctx.clearRect(0,0,W,H);
-renderBackground(s.background,W,H);
+renderBackground(s.background,W,H,ctx);
 if(s.elements){
 s.elements.forEach(el=>{
 if(el.id===editingElementId)return;
@@ -952,27 +1043,27 @@ else if(el.type==='image')renderImageElement(ctx,el);
 updateSelectionBox();
 }
 
-function renderBackground(bg,W,H){
+function renderBackground(bg,W,H,targetCtx){
 if(!bg)return;
 if(bg.img&&bg.img.complete){
-ctx.save();
-if(bg.blur>0)ctx.filter=`blur(${bg.blur*2}px)`;
+targetCtx.save();
+if(bg.blur>0)targetCtx.filter=`blur(${bg.blur*2}px)`;
 const baseRatio=Math.max(W/bg.img.width,H/bg.img.height);
 const scale=(bg.scale||1.0)*baseRatio;
 const drawW=bg.img.width*scale;
 const drawH=bg.img.height*scale;
 const x=((W-drawW)/2)+(bg.offsetX||0);
 const y=((H-drawH)/2)+(bg.offsetY||0);
-ctx.drawImage(bg.img,x,y,drawW,drawH);
-ctx.restore();
+targetCtx.drawImage(bg.img,x,y,drawW,drawH);
+targetCtx.restore();
 }else{
-const grad=ctx.createRadialGradient(W/2,H*0.35,100,W/2,H/2,W);
+const grad=targetCtx.createRadialGradient(W/2,H*0.35,100,W/2,H/2,W);
 grad.addColorStop(0,bg.color1||'#241a14');
 grad.addColorStop(1,bg.color2||'#090807');
-ctx.fillStyle=grad;
-ctx.fillRect(0,0,W,H);
+targetCtx.fillStyle=grad;
+targetCtx.fillRect(0,0,W,H);
 }
-if(bg.darken>0){ctx.fillStyle=`rgba(0,0,0,${bg.darken})`;ctx.fillRect(0,0,W,H);}
+if(bg.darken>0){targetCtx.fillStyle=`rgba(0,0,0,${bg.darken})`;targetCtx.fillRect(0,0,W,H);}
 }
 
 /* ========== RENDER TEKS (JUSTIFY, STABILO SLANTED, EMBOSS, INNER SHADOW) ========== */
@@ -2028,19 +2119,24 @@ debouncedPushHistory();
 }
 
 /* ========== PANEL FORMAT TEKS & KAPITAL ========== */
+let lastWordScrollPos = 0;
 function renderWordSelectionUI() {
     const el = getActiveElement();
     if (!el || el.type !== 'text') return '';
     const words = el.text.split(/\s+/).filter(w=>w.length>0);
-    let html = '';
+    let html = `<div id="wordSelectionContainer" style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; scrollbar-width:none;">`;
     words.forEach((w, i) => {
         const isSel = selectedWordIndices.includes(i);
         html += `<div class="tag-pill ${isSel ? 'active' : ''}" onclick="toggleWordSelection(${i})">${w}</div>`;
     });
+    html += `</div>`;
     return html;
 }
 
 function toggleWordSelection(i) {
+    const container = document.getElementById('wordSelectionContainer');
+    if(container) lastWordScrollPos = container.scrollLeft;
+    
     const idx = selectedWordIndices.indexOf(i);
     if (idx > -1) selectedWordIndices.splice(idx, 1);
     else selectedWordIndices.push(i);
@@ -2048,6 +2144,11 @@ function toggleWordSelection(i) {
     if (currentActivePanel.includes('Format')) openPanelTextFormat();
     else if (currentActivePanel.includes('Stabilo')) openPanelHighlight();
     else if (currentActivePanel.includes('Warna Teks')) openPanelTextColor();
+    
+    setTimeout(() => {
+        const newContainer = document.getElementById('wordSelectionContainer');
+        if(newContainer) newContainer.scrollLeft = lastWordScrollPos;
+    }, 0);
 }
 
 function openPanelTextFormat(){
@@ -2064,9 +2165,7 @@ const html=`
 </div>
 ${formatWordOnlyMode ? `
 <div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk diformat:</div>
-<div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; scrollbar-width:none;">
 ${renderWordSelectionUI()}
-</div>
 ` : ''}
 <div class="ctrl-grid-btns">
 <button class="btn-sub-tool" onclick="toggleFontWeight()"><b>B</b> Tebal</button>
@@ -2168,9 +2267,7 @@ const html=`
 </div>
 ${formatWordOnlyMode ? `
 <div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk distabilo:</div>
-<div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; scrollbar-width:none;">
 ${renderWordSelectionUI()}
-</div>
 ` : ''}
 <div class="ctrl-row">
 <span class="ctrl-label">Warna Stabilo:</span>
@@ -2805,7 +2902,6 @@ const aspect=(el.img.height||300)/(el.img.width||300);
 const baseW = maxDim;
 const baseH = Math.round(maxDim*aspect);
 
-// Buat kanvas 2x lebih besar agar gambar tidak terpotong saat ditarik keluar
 canvas.width = baseW * 2;
 canvas.height = baseH * 2;
 
@@ -2972,24 +3068,70 @@ function trimCanvas(canvas) {
 function applyPerspectiveWarp(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
-const canvas=document.getElementById('perspectiveCanvas');
-const trimmed = trimCanvas(canvas);
+showToast('⏳ Memproses 3D HD...');
 
-el.src=trimmed.toDataURL('image/png');
-el.img=getImageFromCache(el.src);
+setTimeout(() => {
+    const origW = el.img.width;
+    const origH = el.img.height;
 
-const newAspect = trimmed.height / trimmed.width;
-el.height = Math.round(el.width * newAspect);
+    const canvas = document.getElementById('perspectiveCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const previewImgW = rect.width / 2;
+    const previewImgH = rect.height / 2;
+    const offsetX = rect.left + (rect.width - previewImgW) / 2;
+    const offsetY = rect.top + (rect.height - previewImgH) / 2;
 
-requestRender();
-pushHistoryState();
-closePerspectiveModal();
-showToast('✅ Perspektif 3D berhasil diterapkan!');
+    const scaleX = origW / previewImgW;
+    const scaleY = origH / previewImgH;
+
+    const p0 = { x: (perspPins.tl.x - offsetX) * scaleX, y: (perspPins.tl.y - offsetY) * scaleY };
+    const p1 = { x: (perspPins.tr.x - offsetX) * scaleX, y: (perspPins.tr.y - offsetY) * scaleY };
+    const p2 = { x: (perspPins.br.x - offsetX) * scaleX, y: (perspPins.br.y - offsetY) * scaleY };
+    const p3 = { x: (perspPins.bl.x - offsetX) * scaleX, y: (perspPins.bl.y - offsetY) * scaleY };
+
+    const minX = Math.min(p0.x, p1.x, p2.x, p3.x);
+    const maxX = Math.max(p0.x, p1.x, p2.x, p3.x);
+    const minY = Math.min(p0.y, p1.y, p2.y, p3.y);
+    const maxY = Math.max(p0.y, p1.y, p2.y, p3.y);
+
+    const outW = Math.ceil(maxX - minX);
+    const outH = Math.ceil(maxY - minY);
+
+    const hdCanvas = document.createElement('canvas');
+    hdCanvas.width = outW;
+    hdCanvas.height = outH;
+    const hdCtx = hdCanvas.getContext('2d');
+
+    const adjP0 = { x: p0.x - minX, y: p0.y - minY };
+    const adjP1 = { x: p1.x - minX, y: p1.y - minY };
+    const adjP2 = { x: p2.x - minX, y: p2.y - minY };
+    const adjP3 = { x: p3.x - minX, y: p3.y - minY };
+
+    const srcCanvas = document.createElement('canvas');
+    srcCanvas.width = origW;
+    srcCanvas.height = origH;
+    srcCanvas.getContext('2d').drawImage(el.img, 0, 0);
+
+    warpCanvasBilinear(srcCanvas, hdCtx, adjP0, adjP1, adjP2, adjP3, 32);
+
+    const trimmed = trimCanvas(hdCanvas);
+    el.src = trimmed.toDataURL('image/png');
+    el.img = getImageFromCache(el.src);
+
+    const newAspect = trimmed.height / trimmed.width;
+    el.height = Math.round(el.width * newAspect);
+
+    requestRender();
+    pushHistoryState();
+    closePerspectiveModal();
+    showToast('✅ Perspektif 3D HD berhasil diterapkan!');
+}, 50);
 }
 
 /* ========== TANGKAP AJAIB DENGAN INDIKATOR KUAS CANVA ========== */
 let isPaintingGrab=false;
 let grabMaskCanvas=null;
+let grabPaintMode=true;
 
 function openMagicGrabModal(){
 const el=getActiveElement();
@@ -3032,15 +3174,28 @@ clearTimeout(mon._timer);
 mon._timer=setTimeout(()=>{mon.style.display='none';},1200);
 }
 
+function toggleGrabPaintMode() {
+    grabPaintMode = !grabPaintMode;
+    const btn = document.getElementById('grabPaintToggle');
+    if(grabPaintMode) {
+        btn.innerText = '✏️ Kuas: ON';
+        btn.style.color = '#00ff88';
+    } else {
+        btn.innerText = '✏️ Kuas: OFF';
+        btn.style.color = '#aaa';
+    }
+}
+
 function setupMagicGrabEvents(){
 const canvas=document.getElementById('magicGrabCanvas');
 const stalk=document.getElementById('magicGrabStalk');
+const dragHandle=document.getElementById('grabDragHandle');
 let isDraggingStalk=false;
 let stalkOffset={x:0,y:0};
 
-stalk.addEventListener('pointerdown',(e)=>{
+dragHandle.addEventListener('pointerdown',(e)=>{
 isDraggingStalk=true;
-stalk.setPointerCapture(e.pointerId);
+dragHandle.setPointerCapture(e.pointerId);
 const rect=stalk.getBoundingClientRect();
 stalkOffset={x:e.clientX-rect.left,y:e.clientY-rect.top};
 e.stopPropagation();
@@ -3052,16 +3207,16 @@ if(isDraggingStalk){
     const stalkX = e.clientX - stalkOffset.x;
     const stalkY = e.clientY - stalkOffset.y;
     
-    // Pindahkan tangkai
     stalk.style.left = stalkX + 'px';
     stalk.style.top = stalkY + 'px';
-    stalk.style.transform = 'none'; // Hapus translateX(-50%) saat digeser
+    stalk.style.transform = 'none';
     
-    // Kuas berada tepat di atas tangkai
-    const brushX = stalkX - canvasRect.left + (stalk.offsetWidth/2);
-    const brushY = stalkY - canvasRect.top - 20;
-    paintGrabAtCoords(brushX, brushY);
-} else if(isPaintingGrab){
+    if(grabPaintMode) {
+        const brushX = stalkX - canvasRect.left + (stalk.offsetWidth/2);
+        const brushY = stalkY - canvasRect.top - 20;
+        paintGrabAtCoords(brushX, brushY);
+    }
+} else if(isPaintingGrab && grabPaintMode){
     const rect=canvas.getBoundingClientRect();
     paintGrabAtCoords(e.clientX-rect.left, e.clientY-rect.top);
 }
@@ -3074,6 +3229,7 @@ document.getElementById('brushMonitor').style.display='none';
 });
 
 canvas.addEventListener('pointerdown',(e)=>{
+if(!grabPaintMode) return;
 isPaintingGrab=true;
 const rect=canvas.getBoundingClientRect();
 paintGrabAtCoords(e.clientX-rect.left, e.clientY-rect.top);
@@ -3135,13 +3291,13 @@ id:'el_'+Date.now(),
 type:'image',
 img:getImageFromCache(off.toDataURL('image/png')),
 src:off.toDataURL('image/png'),
-x:el.x+20,
-y:el.y+20,
+x:el.x,
+y:el.y,
 width:el.width,
 height:el.height,
 origWidth:off.width,
 origHeight:off.height,
-flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'rgba(0,0,0,0.8)',blur:15,angle:45,distance:8},opacity:1,locked:false,groupId:null
+flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'rgba(0,0,0,0.5)',blur:20,angle:45,distance:10},opacity:1,locked:false,groupId:null
 };
 s.elements.push(newEl);
 selectElement(newEl.id);
@@ -3191,13 +3347,9 @@ if(mode==='manual') document.getElementById('btnWandManual').classList.add('acti
 if(mode==='global') document.getElementById('btnWandGlobal').classList.add('active');
 
 if(mode==='auto'){
-    // Langsung eksekusi auto hapus dominan dari pojok
     const canvas=document.getElementById('magicWandCanvas');
     const tol=parseInt(document.getElementById('wandTolerance').value||30);
-    applyFloodFill(canvas.getContext('2d'), 0, 0, tol);
-    applyFloodFill(canvas.getContext('2d'), canvas.width-1, 0, tol);
-    applyFloodFill(canvas.getContext('2d'), 0, canvas.height-1, tol);
-    applyFloodFill(canvas.getContext('2d'), canvas.width-1, canvas.height-1, tol);
+    applyGlobalColorRemoval(canvas.getContext('2d'), 0, 0, tol);
     showToast('🤖 Background dominan dihapus otomatis');
 }
 }
@@ -3205,7 +3357,7 @@ if(mode==='auto'){
 function setupMagicWandEvents(){
 const canvas=document.getElementById('magicWandCanvas');
 canvas.addEventListener('pointerdown',(e)=>{
-if(wandMode === 'auto') return; // Auto sudah dieksekusi saat tombol ditekan
+if(wandMode === 'auto') return;
 const rect=canvas.getBoundingClientRect();
 const x=Math.round(e.clientX-rect.left);
 const y=Math.round(e.clientY-rect.top);
@@ -3260,7 +3412,7 @@ while(pixelStack.length > 0) {
     const x = pixelStack.pop();
     const idx = (y * w + x) * 4;
     
-    data[idx+3] = 0; // Set transparent
+    data[idx+3] = 0;
     
     const neighbors = [[x+1, y], [x-1, y], [x, y+1], [x, y-1]];
     for(let i=0; i<neighbors.length; i++){
@@ -3345,9 +3497,7 @@ let html=`
 </div>
 ${formatWordOnlyMode ? `
 <div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk diwarnai:</div>
-<div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; scrollbar-width:none;">
 ${renderWordSelectionUI()}
-</div>
 ` : ''}
 <div class="ctrl-row">
 <span class="ctrl-label">Pilih Warna:</span>
@@ -3876,81 +4026,99 @@ pushHistoryState();
 }
 }
 
-/* ========== PROJEK MODAL ========== */
-function getProjectsList(){try{const raw=localStorage.getItem(PROJECTS_KEY);return raw?JSON.parse(raw):[];}catch(e){return[];}}
-function saveProjectsList(list){try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(list));}catch(e){}}
-function openProjectModal(){saveCurrentProjectAuto();renderProjectList();document.getElementById('projectModal').classList.add('active');}
-function closeProjectModal(){document.getElementById('projectModal').classList.remove('active');}
-function saveCurrentProjectAuto(customName){
-let list=getProjectsList();
-let p=list.find(x=>x.id===currentProjectId);
-let thumb='';
-try{thumb=(mainCanvas&&typeof mainCanvas.toDataURL==='function')?mainCanvas.toDataURL('image/jpeg',0.3):'';}catch(e){}
-if(!p){
-p={id:currentProjectId||('proj_'+Date.now()),name:customName||('Projek '+(list.length+1)),ratio:currentRatio,slideCount:slides.length,thumb:thumb,slides:serializeSlides(slides),updatedAt:Date.now()};
-list.unshift(p);
-}else{
-if(customName)p.name=customName;
-p.ratio=currentRatio;p.slideCount=slides.length;p.thumb=thumb;p.slides=serializeSlides(slides);p.updatedAt=Date.now();
+/* ========== PROJEK MODAL (INDEXED DB) ========== */
+async function openProjectModal(){
+await saveCurrentProjectAuto();
+await renderProjectList();
+document.getElementById('projectModal').classList.add('active');
 }
-saveProjectsList(list);
+
+function closeProjectModal(){
+document.getElementById('projectModal').classList.remove('active');
 }
-function renderProjectList(){
-const list=getProjectsList();
+
+async function saveCurrentProjectAuto(customName){
+if(customName) currentProjectName = customName;
+const dataToSave={
+    id: currentProjectId,
+    name: currentProjectName,
+    ratio: currentRatio,
+    slideIndex: currentSlideIndex,
+    slides: serializeSlides(slides),
+    slideCount: slides.length,
+    thumb: (mainCanvas && typeof mainCanvas.toDataURL==='function') ? mainCanvas.toDataURL('image/jpeg',0.2) : '',
+    updatedAt: Date.now()
+};
+await saveProjectToDB(dataToSave);
+}
+
+async function renderProjectList(){
+const list = await getAllProjectsMetaFromDB();
 const c=document.getElementById('projectGridContainer');
 if(!c)return;
 c.innerHTML='';
 list.forEach(p=>{
-const card=document.createElement('div');
-card.className=`project-card ${p.id===currentProjectId?'active':''}`;
-card.innerHTML=`<img class="project-thumb" src="${p.thumb||''}" onerror="this.style.display='none'"><div class="project-title">${p.name}</div><div class="project-meta">${p.ratio||'4:5'}</div><div class="project-actions"><button class="btn-proj-action" onclick="loadProjectById('${p.id}')">Buka</button><button class="btn-proj-action" onclick="deleteProjectById('${p.id}')" style="color:#ff6b6b;">Hapus</button></div>`;
-c.appendChild(card);
+    const card=document.createElement('div');
+    card.className=`project-card ${p.id===currentProjectId?'active':''}`;
+    card.innerHTML=`<img class="project-thumb" src="${p.thumb||''}" onerror="this.style.display='none'"><div class="project-title">${p.name}</div><div class="project-meta">${p.ratio||'4:5'}</div><div class="project-actions"><button class="btn-proj-action" onclick="loadProjectById('${p.id}')">Buka</button><button class="btn-proj-action" onclick="deleteProjectById('${p.id}')" style="color:#ff6b6b;">Hapus</button></div>`;
+    c.appendChild(card);
 });
 }
-function createNewProjectPrompt(){
-const name=prompt('Nama projek baru:','Projek '+(getProjectsList().length+1));
+
+async function createNewProjectPrompt(){
+const list = await getAllProjectsMetaFromDB();
+const name=prompt('Nama projek baru:','Projek '+(list.length+1));
 if(!name)return;
-saveCurrentProjectAuto();
+await saveCurrentProjectAuto();
 currentProjectId='proj_'+Date.now();
+currentProjectName=name;
 localStorage.setItem(CURRENT_PROJ_ID_KEY,currentProjectId);
 slides=[createDefaultSlide()];
 currentSlideIndex=0;
 currentRatio='4:5';
 adjustArtboardSize();
 renderAll();renderCarouselThumbs();pushHistoryState();
-saveCurrentProjectAuto(name);
+await saveCurrentProjectAuto();
 closeProjectModal();
 showToast('✅ Projek dibuat');
 }
-function saveAsNewProjectPrompt(){
+
+async function saveAsNewProjectPrompt(){
 const name=prompt('Nama salinan:','Salinan '+new Date().toLocaleTimeString());
 if(!name)return;
 currentProjectId='proj_'+Date.now();
-saveCurrentProjectAuto(name);
-renderProjectList();
+currentProjectName=name;
+await saveCurrentProjectAuto();
+await renderProjectList();
 showToast('✅ Projek disalin');
 }
-function loadProjectById(id){
-saveCurrentProjectAuto();
-const p=getProjectsList().find(x=>x.id===id);
+
+async function loadProjectById(id){
+await saveCurrentProjectAuto();
+const p = await getProjectFromDB(id);
 if(!p)return;
 currentProjectId=p.id;
+currentProjectName=p.name;
 localStorage.setItem(CURRENT_PROJ_ID_KEY,currentProjectId);
 currentRatio=p.ratio||'4:5';
 document.getElementById('currentRatioLabel').innerText=currentRatio;
 slides=deserializeSlides(p.slides||[]);
-currentSlideIndex=0;
+currentSlideIndex=p.slideIndex||0;
 adjustArtboardSize();renderAll();renderCarouselThumbs();renderBottomToolbar();pushHistoryState();closeProjectModal();showToast(`✅ Membuka: ${p.name}`);
 }
-function deleteProjectById(id){
-let list=getProjectsList();
+
+async function deleteProjectById(id){
+const list = await getAllProjectsMetaFromDB();
 if(list.length<=1){alert('Minimal 1 projek');return;}
 if(confirm('Hapus projek ini?')){
-list=list.filter(x=>x.id!==id);
-saveProjectsList(list);
-if(currentProjectId===id)loadProjectById(list[0].id);
-else renderProjectList();
-showToast('🗑️ Projek dihapus');
+    await deleteProjectFromDB(id);
+    if(currentProjectId===id){
+        const newList = await getAllProjectsMetaFromDB();
+        await loadProjectById(newList[0].id);
+    } else {
+        await renderProjectList();
+    }
+    showToast('🗑️ Projek dihapus');
 }
 }
 
@@ -3981,8 +4149,12 @@ expC.height=mainCanvas.height*mult;
 const ectx=expC.getContext('2d');
 ectx.scale(mult,mult);
 
-renderBackground(s.background,mainCanvas.width,mainCanvas.height);
-ectx.drawImage(mainCanvas,0,0);
+// Render ulang semua elemen ke canvas resolusi tinggi
+renderBackground(s.background,mainCanvas.width,mainCanvas.height,ectx);
+s.elements.forEach(el=>{
+    if(el.type==='text')renderTextElement(ectx,el);
+    else if(el.type==='image')renderImageElement(ectx,el);
+});
 
 setTimeout(()=>{
 const a=document.createElement('a');
