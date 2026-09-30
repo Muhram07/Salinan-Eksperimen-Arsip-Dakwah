@@ -1,4 +1,4 @@
-<!-- Berikut adalah kode lengkap dan utuh untuk **Studio Poster Maker Pro** yang telah diperbaiki dan ditambahkan fitur-fiturnya sesuai dengan permintaan Anda. Semua aturan *Zero Regression Protocol* telah diterapkan secara ketat.
+<!--Berikut adalah kode lengkap dan utuh untuk **Studio Poster Maker Pro** yang telah diperbaiki dan ditambahkan fitur-fiturnya sesuai dengan permintaan Anda. Semua aturan *Zero Regression Protocol* telah diterapkan secara ketat.
 -->
 <!DOCTYPE html>
 <html lang="id">
@@ -21,22 +21,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ui-transparent-mode .top-navbar,
 .ui-transparent-mode .bottom-toolbar-container,
 .ui-transparent-mode .carousel-bar,
-.ui-transparent-mode .pixellab-zoom-widget {
-    animation: breatheOpacity 3s ease-in-out infinite;
-}
-.ui-transparent-mode .top-navbar:hover,
-.ui-transparent-mode .bottom-toolbar-container:hover,
-.ui-transparent-mode .carousel-bar:hover,
-.ui-transparent-mode .pixellab-zoom-widget:hover {
-    animation: none;
-    opacity: 1;
-}
+.ui-transparent-mode .vertical-toolbar,
 .ui-transparent-mode .tool-panel {
     animation: breatheOpacity 3s ease-in-out infinite;
-}
-.ui-transparent-mode .tool-panel:hover {
-    animation: none;
-    opacity: 1;
 }
 
 .top-navbar{height:50px;background:#141414;border-bottom:1px solid rgba(212,175,55,.25);display:flex;align-items:center;padding:0 10px;gap:8px;z-index:200;position:relative;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;}
@@ -121,10 +108,36 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .dpad-btn:active{background:#D4AF37;color:#111;}
 .dpad-center{width:76px;height:40px;background:rgba(0,0,0,.4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#aaa;}
 
-.pixellab-zoom-widget{position:absolute;top:65px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(20,20,20,.65);border:1px solid rgba(212,175,55,.35);border-radius:12px;padding:6px;z-index:105;backdrop-filter:blur(8px);}
-.zoom-btn{background:rgba(255,255,255,.06);border:none;color:#eee;font-size:11px;padding:5px 7px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.zoom-btn:hover{background:#D4AF37;color:#111;}
-.pan-group{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.vertical-toolbar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(20,20,20,0.65);
+    border: 1px solid rgba(212,175,55,0.35);
+    border-radius: 8px;
+    padding: 6px;
+    z-index: 105;
+    backdrop-filter: blur(8px);
+}
+.vertical-toolbar.left-bar { left: 10px; }
+.vertical-toolbar.right-bar { right: 10px; }
+.vertical-toolbar button {
+    background: rgba(255,255,255,0.06);
+    border: none;
+    color: #eee;
+    font-size: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.vertical-toolbar button:hover { background: #D4AF37; color: #111; }
 
 .handled-loupe-container{position:fixed;display:none;z-index:10005;touch-action:none;pointer-events:none;}
 .handled-loupe-glass{width:86px;height:86px;border-radius:50%;border:3px solid #D4AF37;box-shadow:0 6px 25px rgba(0,0,0,.9);position:relative;background:#000;overflow:hidden;}
@@ -191,23 +204,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </header>
 
 <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
-<div class="pixellab-zoom-widget">
-    <div style="display:flex; gap:4px; align-items:center; justify-content:center;">
-        <button class="zoom-btn" onclick="zoomCanvasManual(-0.25)">🔍-</button>
-        <button class="zoom-btn" id="zoomLevelLabel" onclick="resetCanvasZoom()" style="min-width:44px;font-weight:700;">100%</button>
-        <button class="zoom-btn" onclick="zoomCanvasManual(0.25)">🔍+</button>
-    </div>
-    <div class="pan-group">
-        <div></div>
-        <button class="zoom-btn" onclick="panCanvas(0,-40)">▲</button>
-        <div></div>
-        <button class="zoom-btn" onclick="panCanvas(-40,0)">◀</button>
-        <button class="zoom-btn" onclick="centerCanvasArtboard()">🎯</button>
-        <button class="zoom-btn" onclick="panCanvas(40,0)">▶</button>
-        <div></div>
-        <button class="zoom-btn" onclick="panCanvas(0,40)">▼</button>
-        <div></div>
-    </div>
+<div class="vertical-toolbar left-bar">
+    <button onclick="zoomCanvasManual(0.25)">🔍+</button>
+    <button id="zoomLevelLabel" onclick="resetCanvasZoom()" style="font-weight:700; font-size:10px;">100%</button>
+    <button onclick="zoomCanvasManual(-0.25)">🔍-</button>
+    <button onclick="centerCanvasArtboard()">🎯</button>
+</div>
+<div class="vertical-toolbar right-bar">
+    <button onclick="panCanvas(0,-40)">⬆️</button>
+    <button onclick="panCanvas(0,40)">⬇️</button>
+    <button onclick="panCanvas(-40,0)">⬅️</button>
+    <button onclick="panCanvas(40,0)">➡️</button>
+    <button onclick="toggleUITransparency()">👻</button>
 </div>
 
 <div class="artboard-container" id="artboard">
@@ -428,7 +436,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="fmodal-footer">
 <div style="display:flex;align-items:center;gap:10px;">
 <span style="font-size:11px;color:#aaa;">Kuas:</span>
-<input type="range" class="ctrl-slider" id="magicBrushSize" min="10" max="90" value="35" style="width:90px;" oninput="updateBrushMonitorPreview(this.value)">
+<input type="range" class="ctrl-slider" id="magicBrushSize" min="10" max="90" value="35" style="width:90px;" oninput="updateBrushMonitorPreview(this.value, undefined, undefined, true)">
 <button class="btn-nav" onclick="clearMagicGrabMask()">Bersihkan</button>
 </div>
 <button class="btn-nav btn-download" onclick="applyMagicGrabExtraction()">✂️ Pisahkan Subjek</button>
@@ -1284,9 +1292,57 @@ el._calculatedHeight=totalHeight;
 el._renderedW = maxBoxWidth;
 
 if(el.curveAngle&&Math.abs(el.curveAngle)>=3){
-renderCurvedTextLine(targetCtx,el,displayText,cleanFont);
-targetCtx.restore();
-return;
+    const angleRad = (el.curveAngle * Math.PI) / 180;
+    const totalTextWidth = targetCtx.measureText(displayText).width + ((el.letterSpacing||0)*displayText.length);
+    const radius = Math.max(120, totalTextWidth / Math.abs(angleRad));
+    const offSize = Math.ceil(radius * 2 + el.fontSize * 2 + 100);
+    
+    const temp = document.createElement('canvas');
+    temp.width = offSize;
+    temp.height = offSize;
+    const tempCtx = temp.getContext('2d');
+    
+    tempCtx.translate(offSize/2, offSize/2);
+    renderCurvedTextLine(tempCtx, el, displayText, cleanFont);
+    
+    if(el.textSkinImg && el.textSkinImg.complete) {
+        tempCtx.globalCompositeOperation = 'source-in';
+        const skin = el.textSkinImg;
+        const scale = el.textSkinScale || 1.0;
+        const aspect = skin.width / skin.height;
+        let drawW = Math.max(offSize, offSize * aspect) * scale;
+        let drawH = drawW / aspect;
+        const dx = -drawW/2 + (el.textSkinOffsetX || 0);
+        const dy = -drawH/2 + (el.textSkinOffsetY || 0);
+        if(el.skinFilter){
+            tempCtx.filter=`brightness(${el.skinFilter.brightness||100}%) contrast(${el.skinFilter.contrast||100}%) hue-rotate(${el.skinFilter.hue||0}deg) saturate(${el.skinFilter.saturate||100}%)`;
+        }
+        tempCtx.drawImage(skin, dx, dy, drawW, drawH);
+        tempCtx.filter = 'none';
+        tempCtx.globalCompositeOperation = 'source-over';
+    }
+    
+    tempCtx.resetTransform();
+    
+    if(el.innerShadow && el.innerShadow.color !== 'transparent') {
+        applySilhouetteInnerShadow(tempCtx, offSize, offSize, el.innerShadow);
+    }
+    if(el.emboss && el.emboss.active) {
+        applySilhouetteEmboss(tempCtx, offSize, offSize, el.emboss);
+    }
+    
+    if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
+        targetCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
+        targetCtx.shadowBlur=el.shadow.blur||0;
+        const rad=(el.shadow.angle||45)*Math.PI/180;
+        const dist=el.shadow.distance||0;
+        targetCtx.shadowOffsetX=Math.cos(rad)*dist;
+        targetCtx.shadowOffsetY=Math.sin(rad)*dist;
+    }
+    
+    targetCtx.drawImage(temp, -offSize/2, -offSize/2);
+    targetCtx.restore();
+    return;
 }
 
 let startY=-(totalHeight/2)+(lineHeight/2);
@@ -1599,6 +1655,24 @@ const rad=(el.shadow.angle||45)*Math.PI/180;
 const dist=el.shadow.distance||0;
 targetCtx.shadowOffsetX=Math.cos(rad)*dist;
 targetCtx.shadowOffsetY=Math.sin(rad)*dist;
+}
+
+const needsOffscreen = (el.blur && el.blur > 0) || 
+                       (el.cornerRadius && el.cornerRadius > 0) || 
+                       (el.colorOverlay && el.colorOverlay !== 'none') || 
+                       (el.imageSkinImg && el.imageSkinImg.complete) || 
+                       (el.innerShadow && el.innerShadow.color !== 'transparent') || 
+                       (el.emboss && el.emboss.active) || 
+                       (el.borderWidth && el.borderWidth > 0) || 
+                       (el.depthFocus && el.depthFocus.active);
+
+if (!needsOffscreen) {
+    targetCtx.drawImage(el.img, sx, sy, sWidth, sHeight, -finalDrawW/2, -finalDrawH/2, finalDrawW, finalDrawH);
+    if(el.shadow && el.shadow.color && el.shadow.color !== 'transparent'){
+        targetCtx.restore();
+    }
+    targetCtx.restore();
+    return;
 }
 
 const pad = (el.blur || 0) * 3 + (el.borderWidth || 0) * 2 + (el.shadow && el.shadow.color !== 'transparent' ? (el.shadow.blur || 0) + (el.shadow.distance || 0) : 0);
@@ -2193,7 +2267,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelCurveAndSlant()"><span class="icon">🌀</span><span>Lengkung</span></button>
 <button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i></span><span>Format</span></button>
 <button class="tool-btn" onclick="openPanelHighlight()"><span class="icon">🖍️</span><span>Stabilo</span></button>
-<button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Foto</span></button>
+<button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Teks</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
 <button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📐</span><span>Relatif</span></button>
@@ -2203,14 +2277,14 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
-<button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
+<button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
 `;
 }else if(el.type==='image'){
 bar.innerHTML=`
 <button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
-<button class="tool-btn" onclick="openPanelCropImage()" style="color:#4CAF50;"><span class="icon">✂️</span><span>Crop Presisi</span></button>
-<button class="tool-btn" onclick="openFreeCropModal()" style="color:#00ff88;"><span class="icon">✍️</span><span>Crop Jari</span></button>
-<button class="tool-btn" onclick="openPanelImageSkinOverlay()" style="color:#FFE259;"><span class="icon">🎭</span><span>Skin Foto</span></button>
+<button class="tool-btn" onclick="openPanelCropImage()"><span class="icon">✂️</span><span>Crop Presisi</span></button>
+<button class="tool-btn" onclick="openFreeCropModal()"><span class="icon">✍️</span><span>Crop Jari</span></button>
+<button class="tool-btn" onclick="openPanelImageSkinOverlay()"><span class="icon">🎭</span><span>Skin Foto</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">⚖️</span><span>Ukuran Relatif</span></button>
@@ -2230,7 +2304,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
-<button class="tool-btn" onclick="deleteActiveElement()" style="color:#FF4B4B;"><span class="icon">🗑️</span><span>Hapus</span></button>
+<button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
 `;
 }
 }
@@ -2646,7 +2720,7 @@ ${hasSkin?`
 <button class="btn-sub-tool" onclick="resetSkinAdjustments()" style="width:100%;margin-top:10px;">↺ Reset Penyesuaian Skin</button>
 `:`<div style="font-size:11px;color:#888;margin-top:10px;">💡 Unggah pola emas, marmer, atau api untuk mengisi huruf teks secara presisi.</div>`}
 `;
-openToolPanel('🖼️ Skin Foto & Tekstur Teks',html);
+openToolPanel('🖼️ Skin Teks & Tekstur',html);
 }
 
 function updateTextSkinScale(v){const el=getActiveElement();if(!el)return;el.textSkinScale=parseInt(v)/100;document.getElementById('valSkinScale').innerText=v+'%';renderAll();debouncedPushHistory();}
@@ -3458,7 +3532,7 @@ function updateMagicGrabTransform() {
     if(wrapper) wrapper.style.transform = `scale(${magicGrabZoom})`;
 }
 
-function updateBrushMonitorPreview(size, x, y){
+function updateBrushMonitorPreview(size, x, y, fromSlider = false){
 const mon=document.getElementById('brushMonitor');
 mon.style.width=(size * magicGrabZoom)+'px';
 mon.style.height=(size * magicGrabZoom)+'px';
@@ -3474,7 +3548,11 @@ if(x !== undefined && y !== undefined) {
 }
 
 clearTimeout(mon._timer);
-mon._timer=setTimeout(()=>{mon.style.display='none';},1200);
+if(fromSlider) {
+    mon._timer=setTimeout(()=>{mon.style.display='none';},1200);
+} else {
+    mon._timer=setTimeout(()=>{mon.style.display='none';},300);
+}
 }
 
 function toggleGrabPaintMode() {
@@ -3754,16 +3832,37 @@ ctx.putImageData(imgData, 0, 0);
 function applyMagicWand(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
-showToast('⏳ Menerapkan penghapusan background...');
+showToast('⏳ Menerapkan penghapusan background HD...');
 
-const canvas=document.getElementById('magicWandCanvas');
-el.src=canvas.toDataURL('image/png');
-el.img=getImageFromCache(el.src);
+setTimeout(() => {
+    const origW = el.img.width;
+    const origH = el.img.height;
+    
+    const hdOff = document.createElement('canvas');
+    hdOff.width = origW;
+    hdOff.height = origH;
+    const hdCtx = hdOff.getContext('2d');
+    hdCtx.drawImage(el.img, 0, 0);
+    
+    const tol = parseInt(document.getElementById('wandTolerance').value||30);
+    
+    if(wandMode === 'auto' || wandMode === 'global') {
+        applyGlobalColorRemoval(hdCtx, 0, 0, tol);
+    } else {
+        const canvas = document.getElementById('magicWandCanvas');
+        const scaleX = origW / canvas.width;
+        const scaleY = origH / canvas.height;
+        applyFloodFill(hdCtx, Math.round(canvas.width/2 * scaleX), Math.round(canvas.height/2 * scaleY), tol);
+    }
 
-requestRender();
-pushHistoryState();
-closeMagicWandModal();
-showToast('✅ Background berhasil dihapus!');
+    el.src = hdOff.toDataURL('image/png');
+    el.img = getImageFromCache(el.src);
+
+    requestRender();
+    pushHistoryState();
+    closeMagicWandModal();
+    showToast('✅ Background berhasil dihapus!');
+}, 50);
 }
 
 /* ========== DUPLIKAT MENDALAM (DEEP CLONE) ========== */
@@ -4399,6 +4498,7 @@ function generateSlideThumb(slide) {
 function renderCarouselThumbs(){
 const container=document.getElementById('slideThumbList');
 container.innerHTML='';
+let nonDemoCounter = 1;
 slides.forEach((slide,idx)=>{
 const wrapper = document.createElement('div');
 wrapper.style.display = 'flex';
@@ -4413,7 +4513,7 @@ if(slide._thumbData) {
     thumb.style.backgroundSize = 'cover';
     thumb.style.backgroundPosition = 'center';
 } else {
-    thumb.innerText=`${idx+1}`;
+    thumb.innerText = slide.isDemo ? '0' : nonDemoCounter;
 }
 thumb.draggable = true;
 thumb.ondragstart = (e) => { e.dataTransfer.setData('text/plain', idx); };
@@ -4440,8 +4540,11 @@ moveBtns.style.display = 'flex';
 moveBtns.style.gap = '2px';
 moveBtns.innerHTML = `
     <button style="background:none;border:none;color:#aaa;font-size:10px;cursor:pointer;padding:2px;" onclick="moveSlide(${idx}, -1)">◀</button>
+    <span style="font-size:10px;color:#D4AF37;font-weight:bold;">${slide.isDemo ? '0' : nonDemoCounter}</span>
     <button style="background:none;border:none;color:#aaa;font-size:10px;cursor:pointer;padding:2px;" onclick="moveSlide(${idx}, 1)">▶</button>
 `;
+
+if(!slide.isDemo) nonDemoCounter++;
 
 wrapper.appendChild(thumb);
 wrapper.appendChild(moveBtns);
@@ -4797,6 +4900,8 @@ let previewPanX = 0;
 let previewPanY = 0;
 let isDraggingPreview = false;
 let previewStart = {x:0, y:0};
+let initialPinchDist = null;
+let initialPinchZoom = 1.0;
 
 function previewSlide(idx) {
     switchSlide(idx);
@@ -4854,20 +4959,49 @@ function updatePreviewTransform() {
 
 function setupPreviewDrag() {
     const body = document.getElementById('previewBody');
+    
     body.onpointerdown = (e) => {
         if(e.target.closest('.fmodal-footer') || e.target.closest('.fmodal-header')) return;
         isDraggingPreview = true;
         previewStart = {x: e.clientX - previewPanX, y: e.clientY - previewPanY};
         body.setPointerCapture(e.pointerId);
     };
+    
     body.onpointermove = (e) => {
         if(!isDraggingPreview) return;
         previewPanX = e.clientX - previewStart.x;
         previewPanY = e.clientY - previewStart.y;
         updatePreviewTransform();
     };
+    
     body.onpointerup = () => { isDraggingPreview = false; };
     body.onpointercancel = () => { isDraggingPreview = false; };
+    
+    // Pinch to zoom support
+    body.addEventListener('touchstart', (e) => {
+        if(e.touches.length === 2) {
+            isDraggingPreview = false;
+            initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            initialPinchZoom = previewZoom;
+        }
+    }, {passive: false});
+    
+    body.addEventListener('touchmove', (e) => {
+        if(e.touches.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            if(initialPinchDist) {
+                previewZoom = Math.max(0.2, Math.min(5.0, initialPinchZoom * (dist / initialPinchDist)));
+                updatePreviewTransform();
+            }
+        }
+    }, {passive: false});
+    
+    body.addEventListener('touchend', (e) => {
+        if(e.touches.length < 2) {
+            initialPinchDist = null;
+        }
+    });
 }
 
 function updateDemoFloatingBtn() {
@@ -4877,8 +5011,8 @@ function updateDemoFloatingBtn() {
         if(!btn) {
             btn = document.createElement('div');
             btn.id = 'demoFloatingBtn';
-            btn.style.cssText = 'position:fixed; top:120px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, #ff007f, #7928ca); color:#fff; padding:10px 20px; border-radius:30px; font-size:14px; font-weight:bold; z-index:9999; box-shadow:0 4px 15px rgba(0,0,0,0.5); pointer-events:none; animation: floatAnim 3s ease-in-out infinite; text-align:center;';
-            btn.innerHTML = '⚠️ Ini Poster Demo<br><span style="font-size:11px;font-weight:normal;">Edit Slide 2, 3, dst untuk berkarya</span>';
+            btn.style.cssText = 'position:fixed; top:120px; left:15px; background:linear-gradient(135deg, #ff007f, #7928ca); color:#fff; padding:10px 20px; border-radius:30px; font-size:14px; font-weight:bold; z-index:9999; box-shadow:0 4px 15px rgba(0,0,0,0.5); pointer-events:none; animation: floatAnim 3s ease-in-out infinite; text-align:center;';
+            btn.innerHTML = '⚠️ Ini Poster Demo<br><span style="font-size:11px;font-weight:normal;">Edit Slide 1, 2, 3... untuk berkarya</span>';
             document.body.appendChild(btn);
         }
         btn.style.display = 'block';
@@ -4891,4 +5025,3 @@ window.onload=initApp;
 </script>
 </body>
 </html>
-```
