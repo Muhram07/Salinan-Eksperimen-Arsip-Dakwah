@@ -1,9 +1,3 @@
-<!--Tugas diterima. Saya akan menerapkan seluruh 13 poin perbaikan dan fitur baru yang Anda minta dengan mematuhi **Zero Regression Protocol**. Tidak ada fitur lama yang akan rusak, dan kode akan diberikan secara utuh tanpa *placeholder*.
-
-Karena ukuran kode yang sangat besar, **jika output terpotong di tengah jalan, cukup balas dengan kata "Lanjut"**, dan saya akan melanjutkan tepat dari titik terakhir kode terpotong tanpa mengulang.
-
-Berikut adalah kode lengkap `maker.html` yang telah diperbarui:
--->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -45,6 +39,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .workspace-viewport{position:absolute;top:50px;bottom:120px;left:0;right:0;background:#060606;background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 0);background-size:20px 20px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;}
 .artboard-container{position:relative;box-shadow:0 15px 45px rgba(0,0,0,.9),0 0 0 1px rgba(212,175,55,.3);border-radius:6px;overflow:visible;background:#181818;transform-origin:center center;touch-action:none;transition:transform .05s ease-out;}
 #mainCanvas{display:block;width:100%;height:100%;border-radius:6px;touch-action:none;}
+#drawingCanvasOverlay{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:6px;pointer-events:none;z-index:150;display:none;}
 .bleed-guides{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;display:none;z-index:90;}
 .bleed-guides.visible{display:block;}
 .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,.6);}
@@ -185,6 +180,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .tag-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:4px 10px;font-size:11px;color:#ddd;cursor:pointer;white-space:nowrap;}
 .tag-pill:hover,.tag-pill.active{background:#D4AF37;color:#111;font-weight:bold;}
 
+/* Pen Tool Floating Toolbar */
+.pen-toolbar {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20,20,20,0.9);
+    border: 1px solid #D4AF37;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: none;
+    gap: 10px;
+    z-index: 200;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.pen-toolbar.active { display: flex; }
+
 @keyframes floatAnim {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
@@ -226,6 +240,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <div class="artboard-container" id="artboard">
 <canvas id="mainCanvas"></canvas>
+<canvas id="drawingCanvasOverlay"></canvas>
 
 <div class="snap-guide snap-guide-h" id="snapGuideH"></div>
 <div class="snap-guide snap-guide-v" id="snapGuideV"></div>
@@ -274,6 +289,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="tool-panel" id="toolPanel">
 <div class="panel-header"><span class="panel-title" id="panelTitle">Pengaturan</span><button class="panel-close" onclick="closeToolPanel()">×</button></div>
 <div id="panelContent"></div>
+</div>
+
+<div class="pen-toolbar" id="penToolbar">
+    <select id="penBrushType" style="background:#222;color:#fff;border:1px solid #D4AF37;border-radius:4px;padding:4px;font-size:11px;" onchange="updatePenSettings()">
+        <option value="normal">Pena Normal</option>
+        <option value="glow">Gemerlap (Glow)</option>
+        <option value="pixel">Kotak (Pixelate)</option>
+        <option value="marker">Spidol (Transparan)</option>
+        <option value="eraser">Penghapus (Tipe-X)</option>
+    </select>
+    <input type="color" id="penColor" value="#D4AF37" style="width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;" onchange="updatePenSettings()">
+    <input type="range" id="penSize" min="2" max="100" value="10" style="width:80px;accent-color:#D4AF37;" oninput="updatePenSettings()">
+    <button class="btn-nav" onclick="clearPenCanvas()">🗑️ Bersihkan</button>
+    <button class="btn-nav btn-download" onclick="finishPenDrawing()">✅ Selesai</button>
 </div>
 
 <input type="file" id="fileImageInput" accept="image/*" multiple style="display:none;" onchange="handleImageUpload(event)">
@@ -442,24 +471,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 </div>
 
-<div class="feature-modal" id="penToolModal">
-<div class="fmodal-header">
-<div style="font-weight:800;color:#D4AF37;font-size:13px;">✍️ Pen Tool (Gambar Bebas)</div>
-<button class="panel-close" onclick="closePenToolModal()">✕</button>
-</div>
-<div class="fmodal-body" id="penToolBody" style="background:#111;">
-<canvas id="penToolCanvas" style="box-shadow:0 0 20px #000;border-radius:6px; background:transparent;"></canvas>
-</div>
-<div class="fmodal-footer">
-<div style="display:flex;align-items:center;gap:10px;">
-<input type="color" id="penColor" value="#D4AF37" style="width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;">
-<input type="range" class="ctrl-slider" id="penSize" min="2" max="50" value="8" style="width:80px;">
-<button class="btn-nav" onclick="clearPenCanvas()">Bersihkan</button>
-</div>
-<button class="btn-nav btn-download" onclick="applyPenDrawing()">✅ Simpan Gambar</button>
-</div>
-</div>
-
 <div class="feature-modal" id="magicGrabModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">✨ Tangkap Ajaib (Magic Grab Brush)</div>
@@ -596,6 +607,7 @@ let currentActivePanel='';
 let wandMode='auto';
 let uiTransparent=false;
 let copiedElement=null;
+let appMode='select'; // 'select' or 'drawing'
 
 // Optimasi Cache Gambar agar tidak memory leak
 const imageCache=new Map();
@@ -610,13 +622,18 @@ if(imageCache.size >= MAX_CACHE_SIZE) {
 const img=new Image();
 img.crossOrigin="anonymous";
 img.src=src;
-img.onload=()=>requestRender();
+img.onload=()=>{
+    renderPending=false;
+    requestRender();
+};
 imageCache.set(src,img);
 return img;
 }
 
 const mainCanvas=document.getElementById('mainCanvas');
 const ctx=mainCanvas.getContext('2d');
+const drawingCanvasOverlay=document.getElementById('drawingCanvasOverlay');
+const dctx=drawingCanvasOverlay.getContext('2d');
 const artboard=document.getElementById('artboard');
 const selBox=document.getElementById('selBox');
 const canvasDirectTextEditor=document.getElementById('canvasDirectTextEditor');
@@ -710,6 +727,9 @@ clearTimeout(t._timer);
 t._timer=setTimeout(()=>t.classList.remove('show'),2500);
 }
 
+window.addEventListener('offline', () => showToast('⚠️ Koneksi terputus. Mode offline aktif.'));
+window.addEventListener('online', () => showToast('✅ Koneksi kembali normal.'));
+
 function requestRender(){
 if(!renderPending){
 renderPending=true;
@@ -726,6 +746,7 @@ function rawSerializeSlides(slidesList){
             if(el.type==='image'){
                 copy.imgSrc=el.src||(el.img?el.img.src:copy.imgSrc);
                 delete copy.img;
+                delete copy._processedImgCanvas;
             }
             if(el.textSkinImg){copy.textSkinSrc=el.textSkinSrc||el.textSkinImg.src;delete copy.textSkinImg;}
             if(el.imageSkinImg){copy.imageSkinSrc=el.imageSkinSrc||el.imageSkinImg.src;delete copy.imageSkinImg;}
@@ -762,6 +783,7 @@ if(copy.textSkinSrc){copy.textSkinImg=getImageFromCache(copy.textSkinSrc);}
 if(copy.imageSkinSrc){copy.imageSkinImg=getImageFromCache(copy.imageSkinSrc);}
 if(!copy.wordStyles) copy.wordStyles = {};
 if(!copy.filters) copy.filters = { brightness: 100, contrast: 100, saturate: 100, hue: 0 };
+if(!copy.advancedColor) copy.advancedColor = { active: false, channels: {} };
 return copy;
 })
 };
@@ -847,6 +869,7 @@ setupMagicGrabEvents();
 setupFreeCropEvents();
 setupHandledLoupeEvents();
 setupMagicWandEvents();
+setupPenToolEvents();
 }
 
 function triggerAutoSave(){
@@ -1034,6 +1057,28 @@ function applyCanvasFilters(ctx, filters) {
     }
 }
 
+/* ========== UNIFIED COLOR PICKER UI ========== */
+function getColorPickerHTML(currentValue, onChangeFuncName, allowTransparent = true) {
+    let html = `
+    <div class="ctrl-row">
+        <span class="ctrl-label">Kode Hex:</span>
+        <input type="text" value="${currentValue}" onchange="${onChangeFuncName}(this.value)" id="hexInput_${onChangeFuncName}" style="width:70px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:2px 4px; font-size:11px;">
+        <button class="btn-sub-tool" onclick="navigator.clipboard.writeText(document.getElementById('hexInput_${onChangeFuncName}').value).then(()=>showToast('Disalin!'))" style="padding:4px;">📋 Copy</button>
+        <button class="btn-sub-tool" onclick="navigator.clipboard.readText().then(t=>${onChangeFuncName}(t))" style="padding:4px;">📋 Paste</button>
+        <button class="btn-sub-tool active" onclick="openHandledLoupe(${onChangeFuncName})" style="padding:4px;">🧪 Pipet</button>
+    </div>
+    <div class="color-palette-scroll" style="margin-top:8px;">
+    `;
+    if(allowTransparent) {
+        html += `<div class="color-circle" style="background:#222;color:#ff6b6b;display:flex;align-items:center;justify-content:center;font-size:10px;" onclick="${onChangeFuncName}('transparent')">✕</div>`;
+    }
+    QUICK_COLORS.forEach(c => {
+        html += `<div class="color-circle ${currentValue===c?'active':''}" style="background:${c};" onclick="${onChangeFuncName}('${c}')"></div>`;
+    });
+    html += `</div>`;
+    return html;
+}
+
 /* ========== RATIO & RESIZING ========== */
 function toggleRatioSelector(){
 const ratios=Object.keys(RATIO_PRESETS);
@@ -1055,6 +1100,8 @@ const targetW=preset.width;
 const targetH=preset.height;
 mainCanvas.width=targetW;
 mainCanvas.height=targetH;
+drawingCanvasOverlay.width=targetW;
+drawingCanvasOverlay.height=targetH;
 const vp=document.getElementById('workspaceViewport');
 const padding=24;
 const availW=vp.clientWidth-padding;
@@ -1157,27 +1204,27 @@ ${hasImg?`
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Zoom:</span><span class="ctrl-val" id="bgScaleVal">${Math.round((bg.scale||1)*100)}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgScaleSlider',-10,(v)=>updateBgPosition('scale',v))">-</button>
+<button class="btn-step" onclick="stepSliderVal('bgScaleSlider',-1,(v)=>updateBgPosition('scale',v))">-</button>
 <input type="range" class="ctrl-slider" id="bgScaleSlider" min="100" max="500" value="${Math.round((bg.scale||1)*100)}" oninput="updateBgPosition('scale',this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgScaleSlider',10,(v)=>updateBgPosition('scale',v))">+</button>
+<button class="btn-step" onclick="stepSliderVal('bgScaleSlider',1,(v)=>updateBgPosition('scale',v))">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="bgOffXVal">${bg.offsetX||0}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgOffXSlider',-25,(v)=>updateBgPosition('offsetX',v))">-</button>
+<button class="btn-step" onclick="stepSliderVal('bgOffXSlider',-1,(v)=>updateBgPosition('offsetX',v))">-</button>
 <input type="range" class="ctrl-slider" id="bgOffXSlider" min="-1500" max="1500" value="${bg.offsetX||0}" oninput="updateBgPosition('offsetX',this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgOffXSlider',25,(v)=>updateBgPosition('offsetX',v))">+</button>
+<button class="btn-step" onclick="stepSliderVal('bgOffXSlider',1,(v)=>updateBgPosition('offsetX',v))">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="bgOffYVal">${bg.offsetY||0}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgOffYSlider',-25,(v)=>updateBgPosition('offsetY',v))">-</button>
+<button class="btn-step" onclick="stepSliderVal('bgOffYSlider',-1,(v)=>updateBgPosition('offsetY',v))">-</button>
 <input type="range" class="ctrl-slider" id="bgOffYSlider" min="-1500" max="1500" value="${bg.offsetY||0}" oninput="updateBgPosition('offsetY',this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgOffYSlider',25,(v)=>updateBgPosition('offsetY',v))">+</button>
+<button class="btn-step" onclick="stepSliderVal('bgOffYSlider',1,(v)=>updateBgPosition('offsetY',v))">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:14px;"><span class="ctrl-label">Kegelapan:</span><span class="ctrl-val" id="bgDarkenVal">${Math.round((bg.darken||0)*100)}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',-5,updateBgDarken)">-</button>
+<button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',-1,updateBgDarken)">-</button>
 <input type="range" class="ctrl-slider" id="bgDarkenSlider" min="0" max="95" value="${Math.round((bg.darken||0)*100)}" oninput="updateBgDarken(this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',5,updateBgDarken)">+</button>
+<button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',1,updateBgDarken)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Blur:</span><span class="ctrl-val" id="bgBlurVal">${bg.blur||0}px</span></div>
 <div class="stepper-row">
@@ -1760,7 +1807,8 @@ const needsOffscreen = (el.blur && el.blur > 0) ||
                        (el.emboss && el.emboss.active) || 
                        (el.borderWidth && el.borderWidth > 0) || 
                        (el.depthFocus && el.depthFocus.active) ||
-                       (el.filters && (el.filters.brightness!==100 || el.filters.contrast!==100 || el.filters.saturate!==100 || el.filters.hue!==0));
+                       (el.filters && (el.filters.brightness!==100 || el.filters.contrast!==100 || el.filters.saturate!==100 || el.filters.hue!==0)) ||
+                       (el.advancedColor && el.advancedColor.active);
 
 if (!needsOffscreen) {
     targetCtx.drawImage(el.img, sx, sy, sWidth, sHeight, -finalDrawW/2, -finalDrawH/2, finalDrawW, finalDrawH);
@@ -1792,6 +1840,11 @@ renderTiltShiftDepthBlur(octx,el.img,sx,sy,sWidth,sHeight,finalDrawW,finalDrawH,
 if(el.blur&&el.blur>0)octx.filter=`blur(${el.blur}px)`;
 octx.drawImage(el.img,sx,sy,sWidth,sHeight,pad,pad,finalDrawW,finalDrawH);
 octx.filter='none';
+}
+
+// Advanced Color (HSL)
+if(el.advancedColor && el.advancedColor.active) {
+    applyAdvancedColor(octx, off.width, off.height, el.advancedColor);
 }
 
 if(el.colorOverlay&&el.colorOverlay!=='none'){
@@ -1862,33 +1915,109 @@ function renderShapeElement(targetCtx, el) {
         targetCtx.shadowOffsetY = Math.sin(rad) * dist;
     }
 
-    targetCtx.fillStyle = el.color || '#D4AF37';
-    targetCtx.beginPath();
-    
     const w = el.width || 200;
     const h = el.height || 200;
     el._renderedW = w;
     el._renderedH = h;
 
-    if(el.shapeType === 'rect') {
-        const r = el.cornerRadius || 0;
-        if(r > 0) targetCtx.roundRect(-w/2, -h/2, w, h, r);
-        else targetCtx.rect(-w/2, -h/2, w, h);
-    } else if(el.shapeType === 'circle') {
-        targetCtx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI*2);
-    } else if(el.shapeType === 'triangle') {
-        targetCtx.moveTo(0, -h/2);
-        targetCtx.lineTo(w/2, h/2);
-        targetCtx.lineTo(-w/2, h/2);
-        targetCtx.closePath();
-    }
+    const drawShape = (ctx) => {
+        ctx.beginPath();
+        if(el.shapeType === 'rect') {
+            const r = el.cornerRadius || 0;
+            if(r > 0) ctx.roundRect(-w/2, -h/2, w, h, r);
+            else ctx.rect(-w/2, -h/2, w, h);
+        } else if(el.shapeType === 'circle') {
+            ctx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI*2);
+        } else if(el.shapeType === 'triangle') {
+            ctx.moveTo(0, -h/2);
+            ctx.lineTo(w/2, h/2);
+            ctx.lineTo(-w/2, h/2);
+            ctx.closePath();
+        } else if(el.shapeType === 'star') {
+            const spikes = 5;
+            const outerRadius = w/2;
+            const innerRadius = w/4;
+            let rot = Math.PI / 2 * 3;
+            let x = 0, y = 0;
+            const step = Math.PI / spikes;
+            ctx.moveTo(0, -outerRadius);
+            for(let i=0; i<spikes; i++){
+                x = Math.cos(rot) * outerRadius;
+                y = Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+                x = Math.cos(rot) * innerRadius;
+                y = Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(0, -outerRadius);
+            ctx.closePath();
+        } else if(el.shapeType === 'polygon') {
+            const sides = 6;
+            const size = w/2;
+            ctx.moveTo(size * Math.cos(0), size * Math.sin(0));
+            for (let i = 1; i <= sides; i++) {
+                ctx.lineTo(size * Math.cos(i * 2 * Math.PI / sides), size * Math.sin(i * 2 * Math.PI / sides));
+            }
+            ctx.closePath();
+        } else if(el.shapeType === 'line') {
+            ctx.moveTo(-w/2, 0);
+            ctx.lineTo(w/2, 0);
+        }
+    };
 
-    targetCtx.fill();
+    const needsOffscreen = (el.innerShadow && el.innerShadow.color !== 'transparent') || (el.emboss && el.emboss.active);
 
-    if(el.borderWidth && el.borderWidth > 0) {
-        targetCtx.lineWidth = el.borderWidth;
-        targetCtx.strokeStyle = el.borderColor || '#fff';
-        targetCtx.stroke();
+    if(needsOffscreen) {
+        const pad = 20;
+        const off = document.createElement('canvas');
+        off.width = w + pad*2;
+        off.height = h + pad*2;
+        const octx = off.getContext('2d');
+        octx.translate(w/2 + pad, h/2 + pad);
+        
+        octx.fillStyle = el.color || '#D4AF37';
+        drawShape(octx);
+        if(el.shapeType === 'line') {
+            octx.strokeStyle = el.color || '#D4AF37';
+            octx.lineWidth = el.height || 10;
+            octx.stroke();
+        } else {
+            octx.fill();
+        }
+
+        if(el.innerShadow && el.innerShadow.color !== 'transparent'){
+            applySilhouetteInnerShadow(octx, off.width, off.height, el.innerShadow);
+        }
+        if(el.emboss && el.emboss.active){
+            applySilhouetteEmboss(octx, off.width, off.height, el.emboss);
+        }
+
+        targetCtx.drawImage(off, -w/2 - pad, -h/2 - pad);
+        
+        if(el.borderWidth && el.borderWidth > 0 && el.shapeType !== 'line') {
+            targetCtx.lineWidth = el.borderWidth;
+            targetCtx.strokeStyle = el.borderColor || '#fff';
+            drawShape(targetCtx);
+            targetCtx.stroke();
+        }
+    } else {
+        targetCtx.fillStyle = el.color || '#D4AF37';
+        drawShape(targetCtx);
+        if(el.shapeType === 'line') {
+            targetCtx.strokeStyle = el.color || '#D4AF37';
+            targetCtx.lineWidth = el.height || 10;
+            targetCtx.stroke();
+        } else {
+            targetCtx.fill();
+        }
+
+        if(el.borderWidth && el.borderWidth > 0 && el.shapeType !== 'line') {
+            targetCtx.lineWidth = el.borderWidth;
+            targetCtx.strokeStyle = el.borderColor || '#fff';
+            targetCtx.stroke();
+        }
     }
 
     targetCtx.restore();
@@ -2046,8 +2175,61 @@ bctx.drawImage(maskCanvas,0,0);
 targetCtx.drawImage(blurCanvas,pad,pad);
 }
 
+/* ========== ADVANCED COLOR (HSL) ENGINE ========== */
+function applyAdvancedColor(ctx, w, h, settings) {
+    const imgData = ctx.getImageData(0, 0, w, h);
+    const data = imgData.data;
+    
+    // Simplified HSL adjustment for performance
+    // In a real app, this would use WebGL or a Worker.
+    // We apply global adjustments here.
+    const intensity = settings.intensity !== undefined ? settings.intensity : 100;
+    const highlights = settings.highlights !== undefined ? settings.highlights : 0;
+    const shadows = settings.shadows !== undefined ? settings.shadows : 0;
+    const midtones = settings.midtones !== undefined ? settings.midtones : 0;
+    
+    const intFactor = intensity / 100;
+    
+    for(let i=0; i<data.length; i+=4) {
+        if(data[i+3] === 0) continue;
+        
+        let r = data[i], g = data[i+1], b = data[i+2];
+        
+        // Luma
+        const luma = 0.299*r + 0.587*g + 0.114*b;
+        
+        // Highlights/Shadows/Midtones
+        if(highlights !== 0 && luma > 128) {
+            const factor = (luma - 128) / 127;
+            r += highlights * factor; g += highlights * factor; b += highlights * factor;
+        }
+        if(shadows !== 0 && luma < 128) {
+            const factor = (128 - luma) / 128;
+            r += shadows * factor; g += shadows * factor; b += shadows * factor;
+        }
+        if(midtones !== 0) {
+            const factor = 1 - Math.abs(luma - 128) / 128;
+            r += midtones * factor; g += midtones * factor; b += midtones * factor;
+        }
+        
+        // Intensity
+        if(intFactor !== 1) {
+            r = luma + (r - luma) * intFactor;
+            g = luma + (g - luma) * intFactor;
+            b = luma + (b - luma) * intFactor;
+        }
+        
+        data[i] = Math.min(255, Math.max(0, r));
+        data[i+1] = Math.min(255, Math.max(0, g));
+        data[i+2] = Math.min(255, Math.max(0, b));
+    }
+    ctx.putImageData(imgData, 0, 0);
+}
+
 /* ========== SELECTION & MAGNET SNAPPING ENGINE ========== */
-function selectElement(elId){activeElementId=elId;updateSelectionBox();renderBottomToolbar();closeToolPanel();}
+function selectElement(elId){
+if(appMode === 'drawing') return;
+activeElementId=elId;updateSelectionBox();renderBottomToolbar();closeToolPanel();}
 function deselectElement(){activeElementId=null;editingElementId=null;selBox.classList.remove('active');hideSnapGuides();closeDirectCanvasTextEditor();renderBottomToolbar();closeToolPanel();}
 function handleViewportClick(e){if(e.target===document.getElementById('workspaceViewport'))deselectElement();}
 
@@ -2217,6 +2399,7 @@ if(other.groupId===hitEl.groupId){other._startGroupPos={x:other.x,y:other.y};}
 }
 
 function handleArtboardPointerDown(e){
+if(appMode === 'drawing') return;
 if(e.target.closest('#stalkContainer')||e.target.closest('.sel-handle')||e.target.closest('.sel-handle-edge'))return;
 if(isPaintingGrab) return;
 if(checkDemo()) return;
@@ -2343,7 +2526,15 @@ const dy=e.clientY-rotateCenter.y;
 let angle=Math.atan2(dy,dx)*(180/Math.PI)-90;
 angle=Math.round(angle);
 if(angle<0)angle+=360;
+
+// Snapping to 45 degrees
+if (angle % 45 <= 3 || angle % 45 >= 42) {
+    angle = Math.round(angle / 45) * 45;
+}
+if (angle === 360) angle = 0;
+
 el.rotation=angle;
+showToast(`Rotasi: ${angle}°`);
 requestRender();
 }else if(dragMode==='resize-handle'){
 if(['br','bl','tr','tl'].includes(activeHandle)){
@@ -2394,7 +2585,8 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
 <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
 <button class="tool-btn" onclick="openPanelAddShape()"><span class="icon">🔶</span><span>Bentuk</span></button>
-<button class="tool-btn" onclick="openPenToolModal()"><span class="icon">✍️</span><span>Gambar</span></button>
+<button class="tool-btn" onclick="openPenToolOverlay()"><span class="icon">✍️</span><span>Gambar</span></button>
+<button class="tool-btn" onclick="window.open('https://drive.google.com/drive/folders/1CIKP7QnMDWPt0FNAucE8Jd_Cj52nX05X', '_blank')"><span class="icon">☁️</span><span>Elemen</span></button>
 <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
 <button class="tool-btn" onclick="openPanelBleed()"><span class="icon">📐</span><span>Garis Bantu</span></button>
@@ -2433,6 +2625,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openFreeCropModal()"><span class="icon">✍️</span><span>Crop Jari</span></button>
 <button class="tool-btn" onclick="openPanelImageSkinOverlay()"><span class="icon">🎭</span><span>Skin Foto</span></button>
 <button class="tool-btn" onclick="openPanelAdjustLight()"><span class="icon">💡</span><span>Cahaya & Warna</span></button>
+<button class="tool-btn" onclick="openPanelAdvancedColor()"><span class="icon">🌈</span><span>Warna HSL</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openEnvelopeModal()"><span class="icon">🌊</span><span>Envelope</span></button>
@@ -2579,15 +2772,15 @@ const html=`
 </div>
 <div class="ctrl-row"><span class="ctrl-label">Ukuran Font:</span><span class="ctrl-val" id="valFontSize">${el.fontSize}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('fsSlider',-2,updateFontSize)">-</button>
+<button class="btn-step" onclick="stepSliderVal('fsSlider',-1,updateFontSize)">-</button>
 <input type="range" class="ctrl-slider" id="fsSlider" min="12" max="300" value="${el.fontSize}" oninput="updateFontSize(this.value)">
-<button class="btn-step" onclick="stepSliderVal('fsSlider',2,updateFontSize)">+</button>
+<button class="btn-step" onclick="stepSliderVal('fsSlider',1,updateFontSize)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Lebar Kotak:</span><span class="ctrl-val" id="valBoxW">${curW}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('boxWSlider',-20,updateTextBoxWidth)">-</button>
+<button class="btn-step" onclick="stepSliderVal('boxWSlider',-10,updateTextBoxWidth)">-</button>
 <input type="range" class="ctrl-slider" id="boxWSlider" min="100" max="1080" value="${curW}" oninput="updateTextBoxWidth(this.value)">
-<button class="btn-step" onclick="stepSliderVal('boxWSlider',20,updateTextBoxWidth)">+</button>
+<button class="btn-step" onclick="stepSliderVal('boxWSlider',10,updateTextBoxWidth)">+</button>
 </div>
 <div class="ctrl-grid-btns" style="margin-top:10px;">
 <button class="btn-sub-tool" onclick="updateTextBoxWidth(500)">Lebar 500</button>
@@ -2783,34 +2976,26 @@ ${formatWordOnlyMode ? `
 <div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk distabilo:</div>
 ${renderWordSelectionUI()}
 ` : ''}
-<div class="ctrl-row">
-<span class="ctrl-label">Warna Stabilo:</span>
-<input type="text" value="${el.highlightColor||'transparent'}" onchange="setHighlightColor(this.value)" style="width:70px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:2px 4px; font-size:11px;">
-<button class="btn-sub-tool active" onclick="openHandledLoupe(setHighlightColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
-<button class="btn-reset-tool" onclick="resetHighlight()">↺ Reset</button>
-</div>
-<div class="color-palette-scroll" style="margin-top:8px;">
-<div class="color-circle" style="background:#444;" onclick="setHighlightColor('transparent')">✕</div>
-${QUICK_COLORS.map(c=>`<div class="color-circle" style="background:${c};" onclick="setHighlightColor('${c}')"></div>`).join('')}
-</div>
+${getColorPickerHTML(el.highlightColor||'transparent', 'setHighlightColor')}
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Transparansi:</span><span class="ctrl-val" id="valHiAlpha">${curAlpha}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('hiAlphaSlider',-5,updateHighlightAlpha)">-</button>
+<button class="btn-step" onclick="stepSliderVal('hiAlphaSlider',-1,updateHighlightAlpha)">-</button>
 <input type="range" class="ctrl-slider" id="hiAlphaSlider" min="10" max="100" value="${curAlpha}" oninput="updateHighlightAlpha(this.value)">
-<button class="btn-step" onclick="stepSliderVal('hiAlphaSlider',5,updateHighlightAlpha)">+</button>
+<button class="btn-step" onclick="stepSliderVal('hiAlphaSlider',1,updateHighlightAlpha)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Sudut Tumpul:</span><span class="ctrl-val" id="valHiRad">${curRad}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('hiRadSlider',-2,updateHighlightRadius)">-</button>
+<button class="btn-step" onclick="stepSliderVal('hiRadSlider',-1,updateHighlightRadius)">-</button>
 <input type="range" class="ctrl-slider" id="hiRadSlider" min="0" max="30" value="${curRad}" oninput="updateHighlightRadius(this.value)">
-<button class="btn-step" onclick="stepSliderVal('hiRadSlider',2,updateHighlightRadius)">+</button>
+<button class="btn-step" onclick="stepSliderVal('hiRadSlider',1,updateHighlightRadius)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Tebal Bantalan:</span><span class="ctrl-val" id="valHiPad">${curPadX}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('hiPadSlider',-2,updateHighlightPadding)">-</button>
+<button class="btn-step" onclick="stepSliderVal('hiPadSlider',-1,updateHighlightPadding)">-</button>
 <input type="range" class="ctrl-slider" id="hiPadSlider" min="2" max="35" value="${curPadX}" oninput="updateHighlightPadding(this.value)">
-<button class="btn-step" onclick="stepSliderVal('hiPadSlider',2,updateHighlightPadding)">+</button>
+<button class="btn-step" onclick="stepSliderVal('hiPadSlider',1,updateHighlightPadding)">+</button>
 </div>
+<button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="resetHighlight()">↺ Reset Stabilo</button>
 `;
 openToolPanel('🖍️ Pengaturan Lengkap Stabilo',html);
 }
@@ -2861,29 +3046,29 @@ ${hasSkin?`<button class="btn-reset-tool" onclick="removeTextSkin()">🗑️ Hap
 ${hasSkin?`
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Zoom Gambar:</span><span class="ctrl-val" id="valSkinScale">${curScale}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('skinScaleSlider',-10,updateTextSkinScale)">-</button>
+<button class="btn-step" onclick="stepSliderVal('skinScaleSlider',-1,updateTextSkinScale)">-</button>
 <input type="range" class="ctrl-slider" id="skinScaleSlider" min="20" max="400" value="${curScale}" oninput="updateTextSkinScale(this.value)">
-<button class="btn-step" onclick="stepSliderVal('skinScaleSlider',10,updateTextSkinScale)">+</button>
+<button class="btn-step" onclick="stepSliderVal('skinScaleSlider',1,updateTextSkinScale)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="valSkinOffX">${el.textSkinOffsetX||0}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('skinOffXSlider',-15,updateTextSkinOffsetX)">-</button>
+<button class="btn-step" onclick="stepSliderVal('skinOffXSlider',-1,updateTextSkinOffsetX)">-</button>
 <input type="range" class="ctrl-slider" id="skinOffXSlider" min="-500" max="500" value="${el.textSkinOffsetX||0}" oninput="updateTextSkinOffsetX(this.value)">
-<button class="btn-step" onclick="stepSliderVal('skinOffXSlider',15,updateTextSkinOffsetX)">+</button>
+<button class="btn-step" onclick="stepSliderVal('skinOffXSlider',1,updateTextSkinOffsetX)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="valSkinOffY">${el.textSkinOffsetY||0}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('skinOffYSlider',-15,updateTextSkinOffsetY)">-</button>
+<button class="btn-step" onclick="stepSliderVal('skinOffYSlider',-1,updateTextSkinOffsetY)">-</button>
 <input type="range" class="ctrl-slider" id="skinOffYSlider" min="-500" max="500" value="${el.textSkinOffsetY||0}" oninput="updateTextSkinOffsetY(this.value)">
-<button class="btn-step" onclick="stepSliderVal('skinOffYSlider',15,updateTextSkinOffsetY)">+</button>
+<button class="btn-step" onclick="stepSliderVal('skinOffYSlider',1,updateTextSkinOffsetY)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Blend Mode:</span>
 <select onchange="updateTextSkinBlend(this.value)" style="background:#222;color:#fff;border:1px solid #D4AF37;border-radius:4px;padding:2px;font-size:11px;">
     <option value="source-in" ${el.textSkinBlend==='source-in'?'selected':''}>Normal (Mask)</option>
-    <option value="multiply" ${el.textSkinBlend==='multiply'?'selected':''}>Multiply</option>
+    <option value="multiply" ${el.textSkinBlend==='multiply'?'selected':''}>Subtrack (Multiply)</option>
     <option value="screen" ${el.textSkinBlend==='screen'?'selected':''}>Screen</option>
     <option value="overlay" ${el.textSkinBlend==='overlay'?'selected':''}>Overlay</option>
-    <option value="difference" ${el.textSkinBlend==='difference'?'selected':''}>Subtract (Difference)</option>
+    <option value="difference" ${el.textSkinBlend==='difference'?'selected':''}>Negatif (Difference)</option>
 </select>
 </div>
 
@@ -2983,6 +3168,60 @@ function resetElementFilters() {
     renderAll(); pushHistoryState(); openPanelAdjustLight();
 }
 
+/* ========== ADVANCED COLOR (HSL) PANEL ========== */
+function openPanelAdvancedColor() {
+    const el = getActiveElement();
+    if(!el || el.type !== 'image') return;
+    if(!el.advancedColor) el.advancedColor = { active: false, intensity: 100, highlights: 0, shadows: 0, midtones: 0 };
+    const ac = el.advancedColor;
+    
+    const html = `
+    <div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:12px;font-weight:700;">Status Warna HSL</span>
+        <button class="btn-sub-tool ${ac.active?'active':''}" onclick="toggleAdvancedColor()">${ac.active?'Aktif':'Mati'}</button>
+    </div>
+    
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">PENYESUAIAN CAHAYA LANJUTAN:</div>
+    
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Intensitas:</span><span class="ctrl-val" id="valAcInt">${ac.intensity}%</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="200" value="${ac.intensity}" oninput="updateAdvancedColor('intensity', this.value)">
+    
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Highlights:</span><span class="ctrl-val" id="valAcHigh">${ac.highlights}</span></div>
+    <input type="range" class="ctrl-slider" min="-100" max="100" value="${ac.highlights}" oninput="updateAdvancedColor('highlights', this.value)">
+    
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Shadows:</span><span class="ctrl-val" id="valAcShad">${ac.shadows}</span></div>
+    <input type="range" class="ctrl-slider" min="-100" max="100" value="${ac.shadows}" oninput="updateAdvancedColor('shadows', this.value)">
+    
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Midtones:</span><span class="ctrl-val" id="valAcMid">${ac.midtones}</span></div>
+    <input type="range" class="ctrl-slider" min="-100" max="100" value="${ac.midtones}" oninput="updateAdvancedColor('midtones', this.value)">
+    
+    <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="resetAdvancedColor()">↺ Reset HSL</button>
+    `;
+    openToolPanel('🌈 Warna HSL & Cahaya Lanjutan', html);
+}
+
+function toggleAdvancedColor() {
+    const el = getActiveElement(); if(!el) return;
+    el.advancedColor.active = !el.advancedColor.active;
+    renderAll(); pushHistoryState(); openPanelAdvancedColor();
+}
+
+function updateAdvancedColor(prop, val) {
+    const el = getActiveElement(); if(!el) return;
+    el.advancedColor[prop] = parseInt(val);
+    if(prop === 'intensity') document.getElementById('valAcInt').innerText = val + '%';
+    if(prop === 'highlights') document.getElementById('valAcHigh').innerText = val;
+    if(prop === 'shadows') document.getElementById('valAcShad').innerText = val;
+    if(prop === 'midtones') document.getElementById('valAcMid').innerText = val;
+    renderAll(); debouncedPushHistory();
+}
+
+function resetAdvancedColor() {
+    const el = getActiveElement(); if(!el) return;
+    el.advancedColor = { active: false, intensity: 100, highlights: 0, shadows: 0, midtones: 0 };
+    renderAll(); pushHistoryState(); openPanelAdvancedColor();
+}
+
 /* ========== BAYANGAN 3D, BAYANGAN DALAM & EMBOSS (TEKS & GAMBAR) ========== */
 let activeShadowTab = 'outer';
 function openPanelAdvancedShadow(){
@@ -3022,66 +3261,48 @@ if(tab==='outer'){
 const sh=el.shadow;
 const curAlpha=Math.round((sh.alpha!==undefined?sh.alpha:0.8)*100);
 container.innerHTML=`
-<div class="ctrl-row">
-<span class="ctrl-label">Warna Bayang:</span>
-<input type="text" value="${sh.color||'rgba(0,0,0,0.8)'}" onchange="setOuterShadowColor(this.value)" style="width:70px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:2px 4px; font-size:11px;">
-<button class="btn-sub-tool active" onclick="openHandledLoupe(setOuterShadowColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
-<button class="btn-reset-tool" onclick="updateShadowProp('blur',0)">Matikan</button>
-</div>
-<div class="color-palette-scroll" style="margin-top:8px;">
-<div class="color-circle" style="background:#222;color:#ff6b6b;display:flex;align-items:center;justify-content:center;font-size:10px;" onclick="setOuterShadowColor('transparent')">✕</div>
-${QUICK_COLORS.map(c=>`<div class="color-circle" style="background:${c};" onclick="setOuterShadowColor('${c}')"></div>`).join('')}
-</div>
+${getColorPickerHTML(sh.color||'rgba(0,0,0,0.8)', 'setOuterShadowColor')}
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kepekatan/Alpha:</span><span class="ctrl-val" id="valShAlpha">${curAlpha}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('shAlphaSlider',-5,updateShadowAlpha)">-</button>
+<button class="btn-step" onclick="stepSliderVal('shAlphaSlider',-1,updateShadowAlpha)">-</button>
 <input type="range" class="ctrl-slider" id="shAlphaSlider" min="10" max="100" value="${curAlpha}" oninput="updateShadowAlpha(this.value)">
-<button class="btn-step" onclick="stepSliderVal('shAlphaSlider',5,updateShadowAlpha)">+</button>
+<button class="btn-step" onclick="stepSliderVal('shAlphaSlider',1,updateShadowAlpha)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Blur Bayangan:</span><span class="ctrl-val" id="valShBlur">${sh.blur||0}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('shBlurSlider',-2,(v)=>updateShadowProp('blur',v))">-</button>
+<button class="btn-step" onclick="stepSliderVal('shBlurSlider',-1,(v)=>updateShadowProp('blur',v))">-</button>
 <input type="range" class="ctrl-slider" id="shBlurSlider" min="0" max="60" value="${sh.blur||0}" oninput="updateShadowProp('blur',this.value)">
-<button class="btn-step" onclick="stepSliderVal('shBlurSlider',2,(v)=>updateShadowProp('blur',v))">+</button>
+<button class="btn-step" onclick="stepSliderVal('shBlurSlider',1,(v)=>updateShadowProp('blur',v))">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Jarak Bayangan:</span><span class="ctrl-val" id="valShDist">${sh.distance||0}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('shDistSlider',-2,(v)=>updateShadowProp('distance',v))">-</button>
+<button class="btn-step" onclick="stepSliderVal('shDistSlider',-1,(v)=>updateShadowProp('distance',v))">-</button>
 <input type="range" class="ctrl-slider" id="shDistSlider" min="0" max="60" value="${sh.distance||0}" oninput="updateShadowProp('distance',this.value)">
-<button class="btn-step" onclick="stepSliderVal('shDistSlider',2,(v)=>updateShadowProp('distance',v))">+</button>
+<button class="btn-step" onclick="stepSliderVal('shDistSlider',1,(v)=>updateShadowProp('distance',v))">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Arah/Sudut:</span><span class="ctrl-val" id="valShAngle">${sh.angle||45}°</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('shAngleSlider',-15,(v)=>updateShadowProp('angle',v))">-</button>
+<button class="btn-step" onclick="stepSliderVal('shAngleSlider',-1,(v)=>updateShadowProp('angle',v))">-</button>
 <input type="range" class="ctrl-slider" id="shAngleSlider" min="0" max="360" value="${sh.angle||45}" oninput="updateShadowProp('angle',this.value)">
-<button class="btn-step" onclick="stepSliderVal('shAngleSlider',15,(v)=>updateShadowProp('angle',v))">+</button>
+<button class="btn-step" onclick="stepSliderVal('shAngleSlider',1,(v)=>updateShadowProp('angle',v))">+</button>
 </div>
 `;
 }else if(tab==='inner'){
 const ish=el.innerShadow;
 const curAlpha=Math.round((ish.alpha!==undefined?ish.alpha:0.85)*100);
 container.innerHTML=`
-<div class="ctrl-row">
-<span class="ctrl-label">Warna Inner:</span>
-<input type="text" value="${ish.color||'transparent'}" onchange="setInnerShadowColor(this.value)" style="width:70px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:2px 4px; font-size:11px;">
-<button class="btn-sub-tool active" onclick="openHandledLoupe(setInnerShadowColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
-<button class="btn-reset-tool" onclick="setInnerShadowColor('transparent')">Matikan</button>
-</div>
-<div class="color-palette-scroll" style="margin-top:8px;">
-<div class="color-circle" style="background:#222;color:#ff6b6b;display:flex;align-items:center;justify-content:center;font-size:10px;" onclick="setInnerShadowColor('transparent')">✕</div>
-${QUICK_COLORS.map(c=>`<div class="color-circle" style="background:${c};" onclick="setInnerShadowColor('${c}')"></div>`).join('')}
-</div>
+${getColorPickerHTML(ish.color||'transparent', 'setInnerShadowColor')}
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Opasitas/Alpha:</span><span class="ctrl-val" id="valIShAlpha">${curAlpha}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('iShAlphaSlider',-5,updateInnerShadowAlpha)">-</button>
+<button class="btn-step" onclick="stepSliderVal('iShAlphaSlider',-1,updateInnerShadowAlpha)">-</button>
 <input type="range" class="ctrl-slider" id="iShAlphaSlider" min="10" max="100" value="${curAlpha}" oninput="updateInnerShadowAlpha(this.value)">
-<button class="btn-step" onclick="stepSliderVal('iShAlphaSlider',5,updateInnerShadowAlpha)">+</button>
+<button class="btn-step" onclick="stepSliderVal('iShAlphaSlider',1,updateInnerShadowAlpha)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Intensitas Blur:</span><span class="ctrl-val" id="valIShBlur">${ish.blur||0}px</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('iShBlurSlider',-2,updateInnerShadowBlur)">-</button>
+<button class="btn-step" onclick="stepSliderVal('iShBlurSlider',-1,updateInnerShadowBlur)">-</button>
 <input type="range" class="ctrl-slider" id="iShBlurSlider" min="0" max="35" value="${ish.blur||0}" oninput="updateInnerShadowBlur(this.value)">
-<button class="btn-step" onclick="stepSliderVal('iShBlurSlider',2,updateInnerShadowBlur)">+</button>
+<button class="btn-step" onclick="stepSliderVal('iShBlurSlider',1,updateInnerShadowBlur)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Jarak Kedalaman:</span><span class="ctrl-val" id="valIShDist">${ish.distance||4}px</span></div>
 <div class="stepper-row">
@@ -3457,75 +3678,106 @@ setTimeout(() => {
 }, 50);
 }
 
-/* ========== PEN TOOL (GAMBAR BEBAS) ========== */
+/* ========== PEN TOOL (GAMBAR BEBAS DI KANVAS UTAMA) ========== */
 let isDrawingPen = false;
 let lastPenX = 0;
 let lastPenY = 0;
 
-function openPenToolModal() {
+function openPenToolOverlay() {
     if(checkDemo()) return;
-    const modal = document.getElementById('penToolModal');
-    modal.classList.add('active');
-    
-    const canvas = document.getElementById('penToolCanvas');
-    const maxW = Math.min(window.innerWidth * 0.9, 500);
-    canvas.width = maxW;
-    canvas.height = maxW; // Square canvas for drawing
-    
+    deselectElement();
+    appMode = 'drawing';
+    document.getElementById('penToolbar').classList.add('active');
+    drawingCanvasOverlay.style.display = 'block';
+    drawingCanvasOverlay.style.pointerEvents = 'auto';
     clearPenCanvas();
-    setupPenToolEvents();
+    showToast('✍️ Mode Gambar Aktif');
 }
 
-function closePenToolModal() {
-    document.getElementById('penToolModal').classList.remove('active');
+function updatePenSettings() {
+    // Just to trigger UI updates if needed
 }
 
 function clearPenCanvas() {
-    const canvas = document.getElementById('penToolCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    dctx.clearRect(0, 0, drawingCanvasOverlay.width, drawingCanvasOverlay.height);
 }
 
 function setupPenToolEvents() {
-    const canvas = document.getElementById('penToolCanvas');
-    
-    canvas.onpointerdown = (e) => {
+    drawingCanvasOverlay.onpointerdown = (e) => {
+        if(appMode !== 'drawing') return;
         isDrawingPen = true;
-        const rect = canvas.getBoundingClientRect();
-        lastPenX = e.clientX - rect.left;
-        lastPenY = e.clientY - rect.top;
-        canvas.setPointerCapture(e.pointerId);
+        const rect = drawingCanvasOverlay.getBoundingClientRect();
+        lastPenX = (e.clientX - rect.left) / (canvasScale * userZoomScale);
+        lastPenY = (e.clientY - rect.top) / (canvasScale * userZoomScale);
+        drawingCanvasOverlay.setPointerCapture(e.pointerId);
     };
     
-    canvas.onpointermove = (e) => {
-        if(!isDrawingPen) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+    drawingCanvasOverlay.onpointermove = (e) => {
+        if(!isDrawingPen || appMode !== 'drawing') return;
+        const rect = drawingCanvasOverlay.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / (canvasScale * userZoomScale);
+        const y = (e.clientY - rect.top) / (canvasScale * userZoomScale);
         
-        const ctx = canvas.getContext('2d');
-        ctx.beginPath();
-        ctx.moveTo(lastPenX, lastPenY);
-        ctx.lineTo(x, y);
-        ctx.strokeStyle = document.getElementById('penColor').value;
-        ctx.lineWidth = document.getElementById('penSize').value;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
+        const type = document.getElementById('penBrushType').value;
+        const color = document.getElementById('penColor').value;
+        const size = parseInt(document.getElementById('penSize').value);
+        
+        dctx.beginPath();
+        dctx.moveTo(lastPenX, lastPenY);
+        dctx.lineTo(x, y);
+        
+        if(type === 'eraser') {
+            dctx.globalCompositeOperation = 'destination-out';
+            dctx.lineWidth = size;
+            dctx.lineCap = 'round';
+            dctx.lineJoin = 'round';
+            dctx.stroke();
+        } else {
+            dctx.globalCompositeOperation = 'source-over';
+            dctx.strokeStyle = color;
+            dctx.lineWidth = size;
+            
+            if(type === 'glow') {
+                dctx.shadowBlur = size;
+                dctx.shadowColor = color;
+                dctx.lineCap = 'round';
+                dctx.lineJoin = 'round';
+            } else if(type === 'pixel') {
+                dctx.shadowBlur = 0;
+                dctx.lineCap = 'square';
+                dctx.lineJoin = 'miter';
+            } else if(type === 'marker') {
+                dctx.shadowBlur = 0;
+                dctx.globalAlpha = 0.5;
+                dctx.lineCap = 'round';
+                dctx.lineJoin = 'round';
+            } else {
+                dctx.shadowBlur = 0;
+                dctx.globalAlpha = 1.0;
+                dctx.lineCap = 'round';
+                dctx.lineJoin = 'round';
+            }
+            dctx.stroke();
+            dctx.globalAlpha = 1.0;
+            dctx.shadowBlur = 0;
+        }
         
         lastPenX = x;
         lastPenY = y;
     };
     
-    canvas.onpointerup = () => { isDrawingPen = false; };
-    canvas.onpointercancel = () => { isDrawingPen = false; };
+    drawingCanvasOverlay.onpointerup = () => { isDrawingPen = false; };
+    drawingCanvasOverlay.onpointercancel = () => { isDrawingPen = false; };
 }
 
-function applyPenDrawing() {
-    const canvas = document.getElementById('penToolCanvas');
-    const trimmed = trimCanvas(canvas);
+function finishPenDrawing() {
+    const trimmed = trimCanvas(drawingCanvasOverlay);
     if(!trimmed) {
-        showToast('⚠️ Gambar masih kosong!');
+        appMode = 'select';
+        document.getElementById('penToolbar').classList.remove('active');
+        drawingCanvasOverlay.style.display = 'none';
+        drawingCanvasOverlay.style.pointerEvents = 'none';
+        showToast('⚠️ Gambar kosong dibatalkan');
         return;
     }
     
@@ -3544,11 +3796,46 @@ function applyPenDrawing() {
         flipH: false, flipV: false, cornerRadius: 0, borderWidth: 0, borderColor: '#D4AF37', colorOverlay: 'none', blur: 0, blendMode: 'normal', cropL: 0, cropR: 0, cropT: 0, cropB: 0, shadow: {color: 'transparent', blur: 0, angle: 45, distance: 0}, opacity: 1, locked: false, groupId: null
     };
     s.elements.push(newEl);
+    
+    appMode = 'select';
+    document.getElementById('penToolbar').classList.remove('active');
+    drawingCanvasOverlay.style.display = 'none';
+    drawingCanvasOverlay.style.pointerEvents = 'none';
+    
     selectElement(newEl.id);
     renderAll();
     pushHistoryState();
-    closePenToolModal();
     showToast('✅ Gambar berhasil ditambahkan!');
+}
+
+function trimCanvas(canvas) {
+    const ctx = canvas.getContext('2d');
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const l = pixels.data.length;
+    let bound = { top: null, left: null, right: null, bottom: null };
+    let x, y;
+
+    for (let i = 0; i < l; i += 4) {
+        if (pixels.data[i + 3] !== 0) {
+            x = (i / 4) % canvas.width;
+            y = ~~((i / 4) / canvas.width);
+
+            if (bound.top === null) bound.top = y;
+            if (bound.left === null || x < bound.left) bound.left = x;
+            if (bound.right === null || x > bound.right) bound.right = x;
+            if (bound.bottom === null || y > bound.bottom) bound.bottom = y;
+        }
+    }
+    
+    if (bound.top === null) return null;
+
+    const trimHeight = bound.bottom - bound.top + 1;
+    const trimWidth = bound.right - bound.left + 1;
+    const trimmed = document.createElement('canvas');
+    trimmed.width = trimWidth;
+    trimmed.height = trimHeight;
+    trimmed.getContext('2d').drawImage(canvas, bound.left, bound.top, trimWidth, trimHeight, 0, 0, trimWidth, trimHeight);
+    return trimmed;
 }
 
 /* ========== PERSPEKTIF 3D (BILINEAR MESH & RESET ASLI) ========== */
@@ -3654,7 +3941,6 @@ const p1={x:perspPins.tr.x-rect.left,y:perspPins.tr.y-rect.top};
 const p2={x:perspPins.br.x-rect.left,y:perspPins.br.y-rect.top};
 const p3={x:perspPins.bl.x-rect.left,y:perspPins.bl.y-rect.top};
 
-// Draw grid overlay for better perspective visualization
 warpCanvasBilinear(perspCanvasOffscreen,pctx,p0,p1,p2,p3,16);
 }
 
@@ -3703,36 +3989,6 @@ ctx.drawImage(im,0,0);
 ctx.drawImage(im,0,0);
 }
 ctx.restore();
-}
-
-function trimCanvas(canvas) {
-    const ctx = canvas.getContext('2d');
-    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const l = pixels.data.length;
-    let bound = { top: null, left: null, right: null, bottom: null };
-    let x, y;
-
-    for (let i = 0; i < l; i += 4) {
-        if (pixels.data[i + 3] !== 0) {
-            x = (i / 4) % canvas.width;
-            y = ~~((i / 4) / canvas.width);
-
-            if (bound.top === null) bound.top = y;
-            if (bound.left === null || x < bound.left) bound.left = x;
-            if (bound.right === null || x > bound.right) bound.right = x;
-            if (bound.bottom === null || y > bound.bottom) bound.bottom = y;
-        }
-    }
-    
-    if (bound.top === null) return canvas;
-
-    const trimHeight = bound.bottom - bound.top + 1;
-    const trimWidth = bound.right - bound.left + 1;
-    const trimmed = document.createElement('canvas');
-    trimmed.width = trimWidth;
-    trimmed.height = trimHeight;
-    trimmed.getContext('2d').drawImage(canvas, bound.left, bound.top, trimWidth, trimHeight, 0, 0, trimWidth, trimHeight);
-    return trimmed;
 }
 
 function applyPerspectiveWarp(){
@@ -4041,6 +4297,9 @@ function openPanelAddShape() {
         <button class="btn-sub-tool" onclick="addNewShape('rect')">⬛ Kotak</button>
         <button class="btn-sub-tool" onclick="addNewShape('circle')">⏺️ Lingkaran</button>
         <button class="btn-sub-tool" onclick="addNewShape('triangle')">🔺 Segitiga</button>
+        <button class="btn-sub-tool" onclick="addNewShape('star')">⭐ Bintang</button>
+        <button class="btn-sub-tool" onclick="addNewShape('polygon')">⬡ Segienam</button>
+        <button class="btn-sub-tool" onclick="addNewShape('line')">➖ Garis</button>
     </div>
     `;
     openToolPanel('🔶 Tambah Bentuk', html);
@@ -4055,7 +4314,7 @@ function addNewShape(type) {
         x: mainCanvas.width / 2,
         y: mainCanvas.height / 2,
         width: 300,
-        height: 300,
+        height: type === 'line' ? 10 : 300,
         color: '#D4AF37',
         opacity: 1,
         rotation: 0,
@@ -4077,15 +4336,7 @@ function addNewShape(type) {
 function openPanelShapeColor() {
     const el = getActiveElement();
     if(!el || el.type !== 'shape') return;
-    let html = `
-    <div class="ctrl-row">
-    <span class="ctrl-label">Warna Bentuk:</span>
-    <input type="color" value="${el.color || '#D4AF37'}" onchange="setShapeColor(this.value)">
-    <button class="btn-sub-tool active" onclick="openHandledLoupe(setShapeColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
-    </div>
-    <div class="color-palette-scroll" style="margin-top:8px;">`;
-    QUICK_COLORS.forEach(c => { html += `<div class="color-circle ${el.color===c?'active':''}" style="background:${c};" onclick="setShapeColor('${c}')"></div>`; });
-    html += `</div>`;
+    let html = getColorPickerHTML(el.color || '#D4AF37', 'setShapeColor', false);
     openToolPanel('🎨 Warna Bentuk', html);
 }
 
@@ -4640,14 +4891,8 @@ ${formatWordOnlyMode ? `
 <div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk diwarnai:</div>
 ${renderWordSelectionUI()}
 ` : ''}
-<div class="ctrl-row">
-<span class="ctrl-label">Pilih Warna:</span>
-<input type="color" value="${el.color||'#ffffff'}" onchange="setTextColor(this.value)">
-<button class="btn-sub-tool active" onclick="openHandledLoupe(setTextColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
-</div>
-<div class="color-palette-scroll" style="margin-top:8px;">`;
-QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.color===c?'active':''}" style="background:${c};" onclick="setTextColor('${c}')"></div>`;});
-html+=`</div>`;
+${getColorPickerHTML(el.color||'#ffffff', 'setTextColor', false)}
+`;
 openToolPanel('Warna Teks',html);
 }
 function setTextColor(color){
@@ -4726,9 +4971,9 @@ const el=getActiveElement();
 if(!el)return;
 const html=`<div class="ctrl-row"><span class="ctrl-label">Rotasi:</span><span class="ctrl-val" id="valRot">${el.rotation||0}°</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('rSlider',-5,updateRotation)">-</button>
+<button class="btn-step" onclick="stepSliderVal('rSlider',-1,updateRotation)">-</button>
 <input type="range" class="ctrl-slider" id="rSlider" min="0" max="360" value="${el.rotation||0}" oninput="updateRotation(this.value)">
-<button class="btn-step" onclick="stepSliderVal('rSlider',5,updateRotation)">+</button>
+<button class="btn-step" onclick="stepSliderVal('rSlider',1,updateRotation)">+</button>
 </div>`;
 openToolPanel('Rotasi Elemen',html);
 }
@@ -4751,9 +4996,9 @@ if(!el)return;
 const curVal=Math.round((el.opacity!==undefined?el.opacity:1)*100);
 const html=`<div class="ctrl-row"><span class="ctrl-label">Transparansi:</span><span class="ctrl-val" id="valOp">${curVal}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('opSlider',-5,updateElemOpacity)">-</button>
+<button class="btn-step" onclick="stepSliderVal('opSlider',-1,updateElemOpacity)">-</button>
 <input type="range" class="ctrl-slider" id="opSlider" min="5" max="100" value="${curVal}" oninput="updateElemOpacity(this.value)">
-<button class="btn-step" onclick="stepSliderVal('opSlider',5,updateElemOpacity)">+</button>
+<button class="btn-step" onclick="stepSliderVal('opSlider',1,updateElemOpacity)">+</button>
 </div>`;
 openToolPanel('Transparansi Elemen',html);
 }
@@ -4776,15 +5021,7 @@ function openPanelImageBorder(){
 const el=getActiveElement();
 if(!el)return;
 let html=`
-<div class="ctrl-row">
-<span class="ctrl-label">Warna Garis:</span>
-<input type="color" value="${el.borderColor||'#D4AF37'}" onchange="setBorderColor(this.value)">
-<button class="btn-sub-tool active" onclick="openHandledLoupe(setBorderColor)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
-<button class="btn-reset-tool" onclick="updateBorderWidth(0)">Matikan</button>
-</div>
-<div class="color-palette-scroll" style="margin-top:8px;">`;
-QUICK_COLORS.forEach(c=>{html+=`<div class="color-circle ${el.borderColor===c?'active':''}" style="background:${c};" onclick="setBorderColor('${c}')"></div>`;});
-html+=`</div>
+${getColorPickerHTML(el.borderColor||'#D4AF37', 'setBorderColor')}
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Garis Tepi:</span><span class="ctrl-val" id="valBorderW">${el.borderWidth||0}px</span></div>
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('bwSlider',-1,updateBorderWidth)">-</button>
@@ -4815,12 +5052,12 @@ const html=`
 <div class="ctrl-grid-btns">
 <button class="btn-sub-tool ${curBlend==='screen'?'active':''}" onclick="setImageBlendMode('screen')">🔥 Screen<span style="font-size:8px;color:#bbb;">Hilang Hitam</span></button>
 <button class="btn-sub-tool ${curBlend==='lighter'?'active':''}" onclick="setImageBlendMode('lighter')">⚡ Add<span style="font-size:8px;color:#bbb;">Menyala</span></button>
-<button class="btn-sub-tool ${curBlend==='multiply'?'active':''}" onclick="setImageBlendMode('multiply')">🌑 Multiply<span style="font-size:8px;color:#bbb;">Hilang Putih</span></button>
+<button class="btn-sub-tool ${curBlend==='multiply'?'active':''}" onclick="setImageBlendMode('multiply')">🌑 Subtrack<span style="font-size:8px;color:#bbb;">Hilang Putih</span></button>
 <button class="btn-sub-tool ${curBlend==='overlay'?'active':''}" onclick="setImageBlendMode('overlay')">🌈 Overlay<span style="font-size:8px;color:#bbb;">Dramatis</span></button>
 <button class="btn-sub-tool ${curBlend==='color-dodge'?'active':''}" onclick="setImageBlendMode('color-dodge')">💡 Dodge<span style="font-size:8px;color:#bbb;">Neon</span></button>
 <button class="btn-sub-tool ${curBlend==='soft-light'?'active':''}" onclick="setImageBlendMode('soft-light')">☁️ Soft Light<span style="font-size:8px;color:#bbb;">Lembut</span></button>
 <button class="btn-sub-tool ${curBlend==='hard-light'?'active':''}" onclick="setImageBlendMode('hard-light')">💥 Hard Light<span style="font-size:8px;color:#bbb;">Kuat</span></button>
-<button class="btn-sub-tool ${curBlend==='difference'?'active':''}" onclick="setImageBlendMode('difference')">➖ Subtract<span style="font-size:8px;color:#bbb;">Inversi</span></button>
+<button class="btn-sub-tool ${curBlend==='difference'?'active':''}" onclick="setImageBlendMode('difference')">➖ Negatif<span style="font-size:8px;color:#bbb;">Inversi</span></button>
 <button class="btn-sub-tool ${curBlend==='normal'?'active':''}" onclick="setImageBlendMode('normal')">⚪ Normal<span style="font-size:8px;color:#bbb;">Standar</span></button>
 </div>
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kekuatan (Opasitas):</span><span class="ctrl-val" id="valBlendOp">${curOp}%</span></div>
@@ -4837,16 +5074,7 @@ function openPanelPngColorOverlay(){
 const el=getActiveElement();
 if(!el)return;
 let html=`
-<div class="ctrl-row">
-<span class="ctrl-label">Warna Siluet:</span>
-<input type="color" value="${el.colorOverlay||'#ffffff'}" onchange="setPngColorOverlay(this.value)">
-<button class="btn-sub-tool active" onclick="openHandledLoupe(setPngColorOverlay)" style="flex-direction:row;padding:4px 8px;">🧪 Kaca Pembesar</button>
-<button class="btn-reset-tool" onclick="setPngColorOverlay('none')">Matikan</button>
-</div>
-<div class="color-palette-scroll" style="margin-top:8px;">
-<div class="color-circle" style="background:#333;color:#aaa;display:flex;align-items:center;justify-content:center;font-size:10px;" onclick="setPngColorOverlay('none')">✕</div>
-${QUICK_COLORS.map(c=>`<div class="color-circle ${el.colorOverlay===c?'active':''}" style="background:${c};" onclick="setPngColorOverlay('${c}')"></div>`).join('')}
-</div>
+${getColorPickerHTML(el.colorOverlay||'#ffffff', 'setPngColorOverlay')}
 <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="setPngColorOverlay('none')">↺ Reset Warna Siluet</button>
 `;
 openToolPanel('🎨 Warna Siluet Full PNG',html);
@@ -4907,10 +5135,13 @@ function openPanelImageSkinOverlay() {
     <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Blend Mode:</span>
     <select onchange="updateImageSkin('imageSkinBlend', this.value)" style="background:#222;color:#fff;border:1px solid #D4AF37;border-radius:4px;padding:2px;font-size:11px;">
         <option value="source-in" ${el.imageSkinBlend==='source-in'?'selected':''}>Normal (Mask)</option>
-        <option value="multiply" ${el.imageSkinBlend==='multiply'?'selected':''}>Multiply</option>
+        <option value="multiply" ${el.imageSkinBlend==='multiply'?'selected':''}>Subtrack (Multiply)</option>
         <option value="screen" ${el.imageSkinBlend==='screen'?'selected':''}>Screen</option>
         <option value="overlay" ${el.imageSkinBlend==='overlay'?'selected':''}>Overlay</option>
-        <option value="difference" ${el.imageSkinBlend==='difference'?'selected':''}>Subtract (Difference)</option>
+        <option value="difference" ${el.imageSkinBlend==='difference'?'selected':''}>Negatif (Difference)</option>
+        <option value="color-dodge" ${el.imageSkinBlend==='color-dodge'?'selected':''}>Dodge</option>
+        <option value="soft-light" ${el.imageSkinBlend==='soft-light'?'selected':''}>Soft Light</option>
+        <option value="hard-light" ${el.imageSkinBlend==='hard-light'?'selected':''}>Hard Light</option>
     </select>
     </div>
     <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="removeImageSkin()">↺ Reset Skin</button>
@@ -5677,4 +5908,3 @@ window.onload=initApp;
 </script>
 </body>
 </html>
-```
