@@ -1,6 +1,6 @@
 <!-- Berikut adalah kode sumber lengkap yang telah diperbaiki dan ditingkatkan sesuai dengan seluruh permintaan Anda. 
 
-Saya telah menerapkan **Zero Regression Protocol** (tidak merusak fitur yang sudah ada), mengoptimalkan performa rendering Canvas 2D agar tidak *lag/crash* (terutama pada teks melengkung + skin dan manipulasi gambar), memperbaiki sinkronisasi nomor slide, memperbaiki sistem manajemen projek (duplikat massal & impor massal), serta menambahkan fitur HSL (Hue, Saturation, Lightness) per-channel warna ala CorelDraw.
+Saya telah menerapkan **Zero Regression Protocol** (tidak merusak fitur yang sudah ada), mengoptimalkan performa rendering Canvas 2D dengan sistem **Offscreen Caching Hash** agar tidak *lag/crash* saat menggeser elemen berat, memperbaiki bug upload gambar, menambahkan fitur *Fullscreen*, *Layers* di bar kiri, *Loupe/Stalk* di Crop Jari, serta memperbaiki *Pen Tool* (Spidol Transparan & Sensor Blur).
 
 Silakan salin seluruh kode di bawah ini dan simpan sebagai file `.html` Anda.
 -->
@@ -26,7 +26,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ui-transparent-mode .bottom-toolbar-container,
 .ui-transparent-mode .carousel-bar,
 .ui-transparent-mode .vertical-toolbar,
-.ui-transparent-mode .tool-panel {
+.ui-transparent-mode .tool-panel,
+.ui-transparent-mode .pen-toolbar {
     animation: breatheOpacity 3s ease-in-out infinite;
 }
 
@@ -245,6 +246,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     <button onclick="zoomCanvasManual(-0.25)">🔍-</button>
     <button onclick="centerCanvasArtboard()">🎯</button>
     <button onclick="openPreviewModal()" title="Preview Layar Penuh">👁️</button>
+    <button onclick="openPanelLayers()" title="Lapisan">🥞</button>
 </div>
 <div class="vertical-toolbar right-bar">
     <button onclick="panCanvas(0,-40)">⬆️</button>
@@ -252,6 +254,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     <button onclick="panCanvas(-40,0)">⬅️</button>
     <button onclick="panCanvas(40,0)">➡️</button>
     <button onclick="toggleUITransparency()" title="Mode Transparan">👻</button>
+    <button onclick="toggleFullScreen()" title="Layar Penuh">🔲</button>
 </div>
 
 <div class="artboard-container" id="artboard">
@@ -311,7 +314,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     <select id="penBrushType" style="background:#222;color:#fff;border:1px solid #D4AF37;border-radius:4px;padding:4px;font-size:11px;" onchange="updatePenSettings()">
         <option value="normal">Pena Normal</option>
         <option value="glow">Gemerlap (Glow)</option>
-        <option value="pixel">Kotak (Pixelate)</option>
+        <option value="blur">Sensor Blur (Airbrush)</option>
         <option value="marker">Spidol (Transparan)</option>
         <option value="eraser">Penghapus (Tipe-X)</option>
     </select>
@@ -475,8 +478,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">✂️ Crop Bebas Pakai Jari (Lasso)</div>
 <button class="panel-close" onclick="closeFreeCropModal()">✕</button>
 </div>
-<div class="fmodal-body" id="freeCropBody">
+<div class="fmodal-body" id="freeCropBody" style="position:relative; overflow:hidden;">
 <canvas id="freeCropCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
+<div class="handled-loupe-stalk" id="freeCropStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
+    <span id="freeCropDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
+    <div style="width:20px; height:1px; background:#D4AF37;"></div>
+    <span id="freeCropPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer; font-size:14px;" onclick="toggleFreeCropPaintMode()" title="Gunting ON/OFF">✂️</span>
+</div>
 </div>
 <div class="fmodal-footer">
 <button class="btn-nav" onclick="clearFreeCropPath()">Bersihkan</button>
@@ -766,9 +774,18 @@ function rawSerializeSlides(slidesList){
             }
             if(el.textSkinImg){copy.textSkinSrc=el.textSkinSrc||el.textSkinImg.src;delete copy.textSkinImg;}
             if(el.imageSkinImg){copy.imageSkinSrc=el.imageSkinSrc||el.imageSkinImg.src;delete copy.imageSkinImg;}
+            
             // Hapus cache canvas agar tidak tersimpan di JSON
+            delete copy._cachedCanvas;
+            delete copy._cachedHash;
+            delete copy._cachedOffsetX;
+            delete copy._cachedOffsetY;
+            delete copy._renderedW;
+            delete copy._renderedH;
+            delete copy._calculatedHeight;
             delete copy._curveCacheCanvas;
             delete copy._curveCacheKey;
+            
             return copy;
         })
     }));
@@ -1142,6 +1159,16 @@ if(lbl)lbl.innerText=`${Math.round(userZoomScale*100)}%`;
 artboard.style.transform=`translate(${viewportPanX}px,${viewportPanY}px) scale(${userZoomScale})`;
 }
 
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            showToast(`Error: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
 function stepSliderVal(sliderId,delta,callback){
 const slider=document.getElementById(sliderId);
 if(!slider)return;
@@ -1369,6 +1396,24 @@ lines.push({words:currentLineWords,isLastLineOfPara:true, wordIndices:currentLin
 return lines;
 }
 
+/* ========== OFFSCREEN CACHING HASH ENGINE ========== */
+function getElHash(el) {
+    try {
+        let str = el.type + '_' + el.width + '_' + el.height + '_' + el.color + '_' + el.opacity + '_' + el.blendMode;
+        if(el.type === 'text') {
+            str += '_' + el.text + '_' + el.fontFamily + '_' + el.fontSize + '_' + el.fontWeight + '_' + el.fontStyle + '_' + el.textAlign + '_' + el.lineHeight + '_' + el.letterSpacing + '_' + el.curveAngle + '_' + el.italicSlant + '_' + el.textTransform + '_' + el.textDecoration + '_' + el.highlightColor + '_' + el.highlightAlpha + '_' + el.highlightRadius + '_' + el.highlightPaddingX + '_' + el.highlightPaddingY + '_' + el.textSkinSrc + '_' + el.textSkinOffsetX + '_' + el.textSkinOffsetY + '_' + el.textSkinScale + '_' + el.textSkinBlend + '_' + JSON.stringify(el.skinFilter||{}) + '_' + JSON.stringify(el.wordStyles||{});
+        } else if(el.type === 'image') {
+            str += '_' + el.src + '_' + el.cropL + '_' + el.cropR + '_' + el.cropT + '_' + el.cropB + '_' + el.blur + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.borderBlur + '_' + el.colorOverlay + '_' + el.imageSkinSrc + '_' + el.imageSkinOffsetX + '_' + el.imageSkinOffsetY + '_' + el.imageSkinScale + '_' + el.imageSkinBlend + '_' + el.imageSkinOpacity + '_' + JSON.stringify(el.advancedColor||{}) + '_' + JSON.stringify(el.depthFocus||{});
+        } else if(el.type === 'shape') {
+            str += '_' + el.shapeType + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor;
+        }
+        str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.emboss||{});
+        return str;
+    } catch(e) {
+        return Math.random().toString();
+    }
+}
+
 /* ========== RENDER ENGINE UTAMA ========== */
 function renderAll(){
 const s=getCurrentSlide();
@@ -1421,43 +1466,47 @@ targetCtx.globalAlpha=el.opacity!==undefined?el.opacity:1;
 
 if(el.blendMode&&el.blendMode!=='normal'){targetCtx.globalCompositeOperation=el.blendMode;}
 
+if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
+    targetCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
+    targetCtx.shadowBlur=el.shadow.blur||0;
+    const rad=(el.shadow.angle||45)*Math.PI/180;
+    const dist=el.shadow.distance||0;
+    targetCtx.shadowOffsetX=Math.cos(rad)*dist;
+    targetCtx.shadowOffsetY=Math.sin(rad)*dist;
+}
+
+const hash = getElHash(el);
+if (el._cachedHash === hash && el._cachedCanvas) {
+    targetCtx.drawImage(el._cachedCanvas, -el._cachedCanvas.width/2 + (el._cachedOffsetX||0), -el._cachedCanvas.height/2 + (el._cachedOffsetY||0));
+    targetCtx.restore();
+    return;
+}
+
 const fontSize=el.fontSize;
 const lineHeight=fontSize*(el.lineHeight||1.3);
 const cleanFont=getCleanFont(el.fontFamily);
 const maxBoxWidth=el.width||750;
 let displayText=el.text||'';
 
-const wrappedData=getWrappedLines(targetCtx,displayText,maxBoxWidth,el);
-const totalHeight=wrappedData.length*lineHeight;
-el._calculatedHeight=totalHeight;
-el._renderedW = maxBoxWidth;
-
 if(el.curveAngle&&Math.abs(el.curveAngle)>=3){
     const angleRad = (el.curveAngle * Math.PI) / 180;
-    const totalTextWidth = targetCtx.measureText(displayText).width + ((el.letterSpacing||0)*displayText.length);
+    const tempCtx = document.createElement('canvas').getContext('2d');
+    tempCtx.font = `${el.fontStyle||'normal'} ${el.fontWeight||'normal'} ${fontSize}px ${cleanFont}`;
+    const totalTextWidth = tempCtx.measureText(displayText).width + ((el.letterSpacing||0)*displayText.length);
     const radius = Math.max(120, totalTextWidth / Math.abs(angleRad));
     const offSize = Math.ceil(radius * 2 + el.fontSize * 2 + 100);
     
-    // Caching Curved Text to prevent lag
-    const cacheKey = `${displayText}_${cleanFont}_${el.fontSize}_${el.color}_${el.curveAngle}_${el.letterSpacing}_${el.shadow?.color}_${el.textSkinSrc}_${el.textSkinOffsetX}_${el.textSkinOffsetY}_${el.textSkinScale}_${JSON.stringify(el.filters)}_${JSON.stringify(el.innerShadow)}_${JSON.stringify(el.emboss)}`;
+    const off = document.createElement('canvas');
+    off.width = offSize;
+    off.height = offSize;
+    const octx = off.getContext('2d');
+    octx.translate(offSize/2, offSize/2);
     
-    if(el._curveCacheKey === cacheKey && el._curveCacheCanvas) {
-        targetCtx.drawImage(el._curveCacheCanvas, -offSize/2, -offSize/2);
-        targetCtx.restore();
-        return;
-    }
-
-    const temp = document.createElement('canvas');
-    temp.width = offSize;
-    temp.height = offSize;
-    const tempCtx = temp.getContext('2d');
-    
-    tempCtx.translate(offSize/2, offSize/2);
-    applyCanvasFilters(tempCtx, el.filters);
-    renderCurvedTextLine(tempCtx, el, displayText, cleanFont);
+    applyCanvasFilters(octx, el.filters);
+    renderCurvedTextLine(octx, el, displayText, cleanFont);
     
     if(el.textSkinImg && el.textSkinImg.complete) {
-        tempCtx.globalCompositeOperation = el.textSkinBlend || 'source-in';
+        octx.globalCompositeOperation = el.textSkinBlend || 'source-in';
         const skin = el.textSkinImg;
         const scale = el.textSkinScale || 1.0;
         const aspect = skin.width / skin.height;
@@ -1466,52 +1515,51 @@ if(el.curveAngle&&Math.abs(el.curveAngle)>=3){
         const dx = -drawW/2 + (el.textSkinOffsetX || 0);
         const dy = -drawH/2 + (el.textSkinOffsetY || 0);
         if(el.skinFilter){
-            tempCtx.filter=`brightness(${el.skinFilter.brightness||100}%) contrast(${el.skinFilter.contrast||100}%) hue-rotate(${el.skinFilter.hue||0}deg) saturate(${el.skinFilter.saturate||100}%)`;
+            octx.filter=`brightness(${el.skinFilter.brightness||100}%) contrast(${el.skinFilter.contrast||100}%) hue-rotate(${el.skinFilter.hue||0}deg) saturate(${el.skinFilter.saturate||100}%)`;
         }
-        tempCtx.drawImage(skin, dx, dy, drawW, drawH);
-        tempCtx.filter = 'none';
-        tempCtx.globalCompositeOperation = 'source-over';
+        octx.drawImage(skin, dx, dy, drawW, drawH);
+        octx.filter = 'none';
+        octx.globalCompositeOperation = 'source-over';
     }
-    
-    tempCtx.resetTransform();
     
     if(el.innerShadow && el.innerShadow.color !== 'transparent') {
-        applySilhouetteInnerShadow(tempCtx, offSize, offSize, el.innerShadow);
+        applySilhouetteInnerShadow(octx, offSize, offSize, el.innerShadow);
     }
     if(el.emboss && el.emboss.active) {
-        applySilhouetteEmboss(tempCtx, offSize, offSize, el.emboss);
+        applySilhouetteEmboss(octx, offSize, offSize, el.emboss);
     }
     
-    if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
-        const shadowCtx = temp.getContext('2d');
-        shadowCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
-        shadowCtx.shadowBlur=el.shadow.blur||0;
-        const rad=(el.shadow.angle||45)*Math.PI/180;
-        const dist=el.shadow.distance||0;
-        shadowCtx.shadowOffsetX=Math.cos(rad)*dist;
-        shadowCtx.shadowOffsetY=Math.sin(rad)*dist;
-    }
-    
-    el._curveCacheCanvas = temp;
-    el._curveCacheKey = cacheKey;
+    el._cachedCanvas = off;
+    el._cachedHash = hash;
+    el._cachedOffsetX = 0;
+    el._cachedOffsetY = 0;
+    el._renderedW = offSize;
+    el._calculatedHeight = offSize;
 
-    targetCtx.drawImage(temp, -offSize/2, -offSize/2);
+    targetCtx.drawImage(off, -offSize/2, -offSize/2);
     targetCtx.restore();
     return;
 }
 
+const tempCtx = document.createElement('canvas').getContext('2d');
+const wrappedData=getWrappedLines(tempCtx,displayText,maxBoxWidth,el);
+const totalHeight=wrappedData.length*lineHeight;
+el._calculatedHeight=totalHeight;
+el._renderedW = maxBoxWidth;
+
+const padX = (el.highlightPaddingX !== undefined ? el.highlightPaddingX : 12) + 20;
+const padY = (el.highlightPaddingY !== undefined ? el.highlightPaddingY : 4) + 20;
+const cW = maxBoxWidth + padX * 2;
+const cH = totalHeight + padY * 2;
+
+const off = document.createElement('canvas');
+off.width = cW;
+off.height = cH;
+const octx = off.getContext('2d');
+octx.translate(cW/2, cH/2);
+
 let startY=-(totalHeight/2)+(lineHeight/2);
 const letterSpace=el.letterSpacing||0;
-
-// Outer Shadow Teks
-if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
-targetCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
-targetCtx.shadowBlur=el.shadow.blur||0;
-const rad=(el.shadow.angle||45)*Math.PI/180;
-const dist=el.shadow.distance||0;
-targetCtx.shadowOffsetX=Math.cos(rad)*dist;
-targetCtx.shadowOffsetY=Math.sin(rad)*dist;
-}
 
 const linesInfo = [];
 wrappedData.forEach((lineObj, idx) => {
@@ -1538,8 +1586,8 @@ wrappedData.forEach((lineObj, idx) => {
         }
         
         const wordWithSpace = (wIdx < lineObj.words.length - 1) ? displayWord + ' ' : displayWord;
-        targetCtx.font = `${wFontStyle} ${wFontWeight} ${fontSize}px ${cleanFont}`;
-        const wordW = targetCtx.measureText(wordWithSpace).width + (letterSpace * wordWithSpace.length);
+        octx.font = `${wFontStyle} ${wFontWeight} ${fontSize}px ${cleanFont}`;
+        const wordW = octx.measureText(wordWithSpace).width + (letterSpace * wordWithSpace.length);
         
         totalLineWidth += wordW;
         
@@ -1585,60 +1633,53 @@ wrappedData.forEach((lineObj, idx) => {
     });
 });
 
-const padX = el.highlightPaddingX !== undefined ? el.highlightPaddingX : 12;
-const padY = el.highlightPaddingY !== undefined ? el.highlightPaddingY : 4;
+const hPadX = el.highlightPaddingX !== undefined ? el.highlightPaddingX : 12;
+const hPadY = el.highlightPaddingY !== undefined ? el.highlightPaddingY : 4;
 const radius = el.highlightRadius !== undefined ? el.highlightRadius : 6;
 
-// Collect Highlights
 const rectsByColor = {};
-
-// Base highlight
 if (el.highlightColor && el.highlightColor !== 'transparent') {
     rectsByColor[el.highlightColor] = [];
     linesInfo.forEach(line => {
         rectsByColor[el.highlightColor].push({
-            x: line.startX - padX,
-            y: line.lineY - (lineHeight/2) - padY,
-            w: line.drawW + (padX*2),
-            h: lineHeight + (padY*2),
+            x: line.startX - hPadX,
+            y: line.lineY - (lineHeight/2) - hPadY,
+            w: line.drawW + (hPadX*2),
+            h: lineHeight + (hPadY*2),
             r: radius
         });
     });
 }
 
-// Word highlights
 linesInfo.forEach(line => {
     line.wordsInfo.forEach(wInfo => {
         if (wInfo.wHighlightColor && wInfo.wHighlightColor !== 'transparent') {
             if (!rectsByColor[wInfo.wHighlightColor]) rectsByColor[wInfo.wHighlightColor] = [];
             rectsByColor[wInfo.wHighlightColor].push({
-                x: wInfo.x - padX,
-                y: wInfo.y - (lineHeight/2) - padY,
-                w: wInfo.wordW + (padX*2),
-                h: lineHeight + (padY*2),
+                x: wInfo.x - hPadX,
+                y: wInfo.y - (lineHeight/2) - hPadY,
+                w: wInfo.wordW + (hPadX*2),
+                h: lineHeight + (hPadY*2),
                 r: radius
             });
         }
     });
 });
 
-// Draw Highlights
-targetCtx.save();
-targetCtx.shadowColor = 'transparent';
+octx.save();
 for (const color in rectsByColor) {
-    targetCtx.beginPath();
+    octx.beginPath();
     rectsByColor[color].forEach(rect => {
-        targetCtx.roundRect(rect.x, rect.y, rect.w, rect.h, rect.r);
+        octx.roundRect(rect.x, rect.y, rect.w, rect.h, rect.r);
     });
-    targetCtx.fillStyle = color;
-    targetCtx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.5);
-    targetCtx.fill();
+    octx.fillStyle = color;
+    octx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.5);
+    octx.fill();
 }
-targetCtx.restore();
+octx.restore();
 
-// Draw Text
-targetCtx.textAlign = 'left';
-targetCtx.textBaseline = 'middle';
+octx.textAlign = 'left';
+octx.textBaseline = 'middle';
 
 linesInfo.forEach(line => {
     line.wordsInfo.forEach(wInfo => {
@@ -1693,46 +1734,52 @@ linesInfo.forEach(line => {
                 applySilhouetteEmboss(tempCtx, temp.width, temp.height, el.emboss);
             }
             
-            targetCtx.drawImage(temp, wInfo.x - pad, wInfo.y - temp.height/2);
+            octx.drawImage(temp, wInfo.x - pad, wInfo.y - temp.height/2);
             
             if(el.borderWidth && el.borderWidth > 0){
-                targetCtx.lineWidth = el.borderWidth * 2;
-                targetCtx.strokeStyle = el.borderColor || '#D4AF37';
-                targetCtx.strokeText(wInfo.wordWithSpace, wInfo.x, wInfo.y);
+                octx.lineWidth = el.borderWidth * 2;
+                octx.strokeStyle = el.borderColor || '#D4AF37';
+                octx.strokeText(wInfo.wordWithSpace, wInfo.x, wInfo.y);
             }
         } else {
-            targetCtx.font = `${wInfo.wFontStyle} ${wInfo.wFontWeight} ${fontSize}px ${cleanFont}`;
-            targetCtx.fillStyle = wInfo.wColor;
+            octx.font = `${wInfo.wFontStyle} ${wInfo.wFontWeight} ${fontSize}px ${cleanFont}`;
+            octx.fillStyle = wInfo.wColor;
             if(letterSpace === 0){
-                targetCtx.fillText(wInfo.wordWithSpace, wInfo.x, wInfo.y);
+                octx.fillText(wInfo.wordWithSpace, wInfo.x, wInfo.y);
             } else {
                 let charX = wInfo.x;
                 for(let c=0; c<wInfo.wordWithSpace.length; c++){
                     const ch = wInfo.wordWithSpace[c];
-                    targetCtx.fillText(ch, charX, wInfo.y);
-                    charX += targetCtx.measureText(ch).width + letterSpace;
+                    octx.fillText(ch, charX, wInfo.y);
+                    charX += octx.measureText(ch).width + letterSpace;
                 }
             }
             if(el.borderWidth && el.borderWidth > 0){
-                targetCtx.lineWidth = el.borderWidth * 2;
-                targetCtx.strokeStyle = el.borderColor || '#D4AF37';
-                targetCtx.strokeText(wInfo.wordWithSpace, wInfo.x, wInfo.y);
+                octx.lineWidth = el.borderWidth * 2;
+                octx.strokeStyle = el.borderColor || '#D4AF37';
+                octx.strokeText(wInfo.wordWithSpace, wInfo.x, wInfo.y);
             }
         }
         
         if(wInfo.wTextDecoration === 'underline'){
-            targetCtx.save();
-            targetCtx.shadowColor = 'transparent';
-            targetCtx.strokeStyle = wInfo.wColor;
-            targetCtx.lineWidth = Math.max(2, fontSize * 0.06);
-            targetCtx.beginPath();
-            targetCtx.moveTo(wInfo.x, wInfo.y + (fontSize * 0.45));
-            targetCtx.lineTo(wInfo.x + wInfo.wordW, wInfo.y + (fontSize * 0.45));
-            targetCtx.stroke();
-            targetCtx.restore();
+            octx.save();
+            octx.strokeStyle = wInfo.wColor;
+            octx.lineWidth = Math.max(2, fontSize * 0.06);
+            octx.beginPath();
+            octx.moveTo(wInfo.x, wInfo.y + (fontSize * 0.45));
+            octx.lineTo(wInfo.x + wInfo.wordW, wInfo.y + (fontSize * 0.45));
+            octx.stroke();
+            octx.restore();
         }
     });
 });
+
+el._cachedCanvas = off;
+el._cachedHash = hash;
+el._cachedOffsetX = 0;
+el._cachedOffsetY = 0;
+
+targetCtx.drawImage(off, -off.width/2, -off.height/2);
 targetCtx.restore();
 }
 
@@ -1791,7 +1838,6 @@ const finalDrawH=Math.round(baseH*visHFrac);
 el._renderedW=finalDrawW;
 el._renderedH=finalDrawH;
 
-// Hitung offset agar gambar yang di-crop tetap berada di posisi visual aslinya
 const cxOffset = ((cropL - cropR) / 200) * baseW;
 const cyOffset = ((cropT - cropB) / 200) * baseH;
 
@@ -1800,65 +1846,49 @@ targetCtx.translate(el.x + cxOffset, el.y + cyOffset);
 if(el.rotation)targetCtx.rotate((el.rotation*Math.PI)/180);
 targetCtx.scale(el.flipH?-1:1,el.flipV?-1:1);
 
-// Terapkan Opacity dan Blend Mode di targetCtx
 targetCtx.globalAlpha=el.opacity!==undefined?el.opacity:1;
 if(el.blendMode&&el.blendMode!=='normal'){targetCtx.globalCompositeOperation=el.blendMode;}
 
-// Outer Shadow dengan Alpha
 if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
-targetCtx.save();
-targetCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
-targetCtx.shadowBlur=el.shadow.blur||0;
-const rad=(el.shadow.angle||45)*Math.PI/180;
-const dist=el.shadow.distance||0;
-targetCtx.shadowOffsetX=Math.cos(rad)*dist;
-targetCtx.shadowOffsetY=Math.sin(rad)*dist;
+    targetCtx.shadowColor=parseColorToRGBA(el.shadow.color, el.shadow.alpha);
+    targetCtx.shadowBlur=el.shadow.blur||0;
+    const rad=(el.shadow.angle||45)*Math.PI/180;
+    const dist=el.shadow.distance||0;
+    targetCtx.shadowOffsetX=Math.cos(rad)*dist;
+    targetCtx.shadowOffsetY=Math.sin(rad)*dist;
 }
 
-const needsOffscreen = (el.blur && el.blur > 0) || 
-                       (el.cornerRadius && el.cornerRadius > 0) || 
-                       (el.colorOverlay && el.colorOverlay !== 'none') || 
-                       (el.imageSkinImg && el.imageSkinImg.complete) || 
-                       (el.innerShadow && el.innerShadow.color !== 'transparent') || 
-                       (el.emboss && el.emboss.active) || 
-                       (el.borderWidth && el.borderWidth > 0) || 
-                       (el.depthFocus && el.depthFocus.active) ||
-                       (el.filters && (el.filters.brightness!==100 || el.filters.contrast!==100 || el.filters.saturate!==100 || el.filters.hue!==0)) ||
-                       (el.advancedColor && el.advancedColor.active);
-
-if (!needsOffscreen) {
-    targetCtx.drawImage(el.img, sx, sy, sWidth, sHeight, -finalDrawW/2, -finalDrawH/2, finalDrawW, finalDrawH);
-    if(el.shadow && el.shadow.color && el.shadow.color !== 'transparent'){
-        targetCtx.restore();
-    }
+const hash = getElHash(el);
+if (el._cachedHash === hash && el._cachedCanvas) {
+    targetCtx.drawImage(el._cachedCanvas, -el._cachedCanvas.width/2, -el._cachedCanvas.height/2);
     targetCtx.restore();
     return;
 }
 
-const pad = (el.blur || 0) * 3 + (el.borderWidth || 0) * 2 + (el.shadow && el.shadow.color !== 'transparent' ? (el.shadow.blur || 0) + (el.shadow.distance || 0) : 0);
+const pad = (el.blur || 0) * 3 + (el.borderWidth || 0) * 2 + 20;
 const off=document.createElement('canvas');
 off.width=finalDrawW + pad * 2;
 off.height=finalDrawH + pad * 2;
 const octx=off.getContext('2d');
+octx.translate(off.width/2, off.height/2);
 
 applyCanvasFilters(octx, el.filters);
 
 const radius=Math.min(el.cornerRadius||0,Math.min(finalDrawW,finalDrawH)/2);
 if(radius>0){
 octx.beginPath();
-octx.roundRect(pad,pad,finalDrawW,finalDrawH,radius);
+octx.roundRect(-finalDrawW/2,-finalDrawH/2,finalDrawW,finalDrawH,radius);
 octx.clip();
 }
 
 if(el.depthFocus&&el.depthFocus.active){
-renderTiltShiftDepthBlur(octx,el.img,sx,sy,sWidth,sHeight,finalDrawW,finalDrawH,el.depthFocus, pad);
+renderTiltShiftDepthBlur(octx,el.img,sx,sy,sWidth,sHeight,finalDrawW,finalDrawH,el.depthFocus, -finalDrawW/2, -finalDrawH/2);
 }else{
 if(el.blur&&el.blur>0)octx.filter=`blur(${el.blur}px)`;
-octx.drawImage(el.img,sx,sy,sWidth,sHeight,pad,pad,finalDrawW,finalDrawH);
+octx.drawImage(el.img,sx,sy,sWidth,sHeight,-finalDrawW/2,-finalDrawH/2,finalDrawW,finalDrawH);
 octx.filter='none';
 }
 
-// Advanced Color (HSL)
 if(el.advancedColor && el.advancedColor.active) {
     applyAdvancedColor(octx, off.width, off.height, el.advancedColor);
 }
@@ -1866,10 +1896,9 @@ if(el.advancedColor && el.advancedColor.active) {
 if(el.colorOverlay&&el.colorOverlay!=='none'){
 octx.globalCompositeOperation='source-in';
 octx.fillStyle=el.colorOverlay;
-octx.fillRect(0,0,off.width,off.height);
+octx.fillRect(-off.width/2,-off.height/2,off.width,off.height);
 }
 
-// Skin Texture Overlay pada Foto
 if(el.imageSkinImg&&el.imageSkinImg.complete){
 const sOff=document.createElement('canvas');
 sOff.width=off.width;
@@ -1880,37 +1909,33 @@ const sScale=el.imageSkinScale||1.0;
 const sAspect=sImg.width/sImg.height;
 let sDrawW=Math.max(finalDrawW,finalDrawH*sAspect)*sScale;
 let sDrawH=sDrawW/sAspect;
-const sDx=((finalDrawW-sDrawW)/2)+(el.imageSkinOffsetX||0) + pad;
-const sDy=((finalDrawH-sDrawH)/2)+(el.imageSkinOffsetY||0) + pad;
+const sDx=((finalDrawW-sDrawW)/2)+(el.imageSkinOffsetX||0) + (off.width/2 - finalDrawW/2);
+const sDy=((finalDrawH-sDrawH)/2)+(el.imageSkinOffsetY||0) + (off.height/2 - finalDrawH/2);
 soctx.drawImage(sImg,sDx,sDy,sDrawW,sDrawH);
 
 octx.save();
 octx.globalCompositeOperation=el.imageSkinBlend||'source-in';
 octx.globalAlpha=el.imageSkinOpacity!==undefined?el.imageSkinOpacity:1.0;
-octx.drawImage(sOff,0,0);
+octx.drawImage(sOff,-off.width/2,-off.height/2);
 octx.restore();
 }
 
-// Inner Shadow pada Siluet PNG
 if(el.innerShadow&&el.innerShadow.color&&el.innerShadow.color!=='transparent'){
 applySilhouetteInnerShadow(octx,off.width,off.height,el.innerShadow);
 }
 
-// Emboss 3D pada Siluet PNG
 if(el.emboss&&el.emboss.active){
 applySilhouetteEmboss(octx,off.width,off.height,el.emboss);
 }
 
-// Garis Tepi Siluet Orang / PNG Transparan (Contour Sticker Stroke)
 if(el.borderWidth&&el.borderWidth>0&&el.borderColor){
-renderContourStrokePNG(targetCtx,off,finalDrawW,finalDrawH,el, pad);
-}else{
-targetCtx.drawImage(off,-finalDrawW/2 - pad,-finalDrawH/2 - pad);
+renderContourStrokePNG(octx,off,finalDrawW,finalDrawH,el);
 }
 
-if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
-targetCtx.restore();
-}
+el._cachedCanvas = off;
+el._cachedHash = hash;
+
+targetCtx.drawImage(off,-off.width/2,-off.height/2);
 targetCtx.restore();
 }
 
@@ -1931,10 +1956,24 @@ function renderShapeElement(targetCtx, el) {
         targetCtx.shadowOffsetY = Math.sin(rad) * dist;
     }
 
+    const hash = getElHash(el);
+    if (el._cachedHash === hash && el._cachedCanvas) {
+        targetCtx.drawImage(el._cachedCanvas, -el._cachedCanvas.width/2, -el._cachedCanvas.height/2);
+        targetCtx.restore();
+        return;
+    }
+
     const w = el.width || 200;
     const h = el.height || 200;
     el._renderedW = w;
     el._renderedH = h;
+
+    const pad = 20 + (el.borderWidth || 0);
+    const off = document.createElement('canvas');
+    off.width = w + pad*2;
+    off.height = h + pad*2;
+    const octx = off.getContext('2d');
+    octx.translate(off.width/2, off.height/2);
 
     const drawShape = (ctx) => {
         ctx.beginPath();
@@ -1983,64 +2022,39 @@ function renderShapeElement(targetCtx, el) {
         }
     };
 
-    const needsOffscreen = (el.innerShadow && el.innerShadow.color !== 'transparent') || (el.emboss && el.emboss.active);
-
-    if(needsOffscreen) {
-        const pad = 20;
-        const off = document.createElement('canvas');
-        off.width = w + pad*2;
-        off.height = h + pad*2;
-        const octx = off.getContext('2d');
-        octx.translate(w/2 + pad, h/2 + pad);
-        
-        octx.fillStyle = el.color || '#D4AF37';
-        drawShape(octx);
-        if(el.shapeType === 'line') {
-            octx.strokeStyle = el.color || '#D4AF37';
-            octx.lineWidth = el.height || 10;
-            octx.stroke();
-        } else {
-            octx.fill();
-        }
-        
-        if(el.borderWidth && el.borderWidth > 0 && el.shapeType !== 'line') {
-            octx.lineWidth = el.borderWidth;
-            octx.strokeStyle = el.borderColor || '#fff';
-            drawShape(octx);
-            octx.stroke();
-        }
-
-        if(el.innerShadow && el.innerShadow.color !== 'transparent'){
-            applySilhouetteInnerShadow(octx, off.width, off.height, el.innerShadow);
-        }
-        if(el.emboss && el.emboss.active){
-            applySilhouetteEmboss(octx, off.width, off.height, el.emboss);
-        }
-
-        targetCtx.drawImage(off, -w/2 - pad, -h/2 - pad);
+    octx.fillStyle = el.color || '#D4AF37';
+    drawShape(octx);
+    if(el.shapeType === 'line') {
+        octx.strokeStyle = el.color || '#D4AF37';
+        octx.lineWidth = el.height || 10;
+        octx.stroke();
     } else {
-        targetCtx.fillStyle = el.color || '#D4AF37';
-        drawShape(targetCtx);
-        if(el.shapeType === 'line') {
-            targetCtx.strokeStyle = el.color || '#D4AF37';
-            targetCtx.lineWidth = el.height || 10;
-            targetCtx.stroke();
-        } else {
-            targetCtx.fill();
-        }
-
-        if(el.borderWidth && el.borderWidth > 0 && el.shapeType !== 'line') {
-            targetCtx.lineWidth = el.borderWidth;
-            targetCtx.strokeStyle = el.borderColor || '#fff';
-            targetCtx.stroke();
-        }
+        octx.fill();
+    }
+    
+    if(el.borderWidth && el.borderWidth > 0 && el.shapeType !== 'line') {
+        octx.lineWidth = el.borderWidth;
+        octx.strokeStyle = el.borderColor || '#fff';
+        drawShape(octx);
+        octx.stroke();
     }
 
+    if(el.innerShadow && el.innerShadow.color !== 'transparent'){
+        applySilhouetteInnerShadow(octx, off.width, off.height, el.innerShadow);
+    }
+    if(el.emboss && el.emboss.active){
+        applySilhouetteEmboss(octx, off.width, off.height, el.emboss);
+    }
+
+    el._cachedCanvas = off;
+    el._cachedHash = hash;
+
+    targetCtx.drawImage(off, -off.width/2, -off.height/2);
     targetCtx.restore();
 }
 
 /* Helper Contour Sticker Stroke untuk PNG Transparan & Foto Kotak */
-function renderContourStrokePNG(targetCtx,imgCanvas,w,h,el, pad){
+function renderContourStrokePNG(targetCtx,imgCanvas,w,h,el){
 const bw=el.borderWidth||4;
 const bcolor=el.borderColor||'#D4AF37';
 const blur=el.borderBlur||0;
@@ -2062,8 +2076,10 @@ sctx.globalAlpha=el.borderAlpha!==undefined?el.borderAlpha:1.0;
 sctx.fillRect(0,0,strokeCanvas.width,strokeCanvas.height);
 sctx.restore();
 
-targetCtx.drawImage(strokeCanvas,-w/2 - pad,-h/2 - pad);
-targetCtx.drawImage(imgCanvas,-w/2 - pad,-h/2 - pad);
+targetCtx.save();
+targetCtx.globalCompositeOperation='destination-over';
+targetCtx.drawImage(strokeCanvas,-imgCanvas.width/2,-imgCanvas.height/2);
+targetCtx.restore();
 }
 
 function applySilhouetteInnerShadow(targetCtx,w,h,ish){
@@ -2086,7 +2102,7 @@ targetCtx.shadowColor=parseColorToRGBA(ish.color||'rgba(0,0,0,0.85)', ish.alpha)
 targetCtx.shadowBlur=blur;
 targetCtx.shadowOffsetX=ox;
 targetCtx.shadowOffsetY=oy;
-targetCtx.drawImage(temp,0,0);
+targetCtx.drawImage(temp,-w/2,-h/2);
 targetCtx.restore();
 }
 
@@ -2115,7 +2131,7 @@ targetCtx.save();
 if(em.cutout && em.cutout > 0) {
     targetCtx.globalCompositeOperation = 'destination-out';
     targetCtx.globalAlpha = em.cutout;
-    targetCtx.drawImage(hl, 0, 0);
+    targetCtx.drawImage(hl, -w/2, -h/2);
     targetCtx.globalAlpha = 1.0;
 }
 
@@ -2125,18 +2141,18 @@ targetCtx.globalAlpha=em.intensity!==undefined?em.intensity:0.85;
 hctx.globalCompositeOperation='source-in';
 hctx.fillStyle=em.highlightColor||'rgba(255,255,255,0.85)';
 hctx.fillRect(0,0,w,h);
-targetCtx.drawImage(hl,0,0);
+targetCtx.drawImage(hl,-w/2,-h/2);
 
 sctx.globalCompositeOperation='source-in';
 sctx.fillStyle=em.shadowColor||'rgba(0,0,0,0.85)';
 sctx.fillRect(0,0,w,h);
-targetCtx.drawImage(sh,0,0);
+targetCtx.drawImage(sh,-w/2,-h/2);
 
 targetCtx.restore();
 }
 
 /* ========== FOKUS LENSA DSLR / TILT-SHIFT ENGINE ========== */
-function renderTiltShiftDepthBlur(targetCtx,img,sx,sy,sw,sh,dw,dh,focusData, pad){
+function renderTiltShiftDepthBlur(targetCtx,img,sx,sy,sw,sh,dw,dh,focusData, dx, dy){
 const sharpCanvas=document.createElement('canvas');
 sharpCanvas.width=dw;sharpCanvas.height=dh;
 sharpCanvas.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,dw,dh);
@@ -2185,10 +2201,10 @@ mctx.fillStyle=grad;
 mctx.fillRect(0,0,dw,dh);
 }
 
-targetCtx.drawImage(sharpCanvas,pad,pad);
+targetCtx.drawImage(sharpCanvas,dx,dy);
 bctx.globalCompositeOperation='destination-in';
 bctx.drawImage(maskCanvas,0,0);
-targetCtx.drawImage(blurCanvas,pad,pad);
+targetCtx.drawImage(blurCanvas,dx,dy);
 }
 
 /* ========== ADVANCED COLOR (HSL) ENGINE ========== */
@@ -2249,7 +2265,6 @@ function applyAdvancedColor(ctx, w, h, settings) {
         
         let r = data[i], g = data[i+1], b = data[i+2];
         
-        // HSL Channel Adjustments
         if(hasChannelAdjustments) {
             let [h_val, s_val, l_val] = rgbToHsl(r, g, b);
             let hueDeg = h_val * 360;
@@ -2280,7 +2295,6 @@ function applyAdvancedColor(ctx, w, h, settings) {
             }
         }
         
-        // Luma for Highlights/Shadows
         const luma = 0.299*r + 0.587*g + 0.114*b;
         
         if(highlights !== 0 && luma > 128) {
@@ -2296,7 +2310,6 @@ function applyAdvancedColor(ctx, w, h, settings) {
             r += midtones * factor; g += midtones * factor; b += midtones * factor;
         }
         
-        // Intensity
         if(intFactor !== 1) {
             r = luma + (r - luma) * intFactor;
             g = luma + (g - luma) * intFactor;
@@ -2611,7 +2624,6 @@ let angle=Math.atan2(dy,dx)*(180/Math.PI)-90;
 angle=Math.round(angle);
 if(angle<0)angle+=360;
 
-// Snapping to 45 degrees
 if (angle % 45 <= 3 || angle % 45 >= 42) {
     angle = Math.round(angle / 45) * 45;
 }
@@ -2895,7 +2907,7 @@ if(!el)return;
 const num=parseInt(v);
 el.width=num;
 document.getElementById('valBoxW').innerText=num+'px';
-requestRender();
+renderAll();
 debouncedPushHistory();
 }
 
@@ -2912,7 +2924,7 @@ if(boxSlider){boxSlider.value=el.width;document.getElementById('valBoxW').innerT
 el.fontSize=num;
 const lbl=document.getElementById('valFontSize');
 if(lbl)lbl.innerText=val+'px';
-requestRender();
+renderAll();
 debouncedPushHistory();
 }
 
@@ -3695,6 +3707,7 @@ showToast(pos==='top'?'⏫ Dipindah ke paling depan':'⏬ Dipindah ke paling bel
 /* ========== CROP BEBAS MENGGUNAKAN JARI (LASSO CUTOUT) ========== */
 let freeCropPoints=[];
 let isDrawingFreeCrop=false;
+let freeCropPaintMode=true;
 
 function openFreeCropModal(){
 const el=getActiveElement();
@@ -3721,25 +3734,73 @@ freeCropPoints=[];
 renderFreeCropDisplay();
 }
 
+function toggleFreeCropPaintMode() {
+    freeCropPaintMode = !freeCropPaintMode;
+    const btn = document.getElementById('freeCropPaintToggle');
+    if(freeCropPaintMode) {
+        btn.innerText = '✂️';
+        btn.style.color = '#00ff88';
+    } else {
+        btn.innerText = '🚫';
+        btn.style.color = '#ff6b6b';
+    }
+}
+
 function setupFreeCropEvents(){
 const canvas=document.getElementById('freeCropCanvas');
-canvas.addEventListener('pointerdown',(e)=>{
-isDrawingFreeCrop=true;
-const rect=canvas.getBoundingClientRect();
-freeCropPoints=[{x:e.clientX-rect.left,y:e.clientY-rect.top}];
-renderFreeCropDisplay();
-});
+const stalk=document.getElementById('freeCropStalk');
+const dragHandle=document.getElementById('freeCropDragHandle');
+let isDraggingStalk=false;
+let stalkOffset={x:0,y:0};
+
+if(dragHandle) {
+    dragHandle.addEventListener('pointerdown',(e)=>{
+        isDraggingStalk=true;
+        dragHandle.setPointerCapture(e.pointerId);
+        const rect=stalk.getBoundingClientRect();
+        stalkOffset={x:e.clientX-rect.left,y:e.clientY-rect.top};
+        e.stopPropagation();
+    });
+}
+
 window.addEventListener('pointermove',(e)=>{
-if(!isDrawingFreeCrop)return;
-const canvas=document.getElementById('freeCropCanvas');
-const rect=canvas.getBoundingClientRect();
-freeCropPoints.push({x:e.clientX-rect.left,y:e.clientY-rect.top});
-renderFreeCropDisplay();
+    if(isDraggingStalk){
+        const stalkX = e.clientX - stalkOffset.x;
+        const stalkY = e.clientY - stalkOffset.y;
+        stalk.style.left = stalkX + 'px';
+        stalk.style.top = stalkY + 'px';
+        stalk.style.transform = 'none';
+        
+        if(freeCropPaintMode) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const brushX = (stalkX - canvasRect.left + (stalk.offsetWidth/2));
+            const brushY = (stalkY - canvasRect.top - 20);
+            addFreeCropPoint(brushX, brushY);
+        }
+    } else if(isDrawingFreeCrop && freeCropPaintMode){
+        const rect=canvas.getBoundingClientRect();
+        addFreeCropPoint(e.clientX-rect.left, e.clientY-rect.top);
+    }
 });
+
 window.addEventListener('pointerup',()=>{
-isDrawingFreeCrop=false;
-renderFreeCropDisplay();
+    isDraggingStalk=false;
+    isDrawingFreeCrop=false;
+    renderFreeCropDisplay();
 });
+
+canvas.addEventListener('pointerdown',(e)=>{
+    if(!freeCropPaintMode) return;
+    isDrawingFreeCrop=true;
+    const rect=canvas.getBoundingClientRect();
+    freeCropPoints=[{x:e.clientX-rect.left,y:e.clientY-rect.top}];
+    renderFreeCropDisplay();
+});
+}
+
+function addFreeCropPoint(x, y) {
+    freeCropPoints.push({x, y});
+    renderFreeCropDisplay();
 }
 
 function renderFreeCropDisplay(){
@@ -3842,6 +3903,9 @@ function setupPenToolEvents() {
         lastPenX = (e.clientX - rect.left) / (canvasScale * userZoomScale);
         lastPenY = (e.clientY - rect.top) / (canvasScale * userZoomScale);
         drawingCanvasOverlay.setPointerCapture(e.pointerId);
+        
+        dctx.beginPath();
+        dctx.moveTo(lastPenX, lastPenY);
     };
     
     drawingCanvasOverlay.onpointermove = (e) => {
@@ -3854,16 +3918,15 @@ function setupPenToolEvents() {
         const color = document.getElementById('penColor').value;
         const size = parseInt(document.getElementById('penSize').value);
         
-        dctx.beginPath();
-        dctx.moveTo(lastPenX, lastPenY);
-        dctx.lineTo(x, y);
-        
         if(type === 'eraser') {
             dctx.globalCompositeOperation = 'destination-out';
             dctx.lineWidth = size;
             dctx.lineCap = 'round';
             dctx.lineJoin = 'round';
+            dctx.lineTo(x, y);
             dctx.stroke();
+            dctx.beginPath();
+            dctx.moveTo(x, y);
         } else {
             dctx.globalCompositeOperation = 'source-over';
             dctx.strokeStyle = color;
@@ -3874,10 +3937,11 @@ function setupPenToolEvents() {
                 dctx.shadowColor = color;
                 dctx.lineCap = 'round';
                 dctx.lineJoin = 'round';
-            } else if(type === 'pixel') {
+            } else if(type === 'blur') {
                 dctx.shadowBlur = 0;
-                dctx.lineCap = 'square';
-                dctx.lineJoin = 'miter';
+                dctx.filter = 'blur(8px)';
+                dctx.lineCap = 'round';
+                dctx.lineJoin = 'round';
             } else if(type === 'marker') {
                 dctx.shadowBlur = 0;
                 dctx.globalAlpha = 0.5;
@@ -3889,9 +3953,15 @@ function setupPenToolEvents() {
                 dctx.lineCap = 'round';
                 dctx.lineJoin = 'round';
             }
+            
+            dctx.lineTo(x, y);
             dctx.stroke();
+            dctx.beginPath();
+            dctx.moveTo(x, y);
+            
             dctx.globalAlpha = 1.0;
             dctx.shadowBlur = 0;
+            dctx.filter = 'none';
         }
         
         lastPenX = x;
@@ -6086,3 +6156,4 @@ window.onload=initApp;
 </script>
 </body>
 </html>
+```
