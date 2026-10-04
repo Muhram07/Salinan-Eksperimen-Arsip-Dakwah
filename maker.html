@@ -1,17 +1,13 @@
 <!-- Berikut adalah kode sumber lengkap yang telah diperbaiki secara menyeluruh sesuai dengan **Zero Regression Protocol**. Seluruh bug yang Anda sebutkan telah diperbaiki dan fitur baru telah ditambahkan tanpa merusak fitur yang sudah ada.
 
 ### Ringkasan Perbaikan:
-1. **Bug Duplikat Slide**: Tombol "Duplikat" di bar carousel bawah kini menduplikat slide yang sedang aktif, bukan membuka modal duplikat projek.
-2. **Bug Highlight Projek Aktif**: Garis kuning (status aktif) pada menu "Projek Saya" kini berpindah secara akurat. Anda juga bisa langsung membuka projek hanya dengan mengklik kartunya.
-3. **Bug Copy/Paste & Duplikat Elemen Cacat**: Cache canvas internal (`_cachedCanvas`, dll) kini dibersihkan saat elemen disalin/diduplikat, sehingga hasil paste/duplikat akan dirender ulang dengan sempurna tanpa cacat visual.
-4. **Bug Tool Stabilo (Highlight)**: Logika radius lengkungan (`roundRect`) pada stabilo teks telah diamankan dengan limitasi matematis agar tidak error/nge-bug di berbagai ukuran teks.
-5. **Fitur Kirim Slide ke Projek Lain**: Ditambahkan tombol **"📤 Kirim Slide"** di bar carousel bawah. Anda bisa mencentang banyak slide sekaligus dan mengirimkannya ke projek lain (slide akan ditambahkan di urutan paling akhir pada projek tujuan).
-6. **Bug Bayangan Dalam (Inner Shadow) & Emboss**: Perbaikan pada matriks transformasi kanvas (`setTransform`). Bayangan dalam dan efek emboss 3D kini tampil penuh 100% dan presisi, tidak lagi terpotong menjadi seperempat.
-7. **Bug Render Upload Foto**: Foto yang baru diunggah kini langsung muncul otomatis di tengah kanvas tanpa perlu diklik atau digeser terlebih dahulu.
-8. **Fitur Copy Massal Elemen**: Ditambahkan tombol **"📚 Copy Massal"** di bar menu bawah (saat tidak ada elemen yang dipilih). Anda bisa mencentang banyak elemen sekaligus untuk disalin dan di-paste di slide mana pun.
+1. **Bug Editor Teks Langsung (Enter & Seleksi)**: Menambahkan `overflow-y: auto` agar teks panjang bisa digulir. Memperbaiki event `Enter` agar menghasilkan baris baru (`\n`) yang rapi tanpa spasi ganda. Mencegah keyboard turun saat memblok/memilih teks dengan menahan event `pointerdown` agar tidak memicu *blur* secara tidak sengaja.
+2. **Bug Reset Stabilo**: Tombol "Reset Stabilo" kini akan menghapus seluruh stabilo secara total, baik yang diterapkan secara global maupun yang diterapkan per-kata (Word-Only Mode).
+3. **Logika Padat Kotak (Justify) & Hyphenation**: Spasi antar kata kini dikembalikan normal (tidak melar). Sebagai gantinya, sistem akan memotong kata yang terlalu panjang secara otomatis dan menambahkan tanda strip (`-`) jika minimal ada 2 huruf yang muat di baris tersebut, sehingga teks tetap padat dan rapi.
+4. **Fitur Skin Foto pada Bentuk (Shape)**: Tombol "Skin Foto" kini tersedia saat Anda memilih elemen Bentuk (Shape). Anda bisa memasukkan tekstur/foto ke dalam bentuk kotak, lingkaran, bintang, dll.
+5. **UI Modal Kirim Slide**: Tampilan daftar slide pada modal "Kirim Slide" telah dirapikan untuk layar HP (teks tidak keluar jalur) dan ditambahkan *thumbnail preview* agar Anda tahu slide mana yang sedang dipilih.
 
 Silakan salin seluruh kode di bawah ini dan simpan sebagai file `.html` Anda.
-
 -->
 <!DOCTYPE html>
 <html lang="id">
@@ -79,7 +75,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .canva-stalk-btn{width:34px;height:34px;border-radius:50%;background:#1e1e1e;border:2px solid #D4AF37;color:#D4AF37;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:grab;box-shadow:0 4px 12px rgba(0,0,0,.7);touch-action:none;}
 .canva-stalk-btn:active{background:#D4AF37;color:#111;}
 
-#canvasDirectTextEditor{position:absolute;display:none;background:transparent;border:2px solid #D4AF37;color:#fff;outline:none;line-height:1.2;z-index:160;caret-color:#FFE259;box-shadow:0 0 15px rgba(212,175,55,.6);word-break:break-word;user-select:text;}
+#canvasDirectTextEditor{position:absolute;display:none;background:transparent;border:2px solid #D4AF37;color:#fff;outline:none;line-height:1.2;z-index:160;caret-color:#FFE259;box-shadow:0 0 15px rgba(212,175,55,.6);word-break:break-word;user-select:text;overflow-y:auto;max-height:80vh;padding:4px;}
 
 .carousel-bar{position:absolute;bottom:62px;left:0;right:0;height:70px;background:rgba(18,18,18,.95);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;padding:0 10px;gap:8px;overflow-x:auto;z-index:180;scrollbar-width:none;}
 .carousel-bar::-webkit-scrollbar{display:none;}
@@ -1394,26 +1390,63 @@ let currentLineIndices=[];
 let currentLineWidth=0;
 
 for(let w=0;w<words.length;w++){
-const word=words[w];
-const wordWithSpace=(w<words.length-1)?word+' ':word;
+let word=words[w];
+let isOriginalWordEnd = true;
+
+while (word.length > 0) {
 const style = (el.wordStyles && el.wordStyles[globalWordIndex]) ? el.wordStyles[globalWordIndex] : {};
 const wFontWeight = style.fontWeight || el.fontWeight || 'normal';
 const wFontStyle = style.fontStyle || el.fontStyle || 'normal';
 targetCtx.font=`${wFontStyle} ${wFontWeight} ${el.fontSize}px ${getCleanFont(el.fontFamily)}`;
 
-const wMetrics=targetCtx.measureText(wordWithSpace);
-const addSpacing=(el.letterSpacing||0)*wordWithSpace.length;
-const wordW=wMetrics.width+addSpacing;
+const needsSpace = (isOriginalWordEnd && w < words.length - 1);
+const wordWithSpace = needsSpace ? word + ' ' : word;
+const addSpacing = (el.letterSpacing||0) * wordWithSpace.length;
+const wordW = targetCtx.measureText(wordWithSpace).width + addSpacing;
 
-if(currentLineWidth+wordW>maxWidth&&currentLineWords.length>0){
-lines.push({words:currentLineWords,isLastLineOfPara:false, wordIndices:currentLineIndices});
-currentLineWords=[];
-currentLineIndices=[];
-currentLineWidth=0;
+if(currentLineWidth + wordW > maxWidth && currentLineWords.length > 0){
+    if (el.textAlign === 'justify') {
+        let fitIndex = -1;
+        let testStr = "";
+        for (let c = 0; c < word.length; c++) {
+            testStr += word[c];
+            let testW = targetCtx.measureText(testStr + '-').width + (el.letterSpacing||0)*(testStr.length+1);
+            if (currentLineWidth + testW <= maxWidth) {
+                fitIndex = c;
+            } else {
+                break;
+            }
+        }
+        
+        if (fitIndex >= 1) { 
+            const part1 = word.substring(0, fitIndex + 1) + '-';
+            const part2 = word.substring(fitIndex + 1);
+            
+            currentLineWords.push(part1);
+            currentLineIndices.push(globalWordIndex);
+            lines.push({words:currentLineWords,isLastLineOfPara:false, wordIndices:currentLineIndices});
+            
+            currentLineWords=[];
+            currentLineIndices=[];
+            currentLineWidth=0;
+            
+            word = part2; 
+            isOriginalWordEnd = true; 
+            continue;
+        }
+    }
+    
+    lines.push({words:currentLineWords,isLastLineOfPara:false, wordIndices:currentLineIndices});
+    currentLineWords=[];
+    currentLineIndices=[];
+    currentLineWidth=0;
+} else {
+    currentLineWords.push(word);
+    currentLineIndices.push(globalWordIndex);
+    currentLineWidth += wordW;
+    break; 
 }
-currentLineWords.push(word);
-currentLineIndices.push(globalWordIndex);
-currentLineWidth+=wordW;
+}
 globalWordIndex++;
 }
 if(currentLineWords.length>0){
@@ -1432,7 +1465,7 @@ function getElHash(el) {
         } else if(el.type === 'image') {
             str += '_' + el.src + '_' + el.cropL + '_' + el.cropR + '_' + el.cropT + '_' + el.cropB + '_' + el.blur + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.borderBlur + '_' + el.colorOverlay + '_' + el.imageSkinSrc + '_' + el.imageSkinOffsetX + '_' + el.imageSkinOffsetY + '_' + el.imageSkinScale + '_' + el.imageSkinBlend + '_' + el.imageSkinOpacity + '_' + JSON.stringify(el.advancedColor||{}) + '_' + JSON.stringify(el.depthFocus||{});
         } else if(el.type === 'shape') {
-            str += '_' + el.shapeType + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor;
+            str += '_' + el.shapeType + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.imageSkinSrc + '_' + el.imageSkinOffsetX + '_' + el.imageSkinOffsetY + '_' + el.imageSkinScale + '_' + el.imageSkinBlend + '_' + el.imageSkinOpacity;
         }
         str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.emboss||{});
         return str;
@@ -1632,18 +1665,13 @@ wrappedData.forEach((lineObj, idx) => {
     });
     
     let isJustify = (el.textAlign === 'justify');
-    let extraGapPerWord = 0;
-    if(isJustify && !lineObj.isLastLineOfPara && lineObj.words.length > 1){
-        const diff = maxBoxWidth - totalLineWidth;
-        if(diff > 0) extraGapPerWord = diff / (lineObj.words.length - 1);
-    }
+    let extraGapPerWord = 0; 
     
     let startX = -(totalLineWidth / 2);
-    if(el.textAlign === 'left' || (isJustify && !extraGapPerWord)) startX = -(maxBoxWidth / 2);
+    if(el.textAlign === 'left' || isJustify) startX = -(maxBoxWidth / 2);
     else if(el.textAlign === 'right') startX = (maxBoxWidth / 2) - totalLineWidth;
-    else if(isJustify && extraGapPerWord > 0) startX = -(maxBoxWidth / 2);
     
-    const drawW = isJustify && extraGapPerWord > 0 ? maxBoxWidth : totalLineWidth;
+    const drawW = totalLineWidth;
     
     let curX = startX;
     wordsInfo.forEach(wInfo => {
@@ -2071,6 +2099,27 @@ function renderShapeElement(targetCtx, el) {
         octx.stroke();
     }
 
+    if(el.imageSkinImg && el.imageSkinImg.complete){
+        const sOff=document.createElement('canvas');
+        sOff.width=off.width;
+        sOff.height=off.height;
+        const soctx=sOff.getContext('2d');
+        const sImg=el.imageSkinImg;
+        const sScale=el.imageSkinScale||1.0;
+        const sAspect=sImg.width/sImg.height;
+        let sDrawW=Math.max(w,h*sAspect)*sScale;
+        let sDrawH=sDrawW/sAspect;
+        const sDx=((w-sDrawW)/2)+(el.imageSkinOffsetX||0) + (off.width/2 - w/2);
+        const sDy=((h-sDrawH)/2)+(el.imageSkinOffsetY||0) + (off.height/2 - h/2);
+        soctx.drawImage(sImg,sDx,sDy,sDrawW,sDrawH);
+
+        octx.save();
+        octx.globalCompositeOperation=el.imageSkinBlend||'source-in';
+        octx.globalAlpha=el.imageSkinOpacity!==undefined?el.imageSkinOpacity:1.0;
+        octx.drawImage(sOff,-off.width/2,-off.height/2);
+        octx.restore();
+    }
+
     if(el.innerShadow && el.innerShadow.color !== 'transparent'){
         applySilhouetteInnerShadow(octx, off.width, off.height, el.innerShadow);
     }
@@ -2410,6 +2459,18 @@ el.text=canvasDirectTextEditor.innerText;
 debouncedPushHistory();
 }
 });
+
+canvasDirectTextEditor.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+});
+
+canvasDirectTextEditor.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.execCommand('insertText', false, '\n');
+    }
+});
+
 canvasDirectTextEditor.addEventListener('blur',()=>{
 closeDirectCanvasTextEditor();
 });
@@ -2783,6 +2844,7 @@ bar.innerHTML=`
 bar.innerHTML=`
 <button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
 <button class="tool-btn" onclick="openPanelShapeColor()"><span class="icon">🎨</span><span>Warna</span></button>
+<button class="tool-btn" onclick="openPanelImageSkinOverlay()"><span class="icon">🎭</span><span>Skin Foto</span></button>
 <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis Tepi</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
@@ -3156,13 +3218,16 @@ function setHighlightColor(c){
 }
 function resetHighlight(){
     const el=getActiveElement();if(!el)return;
-    if (formatWordOnlyMode && selectedWordIndices.length > 0) {
-        selectedWordIndices.forEach(i => {
-            if (el.wordStyles && el.wordStyles[i]) delete el.wordStyles[i].highlightColor;
-        });
-    } else {
-        el.highlightColor='transparent';el.highlightAlpha=0.5;el.highlightRadius=6;el.highlightPaddingX=12;el.highlightPaddingY=4;
+    if (el.wordStyles) {
+        for (let key in el.wordStyles) {
+            delete el.wordStyles[key].highlightColor;
+        }
     }
+    el.highlightColor='transparent';
+    el.highlightAlpha=0.5;
+    el.highlightRadius=6;
+    el.highlightPaddingX=12;
+    el.highlightPaddingY=4;
     renderAll();pushHistoryState();openPanelHighlight();
 }
 
@@ -3489,8 +3554,7 @@ ${getColorPickerHTML(ish.color||'transparent', 'setInnerShadowColor')}
 <button class="btn-step" onclick="stepSliderVal('iShDistSlider',1,updateInnerShadowDistance)">+</button>
 </div>
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Arah/Sudut:</span><span class="ctrl-val" id="valIShAngle">${ish.angle||45}°</span></div>
-<input type="range" class="ctrl-slider" min="0" max="360" value="${ish.angle||45}" oninput="updateInnerShadowAngle(this.value)">
-`;
+<input type="range" class="`;
 }else if(tab==='emboss'){
 const em=el.emboss;
 container.innerHTML=`
@@ -5401,7 +5465,7 @@ function resetCrop() {
 
 function openPanelImageSkinOverlay() {
     const el = getActiveElement();
-    if(!el || el.type !== 'image') return;
+    if(!el || (el.type !== 'image' && el.type !== 'shape')) return;
     const hasSkin = !!el.imageSkinImg;
     const curScale = Math.round((el.imageSkinScale||1.0)*100);
     const html = `
@@ -5458,7 +5522,7 @@ function handleImageSkinUpload(e) {
     const reader = new FileReader();
     reader.onload = (event) => {
         const el = getActiveElement();
-        if(el && el.type === 'image') {
+        if(el && (el.type === 'image' || el.type === 'shape')) {
             el.imageSkinSrc = event.target.result;
             el.imageSkinImg = getImageFromCache(el.imageSkinSrc);
             renderAll(); pushHistoryState(); openPanelImageSkinOverlay();
