@@ -1,8 +1,7 @@
-<!--Berikut adalah perbaikan menyeluruh dan penambahan fitur sesuai dengan instruksi Anda, termasuk **Perbaikan Bug Slide**, **Fitur Offline-First PWA**, **Device Fingerprinting (Lisensi Terkunci)**, **Skema Langganan**, dan **Sistem Dead-Man's Switch** (Otomatis gratis jika GitHub Anda vakum selama 30 hari). 
+<!--
+Pada file ini, saya telah menghapus semua link yang berakhiran `.html` (termasuk tombol Arsip) dan mengubah path pemanggilan Manifest & SW menjadi absolute route.
 
-Sesuai dengan protokol *Zero Regression*, tidak ada satu pun fungsi desain, kanvas, atau layout yang dirusak. 
-
-Salin seluruh kode di bawah ini dan simpan ke file `maker.html` Anda. Jangan lupa siapkan file `postermaker.manifest.json` dan `sw.js` (Service Worker) secara terpisah di repository GitHub Anda agar fitur offline dan install PWA berjalan sempurna.
+Silakan salin kode di bawah ini secara penuh dan timpa file `maker.html` Anda:
 -->
 
 <!DOCTYPE html>
@@ -11,7 +10,7 @@ Salin seluruh kode di bawah ini dan simpan ke file `maker.html` Anda. Jangan lup
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Studio Poster Maker Pro - Canva , PixelLab & CorelDraw Suite</title>
-<link rel="manifest" href="postermaker.manifest.json">
+<link rel="manifest" href="/postermaker.manifest.json">
 <meta name="theme-color" content="#0b0b0b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -229,7 +228,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <header class="top-navbar">
 <div class="nav-left">
-<a href="index.html" class="btn-nav">⬅️ Arsip</a>
+<a href="/index" class="btn-nav">⬅️ Arsip</a>
 <button class="btn-nav" id="btnUndo" onclick="undo()" disabled>↩️</button>
 <button class="btn-nav" id="btnRedo" onclick="redo()" disabled>↪️</button>
 <div class="save-indicator"><span class="save-dot" id="saveDot"></span><span id="saveText">Tersimpan</span></div>
@@ -936,7 +935,7 @@ return s.elements.find(e=>e.id===activeElementId)||null;
 
 async function loadDemoProject() {
     try {
-        const res = await fetch('demo.json');
+        const res = await fetch('/demo.json');
         if(res.ok) {
             const projectData = await res.json();
             if(projectData && projectData.slides && projectData.slides.length > 0) {
@@ -3484,7 +3483,9 @@ function openPanelAdvancedColor() {
     <input type="range" class="ctrl-slider" min="-180" max="180" value="${chData.h}" oninput="updateHslChannel('h', this.value)">
     
     <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Saturation:</span><span class="ctrl-val" id="valAcS">${chData.s}%</span></div>
-    <input type="range" class="ctrl-slider" min="-100" max="100" value="${chData.s}" oninput="updateHslChannel('s', this.value)"><div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Lightness:</span><span class="ctrl-val" id="valAcL">${chData.l}%</span></div>
+    <input type="range" class="ctrl-slider" min="-100" max="100" value="${chData.s}" oninput="updateHslChannel('s', this.value)">
+    
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Lightness:</span><span class="ctrl-val" id="valAcL">${chData.l}%</span></div>
     <input type="range" class="ctrl-slider" min="-100" max="100" value="${chData.l}" oninput="updateHslChannel('l', this.value)">
 
     <div style="font-size:11px;font-weight:700;color:#D4AF37;margin:16px 0 8px;">PENYESUAIAN CAHAYA LANJUTAN:</div>
@@ -6507,7 +6508,7 @@ function dismissPWA() {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(reg => {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
             console.log('Service Worker Registered!', reg);
         }).catch(err => {
             console.log('Service Worker Registration Failed!', err);
@@ -6716,4 +6717,3 @@ window.onload=initApp;
 </script>
 </body>
 </html>
-```
