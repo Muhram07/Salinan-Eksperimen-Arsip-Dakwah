@@ -1,8 +1,9 @@
-const CACHE_NAME = 'poster-maker-offline-v2';
+const CACHE_NAME = 'maker-pro-offline-v3';
 const ASSETS_TO_CACHE = [
     '/maker',
     '/postermaker.manifest.json',
-    '/demo.json'
+    '/demo.json',
+    '/icon.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -15,7 +16,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-    // Menghapus cache versi lama yang error (v1)
+    // Menghapus cache versi lama
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
@@ -43,4 +44,3 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
-
