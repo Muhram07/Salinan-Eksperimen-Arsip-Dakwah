@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Voucher - Maker Pro</title>
+    <style>
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { background: #0b0b0b; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
+        .container { background: #181818; border: 1px solid #D4AF37; padding: 25px; border-radius: 12px; max-width: 400px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        h2 { color: #D4AF37; text-align: center; margin-top: 0; }
+        label { font-size: 12px; color: #aaa; margin-bottom: 5px; display: block; }
+        input { width: 100%; background: #222; border: 1px solid #555; color: #fff; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; outline: none; }
+        input:focus { border-color: #D4AF37; }
+        button { width: 100%; background: linear-gradient(135deg, #FFE259, #D4AF37); border: none; color: #111; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        .result-box { margin-top: 20px; padding: 15px; background: #0a0a0a; border: 1px dashed #00ff88; border-radius: 6px; text-align: center; }
+        .code { font-size: 20px; font-weight: bold; color: #00ff88; letter-spacing: 2px; margin-bottom: 10px; word-break: break-all; }
+        .warning { font-size: 10px; color: #ff6b6b; text-align: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Maker Pro<br><span style="font-size: 14px; color:#fff;">Admin Voucher Generator</span></h2>
+        
+        <label>1. Masukkan ID Perangkat Pembeli:</label>
+        <input type="text" id="deviceId" placeholder="Contoh: DEV-X9K2A-10F4">
+        
+        <label>2. Durasi Aktif (Hari):</label>
+        <input type="number" id="days" placeholder="Contoh: 30" value="30">
+        
+        <button onclick="generateVoucher()">Buat Kode Voucher</button>
+
+        <div class="result-box" id="resultBox" style="display:none;">
+            <div style="font-size:10px; color:#aaa; margin-bottom:5px;">KODE VOUCHER:</div>
+            <div class="code" id="outputCode"></div>
+            <button style="background: #222; color: #fff; border: 1px solid #D4AF37;" onclick="copyCode()">📋 Salin Kode</button>
+        </div>
+
+        <div class="warning">
+            ⚠️ JANGAN PERNAH MENGUPLOAD FILE INI KE SERVER. SIMPAN HANYA DI PC/HP PRIBADI ANDA SECARA OFFLINE.
+        </div>
+    </div>
+
+    <script>
+        // Kunci Rahasia ini HARUS SAMA PERSIS dengan yang ada di file maker.html
+        const SECRET_KEY_VOUCHER = "MAKER_PRO_SECRET_KEY_2026";
+
+        async function createSignature(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw", encoder.encode(SECRET_KEY_VOUCHER),
+                { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+            );
+            const signature = await crypto.subtle.sign("HMAC", keyMaterial, data);
+            const hashArray = Array.from(new Uint8Array(signature));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 8).toUpperCase();
+        }
+
+        async function generateVoucher() {
+            const deviceId = document.getElementById('deviceId').value.trim();
+            const days = parseInt(document.getElementById('days').value);
+
+            if (!deviceId) {
+                alert("ID Perangkat tidak boleh kosong!");
+                return;
+            }
+            if (isNaN(days) || days <= 0) {
+                alert("Durasi hari tidak valid!");
+                return;
+            }
+
+            // Enkripsi Durasi + ID Perangkat menggunakan Secret Key
+            const sig = await createSignature(`${days}-${deviceId}`);
+            const code = `MP-${days}-${sig}`;
+
+            document.getElementById('outputCode').innerText = code;
+            document.getElementById('resultBox').style.display = 'block';
+        }
+
+        function copyCode() {
+            const code = document.getElementById('outputCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert("Kode berhasil disalin!\n" + code);
+            });
+        }
+    </script>
+</body>
+</html>
