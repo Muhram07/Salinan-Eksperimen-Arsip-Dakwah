@@ -15,37 +15,47 @@
         button { width: 100%; background: linear-gradient(135deg, #FFE259, #D4AF37); border: none; color: #111; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
         button:active { transform: scale(0.98); }
         .result-box { margin-top: 20px; padding: 15px; background: #0a0a0a; border: 1px dashed #00ff88; border-radius: 6px; text-align: center; }
-        .code { font-size: 20px; font-weight: bold; color: #00ff88; letter-spacing: 2px; margin-bottom: 10px; word-break: break-all; }
+        .code { font-size: 16px; font-weight: bold; color: #00ff88; letter-spacing: 1px; margin-bottom: 10px; word-break: break-all; }
         .warning { font-size: 10px; color: #ff6b6b; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Maker Pro<br><span style="font-size: 14px; color:#fff;">Admin Voucher Generator</span></h2>
+        <h2>Maker Pro<br><span style="font-size: 14px; color:#fff;">Admin Voucher Generator V2</span></h2>
         
         <label>1. Masukkan ID Perangkat Pembeli:</label>
         <input type="text" id="deviceId" placeholder="Contoh: DEV-X9K2A-10F4">
         
         <label>2. Durasi Aktif (Hari):</label>
         <input type="number" id="days" placeholder="Contoh: 30" value="30">
+
+        <label>3. Batas Akhir Voucher Bisa Diklaim:</label>
+        <input type="datetime-local" id="deadline">
         
         <button onclick="generateVoucher()">Buat Kode Voucher</button>
 
         <div class="result-box" id="resultBox" style="display:none;">
-            <div style="font-size:10px; color:#aaa; margin-bottom:5px;">KODE VOUCHER:</div>
+            <div style="font-size:10px; color:#aaa; margin-bottom:5px;">KODE VOUCHER (Sekali Pakai):</div>
             <div class="code" id="outputCode"></div>
             <button style="background: #222; color: #fff; border: 1px solid #D4AF37;" onclick="copyCode()">📋 Salin Kode</button>
         </div>
 
         <div class="warning">
-            ⚠️ JANGAN PERNAH MENGUPLOAD FILE INI KE SERVER. SIMPAN HANYA DI PC/HP PRIBADI ANDA SECARA OFFLINE.
+            ⚠️ VOUCHER INI MEMILIKI BATAS WAKTU KLAIM. JIKA MELEWATI TANGGAL DI ATAS, VOUCHER AKAN HANGUS.
         </div>
     </div>
 
     <script>
-        // Kunci Rahasia ini HARUS SAMA PERSIS dengan yang ada di file maker.html
         const SECRET_KEY_VOUCHER = "MAKER_PRO_SECRET_KEY_2026";
+
+        // Set default deadline ke besok (H+1) secara otomatis
+        window.onload = () => {
+            const now = new Date();
+            now.setDate(now.getDate() + 1); // +1 Hari
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('deadline').value = now.toISOString().slice(0,16);
+        };
 
         async function createSignature(text) {
             const encoder = new TextEncoder();
@@ -62,19 +72,23 @@
         async function generateVoucher() {
             const deviceId = document.getElementById('deviceId').value.trim();
             const days = parseInt(document.getElementById('days').value);
+            const deadlineVal = document.getElementById('deadline').value;
 
-            if (!deviceId) {
-                alert("ID Perangkat tidak boleh kosong!");
-                return;
-            }
-            if (isNaN(days) || days <= 0) {
-                alert("Durasi hari tidak valid!");
-                return;
-            }
+            if (!deviceId) { alert("ID Perangkat tidak boleh kosong!"); return; }
+            if (isNaN(days) || days <= 0) { alert("Durasi hari tidak valid!"); return; }
+            if (!deadlineVal) { alert("Batas klaim tidak boleh kosong!"); return; }
 
-            // Enkripsi Durasi + ID Perangkat menggunakan Secret Key
-            const sig = await createSignature(`${days}-${deviceId}`);
-            const code = `MP-${days}-${sig}`;
+            const deadlineTime = new Date(deadlineVal).getTime();
+            const deadlineHex = Math.floor(deadlineTime / 1000).toString(16).toUpperCase();
+            
+            // Tambahkan Salt (Angka Acak) agar kode selalu berbeda tiap diklik
+            const salt = Math.floor(Math.random() * 0xFFFF).toString(16).padStart(4, '0').toUpperCase();
+
+            // Enkripsi Durasi + ID Perangkat + Deadline + Salt
+            const sig = await createSignature(`${days}-${deviceId}-${deadlineHex}-${salt}`);
+            
+            // Format Final V2: MP-[HARI]-[DEADLINE]-[SALT]-[SIGNATURE]
+            const code = `MP-${days}-${deadlineHex}-${salt}-${sig}`;
 
             document.getElementById('outputCode').innerText = code;
             document.getElementById('resultBox').style.display = 'block';
@@ -89,4 +103,3 @@
     </script>
 </body>
 </html>
-
