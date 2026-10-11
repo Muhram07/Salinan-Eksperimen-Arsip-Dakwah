@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maker-pro-offline-v3';
+const CACHE_NAME = 'maker-pro-offline-v4';
 const ASSETS_TO_CACHE = [
     '/maker',
     '/postermaker.manifest.json',
