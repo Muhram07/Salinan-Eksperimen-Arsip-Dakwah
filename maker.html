@@ -1,21 +1,19 @@
-<!--Berikut adalah perbaikan komprehensif untuk aplikasi **Maker Pro** Anda sesuai dengan protokol *Zero Regression* dan 100% kode utuh tanpa jalan pintas.
+<!--Berikut adalah perbaikan komprehensif berdasarkan 9 poin yang Anda sebutkan, diimplementasikan dengan **Zero Regression Protocol** (tidak merusak fitur yang sudah ada, 100% kode utuh dari atas ke bawah).
 
-### Penjelasan Perbaikan yang Dilakukan:
-1. **Sinkronisasi Nomor Slide (Hapus Slide):** Logika pada `deleteCurrentSlide()` telah diperbaiki. Sekarang notifikasi konfirmasi akan membaca nomor slide yang sebenarnya (mengabaikan slide demo dalam perhitungan) sehingga akurat (misal: "Hapus Slide 1?").
-2. **Bug Font & Render Pertama (Baloo 2, dll):** Saya telah menambahkan `document.fonts.ready.then(...)` dan global font loading listener. Render kanvas sekarang akan otomatis memperbarui dirinya seketika saat font selesai di-download oleh browser, sehingga tidak ada lagi efek teks kurus/default di awal.
-3. **Bug Hapus Projek Aktif:** Logika pada `deleteProjectById()` diperbaiki. Jika projek yang terbingkai kuning (aktif) dihapus, sistem akan otomatis membuka projek lain yang tersedia, atau membuat projek default baru jika kosong.
-4. **Ikon & Nama Aplikasi:** Meta tag, title bar, manifest, dan tampilan nama telah diubah menjadi **Maker Pro** dan menggunakan pemanggilan `/icon.png` di *root directory*.
-5. **Jarak UI Garis Kuning Langganan:** Telah ditambahkan `margin-top: 18px;` pada kontainer harga di dalam *Subscription Wall* sehingga posisinya lebih turun dan proporsional.
-6. **Keamanan Voucher Tingkat Tinggi (Cryptographic Signature):** 
-   - Voucher lama yang mudah ditebak telah dibuang.
-   - Menggunakan sistem *HMAC-SHA256 (Web Crypto API)* yang mengikat **Durasi + Device ID + Secret Key**.
-   - **Kelebihan:** Voucher tidak bisa asal ditebak. Jika user *clear cache*, ID perangkatnya (berbasis spesifikasi hardware) akan tetap sama, sehingga mereka bisa memasukkan voucher yang sama untuk perangkat mereka sendiri, NAMUN voucher itu **tidak akan bisa dipakai di HP temannya** (karena beda ID Perangkat = Beda hasil enkripsi).
-   - *Cara Generate Voucher (Untuk Admin/Anda):* Buka aplikasi di HP/PC Anda, buka Inspect Element (Console), lalu ketik: `await generateAdminVoucher(30, "DEV-A1B2C3")` (ganti 30 dengan hari, dan DEV-A1B2C3 dengan ID HP pelanggan).
+### Ringkasan Perbaikan yang Dilakukan:
+1. **Subscription Wall & WA Template:** Menambahkan tombol **Copy** dan **Info (i)** di sebelah Device ID. Template WhatsApp diperbarui menyerupai formulir yang lebih mudah untuk Anda salin dan identifikasi paket pilihannya.
+2. **UI Subscription Terpotong:** Memperbaiki styling kontainer subscription dengan mengubah `align-items: center;` menjadi `align-items: flex-start;` dan menambahkan padding atas yang tebal agar tidak tertutup notch/kamera HP.
+3. **Bug Hapus Projek Aktif:** Memperbaiki logika fungsi `deleteProjectById()`. Kini menghapus projek yang sedang dibingkai kuning (aktif) akan berjalan lancar dan otomatis memuat projek lain tanpa menimbulkan *looping error*.
+4. **Sistem Deteksi Versi Web App (Notif Update):** Menambahkan logika *App Version*. Jika ada versi baru, pop-up akan muncul memberi tahu pengguna cara update dan menyediakan tautan web app dengan tombol salin otomatis.
+5. **Auto Refresh Render di Awal (Font Glitch):** Menambahkan pemaksaan *Render ulang dan hapus cache kanvas* secara otomatis pada 500ms dan 1500ms setelah aplikasi terbuka. Ini menggantikan trik "tekan elemen dan undo-redo" secara kasat mata, membuat font otomatis sempurna saat baru dimuat.
+6. **Mode Transparansi Lebih Lama:** Memperbarui CSS Animasi (`breatheOpacity`) sehingga fase transparan (tembus pandang) bertahan lebih lama sebelum kembali solid (durasi animasi 5 detik, persentase jeda tembus pandang diperlebar).
+7. **Bug Gambar Telat Muncul:** Menambahkan pemicu re-render berantai (delay 50ms & 300ms) pada proses *Image Upload* sehingga gambar (PNG/JPG) yang baru dimasukkan akan langsung tampil tanpa perlu layar disentuh/digeser.
+8. **Rata Tengah Vertikal & Horizontal:** Menambahkan tombol khusus untuk Rata Tengah Vertikal dan Rata Tengah Horizontal pada panel **Posisi Presisi**, persis di atas tombol "Langkah Sensitif".
+9. **Durasi Notifikasi Diperlama:** Semua notifikasi toast (warna hitam melayang di atas) sekarang bertahan selama **5000ms (5 Detik)**, meningkat dari sebelumnya 2.5 detik.
 
 ---
 
-### 1. File Utama: `maker.html`
-*(Salin seluruh kode di bawah ini dan timpa file `maker.html` Anda. Kode ini utuh dari awal sampai akhir)*
+### KODE FULL (Silakan copy seluruh teks di bawah ini dan timpa file `maker.html` Anda)
 
 -->
 <!DOCTYPE html>
@@ -35,10 +33,11 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none;}
 html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
 
-/* UI Transparent Mode (Breathing Effect) */
+/* UI Transparent Mode (Breathing Effect - Diperlama Transparannya) */
 @keyframes breatheOpacity {
-    0%, 100% { opacity: 0.25; }
-    50% { opacity: 0.85; }
+    0%, 100% { opacity: 0.15; }
+    25%, 75% { opacity: 0.15; }
+    50% { opacity: 0.95; }
 }
 .ui-transparent-mode .top-navbar,
 .ui-transparent-mode .bottom-toolbar-container,
@@ -46,7 +45,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ui-transparent-mode .vertical-toolbar,
 .ui-transparent-mode .tool-panel,
 .ui-transparent-mode .pen-toolbar {
-    animation: breatheOpacity 3s ease-in-out infinite;
+    animation: breatheOpacity 5s ease-in-out infinite;
 }
 
 .top-navbar{height:50px;background:#141414;border-bottom:1px solid rgba(212,175,55,.25);display:flex;align-items:center;padding:0 10px;gap:8px;z-index:200;position:relative;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;}
@@ -250,6 +249,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="save-indicator"><span class="save-dot" id="saveDot"></span><span id="saveText">Tersimpan</span></div>
 </div>
 <div class="nav-right">
+<span id="appVersionDisplay" style="font-size:10px;color:#888;font-weight:bold;margin-right:4px;"></span>
 <button class="btn-nav" onclick="openProjectModal()" style="border-color:#D4AF37;color:#D4AF37;">📁 Projek</button>
 <button class="btn-nav" onclick="toggleRatioSelector()">📏 <span id="currentRatioLabel">4:5</span></button>
 <button class="btn-nav" onclick="openPanelBleed()">📐 Garis Bantu</button>
@@ -588,6 +588,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 </div>
 
+<!-- Modal Update Notifikasi -->
+<div class="feature-modal" id="updateModal" style="z-index:9999999;">
+    <div class="fmodal-header">
+        <div style="font-weight:800;color:#D4AF37;font-size:13px;">🚀 Update Aplikasi Tersedia!</div>
+        <button class="panel-close" onclick="document.getElementById('updateModal').classList.remove('active')">✕</button>
+    </div>
+    <div class="fmodal-body" style="flex-direction:column; padding:20px; text-align:center;">
+        <h3 style="color:#fff;margin-bottom:10px;">Versi Baru Ditemukan</h3>
+        <p style="font-size:12px;color:#aaa;margin-bottom:20px;">Untuk mendapatkan fitur terbaru, perbaikan bug, dan stabilitas, silakan update aplikasi Anda sekarang.</p>
+        <div style="background:#222;padding:12px;border-radius:8px;font-size:11px;color:#ddd;text-align:left;margin-bottom:20px;line-height:1.5;">
+            <b style="color:#D4AF37;">Cara Update Otomatis:</b><br>
+            1. <b>Hapus</b> / <b>Uninstall</b> aplikasi Maker Pro (dari layar beranda HP Anda).<br>
+            2. Buka link web app di bawah ini menggunakan <b>Google Chrome</b>.<br>
+            3. Tunggu notifikasi "Install App" muncul kembali, lalu klik Install. (Atau klik menu titik tiga di Chrome > "Tambahkan ke Layar Utama").
+        </div>
+        <div style="display:flex;gap:8px;width:100%;align-items:center;">
+            <input type="text" id="updateUrl" value="https://file-dakwah-muhram-of.pages.dev/maker" readonly style="flex:1;background:#111;color:#fff;border:1px solid #D4AF37;padding:10px;border-radius:6px;font-size:11px;">
+            <button class="btn-nav active" style="height:36px;justify-content:center;" onclick="navigator.clipboard.writeText(document.getElementById('updateUrl').value);showToast('📋 Link Update Disalin!')">Copy Link</button>
+        </div>
+    </div>
+    <div class="fmodal-footer">
+        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="window.open('https://file-dakwah-muhram-of.pages.dev/maker', '_blank')">🌐 Buka di Browser</button>
+    </div>
+</div>
+
 <div class="brush-monitor-circle" id="brushMonitor"></div>
 <div class="toast" id="toast"></div>
 
@@ -602,16 +627,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <!-- Subscription Wall -->
-<div id="subscriptionWall" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,10,10,0.98);z-index:999999;flex-direction:column;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(15px);overflow-y:auto;">
-    <div style="max-width:400px;width:100%;background:#181818;border:1px solid #D4AF37;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 50px rgba(0,0,0,0.9);">
+<div id="subscriptionWall" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,10,10,0.98);z-index:999999;flex-direction:column;align-items:flex-start;justify-content:flex-start;padding:40px 20px;backdrop-filter:blur(15px);overflow-y:auto;">
+    <div style="max-width:400px;width:100%;margin:0 auto;background:#181818;border:1px solid #D4AF37;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 50px rgba(0,0,0,0.9);">
         <div style="text-align:center;">
             <h2 style="color:#ff6b6b;font-size:20px;margin-bottom:8px;">⏱️ Masa Trial Habis</h2>
             <p style="font-size:12px;color:#aaa;line-height:1.5;">Untuk melanjutkan menggunakan <b>Maker Pro</b> tanpa batas, silakan aktifkan paket langganan.</p>
         </div>
         
         <div style="background:#0a0a0a;border:1px solid rgba(255,255,255,0.1);padding:12px;border-radius:8px;font-size:11px;color:#00ff88;text-align:center;word-break:break-all;">
-            <div style="color:#aaa;margin-bottom:4px;font-size:10px;">ID PERANGKAT ANDA (TERKUNCI):</div>
-            <strong id="deviceIdDisplay" style="font-size:14px;letter-spacing:1px;">MEMUAT...</strong>
+            <div style="color:#aaa;margin-bottom:6px;font-size:10px;">ID PERANGKAT ANDA (TERKUNCI):</div>
+            <div style="display:flex; gap:6px; justify-content:center; align-items:center; margin-top:4px;">
+                <strong id="deviceIdDisplay" style="font-size:14px;letter-spacing:1px;">MEMUAT...</strong>
+                <button onclick="copyDeviceId()" style="background:#D4AF37;color:#000;border:none;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-weight:bold;">📋 Copy</button>
+                <button onclick="showIdInfo()" style="background:rgba(255,255,255,0.1);color:#fff;border:none;padding:4px 8px;border-radius:4px;font-size:10px;cursor:pointer;">ℹ️ Info</button>
+            </div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;color:#ddd;margin-top:12px;">
@@ -626,7 +655,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
             <a href="https://link.dana.id/minta?full_url=https://qr.dana.id/v1/281012012021032245239175" target="_blank" style="text-decoration:none;background:#118EEA;color:#fff;padding:12px;border-radius:8px;font-size:12px;font-weight:bold;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;">💳 Bayar via DANA (082312428638)</a>
-            <button onclick="confirmWhatsApp()" style="border:none;background:#25D366;color:#fff;padding:12px;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">💬 Konfirmasi WA & Bukti Transfer</button>
+            <select id="waPackageSelect" style="background:#222;color:#fff;border:1px solid #25D366;padding:12px;border-radius:8px;font-size:12px;outline:none;">
+                <option value="1 Hari (5K)">Pilih Paket: 1 Hari (5K)</option>
+                <option value="3 Hari (10K)">Pilih Paket: 3 Hari (10K)</option>
+                <option value="7 Hari (20K)">Pilih Paket: 7 Hari (20K)</option>
+                <option value="14 Hari (35K)">Pilih Paket: 14 Hari (35K)</option>
+                <option value="28 Hari (55K)">Pilih Paket: 28 Hari (55K)</option>
+                <option value="42 Hari (75K)">Pilih Paket: 42 Hari (75K)</option>
+                <option value="2 Bulan (95K)">Pilih Paket: 2 Bulan (95K)</option>
+            </select>
+            <button onclick="confirmWhatsApp()" style="border:none;background:#25D366;color:#fff;padding:12px;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">💬 Format WA Otomatis & Bukti Transfer</button>
         </div>
 
         <div style="border-top:1px dashed rgba(255,255,255,0.2);padding-top:16px;display:flex;flex-direction:column;gap:8px;">
@@ -639,6 +677,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* ========== CORE STATE & INDEXED DB ========== */
+const APP_VERSION = 'v1.0.3'; // Versi Aplikasi
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -843,7 +882,7 @@ if(!t)return;
 t.innerText=msg;
 t.classList.add('show');
 clearTimeout(t._timer);
-t._timer=setTimeout(()=>t.classList.remove('show'),2500);
+t._timer=setTimeout(()=>t.classList.remove('show'),5000); // 5 Detik
 }
 
 window.addEventListener('offline', () => showToast('⚠️ Koneksi terputus. Mode offline aktif.'));
@@ -941,7 +980,7 @@ function getCurrentSlide(){return(slides&&slides.length>0)?(slides[currentSlideI
 function getActiveElement(){
 if(!activeElementId)return null;
 const s=getCurrentSlide();
-if(!s||!s.elements)return null;
+if(!s||s.elements===undefined)return null;
 return s.elements.find(e=>e.id===activeElementId)||null;
 }
 
@@ -962,7 +1001,20 @@ async function loadDemoProject() {
     return null;
 }
 
+// Cek versi aplikasi untuk notifikasi update
+function checkAppVersion() {
+    const storedVer = localStorage.getItem('APP_VERSION_STORED');
+    if(storedVer && storedVer !== APP_VERSION) {
+        document.getElementById('updateModal').classList.add('active');
+    }
+    localStorage.setItem('APP_VERSION_STORED', APP_VERSION);
+    const verDisplay = document.getElementById('appVersionDisplay');
+    if(verDisplay) verDisplay.innerText = APP_VERSION;
+}
+
 async function initApp(){
+checkAppVersion();
+
 try { await initDB(); } catch(e) { console.warn("IndexedDB gagal", e); }
 await loadFromStorage();
 
@@ -983,7 +1035,7 @@ slides.forEach(s => { if(!s._thumbData) s._thumbData = generateSlideThumb(s); })
 adjustArtboardSize();
 pushHistoryState();
 
-// Memastikan font selesai dimuat sebelum render pertama kali (Bug Fix #2)
+// Memastikan font selesai dimuat sebelum render pertama kali (Bug Fix #2 dan #5)
 document.fonts.ready.then(() => {
     renderPending=false;
     requestRender();
@@ -991,6 +1043,17 @@ document.fonts.ready.then(() => {
     renderCarouselThumbs();
     renderBottomToolbar();
     updateDemoFloatingBtn();
+    
+    // Auto-refresh rendering pada tahap awal untuk memaksa layout font terkalibrasi dengan benar
+    setTimeout(() => {
+        slides.forEach(s => {
+            if(s.elements) {
+                s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; });
+            }
+        });
+        renderAll(); adjustArtboardSize();
+    }, 500);
+    setTimeout(() => { renderAll(); adjustArtboardSize(); }, 1500);
 });
 
 window.addEventListener('resize',()=>{adjustArtboardSize();renderAll();});
@@ -3634,7 +3697,7 @@ ${getColorPickerHTML(sh.color||'rgba(0,0,0,0.8)', 'setOuterShadowColor')}
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('shAngleSlider',-1,(v)=>updateShadowProp('angle',v))">-</button>
 <input type="range" class="ctrl-slider" id="shAngleSlider" min="0" max="360" value="${sh.angle||45}" oninput="updateShadowProp('angle',this.value)">
-<button</button>
+<button class="btn-step" onclick="stepSliderVal('shAngleSlider',1,(v)=>updateShadowProp('angle',v))">+</button>
 </div>
 `;
 }else if(tab==='inner'){
@@ -3745,7 +3808,12 @@ const html=`
 <button class="btn-step" onclick="stepSliderVal('nudgeSlider',1,updateNudgeStep)">+</button>
 </div>
 
-<div style="font-size:11px;font-weight:700;color:#D4AF37;margin:12px 0 6px;">JOYSTICK (TEKAN & TAHAN UNTUK GESER):</div>
+<div style="font-size:11px;font-weight:700;color:#D4AF37;margin:12px 0 6px;">TATA LETAK & JOYSTICK:</div>
+<div class="ctrl-grid-btns" style="margin-bottom:12px;">
+<button class="btn-sub-tool" onclick="setAlignPosition('center-h')">↔️ Tengah Horisontal</button>
+<button class="btn-sub-tool" onclick="setAlignPosition('center-v')">↕️ Tengah Vertikal</button>
+</div>
+
 <div class="dpad-container">
 <button class="dpad-btn" onpointerdown="startDpadHold(0,-1)" onpointerup="stopDpadHold()" onpointerleave="stopDpadHold()">▲</button>
 <div class="dpad-row">
@@ -3815,6 +3883,8 @@ case 'top':el.x=W/2;el.y=pY+(elH/2);break;
 case 'top-right':el.x=W-pX-(elW/2);el.y=pY+(elH/2);break;
 case 'left':el.x=pX+(elW/2);el.y=H/2;break;
 case 'center':el.x=W/2;el.y=H/2;break;
+case 'center-h':el.x=W/2;break;
+case 'center-v':el.y=H/2;break;
 case 'right':el.x=W-pX-(elW/2);el.y=H/2;break;
 case 'bottom-left':el.x=pX+(elW/2);el.y=H-pY-(elH/2);break;
 case 'bottom':el.x=W/2;el.y=H-pY-(elH/2);break;
@@ -5769,6 +5839,9 @@ Array.from(files).forEach((file, index) => {
                     selectElement(newEl.id);
                     renderAll();
                     pushHistoryState();
+                    // Fix Bug Gambar telat render (Auto Force Render beruntun sesudah diupload)
+                    setTimeout(() => renderAll(), 50);
+                    setTimeout(() => renderAll(), 300);
                 }
             };
             img.src=compressedSrc;
@@ -6076,9 +6149,9 @@ list.forEach(p=>{
 });
 }
 
-async function createNewProjectPrompt(){
+async function createNewProjectPrompt(forceName = null){
 const list = await getAllProjectsMetaFromDB();
-const name=prompt('Nama projek baru:','Projek '+(list.length+1));
+const name = forceName || prompt('Nama projek baru:','Projek '+(list.length+1));
 if(!name)return;
 await saveCurrentProjectAuto();
 currentProjectId='proj_'+Date.now();
@@ -6178,7 +6251,11 @@ if(confirm('Hapus projek ini?')){
     await deleteProjectFromDB(id);
     if(currentProjectId===id){
         const newList = await getAllProjectsMetaFromDB();
-        await loadProjectById(newList[0].id);
+        if(newList.length > 0) {
+            await loadProjectById(newList[0].id);
+        } else {
+            await createNewProjectPrompt("Projek Default");
+        }
     } else {
         await renderProjectList();
     }
@@ -6571,6 +6648,16 @@ function getStoredDeviceId() {
     return id;
 }
 
+// Tombol Copy Device ID dan Tombol Info
+function copyDeviceId() {
+    const did = document.getElementById('deviceIdDisplay').innerText;
+    navigator.clipboard.writeText(did).then(() => showToast('📋 Device ID disalin!'));
+}
+
+function showIdInfo() {
+    alert("ℹ️ INFO DEVICE ID:\n\nID ini unik untuk setiap perangkat dan browser yang Anda gunakan. Jika Anda ingin pindah HP atau menggunakan langganan di perangkat lain, Anda dapat menyalin ID ini dan mengirimkannya ke Admin melalui WhatsApp, Instagram, Telegram, dll.\n\nSetiap ID mewakili 1 lisensi perangkat.");
+}
+
 // Fungsi Kriptografi Khusus untuk Hash Voucher
 async function createSignature(text) {
     const encoder = new TextEncoder();
@@ -6581,7 +6668,6 @@ async function createSignature(text) {
     );
     const signature = await crypto.subtle.sign("HMAC", keyMaterial, data);
     const hashArray = Array.from(new Uint8Array(signature));
-    // Ambil 8 karakter hexadecimal
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 8).toUpperCase();
 }
 
@@ -6687,8 +6773,9 @@ function showSubscriptionWall(msg) {
 
 function confirmWhatsApp() {
     const deviceId = getStoredDeviceId();
+    const pkg = document.getElementById('waPackageSelect').value;
     const waNumber = "6282312428638"; 
-    const msg = encodeURIComponent(`Halo Admin Studio Poster,\n\nSaya ingin mengonfirmasi pembayaran paket langganan.\n\n*ID Perangkat Saya (Penting):*\n${deviceId}\n\n*Bukti Transfer DANA sudah saya siapkan.* Mohon segera buatkan kode vouchernya.`);
+    const msg = encodeURIComponent(`Halo Admin Studio Poster,\n\nSaya ingin mengonfirmasi pembayaran paket langganan.\n\n*Pilihan Paket:*\n${pkg}\n\n*ID Perangkat Saya (Penting):*\n${deviceId}\n\n*Bukti Transfer DANA sudah saya siapkan.* Mohon segera buatkan kode vouchernya.`);
     window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
 }
 
