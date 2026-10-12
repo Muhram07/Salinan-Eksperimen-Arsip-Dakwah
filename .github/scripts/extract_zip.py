@@ -318,3 +318,4 @@ if __name__ == "__main__":
     repo_path = os.getcwd()
     fix_folder_sequences(os.path.join(repo_path, "posters"))
     build_manifest()
+
