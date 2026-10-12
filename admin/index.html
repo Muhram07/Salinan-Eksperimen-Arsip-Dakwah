@@ -430,12 +430,10 @@
             }
         }
 
-        // FUNGSI NORMALISASI KATEGORI ADMIN AGAR SELALU BAKU & NON-PETIK
         function standardizeKategoriAdmin(kat) {
             if(!kat) return "Umum";
-            let k = kat.trim().replace(/['"’‘]/g, ""); // Bersihkan semua tanda petik
+            let k = kat.trim().replace(/['"’‘]/g, ""); 
             
-            // Kamus baku non-petik (mencegah Do'A, Bid'ah, dll.)
             const mapBaku = {
                 "doa": "Doa",
                 "bidah": "Bidah",
@@ -489,7 +487,6 @@
             const key = k.toLowerCase().trim();
             if(mapBaku[key]) return mapBaku[key];
             
-            // Fallback: Kapitalisasi huruf pertama setiap kata
             return k.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
         }
 
@@ -551,32 +548,24 @@
             async function loadKategoriList() {
                 const datalist = document.getElementById('kategori-list');
                 
-                // MASTER BULAN HIJRIAH (VERSI BERSIH NON-PETIK SINKRON DENGAN ZIP PY)
                 const masterBulanHijriah = [
-                    "Muharram (1)",
-                    "Safar (2)",
-                    "Rabiul Awwal (3)",
-                    "Rabiul Akhir (4)",
-                    "Jumadil Awwal (5)",
-                    "Jumadil Akhir (6)",
-                    "Rajab (7)",
-                    "Syaban (8)",
-                    "Ramadhan (9)",
-                    "Syawwal (10)",
-                    "Dzulqadah (11)",
-                    "Dzulhijjah (12)"
+                    "Muharram (1)", "Safar (2)", "Rabiul Awwal (3)", "Rabiul Akhir (4)",
+                    "Jumadil Awwal (5)", "Jumadil Akhir (6)", "Rajab (7)", "Syaban (8)",
+                    "Ramadhan (9)", "Syawwal (10)", "Dzulqadah (11)", "Dzulhijjah (12)"
                 ];
 
-                // MASTER KATEGORI UMUM (VERSI BERSIH NON-PETIK)
                 const masterKategoriUmum = [
-                    "Doa", "Bidah", "Tauhid", "Sunnah", "Akidah", "Fikih", "Hadits Shahih & Hasan", "Hadits Dhaif & Maudhu", "Tafsir", "Adab", "Syirik", "Rumah Tangga", "Reminder", "Dzikir", "Kitab", "Sholat", "Muamalah", "Puasa", "Manhaj Salaf", "Firqah-Firqah"
+                    "Doa", "Bidah", "Tauhid", "Sunnah", "Akidah", "Fikih", "Hadits Shahih & Hasan",
+                    "Hadits Dhaif & Maudhu", "Tafsir", "Adab", "Syirik", "Rumah Tangga", "Reminder",
+                    "Dzikir", "Kitab", "Sholat", "Muamalah", "Puasa", "Manhaj Salaf", "Firqah-Firqah"
                 ];
 
                 let categoriesFromManifest = [];
 
                 try {
-                    let res = await fetch('manifest.json');
-                    if(!res.ok) res = await fetch('/manifest.json');
+                    // FIX: Cache buster ditambahkan agar list kategori selalu update
+                    let res = await fetch('manifest.json?v=' + new Date().getTime());
+                    if(!res.ok) res = await fetch('/manifest.json?v=' + new Date().getTime());
                     if (res.ok) {
                         const data = await res.json();
                         cachedKategoriEmojis = data.kategori_emoji || {};
@@ -586,10 +575,7 @@
                     }
                 } catch (e) { /* Ignore error */ }
 
-                // Bersihkan & standarisasi semua kategori dari manifest (hilangkan Do'A, Bid'ah dll)
                 const cleanedManifest = categoriesFromManifest.map(k => standardizeKategoriAdmin(k));
-
-                // Gabungkan dan hilangkan duplikasi / sinonim
                 const combinedList = Array.from(new Set([...masterBulanHijriah, ...masterKategoriUmum, ...cleanedManifest]));
 
                 datalist.innerHTML = combinedList.map(k => `<option value="${k}">`).join('');
@@ -631,7 +617,6 @@
                 });
             }
 
-            // PERBAIKAN 1: JOIN MENGGUNAKAN SPASI UNTUK MENGHINDARI MULTILINE YAML ERROR
             function formatCollaborator(text) {
                 if (!text) return '';
                 let lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
@@ -640,7 +625,7 @@
                         return `*${line}*`;
                     }
                     return line;
-                }).join(' '); // <-- PERBAIKAN DI SINI
+                }).join(' '); 
             }
 
             window.handleFileSelect = function(event) {
@@ -688,6 +673,12 @@
                 }
             };
 
+            // FIX: Mengganti tanda kutip ganda (") dengan tanda kutip tunggal (') agar aman saat di-parse ke format YAML (MD)
+            function sanitizeForYAML(str) {
+                if(!str) return '';
+                return str.replace(/"/g, "'");
+            }
+
             window.downloadZipManual = async function() {
                 const status = document.getElementById('statusProgress');
                 const statusText = document.getElementById('statusText');
@@ -695,12 +686,13 @@
                 status.style.display = 'block';
                 statusText.innerHTML = '⏳ Mengemas file menjadi satu ZIP...';
 
-                const judul = document.getElementById('inpJudul').value.trim();
+                // Terapkan sanitasi
+                const judul = sanitizeForYAML(document.getElementById('inpJudul').value.trim());
                 const rawKategori = document.getElementById('inpKategori').value.trim();
-                const kategori = standardizeKategoriAdmin(rawKategori); // Otomatis non-petik baku
-                const emoji = document.getElementById('inpEmoji').value.trim();
-                const tags = document.getElementById('inpTag').value.trim().replace(/['"’‘]/g, "");
-                const collaborator = document.getElementById('inpCaption').value.trim();
+                const kategori = sanitizeForYAML(standardizeKategoriAdmin(rawKategori));
+                const emoji = sanitizeForYAML(document.getElementById('inpEmoji').value.trim());
+                const tags = sanitizeForYAML(document.getElementById('inpTag').value.trim());
+                const collaborator = sanitizeForYAML(document.getElementById('inpCaption').value.trim());
                 const content = document.getElementById('inpContent').value.trim();
                 const pdfInput = document.getElementById('inpFilePdf');
                 const pilihanPdf = document.getElementById('inpPdfOption').value;
@@ -784,12 +776,13 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 status.style.display = 'block';
                 statusText.innerHTML = '⏳ Mengemas file menjadi satu ZIP...';
 
-                const judul = document.getElementById('inpJudul').value.trim();
+                // Terapkan sanitasi
+                const judul = sanitizeForYAML(document.getElementById('inpJudul').value.trim());
                 const rawKategori = document.getElementById('inpKategori').value.trim();
-                const kategori = standardizeKategoriAdmin(rawKategori); // Otomatis non-petik baku
-                const emoji = document.getElementById('inpEmoji').value.trim();
-                const tags = document.getElementById('inpTag').value.trim().replace(/['"’‘]/g, "");
-                const collaborator = document.getElementById('inpCaption').value.trim();
+                const kategori = sanitizeForYAML(standardizeKategoriAdmin(rawKategori)); 
+                const emoji = sanitizeForYAML(document.getElementById('inpEmoji').value.trim());
+                const tags = sanitizeForYAML(document.getElementById('inpTag').value.trim());
+                const collaborator = sanitizeForYAML(document.getElementById('inpCaption').value.trim());
                 const content = document.getElementById('inpContent').value.trim();
                 const pdfInput = document.getElementById('inpFilePdf');
                 const pilihanPdf = document.getElementById('inpPdfOption').value;
