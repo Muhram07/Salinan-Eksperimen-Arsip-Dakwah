@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Arsip Dakwah</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{
+            background: radial-gradient(circle at 50% 0%, #181818 0%, #0b0b0b 70%);
+            color:#fff; font-family:'Segoe UI', Arial, sans-serif; padding:20px; max-width:1100px; margin:auto; min-height:100vh;
+        }
+        #loginPage, #adminDashboard{width:100%;}
+        .admin-box{
+            background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px; padding:30px;
+            backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); margin-bottom:20px;
+        }
+        .admin-box h1, .admin-box h2{color:#D4AF37;text-align:center;letter-spacing:1px;}
+        .admin-box p{color:#bdbdbd;text-align:center;margin-bottom:15px;}
+
+        input, select, textarea{
+            width:100%;padding:14px 20px;border:none; border-radius:16px;font-size:16px;outline:none;
+            background:rgba(255, 255, 255, 0.12); color:#fff; box-shadow:0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom:15px; font-family:inherit;
+        }
+        input[type="file"]{padding:10px; cursor:pointer;}
+        input:focus, textarea:focus, select:focus{border-color:#D4AF37;background:rgba(255,255,255,0.2);}
+        textarea{min-height:120px;resize:vertical;}
+        select option{background:#111;}
+
+        .btn-gold{
+            background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(4px); border: 1px solid rgba(212, 175, 55, 0.4);
+            color: #D4AF37; padding:12px 20px; border-radius:20px; font-weight:bold;cursor:pointer;font-size:16px;width:100%;
+            box-shadow:0 4px 15px rgba(0,0,0,0.3); animation: pulse-nav 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse-nav {0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+        .btn-gold:hover{background:rgba(212, 175, 55, 0.15);box-shadow:0 0 25px rgba(212,175,55,0.2);animation-play-state:paused;transform:scale(1.05);}
+        .btn-gold:active{transform:scale(0.95);}
+
+        .btn-solid{
+            background: linear-gradient(135deg, #D4AF37, #E6B800); color:#111; border:none; padding:12px 20px; border-radius:20px;
+            font-weight:bold;cursor:pointer;width:100%; transition:0.3s;
+        }
+        .btn-solid:hover{transform:scale(1.02);}
+
+        .admin-menu{display:flex;flex-direction:column;gap:10px;}
+        .admin-menu .btn-gold{width:100%;text-align:center;}
+        
+        #statusProgress{ display:none; text-align:left; background:#111; padding:15px; border-radius:12px; border:1px solid #D4AF37; margin-top:10px;}
+
+        .api-config {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .api-config label {
+            color: #aaa;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .api-config input {
+            margin-bottom: 10px;
+        }
+
+        .btn-upload-navigate {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            text-decoration: none;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            padding: 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-upload-navigate:hover {
+            background: #D4AF37;
+            color: #111;
+            transform: scale(1.02);
+        }
+
+        /* PREVIEW GAMBAR */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 15px 0 20px 0;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px dashed #444;
+            width: 100%;
+            align-items: center;
+        }
+        .preview-item {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .preview-item img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 1px solid #555;
+            background: #111;
+            max-height: 80vh;
+        }
+        .preview-item .order-number {
+            font-size: 14px;
+            color: #aaa;
+            margin: 5px 0 2px 0;
+        }
+        .preview-item .order-controls {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .preview-item .order-controls button {
+            background: transparent;
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+            max-width: 60px;
+        }
+        .preview-item .order-controls button:hover {
+            background: #D4AF37;
+            color: #111;
+        }
+        .preview-item .order-controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #555;
+            color: #555;
+        }
+
+        /* COLLABORATOR CHIPS */
+        .collab-wrapper {
+            background: rgba(255,255,255,0.04);
+            border: 1px dashed rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .collab-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .collab-chip {
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+        }
+        .collab-chip:hover {
+            background: #D4AF37;
+            color: #111;
+        }
+        .collab-chip.selected {
+            background: #D4AF37;
+            color: #111;
+            font-weight: bold;
+        }
+        .btn-small-gold {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginPage">
+        <div class="admin-box" style="max-width:400px;margin:auto;margin-top:100px;">
+            <h1>🔐 Admin Panel</h1>
+            <p>Masukkan PIN untuk mengelola konten</p>
+            <input type="password" id="pinInput" placeholder="PIN Admin" style="text-align:center;">
+            <button class="btn-solid" id="loginBtn">Masuk</button>
+            <p id="loginStatus" style="margin-top:10px;color:#ff5555;font-size:14px;font-weight:bold;"></p>
+        </div>
+    </div>
+
+    <div id="adminDashboard" style="display:none;">
+        <div class="admin-box">
+            <h1>Dashboard ⚙️Admin⚙️</h1>
+            <p>Selamat datang di panel kontrol Arsip Dakwah</p>
+        </div>
+        <div class="admin-box">
+            <div class="admin-menu">
+                <button class="btn-gold" onclick="window.open('https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/tree/main/posters', '_blank')">📂 Lihat Semua Poster</button>
+                <button class="btn-gold" onclick="showSection('add')">➕ Buat Poster Baru</button>
+                <button class="btn-gold" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <div id="sectionAdd" class="admin-box" style="display:none;">
+            <h2>🚀 Generator Poster Terpadu</h2>
+            <p style="text-align:left;font-size:14px;color:#aaa;margin-bottom:15px;">Isi data poster, upload gambar, pilih opsi PDF, lalu klik <b>Kirim ke GitHub</b>.</p>
+            
+            <div class="api-config">
+                <label>🌐 Cloudflare Worker API URL</label>
+                <input type="text" id="inpApiUrl" placeholder="https://api-dakwah.mnursurisma.workers.dev" style="font-size:13px;">
+                <label>🔑 API Secret Key</label>
+                <input type="text" id="inpApiKey" placeholder="kuncirahasia123" style="font-size:13px;">
+            </div>
+
+            <label>Judul Poster</label>
+            <input type="text" id="inpJudul" placeholder="Masukkan judul poster">
+            
+            <label>Kategori (Ketik untuk mencari/menambah baru)</label>
+            <input type="text" id="inpKategori" list="kategori-list" placeholder="cth: Doa, Bidah, Rabiul Akhir (4), Tauhid">
+            <datalist id="kategori-list"></datalist>
+
+            <label>Emoji Ikon Kategori (Bisa diedit kapan saja/kosongkan)</label>
+            <input type="text" id="inpEmoji" list="emoji-list" placeholder="Kosongkan/Emoji baru(default 📂)">
+            <datalist id="emoji-list">
+                <option value="☝️"><option value="☪️"><option value="🕋"><option value="📖"><option value="🛡️"><option value="⚠️"><option value="🚫"><option value="👤"><option value="🗨️"><option value="⏰"><option value="💡"><option value="🔔"><option value="🥀"><option value="🌟">
+            </datalist>
+
+            <label>Tag (pisahkan koma)</label>
+            <input type="text" id="inpTag" placeholder="sunnah, dzikir, sholat">
+
+            <label>Collaborator</label>
+            <div class="collab-wrapper">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:5px;">
+                    <span style="font-size:12px; color:#D4AF37; font-weight:bold;">⚡ Pilih Username (Maksimal 6):</span>
+                    <button class="btn-small-gold" type="button" onclick="manageCollabList()">⚙️ Edit Master List</button>
+                </div>
+                <div id="collabChips" class="collab-chips"></div>
+                <button class="btn-small-gold" type="button" onclick="resetCollaboratorText()" style="background:rgba(255,255,255,0.05); color:#aaa; border-color:#555;">🔄 Reset Teks Collab</button>
+            </div>
+            <textarea id="inpCaption" placeholder="Collab Dakwah Sunnah :\n@tauhidsunnah_id"></textarea>
+
+            <label>Isi Caption Lengkap</label>
+            <textarea id="inpContent" placeholder="Tulis caption lengkap di sini..."></textarea>
+
+            <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
+                <label style="font-weight:bold;color:#D4AF37;">📸 Upload & Urutkan Gambar</label>
+                <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih gambar. Nama file akan otomatis berubah menjadi <b>1.jpg, 2.jpg, 3.jpg</b>.</p>
+                <input type="file" id="inpFileGambar" multiple accept="image/*" onchange="handleFileSelect(event)">
+                
+                <div id="previewContainer" class="preview-container"></div>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
+                <label style="font-weight:bold;color:#D4AF37;">📄 Opsi PDF</label>
+                <select id="inpPdfOption" onchange="togglePdfInput()">
+                    <option value="tidak">Tidak Pakai PDF</option>
+                    <option value="ya">Pakai PDF</option>
+                </select>
+                <div id="pdfUploadWrapper" style="display:none; margin-top:15px;">
+                    <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih file PDF. Nama file akan otomatis berubah menjadi <b>brosur.pdf</b>.</p>
+                    <input type="file" id="inpFilePdf" accept=".pdf">
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn-solid" onclick="kirimKeGitHub()" style="font-size:18px;padding:15px;">🚀 KIRIM POSTER KE GITHUB (API)</button>
+                <button class="btn-solid" onclick="downloadZipManual()" style="font-size:16px;padding:15px; background:#333; color:#D4AF37; border:1px solid #D4AF37;">⬇️ DOWNLOAD ZIP MANUAL (Plan B)</button>
+            </div>
+            
+            <div id="statusProgress">
+                <span style="color:#D4AF37; font-weight:bold;">📌 Status:</span>
+                <div id="statusText" style="color:#fff; margin-top:10px; line-height:1.6;"></div>
+            </div>
+
+            <a href="https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/tree/main/_uploads" target="_blank" class="btn-upload-navigate">📤 Buka Folder _uploads di GitHub (Manual)</a>
+        </div>
+    </div>
+
+    <script>
+        const ALLOWED_PINS = ["301102", "291104", "666666"];
+        
+        const DEFAULT_COLLABS = [
+            "@tauhidsunnah_id",
+            "@an.nashiha_daily",
+            "@sunnahstori",
+            "@al.nasiha",
+            "@thalabulilmi.id",
+            "@thequran_path",
+            "@bedahkitab_",
+            "@backtosalafushshalih_",
+            "@akun_salafy",
+            "@safari_dakwah",
+            "@bummimadara",
+            "@silentreminder",
+            "@thalibmuda",
+            "@kajian.dakwah.sunnahh",
+            "@mukmin_sunnah",
+            "@abumalik_alfaruq",
+            "@thequran_verse",
+            "@tauhid_base",
+            "@dialislam",
+            "@adamalqordhowi",
+            "@khurafat.channel",
+            "@dakwah_salafy.id",
+            "@reelssunnah",
+            "@tawheedfirst.id"
+        ];
+
+        function logout() {
+            localStorage.removeItem('adminLogin');
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('pinInput').value = '';
+            document.getElementById('loginStatus').innerText = '';
+        }
+
+        function showSection(section) {
+            if(section === 'add') {
+                document.getElementById('sectionAdd').style.display = 'block';
+                initCollaboratorSystem();
+            } else {
+                document.getElementById('sectionAdd').style.display = 'none';
+            }
+        }
+
+        function togglePdfInput() {
+            const val = document.getElementById('inpPdfOption').value;
+            const wrapper = document.getElementById('pdfUploadWrapper');
+            if(val === 'ya') {
+                wrapper.style.display = 'block';
+            } else {
+                wrapper.style.display = 'none';
+                document.getElementById('inpFilePdf').value = '';
+            }
+        }
+
+        function getCollabList() {
+            const saved = localStorage.getItem('dakwahCollabList');
+            if (saved) {
+                try { return JSON.parse(saved); } catch(e){}
+            }
+            return DEFAULT_COLLABS;
+        }
+
+        function initCollaboratorSystem() {
+            const captionTextarea = document.getElementById('inpCaption');
+            if (!captionTextarea.value.trim()) {
+                resetCollaboratorText();
+            }
+            renderCollabChips();
+        }
+
+        function resetCollaboratorText() {
+            const captionTextarea = document.getElementById('inpCaption');
+            captionTextarea.value = "Collab Dakwah Sunnah :";
+            renderCollabChips();
+        }
+
+        function renderCollabChips() {
+            const container = document.getElementById('collabChips');
+            if (!container) return;
+            const list = getCollabList();
+            const currentText = document.getElementById('inpCaption').value;
+
+            container.innerHTML = '';
+            list.forEach(username => {
+                const cleanUser = username.startsWith('@') ? username : '@' + username;
+                const isSelected = currentText.includes(cleanUser);
+
+                const chip = document.createElement('span');
+                chip.className = `collab-chip ${isSelected ? 'selected' : ''}`;
+                chip.innerText = cleanUser;
+                chip.onclick = () => toggleCollabUser(cleanUser);
+                container.appendChild(chip);
+            });
+        }
+
+        function toggleCollabUser(username) {
+            const captionTextarea = document.getElementById('inpCaption');
+            let lines = captionTextarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            let headerLines = ["Collab Dakwah Sunnah :"];
+            let currentUsers = lines.filter(l => l.startsWith('@'));
+
+            if (currentUsers.includes(username)) {
+                currentUsers = currentUsers.filter(u => u !== username);
+            } else {
+                if (currentUsers.length >= 6) {
+                    alert('⚠️ Maksimal 6 username collaborator!');
+                    return;
+                }
+                currentUsers.push(username);
+            }
+
+            captionTextarea.value = headerLines.join('\n') + '\n' + currentUsers.join('\n');
+            renderCollabChips();
+        }
+
+        function manageCollabList() {
+            const currentList = getCollabList().join(', ');
+            const input = prompt('Masukkan daftar username collaborator (pisahkan dengan koma):', currentList);
+            
+            if (input !== null) {
+                const newList = input.split(',')
+                    .map(item => item.trim())
+                    .filter(item => item.length > 0)
+                    .map(item => item.startsWith('@') ? item : '@' + item);
+
+                localStorage.setItem('dakwahCollabList', JSON.stringify(newList));
+                renderCollabChips();
+            }
+        }
+
+        // FUNGSI NORMALISASI KATEGORI ADMIN AGAR SELALU BAKU & NON-PETIK
+        function standardizeKategoriAdmin(kat) {
+            if(!kat) return "Umum";
+            let k = kat.trim().replace(/['"’‘]/g, ""); // Bersihkan semua tanda petik
+            
+            // Kamus baku non-petik (mencegah Do'A, Bid'ah, dll.)
+            const mapBaku = {
+                "doa": "Doa",
+                "bidah": "Bidah",
+                "dzikir": "Dzikir",
+                "tauhid": "Tauhid",
+                "kitab": "Kitab",
+                "sholat": "Sholat",
+                "adab": "Adab",
+                "akidah": "Akidah",
+                "muamalah": "Muamalah",
+                "hadits shahih & hasan": "Hadits Shahih & Hasan",
+                "hadits dhaif & maudhu": "Hadits Dhaif & Maudhu",
+                "sunnah": "Sunnah",
+                "tafsir": "Tafsir",
+                "syirik": "Syirik",
+                "rumah tangga": "Rumah Tangga",
+                "reminder": "Reminder",
+                "fikih": "Fikih",
+                "puasa": "Puasa",
+                "manhaj salaf": "Manhaj Salaf",
+                "firqah-firqah": "Firqah-Firqah",
+                "rabiul awal": "Rabiul Awwal (3)",
+                "rabiul awwal": "Rabiul Awwal (3)",
+                "rabiul awwal (3)": "Rabiul Awwal (3)",
+                "rabiul akhir": "Rabiul Akhir (4)",
+                "rabiul akhir (4)": "Rabiul Akhir (4)",
+                "syaban": "Syaban (8)",
+                "syaban (8)": "Syaban (8)",
+                "dzulqadah": "Dzulqadah (11)",
+                "dzulqadah (11)": "Dzulqadah (11)",
+                "dzulhijjah": "Dzulhijjah (12)",
+                "dzulhijjah (12)": "Dzulhijjah (12)",
+                "muharram": "Muharram (1)",
+                "muharram (1)": "Muharram (1)",
+                "safar": "Safar (2)",
+                "safar (2)": "Safar (2)",
+                "jumadil awal": "Jumadil Awwal (5)",
+                "jumadil awwal": "Jumadil Awwal (5)",
+                "jumadil awwal (5)": "Jumadil Awwal (5)",
+                "jumadil akhir": "Jumadil Akhir (6)",
+                "jumadil akhir (6)": "Jumadil Akhir (6)",
+                "rajab": "Rajab (7)",
+                "rajab (7)": "Rajab (7)",
+                "ramadhan": "Ramadhan (9)",
+                "ramadhan (9)": "Ramadhan (9)",
+                "syawal": "Syawwal (10)",
+                "syawwal": "Syawwal (10)",
+                "syawwal (10)": "Syawwal (10)"
+            };
+
+            const key = k.toLowerCase().trim();
+            if(mapBaku[key]) return mapBaku[key];
+            
+            // Fallback: Kapitalisasi huruf pertama setiap kata
+            return k.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginPage = document.getElementById('loginPage');
+            const dashboard = document.getElementById('adminDashboard');
+            const pinInput = document.getElementById('pinInput');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginStatus = document.getElementById('loginStatus');
+            
+            const apiUrlInput = document.getElementById('inpApiUrl');
+            const apiKeyInput = document.getElementById('inpApiKey');
+
+            apiUrlInput.addEventListener('input', () => {
+                localStorage.setItem('dakwahApiUrl', apiUrlInput.value);
+            });
+            apiKeyInput.addEventListener('input', () => {
+                localStorage.setItem('dakwahApiKey', apiKeyInput.value);
+            });
+
+            if(localStorage.getItem('adminLogin') === 'true') {
+                loginPage.style.display = 'none';
+                dashboard.style.display = 'block';
+                
+                const savedUrl = localStorage.getItem('dakwahApiUrl');
+                const savedKey = localStorage.getItem('dakwahApiKey');
+                if(savedUrl) apiUrlInput.value = savedUrl;
+                if(savedKey) apiKeyInput.value = savedKey;
+                
+                loadKategoriList();
+            }
+
+            function handleLogin() {
+                if(ALLOWED_PINS.includes(pinInput.value.trim())) {
+                    localStorage.setItem('adminLogin', 'true');
+                    loginPage.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    
+                    const savedUrl = localStorage.getItem('dakwahApiUrl');
+                    const savedKey = localStorage.getItem('dakwahApiKey');
+                    if(savedUrl) apiUrlInput.value = savedUrl;
+                    if(savedKey) apiKeyInput.value = savedKey;
+                    
+                    loadKategoriList();
+                } else {
+                    loginStatus.innerText = '❌ PIN Salah!';
+                    pinInput.value = '';
+                    setTimeout(() => { loginStatus.innerText = ''; }, 3000);
+                }
+            }
+
+            loginBtn.addEventListener('click', handleLogin);
+            pinInput.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') handleLogin();
+            });
+
+            document.getElementById('inpCaption').addEventListener('input', renderCollabChips);
+
+            async function loadKategoriList() {
+                const datalist = document.getElementById('kategori-list');
+                
+                // MASTER BULAN HIJRIAH (VERSI BERSIH NON-PETIK SINKRON DENGAN ZIP PY)
+                const masterBulanHijriah = [
+                    "Muharram (1)",
+                    "Safar (2)",
+                    "Rabiul Awwal (3)",
+                    "Rabiul Akhir (4)",
+                    "Jumadil Awwal (5)",
+                    "Jumadil Akhir (6)",
+                    "Rajab (7)",
+                    "Syaban (8)",
+                    "Ramadhan (9)",
+                    "Syawwal (10)",
+                    "Dzulqadah (11)",
+                    "Dzulhijjah (12)"
+                ];
+
+                // MASTER KATEGORI UMUM (VERSI BERSIH NON-PETIK)
+                const masterKategoriUmum = [
+                    "Doa", "Bidah", "Tauhid", "Sunnah", "Akidah", "Fikih", "Hadits Shahih & Hasan", "Hadits Dhaif & Maudhu", "Tafsir", "Adab", "Syirik", "Rumah Tangga", "Reminder", "Dzikir", "Kitab", "Sholat", "Muamalah", "Puasa", "Manhaj Salaf", "Firqah-Firqah"
+                ];
+
+                let categoriesFromManifest = [];
+
+                try {
+                    let res = await fetch('manifest.json');
+                    if(!res.ok) res = await fetch('/manifest.json');
+                    if (res.ok) {
+                        const data = await res.json();
+                        cachedKategoriEmojis = data.kategori_emoji || {};
+                        if(data.kategori_list && data.kategori_list.length > 0) {
+                            categoriesFromManifest = data.kategori_list;
+                        }
+                    }
+                } catch (e) { /* Ignore error */ }
+
+                // Bersihkan & standarisasi semua kategori dari manifest (hilangkan Do'A, Bid'ah dll)
+                const cleanedManifest = categoriesFromManifest.map(k => standardizeKategoriAdmin(k));
+
+                // Gabungkan dan hilangkan duplikasi / sinonim
+                const combinedList = Array.from(new Set([...masterBulanHijriah, ...masterKategoriUmum, ...cleanedManifest]));
+
+                datalist.innerHTML = combinedList.map(k => `<option value="${k}">`).join('');
+            }
+
+            let cachedKategoriEmojis = {};
+            let selectedFiles = [];
+
+            function toSlug(text) {
+                return text.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+            }
+
+            function downloadFile(url, fileName) {
+                const a = document.createElement('a');
+                a.href = url; a.download = fileName;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            }
+
+            function cleanMarkdownText(text) {
+                if (!text) return '';
+                return text
+                    .replace(/\r\n/g, '\n')
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .join('\n\n');
+            }
+
+            function blobToBase64(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const dataUrl = reader.result;
+                        const base64 = dataUrl.split(',')[1];
+                        resolve(base64);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            }
+
+            // PERBAIKAN 1: JOIN MENGGUNAKAN SPASI UNTUK MENGHINDARI MULTILINE YAML ERROR
+            function formatCollaborator(text) {
+                if (!text) return '';
+                let lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+                return lines.map(line => {
+                    if (line.startsWith('@')) {
+                        return `*${line}*`;
+                    }
+                    return line;
+                }).join(' '); // <-- PERBAIKAN DI SINI
+            }
+
+            window.handleFileSelect = function(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    selectedFiles = Array.from(files);
+                    renderPreview();
+                }
+            };
+
+            function renderPreview() {
+                const container = document.getElementById('previewContainer');
+                container.innerHTML = '';
+                
+                if (selectedFiles.length === 0) return;
+
+                selectedFiles.forEach((file, index) => {
+                    const url = URL.createObjectURL(file);
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    
+                    div.innerHTML = `
+                        <img src="${url}" alt="Preview ${index+1}">
+                        <div class="order-number">${index + 1}.jpg</div>
+                        <div class="order-controls">
+                            <button onclick="moveUp(${index})" ${index === 0 ? 'disabled' : ''}>▲</button>
+                            <button onclick="moveDown(${index})" ${index === selectedFiles.length - 1 ? 'disabled' : ''}>▼</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            window.moveUp = function(index) {
+                if (index > 0) {
+                    [selectedFiles[index], selectedFiles[index-1]] = [selectedFiles[index-1], selectedFiles[index]];
+                    renderPreview();
+                }
+            };
+
+            window.moveDown = function(index) {
+                if (index < selectedFiles.length - 1) {
+                    [selectedFiles[index], selectedFiles[index+1]] = [selectedFiles[index+1], selectedFiles[index]];
+                    renderPreview();
+                }
+            };
+
+            window.downloadZipManual = async function() {
+                const status = document.getElementById('statusProgress');
+                const statusText = document.getElementById('statusText');
+
+                status.style.display = 'block';
+                statusText.innerHTML = '⏳ Mengemas file menjadi satu ZIP...';
+
+                const judul = document.getElementById('inpJudul').value.trim();
+                const rawKategori = document.getElementById('inpKategori').value.trim();
+                const kategori = standardizeKategoriAdmin(rawKategori); // Otomatis non-petik baku
+                const emoji = document.getElementById('inpEmoji').value.trim();
+                const tags = document.getElementById('inpTag').value.trim().replace(/['"’‘]/g, "");
+                const collaborator = document.getElementById('inpCaption').value.trim();
+                const content = document.getElementById('inpContent').value.trim();
+                const pdfInput = document.getElementById('inpFilePdf');
+                const pilihanPdf = document.getElementById('inpPdfOption').value;
+
+                if(!judul || !rawKategori) {
+                    statusText.innerHTML = '❌ Masukkan Judul dan Kategori terlebih dahulu!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
+                }
+                
+                if(selectedFiles.length === 0) {
+                    statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
+                }
+
+                const slug = toSlug(judul);
+                const namaZip = `${slug}-001.zip`;
+                const zip = new JSZip();
+
+                statusText.innerHTML = `📸 Memasukkan ${selectedFiles.length} gambar ke ZIP...`;
+                for(let i = 0; i < selectedFiles.length; i++) {
+                    zip.file(`${i + 1}.jpg`, selectedFiles[i]);
+                }
+
+                let pdfLine = '';
+                if(pilihanPdf === 'ya') {
+                    if(pdfInput.files.length > 0) {
+                        statusText.innerHTML = `📄 Memasukkan PDF ke ZIP...`;
+                        zip.file('brosur.pdf', pdfInput.files[0]);
+                        pdfLine = `pdf: "brosur.pdf"`;
+                    } else {
+                        statusText.innerHTML = '❌ Anda memilih "Pakai PDF" tetapi belum mengupload filenya!';
+                        setTimeout(() => status.style.display = 'none', 3000);
+                        return;
+                    }
+                } else {
+                    pdfLine = `tidakpakepdf: "brosur.pdf"`;
+                }
+
+                const finalContent = cleanMarkdownText(content);
+                const finalCollaborator = formatCollaborator(collaborator);
+
+                statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
+                const imagesStr = Array.from({length: selectedFiles.length}, (_, i) => `${i + 1}.jpg`).join(', ');
+                
+                const finalEmoji = emoji || cachedKategoriEmojis[kategori.toLowerCase()] || '📂';
+                const template = `---
+judul: "${judul}"
+sub_judul: "${finalCollaborator || 'Tulis collaborator di sini'}"
+kategori: "${kategori}"
+kategori_emoji: "${finalEmoji}"
+tags: "${tags || 'tag1, tag2'}"
+images: "${imagesStr}"
+${pdfLine}
+---
+${finalContent || 'Tulis isi caption di sini...'}`;
+                zip.file('poster.md', template);
+
+                statusText.innerHTML = `📦 Download ZIP... (${namaZip})`;
+                const contentZip = await zip.generateAsync({type:"blob"});
+                const urlZip = URL.createObjectURL(contentZip);
+                downloadFile(urlZip, namaZip);
+                URL.revokeObjectURL(urlZip);
+
+                statusText.innerHTML = `✅ Berhasil! ZIP didownload. Silakan upload ke folder _uploads secara manual.`;
+            };
+
+            window.kirimKeGitHub = async function() {
+                const status = document.getElementById('statusProgress');
+                const statusText = document.getElementById('statusText');
+
+                const apiUrl = document.getElementById('inpApiUrl').value.trim();
+                const apiKey = document.getElementById('inpApiKey').value.trim();
+
+                if(!apiUrl || !apiKey) {
+                    alert('❌ Harap isi API URL dan Secret Key di bagian konfigurasi!');
+                    return;
+                }
+
+                status.style.display = 'block';
+                statusText.innerHTML = '⏳ Mengemas file menjadi satu ZIP...';
+
+                const judul = document.getElementById('inpJudul').value.trim();
+                const rawKategori = document.getElementById('inpKategori').value.trim();
+                const kategori = standardizeKategoriAdmin(rawKategori); // Otomatis non-petik baku
+                const emoji = document.getElementById('inpEmoji').value.trim();
+                const tags = document.getElementById('inpTag').value.trim().replace(/['"’‘]/g, "");
+                const collaborator = document.getElementById('inpCaption').value.trim();
+                const content = document.getElementById('inpContent').value.trim();
+                const pdfInput = document.getElementById('inpFilePdf');
+                const pilihanPdf = document.getElementById('inpPdfOption').value;
+
+                if(!judul || !rawKategori) {
+                    statusText.innerHTML = '❌ Masukkan Judul dan Kategori terlebih dahulu!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
+                }
+
+                if(selectedFiles.length === 0) {
+                    statusText.innerHTML = '❌ Anda belum memasukkan gambar!';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                    return;
+                }
+
+                const slug = toSlug(judul);
+                const namaZip = `${slug}-001.zip`;
+                const zip = new JSZip();
+
+                statusText.innerHTML = `📸 Memasukkan ${selectedFiles.length} gambar ke ZIP...`;
+                for(let i = 0; i < selectedFiles.length; i++) {
+                    zip.file(`${i + 1}.jpg`, selectedFiles[i]);
+                }
+
+                let pdfLine = '';
+                if(pilihanPdf === 'ya') {
+                    if(pdfInput.files.length > 0) {
+                        statusText.innerHTML = `📄 Memasukkan PDF ke ZIP...`;
+                        zip.file('brosur.pdf', pdfInput.files[0]);
+                        pdfLine = `pdf: "brosur.pdf"`;
+                    } else {
+                        statusText.innerHTML = '❌ Anda memilih "Pakai PDF" tetapi belum mengupload filenya!';
+                        setTimeout(() => status.style.display = 'none', 3000);
+                        return;
+                    }
+                } else {
+                    pdfLine = `tidakpakepdf: "brosur.pdf"`;
+                }
+
+                const finalContent = cleanMarkdownText(content);
+                const finalCollaborator = formatCollaborator(collaborator);
+
+                statusText.innerHTML = `📝 Memasukkan poster.md ke ZIP...`;
+                const imagesStr = Array.from({length: selectedFiles.length}, (_, i) => `${i + 1}.jpg`).join(', ');
+                
+                const finalEmoji = emoji || cachedKategoriEmojis[kategori.toLowerCase()] || '📂';
+                const template = `---
+judul: "${judul}"
+sub_judul: "${finalCollaborator || 'Tulis collaborator di sini'}"
+kategori: "${kategori}"
+kategori_emoji: "${finalEmoji}"
+tags: "${tags || 'tag1, tag2'}"
+images: "${imagesStr}"
+${pdfLine}
+---
+${finalContent || 'Tulis isi caption di sini...'}`;
+                zip.file('poster.md', template);
+
+                statusText.innerHTML = `📦 Menyiapkan ZIP...`;
+                const contentZip = await zip.generateAsync({type:"blob"});
+                
+                if (contentZip.size > 100 * 1024 * 1024) {
+                    statusText.innerHTML = '❌ GAGAL! Ukuran ZIP melebihi 100 MB. Silakan kurangi jumlah gambar.';
+                    setTimeout(() => status.style.display = 'none', 5000);
+                    return;
+                }
+
+                statusText.innerHTML = `🔄 Mengonversi ZIP ke Base64...`;
+                const base64String = await blobToBase64(contentZip);
+
+                statusText.innerHTML = `📤 Mengirim Base64 ke Cloudflare API... (${(contentZip.size / 1024 / 1024).toFixed(2)} MB)`;
+                
+                const formData = new FormData();
+                formData.append('content_base64', base64String);
+                formData.append('filename', namaZip);
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-API-KEY': apiKey
+                        },
+                        body: formData
+                    });
+
+                    let result;
+                    const text = await response.text();
+                    try {
+                        result = JSON.parse(text);
+                    } catch {
+                        result = { error: text.substring(0, 150) };
+                    }
+
+                    if (response.ok && result.success) {
+                        statusText.innerHTML = `✅ Berhasil! ZIP dikirim ke GitHub. Bot akan memprosesnya otomatis.`;
+                    } else {
+                        statusText.innerHTML = `❌ Gagal mengirim ke API: ${result.error || 'Unknown Error'}`;
+                    }
+                } catch (error) {
+                    statusText.innerHTML = `❌ Error koneksi ke API. Detail: ${error.message}`;
+                }
+            };
+        });
+    </script>
+</body>
+</html>
