@@ -9,6 +9,7 @@ import json
 import zipfile
 import shutil
 import sys
+import yaml  # FIX: Library YAML sekarang benar-benar digunakan
 
 # Kamus pemetaan bulan Hijriah versi bersih NON-PETIK
 HIJRIAH_NORMALIZE_MAP = {
@@ -107,27 +108,33 @@ def get_canonical_kategori(kat_str):
 def parse_frontmatter(md_content):
     meta = {}
     content = md_content
-    match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", md_content, re.DOTALL)
+    # FIX: Regex dibuat lebih kebal dengan \r?\n untuk line-break Windows/Linux & match via search
+    match = re.search(r"^\s*---\r?\n(.*?)\r?\n---\r?\n(.*)", md_content, re.DOTALL)
     if match:
         yaml_text = match.group(1)
         content = match.group(2).strip()
-        current_key = None
-        
-        # Smart Multiline Parser (Solusi pelengkap untuk YAML)
-        for line in yaml_text.splitlines():
-            stripped_line = line.strip()
-            if not stripped_line or stripped_line.startswith("#"): continue
-            
-            if ":" in line and not stripped_line.startswith("*") and not stripped_line.startswith("@"):
-                key, val = line.split(":", 1)
-                key = key.strip()
-                val = val.strip().strip("'").strip('"')
-                meta[key] = val
-                current_key = key
-            else:
-                if current_key:
-                    add_val = stripped_line.strip("'").strip('"')
-                    meta[current_key] += " " + add_val
+        try:
+            # FIX: Menggunakan pyyaml agar pembacaan multiline & tanda kutip lebih sempurna
+            parsed = yaml.safe_load(yaml_text)
+            if isinstance(parsed, dict):
+                meta = parsed
+        except Exception as e:
+            print(f"⚠️ PyYAML Gagal, fallback ke parser manual: {e}")
+            current_key = None
+            for line in yaml_text.splitlines():
+                stripped_line = line.strip()
+                if not stripped_line or stripped_line.startswith("#"): continue
+                
+                if ":" in line and not stripped_line.startswith("*") and not stripped_line.startswith("@"):
+                    key, val = line.split(":", 1)
+                    key = key.strip()
+                    val = val.strip().strip("'").strip('"')
+                    meta[key] = val
+                    current_key = key
+                else:
+                    if current_key:
+                        add_val = stripped_line.strip("'").strip('"')
+                        meta[current_key] += " " + add_val
     return meta, content
 
 def extract_all_zips():
@@ -147,7 +154,6 @@ def extract_all_zips():
         for zf in zip_files:
             zip_path = os.path.join(uploads_dir, zf)
             slug_name = os.path.splitext(zf)[0]
-            # Hapus akhiran -001 bawaan dari Admin
             base_slug = re.sub(r'-\d{3}$', '', slug_name)
             temp_extract = os.path.join(repo_root, "_temp_extract")
 
@@ -168,7 +174,6 @@ def extract_all_zips():
                             kat_folder = clean_non_petik(kat_baku).lower().replace(" ", "-")
                         break
 
-                # Agar tidak terjadi timpa file saat ekstrak, kita simpan sbg folder temporary
                 target_dir = os.path.join(posters_root, kat_folder, base_slug)
                 counter = 1
                 while os.path.exists(target_dir):
@@ -192,11 +197,6 @@ def extract_all_zips():
                 if os.path.exists(temp_extract): shutil.rmtree(temp_extract)
 
 def fix_folder_sequences(posters_root):
-    """
-    Fungsi cerdas untuk merapikan nomor urut folder (001, 002, 003).
-    Mendeteksi folder ganda/berantakan & memberinya nomor baru yg benar.
-    Yg sudah benar dibiarkan.
-    """
     if not os.path.exists(posters_root): return
 
     for kat_folder in os.listdir(posters_root):
@@ -208,7 +208,6 @@ def fix_folder_sequences(posters_root):
         seen_seqs = set()
         duplicates_or_invalid = []
 
-        # Tahap 1: Cek folder mana yang nomor urutnya valid & tidak duplikat
         for folder in subfolders:
             match = re.search(r'-(\d{3})$', folder)
             if match:
@@ -218,20 +217,17 @@ def fix_folder_sequences(posters_root):
                 else:
                     seen_seqs.add(seq)
             else:
-                # Folder tidak ada nomor urut (contoh bawaan temp saat ekstrak)
                 duplicates_or_invalid.append(folder)
 
         if not duplicates_or_invalid:
             continue
 
-        # Tahap 2: Ganti nama (Rename) yg berantakan dengan urutan selanjutnya
         current_max = max(seen_seqs) if seen_seqs else 0
 
         for folder in duplicates_or_invalid:
             current_max += 1
             new_seq_str = f"{current_max:03d}"
             
-            # Buang nomor usang atau akhiran "-temp" 
             base_name = re.sub(r'-\d{3}$', '', folder)
             base_name = re.sub(r'-temp\d+$', '', base_name)
             
@@ -239,7 +235,6 @@ def fix_folder_sequences(posters_root):
             old_path = os.path.join(kat_path, folder)
             new_path = os.path.join(kat_path, new_folder_name)
             
-            # Cek jika entah kenapa nama path sudah ada, maka loncat 1 angka lagi
             while os.path.exists(new_path):
                 current_max += 1
                 new_seq_str = f"{current_max:03d}"
@@ -265,7 +260,9 @@ def build_manifest():
             try:
                 with open(md_path, "r", encoding="utf-8") as f:
                     meta, content = parse_frontmatter(f.read())
-            except Exception:
+            except Exception as e:
+                # FIX: Tambahkan logging agar ketahuan jika ada file MD yang corrupt
+                print(f"❌ Gagal baca MD di {md_path}: {e}")
                 continue
 
             rel_path = os.path.relpath(root, posters_dir).replace("\\", "/")
@@ -314,8 +311,6 @@ def build_manifest():
 
 if __name__ == "__main__":
     extract_all_zips()
-    # Fitur Cerdas: Urutkan folder-folder lama/baru yg acak-acakan sebelum dibuat manifest
     repo_path = os.getcwd()
     fix_folder_sequences(os.path.join(repo_path, "posters"))
     build_manifest()
-
