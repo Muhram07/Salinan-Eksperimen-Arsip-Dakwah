@@ -978,7 +978,6 @@
             if (menu === 'arsip') {
                 scrollToTop();
             } else if (menu === 'maker') {
-                // Menghubungkan langsung ke file maker.html
                 window.location.href = 'maker.html';
             }
         }
@@ -1231,8 +1230,10 @@
             let manifestData = { posters: [] };
 
             try {
-                let res = await fetch('manifest.json');
-                if(!res.ok) res = await fetch('/manifest.json');
+                // FIX: Menambahkan Cache Buster (?v=timestamp) ke fetch agar manifest.json selalu yang terbaru dari Cloudflare/GitHub.
+                const cacheBuster = '?v=' + new Date().getTime();
+                let res = await fetch('manifest.json' + cacheBuster);
+                if(!res.ok) res = await fetch('/manifest.json' + cacheBuster);
                 if(res.ok) manifestData = await res.json();
             } catch(e) { console.warn("Gagal mengambil manifest", e); }
 
