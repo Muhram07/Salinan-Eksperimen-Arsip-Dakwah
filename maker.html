@@ -1,15 +1,14 @@
 <!--
 
-Berikut adalah perbaikan **100% UTUH DAN LENGKAP** dari aplikasi "Studio Poster Maker Pro". 
-Semua fitur yang Anda minta telah diintegrasikan dengan mulus tanpa merusak satu pun fungsi yang sudah berjalan sebelumnya.
+Berikut adalah kode sumber **100% UTUH DAN LENGKAP** dari aplikasi "Studio Poster Maker Pro" yang telah diperbaiki dan ditambahkan fitur-fiturnya sesuai dengan instruksi Anda (Zero Regression Protocol & Canvas 2D Best Practices).
 
-**Catatan Rincian Perbaikan:**
-1. **Hack Dzikir Fullscreen (Foto/PNG):** Menambahkan `dzikirOverlay` yang akan menutupi layar saat foto diunggah. Tombol bertuliskan *"Astaghfirullaha wa atuwbu ilaih"* harus ditekan 2x (yang secara real-time akan memicu fullscreen ON lalu OFF) sebelum overlay hilang dan foto muncul.
-2. **Hapus Tombol (X) di Mode Trial:** Tombol (X) pada `subscriptionWall` telah dihapus sepenuhnya. Pengguna wajib melanjutkan transaksi jika waktu trial habis.
-3. **Perbaikan Bentuk (Shape) & Blur Realtime:** Bentuk 'Crescent' (Bulan Sabit) dan 'Capsule' (Kapsul) telah diperbaiki rumus kanvasnya sehingga bentuknya sempurna. Parameter `el.borderBlur` juga telah dimasukkan ke dalam sistem *Hash Cache*, sehingga efek blur pada bentuk akan ter-update secara *real-time* saat digeser.
-4. **Unduh Font Tambahan:** Ditambahkan tombol "⬇️ Unduh Font Tambahan" pada panel Font. Menampilkan modal dengan daftar 10 font premium baru (seperti Jersey 10, Rubik Doodle, Protest Strike, dll) yang bisa dicentang dan "diinstal" langsung ke dalam aplikasi.
-5. **Auto-Increment Version:** Versi diupdate ke `v1.0.7`, beserta penambahan komentar instruksi versi untuk AI di bagian atas skrip.
-6. **Perbaikan Tampilan Slide Demo:** Panah pemindah slide khusus di Slide Demo telah dihilangkan. Pesan peringatan *"Slide Demo - Tidak dapat diedit"* di toolbar bawah sekarang muncul seketika secara real-time saat slide demo ditekan.
+### **Rangkuman Pembaruan (Versi 1.0.8):**
+1. **Ekspor/Download Font Kustom:** Tombol unduh font diubah fungsinya menjadi **"⬇️ Ekspor Font Pribadi"**. Pengguna kini bisa mencentang dan mendownload file `.ttf/.otf` dari font kustom yang pernah mereka unggah sebelumnya. Font ekstra premium (seperti Jersey 10, Rubik Doodle, dll) telah digabungkan otomatis ke daftar font default.
+2. **Sinkronisasi & Update Otomatis:** Ditambahkan tombol **"🔄 Update"** di navbar atas. Sistem akan membersihkan cache Service Worker dan me-reload aplikasi secara halus tanpa menghapus data IndexedDB (projek) maupun localStorage (Sisa waktu Trial/Voucher).
+3. **Perbaikan Tool Kapsul (Shape):** Rumus matematika kanvas pada bentuk kapsul telah diperbaiki sehingga dapat memanjang sempurna menyesuaikan tarikan dimensi (lebar/tinggi), tidak lagi membulat kaku.
+4. **Perbaikan Tampilan Demo Slide:** Penambahan logika pembersihan *cache ukuran canvas* (`_calculatedHeight` & `_cachedCanvas`) sesaat setelah font web termuat sempurna (`document.fonts.ready`). Ini memperbaiki bug rendering dimana teks demo sebelumnya sering berantakan/hancur.
+5. **Tool Baru: Fade Tepi (Gradient Blur Edge):** Ditambahkan tool **"🌫️ Fade Tepi"** di bar bawah (tampil saat tidak memilih elemen apa-apa). Anda bisa mengatur gradien halus yang masuk dari Kiri, Kanan, Atas, Bawah, Horizontal (2 arah), atau Vertikal (2 arah), lengkap dengan pengaturan warna dan persentase kedalaman (Depth).
+6. **PWA Prompt Presisten:** Notifikasi instalasi aplikasi akan terus muncul setiap kali browser dibuka jika aplikasi belum diinstal. Penggunaan `localStorage` diganti dengan `sessionStorage` agar tombol (X) hanya menyembunyikannya sementara untuk sesi saat itu saja.
 
 -->
 <!DOCTYPE html>
@@ -24,7 +23,7 @@ Semua fitur yang Anda minta telah diintegrasikan dengan mulus tanpa merusak satu
 <meta name="theme-color" content="#0b0b0b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Abel&family=Almendra:wght@400;700&family=Astloch:wght@400;700&family=Bungee+Inline&family=Crimson+Text:wght@400;700&family=Eczar:wght@400;700&family=El+Messiri:wght@400;700&family=Exo+2:wght@400;700&family=Faster+One&family=Fira+Sans:wght@400;700&family=Frijole&family=Harmattan:wght@400;700&family=Inconsolata:wght@400;700&family=Itim&family=Jomhuria&family=Josefin+Sans:wght@400;700&family=Kanit:wght@400;700&family=Kelly+Slab&family=Knewave&family=Kurale&family=Lalezar&family=Lato:wght@400;700&family=Lemonada:wght@400;700&family=Macondo&family=Mada:wght@400;700&family=Mali:wght@400;700&family=Megrim&family=Mirza:wght@400;700&family=Monoton&family=Nosifer&family=Nunito+Sans:wght@400;700;900&family=Open+Sans:wght@400;700&family=Poppins:wght@400;700;900&family=Pridi:wght@400;700&family=Quicksand:wght@400;700&family=Rakkas&family=Raleway:wght@400;700&family=Ranga:wght@400;700&family=Roboto:wght@400;700&family=Rye&family=Shojumaru&family=Signika:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Sriracha&family=Sura:wght@400;700&family=Ubuntu:wght@400;700&family=Varela+Round&family=Yanone+Kaffeesatz:wght@400;700&family=Yatra+One&family=Zilla+Slab:wght@400;700&family=Abril+Fatface&family=Acme&family=Alfa+Slab+One&family=Amiri:wght@400;700&family=Anton&family=Archivo+Black&family=Aref+Ruqaa&family=Bebas+Neue&family=Big+Shoulders+Display:wght@700;900&family=Black+Ops+One&family=Bungee&family=Cairo:wght@700&family=Carter+One&family=Caveat:wght@400;700&family=Changa:wght@700&family=Cinzel:wght@400;700;900&family=Cookie&family=Courgette&family=Creepster&family=Dancing+Script:wght@700&family=Fredoka:wght@600;700&family=Great+Vibes&family=Inter:wght@400;600;700;800&family=Kaushan+Script&family=Lateef&family=Lilita+One&family=Lobster&family=Lora:wght@500;700&family=Montserrat:wght@400;700;800;900&family=Nunito:wght@700;900&family=Oleo+Script&family=Orbitron:wght@700;900&family=Oswald:wght@700&family=Outfit:wght@600;800;900&family=Pacifico&family=Passion+One:wght@700&family=Patua+One&family=Permanent+Marker&family=Playfair+Display:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Reem+Kufi:wght@700&family=Righteous&family=Rubik:wght@700;900&family=Russo+One&family=Satisfy&family=Scheherazade+New&family=Sigmar+One&family=Space+Mono:wght@400;700&family=Staatliches&family=Tajawal:wght@700&family=Teko:wght@700&family=Titan+One&family=Yellowtail&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Abel&family=Almendra:wght@400;700&family=Astloch:wght@400;700&family=Bungee+Inline&family=Crimson+Text:wght@400;700&family=Eczar:wght@400;700&family=El+Messiri:wght@400;700&family=Exo+2:wght@400;700&family=Faster+One&family=Fira+Sans:wght@400;700&family=Frijole&family=Harmattan:wght@400;700&family=Inconsolata:wght@400;700&family=Itim&family=Jomhuria&family=Josefin+Sans:wght@400;700&family=Kanit:wght@400;700&family=Kelly+Slab&family=Knewave&family=Kurale&family=Lalezar&family=Lato:wght@400;700&family=Lemonada:wght@400;700&family=Macondo&family=Mada:wght@400;700&family=Mali:wght@400;700&family=Megrim&family=Mirza:wght@400;700&family=Monoton&family=Nosifer&family=Nunito+Sans:wght@400;700;900&family=Open+Sans:wght@400;700&family=Poppins:wght@400;700;900&family=Pridi:wght@400;700&family=Quicksand:wght@400;700&family=Rakkas&family=Raleway:wght@400;700&family=Ranga:wght@400;700&family=Roboto:wght@400;700&family=Rye&family=Shojumaru&family=Signika:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Sriracha&family=Sura:wght@400;700&family=Ubuntu:wght@400;700&family=Varela+Round&family=Yanone+Kaffeesatz:wght@400;700&family=Yatra+One&family=Zilla+Slab:wght@400;700&family=Abril+Fatface&family=Acme&family=Alfa+Slab+One&family=Amiri:wght@400;700&family=Anton&family=Archivo+Black&family=Aref+Ruqaa&family=Bebas+Neue&family=Big+Shoulders+Display:wght@700;900&family=Black+Ops+One&family=Bungee&family=Cairo:wght@700&family=Carter+One&family=Caveat:wght@400;700&family=Changa:wght@700&family=Cinzel:wght@400;700;900&family=Cookie&family=Courgette&family=Creepster&family=Dancing+Script:wght@700&family=Fredoka:wght@600;700&family=Great+Vibes&family=Inter:wght@400;600;700;800&family=Kaushan+Script&family=Lateef&family=Lilita+One&family=Lobster&family=Lora:wght@500;700&family=Montserrat:wght@400;700;800;900&family=Nunito:wght@700;900&family=Oleo+Script&family=Orbitron:wght@700;900&family=Oswald:wght@700&family=Outfit:wght@600;800;900&family=Pacifico&family=Passion+One:wght@700&family=Patua+One&family=Permanent+Marker&family=Playfair+Display:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Reem+Kufi:wght@700&family=Righteous&family=Rubik:wght@700;900&family=Russo+One&family=Satisfy&family=Scheherazade+New&family=Sigmar+One&family=Space+Mono:wght@400;700&family=Staatliches&family=Tajawal:wght@700&family=Teko:wght@700&family=Titan+One&family=Yellowtail&family=Jersey+10&family=Protest+Strike&family=Madimi+One&family=Rubik+Doodle+Shadow&family=Sedan&family=Honk&family=Micro+5&family=Ojuju:wght@200..800&family=Platypi:ital,wght@0,300..800;1,300..800&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none;}
 html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
@@ -282,6 +281,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 <div class="nav-right">
 <span id="appVersionDisplay" style="font-size:10px;color:#888;font-weight:bold;margin-right:4px;"></span>
+<button class="btn-nav" onclick="syncAppVersion()" style="color:#00ff88;border-color:#00ff88;" title="Sinkronisasi & Update Versi">🔄 Update</button>
 <button class="btn-nav" onclick="openProjectModal()" style="border-color:#D4AF37;color:#D4AF37;">📁 Projek</button>
 <button class="btn-nav" onclick="toggleRatioSelector()">📏 <span id="currentRatioLabel">4:5</span></button>
 <button class="btn-nav" onclick="openPanelBleed()">📐 Garis Bantu</button>
@@ -450,17 +450,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     </div>
 </div>
 
-<!-- Modal Download Font Tambahan -->
-<div class="feature-modal" id="fontDownloadModal">
+<!-- Modal Ekspor Font Pribadi -->
+<div class="feature-modal" id="fontExportModal">
     <div class="fmodal-header">
-        <div style="font-weight:800;color:#00ff88;font-size:13px;">⬇️ Unduh Font Tambahan</div>
-        <button class="panel-close" onclick="closeFontDownloadModal()">✕</button>
+        <div style="font-weight:800;color:#00ff88;font-size:13px;">⬇️ Ekspor Font Pribadi</div>
+        <button class="panel-close" onclick="closeFontExportModal()">✕</button>
     </div>
     <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto;" id="fontDownloadList">
         <!-- Checkboxes generated by JS -->
     </div>
     <div class="fmodal-footer">
-        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px; background:#00ff88; color:#000;" onclick="executeFontDownload()">⬇️ Install Font Terpilih</button>
+        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px; background:#00ff88; color:#000;" onclick="executeFontExport()">⬇️ Ekspor (.ttf) Terpilih</button>
     </div>
 </div>
 
@@ -635,7 +635,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 </div>
 
-<!-- Modal Update Notifikasi -->
+<!-- Modal Update Notifikasi (Dummy jika perlu untuk versi lama, logic sinkronisasi dipindah ke tombol langsung) -->
 <div class="feature-modal" id="updateModal" style="z-index:9999999;">
     <div class="fmodal-header">
         <div style="font-weight:800;color:#D4AF37;font-size:13px;">🚀 Update Aplikasi Tersedia!</div>
@@ -644,19 +644,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     <div class="fmodal-body" style="flex-direction:column; padding:20px; text-align:center;">
         <h3 style="color:#fff;margin-bottom:10px;">Versi Baru Ditemukan</h3>
         <p style="font-size:12px;color:#aaa;margin-bottom:20px;">Untuk mendapatkan fitur terbaru, perbaikan bug, dan stabilitas, silakan update aplikasi Anda sekarang.</p>
-        <div style="background:#222;padding:12px;border-radius:8px;font-size:11px;color:#ddd;text-align:left;margin-bottom:20px;line-height:1.5;">
-            <b style="color:#D4AF37;">Cara Update Otomatis:</b><br>
-            1. <b>Hapus</b> / <b>Uninstall</b> aplikasi Maker Pro (dari layar beranda HP Anda).<br>
-            2. Buka link web app di bawah ini menggunakan <b>Google Chrome</b>.<br>
-            3. Tunggu notifikasi "Install App" muncul kembali, lalu klik Install. (Atau klik menu titik tiga di Chrome > "Tambahkan ke Layar Utama").
-        </div>
-        <div style="display:flex;gap:8px;width:100%;align-items:center;">
-            <input type="text" id="updateUrl" value="https://file-dakwah-muhram-of.pages.dev/maker" readonly style="flex:1;background:#111;color:#fff;border:1px solid #D4AF37;padding:10px;border-radius:6px;font-size:11px;">
-            <button class="btn-nav active" style="height:36px;justify-content:center;" onclick="navigator.clipboard.writeText(document.getElementById('updateUrl').value);showToast('📋 Link Update Disalin!')">Copy Link</button>
-        </div>
-    </div>
-    <div class="fmodal-footer">
-        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="window.open('https://file-dakwah-muhram-of.pages.dev/maker', '_blank')">🌐 Buka di Browser</button>
+        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="syncAppVersion()">🔄 Update Sekarang</button>
     </div>
 </div>
 
@@ -788,10 +776,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* VERSION HISTORY: 
-   AI auto-increment notes: If you update this app further, increment this variable 
-   (e.g., from v1.0.7 to v1.0.8) and keep this comment for reference.
+   Update v1.0.8: Font Export, Smart Sync, Capsule Shape fix, Demo Slide fix, Fade Edge Tool, PWA Session.
 */
-const APP_VERSION = 'v1.0.7'; 
+const APP_VERSION = 'v1.0.8'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -802,21 +789,7 @@ const RATIO_PRESETS={
 '9:16':{width:1080,height:1920,label:'9:16 Story'}
 };
 
-/* DOWNLOADABLE EXTRA FONTS (Simulasi Install Web Fonts) */
-const DOWNLOADABLE_FONTS = [
-    {name: 'Jersey 10', url: 'https://fonts.googleapis.com/css2?family=Jersey+10&display=swap'},
-    {name: 'Protest Strike', url: 'https://fonts.googleapis.com/css2?family=Protest+Strike&display=swap'},
-    {name: 'Madimi One', url: 'https://fonts.googleapis.com/css2?family=Madimi+One&display=swap'},
-    {name: 'Rubik Doodle Shadow', url: 'https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow&display=swap'},
-    {name: 'Sedan', url: 'https://fonts.googleapis.com/css2?family=Sedan&display=swap'},
-    {name: 'Honk', url: 'https://fonts.googleapis.com/css2?family=Honk&display=swap'},
-    {name: 'Micro 5', url: 'https://fonts.googleapis.com/css2?family=Micro+5&display=swap'},
-    {name: 'Ojuju', url: 'https://fonts.googleapis.com/css2?family=Ojuju:wght@200..800&display=swap'},
-    {name: 'Platypi', url: 'https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,300..800;1,300..800&display=swap'},
-    {name: 'Pixelify Sans', url: 'https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap'}
-];
-let downloadedFontsList = JSON.parse(localStorage.getItem('DOWNLOADED_FONTS_LIST') || '[]');
-
+/* SEMUA FONT (Termasuk font ekstra yg sebelumnya didownload) dimasukkan ke FONT_FAMILIES default */
 const FONT_FAMILIES=[
 {name:'🔥 Anton (AA)',font:"Anton, sans-serif"},
 {name:'💥 Archivo Black (AA/Aa)',font:"Archivo Black, sans-serif"},
@@ -920,7 +893,17 @@ const FONT_FAMILIES=[
 {name:'🌊 Knewave (Aa)', font:"Knewave, display"},
 {name:'💨 Faster One (AA)', font:"'Faster One', display"},
 {name:'🧟 Frijole (AA)', font:"Frijole, display"},
-{name:'🩸 Nosifer (AA)', font:"Nosifer, display"}
+{name:'🩸 Nosifer (AA)', font:"Nosifer, display"},
+{name:'✨ Jersey 10', font:"'Jersey 10', sans-serif"},
+{name:'✨ Protest Strike', font:"'Protest Strike', sans-serif"},
+{name:'✨ Madimi One', font:"'Madimi One', sans-serif"},
+{name:'✨ Rubik Doodle Shadow', font:"'Rubik Doodle Shadow', sans-serif"},
+{name:'✨ Sedan', font:"Sedan, serif"},
+{name:'✨ Honk', font:"Honk, system-ui"},
+{name:'✨ Micro 5', font:"'Micro 5', sans-serif"},
+{name:'✨ Ojuju', font:"Ojuju, sans-serif"},
+{name:'✨ Platypi', font:"Platypi, serif"},
+{name:'✨ Pixelify Sans', font:"'Pixelify Sans', sans-serif"}
 ];
 
 let currentRatio='4:5';
@@ -1085,7 +1068,7 @@ if(!t)return;
 t.innerText=msg;
 t.classList.add('show');
 clearTimeout(t._timer);
-t._timer=setTimeout(()=>t.classList.remove('show'),5000);
+t._timer=setTimeout(()=>t.classList.remove('show'),3000);
 }
 
 window.addEventListener('offline', () => showToast('⚠️ Koneksi terputus. Mode offline aktif.'));
@@ -1204,27 +1187,36 @@ async function loadDemoProject() {
     return null;
 }
 
-function loadDownloadedFonts() {
-    downloadedFontsList.forEach(fontName => {
-        const fontObj = DOWNLOADABLE_FONTS.find(f => f.name === fontName);
-        if(fontObj) {
-            const link = document.createElement('link');
-            link.href = fontObj.url;
-            link.rel = 'stylesheet';
-            document.head.appendChild(link);
-            FONT_FAMILIES.push({name: `✨ ${fontObj.name}`, font: `"${fontObj.name}", sans-serif`});
+async function syncAppVersion() {
+    showToast("⏳ Memeriksa sinkronisasi versi...");
+    try {
+        if('caches' in window) {
+            const keys = await caches.keys();
+            for(let key of keys) await caches.delete(key);
         }
-    });
+        if('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for(let reg of regs) await reg.unregister();
+        }
+        localStorage.setItem('APP_VERSION_STORED', APP_VERSION);
+        showToast("✅ Aplikasi berhasil disinkronkan ke versi terbaru!");
+        setTimeout(() => {
+            location.href = location.pathname + '?v=' + Date.now();
+        }, 1500);
+    } catch(err) {
+        showToast("⚠️ Gagal sinkronisasi");
+    }
 }
 
 function checkAppVersion() {
     const storedVer = localStorage.getItem('APP_VERSION_STORED');
     if(storedVer && storedVer !== APP_VERSION) {
-        document.getElementById('updateModal').classList.add('active');
+        syncAppVersion(); // Auto sync jika beda versi
+    } else {
+        localStorage.setItem('APP_VERSION_STORED', APP_VERSION);
+        const verDisplay = document.getElementById('appVersionDisplay');
+        if(verDisplay) verDisplay.innerText = APP_VERSION;
     }
-    localStorage.setItem('APP_VERSION_STORED', APP_VERSION);
-    const verDisplay = document.getElementById('appVersionDisplay');
-    if(verDisplay) verDisplay.innerText = APP_VERSION;
 }
 
 function forceUIWakeup() {
@@ -1241,7 +1233,6 @@ function forceUIWakeup() {
 
 async function initApp(){
 checkAppVersion();
-loadDownloadedFonts();
 
 try { await initDB(); } catch(e) { console.warn("IndexedDB gagal", e); }
 await loadFromStorage();
@@ -1264,22 +1255,26 @@ adjustArtboardSize();
 renderAll();
 pushHistoryState();
 
+// Memastikan layout demo membaik seketika font selesai dimuat
 document.fonts.ready.then(() => {
-    renderPending=false;
+    slides.forEach(s => {
+        if(s.elements) {
+            s.elements.forEach(el => { 
+                el._cachedCanvas = null; 
+                el._cachedHash = null; 
+                el._calculatedHeight = null;
+                el._renderedW = null;
+            });
+        }
+    });
+    renderPending = false;
     requestRender();
     updateCurrentSlideThumb();
     renderCarouselThumbs();
     renderBottomToolbar();
     updateDemoFloatingBtn();
     
-    setTimeout(() => {
-        slides.forEach(s => {
-            if(s.elements) {
-                s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; });
-            }
-        });
-        forceUIWakeup();
-    }, 100);
+    setTimeout(() => { forceUIWakeup(); }, 100);
     setTimeout(() => { forceUIWakeup(); }, 500);
 });
 
@@ -1302,11 +1297,6 @@ document.getElementById('dzikirBtn').onclick = () => {
     }
 };
 }
-
-document.fonts.onloadingdone = () => {
-    renderPending = false;
-    requestRender();
-};
 
 function triggerAutoSave(){
 setSaveIndicator(false);
@@ -1862,6 +1852,8 @@ function getElHash(el) {
             str += '_' + el.src + '_' + el.cropL + '_' + el.cropR + '_' + el.cropT + '_' + el.cropB + '_' + el.blur + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.borderBlur + '_' + el.colorOverlay + '_' + el.imageSkinSrc + '_' + el.imageSkinOffsetX + '_' + el.imageSkinOffsetY + '_' + el.imageSkinScale + '_' + el.imageSkinBlend + '_' + el.imageSkinOpacity + '_' + JSON.stringify(el.advancedColor||{}) + '_' + JSON.stringify(el.depthFocus||{});
         } else if(el.type === 'shape') {
             str += '_' + el.shapeType + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.borderBlur + '_' + el.imageSkinSrc + '_' + el.imageSkinOffsetX + '_' + el.imageSkinOffsetY + '_' + el.imageSkinScale + '_' + el.imageSkinBlend + '_' + el.imageSkinOpacity + '_' + el.color;
+        } else if(el.type === 'fade') {
+            str += '_' + el.fadeDir + '_' + el.fadeDepth;
         }
         str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.emboss||{});
         return str;
@@ -1884,6 +1876,7 @@ if(el.id===editingElementId)return;
 if(el.type==='text')renderTextElement(ctx,el);
 else if(el.type==='image')renderImageElement(ctx,el);
 else if(el.type==='shape')renderShapeElement(ctx,el);
+else if(el.type==='fade')renderFadeElement(ctx,el);
 });
 }
 updateSelectionBox();
@@ -2535,12 +2528,16 @@ function renderShapeElement(targetCtx, el) {
             ctx.lineTo(-w/2, -t); ctx.lineTo(-t, -t);
             ctx.closePath();
         } else if (el.shapeType === 'capsule') {
-            const r = Math.min(w, h) / 2;
-            ctx.moveTo(-w/2 + r, -h/2);
-            ctx.lineTo(w/2 - r, -h/2);
-            ctx.arc(w/2 - r, 0, r, -Math.PI/2, Math.PI/2);
-            ctx.lineTo(-w/2 + r, h/2);
-            ctx.arc(-w/2 + r, 0, r, Math.PI/2, -Math.PI/2);
+            // Perbaikan bentuk kapsul sempurna menyesuaikan rasio w/h
+            if (w > h) {
+                const r = h / 2;
+                ctx.arc(w/2 - r, 0, r, -Math.PI/2, Math.PI/2);
+                ctx.arc(-w/2 + r, 0, r, Math.PI/2, -Math.PI/2);
+            } else {
+                const r = w / 2;
+                ctx.arc(0, -h/2 + r, r, Math.PI, 0);
+                ctx.arc(0, h/2 - r, r, 0, Math.PI);
+            }
             ctx.closePath();
         } else if (el.shapeType === 'trapezoid') {
             ctx.moveTo(-w/4, -h/2);
@@ -2675,6 +2672,62 @@ function renderShapeElement(targetCtx, el) {
     }
 
     targetCtx.drawImage(off, -cW/2, -cH/2, cW, cH);
+    targetCtx.restore();
+}
+
+/* ========== RENDER FADE TEPI ========== */
+function renderFadeElement(targetCtx, el) {
+    targetCtx.save();
+    targetCtx.translate(el.x, el.y);
+    if(el.rotation) targetCtx.rotate((el.rotation * Math.PI) / 180);
+    targetCtx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+    if(el.blendMode && el.blendMode !== 'normal') targetCtx.globalCompositeOperation = el.blendMode;
+
+    const w = el.width || mainCanvas.width;
+    const h = el.height || mainCanvas.height;
+    el._renderedW = w;
+    el._renderedH = h;
+
+    const hash = getElHash(el);
+    const rScale = window.currentRenderScale || 1;
+    if (rScale === 1 && el._cachedHash === hash && el._cachedCanvas) {
+        targetCtx.drawImage(el._cachedCanvas, -w/2, -h/2);
+        targetCtx.restore();
+        return;
+    }
+
+    const off = document.createElement('canvas');
+    off.width = w * rScale;
+    off.height = h * rScale;
+    const octx = off.getContext('2d');
+    octx.scale(rScale, rScale);
+    octx.translate(w/2, h/2);
+
+    const depthVal = Math.max(1, el.fadeDepth || 50); 
+    const color = el.color || '#000000';
+
+    const drawGrad = (x0, y0, x1, y1) => {
+        const grad = octx.createLinearGradient(x0, y0, x1, y1);
+        grad.addColorStop(0, color);
+        grad.addColorStop(1, 'transparent');
+        octx.fillStyle = grad;
+        octx.fillRect(-w/2, -h/2, w, h);
+    };
+
+    if (el.fadeDir === 'left') drawGrad(-w/2, 0, -w/2 + (w * depthVal/100), 0);
+    else if (el.fadeDir === 'right') drawGrad(w/2, 0, w/2 - (w * depthVal/100), 0);
+    else if (el.fadeDir === 'top') drawGrad(0, -h/2, 0, -h/2 + (h * depthVal/100));
+    else if (el.fadeDir === 'bottom') drawGrad(0, h/2, 0, h/2 - (h * depthVal/100));
+    else if (el.fadeDir === 'horizontal') {
+        drawGrad(-w/2, 0, -w/2 + (w * depthVal/100), 0);
+        drawGrad(w/2, 0, w/2 - (w * depthVal/100), 0);
+    } else if (el.fadeDir === 'vertical') {
+        drawGrad(0, -h/2, 0, -h/2 + (h * depthVal/100));
+        drawGrad(0, h/2, 0, h/2 - (h * depthVal/100));
+    }
+
+    if(rScale === 1) { el._cachedCanvas = off; el._cachedHash = hash; }
+    targetCtx.drawImage(off, -w/2, -h/2, w, h);
     targetCtx.restore();
 }
 
@@ -3288,7 +3341,7 @@ factor=Math.max(0.15,factor);
 if(el.type==='text'){
 el.fontSize=Math.round(startElementState.fontSize*factor);
 el.width=Math.round(startElementState.width*factor);
-}else if(el.type==='image' || el.type==='shape'){
+}else if(el.type==='image' || el.type==='shape' || el.type==='fade'){
 el.width=Math.round(startElementState.width*factor);
 el.height=Math.round(startElementState.height*factor);
 }
@@ -3297,7 +3350,7 @@ const sign=activeHandle==='r'?1:-1;
 el.width=Math.max(80,Math.round(startElementState.width+(deltaX*2*sign)));
 }else if(activeHandle==='b'||activeHandle==='t'){
 const sign=activeHandle==='b'?1:-1;
-if(el.type==='image' || el.type==='shape')el.height=Math.max(40,Math.round(startElementState.height+(deltaY*2*sign)));
+if(el.type==='image' || el.type==='shape' || el.type==='fade')el.height=Math.max(40,Math.round(startElementState.height+(deltaY*2*sign)));
 }
 requestRender();
 }
@@ -3329,6 +3382,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
 <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
 <button class="tool-btn" onclick="openPanelAddShape()"><span class="icon">🔶</span><span>Bentuk</span></button>
+<button class="tool-btn" onclick="openPanelFadeEdge()"><span class="icon">🌫️</span><span>Fade Tepi</span></button>
 <button class="tool-btn" onclick="openPenToolOverlay()"><span class="icon">✍️</span><span>Gambar</span></button>
 <button class="tool-btn" onclick="openElementsDrive()"><span class="icon">☁️</span><span>Elemen</span></button>
 <button class="tool-btn" onclick="openPanelBackground()"><span class="icon">🎨</span><span>Background</span></button>
@@ -3410,7 +3464,94 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
 `;
+}else if(el.type==='fade'){
+bar.innerHTML=`
+<button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
+<button class="tool-btn" onclick="openPanelFadeEdge()"><span class="icon">🌫️</span><span>Fade Tepi</span></button>
+<button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
+<button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
+<button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
+<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📐</span><span>Relatif</span></button>
+<button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
+<button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
+<button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
+<button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
+<button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
+<button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
+`;
 }
+}
+
+/* ========== TOOL FADE TEPI ========== */
+function openPanelFadeEdge() {
+    let el = getActiveElement();
+    if (!el || el.type !== 'fade') {
+        addNewFadeEdge();
+        el = getActiveElement();
+    }
+    const html = `
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">ARAH FADE:</div>
+    <div class="ctrl-grid-btns">
+        <button class="btn-sub-tool ${el.fadeDir==='left'?'active':''}" onclick="setFadeDir('left')">➡️ Masuk Kiri</button>
+        <button class="btn-sub-tool ${el.fadeDir==='right'?'active':''}" onclick="setFadeDir('right')">⬅️ Masuk Kanan</button>
+        <button class="btn-sub-tool ${el.fadeDir==='top'?'active':''}" onclick="setFadeDir('top')">⬇️ Masuk Atas</button>
+        <button class="btn-sub-tool ${el.fadeDir==='bottom'?'active':''}" onclick="setFadeDir('bottom')">⬆️ Masuk Bawah</button>
+        <button class="btn-sub-tool ${el.fadeDir==='horizontal'?'active':''}" onclick="setFadeDir('horizontal')">↔️ Kanan Kiri</button>
+        <button class="btn-sub-tool ${el.fadeDir==='vertical'?'active':''}" onclick="setFadeDir('vertical')">↕️ Atas Bawah</button>
+    </div>
+    
+    <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kedalaman (Jauh):</span><span class="ctrl-val" id="valFadeDepth">${el.fadeDepth||50}%</span></div>
+    <input type="range" class="ctrl-slider" min="10" max="100" value="${el.fadeDepth||50}" oninput="setFadeDepth(this.value)">
+    
+    <div style="margin-top:12px;">
+    <span style="font-size:11px;font-weight:700;color:#D4AF37;display:block;margin-bottom:8px;">WARNA FADE:</span>
+    ${getColorPickerHTML(el.color||'#000000', 'setFadeColor')}
+    </div>
+    `;
+    openToolPanel('🌫️ Gradien Fade Tepi', html);
+}
+
+function addNewFadeEdge() {
+    const s = getCurrentSlide();
+    const newEl = {
+        id: 'el_' + Date.now(),
+        type: 'fade',
+        fadeDir: 'left',
+        fadeDepth: 50,
+        x: mainCanvas.width / 2,
+        y: mainCanvas.height / 2,
+        width: mainCanvas.width,
+        height: mainCanvas.height,
+        color: '#000000',
+        opacity: 1,
+        rotation: 0,
+        blendMode: 'normal',
+        locked: false,
+        groupId: null
+    };
+    s.elements.push(newEl);
+    selectElement(newEl.id);
+    renderAll();
+    pushHistoryState();
+}
+
+function setFadeDir(dir) {
+    const el = getActiveElement(); if(!el || el.type!=='fade') return;
+    el.fadeDir = dir;
+    renderAll(); pushHistoryState(); openPanelFadeEdge();
+}
+
+function setFadeDepth(val) {
+    const el = getActiveElement(); if(!el || el.type!=='fade') return;
+    el.fadeDepth = parseInt(val);
+    document.getElementById('valFadeDepth').innerText = val + '%';
+    renderAll(); debouncedPushHistory();
+}
+
+function setFadeColor(c) {
+    const el = getActiveElement(); if(!el || el.type!=='fade') return;
+    el.color = c;
+    renderAll(); pushHistoryState(); openPanelFadeEdge();
 }
 
 function openElementsDrive() {
@@ -4296,10 +4437,11 @@ let html=`<div style="font-size:12px;margin-bottom:8px;">Pilih elemen untuk diga
 s.elements.forEach(el=>{
 const isCurrent=curr&&el.id===curr.id;
 const groupBadge = el.groupId ? `<span style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:4px;font-size:9px;margin-left:4px;">${el.groupId}</span>` : '';
-const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:16px;height:16px;object-fit:cover;border-radius:3px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : '📝');
+let typeLabel = el.type === 'image' ? 'Gambar' : (el.type === 'shape' ? 'Bentuk' : (el.type === 'fade' ? 'Fade' : 'Teks'));
+const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:16px;height:16px;object-fit:cover;border-radius:3px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : (el.type === 'fade' ? '🌫️' : '📝'));
 html+=`<label class="group-select-item ${isCurrent?'current-item':''}">
 <input type="checkbox" class="group-checkbox" value="${el.id}" ${isCurrent?'checked':''}>
-<span>${thumb} ${el.text?el.text.substring(0,15):(el.type==='shape'?'Bentuk':'Gambar')} ${groupBadge}</span>
+<span>${thumb} ${el.text?el.text.substring(0,15):typeLabel} ${groupBadge}</span>
 </label>`;
 });
 html+=`
@@ -4334,9 +4476,10 @@ const s=getCurrentSlide();
 let html='<div class="layer-list-container">';
 for(let i=s.elements.length-1;i>=0;i--){
 const el=s.elements[i];
-const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:20px;height:20px;object-fit:cover;border-radius:4px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : '📝');
+let typeLabel = el.type === 'image' ? 'Gambar' : (el.type === 'shape' ? 'Bentuk' : (el.type === 'fade' ? 'Fade' : 'Teks'));
+const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:20px;height:20px;object-fit:cover;border-radius:4px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : (el.type === 'fade' ? '🌫️' : '📝'));
 html+=`<div class="layer-item ${el.id===activeElementId?'active':''}" onclick="selectElement('${el.id}');openPanelLayers();">
-<span>${thumb} ${el.text?el.text.substring(0,18):(el.type==='shape'?'Bentuk':'Foto')}</span>
+<span>${thumb} ${el.text?el.text.substring(0,18):typeLabel}</span>
 <div class="layer-actions">
 <button class="layer-btn" onclick="event.stopPropagation();moveLayerToExtreme(${i},'top')" title="Paling Depan">⏫</button>
 <button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},1)">▲</button>
@@ -5680,10 +5823,11 @@ function openMultiCopyModal() {
     if(!s || s.elements.length === 0) { showToast('⚠️ Tidak ada elemen di slide ini'); return; }
     let html = `<div style="font-size:12px;margin-bottom:10px;">Pilih elemen untuk disalin:</div>`;
     s.elements.forEach(el => {
-        const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:16px;height:16px;object-fit:cover;border-radius:3px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : '📝');
+        let typeLabel = el.type === 'image' ? 'Gambar' : (el.type === 'shape' ? 'Bentuk' : (el.type === 'fade' ? 'Fade' : 'Teks'));
+        const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:16px;height:16px;object-fit:cover;border-radius:3px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : (el.type === 'fade' ? '🌫️' : '📝'));
         html += `<label style="display:flex; align-items:center; gap:10px; padding:8px; background:rgba(255,255,255,.04); border-radius:6px; margin-bottom:6px; cursor:pointer;">
             <input type="checkbox" class="multi-copy-cb" value="${el.id}" style="accent-color:#D4AF37;">
-            <span>${thumb} ${el.text ? el.text.substring(0,15) : (el.type==='shape'?'Bentuk':'Gambar')}</span>
+            <span>${thumb} ${el.text ? el.text.substring(0,15) : typeLabel}</span>
         </label>`;
     });
     html += `<button class="btn-download" style="width:100%; padding:8px; margin-top:10px; border-radius:6px; border:none; font-weight:bold;" onclick="executeMultiCopy()">📚 Salin Terpilih</button>`;
@@ -5769,60 +5913,53 @@ function togglePinFont(event, fontName) {
     openPanelFontFamily();
 }
 
-function openFontDownloadModal() {
+function openFontExportModal() {
     const listContainer = document.getElementById('fontDownloadList');
     listContainer.innerHTML = '';
     
-    DOWNLOADABLE_FONTS.forEach((f, i) => {
-        const isInstalled = downloadedFontsList.includes(f.name);
-        listContainer.innerHTML += `
-        <label style="display:flex; align-items:center; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:8px; cursor:pointer;">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" class="font-dl-cb" value="${f.name}" ${isInstalled?'checked disabled':''} style="width:18px;height:18px;accent-color:#00ff88;">
+    if(currentProjectFonts.length === 0) {
+        listContainer.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center;">Belum ada font pribadi (.ttf/.otf) yang diunggah ke projek ini.</div>';
+    } else {
+        currentProjectFonts.forEach((f, i) => {
+            listContainer.innerHTML += `
+            <label style="display:flex; align-items:center; gap:10px; padding:12px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:8px; cursor:pointer;">
+                <input type="checkbox" class="font-export-cb" value="${i}" style="width:18px;height:18px;accent-color:#00ff88;">
                 <span style="font-size:14px; font-weight:bold;">${f.name}</span>
-            </div>
-            ${isInstalled ? '<span style="color:#00ff88; font-size:11px; font-weight:bold;">Terinstall</span>' : ''}
-        </label>
-        `;
-    });
-    document.getElementById('fontDownloadModal').classList.add('active');
+            </label>
+            `;
+        });
+    }
+    document.getElementById('fontExportModal').classList.add('active');
 }
 
-function closeFontDownloadModal() {
-    document.getElementById('fontDownloadModal').classList.remove('active');
+function closeFontExportModal() {
+    document.getElementById('fontExportModal').classList.remove('active');
 }
 
-function executeFontDownload() {
-    const cbs = document.querySelectorAll('.font-dl-cb:checked:not(:disabled)');
+function executeFontExport() {
+    const cbs = document.querySelectorAll('.font-export-cb:checked');
     if(cbs.length === 0) {
-        showToast('⚠️ Pilih minimal 1 font untuk diunduh');
+        showToast('⚠️ Pilih minimal 1 font untuk diekspor');
         return;
     }
     
-    showToast('⏳ Mengunduh font...');
-    let addedCount = 0;
+    showToast('⏳ Mengekspor font...');
     
     cbs.forEach(cb => {
-        const fontName = cb.value;
-        const fontObj = DOWNLOADABLE_FONTS.find(f => f.name === fontName);
-        if(fontObj && !downloadedFontsList.includes(fontName)) {
-            const link = document.createElement('link');
-            link.href = fontObj.url;
-            link.rel = 'stylesheet';
-            document.head.appendChild(link);
-            
-            downloadedFontsList.push(fontName);
-            FONT_FAMILIES.push({name: `✨ ${fontObj.name}`, font: `"${fontObj.name}", sans-serif`});
-            addedCount++;
+        const idx = parseInt(cb.value);
+        const fontObj = currentProjectFonts[idx];
+        if(fontObj && fontObj.data) {
+            const a = document.createElement('a');
+            a.href = fontObj.data;
+            a.download = fontObj.name + '.ttf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     });
     
-    if(addedCount > 0) {
-        localStorage.setItem('DOWNLOADED_FONTS_LIST', JSON.stringify(downloadedFontsList));
-        showToast(`✅ ${addedCount} Font berhasil ditambahkan!`);
-        openPanelFontFamily(); 
-    }
-    closeFontDownloadModal();
+    closeFontExportModal();
+    showToast('✅ Font berhasil diekspor!');
 }
 
 function openPanelFontFamily(){
@@ -5832,7 +5969,7 @@ let html='<div style="display:flex;flex-direction:column;gap:6px;">';
 html+=`
 <div style="display:flex; gap:8px; margin-bottom:8px;">
     <button class="btn-sub-tool active" onclick="document.getElementById('fileFontInput').click()" style="flex:1;flex-direction:row;justify-content:center;padding:10px;">📁 Font Lokal (.ttf/.otf)</button>
-    <button class="btn-sub-tool" onclick="openFontDownloadModal()" style="flex:1;flex-direction:row;justify-content:center;padding:10px; border-color:#00ff88; color:#00ff88;">⬇️ Unduh Font Tambahan</button>
+    <button class="btn-sub-tool" onclick="openFontExportModal()" style="flex:1;flex-direction:row;justify-content:center;padding:10px; border-color:#00ff88; color:#00ff88;">⬇️ Ekspor Font Pribadi</button>
 </div>
 `;
 
@@ -5880,7 +6017,8 @@ function handleFontUpload(e) {
     const reader = new FileReader();
     reader.onload = async (evt) => {
         const fontData = evt.target.result;
-        const fontName = 'CustomFont_' + Date.now();
+        const baseFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const fontName = 'CF_' + baseFileName.replace(/[^a-zA-Z0-9]/g, '');
         try {
             const fontFace = new FontFace(fontName, `url(${fontData})`);
             await fontFace.load();
@@ -6419,6 +6557,7 @@ function generateSlideThumb(slide) {
         if(el.type === 'text') renderTextElement(tctx, el);
         else if(el.type === 'image') renderImageElement(tctx, el);
         else if(el.type === 'shape') renderShapeElement(tctx, el);
+        else if(el.type === 'fade') renderFadeElement(tctx, el);
     });
     return tempC.toDataURL('image/jpeg', 0.5);
 }
@@ -6962,6 +7101,7 @@ async function executeDownload() {
             if(el.type === 'text') renderTextElement(ectx, el);
             else if(el.type === 'image') renderImageElement(ectx, el);
             else if(el.type === 'shape') renderShapeElement(ectx, el);
+            else if(el.type === 'fade') renderFadeElement(ectx, el);
         });
         
         const a = document.createElement('a');
@@ -7019,6 +7159,7 @@ function openPreviewModal() {
         if(el.type === 'text') renderTextElement(pctx, el);
         else if(el.type === 'image') renderImageElement(pctx, el);
         else if(el.type === 'shape') renderShapeElement(pctx, el);
+        else if(el.type === 'fade') renderFadeElement(pctx, el);
     });
     
     resetPreviewZoom();
@@ -7123,7 +7264,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
     
     if(!document.getElementById('subscriptionWall').style.display || document.getElementById('subscriptionWall').style.display === 'none') {
-        const hasDismissed = localStorage.getItem('dismissPwaPrompt');
+        const hasDismissed = sessionStorage.getItem('dismissPwaPrompt');
         if(!hasDismissed) {
             document.getElementById('pwaInstallPrompt').style.display = 'flex';
         }
@@ -7145,7 +7286,7 @@ function installPWA() {
 
 function dismissPWA() {
     document.getElementById('pwaInstallPrompt').style.display = 'none';
-    localStorage.setItem('dismissPwaPrompt', 'true');
+    sessionStorage.setItem('dismissPwaPrompt', 'true');
 }
 
 if ('serviceWorker' in navigator) {
