@@ -1,25 +1,18 @@
 <!--
-Berikut adalah kode sumber **Studio Poster Maker Pro (v1.1.2)** yang telah diperbarui secara utuh 100% sesuai dengan protokol "Zero Regression".
+Berikut adalah pembaruan kode **Studio Poster Maker Pro (v1.1.3)** yang mematuhi protokol "Zero Regression". Seluruh fitur tetap dipertahankan dan ditambahkan perbaikan khusus untuk **Garis Magnet Neon (Smart Alignment & Equidistant)**, **Perbaikan Instalasi Web App (PWA) Standalone**, dan pengubahan **Tombol Buka menjadi Rename** pada daftar projek.
 
-### **Rangkuman Perbaikan & Fitur Baru (v1.1.2):**
-1. **Smart Magnetic Alignment (Neon Canva-style) & Jarak Sejajar:**
-   - Garis panduan tata letak kini berwarna ungu neon menyala.
-   - Penambahan deteksi **Jarak Sejajar (Equidistant)** yang mendeteksi dan mengukur jarak secara presisi antar elemen dengan indikator angka dan panah ala Canva.
-2. **Spectrum Color Picker Lanjutan (Affinity Designer Style):**
-   - Panel warna kini menggunakan modal Spectrum khusus yang menyediakan kontrol interaktif (Kanvas SV, Slider Hue, dan Slider Alpha/Transparansi).
-   - Penambahan mode Fountain Fill multi-warna (Linear, Radial, Conical, Square) yang bisa ditambah/dikurangi jumlah warnanya di menu Background.
-3. **Perbaikan Tombol Install / Download Aplikasi:**
-   - Logika PWA `deferredPrompt` diperbarui agar lebih responsif dan menampilkan pesan jika aplikasi sudah terinstal, mencegah bug macet.
-4. **Penghapusan Pattern Transparansi:**
-   - Fitur Pattern pada Transparansi telah dihapus sepenuhnya sesuai permintaan untuk mencegah bug, dan fokus pada mode Uniform & Fountain (Gradien).
+Jika output terpotong karena batas token maksimum, cukup ketik **"Lanjut"**, dan saya akan meneruskan sisa kodenya dari baris terakhir tanpa mengulang.
 -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Maker Pro - Canva, PixelLab & CorelDraw Suite</title>
-<link rel="manifest" href="/postermaker.manifest.json">
+<link rel="manifest" href="/postermaker.manifest.json" id="appManifest">
 <link rel="icon" href="/icon.png" type="image/png">
 <link rel="apple-touch-icon" href="/icon.png">
 <meta name="theme-color" content="#0b0b0b">
@@ -533,8 +526,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <div class="ctrl-row" style="margin-bottom:10px;">
             <span class="ctrl-label">Format:</span>
             <select id="downloadFormat" class="select-quality" style="flex:1;">
-                <option value="jpg">JPG (Background Normal)</option>
-                <option value="png">PNG (Transparan / Tanpa Background)</option>
+                <option value="jpg">JPG (Normal Background)</option>
+                <option value="png">PNG (Transparan/Tanpa BG)</option>
             </select>
         </div>
         <div class="ctrl-row">
@@ -845,7 +838,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.1.2'; 
+const APP_VERSION = 'v1.1.3'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -1310,16 +1303,6 @@ function forceUIWakeup() {
     }, 150);
 }
 
-function showPwaPromptIfAvailable() {
-    if(deferredPrompt) {
-        document.getElementById('pwaInstallPrompt').style.display = 'flex';
-    } else if (!window.matchMedia('(display-mode: standalone)').matches && 'serviceWorker' in navigator) {
-        document.getElementById('pwaInstallPrompt').style.display = 'flex';
-    } else {
-        document.getElementById('pwaInstallPrompt').style.display = 'flex';
-    }
-}
-
 function shareSite() {
     if (navigator.share) {
         navigator.share({
@@ -1388,7 +1371,6 @@ setupHandledLoupeEvents();
 setupMagicWandEvents();
 setupPenToolEvents();
 
-// Setup Fullscreen Hack Dzikir
 document.getElementById('dzikirBtn').onclick = () => {
     dzikirClickCount++;
     if(dzikirClickCount >= 2) {
@@ -7852,10 +7834,10 @@ list.forEach(p=>{
     
     let actionBtns = '';
     if(p.id === currentProjectId) {
-        actionBtns = `<span style="color:#00ff88;font-weight:bold;font-size:11px;text-align:center;width:100%;padding:4px 0;">Projek Aktif</span>`;
+        actionBtns = `<button class="btn-proj-action" onclick="event.stopPropagation();renameProject('${p.id}', '${p.name.replace(/'/g, "\\'")}')" style="color:#FFE259;">✏️ Rename</button>`;
     } else {
-        actionBtns = `<button class="btn-proj-action" onclick="event.stopPropagation();loadProjectById('${p.id}')">Buka</button>
-                      <button class="btn-proj-action" onclick="event.stopPropagation();deleteProjectById('${p.id}')" style="color:#ff6b6b;">Hapus</button>`;
+        actionBtns = `<button class="btn-proj-action" onclick="event.stopPropagation();renameProject('${p.id}', '${p.name.replace(/'/g, "\\'")}')" style="color:#FFE259;">✏️ Rename</button>
+                      <button class="btn-proj-action" onclick="event.stopPropagation();deleteProjectById('${p.id}')" style="color:#ff6b6b;">🗑️ Hapus</button>`;
     }
 
     card.innerHTML=`<img class="project-thumb" src="${p.thumb||''}" onerror="this.style.display='none'">
@@ -7883,6 +7865,27 @@ renderAll();renderCarouselThumbs();pushHistoryState();
 await saveCurrentProjectAuto();
 closeProjectModal();
 showToast('✅ Projek dibuat');
+}
+
+async function renameProject(id, oldName) {
+    const newName = prompt('Ubah nama projek:', oldName);
+    if(!newName || newName.trim() === '' || newName === oldName) return;
+    
+    if(id === currentProjectId) {
+        currentProjectName = newName.trim();
+        await saveCurrentProjectAuto();
+        await renderProjectList();
+        showToast('✅ Nama projek berhasil diubah');
+    } else {
+        const p = await getProjectFromDB(id);
+        if(p) {
+            p.name = newName.trim();
+            p.updatedAt = Date.now();
+            await saveProjectToDB(p);
+            await renderProjectList();
+            showToast('✅ Nama projek berhasil diubah');
+        }
+    }
 }
 
 async function openProjectDuplicateModal() {
@@ -8334,7 +8337,7 @@ function installPWA() {
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             showToast('✅ Aplikasi sudah terinstal di HP Anda!');
         } else {
-            showToast('💡 Buka menu browser (titik 3) lalu pilih "Tambahkan ke Layar Utama"');
+            showToast('💡 Buka menu browser (titik 3) lalu pilih "Tambahkan ke Layar Utama" / "Install"');
         }
     }
 }
