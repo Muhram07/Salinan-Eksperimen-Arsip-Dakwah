@@ -1,20 +1,19 @@
 <!--
-Berikut adalah kode sumber **Studio Poster Maker Pro (v1.1.0)** yang telah diperbarui secara utuh 100% tanpa ada kode yang dipotong, disingkat, atau diabaikan. 
+Berikut adalah kode sumber **Studio Poster Maker Pro (v1.1.1)** yang telah diperbarui secara utuh 100% tanpa ada kode yang dipotong, disingkat, atau diabaikan sesuai dengan protokol "Zero Regression".
 
-### **Rangkuman Perbaikan (v1.1.0):**
-1. **Smart Magnetic Alignment & Spacing (Gaya Canva Sejati):**
-   - Sistem *snapping* dirombak total menggunakan algoritma kalkulasi *Bounding Box*. 
-   - Kini teks dan gambar akan secara magnetik tertarik (snap) ke sisi Kiri, Kanan, Atas, Bawah, dan Titik Tengah elemen lain di kanvas.
-   - Garis *Smart Guide* diubah menjadi warna **Orange Terang (#FF9800)** agar jelas di latar gelap/terang.
-   - **Fitur Jarak Sejajar (Equidistant Snapping):** Jika jarak antar 3 elemen atau lebih sama persis (misal jarak teks 1 ke 2 sama dengan teks 2 ke 3), elemen akan terkunci magnetik dan memunculkan garis indikator jarak!
-2. **Upgrade Transparansi Lanjutan (Conical, Square, Offset, & Invert):**
-   - Menambahkan petunjuk khusus untuk mengunggah "Pola PNG Transparan".
-   - Menambahkan tipe *Fountain* baru: **Conical** (Gradien Memutar) dan **Square** (Gradien Kotak).
-   - Menambahkan tombol **"🔄 Balik (Invert Luar/Dalam)"** untuk membalikkan area mana yang transparan.
-   - Menambahkan slider **Geser X & Geser Y** untuk mengatur titik pusat efek transparansi/pola.
-3. **Perbaikan Render 3D HD (Perspektif & Envelope):**
-   - Bug di mana hasil Perspektif/Envelope pada teks tertunda (harus memencet panel transparansi dulu) telah **diperbaiki sepenuhnya**.
-   - Sistem kini akan menahan proses perenderan *layer* hingga gambar hasil manipulasi *warp* 3D benar-benar 100% termuat ke dalam *cache*, lalu langsung memperbarui memori *hash* sehingga kanvas langsung memunculkan hasil akhir HD seketika.
+### **Rangkuman Perbaikan (v1.1.1):**
+1. **Smart Magnetic Alignment & Jarak Sejajar (Canva-style Neon):**
+   - Efek garis tata letak kini memiliki visualisasi "Neon" (glow) oranye terang.
+   - Perbaikan logika sejajar (snapping): Kini mendeteksi sisi kiri, kanan, atas, bawah, dan tengah secara presisi dan menarik garis hanya di antara batas elemen yang bersentuhan.
+   - **Fitur Jarak Sejajar (Equidistant Snapping):** Otomatis mendeteksi celah/jarak antar elemen. Jika jaraknya sama, elemen akan terkunci magnetik dan memunculkan indikator panah pengukur jarak ala Canva.
+2. **Perbaikan Text 3D (Perspektif & Envelope):**
+   - Teks yang telah di-warp 3D sekarang BISA diatur tingginya (slider "Tinggi 3D" akan muncul di menu Ukuran Teks).
+   - Penyesuaian Cahaya (Brightness, Contrast, dll) dan Inner Shadow kini BISA diterapkan langsung ke teks 3D.
+3. **Penghapusan Fitur Emboss 3D:**
+   - Sesuai instruksi, opsi Emboss 3D telah dihapus sepenuhnya dari tool Bayangan (untuk foto maupun teks) guna menyederhanakan UI dan meningkatkan performa rendering.
+4. **Perbaikan Transparansi Pola (Pattern) & Invert:**
+   - Bug di mana pola (pattern) hilang saat diatur skala/sudutnya telah diatasi.
+   - Fungsi **Invert** pada transparansi kini bekerja secara sempurna (memilih apakah pola melubangi elemen dari dalam atau memotong dari luar) tanpa menimbulkan bug on/off blur.
 -->
 <!DOCTYPE html>
 <html lang="id">
@@ -69,8 +68,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,.6);}
 .guide-line-v{position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed rgba(212,175,55,.6);}
 .snap-guide{position:absolute;pointer-events:none;display:none;z-index:92;}
-.snap-guide-h{left:0;right:0;height:1.5px;background:#FF9800;box-shadow:0 0 8px #FF9800;}
-.snap-guide-v{top:0;bottom:0;width:1.5px;background:#FF9800;box-shadow:0 0 8px #FF9800;}
+.snap-guide-h{left:0;right:0;height:1.5px;background:#FF9800;box-shadow:0 0 10px #FF9800, 0 0 20px #FFC107;}
+.snap-guide-v{top:0;bottom:0;width:1.5px;background:#FF9800;box-shadow:0 0 10px #FF9800, 0 0 20px #FFC107;}
 
 .selection-box {
     position: absolute; border: 1px dashed #D4AF37; pointer-events: none;
@@ -824,7 +823,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.1.0'; 
+const APP_VERSION = 'v1.1.1'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -1186,6 +1185,7 @@ if(!copy.wordStyles) copy.wordStyles = {};
 if(!copy.filters) copy.filters = { brightness: 100, contrast: 100, saturate: 100, hue: 0 };
 if(!copy.advancedColor) copy.advancedColor = { active: false, intensity: 100, highlights: 0, shadows: 0, midtones: 0, channel: 'master', channels: {} };
 if(!copy.transparency) copy.transparency = { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false };
+if(copy.emboss) delete copy.emboss; // Menghapus fitur emboss dari data lama jika ada
 return copy;
 })
 };
@@ -1941,7 +1941,7 @@ function getElHash(el) {
         } else if(el.type === 'fade') {
             str += '_' + el.fadeDir + '_' + el.fadeDepth;
         }
-        str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.emboss||{}) + '_' + JSON.stringify(el.transparency||{});
+        str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.transparency||{});
         return str;
     } catch(e) {
         return Math.random().toString();
@@ -2028,27 +2028,34 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
                 mctx.fillRect(-sW, -sW, sW*2, sW*2);
             }
         }
-    } else if (t.type === 'pattern' && t.patternImg && t.patternImg.complete) {
+    } else if (t.type === 'pattern' && t.patternImg && t.patternImg.complete && t.patternImg.width > 0) {
+        const pCanvas = document.createElement('canvas');
+        const pScale = (t.scale || 100) / 100;
+        pCanvas.width = Math.max(1, t.patternImg.width * pScale);
+        pCanvas.height = Math.max(1, t.patternImg.height * pScale);
+        pCanvas.getContext('2d').drawImage(t.patternImg, 0, 0, pCanvas.width, pCanvas.height);
+        const pattern = mctx.createPattern(pCanvas, 'repeat');
+
         if(t.invert) {
             mctx.fillStyle = `rgba(0,0,0,${alpha})`;
             mctx.fillRect(-w*2, -h*2, w*4, h*4);
+            
             mctx.globalCompositeOperation = 'destination-out';
+            mctx.rotate(((t.angle || 0) * Math.PI) / 180);
+            mctx.fillStyle = pattern;
+            mctx.fillRect(-w*3, -h*3, w*6, h*6);
         } else {
-            mctx.fillStyle = `rgba(0,0,0,${alpha})`;
-            mctx.fillRect(-w*2, -h*2, w*4, h*4);
-            mctx.globalCompositeOperation = 'destination-in';
+            mctx.rotate(((t.angle || 0) * Math.PI) / 180);
+            mctx.fillStyle = pattern;
+            mctx.fillRect(-w*3, -h*3, w*6, h*6);
+            
+            if(alpha < 1) {
+                mctx.globalCompositeOperation = 'destination-in';
+                mctx.setTransform(1,0,0,1,0,0);
+                mctx.fillStyle = `rgba(0,0,0,${alpha})`;
+                mctx.fillRect(-w*2, -h*2, w*4, h*4);
+            }
         }
-        
-        const pCanvas = document.createElement('canvas');
-        const pScale = (t.scale || 100) / 100;
-        pCanvas.width = t.patternImg.width * pScale;
-        pCanvas.height = t.patternImg.height * pScale;
-        pCanvas.getContext('2d').drawImage(t.patternImg, 0, 0, pCanvas.width, pCanvas.height);
-        
-        const pattern = mctx.createPattern(pCanvas, 'repeat');
-        mctx.rotate(((t.angle || 0) * Math.PI) / 180);
-        mctx.fillStyle = pattern;
-        mctx.fillRect(-w*3, -h*3, w*6, h*6);
     }
     mctx.restore();
 
@@ -2117,17 +2124,33 @@ if (!forceRawRender && el.warpSrc) {
     el._renderedW = finalDrawW;
     el._calculatedHeight = finalDrawH;
     
+    const pad = 40;
     const off=document.createElement('canvas');
-    off.width=finalDrawW * rScale;
-    off.height=finalDrawH * rScale;
+    off.width = finalDrawW * rScale + pad*2;
+    off.height = finalDrawH * rScale + pad*2;
     const octx=off.getContext('2d');
     octx.scale(rScale, rScale);
+    octx.translate(pad/rScale, pad/rScale);
+    
+    octx.filter = getFilterString(el.filters, 0);
     octx.drawImage(el.warpImg, 0, 0, finalDrawW, finalDrawH);
+    octx.filter = 'none';
+
+    if(el.innerShadow && el.innerShadow.color !== 'transparent'){
+        applySilhouetteInnerShadow(octx, off.width, off.height, el.innerShadow);
+    }
     
-    if(el.transparency && el.transparency.type !== 'uniform') applyAdvancedTransparency(octx, finalDrawW, finalDrawH, el.transparency);
+    if(el.transparency && el.transparency.type !== 'uniform') {
+        applyAdvancedTransparency(octx, finalDrawW, finalDrawH, el.transparency);
+    }
     
-    if(rScale === 1) { el._cachedCanvas = off; el._cachedHash = hash; el._cachedOffsetX = 0; el._cachedOffsetY = 0; }
-    targetCtx.drawImage(off, -finalDrawW/2, -finalDrawH/2, finalDrawW, finalDrawH);
+    if(rScale === 1) { 
+        el._cachedCanvas = off; 
+        el._cachedHash = hash; 
+        el._cachedOffsetX = 0; 
+        el._cachedOffsetY = 0; 
+    }
+    targetCtx.drawImage(off, -finalDrawW/2 - pad/rScale, -finalDrawH/2 - pad/rScale, finalDrawW + pad*2/rScale, finalDrawH + pad*2/rScale);
     targetCtx.restore();
     return;
 }
@@ -2175,9 +2198,6 @@ if(el.curveAngle&&Math.abs(el.curveAngle)>=3){
     
     if(el.innerShadow && el.innerShadow.color !== 'transparent') {
         applySilhouetteInnerShadow(octx, off.width, off.height, el.innerShadow);
-    }
-    if(el.emboss && el.emboss.active) {
-        applySilhouetteEmboss(octx, off.width, off.height, el.emboss);
     }
     
     if(el.transparency && el.transparency.type !== 'uniform') {
@@ -2343,7 +2363,7 @@ octx.textBaseline = 'middle';
 
 linesInfo.forEach(line => {
     line.wordsInfo.forEach(wInfo => {
-        const useOffscreen = (el.innerShadow && el.innerShadow.color !== 'transparent') || (el.emboss && el.emboss.active) || (el.textSkinImg && el.textSkinImg.complete) || (el.filters && (el.filters.brightness!==100 || el.filters.contrast!==100 || el.filters.saturate!==100 || el.filters.hue!==0));
+        const useOffscreen = (el.innerShadow && el.innerShadow.color !== 'transparent') || (el.textSkinImg && el.textSkinImg.complete) || (el.filters && (el.filters.brightness!==100 || el.filters.contrast!==100 || el.filters.saturate!==100 || el.filters.hue!==0));
         
         if (useOffscreen) {
             const pad = 20;
@@ -2390,9 +2410,6 @@ linesInfo.forEach(line => {
             
             if(el.innerShadow && el.innerShadow.color !== 'transparent'){
                 applySilhouetteInnerShadow(tempCtx, temp.width, temp.height, el.innerShadow);
-            }
-            if(el.emboss && el.emboss.active){
-                applySilhouetteEmboss(tempCtx, temp.width, temp.height, el.emboss);
             }
             
             octx.drawImage(temp, wInfo.x - pad, wInfo.y - (fontSize * 2 + pad * 2)/2, wInfo.wordW + pad * 2, fontSize * 2 + pad * 2);
@@ -2614,10 +2631,6 @@ octx.restore();
 
 if(el.innerShadow&&el.innerShadow.color&&el.innerShadow.color!=='transparent'){
 applySilhouetteInnerShadow(octx,off.width,off.height,el.innerShadow);
-}
-
-if(el.emboss&&el.emboss.active){
-applySilhouetteEmboss(octx,off.width,off.height,el.emboss);
 }
 
 if(el.borderWidth&&el.borderWidth>0&&el.borderColor){
@@ -2896,9 +2909,6 @@ function renderShapeElement(targetCtx, el) {
     if(el.innerShadow && el.innerShadow.color !== 'transparent'){
         applySilhouetteInnerShadow(octx, off.width, off.height, el.innerShadow);
     }
-    if(el.emboss && el.emboss.active){
-        applySilhouetteEmboss(octx, off.width, off.height, el.emboss);
-    }
 
     if(el.transparency && el.transparency.type !== 'uniform') {
         octx.translate(-cW/2, -cH/2);
@@ -3027,52 +3037,6 @@ targetCtx.shadowBlur=blur;
 targetCtx.shadowOffsetX=ox + w*2;
 targetCtx.shadowOffsetY=oy;
 targetCtx.drawImage(temp, -w*2, 0);
-targetCtx.restore();
-}
-
-function applySilhouetteEmboss(targetCtx,w,h,em){
-const depth=em.depth||2.5;
-const rad=(em.lightAngle||45)*Math.PI/180;
-const dx=Math.cos(rad)*depth;
-const dy=Math.sin(rad)*depth;
-
-const hl=document.createElement('canvas');
-hl.width=w;hl.height=h;
-const hctx=hl.getContext('2d');
-hctx.drawImage(targetCtx.canvas,0,0);
-hctx.globalCompositeOperation='source-out';
-hctx.drawImage(targetCtx.canvas,dx,dy);
-
-const sh=document.createElement('canvas');
-sh.width=w;sh.height=h;
-const sctx=sh.getContext('2d');
-sctx.drawImage(targetCtx.canvas,0,0);
-sctx.globalCompositeOperation='source-out';
-sctx.drawImage(targetCtx.canvas,-dx,-dy);
-
-targetCtx.save();
-targetCtx.setTransform(1, 0, 0, 1, 0, 0);
-
-if(em.cutout && em.cutout > 0) {
-    targetCtx.globalCompositeOperation = 'destination-out';
-    targetCtx.globalAlpha = em.cutout;
-    targetCtx.drawImage(hl, 0, 0);
-    targetCtx.globalAlpha = 1.0;
-}
-
-targetCtx.globalCompositeOperation='source-atop';
-targetCtx.globalAlpha=em.intensity!==undefined?em.intensity:0.85;
-
-hctx.globalCompositeOperation='source-in';
-hctx.fillStyle=em.highlightColor||'rgba(255,255,255,0.85)';
-hctx.fillRect(0,0,w,h);
-targetCtx.drawImage(hl, 0, 0);
-
-sctx.globalCompositeOperation='source-in';
-sctx.fillStyle=em.shadowColor||'rgba(0,0,0,0.85)';
-sctx.fillRect(0,0,w,h);
-targetCtx.drawImage(sh, 0, 0);
-
 targetCtx.restore();
 }
 
@@ -3292,13 +3256,25 @@ function drawSmartGuides(lines) {
     sgCtx.clearRect(0,0, smartGuideCanvas.width, smartGuideCanvas.height);
     if(lines.length === 0) return;
     sgCtx.save();
-    sgCtx.strokeStyle = '#FF9800';
+    sgCtx.shadowColor = '#FF9800';
+    sgCtx.shadowBlur = 12;
+    sgCtx.strokeStyle = '#FFC107'; 
     sgCtx.lineWidth = 1.5;
     sgCtx.setLineDash([]);
     lines.forEach(line => {
         sgCtx.beginPath();
-        sgCtx.moveTo(line.x1, line.y1);
-        sgCtx.lineTo(line.x2, line.y2);
+        if(line.gapIndicator) {
+            sgCtx.moveTo(line.x - 5, line.y1); sgCtx.lineTo(line.x + 5, line.y1);
+            sgCtx.moveTo(line.x, line.y1); sgCtx.lineTo(line.x, line.y2);
+            sgCtx.moveTo(line.x - 5, line.y2); sgCtx.lineTo(line.x + 5, line.y2);
+        } else if (line.gapIndicatorX) {
+            sgCtx.moveTo(line.x1, line.y - 5); sgCtx.lineTo(line.x1, line.y + 5);
+            sgCtx.moveTo(line.x1, line.y); sgCtx.lineTo(line.x2, line.y);
+            sgCtx.moveTo(line.x2, line.y - 5); sgCtx.lineTo(line.x2, line.y + 5);
+        } else {
+            sgCtx.moveTo(line.x1, line.y1);
+            sgCtx.lineTo(line.x2, line.y2);
+        }
         sgCtx.stroke();
     });
     sgCtx.restore();
@@ -3544,7 +3520,7 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
         cyOffset = ((cropT - cropB) / 200) * baseH;
     }
 
-    const snapThreshold = 10 / userZoomScale;
+    const snapThreshold = 12 / userZoomScale;
     const W = mainCanvas.width;
     const H = mainCanvas.height;
     
@@ -3585,7 +3561,9 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
                     minDiffX = diff;
                     bestSnapX = ox + tx.offset - cxOffset;
                     smartLines = smartLines.filter(l => l.isY); 
-                    smartLines.push({x1: ox, y1: 0, x2: ox, y2: H, isY: false});
+                    const maxT = Math.min(activeBounds.t, ob.t);
+                    const maxB = Math.max(activeBounds.b, ob.b);
+                    smartLines.push({x1: ox, y1: maxT - 20, x2: ox, y2: maxB + 20, isY: false});
                 }
             }
         }
@@ -3598,7 +3576,9 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
                     minDiffY = diff;
                     bestSnapY = oy + ty.offset - cyOffset;
                     smartLines = smartLines.filter(l => !l.isY); 
-                    smartLines.push({x1: 0, y1: oy, x2: W, y2: oy, isY: true});
+                    const maxL = Math.min(activeBounds.l, ob.l);
+                    const maxR = Math.max(activeBounds.r, ob.r);
+                    smartLines.push({x1: maxL - 20, y1: oy, x2: maxR + 20, y2: oy, isY: true});
                 }
             }
         }
@@ -3638,11 +3618,33 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
                 const gap1 = Math.abs(otherElementsY[i].b - otherElementsY[j].t);
                 const gap2 = Math.abs(otherElementsY[j].b - testBounds.t);
                 const gap3 = Math.abs(testBounds.b - otherElementsY[i].t);
-                if(Math.abs(gap1 - gap2) < snapThreshold) {
-                    smartLines.push({x1: testBounds.cx, y1: otherElementsY[j].b, x2: testBounds.cx, y2: testBounds.t});
+                if(Math.abs(gap1 - gap2) < snapThreshold && gap1 > 10) {
+                    smartLines.push({x: testBounds.cx, y1: otherElementsY[i].b, y2: otherElementsY[j].t, gapIndicator: true});
+                    smartLines.push({x: testBounds.cx, y1: otherElementsY[j].b, y2: testBounds.t, gapIndicator: true});
                 }
-                if(Math.abs(gap1 - gap3) < snapThreshold) {
-                    smartLines.push({x1: testBounds.cx, y1: testBounds.b, x2: testBounds.cx, y2: otherElementsY[i].t});
+                if(Math.abs(gap1 - gap3) < snapThreshold && gap1 > 10) {
+                    smartLines.push({x: testBounds.cx, y1: otherElementsY[i].b, y2: otherElementsY[j].t, gapIndicator: true});
+                    smartLines.push({x: testBounds.cx, y1: testBounds.b, y2: otherElementsY[i].t, gapIndicator: true});
+                }
+            }
+        }
+    }
+
+    if(bestSnapX !== null && minDiffX < snapThreshold) {
+        const testBounds = getElementBounds({ ...el, x: bestSnapX, y: targetY });
+        otherElementsX.sort((a,b) => a.cx - b.cx);
+        for(let i=0; i<otherElementsX.length; i++) {
+            for(let j=i+1; j<otherElementsX.length; j++) {
+                const gap1 = Math.abs(otherElementsX[i].r - otherElementsX[j].l);
+                const gap2 = Math.abs(otherElementsX[j].r - testBounds.l);
+                const gap3 = Math.abs(testBounds.r - otherElementsX[i].l);
+                if(Math.abs(gap1 - gap2) < snapThreshold && gap1 > 10) {
+                    smartLines.push({y: testBounds.cy, x1: otherElementsX[i].r, x2: otherElementsX[j].l, gapIndicatorX: true});
+                    smartLines.push({y: testBounds.cy, x1: otherElementsX[j].r, x2: testBounds.l, gapIndicatorX: true});
+                }
+                if(Math.abs(gap1 - gap3) < snapThreshold && gap1 > 10) {
+                    smartLines.push({y: testBounds.cy, x1: otherElementsX[i].r, x2: otherElementsX[j].l, gapIndicatorX: true});
+                    smartLines.push({y: testBounds.cy, x1: testBounds.r, x2: otherElementsX[i].l, gapIndicatorX: true});
                 }
             }
         }
@@ -3689,6 +3691,7 @@ factor=Math.max(0.15,factor);
 if(el.type==='text'){
 el.fontSize=Math.round(startElementState.fontSize*factor);
 el.width=Math.round(startElementState.width*factor);
+if(el.warpSrc) el.height=Math.round((startElementState.height||300)*factor);
 }else if(el.type==='image' || el.type==='shape' || el.type==='fade'){
 if (el.lockAspect !== false) {
     el.width=Math.round(startElementState.width*factor);
@@ -3703,7 +3706,9 @@ const sign=activeHandle==='r'?1:-1;
 el.width=Math.max(80,Math.round(startElementState.width+(deltaX*2*sign)));
 }else if(activeHandle==='b'||activeHandle==='t'){
 const sign=activeHandle==='b'?1:-1;
-if(el.type==='image' || el.type==='shape' || el.type==='fade')el.height=Math.max(40,Math.round(startElementState.height+(deltaY*2*sign)));
+if(el.type==='image' || el.type==='shape' || el.type==='fade' || (el.type==='text' && el.warpSrc)) {
+    el.height=Math.max(40,Math.round(startElementState.height+(deltaY*2*sign)));
+}
 }
 requestRender();
 }
@@ -4013,6 +4018,9 @@ function openPanelTextSizeFull(){
 const el=getActiveElement();
 if(!el||el.type!=='text')return;
 const curW=el.width||750;
+const curH=el.height||el._calculatedHeight||300;
+const is3D = !!el.warpSrc;
+
 const html=`
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
 <span style="font-size:11px;font-weight:700;color:#D4AF37;">UKURAN & PEMBATAS TEKS:</span>
@@ -4030,6 +4038,14 @@ const html=`
 <input type="range" class="ctrl-slider" id="boxWSlider" min="100" max="1080" value="${curW}" oninput="updateTextBoxWidth(this.value)">
 <button class="btn-step" onclick="stepSliderVal('boxWSlider',10,updateTextBoxWidth)">+</button>
 </div>
+${is3D ? `
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Tinggi 3D:</span><span class="ctrl-val" id="valBoxH">${curH}px</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('boxHSlider',-10,updateTextHeight)">-</button>
+<input type="range" class="ctrl-slider" id="boxHSlider" min="50" max="1500" value="${curH}" oninput="updateTextHeight(this.value)">
+<button class="btn-step" onclick="stepSliderVal('boxHSlider',10,updateTextHeight)">+</button>
+</div>
+` : ''}
 <div class="ctrl-grid-btns" style="margin-top:10px;">
 <button class="btn-sub-tool" onclick="updateTextBoxWidth(500)">Lebar 500</button>
 <button class="btn-sub-tool" onclick="updateTextBoxWidth(750)">Lebar 750</button>
@@ -4056,6 +4072,16 @@ renderAll();
 debouncedPushHistory();
 }
 
+function updateTextHeight(v) {
+const el=getActiveElement();
+if(!el)return;
+const num=parseInt(v);
+el.height=num;
+document.getElementById('valBoxH').innerText=num+'px';
+renderAll();
+debouncedPushHistory();
+}
+
 function updateFontSize(val){
 const el=getActiveElement();
 if(!el)return;
@@ -4063,8 +4089,11 @@ const num=parseInt(val);
 if(lockTextAspect){
 const ratio=num/el.fontSize;
 el.width=Math.round(el.width*ratio);
+if(el.warpSrc) el.height=Math.round((el.height||300)*ratio);
 const boxSlider=document.getElementById('boxWSlider');
 if(boxSlider){boxSlider.value=el.width;document.getElementById('valBoxW').innerText=el.width+'px';}
+const boxHSlider=document.getElementById('boxHSlider');
+if(boxHSlider){boxHSlider.value=el.height;document.getElementById('valBoxH').innerText=el.height+'px';}
 }
 el.fontSize=num;
 const lbl=document.getElementById('valFontSize');
@@ -4515,21 +4544,19 @@ function resetAdvancedColor() {
     renderAll(); pushHistoryState(); openPanelAdvancedColor();
 }
 
-/* ========== BAYANGAN 3D, BAYANGAN DALAM & EMBOSS (TEKS & GAMBAR) ========== */
+/* ========== BAYANGAN 3D, BAYANGAN DALAM (TEKS & GAMBAR) ========== */
 let activeShadowTab = 'outer';
 function openPanelAdvancedShadow(){
 const el=getActiveElement();
 if(!el)return;
 if(!el.shadow)el.shadow={color:'rgba(0,0,0,0.8)',blur:15,distance:8,angle:45,alpha:0.8};
 if(!el.innerShadow)el.innerShadow={color:'transparent',blur:8,distance:4,angle:45,alpha:0.85};
-if(!el.emboss)el.emboss={active:false,depth:2.5,lightAngle:45,intensity:0.85,highlightColor:'rgba(255,255,255,0.85)',shadowColor:'rgba(0,0,0,0.85)',cutout:0};
 
 const html=`
 <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">PILIH EFEK RUANG:</div>
 <div class="ctrl-grid-btns">
 <button class="btn-sub-tool ${activeShadowTab==='outer'?'active':''}" onclick="switchShadowSubTab('outer')">👥 Bayangan Luar</button>
 <button class="btn-sub-tool ${activeShadowTab==='inner'?'active':''}" onclick="switchShadowSubTab('inner')">🕳️ Dalam (Inner)</button>
-<button class="btn-sub-tool ${activeShadowTab==='emboss'?'active':''}" onclick="switchShadowSubTab('emboss')">✨ Emboss 3D</button>
 </div>
 <div id="shadowSubContent" style="margin-top:12px;"></div>
 `;
@@ -4548,7 +4575,6 @@ const btns = document.querySelectorAll('#toolPanel .ctrl-grid-btns .btn-sub-tool
 btns.forEach(b => b.classList.remove('active'));
 if(tab==='outer' && btns[0]) btns[0].classList.add('active');
 if(tab==='inner' && btns[1]) btns[1].classList.add('active');
-if(tab==='emboss' && btns[2]) btns[2].classList.add('active');
 
 if(tab==='outer'){
 const sh=el.shadow;
@@ -4610,29 +4636,6 @@ ${getColorPickerHTML(ish.color||'transparent', 'setInnerShadowColor')}
 <button class="btn-step" onclick="stepSliderVal('iShAngleSlider',1,updateInnerShadowAngle)">+</button>
 </div>
 `;
-}else if(tab==='emboss'){
-const em=el.emboss;
-container.innerHTML=`
-<div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
-<span style="font-size:12px;font-weight:700;">Status Emboss 3D</span>
-<button class="btn-sub-tool ${em.active?'active':''}" onclick="toggleEmbossStatus()">${em.active?'Aktif':'Mati'}</button>
-</div>
-<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kedalaman Bevel:</span><span class="ctrl-val" id="valEmDepth">${em.depth||2.5}px</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('emDepthSlider',-0.5,updateEmbossDepth)">-</button>
-<input type="range" class="ctrl-slider" id="emDepthSlider" min="1" max="12" step="0.5" value="${em.depth||2.5}" oninput="updateEmbossDepth(this.value)">
-<button class="btn-step" onclick="stepSliderVal('emDepthSlider',0.5,updateEmbossDepth)">+</button>
-</div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Arah Cahaya:</span><span class="ctrl-val" id="valEmAngle">${em.lightAngle||45}°</span></div>
-<input type="range" class="ctrl-slider" min="0" max="360" value="${em.lightAngle||45}" oninput="updateEmbossAngle(this.value)">
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Intensitas:</span><span class="ctrl-val" id="valEmInt">${Math.round((em.intensity||0.85)*100)}%</span></div>
-<input type="range" class="ctrl-slider" min="10" max="100" value="${Math.round((em.intensity||0.85)*100)}" oninput="updateEmbossIntensity(this.value)">
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Efek Cakar (Cutout):</span><span class="ctrl-val" id="valEmCutout">${Math.round((em.cutout||0)*100)}%</span></div>
-<input type="range" class="ctrl-slider" min="0" max="100" value="${Math.round((em.cutout||0)*100)}" oninput="updateEmbossCutout(this.value)">
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Warna Highlight:</span><input type="color" value="${rgbaToHex(em.highlightColor||'rgba(255,255,255,0.85)')}" onchange="updateEmbossColor('highlightColor', this.value)"></div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Warna Shadow:</span><input type="color" value="${rgbaToHex(em.shadowColor||'rgba(0,0,0,0.85)')}" onchange="updateEmbossColor('shadowColor', this.value)"></div>
-<div style="font-size:11px;color:#888;margin-top:10px;">Menghasilkan lekukan specular logam mulia timbul 3D pada teks dan foto PNG transparan. Gunakan "Efek Cakar" untuk membuat bagian highlight menjadi transparan/bolong.</div>
-`;
 }
 }
 
@@ -4661,13 +4664,6 @@ function updateInnerShadowBlur(v){const el=getActiveElement();if(!el)return;el.i
 function updateInnerShadowDistance(v){const el=getActiveElement();if(!el)return;el.innerShadow.distance=parseInt(v);document.getElementById('valIShDist').innerText=v+'px';renderAll();debouncedPushHistory();}
 function updateInnerShadowAngle(v){const el=getActiveElement();if(!el)return;el.innerShadow.angle=parseInt(v);document.getElementById('valIShAngle').innerText=v+'°';renderAll();debouncedPushHistory();}
 function setInnerShadowColor(c){const el=getActiveElement();if(!el)return;el.innerShadow.color=c;renderAll();pushHistoryState();switchShadowSubTab('inner');}
-
-function toggleEmbossStatus(){const el=getActiveElement();if(!el)return;el.emboss.active=!el.emboss.active;renderAll();pushHistoryState();switchShadowSubTab('emboss');}
-function updateEmbossDepth(v){const el=getActiveElement();if(!el)return;el.emboss.depth=parseFloat(v);document.getElementById('valEmDepth').innerText=v+'px';renderAll();debouncedPushHistory();}
-function updateEmbossAngle(v){const el=getActiveElement();if(!el)return;el.emboss.lightAngle=parseInt(v);renderAll();debouncedPushHistory();}
-function updateEmbossIntensity(v){const el=getActiveElement();if(!el)return;el.emboss.intensity=parseInt(v)/100;document.getElementById('valEmInt').innerText=v+'%';renderAll();debouncedPushHistory();}
-function updateEmbossCutout(v){const el=getActiveElement();if(!el)return;el.emboss.cutout=parseInt(v)/100;document.getElementById('valEmCutout').innerText=v+'%';renderAll();debouncedPushHistory();}
-function updateEmbossColor(prop, v){const el=getActiveElement();if(!el)return;el.emboss[prop]=parseColorToRGBA(v, 0.85);renderAll();debouncedPushHistory();}
 
 /* ========== D-PAD POSISI HALUS DENGAN HOLD-TO-MOVE ========== */
 let dpadHoldInterval=null;
@@ -5451,6 +5447,7 @@ setTimeout(() => {
         const finalImg = new Image();
         finalImg.onload = () => {
             el.warpImg = finalImg;
+            el.height = el.height || trimmed.height;
             el._cachedCanvas = null;
             el._cachedHash = null;
             requestRender();
@@ -5729,6 +5726,7 @@ function applyEnvelopeWarp() {
             const finalImg = new Image();
             finalImg.onload = () => {
                 el.warpImg = finalImg;
+                el.height = el.height || trimmed.height;
                 el._cachedCanvas = null;
                 el._cachedHash = null;
                 requestRender();
