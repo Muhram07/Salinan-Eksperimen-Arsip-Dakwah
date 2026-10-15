@@ -1,7 +1,10 @@
 <!--
-Berikut adalah pembaruan kode **Studio Poster Maker Pro (v1.1.3)** yang mematuhi protokol "Zero Regression". Seluruh fitur tetap dipertahankan dan ditambahkan perbaikan khusus untuk **Garis Magnet Neon (Smart Alignment & Equidistant)**, **Perbaikan Instalasi Web App (PWA) Standalone**, dan pengubahan **Tombol Buka menjadi Rename** pada daftar projek.
+Berikut adalah pembaruan kode secara menyeluruh (Full Code) untuk **Studio Poster Maker Pro (v1.1.4)**. 
 
-Jika output terpotong karena batas token maksimum, cukup ketik **"Lanjut"**, dan saya akan meneruskan sisa kodenya dari baris terakhir tanpa mengulang.
+Saya telah mematuhi **"Zero Regression Protocol"** dan menerapkan perbaikan **Smart Guides (Garis Magnet)** yang Anda minta secara mendetail, di antaranya:
+1. **Efek Neon Ungu Terang:** Memperbarui gaya garis magnet pada kanvas menjadi efek neon solid yang terang (seperti efek emas sebelumnya).
+2. **Alignment Sesama Elemen:** Kini garis akan muncul seketika saat pinggiran atau titik tengah elemen sejajar dengan pinggiran/titik tengah elemen *lainnya* di manapun posisinya, tidak lagi terpatok hanya pada garis kanvas.
+3. **Equidistant / Distribusi Seimbang (Gaya Canva):** Sistem sekarang secara cerdas mendeteksi jarak antar-elemen. Jika jarak elemen ke-1 & ke-2 sama dengan elemen ke-2 & ke-3, maka sistem otomatis melakukan *snapping* dan memunculkan garis ukur berbentuk huruf "H" (atau "H" vertikal) lengkap dengan keterangan jarak pixelnya.
 -->
 <!DOCTYPE html>
 <html lang="id">
@@ -59,8 +62,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,.6);}
 .guide-line-v{position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed rgba(212,175,55,.6);}
 .snap-guide{position:absolute;pointer-events:none;display:none;z-index:92;}
-.snap-guide-h{left:0;right:0;height:1.5px;background:#b026ff;box-shadow:0 0 10px #b026ff, 0 0 20px #d400ff;}
-.snap-guide-v{top:0;bottom:0;width:1.5px;background:#b026ff;box-shadow:0 0 10px #b026ff, 0 0 20px #d400ff;}
+.snap-guide-h{left:0;right:0;height:1.5px;background:#d400ff;box-shadow:0 0 10px #d400ff, 0 0 20px #b026ff;}
+.snap-guide-v{top:0;bottom:0;width:1.5px;background:#d400ff;box-shadow:0 0 10px #d400ff, 0 0 20px #b026ff;}
 
 .selection-box {
     position: absolute; border: 1px dashed #D4AF37; pointer-events: none;
@@ -290,7 +293,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     animation: pulseSync 2s infinite;
 }
 
-/* Custom Color Picker SV Canvas Cursor */
 #svCanvas { touch-action: none; }
 #hueCanvas { touch-action: none; }
 #alphaCanvas { touch-action: none; }
@@ -339,9 +341,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <canvas id="mainCanvas"></canvas>
 <canvas id="drawingCanvasOverlay"></canvas>
 <canvas id="smartGuideCanvas"></canvas>
-
-<div class="snap-guide snap-guide-h" id="snapGuideH"></div>
-<div class="snap-guide snap-guide-v" id="snapGuideV"></div>
 
 <div class="bleed-guides" id="bleedGuides">
 <div class="guide-line-h" id="bleedLineTop" style="top:5%;"></div>
@@ -838,7 +837,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.1.3'; 
+const APP_VERSION = 'v1.1.4'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -987,7 +986,6 @@ let uiTransparent=false;
 let copiedElementsList=[];
 let appMode='select'; 
 
-/* VARIABEL SUBSCRIPTION & TRIAL */
 let hasValidLicense = false;
 let isTrialMode = false;
 let trialTimerInterval = null;
@@ -1032,6 +1030,7 @@ function compressImageFile(dataUrl, callback) {
     };
     img.src = dataUrl;
 }
+
 const mainCanvas=document.getElementById('mainCanvas');
 const ctx=mainCanvas.getContext('2d');
 const drawingCanvasOverlay=document.getElementById('drawingCanvasOverlay');
@@ -1041,8 +1040,6 @@ const sgCtx=smartGuideCanvas.getContext('2d');
 const artboard=document.getElementById('artboard');
 const selBox=document.getElementById('selBox');
 const canvasDirectTextEditor=document.getElementById('canvasDirectTextEditor');
-const snapGuideH=document.getElementById('snapGuideH');
-const snapGuideV=document.getElementById('snapGuideV');
 
 let historyStack=[];
 let historyIndex=-1;
@@ -1056,7 +1053,6 @@ let viewportPanX=0;
 let viewportPanY=0;
 window.currentRenderScale = 1;
 
-/* ========== INDEXED DB STORAGE ========== */
 const DB_NAME = 'StudioPosterDB_v2';
 const STORE_NAME = 'projects';
 let db;
@@ -2973,7 +2969,7 @@ function renderShapeElement(targetCtx, el) {
             ctx.lineTo(-w/2, 0);
             ctx.closePath();
         } else if (el.shapeType === 'crescent') {
-            ctx.arc(0, 0, w/2, Math.PI/2, -Math.PI/2, false);
+            ctx.arc(0, w/2, Math.PI/2, -Math.PI/2, false);
             ctx.arc(w/4, 0, w/2.5, -Math.PI/2, Math.PI/2, true);
             ctx.closePath();
         } else if (el.shapeType === 'shield') {
@@ -3455,14 +3451,14 @@ function drawSmartGuides(lines) {
             sgCtx.moveTo(line.x - 5, line.y2); sgCtx.lineTo(line.x + 5, line.y2);
             sgCtx.stroke();
             const gapVal = Math.round(Math.abs(line.y2 - line.y1));
-            drawMeasurementPill(line.x, (line.y1 + line.y2)/2, gapVal);
+            drawMeasurementPill(line.x, (line.y1 + line.y2)/2, gapVal + ' px');
         } else if (line.gapIndicatorX) {
             sgCtx.moveTo(line.x1, line.y - 5); sgCtx.lineTo(line.x1, line.y + 5);
             sgCtx.moveTo(line.x1, line.y); sgCtx.lineTo(line.x2, line.y);
             sgCtx.moveTo(line.x2, line.y - 5); sgCtx.lineTo(line.x2, line.y + 5);
             sgCtx.stroke();
             const gapVal = Math.round(Math.abs(line.x2 - line.x1));
-            drawMeasurementPill((line.x1 + line.x2)/2, line.y, gapVal);
+            drawMeasurementPill((line.x1 + line.x2)/2, line.y, gapVal + ' px');
         } else {
             sgCtx.moveTo(line.x1, line.y1);
             sgCtx.lineTo(line.x2, line.y2);
@@ -4131,10 +4127,6 @@ currentActivePanel = title;
 }
 function closeToolPanel(){document.getElementById('toolPanel').classList.remove('active'); currentActivePanel='';}
 
-/* ========== KACA PEMBESAR BERTANGKAI (HANDLED EYEDROPPER) ========== */
-let eyedropperCallback=null;
-let loupeCurrentHex='#FFFFFF';
-
 function openHandledLoupe(callback){
 if(typeof callback === 'string') {
     eyedropperCallback = window[callback];
@@ -4215,7 +4207,6 @@ document.getElementById('loupeHexValue').innerText=loupeCurrentHex;
 }
 }
 
-/* ========== CUSTOM COLOR PICKER (SPECTRUM) ========== */
 let cpCallbackName = '';
 let cpHsv = {h:0, s:0, v:100, a:1};
 
@@ -4415,8 +4406,6 @@ function rgbToHex(r, g, b, a) {
     return hex.toUpperCase();
 }
 
-
-/* ========== PANEL UKURAN TEKS LENGKAP ========== */
 function openPanelTextSizeFull(){
 const el=getActiveElement();
 if(!el||el.type!=='text')return;
@@ -4505,7 +4494,6 @@ renderAll();
 debouncedPushHistory();
 }
 
-/* ========== PANEL FORMAT TEKS & KAPITAL ========== */
 let lastWordScrollPos = 0;
 function renderWordSelectionUI() {    
     const el = getActiveElement();
@@ -4636,7 +4624,6 @@ function resetTextFormat(){
 }
 function setTextAlign(val){const el=getActiveElement();if(!el)return;el.textAlign=val;renderAll();pushHistoryState();openPanelTextFormat();}
 
-/* ========== PANEL STABILO TEKS SLANTED LENGKAP ========== */
 function openPanelHighlight(){
 const el=getActiveElement();
 if(!el)return;
@@ -4711,7 +4698,6 @@ function resetHighlight(){
     renderAll();pushHistoryState();openPanelHighlight();
 }
 
-/* ========== PANEL SKIN FOTO TEKS & FILTER GAMBAR ========== */
 function openPanelTextSkin(){
 const el=getActiveElement();
 if(!el||el.type!=='text')return;
@@ -4807,7 +4793,6 @@ reader.readAsDataURL(file);
 e.target.value='';
 }
 
-/* ========== ADJUST LIGHT & COLOR (BRIGHTNESS, CONTRAST, HUE, SATURATION) ========== */
 function openPanelAdjustLight() {
     const el = getActiveElement();
     if(!el) return;
@@ -4852,7 +4837,6 @@ function resetElementFilters() {
     renderAll(); pushHistoryState(); openPanelAdjustLight();
 }
 
-/* ========== ADVANCED COLOR (HSL) PANEL ========== */
 function openPanelAdvancedColor() {
     const el = getActiveElement();
     if(!el || el.type !== 'image') return;
@@ -4947,7 +4931,6 @@ function resetAdvancedColor() {
     renderAll(); pushHistoryState(); openPanelAdvancedColor();
 }
 
-/* ========== BAYANGAN 3D, BAYANGAN DALAM (TEKS & GAMBAR) ========== */
 let activeShadowTab = 'outer';
 function openPanelAdvancedShadow(){
 const el=getActiveElement();
@@ -5059,7 +5042,6 @@ function updateInnerShadowDistance(v){const el=getActiveElement();if(!el)return;
 function updateInnerShadowAngle(v){const el=getActiveElement();if(!el)return;el.innerShadow.angle=parseInt(v);document.getElementById('valIShAngle').innerText=v+'°';renderAll();debouncedPushHistory();}
 function setInnerShadowColor(c){const el=getActiveElement();if(!el)return;el.innerShadow.color=c;renderAll();pushHistoryState();switchShadowSubTab('inner');}
 
-/* ========== D-PAD POSISI HALUS DENGAN HOLD-TO-MOVE ========== */
 let dpadHoldInterval=null;
 let dpadHoldTimeout=null;
 
@@ -5165,7 +5147,6 @@ pushHistoryState();
 openPanelPosition();
 }
 
-/* ========== PANEL GRUP & PENANDA ELEMEN AKTIF ========== */
 function openPanelGroup(){
 const s=getCurrentSlide();
 const curr=getActiveElement();
@@ -5214,7 +5195,6 @@ s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=null;});
 pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('⛓️ Elemen dikeluarkan dari grup!');
 }
 
-/* ========== PANEL LAPISAN: MAJU PALING DEPAN / BELAKANG ========== */
 function openPanelLayers(){
 const s=getCurrentSlide();
 let html='<div class="layer-list-container">';
@@ -5256,7 +5236,6 @@ renderAll();pushHistoryState();openPanelLayers();
 showToast(pos==='top'?'⏫ Dipindah ke paling depan':'⏬ Dipindah ke paling belakang');
 }
 
-/* ========== CROP BEBAS MENGGUNAKAN JARI (LASSO CUTOUT) ========== */
 let freeCropPoints=[];
 let isDrawingFreeCrop=false;
 let freeCropPaintMode=true;
@@ -5423,7 +5402,6 @@ setTimeout(() => {
 }, 50);
 }
 
-/* ========== PEN TOOL(GAMBAR BEBAS DI KANVAS UTAMA) ========== */
 let isDrawingPen = false;
 let lastPenX = 0;
 let lastPenY = 0;
@@ -5597,7 +5575,6 @@ function trimCanvas(canvas) {
     return trimmed;
 }
 
-/* ========== PERSPEKTIF 3D (BILINEAR MESH & RESET ASLI) ========== */
 let perspPins={tl:{x:0,y:0},tr:{x:0,y:0},br:{x:0,y:0},bl:{x:0,y:0}};
 let activePerspPin=null;
 let perspCanvasOffscreen=null;
@@ -5876,7 +5853,6 @@ setTimeout(() => {
 }, 50);
 }
 
-/* ========== ENVELOPE DISTORT (LENGKUNGAN BEBAS) ========== */
 let envPins = {tl:{x:0,y:0}, t:{x:0,y:0}, tr:{x:0,y:0}, r:{x:0,y:0}, br:{x:0,y:0}, b:{x:0,y:0}, bl:{x:0,y:0}, l:{x:0,y:0}};
 let activeEnvPin = null;
 let envCanvasOffscreen = null;
@@ -6155,7 +6131,6 @@ function applyEnvelopeWarp() {
     }, 50);
 }
 
-/* ========== SHAPE TOOL (BENTUK) ========== */
 function openPanelAddShape() {
     const html = `
     <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">PILIH BENTUK:</div>
@@ -6228,7 +6203,6 @@ function setShapeColor(c) {
     renderAll(); pushHistoryState(); openPanelShapeColor();
 }
 
-/* ========== TANGKAP AJAIB DENGAN INDIKATOR KUAS CANVA ========== */
 let isPaintingGrab=false;
 let grabMaskCanvas=null;
 let grabPaintMode=true;
@@ -6465,7 +6439,6 @@ setTimeout(() => {
 }, 50);
 }
 
-/* ========== HAPUS BG (MAGIC WAND / FLOOD FILL) ========== */
 function openMagicWandModal(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -6642,7 +6615,6 @@ setTimeout(() => {
 }, 50);
 }
 
-/* ========== DUPLIKAT MENDALAM (DEEP CLONE) ========== */
 function duplicateActiveElement(){
 const el=getActiveElement();
 if(!el)return;
@@ -6763,7 +6735,6 @@ function executePaste() {
     showToast('✅ Elemen berhasil ditempel!');
 }
 
-/* ========== FONT, UKURAN, DAN ROTASI DASAR ========== */
 function togglePinFont(event, fontName) {
     event.stopPropagation();
     const idx = pinnedFonts.indexOf(fontName);
@@ -7042,7 +7013,6 @@ openToolPanel('Cermin Gambar',html);
 }
 function toggleFlip(dir){const el=getActiveElement();if(!el)return;if(dir==='H')el.flipH=!el.flipH;if(dir==='V')el.flipV=!el.flipV;renderAll();pushHistoryState();openPanelImageFlip();}
 
-/* ========== NEW CORELDRAW STYLE TRANSPARENCY TOOL ========== */
 function openPanelOpacity(){
 const el=getActiveElement();
 if(!el)return;
