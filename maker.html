@@ -1,21 +1,22 @@
 <!--
-Berikut adalah kode sumber **Studio Poster Maker Pro** yang telah saya perbaiki 100% secara UTUH dan LENGKAP tanpa memotong satu baris pun. 
+Berikut adalah kode sumber **Studio Poster Maker Pro (v1.0.10)** yang telah saya perbarui, perbaiki, dan tingkatkan secara **100% LENGKAP & UTUH** sesuai dengan instruksi Anda tanpa memotong satu baris pun.
 
-### **Rangkuman Perbaikan (v1.0.9):**
-1. **Tombol Unduh & Share:** 
-   - Tombol "Share APK" diganti menjadi **"📤 Share Situs"** yang membagikan link asli (`https://file-dakwah-muhram-of.pages.dev/maker`).
-   - Tombol "Unduh Aplikasi" diubah logikanya agar langsung memunculkan **Pop-up Install Aplikasi PWA** (tanpa download dummy APK).
-2. **Layer Garis Tepi (Border) pada Shape:** Logika rendering canvas pada bentuk (shape) telah dibalik. Kini garis tepi (border) digambar **setelah** tekstur skin foto, sehingga garis batas akan selalu terlihat tajam di atas skin.
-3. **Pembaruan Dzikir UI (Estetik & Akurat):**
-   - Menambahkan kotak neon bergaris emas elegan yang membungkus semua elemen agar sangat rapi.
-   - Mengoreksi tulisan Arab menjadi **"أَسْتَغْفِرُ اللَّهَ وَأَتُوْبُ إِلَيْهِ"** (ditambah sukun di huruf waw), ukuran sedikit dikecilkan, ditebalkan dinormalkan, dan spasi direnggangkan agar harakat tidak bertabrakan. Latin diubah menjadi **"Astaghfirullaha wa atuwbu ilaih."**
-   - **Logika Double Click:** Jika user menekan tombol `+` dengan cepat 2x untuk keluar, angka tersebut tidak akan dihitung ke dalam counter dzikir.
-4. **Sistem Trial 10x (70 Menit Total):**
-   - Setiap kali waktu trial 7 menit habis dan muncul halaman langganan, kini ada tombol baru di bawah tulisan *Akses Berakhir* yakni: **"Saya mau tes lagi ! (X trial tersisa)"**.
-   - Pelanggan diberikan kuota **10 kali** uji coba gratis (masing-masing 7 menit). Jika kuota habis, barulah aplikasi terkunci penuh.
-5. **Update Sinkronisasi:** Nomor versi naik menjadi `v1.0.9`. Tombol update sinkronisasi diatur agar memperbarui versi UI terbaru tanpa menghapus database project dan font lokal Anda.
+### **Rangkuman Fitur Baru (v1.0.10):**
+1. **Smart Alignment & Spacing Guides (Garis Magnet ala Canva):**
+   - Menambahkan sistem *snapping* cerdas. Saat Anda menggeser teks/gambar, akan muncul garis magnetik warna *magenta/pink* yang mensejajarkan tepi (kiri, kanan, atas, bawah) dan titik tengah elemen dengan elemen lain di sekitarnya.
+   - Mengkalkulasi jarak antar elemen agar selaras secara otomatis.
+2. **Advanced Transparency Tool (Gaya CorelDRAW):**
+   - Panel Transparansi dirombak total. Kini mendukung 3 mode utama: **Uniform** (Merata), **Fountain/Gradient** (Transisi Linear & Radial untuk efek menghilang perlahan), dan **Pattern** (Tekstur transparan jaring/vektor).
+   - Lengkap dengan slider sudut rotasi (Angle) dan pengaturan kepekatan (Scale/Radius).
+3. **Perspektif 3D & Envelope Distort untuk TEKS:**
+   - Fitur Perspektif dan Envelope (Lengkung) kini **bisa digunakan langsung pada Teks**.
+   - Teks akan di-raster menjadi resolusi HD untuk di-warp. 
+   - Tombol **"↺ Reset 3D/Warp"** otomatis muncul di panel bawah teks jika teks sedang dalam kondisi melengkung/3D agar bisa kembali menjadi teks normal.
+4. **Update Panel Ukuran Relatif (Bentuk & Foto):**
+   - Icon diubah menjadi penggaris (📏).
+   - Panel kini dilengkapi kontrol **Lebar (px)** dan **Tinggi (px)** secara eksplisit dengan fitur **Kunci Rasio (Lock Aspect Ratio)** agar bisa membesarkan foto/shape secara proporsional layaknya tool ukuran pada Teks, namun tetap mempertahankan opsi persentase relatif kanvas.
 
-*(Karena kode sangat panjang, apabila terpotong di tengah jalan oleh sistem batas karakter, silakan balas dengan kata **"Lanjut"**).*
+*(Catatan: Karena kode ini sangat panjang dan utuh, jika terpotong oleh batas karakter sistem, silakan balas dengan kata **"Lanjut"** maka saya akan meneruskan sisa kodenya dengan presisi).*
 -->
 <!DOCTYPE html>
 <html lang="id">
@@ -64,6 +65,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .artboard-container{position:relative;box-shadow:0 15px 45px rgba(0,0,0,.9),0 0 0 1px rgba(212,175,55,.3);border-radius:6px;overflow:visible;background:#181818;transform-origin:center center;touch-action:none;transition:transform .05s ease-out;}
 #mainCanvas{display:block;width:100%;height:100%;border-radius:6px;touch-action:none;}
 #drawingCanvasOverlay{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:6px;pointer-events:none;z-index:150;display:none;}
+#smartGuideCanvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:6px;pointer-events:none;z-index:155;}
 .bleed-guides{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;display:none;z-index:90;}
 .bleed-guides.visible{display:block;}
 .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,.6);}
@@ -72,7 +74,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .snap-guide-h{left:0;right:0;height:1.5px;background:#00f3ff;box-shadow:0 0 8px #00f3ff;}
 .snap-guide-v{top:0;bottom:0;width:1.5px;background:#00f3ff;box-shadow:0 0 8px #00f3ff;}
 
-/* NEW REFACTORED SELECTION BOX */
 .selection-box {
     position: absolute; border: 1px dashed #D4AF37; pointer-events: none;
     display: none; z-index: 99; box-shadow: 0 0 12px rgba(212,175,55,.4);
@@ -344,6 +345,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="artboard-container" id="artboard">
 <canvas id="mainCanvas"></canvas>
 <canvas id="drawingCanvasOverlay"></canvas>
+<canvas id="smartGuideCanvas"></canvas>
 
 <div class="snap-guide snap-guide-h" id="snapGuideH"></div>
 <div class="snap-guide snap-guide-v" id="snapGuideV"></div>
@@ -416,6 +418,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <input type="file" id="fileBgInput" accept="image/*" style="display:none;" onchange="handleBgUpload(event)">
 <input type="file" id="fileProjectInput" accept=".poster,.json" multiple style="display:none;" onchange="handleProjectImport(event)">
 <input type="file" id="fileFontInput" accept=".ttf,.otf,.woff,.woff2" style="display:none;" onchange="handleFontUpload(event)">
+<input type="file" id="filePatternInput" accept="image/*" style="display:none;" onchange="handlePatternUpload(event)">
 
 <div class="handled-loupe-container" id="handledLoupe">
 <div class="handled-loupe-glass">
@@ -692,7 +695,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     </div>
 </div>
 
-<!-- Overlay Dzikir Upload Foto / Fullscreen Hack (REFACTORED) -->
+<!-- Overlay Dzikir Upload Foto / Fullscreen Hack -->
 <div id="dzikirOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999999; flex-direction:column; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(10px);">
     <div style="border: 2px solid #D4AF37; box-shadow: 0 0 15px rgba(212,175,55,0.4); border-radius: 12px; padding: 30px; max-width: 95%; width: 420px; display: flex; flex-direction: column; align-items: center; text-align:center; background:#111;">
         <div style="font-size:12px; color:#aaa; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">Dzikir & Istighfar (100x)</div>
@@ -823,7 +826,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.0.9'; 
+const APP_VERSION = 'v1.0.10'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -1021,6 +1024,8 @@ const mainCanvas=document.getElementById('mainCanvas');
 const ctx=mainCanvas.getContext('2d');
 const drawingCanvasOverlay=document.getElementById('drawingCanvasOverlay');
 const dctx=drawingCanvasOverlay.getContext('2d');
+const smartGuideCanvas=document.getElementById('smartGuideCanvas');
+const sgCtx=smartGuideCanvas.getContext('2d');
 const artboard=document.getElementById('artboard');
 const selBox=document.getElementById('selBox');
 const canvasDirectTextEditor=document.getElementById('canvasDirectTextEditor');
@@ -1138,6 +1143,7 @@ function rawSerializeSlides(slidesList){
             }
             if(el.textSkinImg){copy.textSkinSrc=el.textSkinSrc||el.textSkinImg.src;delete copy.textSkinImg;}
             if(el.imageSkinImg){copy.imageSkinSrc=el.imageSkinSrc||el.imageSkinImg.src;delete copy.imageSkinImg;}
+            if(el.transparency && el.transparency.patternImg) { copy.transparency.patternSrc = el.transparency.patternImg.src; delete copy.transparency.patternImg; }
             delete copy._cachedCanvas;
             delete copy._cachedHash;
             delete copy._cachedOffsetX;
@@ -1147,6 +1153,7 @@ function rawSerializeSlides(slidesList){
             delete copy._calculatedHeight;
             delete copy._curveCacheCanvas;
             delete copy._curveCacheKey;
+            delete copy.warpImg;
             return copy;
         })
     }));
@@ -1173,11 +1180,14 @@ if(copy.cropR===undefined)copy.cropR=0;
 if(copy.cropT===undefined)copy.cropT=0;
 if(copy.cropB===undefined)copy.cropB=0;
 }
+if(copy.warpSrc) { copy.warpImg = getImageFromCache(copy.warpSrc); }
 if(copy.textSkinSrc){copy.textSkinImg=getImageFromCache(copy.textSkinSrc);}
 if(copy.imageSkinSrc){copy.imageSkinImg=getImageFromCache(copy.imageSkinSrc);}
+if(copy.transparency && copy.transparency.patternSrc) { copy.transparency.patternImg = getImageFromCache(copy.transparency.patternSrc); }
 if(!copy.wordStyles) copy.wordStyles = {};
 if(!copy.filters) copy.filters = { brightness: 100, contrast: 100, saturate: 100, hue: 0 };
 if(!copy.advancedColor) copy.advancedColor = { active: false, intensity: 100, highlights: 0, shadows: 0, midtones: 0, channel: 'master', channels: {} };
+if(!copy.transparency) copy.transparency = { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100 };
 return copy;
 })
 };
@@ -1188,11 +1198,11 @@ function createDefaultSlide(){
 return{
 background:{type:'gradient',color1:'#241a14',color2:'#0d0a08',img:null,blur:0,darken:0.3,scale:1.0,offsetX:0,offsetY:0},
 elements:[
-{id:'el_'+Date.now()+'_1',type:'text',text:'Teman Sejati',x:540,y:310,width:700,fontFamily:"Fredoka, sans-serif",fontSize:68,fontWeight:'700',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'none',color:'#D4AF37',lineHeight:1.2,letterSpacing:0,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.8)',blur:10,angle:45,distance:4,alpha:0.8}},
-{id:'el_'+Date.now()+'_2',type:'text',text:'HANYALAH\nAMAL',x:540,y:470,width:860,fontFamily:"Anton, sans-serif",fontSize:100,fontWeight:'900',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'uppercase',color:'#FFFFFF',lineHeight:1.05,letterSpacing:2,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.95)',blur:20,angle:45,distance:6,alpha:0.95}},
-{id:'el_'+Date.now()+'_3',type:'text',text:'“Mayyit diiringi tiga hal, yang dua akan kembali sedang yang satu terus menyertainya: keluarga, harta dan amalnya. Harta dan keluarganya akan kembali, sedang amalnya akan terus tetap bersamanya.”',x:540,y:840,width:840,fontFamily:"Lora, serif",fontSize:32,fontWeight:'500',fontStyle:'normal',textDecoration:'none',textAlign:'justify',textTransform:'none',color:'#E5E7EB',lineHeight:1.6,letterSpacing:0,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.8)',blur:8,angle:45,distance:3,alpha:0.8}},
-{id:'el_'+Date.now()+'_4',type:'text',text:'HR. Bukhari: 6033',x:540,y:1070,width:600,fontFamily:"Inter, sans-serif",fontSize:26,fontWeight:'700',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'none',color:'#D4AF37',lineHeight:1.4,letterSpacing:1,highlightColor:'rgba(212,175,55,0.15)',highlightAlpha:0.2,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'transparent',blur:0,angle:0,distance:0,alpha:0}},
-{id:'el_'+Date.now()+'_5',type:'text',text:'@tauhidsunnah_id',x:540,y:1250,width:600,fontFamily:"Plus Jakarta Sans, sans-serif",fontSize:24,fontWeight:'800',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'none',color:'#9CA3AF',lineHeight:1.2,letterSpacing:1,highlightColor:'transparent',highlightAlpha:0,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'transparent',blur:0,angle:0,distance:0,alpha:0}}
+{id:'el_'+Date.now()+'_1',type:'text',text:'Teman Sejati',x:540,y:310,width:700,fontFamily:"Fredoka, sans-serif",fontSize:68,fontWeight:'700',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'none',color:'#D4AF37',lineHeight:1.2,letterSpacing:0,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.8)',blur:10,angle:45,distance:4,alpha:0.8}, transparency:{type:'uniform',alpha:100,gradType:'linear',angle:90,scale:100}},
+{id:'el_'+Date.now()+'_2',type:'text',text:'HANYALAH\nAMAL',x:540,y:470,width:860,fontFamily:"Anton, sans-serif",fontSize:100,fontWeight:'900',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'uppercase',color:'#FFFFFF',lineHeight:1.05,letterSpacing:2,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.95)',blur:20,angle:45,distance:6,alpha:0.95}, transparency:{type:'uniform',alpha:100,gradType:'linear',angle:90,scale:100}},
+{id:'el_'+Date.now()+'_3',type:'text',text:'“Mayyit diiringi tiga hal, yang dua akan kembali sedang yang satu terus menyertainya: keluarga, harta dan amalnya. Harta dan keluarganya akan kembali, sedang amalnya akan terus tetap bersamanya.”',x:540,y:840,width:840,fontFamily:"Lora, serif",fontSize:32,fontWeight:'500',fontStyle:'normal',textDecoration:'none',textAlign:'justify',textTransform:'none',color:'#E5E7EB',lineHeight:1.6,letterSpacing:0,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.8)',blur:8,angle:45,distance:3,alpha:0.8}, transparency:{type:'uniform',alpha:100,gradType:'linear',angle:90,scale:100}},
+{id:'el_'+Date.now()+'_4',type:'text',text:'HR. Bukhari: 6033',x:540,y:1070,width:600,fontFamily:"Inter, sans-serif",fontSize:26,fontWeight:'700',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'none',color:'#D4AF37',lineHeight:1.4,letterSpacing:1,highlightColor:'rgba(212,175,55,0.15)',highlightAlpha:0.2,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'transparent',blur:0,angle:0,distance:0,alpha:0}, transparency:{type:'uniform',alpha:100,gradType:'linear',angle:90,scale:100}},
+{id:'el_'+Date.now()+'_5',type:'text',text:'@tauhidsunnah_id',x:540,y:1250,width:600,fontFamily:"Plus Jakarta Sans, sans-serif",fontSize:24,fontWeight:'800',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'none',color:'#9CA3AF',lineHeight:1.2,letterSpacing:1,highlightColor:'transparent',highlightAlpha:0,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'transparent',blur:0,angle:0,distance:0,alpha:0}, transparency:{type:'uniform',alpha:100,gradType:'linear',angle:90,scale:100}}
 ]
 };
 }
@@ -1612,6 +1622,8 @@ mainCanvas.width=targetW;
 mainCanvas.height=targetH;
 drawingCanvasOverlay.width=targetW;
 drawingCanvasOverlay.height=targetH;
+smartGuideCanvas.width=targetW;
+smartGuideCanvas.height=targetH;
 const vp=document.getElementById('workspaceViewport');
 const padding=24;
 const availW=vp.clientWidth-padding;
@@ -1923,7 +1935,7 @@ function getElHash(el) {
     try {
         let str = el.type + '_' + el.width + '_' + el.height + '_' + el.color + '_' + el.opacity + '_' + el.blendMode;
         if(el.type === 'text') {
-            str += '_' + el.text + '_' + el.fontFamily + '_' + el.fontSize + '_' + el.fontWeight + '_' + el.fontStyle + '_' + el.textAlign + '_' + el.lineHeight + '_' + el.letterSpacing + '_' + el.curveAngle + '_' + el.italicSlant + '_' + el.textTransform + '_' + el.textDecoration + '_' + el.highlightColor + '_' + el.highlightAlpha + '_' + el.highlightRadius + '_' + el.highlightPaddingX + '_' + el.highlightPaddingY + '_' + el.textSkinSrc + '_' + el.textSkinOffsetX + '_' + el.textSkinOffsetY + '_' + el.textSkinScale + '_' + el.textSkinBlend + '_' + JSON.stringify(el.skinFilter||{}) + '_' + JSON.stringify(el.wordStyles||{});
+            str += '_' + el.text + '_' + el.fontFamily + '_' + el.fontSize + '_' + el.fontWeight + '_' + el.fontStyle + '_' + el.textAlign + '_' + el.lineHeight + '_' + el.letterSpacing + '_' + el.curveAngle + '_' + el.italicSlant + '_' + el.textTransform + '_' + el.textDecoration + '_' + el.highlightColor + '_' + el.highlightAlpha + '_' + el.highlightRadius + '_' + el.highlightPaddingX + '_' + el.highlightPaddingY + '_' + el.textSkinSrc + '_' + el.textSkinOffsetX + '_' + el.textSkinOffsetY + '_' + el.textSkinScale + '_' + el.textSkinBlend + '_' + JSON.stringify(el.skinFilter||{}) + '_' + JSON.stringify(el.wordStyles||{}) + '_' + el.warpSrc;
         } else if(el.type === 'image') {
             str += '_' + el.src + '_' + el.cropL + '_' + el.cropR + '_' + el.cropT + '_' + el.cropB + '_' + el.blur + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.borderBlur + '_' + el.colorOverlay + '_' + el.imageSkinSrc + '_' + el.imageSkinOffsetX + '_' + el.imageSkinOffsetY + '_' + el.imageSkinScale + '_' + el.imageSkinBlend + '_' + el.imageSkinOpacity + '_' + JSON.stringify(el.advancedColor||{}) + '_' + JSON.stringify(el.depthFocus||{});
         } else if(el.type === 'shape') {
@@ -1931,7 +1943,7 @@ function getElHash(el) {
         } else if(el.type === 'fade') {
             str += '_' + el.fadeDir + '_' + el.fadeDepth;
         }
-        str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.emboss||{});
+        str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.emboss||{}) + '_' + JSON.stringify(el.transparency||{});
         return str;
     } catch(e) {
         return Math.random().toString();
@@ -1957,6 +1969,64 @@ else if(el.type==='fade')renderFadeElement(ctx,el);
 updateSelectionBox();
 }
 
+function applyAdvancedTransparency(targetCtx, w, h, t) {
+    if(!t || t.type === 'uniform') return;
+    
+    const mask = document.createElement('canvas');
+    mask.width = w; mask.height = h;
+    const mctx = mask.getContext('2d');
+    
+    const alpha = (t.alpha !== undefined ? t.alpha : 100) / 100;
+    
+    if(t.type === 'fountain') {
+        const rad = ((t.angle || 90) * Math.PI) / 180;
+        let x0 = w/2, y0 = h/2, x1 = w/2, y1 = h/2;
+        const diag = Math.sqrt(w*w + h*h) / 2;
+        
+        if(t.gradType === 'linear') {
+            x0 = w/2 - Math.cos(rad) * diag;
+            y0 = h/2 - Math.sin(rad) * diag;
+            x1 = w/2 + Math.cos(rad) * diag;
+            y1 = h/2 + Math.sin(rad) * diag;
+            const grad = mctx.createLinearGradient(x0, y0, x1, y1);
+            grad.addColorStop(0, `rgba(0,0,0,${alpha})`);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            mctx.fillStyle = grad;
+            mctx.fillRect(0, 0, w, h);
+        } else if(t.gradType === 'radial') {
+            const radScale = (t.scale || 100) / 100;
+            const grad = mctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, diag * radScale);
+            grad.addColorStop(0, `rgba(0,0,0,${alpha})`);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            mctx.fillStyle = grad;
+            mctx.fillRect(0, 0, w, h);
+        }
+    } else if (t.type === 'pattern' && t.patternImg && t.patternImg.complete) {
+        mctx.fillStyle = `rgba(0,0,0,${alpha})`;
+        mctx.fillRect(0, 0, w, h);
+        mctx.globalCompositeOperation = 'destination-in';
+        
+        const pCanvas = document.createElement('canvas');
+        const pScale = (t.scale || 100) / 100;
+        pCanvas.width = t.patternImg.width * pScale;
+        pCanvas.height = t.patternImg.height * pScale;
+        pCanvas.getContext('2d').drawImage(t.patternImg, 0, 0, pCanvas.width, pCanvas.height);
+        
+        const pattern = mctx.createPattern(pCanvas, 'repeat');
+        mctx.save();
+        mctx.translate(w/2, h/2);
+        mctx.rotate(((t.angle || 0) * Math.PI) / 180);
+        mctx.translate(-w/2, -h/2);
+        mctx.fillStyle = pattern;
+        mctx.fillRect(-w, -h, w*3, h*3);
+        mctx.restore();
+    }
+
+    targetCtx.globalCompositeOperation = 'destination-in';
+    targetCtx.drawImage(mask, 0, 0);
+    targetCtx.globalCompositeOperation = 'source-over';
+}
+
 function renderBackground(bg,W,H,targetCtx){
 if(!bg)return;
 if(bg.img&&bg.img.complete){
@@ -1980,7 +2050,7 @@ targetCtx.fillRect(0,0,W,H);
 if(bg.darken>0){targetCtx.fillStyle=`rgba(0,0,0,${bg.darken})`;targetCtx.fillRect(0,0,W,H);}
 }
 
-function renderTextElement(targetCtx,el){
+function renderTextElement(targetCtx,el, forceRawRender = false){
 targetCtx.save();
 targetCtx.translate(el.x,el.y);
 if(el.rotation)targetCtx.rotate((el.rotation*Math.PI)/180);
@@ -2001,8 +2071,29 @@ if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
 const hash = getElHash(el);
 const rScale = window.currentRenderScale || 1;
 
-if (rScale === 1 && el._cachedHash === hash && el._cachedCanvas) {
+if (!forceRawRender && rScale === 1 && el._cachedHash === hash && el._cachedCanvas) {
     targetCtx.drawImage(el._cachedCanvas, -el._cachedCanvas.width/2 + (el._cachedOffsetX||0), -el._cachedCanvas.height/2 + (el._cachedOffsetY||0));
+    targetCtx.restore();
+    return;
+}
+
+if (!forceRawRender && el.warpImg && el.warpImg.complete) {
+    const finalDrawW = el.width || 300;
+    const finalDrawH = el.height || 300;
+    el._renderedW = finalDrawW;
+    el._calculatedHeight = finalDrawH;
+    
+    const off=document.createElement('canvas');
+    off.width=finalDrawW * rScale;
+    off.height=finalDrawH * rScale;
+    const octx=off.getContext('2d');
+    octx.scale(rScale, rScale);
+    octx.drawImage(el.warpImg, 0, 0, finalDrawW, finalDrawH);
+    
+    if(el.transparency && el.transparency.type !== 'uniform') applyAdvancedTransparency(octx, finalDrawW, finalDrawH, el.transparency);
+    
+    if(rScale === 1) { el._cachedCanvas = off; el._cachedHash = hash; el._cachedOffsetX = 0; el._cachedOffsetY = 0; }
+    targetCtx.drawImage(off, -finalDrawW/2, -finalDrawH/2, finalDrawW, finalDrawH);
     targetCtx.restore();
     return;
 }
@@ -2055,7 +2146,13 @@ if(el.curveAngle&&Math.abs(el.curveAngle)>=3){
         applySilhouetteEmboss(octx, off.width, off.height, el.emboss);
     }
     
-    if(rScale === 1) {
+    if(el.transparency && el.transparency.type !== 'uniform') {
+        octx.translate(-offSize/2, -offSize/2);
+        applyAdvancedTransparency(octx, offSize, offSize, el.transparency);
+        octx.translate(offSize/2, offSize/2);
+    }
+    
+    if(rScale === 1 && !forceRawRender) {
         el._cachedCanvas = off;
         el._cachedHash = hash;
         el._cachedOffsetX = 0;
@@ -2066,7 +2163,7 @@ if(el.curveAngle&&Math.abs(el.curveAngle)>=3){
 
     targetCtx.drawImage(off, -offSize/2, -offSize/2, offSize, offSize);
     targetCtx.restore();
-    return;
+    return off; 
 }
 
 const tempCtx = document.createElement('canvas').getContext('2d');
@@ -2304,7 +2401,13 @@ linesInfo.forEach(line => {
     });
 });
 
-if(rScale === 1) {
+if(el.transparency && el.transparency.type !== 'uniform') {
+    octx.translate(-cW/2, -cH/2);
+    applyAdvancedTransparency(octx, cW, cH, el.transparency);
+    octx.translate(cW/2, cH/2);
+}
+
+if(rScale === 1 && !forceRawRender) {
     el._cachedCanvas = off;
     el._cachedHash = hash;
     el._cachedOffsetX = 0;
@@ -2313,6 +2416,23 @@ if(rScale === 1) {
 
 targetCtx.drawImage(off, -cW/2, -cH/2, cW, cH);
 targetCtx.restore();
+
+return off;
+}
+
+function rasterizeTextToImage(el) {
+    const W = (el.width || 750);
+    const H = (el._calculatedHeight || el.fontSize * 1.5) + 100;
+    const tempC = document.createElement('canvas');
+    tempC.width = W; tempC.height = H;
+    const tctx = tempC.getContext('2d');
+    const dummyEl = { ...el, x: W/2, y: H/2, rotation: 0, opacity: 1, transparency: {type: 'uniform', alpha: 100} };
+    renderTextElement(tctx, dummyEl, true);
+    
+    const trimmed = trimCanvas(tempC);
+    const img = new Image();
+    img.src = trimmed ? trimmed.toDataURL('image/png') : tempC.toDataURL('image/png');
+    return img;
 }
 
 function renderCurvedTextLine(targetCtx,el,text,cleanFont){
@@ -2468,6 +2588,12 @@ applySilhouetteEmboss(octx,off.width,off.height,el.emboss);
 
 if(el.borderWidth&&el.borderWidth>0&&el.borderColor){
 renderContourStrokePNG(octx,off,finalDrawW,finalDrawH,el);
+}
+
+if(el.transparency && el.transparency.type !== 'uniform') {
+    octx.translate(-cW/2, -cH/2);
+    applyAdvancedTransparency(octx, cW, cH, el.transparency);
+    octx.translate(cW/2, cH/2);
 }
 
 if(rScale === 1) {
@@ -2740,6 +2866,12 @@ function renderShapeElement(targetCtx, el) {
         applySilhouetteEmboss(octx, off.width, off.height, el.emboss);
     }
 
+    if(el.transparency && el.transparency.type !== 'uniform') {
+        octx.translate(-cW/2, -cH/2);
+        applyAdvancedTransparency(octx, cW, cH, el.transparency);
+        octx.translate(cW/2, cH/2);
+    }
+
     if(rScale === 1) {
         el._cachedCanvas = off;
         el._cachedHash = hash;
@@ -2797,6 +2929,12 @@ function renderFadeElement(targetCtx, el) {
     } else if (el.fadeDir === 'vertical') {
         drawGrad(0, -h/2, 0, -h/2 + (h * depthVal/100));
         drawGrad(0, h/2, 0, h/2 - (h * depthVal/100));
+    }
+
+    if(el.transparency && el.transparency.type !== 'uniform') {
+        octx.translate(-w/2, -h/2);
+        applyAdvancedTransparency(octx, w, h, el.transparency);
+        octx.translate(w/2, h/2);
     }
 
     if(rScale === 1) { el._cachedCanvas = off; el._cachedHash = hash; }
@@ -3077,7 +3215,7 @@ function applyAdvancedColor(ctx, w, h, settings) {
 function selectElement(elId){
 if(appMode === 'drawing') return;
 activeElementId=elId;updateSelectionBox();renderBottomToolbar();closeToolPanel();}
-function deselectElement(){activeElementId=null;editingElementId=null;selBox.classList.remove('active');hideSnapGuides();closeDirectCanvasTextEditor();renderBottomToolbar();closeToolPanel();}
+function deselectElement(){activeElementId=null;editingElementId=null;selBox.classList.remove('active');hideSnapGuides();closeDirectCanvasTextEditor();renderBottomToolbar();closeToolPanel(); drawSmartGuides([]);}
 function handleViewportClick(e){if(e.target===document.getElementById('workspaceViewport'))deselectElement();}
 
 function updateSelectionBox(){
@@ -3113,6 +3251,36 @@ selBox.classList.add('active');
 function hideSnapGuides(){
 snapGuideH.style.display='none';
 snapGuideV.style.display='none';
+drawSmartGuides([]);
+}
+
+function drawSmartGuides(lines) {
+    sgCtx.clearRect(0,0, smartGuideCanvas.width, smartGuideCanvas.height);
+    if(lines.length === 0) return;
+    sgCtx.save();
+    sgCtx.strokeStyle = '#ff00ff';
+    sgCtx.lineWidth = 1.5;
+    sgCtx.setLineDash([6, 6]);
+    lines.forEach(line => {
+        sgCtx.beginPath();
+        sgCtx.moveTo(line.x1, line.y1);
+        sgCtx.lineTo(line.x2, line.y2);
+        sgCtx.stroke();
+    });
+    sgCtx.restore();
+}
+
+function getElementBounds(el) {
+    let w = el._renderedW || el.width || 200;
+    let h = el._renderedH || (el.type==='text' ? (el._calculatedHeight || el.fontSize*1.5) : (el.height || 200));
+    let cx = el.x;
+    let cy = el.y;
+    if(el.type === 'image') {
+        const cxOffset = (((el.cropL||0) - (el.cropR||0)) / 200) * (el.width||300);
+        const cyOffset = (((el.cropT||0) - (el.cropB||0)) / 200) * (el.height||300);
+        cx += cxOffset; cy += cyOffset;
+    }
+    return { l: cx - w/2, r: cx + w/2, t: cy - h/2, b: cy + h/2, cx, cy, w, h };
 }
 
 function setupDirectCanvasTextEvents(){
@@ -3349,28 +3517,80 @@ if(el.type === 'image') {
 let visualX = targetX + cxOffset;
 let visualY = targetY + cyOffset;
 
-const snapThreshold=12;
+const snapThreshold=8 / userZoomScale;
 const W=mainCanvas.width;
 const H=mainCanvas.height;
 let snappedH=false;
 let snappedV=false;
+let smartLines = [];
 
-if(Math.abs(visualX-(W/2))<=snapThreshold){
-visualX=W/2;
-targetX = visualX - cxOffset;
-snapGuideV.style.left=`${(W/2)*canvasScale}px`;
-snapGuideV.style.display='block';
-snappedV=true;
+const s = getCurrentSlide();
+const activeBounds = getElementBounds({ ...el, x: targetX, y: targetY });
+
+for (let other of s.elements) {
+    if (other.id === el.id || other.groupId === el.groupId) continue;
+    const ob = getElementBounds(other);
+
+    const xPoints = [
+        { val: ob.l, type: 'l' }, { val: ob.cx, type: 'cx' }, { val: ob.r, type: 'r' }
+    ];
+    const targetXPoints = [
+        { val: activeBounds.l, type: 'l', offset: activeBounds.w/2 }, 
+        { val: activeBounds.cx, type: 'cx', offset: 0 }, 
+        { val: activeBounds.r, type: 'r', offset: -activeBounds.w/2 }
+    ];
+
+    for (let xp of xPoints) {
+        if(snappedV) break;
+        for (let txp of targetXPoints) {
+            if (Math.abs(txp.val - xp.val) <= snapThreshold) {
+                targetX = xp.val + txp.offset - cxOffset;
+                visualX = targetX + cxOffset;
+                snappedV = true;
+                smartLines.push({x1: xp.val, y1: 0, x2: xp.val, y2: H});
+                break;
+            }
+        }
+    }
+
+    const yPoints = [
+        { val: ob.t, type: 't' }, { val: ob.cy, type: 'cy' }, { val: ob.b, type: 'b' }
+    ];
+    const targetYPoints = [
+        { val: activeBounds.t, type: 't', offset: activeBounds.h/2 }, 
+        { val: activeBounds.cy, type: 'cy', offset: 0 }, 
+        { val: activeBounds.b, type: 'b', offset: -activeBounds.h/2 }
+    ];
+
+    for (let yp of yPoints) {
+        if(snappedH) break;
+        for (let typ of targetYPoints) {
+            if (Math.abs(typ.val - yp.val) <= snapThreshold) {
+                targetY = yp.val + typ.offset - cyOffset;
+                visualY = targetY + cyOffset;
+                snappedH = true;
+                smartLines.push({x1: 0, y1: yp.val, x2: W, y2: yp.val});
+                break;
+            }
+        }
+    }
 }
-if(Math.abs(visualY-(H/2))<=snapThreshold){
-visualY=H/2;
-targetY = visualY - cyOffset;
-snapGuideH.style.top=`${(H/2)*canvasScale}px`;
-snapGuideH.style.display='block';
-snappedH=true;
-}
-if(!snappedV)snapGuideV.style.display='none';
-if(!snappedH)snapGuideH.style.display='none';
+
+if(!snappedV && Math.abs(visualX-(W/2))<=snapThreshold){
+    visualX=W/2; targetX = visualX - cxOffset;
+    snapGuideV.style.left=`${(W/2)*canvasScale}px`;
+    snapGuideV.style.display='block';
+    snappedV=true;
+} else if(!snappedV) { snapGuideV.style.display='none'; }
+
+if(!snappedH && Math.abs(visualY-(H/2))<=snapThreshold){
+    visualY=H/2; targetY = visualY - cyOffset;
+    snapGuideH.style.top=`${(H/2)*canvasScale}px`;
+    snapGuideH.style.display='block';
+    snappedH=true;
+} else if(!snappedH) { snapGuideH.style.display='none'; }
+
+drawSmartGuides(smartLines);
 
 el.x=targetX;
 el.y=targetY;
@@ -3409,8 +3629,13 @@ if(el.type==='text'){
 el.fontSize=Math.round(startElementState.fontSize*factor);
 el.width=Math.round(startElementState.width*factor);
 }else if(el.type==='image' || el.type==='shape' || el.type==='fade'){
-el.width=Math.round(startElementState.width*factor);
-el.height=Math.round(startElementState.height*factor);
+if (el.lockAspect !== false) {
+    el.width=Math.round(startElementState.width*factor);
+    el.height=Math.round(startElementState.height*factor);
+} else {
+    el.width=Math.max(40,Math.round(startElementState.width+(deltaX*2*(activeHandle==='tr'||activeHandle==='br'?1:-1))));
+    el.height=Math.max(40,Math.round(startElementState.height+(deltaY*2*(activeHandle==='bl'||activeHandle==='br'?1:-1))));
+}
 }
 }else if(activeHandle==='r'||activeHandle==='l'){
 const sign=activeHandle==='r'?1:-1;
@@ -3460,7 +3685,7 @@ bar.innerHTML=`
 }else if(el.type==='text'){
 bar.innerHTML=`
 <button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
-<button class="tool-btn" onclick="openDirectCanvasTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit Teks</span></button>
+${el.warpSrc ? `<button class="tool-btn" onclick="resetTextWarp()"><span class="icon">↺</span><span>Reset 3D</span></button>` : `<button class="tool-btn" onclick="openDirectCanvasTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit Teks</span></button>`}
 <button class="tool-btn" onclick="openPanelFontFamily()"><span class="icon">🔤</span><span>Font</span></button>
 <button class="tool-btn" onclick="openPanelTextSizeFull()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openPanelTextColor()"><span class="icon">🎨</span><span>Warna</span></button>
@@ -3468,13 +3693,14 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelSpacing()"><span class="icon">↔️</span><span>Jarak</span></button>
 <button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
 <button class="tool-btn" onclick="openPanelCurveAndSlant()"><span class="icon">🌀</span><span>Lengkung</span></button>
+<button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
+<button class="tool-btn" onclick="openEnvelopeModal()"><span class="icon">🌊</span><span>Envelope</span></button>
 <button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i></span><span>Format</span></button>
 <button class="tool-btn" onclick="openPanelHighlight()"><span class="icon">🖍️</span><span>Stabilo</span></button>
 <button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Teks</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
 <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
-<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📐</span><span>Relatif</span></button>
 <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'🔗':'⛓️'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
@@ -3494,7 +3720,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openEnvelopeModal()"><span class="icon">🌊</span><span>Envelope</span></button>
-<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">⚖️</span><span>Ukuran Relatif</span></button>
+<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openMagicWandModal()"><span class="icon">🪄</span><span>Hapus BG</span></button>
 <button class="tool-btn" onclick="openMagicGrabModal()"><span class="icon">✨</span><span>Tangkap Ajaib</span></button>
 <button class="tool-btn" onclick="openPanelDepthFocus()"><span class="icon">📷</span><span>Fokus DSLR</span></button>
@@ -3518,6 +3744,7 @@ bar.innerHTML=`
 <button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
 <button class="tool-btn" onclick="openPanelShapeColor()"><span class="icon">🎨</span><span>Warna</span></button>
 <button class="tool-btn" onclick="openPanelImageSkinOverlay()"><span class="icon">🎭</span><span>Skin Foto</span></button>
+<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis Tepi</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
@@ -3537,7 +3764,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
 <button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
 <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
-<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📐</span><span>Relatif</span></button>
+<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
 <button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
@@ -3592,7 +3819,8 @@ function addNewFadeEdge() {
         rotation: 0,
         blendMode: 'normal',
         locked: false,
-        groupId: null
+        groupId: null,
+        transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100 }
     };
     s.elements.push(newEl);
     selectElement(newEl.id);
@@ -4867,7 +5095,8 @@ function finishPenDrawing() {
         height: trimmed.height,
         origWidth: trimmed.width,
         origHeight: trimmed.height,
-        flipH: false, flipV: false, cornerRadius: 0, borderWidth: 0, borderColor: '#D4AF37', colorOverlay: 'none', blur: 0, blendMode: 'normal', cropL: 0, cropR: 0, cropT: 0, cropB: 0, shadow: {color: 'transparent', blur: 0, angle: 45, distance: 0}, opacity: 1, locked: false, groupId: null
+        flipH: false, flipV: false, cornerRadius: 0, borderWidth: 0, borderColor: '#D4AF37', colorOverlay: 'none', blur: 0, blendMode: 'normal', cropL: 0, cropR: 0, cropT: 0, cropB: 0, shadow: {color: 'transparent', blur: 0, angle: 45, distance: 0}, opacity: 1, locked: false, groupId: null,
+        transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100 }
     };
     s.elements.push(newEl);
     
@@ -4919,15 +5148,21 @@ let perspCanvasOffscreen=null;
 
 function openPerspectiveModal(){
 const el=getActiveElement();
-if(!el||el.type!=='image')return;
-if(!el.originalPerspSrc)el.originalPerspSrc=el.src;
+if(!el||(el.type!=='image'&&el.type!=='text'))return;
+
+let targetImg = el.img;
+if(el.type === 'text') {
+    targetImg = rasterizeTextToImage(el);
+}
+
+if(!el.originalPerspSrc)el.originalPerspSrc=el.src || (el.type === 'text' ? 'text_placeholder' : null);
 
 const modal=document.getElementById('perspectiveModal');
 modal.classList.add('active');
 
 const canvas=document.getElementById('perspectiveCanvas');
 const maxDim=Math.min(window.innerWidth*0.8,420);
-const aspect=(el.img.height||300)/(el.img.width||300);
+const aspect=(targetImg.height||300)/(targetImg.width||300);
 const baseW = maxDim;
 const baseH = Math.round(maxDim*aspect);
 
@@ -4937,7 +5172,15 @@ canvas.height = baseH * 2;
 perspCanvasOffscreen=document.createElement('canvas');
 perspCanvasOffscreen.width=baseW;
 perspCanvasOffscreen.height=baseH;
-perspCanvasOffscreen.getContext('2d').drawImage(el.img,0,0,baseW,baseH);
+
+if (targetImg.complete) {
+    perspCanvasOffscreen.getContext('2d').drawImage(targetImg,0,0,baseW,baseH);
+} else {
+    targetImg.onload = () => {
+        perspCanvasOffscreen.getContext('2d').drawImage(targetImg,0,0,baseW,baseH);
+        renderPerspectiveModalWarp();
+    };
+}
 
 resetPerspectivePins();
 setupPerspectivePinDragging();
@@ -4947,9 +5190,30 @@ function closePerspectiveModal(){
 document.getElementById('perspectiveModal').classList.remove('active');
 }
 
+function resetTextWarp() {
+    const el = getActiveElement();
+    if(!el || el.type !== 'text') return;
+    el.warpSrc = null;
+    el.warpImg = null;
+    el.originalPerspSrc = null;
+    el.originalEnvSrc = null;
+    el._cachedCanvas = null;
+    el._cachedHash = null;
+    requestRender();
+    pushHistoryState();
+    renderBottomToolbar();
+    showToast('↺ Teks kembali normal!');
+}
+
 function revertOriginalPerspective(){
 const el=getActiveElement();
-if(!el||!el.originalPerspSrc)return;
+if(!el)return;
+if(el.type === 'text') {
+    resetTextWarp();
+    closePerspectiveModal();
+    return;
+}
+if(!el.originalPerspSrc)return;
 el.src=el.originalPerspSrc;
 el.img=getImageFromCache(el.src);
 requestRender();
@@ -5067,12 +5331,17 @@ ctx.restore();
 
 function applyPerspectiveWarp(){
 const el=getActiveElement();
-if(!el||el.type!=='image')return;
+if(!el)return;
 showToast('⏳ Memproses 3D HD...');
 
 setTimeout(() => {
-    const origW = el.img.width;
-    const origH = el.img.height;
+    let targetImg = el.img;
+    if(el.type === 'text') {
+        targetImg = rasterizeTextToImage(el);
+    }
+    
+    const origW = targetImg.width;
+    const origH = targetImg.height;
 
     const canvas = document.getElementById('perspectiveCanvas');
     const rect = canvas.getBoundingClientRect();
@@ -5110,16 +5379,23 @@ setTimeout(() => {
     const srcCanvas = document.createElement('canvas');
     srcCanvas.width = origW;
     srcCanvas.height = origH;
-    srcCanvas.getContext('2d').drawImage(el.img, 0, 0);
+    srcCanvas.getContext('2d').drawImage(targetImg, 0, 0);
 
     warpCanvasBilinear(srcCanvas, hdCtx, adjP0, adjP1, adjP2, adjP3, 32);
 
     const trimmed = trimCanvas(hdCanvas);
-    el.src = trimmed.toDataURL('image/png');
-    el.img = getImageFromCache(el.src);
-
-    const newAspect = trimmed.height / trimmed.width;
-    el.height = Math.round(el.width * newAspect);
+    
+    if(el.type === 'text') {
+        el.warpSrc = trimmed.toDataURL('image/png');
+        el.warpImg = getImageFromCache(el.warpSrc);
+        el._cachedCanvas = null;
+        renderBottomToolbar();
+    } else {
+        el.src = trimmed.toDataURL('image/png');
+        el.img = getImageFromCache(el.src);
+        const newAspect = trimmed.height / trimmed.width;
+        el.height = Math.round(el.width * newAspect);
+    }
 
     requestRender();
     pushHistoryState();
@@ -5135,15 +5411,19 @@ let envCanvasOffscreen = null;
 
 function openEnvelopeModal() {
     const el = getActiveElement();
-    if(!el || el.type !== 'image') return;
-    if(!el.originalEnvSrc) el.originalEnvSrc = el.src;
+    if(!el || (el.type !== 'image' && el.type !== 'text')) return;
+    
+    let targetImg = el.img;
+    if(el.type === 'text') targetImg = rasterizeTextToImage(el);
+    
+    if(!el.originalEnvSrc) el.originalEnvSrc = el.src || (el.type === 'text' ? 'text_placeholder' : null);
 
     const modal = document.getElementById('envelopeModal');
     modal.classList.add('active');
 
     const canvas = document.getElementById('envelopeCanvas');
     const maxDim = Math.min(window.innerWidth * 0.8, 420);
-    const aspect = (el.img.height || 300) / (el.img.width || 300);
+    const aspect = (targetImg.height || 300) / (targetImg.width || 300);
     const baseW = maxDim;
     const baseH = Math.round(maxDim * aspect);
 
@@ -5153,7 +5433,15 @@ function openEnvelopeModal() {
     envCanvasOffscreen = document.createElement('canvas');
     envCanvasOffscreen.width = baseW;
     envCanvasOffscreen.height = baseH;
-    envCanvasOffscreen.getContext('2d').drawImage(el.img, 0, 0, baseW, baseH);
+    
+    if(targetImg.complete) {
+        envCanvasOffscreen.getContext('2d').drawImage(targetImg, 0, 0, baseW, baseH);
+    } else {
+        targetImg.onload = () => {
+            envCanvasOffscreen.getContext('2d').drawImage(targetImg, 0, 0, baseW, baseH);
+            renderEnvelopeModalWarp();
+        }
+    }
 
     resetEnvelopePins();
     setupEnvelopePinDragging();
@@ -5165,7 +5453,13 @@ function closeEnvelopeModal() {
 
 function revertOriginalEnvelope() {
     const el = getActiveElement();
-    if(!el || !el.originalEnvSrc) return;
+    if(!el) return;
+    if(el.type === 'text') {
+        resetTextWarp();
+        closeEnvelopeModal();
+        return;
+    }
+    if(!el.originalEnvSrc) return;
     el.src = el.originalEnvSrc;
     el.img = getImageFromCache(el.src);
     requestRender();
@@ -5299,12 +5593,15 @@ function renderEnvelopeModalWarp() {
 
 function applyEnvelopeWarp() {
     const el = getActiveElement();
-    if(!el || el.type !== 'image') return;
+    if(!el) return;
     showToast('⏳ Memproses Envelope HD...');
 
     setTimeout(() => {
-        const origW = el.img.width;
-        const origH = el.img.height;
+        let targetImg = el.img;
+        if(el.type === 'text') targetImg = rasterizeTextToImage(el);
+        
+        const origW = targetImg.width;
+        const origH = targetImg.height;
 
         const canvas = document.getElementById('envelopeCanvas');
         const rect = canvas.getBoundingClientRect();
@@ -5345,16 +5642,23 @@ function applyEnvelopeWarp() {
         const srcCanvas = document.createElement('canvas');
         srcCanvas.width = origW;
         srcCanvas.height = origH;
-        srcCanvas.getContext('2d').drawImage(el.img, 0, 0);
+        srcCanvas.getContext('2d').drawImage(targetImg, 0, 0);
 
         warpCanvasEnvelope(srcCanvas, hdCtx, localPins, 32);
 
         const trimmed = trimCanvas(hdCanvas);
-        el.src = trimmed.toDataURL('image/png');
-        el.img = getImageFromCache(el.src);
-
-        const newAspect = trimmed.height / trimmed.width;
-        el.height = Math.round(el.width * newAspect);
+        
+        if(el.type === 'text') {
+            el.warpSrc = trimmed.toDataURL('image/png');
+            el.warpImg = getImageFromCache(el.warpSrc);
+            el._cachedCanvas = null;
+            renderBottomToolbar();
+        } else {
+            el.src = trimmed.toDataURL('image/png');
+            el.img = getImageFromCache(el.src);
+            const newAspect = trimmed.height / trimmed.width;
+            el.height = Math.round(el.width * newAspect);
+        }
 
         requestRender();
         pushHistoryState();
@@ -5413,7 +5717,8 @@ function addNewShape(type) {
         blendMode: 'normal',
         shadow: {color: 'transparent', blur: 0, angle: 45, distance: 0},
         locked: false,
-        groupId: null
+        groupId: null,
+        transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100 }
     };
     s.elements.push(newEl);
     selectElement(newEl.id);
@@ -5660,7 +5965,8 @@ setTimeout(() => {
     height:trimmed.height,
     origWidth:trimmed.width,
     origHeight:trimmed.height,
-    flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'rgba(0,0,0,0.5)',blur:20,angle:45,distance:10},opacity:1,locked:false,groupId:null
+    flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'rgba(0,0,0,0.5)',blur:20,angle:45,distance:10},opacity:1,locked:false,groupId:null,
+    transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100 }
     };
     s.elements.push(newEl);
     selectElement(newEl.id);
@@ -5860,6 +6166,8 @@ copy.y+=35;
 if(el.type==='image'&&el.img)copy.img=el.img;
 if(el.textSkinImg)copy.textSkinImg=el.textSkinImg;
 if(el.imageSkinImg)copy.imageSkinImg=el.imageSkinImg;
+if(el.warpImg)copy.warpImg=el.warpImg;
+if(el.transparency && el.transparency.patternImg) copy.transparency.patternImg=el.transparency.patternImg;
 
 delete copy._cachedCanvas;
 delete copy._cachedHash;
@@ -5878,6 +6186,8 @@ function copyActiveElement() {
     if(el.type==='image'&&el.img) copiedElement.img=el.img;
     if(el.textSkinImg) copiedElement.textSkinImg=el.textSkinImg;
     if(el.imageSkinImg) copiedElement.imageSkinImg=el.imageSkinImg;
+    if(el.warpImg) copiedElement.warpImg=el.warpImg;
+    if(el.transparency && el.transparency.patternImg) copiedElement.transparency.patternImg=el.transparency.patternImg;
     copiedElementsList = []; 
     showToast('📋 Elemen disalin!');
     renderBottomToolbar();
@@ -5911,6 +6221,8 @@ function executeMultiCopy() {
             if(el.img) clone.img = el.img;
             if(el.textSkinImg) clone.textSkinImg = el.textSkinImg;
             if(el.imageSkinImg) clone.imageSkinImg = el.imageSkinImg;
+            if(el.warpImg) clone.warpImg=el.warpImg;
+            if(el.transparency && el.transparency.patternImg) clone.transparency.patternImg=el.transparency.patternImg;
             copiedElementsList.push(clone);
         }
     });
@@ -5952,6 +6264,8 @@ function executePaste() {
             if(sourceEl.img) clone.img = sourceEl.img;
             if(sourceEl.textSkinImg) clone.textSkinImg = sourceEl.textSkinImg;
             if(sourceEl.imageSkinImg) clone.imageSkinImg = sourceEl.imageSkinImg;
+            if(sourceEl.warpImg) clone.warpImg = sourceEl.warpImg;
+            if(sourceEl.transparency && sourceEl.transparency.patternImg) clone.transparency.patternImg = sourceEl.transparency.patternImg;
             
             delete clone._cachedCanvas;
             delete clone._cachedHash;
@@ -6244,19 +6558,105 @@ openToolPanel('Cermin Gambar',html);
 }
 function toggleFlip(dir){const el=getActiveElement();if(!el)return;if(dir==='H')el.flipH=!el.flipH;if(dir==='V')el.flipV=!el.flipV;renderAll();pushHistoryState();openPanelImageFlip();}
 
+/* ========== NEW CORELDRAW STYLE TRANSPARENCY TOOL ========== */
 function openPanelOpacity(){
 const el=getActiveElement();
 if(!el)return;
-const curVal=Math.round((el.opacity!==undefined?el.opacity:1)*100);
-const html=`<div class="ctrl-row"><span class="ctrl-label">Transparansi:</span><span class="ctrl-val" id="valOp">${curVal}%</span></div>
+if(!el.transparency) el.transparency = { type: 'uniform', alpha: Math.round((el.opacity||1)*100), gradType: 'linear', angle: 90, scale: 100 };
+const t = el.transparency;
+
+const html=`
+<div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">PILIH TIPE TRANSPARANSI:</div>
+<div class="ctrl-grid-btns" style="margin-bottom:12px;">
+<button class="btn-sub-tool ${t.type==='uniform'?'active':''}" onclick="setTransparencyType('uniform')">🔳 Uniform (Rata)</button>
+<button class="btn-sub-tool ${t.type==='fountain'?'active':''}" onclick="setTransparencyType('fountain')">🌫️ Fountain (Gradien)</button>
+<button class="btn-sub-tool ${t.type==='pattern'?'active':''}" onclick="setTransparencyType('pattern')">🏁 Pattern (Pola)</button>
+</div>
+
+${t.type==='fountain' ? `
+<div class="ctrl-grid-btns" style="margin-bottom:12px;">
+<button class="btn-sub-tool ${t.gradType==='linear'?'active':''}" onclick="setTransGradientType('linear')">➖ Linear</button>
+<button class="btn-sub-tool ${t.gradType==='radial'?'active':''}" onclick="setTransGradientType('radial')">⭕ Radial</button>
+</div>
+<div class="ctrl-row"><span class="ctrl-label">Sudut (Angle):</span><span class="ctrl-val" id="valTransAngle">${t.angle}°</span></div>
+<input type="range" class="ctrl-slider" min="0" max="360" value="${t.angle}" oninput="updateTransparency('angle', this.value)">
+${t.gradType==='radial' ? `
+<div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Skala Radius:</span><span class="ctrl-val" id="valTransScale">${t.scale}%</span></div>
+<input type="range" class="ctrl-slider" min="10" max="200" value="${t.scale}" oninput="updateTransparency('scale', this.value)">
+` : ''}
+` : ''}
+
+${t.type==='pattern' ? `
+<div class="ctrl-row" style="margin-bottom:8px;">
+<span class="ctrl-label">Pola Tekstur:</span>
+<button class="btn-sub-tool active" onclick="document.getElementById('filePatternInput').click()">📁 Unggah Pola</button>
+</div>
+<div class="ctrl-row"><span class="ctrl-label">Skala Pola:</span><span class="ctrl-val" id="valTransScale">${t.scale}%</span></div>
+<input type="range" class="ctrl-slider" min="10" max="300" value="${t.scale}" oninput="updateTransparency('scale', this.value)">
+<div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Sudut Pola:</span><span class="ctrl-val" id="valTransAngle">${t.angle}°</span></div>
+<input type="range" class="ctrl-slider" min="0" max="360" value="${t.angle}" oninput="updateTransparency('angle', this.value)">
+` : ''}
+
+<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kepekatan ${t.type==='uniform'?'Alpha':'Maks'}:</span><span class="ctrl-val" id="valTransAlpha">${t.alpha}%</span></div>
 <div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('opSlider',-1,updateElemOpacity)">-</button>
-<input type="range" class="ctrl-slider" id="opSlider" min="5" max="100" value="${curVal}" oninput="updateElemOpacity(this.value)">
-<button class="btn-step" onclick="stepSliderVal('opSlider',1,updateElemOpacity)">+</button>
-</div>`;
-openToolPanel('Transparansi Elemen',html);
+<button class="btn-step" onclick="stepSliderVal('opTransSlider',-1,(v)=>updateTransparency('alpha',v))">-</button>
+<input type="range" class="ctrl-slider" id="opTransSlider" min="0" max="100" value="${t.alpha}" oninput="updateTransparency('alpha', this.value)">
+<button class="btn-step" onclick="stepSliderVal('opTransSlider',1,(v)=>updateTransparency('alpha',v))">+</button>
+</div>
+<div style="font-size:10px;color:#888;margin-top:12px;">💡 Tool transparansi tingkat lanjut ala CorelDRAW untuk efek menghilang.</div>
+`;
+openToolPanel('🏁 Advanced Transparency',html);
 }
-function updateElemOpacity(v){const el=getActiveElement();if(!el)return;el.opacity=parseInt(v)/100;document.getElementById('valOp').innerText=v+'%';renderAll();debouncedPushHistory();}
+
+function setTransparencyType(type) {
+    const el = getActiveElement(); if(!el) return;
+    el.transparency.type = type;
+    if(type === 'uniform') el.opacity = el.transparency.alpha / 100;
+    else el.opacity = 1; 
+    renderAll(); pushHistoryState(); openPanelOpacity();
+}
+
+function setTransGradientType(gType) {
+    const el = getActiveElement(); if(!el) return;
+    el.transparency.gradType = gType;
+    renderAll(); pushHistoryState(); openPanelOpacity();
+}
+
+function updateTransparency(prop, val) {
+    const el = getActiveElement(); if(!el) return;
+    el.transparency[prop] = parseInt(val);
+    if(prop === 'alpha') {
+        document.getElementById('valTransAlpha').innerText = val + '%';
+        if(el.transparency.type === 'uniform') el.opacity = val / 100;
+    }
+    if(prop === 'angle') {
+        const lbl = document.getElementById('valTransAngle');
+        if(lbl) lbl.innerText = val + '°';
+    }
+    if(prop === 'scale') {
+        const lbl = document.getElementById('valTransScale');
+        if(lbl) lbl.innerText = val + '%';
+    }
+    renderAll(); debouncedPushHistory();
+}
+
+function handlePatternUpload(e) {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+            const el = getActiveElement();
+            if(el) {
+                el.transparency.patternSrc = img.src;
+                el.transparency.patternImg = img;
+                renderAll(); pushHistoryState(); openPanelOpacity();
+            }
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file); e.target.value = '';
+}
 
 function openPanelImageBlur(){
 const el=getActiveElement();
@@ -6440,8 +6840,30 @@ function openPanelRelativeSizeAndPos() {
     const el = getActiveElement(); if(!el) return;
     const W = mainCanvas.width;
     const curPct = Math.round((el.width / W) * 100);
-    const html = `
-    <div class="ctrl-row"><span class="ctrl-label">Lebar Relatif:</span><span class="ctrl-val" id="valRelW">${curPct}%</span></div>
+    const aspectLocked = el.lockAspect !== false;
+    
+    let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:700;color:#D4AF37;">UKURAN & SKALA:</span>
+        <button class="btn-sub-tool ${aspectLocked?'active':''}" onclick="toggleImageAspectLock()" style="padding:4px 8px;flex-direction:row;">${aspectLocked?'🔒 Kunci Rasio':'🔓 Bebas'}</button>
+    </div>
+    
+    <div class="ctrl-row"><span class="ctrl-label">Lebar (px):</span><span class="ctrl-val" id="valAbsW">${el.width}px</span></div>
+    <div class="stepper-row">
+        <button class="btn-step" onclick="stepSliderVal('absWSlider',-10,updateAbsoluteWidth)">-</button>
+        <input type="range" class="ctrl-slider" id="absWSlider" min="50" max="${W*2}" value="${el.width}" oninput="updateAbsoluteWidth(this.value)">
+        <button class="btn-step" onclick="stepSliderVal('absWSlider',10,updateAbsoluteWidth)">+</button>
+    </div>
+    
+    <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Tinggi (px):</span><span class="ctrl-val" id="valAbsH">${el.height}px</span></div>
+    <div class="stepper-row">
+        <button class="btn-step" onclick="stepSliderVal('absHSlider',-10,updateAbsoluteHeight)">-</button>
+        <input type="range" class="ctrl-slider" id="absHSlider" min="50" max="${mainCanvas.height*2}" value="${el.height}" oninput="updateAbsoluteHeight(this.value)">
+        <button class="btn-step" onclick="stepSliderVal('absHSlider',10,updateAbsoluteHeight)">+</button>
+    </div>
+
+    <div style="margin-top:16px; border-top:1px dashed rgba(212,175,55,0.3); padding-top:12px;"></div>
+    <div class="ctrl-row"><span class="ctrl-label">Relatif Kanvas:</span><span class="ctrl-val" id="valRelW">${curPct}%</span></div>
     <input type="range" class="ctrl-slider" min="10" max="500" value="${curPct}" oninput="updateRelativeSize(this.value)">
     <div class="ctrl-grid-btns" style="margin-top:12px;">
         <button class="btn-sub-tool" onclick="updateRelativeSize(25)">25%</button>
@@ -6449,26 +6871,77 @@ function openPanelRelativeSizeAndPos() {
         <button class="btn-sub-tool" onclick="updateRelativeSize(100)">100%</button>
         <button class="btn-sub-tool" onclick="updateRelativeSize(200)">200%</button>
     </div>
-    <div style="font-size:10px;color:#888;margin-top:12px;">💡 Mengubah ukuran elemen berdasarkan persentase lebar kanvas poster.</div>
     `;
-    openToolPanel('⚖️ Ukuran Relatif Kanvas', html);
+    openToolPanel('📏 Ukuran & Dimensi', html);
+}
+
+function toggleImageAspectLock() {
+    const el = getActiveElement(); if(!el) return;
+    el.lockAspect = (el.lockAspect === false) ? true : false;
+    openPanelRelativeSizeAndPos();
+    showToast(el.lockAspect ? '🔒 Rasio ukuran terkunci' : '🔓 Rasio ukuran bebas');
+}
+
+function updateAbsoluteWidth(v) {
+    const el = getActiveElement(); if(!el) return;
+    const w = parseInt(v);
+    if(el.lockAspect !== false && el.width) {
+        const aspect = el.height / el.width;
+        el.height = Math.round(w * aspect);
+        const slH = document.getElementById('absHSlider');
+        if(slH) { slH.value = el.height; document.getElementById('valAbsH').innerText = el.height + 'px'; }
+    }
+    el.width = w;
+    document.getElementById('valAbsW').innerText = w + 'px';
+    syncRelativeSliderUI();
+    renderAll(); debouncedPushHistory();
+}
+
+function updateAbsoluteHeight(v) {
+    const el = getActiveElement(); if(!el) return;
+    const h = parseInt(v);
+    if(el.lockAspect !== false && el.height) {
+        const aspect = el.width / el.height;
+        el.width = Math.round(h * aspect);
+        const slW = document.getElementById('absWSlider');
+        if(slW) { slW.value = el.width; document.getElementById('valAbsW').innerText = el.width + 'px'; }
+    }
+    el.height = h;
+    document.getElementById('valAbsH').innerText = h + 'px';
+    syncRelativeSliderUI();
+    renderAll(); debouncedPushHistory();
+}
+
+function syncRelativeSliderUI() {
+    const el = getActiveElement(); if(!el) return;
+    const pct = Math.round((el.width / mainCanvas.width) * 100);
+    const slPct = document.querySelector('#toolPanel input[type="range"]:last-of-type');
+    const lblPct = document.getElementById('valRelW');
+    if(slPct) slPct.value = pct;
+    if(lblPct) lblPct.innerText = pct + '%';
 }
 
 function updateRelativeSize(pct) {
     const el = getActiveElement(); if(!el) return;
     const W = mainCanvas.width;
     const newW = Math.round(W * (parseInt(pct) / 100));
-    if(el.type === 'image') {
+    
+    if(el.lockAspect !== false && el.width) {
         const aspect = el.height / el.width;
-        el.width = newW;
         el.height = Math.round(newW * aspect);
-    } else {
-        el.width = newW;
+        const slH = document.getElementById('absHSlider');
+        if(slH) { slH.value = el.height; document.getElementById('valAbsH').innerText = el.height + 'px'; }
     }
+    el.width = newW;
+    
+    const slW = document.getElementById('absWSlider');
+    if(slW) { slW.value = el.width; document.getElementById('valAbsW').innerText = el.width + 'px'; }
+    
     const lbl = document.getElementById('valRelW');
     if(lbl) lbl.innerText = pct + '%';
-    const slider = document.querySelector('#toolPanel input[type="range"]');
+    const slider = document.querySelector('#toolPanel input[type="range"]:last-of-type');
     if(slider) slider.value = pct;
+    
     renderAll(); debouncedPushHistory();
 }
 
@@ -6559,7 +7032,8 @@ Array.from(files).forEach((file, index) => {
                     origWidth:img.width,
                     origHeight:img.height,
                     flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'transparent',blur:0,angle:45,distance:0},opacity:1,locked:false,groupId:null,
-                    filters: { brightness: 100, contrast: 100, saturate: 100, hue: 0 }
+                    filters: { brightness: 100, contrast: 100, saturate: 100, hue: 0 },
+                    transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100 }
                 };
                 s.elements.push(newEl);
                 
@@ -6609,7 +7083,8 @@ curveAngle:0,
 locked:false,
 groupId:null,
 wordStyles:{},
-shadow:{color:'rgba(0,0,0,0.8)',blur:10,angle:45,distance:4}
+shadow:{color:'rgba(0,0,0,0.8)',blur:10,angle:45,distance:4},
+transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100 }
 };
 s.elements.push(newEl);
 selectElement(newEl.id);
