@@ -1,19 +1,17 @@
 <!--
-Berikut adalah kode sumber **Studio Poster Maker Pro (v1.1.1)** yang telah diperbarui secara utuh 100% tanpa ada kode yang dipotong, disingkat, atau diabaikan sesuai dengan protokol "Zero Regression".
+Berikut adalah kode sumber **Studio Poster Maker Pro (v1.1.2)** yang telah diperbarui secara utuh 100% sesuai dengan protokol "Zero Regression".
 
-### **Rangkuman Perbaikan (v1.1.1):**
-1. **Smart Magnetic Alignment & Jarak Sejajar (Canva-style Neon):**
-   - Efek garis tata letak kini memiliki visualisasi "Neon" (glow) oranye terang.
-   - Perbaikan logika sejajar (snapping): Kini mendeteksi sisi kiri, kanan, atas, bawah, dan tengah secara presisi dan menarik garis hanya di antara batas elemen yang bersentuhan.
-   - **Fitur Jarak Sejajar (Equidistant Snapping):** Otomatis mendeteksi celah/jarak antar elemen. Jika jaraknya sama, elemen akan terkunci magnetik dan memunculkan indikator panah pengukur jarak ala Canva.
-2. **Perbaikan Text 3D (Perspektif & Envelope):**
-   - Teks yang telah di-warp 3D sekarang BISA diatur tingginya (slider "Tinggi 3D" akan muncul di menu Ukuran Teks).
-   - Penyesuaian Cahaya (Brightness, Contrast, dll) dan Inner Shadow kini BISA diterapkan langsung ke teks 3D.
-3. **Penghapusan Fitur Emboss 3D:**
-   - Sesuai instruksi, opsi Emboss 3D telah dihapus sepenuhnya dari tool Bayangan (untuk foto maupun teks) guna menyederhanakan UI dan meningkatkan performa rendering.
-4. **Perbaikan Transparansi Pola (Pattern) & Invert:**
-   - Bug di mana pola (pattern) hilang saat diatur skala/sudutnya telah diatasi.
-   - Fungsi **Invert** pada transparansi kini bekerja secara sempurna (memilih apakah pola melubangi elemen dari dalam atau memotong dari luar) tanpa menimbulkan bug on/off blur.
+### **Rangkuman Perbaikan & Fitur Baru (v1.1.2):**
+1. **Smart Magnetic Alignment (Neon Canva-style) & Jarak Sejajar:**
+   - Garis panduan tata letak kini berwarna ungu neon menyala.
+   - Penambahan deteksi **Jarak Sejajar (Equidistant)** yang mendeteksi dan mengukur jarak secara presisi antar elemen dengan indikator angka dan panah ala Canva.
+2. **Spectrum Color Picker Lanjutan (Affinity Designer Style):**
+   - Panel warna kini menggunakan modal Spectrum khusus yang menyediakan kontrol interaktif (Kanvas SV, Slider Hue, dan Slider Alpha/Transparansi).
+   - Penambahan mode Fountain Fill multi-warna (Linear, Radial, Conical, Square) yang bisa ditambah/dikurangi jumlah warnanya di menu Background.
+3. **Perbaikan Tombol Install / Download Aplikasi:**
+   - Logika PWA `deferredPrompt` diperbarui agar lebih responsif dan menampilkan pesan jika aplikasi sudah terinstal, mencegah bug macet.
+4. **Penghapusan Pattern Transparansi:**
+   - Fitur Pattern pada Transparansi telah dihapus sepenuhnya sesuai permintaan untuk mencegah bug, dan fokus pada mode Uniform & Fountain (Gradien).
 -->
 <!DOCTYPE html>
 <html lang="id">
@@ -68,8 +66,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .guide-line-h{position:absolute;left:0;right:0;height:1px;border-top:1px dashed rgba(212,175,55,.6);}
 .guide-line-v{position:absolute;top:0;bottom:0;width:1px;border-left:1px dashed rgba(212,175,55,.6);}
 .snap-guide{position:absolute;pointer-events:none;display:none;z-index:92;}
-.snap-guide-h{left:0;right:0;height:1.5px;background:#FF9800;box-shadow:0 0 10px #FF9800, 0 0 20px #FFC107;}
-.snap-guide-v{top:0;bottom:0;width:1.5px;background:#FF9800;box-shadow:0 0 10px #FF9800, 0 0 20px #FFC107;}
+.snap-guide-h{left:0;right:0;height:1.5px;background:#b026ff;box-shadow:0 0 10px #b026ff, 0 0 20px #d400ff;}
+.snap-guide-v{top:0;bottom:0;width:1.5px;background:#b026ff;box-shadow:0 0 10px #b026ff, 0 0 20px #d400ff;}
 
 .selection-box {
     position: absolute; border: 1px dashed #D4AF37; pointer-events: none;
@@ -298,6 +296,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     gap: 6px;
     animation: pulseSync 2s infinite;
 }
+
+/* Custom Color Picker SV Canvas Cursor */
+#svCanvas { touch-action: none; }
+#hueCanvas { touch-action: none; }
+#alphaCanvas { touch-action: none; }
 </style>
 </head>
 <body>
@@ -316,7 +319,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" onclick="toggleRatioSelector()">📏 <span id="currentRatioLabel">4:5</span></button>
 <button class="btn-nav" onclick="openPanelBleed()">📐 Garis Bantu</button>
 <button class="btn-nav" onclick="shareSite()" style="border-color:#00e5ff;color:#00e5ff;">📤 Share Situs</button>
-<button class="btn-nav" onclick="showPwaPromptIfAvailable()" style="border-color:#00ff88;color:#00ff88;">📲 Unduh Aplikasi</button>
+<button class="btn-nav" onclick="installPWA()" style="border-color:#00ff88;color:#00ff88;">📲 Unduh Aplikasi</button>
 <button class="btn-nav btn-download" onclick="openDownloadModal()">⬇️ Download</button>
 </div>
 </header>
@@ -403,7 +406,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <option value="marker">Spidol (Transparan)</option>
         <option value="eraser">Penghapus (Tipe-X)</option>
     </select>
-    <input type="color" id="penColor" value="#D4AF37" style="width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;" onchange="updatePenSettings()">
+    <button class="btn-sub-tool" style="width:30px;height:30px;padding:0;background:#D4AF37;" id="penColorBtn" onclick="openCustomColorPicker(document.getElementById('penColorHidden').value, 'updatePenColor')"></button>
+    <input type="hidden" id="penColorHidden" value="#D4AF37">
     <input type="range" id="penSize" min="2" max="100" value="10" style="width:80px;accent-color:#D4AF37;" oninput="updatePenSettings()">
     <button class="btn-nav" onclick="clearPenCanvas()">🗑️ Bersihkan</button>
     <button class="btn-nav btn-download" onclick="finishPenDrawing()">✅ Selesai</button>
@@ -415,7 +419,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <input type="file" id="fileBgInput" accept="image/*" style="display:none;" onchange="handleBgUpload(event)">
 <input type="file" id="fileProjectInput" accept=".poster,.json" multiple style="display:none;" onchange="handleProjectImport(event)">
 <input type="file" id="fileFontInput" accept=".ttf,.otf,.woff,.woff2" style="display:none;" onchange="handleFontUpload(event)">
-<input type="file" id="filePatternInput" accept="image/*" style="display:none;" onchange="handlePatternUpload(event)">
 
 <div class="handled-loupe-container" id="handledLoupe">
 <div class="handled-loupe-glass">
@@ -428,6 +431,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav active" style="height:24px;padding:0 8px;font-size:10px;" onclick="confirmSampledColor()">Pilih</button>
 <button class="btn-nav" style="height:24px;padding:0 8px;font-size:10px;color:#ff6b6b;" onclick="closeHandledLoupe()">✕</button>
 </div>
+</div>
+
+<!-- Modal Custom Color Picker (Spectrum) -->
+<div class="feature-modal" id="customColorPickerModal" style="z-index:999999;">
+    <div class="fmodal-header">
+        <div style="font-weight:800;color:#D4AF37;font-size:13px;">Spectrum Warna HSL</div>
+        <button class="panel-close" onclick="closeCustomColorPicker()">✕</button>
+    </div>
+    <div class="fmodal-body" style="flex-direction:column; padding:16px; background:#181818; justify-content:center;">
+        <canvas id="svCanvas" width="250" height="250" style="border-radius:4px; box-shadow:0 0 10px rgba(0,0,0,0.5);"></canvas>
+        <canvas id="hueCanvas" width="250" height="24" style="border-radius:12px; margin-top:16px; box-shadow:0 0 10px rgba(0,0,0,0.5);"></canvas>
+        <canvas id="alphaCanvas" width="250" height="24" style="border-radius:12px; margin-top:16px; box-shadow:0 0 10px rgba(0,0,0,0.5); background-image:linear-gradient(45deg, #333 25%, transparent 25%), linear-gradient(-45deg, #333 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #333 75%), linear-gradient(-45deg, transparent 75%, #333 75%); background-size:10px 10px; background-position:0 0, 0 5px, 5px -5px, -5px 0px;"></canvas>
+        
+        <div style="display:flex; align-items:center; gap:10px; margin-top:20px; width:250px;">
+            <div id="cpPreview" style="width:40px; height:40px; border-radius:8px; border:2px solid #D4AF37;"></div>
+            <input type="text" id="cpHexInput" style="flex:1; background:#111; color:#fff; border:1px solid #555; padding:10px; border-radius:8px; font-family:monospace; font-size:14px; text-transform:uppercase;" onchange="updateCPFromHex(this.value)">
+            <button class="btn-sub-tool" onclick="applyCustomColor()" style="background:#D4AF37; color:#000; font-weight:bold; padding:10px 20px;">PILIH</button>
+        </div>
+    </div>
 </div>
 
 <div class="project-modal" id="projectModal">
@@ -823,7 +845,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.1.1'; 
+const APP_VERSION = 'v1.1.2'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -1140,7 +1162,6 @@ function rawSerializeSlides(slidesList){
             }
             if(el.textSkinImg){copy.textSkinSrc=el.textSkinSrc||el.textSkinImg.src;delete copy.textSkinImg;}
             if(el.imageSkinImg){copy.imageSkinSrc=el.imageSkinSrc||el.imageSkinImg.src;delete copy.imageSkinImg;}
-            if(el.transparency && el.transparency.patternImg) { copy.transparency.patternSrc = el.transparency.patternImg.src; delete copy.transparency.patternImg; }
             delete copy._cachedCanvas;
             delete copy._cachedHash;
             delete copy._cachedOffsetX;
@@ -1163,9 +1184,16 @@ function serializeSlides(slidesList){
 function deserializeSlides(rawSlides){
 return rawSlides.map(s=>{
 const bgSrc=s.background.imgSrc||(s.background.img&&s.background.img.src);
+let parsedBg = {...s.background, imgSrc:bgSrc, img:bgSrc?getImageFromCache(bgSrc):null};
+if(!parsedBg.bgType) {
+    if(parsedBg.img || parsedBg.imgSrc) parsedBg.bgType = 'image';
+    else parsedBg.bgType = 'fountain';
+    parsedBg.gradType = parsedBg.gradType || 'radial';
+    parsedBg.colorStops = parsedBg.colorStops || [{pos:0, color: parsedBg.color1||'#241a14'}, {pos:100, color: parsedBg.color2||'#090807'}];
+}
 return{
 ...s,
-background:{...s.background,imgSrc:bgSrc,img:bgSrc?getImageFromCache(bgSrc):null},
+background:parsedBg,
 elements:s.elements.map(el=>{
 const copy={...el};
 if(copy.type==='image'){
@@ -1180,12 +1208,11 @@ if(copy.cropB===undefined)copy.cropB=0;
 if(copy.warpSrc) { copy.warpImg = getImageFromCache(copy.warpSrc); }
 if(copy.textSkinSrc){copy.textSkinImg=getImageFromCache(copy.textSkinSrc);}
 if(copy.imageSkinSrc){copy.imageSkinImg=getImageFromCache(copy.imageSkinSrc);}
-if(copy.transparency && copy.transparency.patternSrc) { copy.transparency.patternImg = getImageFromCache(copy.transparency.patternSrc); }
 if(!copy.wordStyles) copy.wordStyles = {};
 if(!copy.filters) copy.filters = { brightness: 100, contrast: 100, saturate: 100, hue: 0 };
 if(!copy.advancedColor) copy.advancedColor = { active: false, intensity: 100, highlights: 0, shadows: 0, midtones: 0, channel: 'master', channels: {} };
-if(!copy.transparency) copy.transparency = { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false };
-if(copy.emboss) delete copy.emboss; // Menghapus fitur emboss dari data lama jika ada
+if(!copy.transparency) copy.transparency = { type: 'uniform', alpha: Math.round((copy.opacity||1)*100), gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false };
+if(copy.emboss) delete copy.emboss; 
 return copy;
 })
 };
@@ -1194,7 +1221,7 @@ return copy;
 
 function createDefaultSlide(){
 return{
-background:{type:'gradient',color1:'#241a14',color2:'#0d0a08',img:null,blur:0,darken:0.3,scale:1.0,offsetX:0,offsetY:0},
+background:{bgType:'fountain', gradType:'radial', angle:90, scale:100, offsetX:0, offsetY:0, colorStops:[{pos:0, color:'#241a14'}, {pos:100, color:'#0d0a08'}], color1:'#241a14', color2:'#0d0a08', img:null, blur:0, darken:0.3},
 elements:[
 {id:'el_'+Date.now()+'_1',type:'text',text:'Teman Sejati',x:540,y:310,width:700,fontFamily:"Fredoka, sans-serif",fontSize:68,fontWeight:'700',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'none',color:'#D4AF37',lineHeight:1.2,letterSpacing:0,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.8)',blur:10,angle:45,distance:4,alpha:0.8}, transparency:{type:'uniform',alpha:100,gradType:'linear',angle:90,scale:100,offsetX:0,offsetY:0,invert:false}},
 {id:'el_'+Date.now()+'_2',type:'text',text:'HANYALAH\nAMAL',x:540,y:470,width:860,fontFamily:"Anton, sans-serif",fontSize:100,fontWeight:'900',fontStyle:'normal',textDecoration:'none',textAlign:'center',textTransform:'uppercase',color:'#FFFFFF',lineHeight:1.05,letterSpacing:2,highlightColor:'transparent',highlightAlpha:0.5,opacity:1,rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},filters:{brightness:100,contrast:100,saturate:100,hue:0},shadow:{color:'rgba(0,0,0,0.95)',blur:20,angle:45,distance:6,alpha:0.95}, transparency:{type:'uniform',alpha:100,gradType:'linear',angle:90,scale:100,offsetX:0,offsetY:0,invert:false}},
@@ -1307,6 +1334,7 @@ function shareSite() {
 
 async function initApp(){
 checkAppVersion();
+initColorPicker();
 
 try { await initDB(); } catch(e) { console.warn("IndexedDB gagal", e); }
 await loadFromStorage();
@@ -1580,11 +1608,10 @@ function applyCanvasFilters(ctx, filters, blurAmount = 0) {
 function getColorPickerHTML(currentValue, onChangeFuncName, allowTransparent = true) {
     let html = `
     <div class="ctrl-row">
-        <span class="ctrl-label">Kode Hex:</span>
-        <input type="text" value="${currentValue}" onchange="${onChangeFuncName}(this.value)" id="hexInput_${onChangeFuncName}" style="width:70px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:2px 4px; font-size:11px;">
-        <button class="btn-sub-tool" onclick="navigator.clipboard.writeText(document.getElementById('hexInput_${onChangeFuncName}').value).then(()=>showToast('Disalin!'))" style="padding:4px;">📋 Copy</button>
-        <button class="btn-sub-tool" onclick="navigator.clipboard.readText().then(t=>${onChangeFuncName}(t))" style="padding:4px;">📋 Paste</button>
-        <button class="btn-sub-tool active" onclick="openHandledLoupe(${onChangeFuncName})" style="padding:4px;">🧪 Pipet</button>
+        <span class="ctrl-label">Warna:</span>
+        <button class="btn-sub-tool" style="width:40px;height:30px;background:${currentValue};border:1px solid #fff;border-radius:4px;padding:0;" onclick="openCustomColorPicker('${currentValue}', '${onChangeFuncName}')"></button>
+        <input type="text" value="${currentValue}" onchange="${onChangeFuncName}(this.value)" id="hexInput_${onChangeFuncName}" style="width:75px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:4px; font-size:11px; text-transform:uppercase;">
+        <button class="btn-sub-tool active" onclick="openHandledLoupe(${onChangeFuncName})" style="padding:4px 8px;">🧪 Pipet</button>
     </div>
     <div class="color-palette-scroll" style="margin-top:8px;">
     `;
@@ -1684,7 +1711,9 @@ const html=`
 <input type="range" class="ctrl-slider" id="bleedSlider" min="2" max="15" value="${bleedSettings.margin}" oninput="updateBleedMargin(this.value)">
 <button class="btn-step" onclick="stepSliderVal('bleedSlider',1,updateBleedMargin)">+</button>
 </div>
-<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Warna Garis:</span><input type="color" value="${bleedSettings.color}" onchange="updateBleedColor(this.value)"></div>
+<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Warna Garis:</span>
+<button class="btn-sub-tool" style="width:40px;height:30px;background:${bleedSettings.color};border:1px solid #fff;border-radius:4px;padding:0;" onclick="openCustomColorPicker('${bleedSettings.color}', 'updateBleedColor')"></button>
+</div>
 `;
 openToolPanel('Garis Bantu & Panduan',html);
 }
@@ -1727,62 +1756,135 @@ document.getElementById('bleedLineRight').style.right=`${val}%`;
 function updateBleedColor(c){
     bleedSettings.color=c;
     applyGuideVisuals();
+    openPanelBleed();
 }
 
 function openPanelBackground(){
 const s=getCurrentSlide();
 const bg=s.background;
-const hasImg=!!(bg.img||bg.imgSrc);
-const html=`
-<div class="ctrl-row"><span class="ctrl-label">Gambar Latar:</span><button class="btn-sub-tool active" onclick="document.getElementById('fileBgInput').click()">📁 Unggah</button></div>
-${hasImg?`
-<div style="margin-top:10px;padding:8px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
-<span style="font-size:11px;color:#4CAF50;">✅ Foto Aktif</span>
-<button class="btn-sub-tool" onclick="removeBgImage()" style="color:#ff6b6b;">🗑️ Hapus</button>
+const isImg=(bg.bgType==='image' && !!(bg.img||bg.imgSrc));
+
+let html = `
+<div class="ctrl-grid-btns" style="margin-bottom:12px;">
+    <button class="btn-sub-tool ${bg.bgType==='solid'?'active':''}" onclick="setBgType('solid')">⬛ Solid</button>
+    <button class="btn-sub-tool ${bg.bgType==='fountain'?'active':''}" onclick="setBgType('fountain')">🌫️ Gradien</button>
+    <button class="btn-sub-tool ${bg.bgType==='image'?'active':''}" onclick="setBgType('image')">🖼️ Foto</button>
 </div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Zoom:</span><span class="ctrl-val" id="bgScaleVal">${Math.round((bg.scale||1)*100)}%</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgScaleSlider',-1,(v)=>updateBgPosition('scale',v))">-</button>
-<input type="range" class="ctrl-slider" id="bgScaleSlider" min="100" max="500" value="${Math.round((bg.scale||1)*100)}" oninput="updateBgPosition('scale',this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgScaleSlider',1,(v)=>updateBgPosition('scale',v))">+</button>
-</div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="bgOffXVal">${bg.offsetX||0}px</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgOffXSlider',-1,(v)=>updateBgPosition('offsetX',v))">-</button>
-<input type="range" class="ctrl-slider" id="bgOffXSlider" min="-1500" max="1500" value="${bg.offsetX||0}" oninput="updateBgPosition('offsetX',this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgOffXSlider',1,(v)=>updateBgPosition('offsetX',v))">+</button>
-</div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="bgOffYVal">${bg.offsetY||0}px</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgOffYSlider',-1,(v)=>updateBgPosition('offsetY',v))">-</button>
-<input type="range" class="ctrl-slider" id="bgOffYSlider" min="-1500" max="1500" value="${bg.offsetY||0}" oninput="updateBgPosition('offsetY',this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgOffYSlider',1,(v)=>updateBgPosition('offsetY',v))">+</button>
-</div>
-<div class="ctrl-row" style="margin-top:14px;"><span class="ctrl-label">Kegelapan:</span><span class="ctrl-val" id="bgDarkenVal">${Math.round((bg.darken||0)*100)}%</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',-1,updateBgDarken)">-</button>
-<input type="range" class="ctrl-slider" id="bgDarkenSlider" min="0" max="95" value="${Math.round((bg.darken||0)*100)}" oninput="updateBgDarken(this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',1,updateBgDarken)">+</button>
-</div>
-<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Blur:</span><span class="ctrl-val" id="bgBlurVal">${bg.blur||0}px</span></div>
-<div class="stepper-row">
-<button class="btn-step" onclick="stepSliderVal('bgBlurSlider',-1,updateBgBlur)">-</button>
-<input type="range" class="ctrl-slider" id="bgBlurSlider" min="0" max="30" value="${bg.blur||0}" oninput="updateBgBlur(this.value)">
-<button class="btn-step" onclick="stepSliderVal('bgBlurSlider',1,updateBgBlur)">+</button>
-</div>
-`:`
-<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Warna Pusat:</span><input type="color" value="${bg.color1||'#251c16'}" onchange="updateBgColor('color1',this.value)"></div>
-<div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Warna Tepi:</span><input type="color" value="${bg.color2||'#090807'}" onchange="updateBgColor('color2',this.value)"></div>
-<div class="ctrl-grid-btns" style="margin-top:10px;">
-<button class="btn-sub-tool" onclick="setBgPreset('#241a14','#0d0a08')">☕ Kopi</button>
-<button class="btn-sub-tool" onclick="setBgPreset('#0f172a','#020617')">🌌 Navy</button>
-<button class="btn-sub-tool" onclick="setBgPreset('#064e3b','#022c22')">🌲 Zamrud</button>
-<button class="btn-sub-tool" onclick="setBgPreset('#450a0a','#180303')">🍷 Maroon</button>
-</div>
-`}
 `;
+
+if(bg.bgType === 'image') {
+    html += `
+    <div class="ctrl-row"><span class="ctrl-label">Gambar Latar:</span><button class="btn-sub-tool active" onclick="document.getElementById('fileBgInput').click()">📁 Unggah</button></div>
+    ${isImg ? `
+    <div style="margin-top:10px;padding:8px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:11px;color:#4CAF50;">✅ Foto Aktif</span>
+    <button class="btn-sub-tool" onclick="removeBgImage()" style="color:#ff6b6b;">🗑️ Hapus</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Zoom:</span><span class="ctrl-val" id="bgScaleVal">${Math.round((bg.scale||1)*100)}%</span></div>
+    <div class="stepper-row">
+    <button class="btn-step" onclick="stepSliderVal('bgScaleSlider',-1,(v)=>updateBgPosition('scale',v))">-</button>
+    <input type="range" class="ctrl-slider" id="bgScaleSlider" min="100" max="500" value="${Math.round((bg.scale||1)*100)}" oninput="updateBgPosition('scale',this.value)">
+    <button class="btn-step" onclick="stepSliderVal('bgScaleSlider',1,(v)=>updateBgPosition('scale',v))">+</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="bgOffXVal">${bg.offsetX||0}px</span></div>
+    <div class="stepper-row">
+    <button class="btn-step" onclick="stepSliderVal('bgOffXSlider',-1,(v)=>updateBgPosition('offsetX',v))">-</button>
+    <input type="range" class="ctrl-slider" id="bgOffXSlider" min="-1500" max="1500" value="${bg.offsetX||0}" oninput="updateBgPosition('offsetX',this.value)">
+    <button class="btn-step" onclick="stepSliderVal('bgOffXSlider',1,(v)=>updateBgPosition('offsetX',v))">+</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="bgOffYVal">${bg.offsetY||0}px</span></div>
+    <div class="stepper-row">
+    <button class="btn-step" onclick="stepSliderVal('bgOffYSlider',-1,(v)=>updateBgPosition('offsetY',v))">-</button>
+    <input type="range" class="ctrl-slider" id="bgOffYSlider" min="-1500" max="1500" value="${bg.offsetY||0}" oninput="updateBgPosition('offsetY',this.value)">
+    <button class="btn-step" onclick="stepSliderVal('bgOffYSlider',1,(v)=>updateBgPosition('offsetY',v))">+</button>
+    </div>
+    ` : ''}
+    <div class="ctrl-row" style="margin-top:14px;"><span class="ctrl-label">Kegelapan:</span><span class="ctrl-val" id="bgDarkenVal">${Math.round((bg.darken||0)*100)}%</span></div>
+    <div class="stepper-row">
+    <button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',-1,updateBgDarken)">-</button>
+    <input type="range" class="ctrl-slider" id="bgDarkenSlider" min="0" max="95" value="${Math.round((bg.darken||0)*100)}" oninput="updateBgDarken(this.value)">
+    <button class="btn-step" onclick="stepSliderVal('bgDarkenSlider',1,updateBgDarken)">+</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Blur:</span><span class="ctrl-val" id="bgBlurVal">${bg.blur||0}px</span></div>
+    <div class="stepper-row">
+    <button class="btn-step" onclick="stepSliderVal('bgBlurSlider',-1,updateBgBlur)">-</button>
+    <input type="range" class="ctrl-slider" id="bgBlurSlider" min="0" max="30" value="${bg.blur||0}" oninput="updateBgBlur(this.value)">
+    <button class="btn-step" onclick="stepSliderVal('bgBlurSlider',1,updateBgBlur)">+</button>
+    </div>
+    `;
+} else if (bg.bgType === 'solid') {
+    html += `
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">WARNA SOLID:</div>
+    ${getColorPickerHTML(bg.color1||'#141414', 'updateBgColor1', false)}
+    `;
+} else { // Fountain
+    html += `
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">TIPE FOUNTAIN FILL:</div>
+    <div class="ctrl-grid-btns" style="margin-bottom:12px;">
+        <button class="btn-sub-tool ${bg.gradType==='linear'?'active':''}" onclick="setBgGradType('linear')">➖ Linear</button>
+        <button class="btn-sub-tool ${bg.gradType==='radial'?'active':''}" onclick="setBgGradType('radial')">⭕ Radial</button>
+        <button class="btn-sub-tool ${bg.gradType==='conical'?'active':''}" onclick="setBgGradType('conical')">🌀 Conical</button>
+        <button class="btn-sub-tool ${bg.gradType==='square'?'active':''}" onclick="setBgGradType('square')">⏹️ Square</button>
+    </div>
+    <div class="ctrl-row"><span class="ctrl-label">Sudut:</span><span class="ctrl-val" id="valBgAngle">${bg.angle||90}°</span></div>
+    <input type="range" class="ctrl-slider" min="0" max="360" value="${bg.angle||90}" oninput="updateBgProp('angle', this.value)">
+    ${(bg.gradType==='radial' || bg.gradType==='conical' || bg.gradType==='square') ? `
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Skala:</span><span class="ctrl-val" id="valBgScale">${bg.scale||100}%</span></div>
+    <input type="range" class="ctrl-slider" min="10" max="300" value="${bg.scale||100}" oninput="updateBgProp('scale', this.value)">
+    ` : ''}
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="valBgOffX">${bg.offsetX||0}px</span></div>
+    <input type="range" class="ctrl-slider" min="-1000" max="1000" value="${bg.offsetX||0}" oninput="updateBgProp('offsetX', this.value)">
+    <div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="valBgOffY">${bg.offsetY||0}px</span></div>
+    <input type="range" class="ctrl-slider" min="-1000" max="1000" value="${bg.offsetY||0}" oninput="updateBgProp('offsetY', this.value)">
+    
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin:16px 0 8px;">MULTI WARNA GRADIEN:</div>
+    <div id="bgGradientStopsContainer" style="display:flex; flex-direction:column; gap:8px;">
+    `;
+    
+    bg.colorStops.forEach((st, idx) => {
+        html += `
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:6px; border-radius:6px;">
+            <button class="btn-sub-tool" style="width:30px;height:30px;background:${st.color};border:1px solid #fff;border-radius:4px;padding:0;flex-shrink:0;" onclick="openCustomColorPicker('${st.color}', 'updateBgGradientStopColor_${idx}')"></button>
+            <div style="flex:1;">
+                <div class="ctrl-row"><span class="ctrl-label" style="min-width:auto;">Posisi:</span><span class="ctrl-val" style="min-width:auto;">${st.pos}%</span></div>
+                <input type="range" class="ctrl-slider" min="0" max="100" value="${st.pos}" oninput="updateBgGradientStopPos(${idx}, this.value)">
+            </div>
+            ${bg.colorStops.length > 2 ? `<button class="btn-nav" style="color:#ff6b6b; border-color:#ff6b6b; width:28px; padding:0; justify-content:center; flex-shrink:0;" onclick="removeBgGradientStop(${idx})">✕</button>` : ''}
+        </div>
+        `;
+        window[`updateBgGradientStopColor_${idx}`] = function(color) {
+            updateBgGradientStopColor(idx, color);
+        };
+    });
+    
+    html += `
+    </div>
+    <button class="btn-sub-tool active" style="width:100%; margin-top:8px;" onclick="addBgGradientStop()">➕ Tambah Warna</button>
+    <div class="ctrl-grid-btns" style="margin-top:12px;">
+        <button class="btn-sub-tool" onclick="setBgPreset('#241a14','#0d0a08')">☕ Kopi</button>
+        <button class="btn-sub-tool" onclick="setBgPreset('#0f172a','#020617')">🌌 Navy</button>
+        <button class="btn-sub-tool" onclick="setBgPreset('#064e3b','#022c22')">🌲 Zamrud</button>
+        <button class="btn-sub-tool" onclick="setBgPreset('#450a0a','#180303')">🍷 Maroon</button>
+    </div>
+    `;
+}
+
 openToolPanel('Background Poster',html);
 }
+
+function setBgType(type) { const s = getCurrentSlide(); s.background.bgType = type; renderAll(); pushHistoryState(); openPanelBackground(); }
+function setBgGradType(type) { const s = getCurrentSlide(); s.background.gradType = type; renderAll(); pushHistoryState(); openPanelBackground(); }
+function updateBgProp(prop, val) { 
+    const s = getCurrentSlide(); s.background[prop] = parseInt(val); 
+    const lbl = document.getElementById('valBg' + prop.charAt(0).toUpperCase() + prop.slice(1));
+    if(lbl) { lbl.innerText = val + (prop==='angle'?'°':(prop==='scale'?'%':'px')); }
+    renderAll(); debouncedPushHistory(); 
+}
+function updateBgColor1(c) { const s = getCurrentSlide(); s.background.color1 = c; renderAll(); pushHistoryState(); openPanelBackground(); }
+function updateBgGradientStopColor(idx, color) { const s = getCurrentSlide(); s.background.colorStops[idx].color = color; renderAll(); pushHistoryState(); openPanelBackground(); }
+function updateBgGradientStopPos(idx, pos) { const s = getCurrentSlide(); s.background.colorStops[idx].pos = parseInt(pos); renderAll(); debouncedPushHistory(); openPanelBackground(); }
+function addBgGradientStop() { const s = getCurrentSlide(); s.background.colorStops.push({pos:50, color:'#ffffff'}); s.background.colorStops.sort((a,b)=>a.pos-b.pos); renderAll(); pushHistoryState(); openPanelBackground(); }
+function removeBgGradientStop(idx) { const s = getCurrentSlide(); s.background.colorStops.splice(idx, 1); renderAll(); pushHistoryState(); openPanelBackground(); }
 
 function updateBgPosition(prop,val){
 const s=getCurrentSlide();
@@ -1795,8 +1897,7 @@ debouncedPushHistory();
 }
 function updateBgDarken(val){const s=getCurrentSlide();s.background.darken=parseInt(val)/100;document.getElementById('bgDarkenVal').innerText=`${val}%`;requestRender();debouncedPushHistory();}
 function updateBgBlur(val){const s=getCurrentSlide();s.background.blur=parseInt(val);document.getElementById('bgBlurVal').innerText=`${val}px`;requestRender();debouncedPushHistory();}
-function updateBgColor(prop,val){const s=getCurrentSlide();s.background[prop]=val;requestRender();pushHistoryState();}
-function setBgPreset(c1,c2){const s=getCurrentSlide();s.background.color1=c1;s.background.color2=c2;requestRender();pushHistoryState();openPanelBackground();}
+function setBgPreset(c1,c2){const s=getCurrentSlide();s.background.colorStops=[{pos:0,color:c1},{pos:100,color:c2}];requestRender();pushHistoryState();openPanelBackground();}
 
 let dzikirClickCount = 0;
 let dzikirCount = 0;
@@ -1811,6 +1912,7 @@ const reader=new FileReader();
 reader.onload=(evt)=>{
     compressImageFile(evt.target.result, (compressedSrc) => {
         const s=getCurrentSlide();
+        s.background.bgType='image';
         s.background.imgSrc=compressedSrc;
         s.background.img=getImageFromCache(compressedSrc);
         s.background.scale=1.0;
@@ -1826,6 +1928,7 @@ e.target.value='';
 }
 function removeBgImage(){
 const s=getCurrentSlide();
+s.background.bgType='fountain';
 s.background.img=null;
 s.background.imgSrc=null;
 requestRender();
@@ -1948,6 +2051,63 @@ function getElHash(el) {
     }
 }
 
+function parseColorToRGBAObj(color) {
+    let r=0, g=0, b=0, a=1;
+    if (color.startsWith('#')) {
+        let hex = color.slice(1);
+        if (hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+        if (hex.length >= 6) {
+            r = parseInt(hex.slice(0,2), 16);
+            g = parseInt(hex.slice(2,4), 16);
+            b = parseInt(hex.slice(4,6), 16);
+        }
+        if (hex.length === 8) {
+            a = parseInt(hex.slice(6,8), 16) / 255;
+        }
+    } else if (color.startsWith('rgb')) {
+        const parts = color.match(/[\d.]+/g);
+        if (parts && parts.length >= 3) {
+            r = parseInt(parts[0]); g = parseInt(parts[1]); b = parseInt(parts[2]);
+            if (parts.length >= 4) a = parseFloat(parts[3]);
+        }
+    } else if (color.startsWith('hsl')) {
+        const parts = color.match(/[\d.]+/g);
+        if (parts && parts.length >= 3) {
+            const h = parseFloat(parts[0])/360;
+            const s = parseFloat(parts[1])/100;
+            const l = parseFloat(parts[2])/100;
+            if (parts.length >= 4) a = parseFloat(parts[3]);
+            const rgb = hslToRgb(h,s,l);
+            r = rgb[0]; g = rgb[1]; b = rgb[2];
+        }
+    }
+    return {r, g, b, a};
+}
+
+function blendColors(c1, c2, ratio) {
+    const p1 = parseColorToRGBAObj(c1);
+    const p2 = parseColorToRGBAObj(c2);
+    const r = Math.round(p1.r + (p2.r - p1.r)*ratio);
+    const g = Math.round(p1.g + (p2.g - p1.g)*ratio);
+    const b = Math.round(p1.b + (p2.b - p1.b)*ratio);
+    const a = p1.a + (p2.a - p1.a)*ratio;
+    return `rgba(${r},${g},${b},${a})`;
+}
+
+function getInterpolatedColor(stops, pct) {
+    let s = [...stops].sort((a,b) => a.pos - b.pos);
+    if(pct <= s[0].pos) return s[0].color;
+    if(pct >= s[s.length-1].pos) return s[s.length-1].color;
+    for(let i=0; i<s.length-1; i++) {
+        if(pct >= s[i].pos && pct <= s[i+1].pos) {
+            let range = s[i+1].pos - s[i].pos;
+            let localPct = (pct - s[i].pos) / range;
+            return blendColors(s[i].color, s[i+1].color, localPct);
+        }
+    }
+    return s[0].color;
+}
+
 function renderAll(){
 const s=getCurrentSlide();
 if(!s)return;
@@ -1975,8 +2135,20 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
     const mctx = mask.getContext('2d');
     
     const alpha = (t.alpha !== undefined ? t.alpha : 100) / 100;
-    const c0 = t.invert ? 'rgba(0,0,0,0)' : `rgba(0,0,0,${alpha})`;
-    const c1 = t.invert ? `rgba(0,0,0,${alpha})` : 'rgba(0,0,0,0)';
+    
+    const stops = t.colorStops || [{pos:0, color:'rgba(0,0,0,1)'}, {pos:100, color:'rgba(0,0,0,0)'}];
+    let finalStops = stops.map(st => {
+        let aVal = parseColorToRGBAObj(st.color).a * alpha;
+        if(t.invert) aVal = alpha - aVal;
+        return {pos: st.pos, color: `rgba(0,0,0,${aVal})`};
+    });
+    
+    if(!t.colorStops) {
+        finalStops = [
+            {pos: 0, color: t.invert ? 'rgba(0,0,0,0)' : `rgba(0,0,0,${alpha})`},
+            {pos: 100, color: t.invert ? `rgba(0,0,0,${alpha})` : 'rgba(0,0,0,0)'}
+        ];
+    }
     
     mctx.save();
     mctx.translate(w/2 + (t.offsetX || 0), h/2 + (t.offsetY || 0));
@@ -1991,29 +2163,25 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
             const x1 = Math.cos(rad) * diag;
             const y1 = Math.sin(rad) * diag;
             const grad = mctx.createLinearGradient(x0, y0, x1, y1);
-            grad.addColorStop(0, c0);
-            grad.addColorStop(1, c1);
+            finalStops.forEach(st => grad.addColorStop(st.pos/100, st.color));
             mctx.fillStyle = grad;
             mctx.fillRect(-w*2, -h*2, w*4, h*4);
         } else if(t.gradType === 'radial') {
             const radScale = (t.scale || 100) / 100;
             const grad = mctx.createRadialGradient(0, 0, 0, 0, 0, diag * radScale);
-            grad.addColorStop(0, c0);
-            grad.addColorStop(1, c1);
+            finalStops.forEach(st => grad.addColorStop(st.pos/100, st.color));
             mctx.fillStyle = grad;
             mctx.fillRect(-w*2, -h*2, w*4, h*4);
         } else if(t.gradType === 'conical') {
             if(mctx.createConicGradient) {
                 const grad = mctx.createConicGradient(((t.angle || 0) * Math.PI) / 180, 0, 0);
-                grad.addColorStop(0, c0);
-                grad.addColorStop(1, c1);
+                finalStops.forEach(st => grad.addColorStop(st.pos/100, st.color));
                 mctx.fillStyle = grad;
                 mctx.fillRect(-w*2, -h*2, w*4, h*4);
             } else {
                 const radScale = (t.scale || 100) / 100;
                 const grad = mctx.createRadialGradient(0, 0, 0, 0, 0, diag * radScale);
-                grad.addColorStop(0, c0);
-                grad.addColorStop(1, c1);
+                finalStops.forEach(st => grad.addColorStop(st.pos/100, st.color));
                 mctx.fillStyle = grad;
                 mctx.fillRect(-w*2, -h*2, w*4, h*4);
             }
@@ -2022,38 +2190,10 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
             const steps = 30;
             for(let i=0; i<=steps; i++) {
                 const ratio = i / steps;
-                const rAlpha = t.invert ? (alpha * ratio) : (alpha * (1 - ratio));
-                mctx.fillStyle = `rgba(0,0,0,${rAlpha})`;
+                let col = getInterpolatedColor(finalStops, ratio*100);
+                mctx.fillStyle = col;
                 const sW = size * (1 - ratio);
                 mctx.fillRect(-sW, -sW, sW*2, sW*2);
-            }
-        }
-    } else if (t.type === 'pattern' && t.patternImg && t.patternImg.complete && t.patternImg.width > 0) {
-        const pCanvas = document.createElement('canvas');
-        const pScale = (t.scale || 100) / 100;
-        pCanvas.width = Math.max(1, t.patternImg.width * pScale);
-        pCanvas.height = Math.max(1, t.patternImg.height * pScale);
-        pCanvas.getContext('2d').drawImage(t.patternImg, 0, 0, pCanvas.width, pCanvas.height);
-        const pattern = mctx.createPattern(pCanvas, 'repeat');
-
-        if(t.invert) {
-            mctx.fillStyle = `rgba(0,0,0,${alpha})`;
-            mctx.fillRect(-w*2, -h*2, w*4, h*4);
-            
-            mctx.globalCompositeOperation = 'destination-out';
-            mctx.rotate(((t.angle || 0) * Math.PI) / 180);
-            mctx.fillStyle = pattern;
-            mctx.fillRect(-w*3, -h*3, w*6, h*6);
-        } else {
-            mctx.rotate(((t.angle || 0) * Math.PI) / 180);
-            mctx.fillStyle = pattern;
-            mctx.fillRect(-w*3, -h*3, w*6, h*6);
-            
-            if(alpha < 1) {
-                mctx.globalCompositeOperation = 'destination-in';
-                mctx.setTransform(1,0,0,1,0,0);
-                mctx.fillStyle = `rgba(0,0,0,${alpha})`;
-                mctx.fillRect(-w*2, -h*2, w*4, h*4);
             }
         }
     }
@@ -2065,26 +2205,72 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
 }
 
 function renderBackground(bg,W,H,targetCtx){
-if(!bg)return;
-if(bg.img&&bg.img.complete){
-targetCtx.save();
-if(bg.blur>0)targetCtx.filter=`blur(${bg.blur*2}px)`;
-const baseRatio=Math.max(W/bg.img.width,H/bg.img.height);
-const scale=(bg.scale||1.0)*baseRatio;
-const drawW=bg.img.width*scale;
-const drawH=bg.img.height*scale;
-const x=((W-drawW)/2)+(bg.offsetX||0);
-const y=((H-drawH)/2)+(bg.offsetY||0);
-targetCtx.drawImage(bg.img,x,y,drawW,drawH);
-targetCtx.restore();
-}else{
-const grad=targetCtx.createRadialGradient(W/2,H*0.35,100,W/2,H/2,W);
-grad.addColorStop(0,bg.color1||'#241a14');
-grad.addColorStop(1,bg.color2||'#090807');
-targetCtx.fillStyle=grad;
-targetCtx.fillRect(0,0,W,H);
-}
-if(bg.darken>0){targetCtx.fillStyle=`rgba(0,0,0,${bg.darken})`;targetCtx.fillRect(0,0,W,H);}
+    if(!bg)return;
+    if(bg.bgType === 'image' && bg.img && bg.img.complete){
+        targetCtx.save();
+        if(bg.blur>0)targetCtx.filter=`blur(${bg.blur*2}px)`;
+        const baseRatio=Math.max(W/bg.img.width,H/bg.img.height);
+        const scale=(bg.scale||1.0)*baseRatio;
+        const drawW=bg.img.width*scale;
+        const drawH=bg.img.height*scale;
+        const x=((W-drawW)/2)+(bg.offsetX||0);
+        const y=((H-drawH)/2)+(bg.offsetY||0);
+        targetCtx.drawImage(bg.img,x,y,drawW,drawH);
+        targetCtx.restore();
+    } else if(bg.bgType === 'solid') {
+        targetCtx.fillStyle = bg.color1 || '#241a14';
+        targetCtx.fillRect(0,0,W,H);
+    } else {
+        const stops = bg.colorStops || [{pos:0, color: bg.color1||'#241a14'}, {pos:100, color: bg.color2||'#090807'}];
+        
+        targetCtx.save();
+        targetCtx.translate(W/2 + (bg.offsetX||0), H/2 + (bg.offsetY||0));
+        
+        const diag = Math.sqrt(W*W + H*H) / 2;
+        const rad = ((bg.angle || 90) * Math.PI) / 180;
+        
+        if(bg.gradType === 'linear') {
+            const x0 = -Math.cos(rad) * diag;
+            const y0 = -Math.sin(rad) * diag;
+            const x1 = Math.cos(rad) * diag;
+            const y1 = Math.sin(rad) * diag;
+            const grad = targetCtx.createLinearGradient(x0, y0, x1, y1);
+            stops.forEach(st => grad.addColorStop(st.pos/100, st.color));
+            targetCtx.fillStyle = grad;
+            targetCtx.fillRect(-W*2, -H*2, W*4, H*4);
+        } else if(bg.gradType === 'radial') {
+            const radScale = (bg.scale || 100) / 100;
+            const grad = targetCtx.createRadialGradient(0, 0, 0, 0, 0, diag * radScale);
+            stops.forEach(st => grad.addColorStop(st.pos/100, st.color));
+            targetCtx.fillStyle = grad;
+            targetCtx.fillRect(-W*2, -H*2, W*4, H*4);
+        } else if(bg.gradType === 'conical') {
+            if(targetCtx.createConicGradient) {
+                const grad = targetCtx.createConicGradient(rad, 0, 0);
+                stops.forEach(st => grad.addColorStop(st.pos/100, st.color));
+                targetCtx.fillStyle = grad;
+                targetCtx.fillRect(-W*2, -H*2, W*4, H*4);
+            } else {
+                const radScale = (bg.scale || 100) / 100;
+                const grad = targetCtx.createRadialGradient(0, 0, 0, 0, 0, diag * radScale);
+                stops.forEach(st => grad.addColorStop(st.pos/100, st.color));
+                targetCtx.fillStyle = grad;
+                targetCtx.fillRect(-W*2, -H*2, W*4, H*4);
+            }
+        } else if(bg.gradType === 'square') {
+            const size = Math.max(W, H) * ((bg.scale || 100) / 100);
+            const numSteps = 40;
+            for(let i=0; i<=numSteps; i++) {
+                const ratio = i / numSteps;
+                let col = getInterpolatedColor(stops, ratio*100);
+                targetCtx.fillStyle = col;
+                const sW = size * (1 - ratio);
+                targetCtx.fillRect(-sW, -sW, sW*2, sW*2);
+            }
+        }
+        targetCtx.restore();
+    }
+    if(bg.darken>0){targetCtx.fillStyle=`rgba(0,0,0,${bg.darken})`;targetCtx.fillRect(0,0,W,H);}
 }
 
 function renderTextElement(targetCtx,el, forceRawRender = false){
@@ -3256,26 +3442,50 @@ function drawSmartGuides(lines) {
     sgCtx.clearRect(0,0, smartGuideCanvas.width, smartGuideCanvas.height);
     if(lines.length === 0) return;
     sgCtx.save();
-    sgCtx.shadowColor = '#FF9800';
-    sgCtx.shadowBlur = 12;
-    sgCtx.strokeStyle = '#FFC107'; 
+    sgCtx.shadowColor = '#b026ff';
+    sgCtx.shadowBlur = 15;
+    sgCtx.strokeStyle = '#d400ff'; 
     sgCtx.lineWidth = 1.5;
-    sgCtx.setLineDash([]);
+    sgCtx.setLineDash([5, 5]);
+    
+    const drawMeasurementPill = (x, y, text) => {
+        sgCtx.save();
+        sgCtx.setLineDash([]);
+        sgCtx.shadowBlur = 0;
+        sgCtx.font = "bold 12px sans-serif";
+        const tw = sgCtx.measureText(text).width;
+        sgCtx.fillStyle = '#b026ff';
+        sgCtx.beginPath();
+        sgCtx.roundRect(x - tw/2 - 6, y - 10, tw + 12, 20, 10);
+        sgCtx.fill();
+        sgCtx.fillStyle = '#fff';
+        sgCtx.textAlign = 'center';
+        sgCtx.textBaseline = 'middle';
+        sgCtx.fillText(text, x, y);
+        sgCtx.restore();
+    };
+
     lines.forEach(line => {
         sgCtx.beginPath();
         if(line.gapIndicator) {
             sgCtx.moveTo(line.x - 5, line.y1); sgCtx.lineTo(line.x + 5, line.y1);
             sgCtx.moveTo(line.x, line.y1); sgCtx.lineTo(line.x, line.y2);
             sgCtx.moveTo(line.x - 5, line.y2); sgCtx.lineTo(line.x + 5, line.y2);
+            sgCtx.stroke();
+            const gapVal = Math.round(Math.abs(line.y2 - line.y1));
+            drawMeasurementPill(line.x, (line.y1 + line.y2)/2, gapVal);
         } else if (line.gapIndicatorX) {
             sgCtx.moveTo(line.x1, line.y - 5); sgCtx.lineTo(line.x1, line.y + 5);
             sgCtx.moveTo(line.x1, line.y); sgCtx.lineTo(line.x2, line.y);
             sgCtx.moveTo(line.x2, line.y - 5); sgCtx.lineTo(line.x2, line.y + 5);
+            sgCtx.stroke();
+            const gapVal = Math.round(Math.abs(line.x2 - line.x1));
+            drawMeasurementPill((line.x1 + line.x2)/2, line.y, gapVal);
         } else {
             sgCtx.moveTo(line.x1, line.y1);
             sgCtx.lineTo(line.x2, line.y2);
+            sgCtx.stroke();
         }
-        sgCtx.stroke();
     });
     sgCtx.restore();
 }
@@ -3863,7 +4073,7 @@ function openPanelFadeEdge() {
     
     <div style="margin-top:12px;">
     <span style="font-size:11px;font-weight:700;color:#D4AF37;display:block;margin-bottom:8px;">WARNA FADE:</span>
-    ${getColorPickerHTML(el.color||'#000000', 'setFadeColor')}
+    ${getColorPickerHTML(el.color||'#000000', 'setFadeColor', false)}
     </div>
     `;
     openToolPanel('🌫️ Gradien Fade Tepi', html);
@@ -3944,7 +4154,11 @@ let eyedropperCallback=null;
 let loupeCurrentHex='#FFFFFF';
 
 function openHandledLoupe(callback){
-eyedropperCallback=callback;
+if(typeof callback === 'string') {
+    eyedropperCallback = window[callback];
+} else {
+    eyedropperCallback = callback;
+}
 const loupe=document.getElementById('handledLoupe');
 loupe.style.display='block';
 loupe.style.left='50%';
@@ -3960,7 +4174,9 @@ eyedropperCallback=null;
 
 function confirmSampledColor(){
 if(eyedropperCallback&&loupeCurrentHex){
-eyedropperCallback(loupeCurrentHex);
+    if (typeof eyedropperCallback === 'function') {
+        eyedropperCallback(loupeCurrentHex);
+    }
 }
 closeHandledLoupe();
 showToast(`✅ Warna terpilih: ${loupeCurrentHex}`);
@@ -4008,10 +4224,215 @@ lctx.imageSmoothingEnabled=false;
 lctx.drawImage(mainCanvas,canvasX-9,canvasY-9,18,18,0,0,86,86);
 
 const p=ctx.getImageData(canvasX,canvasY,1,1).data;
-loupeCurrentHex='#'+((1<<24)+(p[0]<<16)+(p[1]<<8)+p[2]).toString(16).slice(1).toUpperCase();
+let rHex = p[0].toString(16).padStart(2,'0');
+let gHex = p[1].toString(16).padStart(2,'0');
+let bHex = p[2].toString(16).padStart(2,'0');
+loupeCurrentHex='#'+rHex+gHex+bHex;
+loupeCurrentHex = loupeCurrentHex.toUpperCase();
 document.getElementById('loupeHexValue').innerText=loupeCurrentHex;
 }
 }
+
+/* ========== CUSTOM COLOR PICKER (SPECTRUM) ========== */
+let cpCallbackName = '';
+let cpHsv = {h:0, s:0, v:100, a:1};
+
+function initColorPicker() {
+    const svC = document.getElementById('svCanvas');
+    const hueC = document.getElementById('hueCanvas');
+    const alpC = document.getElementById('alphaCanvas');
+    
+    if(!svC || !hueC || !alpC) return;
+    
+    const svCtx = svC.getContext('2d');
+    const hueCtx = hueC.getContext('2d');
+    const alpCtx = alpC.getContext('2d');
+    
+    const drawHue = () => {
+        const grad = hueCtx.createLinearGradient(0, 0, hueC.width, 0);
+        grad.addColorStop(0, '#f00');
+        grad.addColorStop(1/6, '#ff0');
+        grad.addColorStop(2/6, '#0f0');
+        grad.addColorStop(3/6, '#0ff');
+        grad.addColorStop(4/6, '#00f');
+        grad.addColorStop(5/6, '#f0f');
+        grad.addColorStop(1, '#f00');
+        hueCtx.fillStyle = grad;
+        hueCtx.fillRect(0, 0, hueC.width, hueC.height);
+        
+        hueCtx.strokeStyle = '#fff';
+        hueCtx.lineWidth = 2;
+        hueCtx.beginPath();
+        const x = (cpHsv.h / 360) * hueC.width;
+        hueCtx.arc(x, hueC.height/2, hueC.height/2 - 2, 0, Math.PI*2);
+        hueCtx.stroke();
+    };
+    
+    const drawSV = () => {
+        const rgbHue = hsvToRgb(cpHsv.h, 100, 100);
+        svCtx.fillStyle = `rgb(${rgbHue.r},${rgbHue.g},${rgbHue.b})`;
+        svCtx.fillRect(0, 0, svC.width, svC.height);
+        
+        const gWhite = svCtx.createLinearGradient(0, 0, svC.width, 0);
+        gWhite.addColorStop(0, 'rgba(255,255,255,1)');
+        gWhite.addColorStop(1, 'rgba(255,255,255,0)');
+        svCtx.fillStyle = gWhite;
+        svCtx.fillRect(0, 0, svC.width, svC.height);
+        
+        const gBlack = svCtx.createLinearGradient(0, 0, 0, svC.height);
+        gBlack.addColorStop(0, 'rgba(0,0,0,0)');
+        gBlack.addColorStop(1, 'rgba(0,0,0,1)');
+        svCtx.fillStyle = gBlack;
+        svCtx.fillRect(0, 0, svC.width, svC.height);
+        
+        svCtx.strokeStyle = (cpHsv.v < 50 && cpHsv.s < 50) ? '#fff' : '#000';
+        svCtx.lineWidth = 2;
+        svCtx.beginPath();
+        const x = (cpHsv.s / 100) * svC.width;
+        const y = (1 - (cpHsv.v / 100)) * svC.height;
+        svCtx.arc(x, y, 6, 0, Math.PI*2);
+        svCtx.stroke();
+    };
+    
+    const drawAlpha = () => {
+        alpCtx.clearRect(0,0,alpC.width,alpC.height);
+        const rgb = hsvToRgb(cpHsv.h, cpHsv.s, cpHsv.v);
+        const grad = alpCtx.createLinearGradient(0, 0, alpC.width, 0);
+        grad.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},0)`);
+        grad.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b},1)`);
+        alpCtx.fillStyle = grad;
+        alpCtx.fillRect(0, 0, alpC.width, alpC.height);
+        
+        alpCtx.strokeStyle = '#fff';
+        alpCtx.lineWidth = 2;
+        alpCtx.beginPath();
+        const x = cpHsv.a * alpC.width;
+        alpCtx.arc(x, alpC.height/2, alpC.height/2 - 2, 0, Math.PI*2);
+        alpCtx.stroke();
+    };
+
+    const updateAll = () => {
+        drawHue(); drawSV(); drawAlpha();
+        const rgb = hsvToRgb(cpHsv.h, cpHsv.s, cpHsv.v);
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b, cpHsv.a);
+        document.getElementById('cpPreview').style.background = hex;
+        document.getElementById('cpHexInput').value = hex;
+    };
+
+    let draggingSV = false, draggingHue = false, draggingAlpha = false;
+    
+    svC.onpointerdown = (e) => { draggingSV = true; svC.setPointerCapture(e.pointerId); handleSVDOM(e); };
+    hueC.onpointerdown = (e) => { draggingHue = true; hueC.setPointerCapture(e.pointerId); handleHueDOM(e); };
+    alpC.onpointerdown = (e) => { draggingAlpha = true; alpC.setPointerCapture(e.pointerId); handleAlphaDOM(e); };
+    
+    const handleSVDOM = (e) => {
+        const rect = svC.getBoundingClientRect();
+        let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        let y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+        cpHsv.s = (x / rect.width) * 100;
+        cpHsv.v = (1 - (y / rect.height)) * 100;
+        updateAll();
+    };
+    
+    const handleHueDOM = (e) => {
+        const rect = hueC.getBoundingClientRect();
+        let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        cpHsv.h = (x / rect.width) * 360;
+        if(cpHsv.h >= 360) cpHsv.h = 359;
+        updateAll();
+    };
+    
+    const handleAlphaDOM = (e) => {
+        const rect = alpC.getBoundingClientRect();
+        let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        cpHsv.a = x / rect.width;
+        updateAll();
+    };
+
+    window.addEventListener('pointermove', (e) => {
+        if(draggingSV) handleSVDOM(e);
+        if(draggingHue) handleHueDOM(e);
+        if(draggingAlpha) handleAlphaDOM(e);
+    });
+    window.addEventListener('pointerup', () => {
+        draggingSV = false; draggingHue = false; draggingAlpha = false;
+    });
+    
+    window.updateCPVisuals = updateAll;
+}
+
+function openCustomColorPicker(initColor, callbackName) {
+    cpCallbackName = callbackName;
+    const rgba = parseColorToRGBAObj(initColor);
+    const hsv = rgbToHsv(rgba.r, rgba.g, rgba.b);
+    cpHsv = { h: hsv.h, s: hsv.s, v: hsv.v, a: rgba.a };
+    document.getElementById('customColorPickerModal').classList.add('active');
+    if(window.updateCPVisuals) window.updateCPVisuals();
+}
+
+function closeCustomColorPicker() {
+    document.getElementById('customColorPickerModal').classList.remove('active');
+}
+
+function applyCustomColor() {
+    const hex = document.getElementById('cpHexInput').value;
+    if(cpCallbackName && typeof window[cpCallbackName] === 'function') {
+        window[cpCallbackName](hex);
+    }
+    closeCustomColorPicker();
+}
+
+function updateCPFromHex(hex) {
+    const rgba = parseColorToRGBAObj(hex);
+    const hsv = rgbToHsv(rgba.r, rgba.g, rgba.b);
+    cpHsv = { h: hsv.h, s: hsv.s, v: hsv.v, a: rgba.a };
+    if(window.updateCPVisuals) window.updateCPVisuals();
+}
+
+function rgbToHsv(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max * 100;
+    const d = max - min;
+    s = max === 0 ? 0 : (d / max) * 100;
+    if(max === min) { h = 0; }
+    else {
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h = h * 60;
+    }
+    return {h, s, v};
+}
+
+function hsvToRgb(h, s, v) {
+    s /= 100; v /= 100;
+    const i = Math.floor(h / 60);
+    const f = h / 60 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+    let r, g, b;
+    switch(i % 6){
+        case 0: r=v, g=t, b=p; break;
+        case 1: r=q, g=v, b=p; break;
+        case 2: r=p, g=v, b=t; break;
+        case 3: r=p, g=q, b=v; break;
+        case 4: r=t, g=p, b=v; break;
+        case 5: r=v, g=p, b=q; break;
+    }
+    return { r: Math.round(r*255), g: Math.round(g*255), b: Math.round(b*255) };
+}
+
+function rgbToHex(r, g, b, a) {
+    const toHex = (c) => c.toString(16).padStart(2, '0');
+    let hex = '#' + toHex(r) + toHex(g) + toHex(b);
+    if(a < 1.0) hex += toHex(Math.round(a * 255));
+    return hex.toUpperCase();
+}
+
 
 /* ========== PANEL UKURAN TEKS LENGKAP ========== */
 function openPanelTextSizeFull(){
@@ -4580,7 +5001,7 @@ if(tab==='outer'){
 const sh=el.shadow;
 const curAlpha=Math.round((sh.alpha!==undefined?sh.alpha:0.8)*100);
 container.innerHTML=`
-${getColorPickerHTML(sh.color||'rgba(0,0,0,0.8)', 'setOuterShadowColor')}
+${getColorPickerHTML(sh.color||'rgba(0,0,0,0.8)', 'setOuterShadowColor', false)}
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kepekatan/Alpha:</span><span class="ctrl-val" id="valShAlpha">${curAlpha}%</span></div>
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('shAlphaSlider',-1,updateShadowAlpha)">-</button>
@@ -4637,15 +5058,6 @@ ${getColorPickerHTML(ish.color||'transparent', 'setInnerShadowColor')}
 </div>
 `;
 }
-}
-
-function rgbaToHex(rgba) {
-    const parts = rgba.match(/[\d.]+/g);
-    if(!parts || parts.length < 3) return '#ffffff';
-    const r = parseInt(parts[0]).toString(16).padStart(2, '0');
-    const g = parseInt(parts[1]).toString(16).padStart(2, '0');
-    const b = parseInt(parts[2]).toString(16).padStart(2, '0');
-    return `#${r}${g}${b}`;
 }
 
 function updateShadowProp(p,v){
@@ -5052,6 +5464,11 @@ function clearPenCanvas() {
     dctx.clearRect(0, 0, drawingCanvasOverlay.width, drawingCanvasOverlay.height);
 }
 
+function updatePenColor(color) {
+    document.getElementById('penColorHidden').value = color;
+    document.getElementById('penColorBtn').style.background = color;
+}
+
 function setupPenToolEvents() {
     drawingCanvasOverlay.onpointerdown = (e) => {
         if(appMode !== 'drawing') return;
@@ -5072,7 +5489,7 @@ function setupPenToolEvents() {
         const y = (e.clientY - rect.top) / (canvasScale * userZoomScale);
         
         const type = document.getElementById('penBrushType').value;
-        const color = document.getElementById('penColor').value;
+        const color = document.getElementById('penColorHidden').value;
         const size = parseInt(document.getElementById('penSize').value);
         
         if(type === 'eraser') {
@@ -6256,7 +6673,6 @@ if(el.type==='image'&&el.img)copy.img=el.img;
 if(el.textSkinImg)copy.textSkinImg=el.textSkinImg;
 if(el.imageSkinImg)copy.imageSkinImg=el.imageSkinImg;
 if(el.warpImg)copy.warpImg=el.warpImg;
-if(el.transparency && el.transparency.patternImg) copy.transparency.patternImg=el.transparency.patternImg;
 
 delete copy._cachedCanvas;
 delete copy._cachedHash;
@@ -6276,7 +6692,6 @@ function copyActiveElement() {
     if(el.textSkinImg) copiedElement.textSkinImg=el.textSkinImg;
     if(el.imageSkinImg) copiedElement.imageSkinImg=el.imageSkinImg;
     if(el.warpImg) copiedElement.warpImg=el.warpImg;
-    if(el.transparency && el.transparency.patternImg) copiedElement.transparency.patternImg=el.transparency.patternImg;
     copiedElementsList = []; 
     showToast('📋 Elemen disalin!');
     renderBottomToolbar();
@@ -6311,7 +6726,6 @@ function executeMultiCopy() {
             if(el.textSkinImg) clone.textSkinImg = el.textSkinImg;
             if(el.imageSkinImg) clone.imageSkinImg = el.imageSkinImg;
             if(el.warpImg) clone.warpImg=el.warpImg;
-            if(el.transparency && el.transparency.patternImg) clone.transparency.patternImg=el.transparency.patternImg;
             copiedElementsList.push(clone);
         }
     });
@@ -6354,7 +6768,6 @@ function executePaste() {
             if(sourceEl.textSkinImg) clone.textSkinImg = sourceEl.textSkinImg;
             if(sourceEl.imageSkinImg) clone.imageSkinImg = sourceEl.imageSkinImg;
             if(sourceEl.warpImg) clone.warpImg = sourceEl.warpImg;
-            if(sourceEl.transparency && sourceEl.transparency.patternImg) clone.transparency.patternImg = sourceEl.transparency.patternImg;
             
             delete clone._cachedCanvas;
             delete clone._cachedHash;
@@ -6651,7 +7064,7 @@ function toggleFlip(dir){const el=getActiveElement();if(!el)return;if(dir==='H')
 function openPanelOpacity(){
 const el=getActiveElement();
 if(!el)return;
-if(!el.transparency) el.transparency = { type: 'uniform', alpha: Math.round((el.opacity||1)*100), gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false };
+if(!el.transparency) el.transparency = { type: 'uniform', alpha: Math.round((el.opacity||1)*100), gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false, colorStops:[] };
 const t = el.transparency;
 
 const html=`
@@ -6659,7 +7072,6 @@ const html=`
 <div class="ctrl-grid-btns" style="margin-bottom:12px;">
 <button class="btn-sub-tool ${t.type==='uniform'?'active':''}" onclick="setTransparencyType('uniform')">🔳 Uniform (Rata)</button>
 <button class="btn-sub-tool ${t.type==='fountain'?'active':''}" onclick="setTransparencyType('fountain')">🌫️ Fountain (Gradien)</button>
-<button class="btn-sub-tool ${t.type==='pattern'?'active':''}" onclick="setTransparencyType('pattern')">🏁 Pattern (Pola)</button>
 </div>
 
 <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -6686,23 +7098,7 @@ ${(t.gradType==='radial' || t.gradType==='conical' || t.gradType==='square') ? `
 <input type="range" class="ctrl-slider" min="-500" max="500" value="${t.offsetY || 0}" oninput="updateTransparency('offsetY', this.value)">
 ` : ''}
 
-${t.type==='pattern' ? `
-<div style="font-size:10px;color:#00ff88;margin-bottom:8px;line-height:1.4;">💡 <b>Info:</b> Unggah gambar berformat PNG (Transparan) atau tekstur jaring-jaring hitam putih untuk menjadikannya pola transparansi. Area gelap/transparan pada pola akan melubangi elemen.</div>
-<div class="ctrl-row" style="margin-bottom:8px;">
-<span class="ctrl-label">Pola Tekstur:</span>
-<button class="btn-sub-tool active" onclick="document.getElementById('filePatternInput').click()">📁 Unggah Pola</button>
-</div>
-<div class="ctrl-row"><span class="ctrl-label">Skala Pola:</span><span class="ctrl-val" id="valTransScale">${t.scale}%</span></div>
-<input type="range" class="ctrl-slider" min="10" max="300" value="${t.scale}" oninput="updateTransparency('scale', this.value)">
-<div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Sudut Pola:</span><span class="ctrl-val" id="valTransAngle">${t.angle}°</span></div>
-<input type="range" class="ctrl-slider" min="0" max="360" value="${t.angle}" oninput="updateTransparency('angle', this.value)">
-<div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser X:</span><span class="ctrl-val" id="valTransOffsetX">${t.offsetX || 0}px</span></div>
-<input type="range" class="ctrl-slider" min="-500" max="500" value="${t.offsetX || 0}" oninput="updateTransparency('offsetX', this.value)">
-<div class="ctrl-row" style="margin-top:8px;"><span class="ctrl-label">Geser Y:</span><span class="ctrl-val" id="valTransOffsetY">${t.offsetY || 0}px</span></div>
-<input type="range" class="ctrl-slider" min="-500" max="500" value="${t.offsetY || 0}" oninput="updateTransparency('offsetY', this.value)">
-` : ''}
-
-<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kepekatan ${t.type==='uniform'?'Alpha':'Maks'}:</span><span class="ctrl-val" id="valTransAlpha">${t.alpha}%</span></div>
+<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kepekatan Maks:</span><span class="ctrl-val" id="valTransAlpha">${t.alpha}%</span></div>
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('opTransSlider',-1,(v)=>updateTransparency('alpha',v))">-</button>
 <input type="range" class="ctrl-slider" id="opTransSlider" min="0" max="100" value="${t.alpha}" oninput="updateTransparency('alpha', this.value)">
@@ -6756,24 +7152,6 @@ function updateTransparency(prop, val) {
         if(lbl) lbl.innerText = val + 'px';
     }
     renderAll(); debouncedPushHistory();
-}
-
-function handlePatternUpload(e) {
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-            const el = getActiveElement();
-            if(el) {
-                el.transparency.patternSrc = img.src;
-                el.transparency.patternImg = img;
-                renderAll(); pushHistoryState(); openPanelOpacity();
-            }
-        };
-        img.src = event.target.result;
-    };
-    reader.readAsDataURL(file); e.target.value = '';
 }
 
 function openPanelImageBlur(){
@@ -6847,7 +7225,7 @@ function openPanelPngColorOverlay(){
 const el=getActiveElement();
 if(!el)return;
 let html=`
-${getColorPickerHTML(el.colorOverlay||'#ffffff', 'setPngColorOverlay')}
+${getColorPickerHTML(el.colorOverlay||'#ffffff', 'setPngColorOverlay', false)}
 <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="setPngColorOverlay('none')">↺ Reset Warna Siluet</button>
 `;
 openToolPanel('🎨 Warna Siluet Full PNG',html);
@@ -7943,15 +8321,22 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 function installPWA() {
     if(deferredPrompt) {
+        document.getElementById('pwaInstallPrompt').style.display = 'none';
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the A2HS prompt');
+                showToast('✅ Aplikasi berhasil diinstall!');
             }
             deferredPrompt = null;
         });
+    } else {
+        document.getElementById('pwaInstallPrompt').style.display = 'none';
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            showToast('✅ Aplikasi sudah terinstal di HP Anda!');
+        } else {
+            showToast('💡 Buka menu browser (titik 3) lalu pilih "Tambahkan ke Layar Utama"');
+        }
     }
-    document.getElementById('pwaInstallPrompt').style.display = 'none';
 }
 
 function dismissPWA() {
