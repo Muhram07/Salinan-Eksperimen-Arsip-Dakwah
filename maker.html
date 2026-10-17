@@ -1,10 +1,11 @@
 <!--
-Berikut adalah perbaikan komprehensif (Update v1.1.6) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan 5 poin instruksi ketat Anda. 
+Berikut adalah perbaikan komprehensif (Update v1.1.7) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan 4 poin instruksi ketat Anda. 
 
 Semua fitur baru (Smart Alignment Neon Solid, Equidistant Guides, Tabel Excel-style, dan Bagan Organisasi) telah saya rancang secara *native* menyatu ke dalam Canvas 2D engine tanpa mengganggu fitur lain (Zero Regression).
 
 *(Karena ukuran kode yang masif, jika output ini terpotong, cukup ketik **"Lanjut"**).*
 -->
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -396,14 +397,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <div style="font-weight:800;color:#D4AF37;font-size:13px;">✏️ Editor Data Tabel</div>
         <button class="panel-close" onclick="closeTableEditor()">✕</button>
     </div>
-    <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:flex-start; justify-content:flex-start; overflow:auto; width: 100%;">
+    <div class="fmodal-body" id="tableModalBody" style="flex-direction:column; padding:16px; align-items:flex-start; justify-content:flex-start; overflow:auto; width: 100%; touch-action: pan-x pan-y;">
         <div style="display:flex; gap:10px; margin-bottom:10px; width: 100%; flex-wrap: wrap;">
             <button class="btn-sub-tool" onclick="addTableRow()">➕ Baris Bawah</button>
             <button class="btn-sub-tool" onclick="addTableCol()">➕ Kolom Kanan</button>
             <button class="btn-sub-tool" style="color:#ff6b6b;" onclick="removeTableRow()">➖ Hapus Baris</button>
             <button class="btn-sub-tool" style="color:#ff6b6b;" onclick="removeTableCol()">➖ Hapus Kolom</button>
         </div>
-        <div id="tableEditorGrid" style="display:grid; gap:4px; width:100%;"></div>
+        <div style="width:100%; overflow-x:auto; touch-action: pan-x pan-y; padding-bottom: 20px;">
+            <div id="tableEditorGrid" style="display:grid; gap:4px; width:max-content; min-width:100%;"></div>
+        </div>
     </div>
     <div class="fmodal-footer">
         <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="closeTableEditor()">✅ Selesai</button>
@@ -856,7 +859,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.1.6'; 
+const APP_VERSION = 'v1.1.7'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -3101,7 +3104,6 @@ function renderShapeElement(targetCtx, el) {
         octx.shadowBlur = 0; 
     }
 
-    // ORGANISATIONAL CHART TEXT RENDERING FOR SHAPES
     if (el.text) {
         octx.fillStyle = el.colorOverlay || '#111111';
         const fontSize = el.fontSize || 22;
@@ -3199,7 +3201,6 @@ function renderFadeElement(targetCtx, el) {
     targetCtx.restore();
 }
 
-/* ========== TABLE COMPONENT RENDERER ========== */
 function renderTableElement(targetCtx, el) {
     targetCtx.save();
     targetCtx.translate(el.x, el.y);
@@ -3225,16 +3226,14 @@ function renderTableElement(targetCtx, el) {
     const octx = off.getContext('2d');
     octx.scale(rScale, rScale);
     
-    // Draw cells
     let currentY = 0;
     for (let r = 0; r < el.rows; r++) {
         let currentX = 0;
         const rowH = (el.rowHeights[r] / 100) * H;
         for (let c = 0; c < el.cols; c++) {
             const colW = (el.colWidths[c] / 100) * W;
-            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', bgColor:'transparent', color:'#fff', bgImgSrc:null};
+            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', bgColor:'transparent', color:'#fff', bgImgSrc:null, fontSize:24, fontWeight:'bold'};
             
-            // Background
             if (cell.bgColor && cell.bgColor !== 'transparent') {
                 octx.fillStyle = cell.bgColor;
                 octx.fillRect(currentX, currentY, colW, rowH);
@@ -3246,7 +3245,6 @@ function renderTableElement(targetCtx, el) {
                 }
             }
             
-            // Text Auto-Wrap
             if (cell.text) {
                 octx.fillStyle = cell.color || '#fff';
                 const fontSize = cell.fontSize || Math.min(24, rowH * 0.4);
@@ -3269,14 +3267,11 @@ function renderTableElement(targetCtx, el) {
         currentY += rowH;
     }
 
-    // Draw borders
     octx.strokeStyle = el.borderColor || '#D4AF37';
     octx.lineWidth = el.borderWidth || 2;
     
-    // Outer border
     octx.strokeRect(0, 0, W, H);
     
-    // Inner lines
     octx.beginPath();
     let lx = 0;
     for (let c = 0; c < el.cols - 1; c++) {
@@ -3295,7 +3290,6 @@ function renderTableElement(targetCtx, el) {
     targetCtx.restore();
 }
 
-/* ========== CONNECTOR (ORG CHART LINE) RENDERER ========== */
 function renderConnectorElement(targetCtx, el) {
     const s = getCurrentSlide();
     if (!s) return;
@@ -3602,6 +3596,7 @@ function drawSmartGuides(lines) {
     if(lines.length === 0) return;
     sgCtx.save();
     
+    // NEON GLOW EFFECT
     sgCtx.shadowColor = '#d400ff';
     sgCtx.shadowBlur = 12;
     sgCtx.strokeStyle = '#b026ff'; 
@@ -3611,16 +3606,24 @@ function drawSmartGuides(lines) {
     const drawMeasurementPill = (x, y, text) => {
         sgCtx.save();
         sgCtx.setLineDash([]);
-        sgCtx.shadowBlur = 6;
-        sgCtx.shadowColor = 'rgba(0,0,0,0.8)';
+        // Multi-layered shadow for neon text pill
+        sgCtx.shadowBlur = 8;
+        sgCtx.shadowColor = '#d400ff';
         sgCtx.font = "bold 11px 'Plus Jakarta Sans', sans-serif";
         const tw = sgCtx.measureText(text).width;
-        sgCtx.fillStyle = '#b026ff';
+        
+        // Semi-transparent background
+        sgCtx.fillStyle = 'rgba(20, 0, 40, 0.85)';
         sgCtx.beginPath();
-        sgCtx.roundRect(x - tw/2 - 6, y - 10, tw + 12, 20, 10);
+        sgCtx.roundRect(x - tw/2 - 8, y - 12, tw + 16, 24, 12);
         sgCtx.fill();
-        sgCtx.shadowBlur = 0;
-        sgCtx.fillStyle = '#fff';
+        sgCtx.lineWidth = 1;
+        sgCtx.strokeStyle = '#b026ff';
+        sgCtx.stroke();
+        
+        sgCtx.shadowBlur = 10;
+        sgCtx.shadowColor = '#ff55ff';
+        sgCtx.fillStyle = '#ffffff';
         sgCtx.textAlign = 'center';
         sgCtx.textBaseline = 'middle';
         sgCtx.fillText(text, x, y);
@@ -3830,11 +3833,10 @@ const clickY=(e.clientY-rect.top)/(canvasScale*userZoomScale);
 let hitEl=null;
 for(let i=s.elements.length-1;i>=0;i--){
 const el=s.elements[i];
-if(el.type === 'connector') continue; // Don't select connectors directly via click area
+if(el.type === 'connector') continue; 
 if(isPointerInsideElement(clickX,clickY,el)){hitEl=el;break;}
 }
 
-// Special check for connectors if no solid shape hit
 if (!hitEl) {
     for(let i=s.elements.length-1;i>=0;i--){
         const el=s.elements[i];
@@ -3842,7 +3844,6 @@ if (!hitEl) {
             const n1 = s.elements.find(e => e.id === el.fromId);
             const n2 = s.elements.find(e => e.id === el.toId);
             if(n1 && n2) {
-                // simple bounding box check for connector
                 const minX = Math.min(n1.x, n2.x) - 10;
                 const maxX = Math.max(n1.x, n2.x) + 10;
                 const minY = Math.min(n1.y, n2.y) - 10;
@@ -4360,7 +4361,6 @@ bar.innerHTML=`
 }
 }
 
-/* ========== TABLE TOOL LOGIC ========== */
 function addNewTable() {
     const s = getCurrentSlide();
     const newEl = {
@@ -4388,22 +4388,26 @@ function openTableEditor() {
     grid.innerHTML = '';
     for(let r=0; r<el.rows; r++) {
         for(let c=0; c<el.cols; c++) {
-            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', color:'#fff', bgColor:'transparent'};
+            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', color:'#fff', bgColor:'transparent', fontSize:24};
             grid.innerHTML += `
-            <div style="display:flex; flex-direction:column; gap:4px; background:rgba(255,255,255,0.05); padding:6px; border:1px solid #D4AF37; border-radius:6px; min-width:80px;">
+            <div style="display:flex; flex-direction:column; gap:4px; background:rgba(255,255,255,0.05); padding:6px; border:1px solid #D4AF37; border-radius:6px; min-width:100px;">
                 <input type="text" value="${cell.text}" oninput="updateTableCellText(${r}, ${c}, this.value)" style="background:#111; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:4px; font-size:11px; width:100%; border-radius:4px; text-align:center;">
-                <div style="display:flex; gap:4px; justify-content:center; align-items:center; margin-top:4px;">
+                <div style="display:flex; gap:4px; justify-content:space-between; align-items:center; margin-top:4px;">
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <span style="font-size:9px; color:#aaa; margin-bottom:2px;">Teks</span>
-                        <input type="color" value="${cell.color==='transparent'?'#ffffff':parseColorToHex(cell.color)}" onchange="updateTableCellColor(${r}, ${c}, this.value)" style="width:24px; height:24px; border:none; padding:0; cursor:pointer; background:transparent;">
+                        <input type="color" value="${cell.color==='transparent'?'#ffffff':parseColorToHex(cell.color)}" onchange="updateTableCellColor(${r}, ${c}, this.value)" style="width:20px; height:20px; border:none; padding:0; cursor:pointer; background:transparent;">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <span style="font-size:9px; color:#aaa; margin-bottom:2px;">Bg</span>
-                        <input type="color" value="${cell.bgColor==='transparent'?'#000000':parseColorToHex(cell.bgColor)}" onchange="updateTableCellBg(${r}, ${c}, this.value)" style="width:24px; height:24px; border:none; padding:0; cursor:pointer; background:transparent;">
+                        <input type="color" value="${cell.bgColor==='transparent'?'#000000':parseColorToHex(cell.bgColor)}" onchange="updateTableCellBg(${r}, ${c}, this.value)" style="width:20px; height:20px; border:none; padding:0; cursor:pointer; background:transparent;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:9px; color:#aaa; margin-bottom:2px;">Size</span>
+                        <input type="number" value="${cell.fontSize || 24}" onchange="updateTableCellFontSize(${r}, ${c}, this.value)" style="width:28px; height:20px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; font-size:10px; text-align:center;">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <span style="font-size:9px; color:#aaa; margin-bottom:2px;">Foto</span>
-                        <button class="btn-sub-tool" style="padding:0; width:24px; height:24px; font-size:12px; justify-content:center;" onclick="uploadCellBgImage(${r}, ${c})">📷</button>
+                        <button class="btn-sub-tool" style="padding:0; width:20px; height:20px; font-size:10px; justify-content:center;" onclick="uploadCellBgImage(${r}, ${c})">📷</button>
                     </div>
                 </div>
             </div>`;
@@ -4417,6 +4421,7 @@ function closeTableEditor() { document.getElementById('tableEditorModal').classL
 function updateTableCellText(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].text = val; requestRender(); debouncedPushHistory(); } }
 function updateTableCellColor(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].color = val; requestRender(); debouncedPushHistory(); } }
 function updateTableCellBg(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].bgColor = val; requestRender(); debouncedPushHistory(); } }
+function updateTableCellFontSize(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].fontSize = parseInt(val); requestRender(); debouncedPushHistory(); } }
 
 function parseColorToHex(color) {
     if(!color || color==='transparent') return '#000000';
@@ -4452,7 +4457,7 @@ function addTableRow() {
     const el = getActiveElement(); if(!el || el.type !== 'table') return;
     el.rows++;
     el.rowHeights = Array(el.rows).fill(100 / el.rows);
-    el.cells.push(Array(el.cols).fill(0).map(() => ({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null})));
+    el.cells.push(Array(el.cols).fill(0).map(() => ({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24})));
     renderAll(); pushHistoryState(); openTableEditor();
 }
 
@@ -4460,7 +4465,7 @@ function addTableCol() {
     const el = getActiveElement(); if(!el || el.type !== 'table') return;
     el.cols++;
     el.colWidths = Array(el.cols).fill(100 / el.cols);
-    el.cells.forEach(row => row.push({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null}));
+    el.cells.forEach(row => row.push({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24}));
     renderAll(); pushHistoryState(); openTableEditor();
 }
 
@@ -4498,7 +4503,6 @@ function openPanelTableStyle() {
 function updateTableBorderColor(c) { const el = getActiveElement(); if(el) el.borderColor = c; renderAll(); pushHistoryState(); openPanelTableStyle(); }
 function updateTableBorderWidth(v) { const el = getActiveElement(); if(el) el.borderWidth = parseInt(v); const l = document.getElementById('valTableBorderW'); if(l) l.innerText=v+'px'; renderAll(); debouncedPushHistory(); }
 
-/* ========== ORG CHART (BAGAN) LOGIC ========== */
 function generateOrgChart() {
     const s = getCurrentSlide();
     const rootId = 'el_' + Date.now();
@@ -4581,7 +4585,6 @@ function openPanelConnectorColor() {
 function updateConnectorColor(c) { const el = getActiveElement(); if(el) el.color = c; renderAll(); pushHistoryState(); openPanelConnectorColor(); }
 function updateConnectorWidth(v) { const el = getActiveElement(); if(el) el.borderWidth = parseInt(v); const l = document.getElementById('valConnBorderW'); if(l) l.innerText=v+'px'; renderAll(); debouncedPushHistory(); }
 
-/* ========== FADE EDGE TOOL ========== */
 function openPanelFadeEdge() {
     let el = getActiveElement();
     if (!el || el.type !== 'fade') {
@@ -4680,7 +4683,6 @@ currentActivePanel = title;
 }
 function closeToolPanel(){document.getElementById('toolPanel').classList.remove('active'); currentActivePanel='';}
 
-/* ========== KACA PEMBESAR BERTANGKAI (HANDLED EYEDROPPER) ========== */
 let eyedropperCallback=null;
 let loupeCurrentHex='#FFFFFF';
 
@@ -4764,7 +4766,6 @@ document.getElementById('loupeHexValue').innerText=loupeCurrentHex;
 }
 }
 
-/* ========== CUSTOM COLOR PICKER (SPECTRUM) ========== */
 let cpCallbackName = '';
 let cpHsv = {h:0, s:0, v:100, a:1};
 
@@ -4964,8 +4965,6 @@ function rgbToHex(r, g, b, a) {
     return hex.toUpperCase();
 }
 
-
-/* ========== PANEL UKURAN TEKS LENGKAP ========== */
 function openPanelTextSizeFull(){
 const el=getActiveElement();
 if(!el||el.type!=='text')return;
@@ -5054,7 +5053,6 @@ renderAll();
 debouncedPushHistory();
 }
 
-/* ========== PANEL FORMAT TEKS & KAPITAL ========== */
 let lastWordScrollPos = 0;
 function renderWordSelectionUI() {    
     const el = getActiveElement();
@@ -5185,7 +5183,6 @@ function resetTextFormat(){
 }
 function setTextAlign(val){const el=getActiveElement();if(!el)return;el.textAlign=val;renderAll();pushHistoryState();openPanelTextFormat();}
 
-/* ========== PANEL STABILO TEKS SLANTED LENGKAP ========== */
 function openPanelHighlight(){
 const el=getActiveElement();
 if(!el)return;
@@ -5260,7 +5257,6 @@ function resetHighlight(){
     renderAll();pushHistoryState();openPanelHighlight();
 }
 
-/* ========== PANEL SKIN FOTO TEKS & FILTER GAMBAR ========== */
 function openPanelTextSkin(){
 const el=getActiveElement();
 if(!el||el.type!=='text')return;
@@ -5356,7 +5352,6 @@ reader.readAsDataURL(file);
 e.target.value='';
 }
 
-/* ========== ADJUST LIGHT & COLOR (BRIGHTNESS, CONTRAST, HUE, SATURATION) ========== */
 function openPanelAdjustLight() {
     const el = getActiveElement();
     if(!el) return;
@@ -5401,7 +5396,6 @@ function resetElementFilters() {
     renderAll(); pushHistoryState(); openPanelAdjustLight();
 }
 
-/* ========== ADVANCED COLOR (HSL) PANEL ========== */
 function openPanelAdvancedColor() {
     const el = getActiveElement();
     if(!el || el.type !== 'image') return;
@@ -5496,7 +5490,6 @@ function resetAdvancedColor() {
     renderAll(); pushHistoryState(); openPanelAdvancedColor();
 }
 
-/* ========== BAYANGAN 3D, BAYANGAN DALAM (TEKS & GAMBAR) ========== */
 let activeShadowTab = 'outer';
 function openPanelAdvancedShadow(){
 const el=getActiveElement();
@@ -5608,7 +5601,6 @@ function updateInnerShadowDistance(v){const el=getActiveElement();if(!el)return;
 function updateInnerShadowAngle(v){const el=getActiveElement();if(!el)return;el.innerShadow.angle=parseInt(v);document.getElementById('valIShAngle').innerText=v+'°';renderAll();debouncedPushHistory();}
 function setInnerShadowColor(c){const el=getActiveElement();if(!el)return;el.innerShadow.color=c;renderAll();pushHistoryState();switchShadowSubTab('inner');}
 
-/* ========== D-PAD POSISI HALUS DENGAN HOLD-TO-MOVE ========== */
 let dpadHoldInterval=null;
 let dpadHoldTimeout=null;
 
@@ -5714,7 +5706,6 @@ pushHistoryState();
 openPanelPosition();
 }
 
-/* ========== PANEL GRUP & PENANDA ELEMEN AKTIF ========== */
 function openPanelGroup(){
 const s=getCurrentSlide();
 const curr=getActiveElement();
@@ -5763,7 +5754,6 @@ s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=null;});
 pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('⛓️ Elemen dikeluarkan dari grup!');
 }
 
-/* ========== PANEL LAPISAN: MAJU PALING DEPAN / BELAKANG ========== */
 function openPanelLayers(){
 const s=getCurrentSlide();
 let html='<div class="layer-list-container">';
@@ -5805,7 +5795,6 @@ renderAll();pushHistoryState();openPanelLayers();
 showToast(pos==='top'?'⏫ Dipindah ke paling depan':'⏬ Dipindah ke paling belakang');
 }
 
-/* ========== CROP BEBAS MENGGUNAKAN JARI (LASSO CUTOUT) ========== */
 let freeCropPoints=[];
 let isDrawingFreeCrop=false;
 let freeCropPaintMode=true;
@@ -5972,7 +5961,6 @@ setTimeout(() => {
 }, 50);
 }
 
-/* ========== PEN TOOL(GAMBAR BEBAS DI KANVAS UTAMA) ========== */
 let isDrawingPen = false;
 let lastPenX = 0;
 let lastPenY = 0;
@@ -5988,8 +5976,7 @@ function openPenToolOverlay() {
     showToast('✍️ Mode Gambar Aktif');
 }
 
-function updatePenSettings() {
-}
+function updatePenSettings() {}
 
 function clearPenCanvas() {
     dctx.clearRect(0, 0, drawingCanvasOverlay.width, drawingCanvasOverlay.height);
@@ -6146,7 +6133,6 @@ function trimCanvas(canvas) {
     return trimmed;
 }
 
-/* ========== PERSPEKTIF 3D (BILINEAR MESH & RESET ASLI) ========== */
 let perspPins={tl:{x:0,y:0},tr:{x:0,y:0},br:{x:0,y:0},bl:{x:0,y:0}};
 let activePerspPin=null;
 let perspCanvasOffscreen=null;
@@ -6425,7 +6411,6 @@ setTimeout(() => {
 }, 50);
 }
 
-/* ========== ENVELOPE DISTORT (LENGKUNGAN BEBAS) ========== */
 let envPins = {tl:{x:0,y:0}, t:{x:0,y:0}, tr:{x:0,y:0}, r:{x:0,y:0}, br:{x:0,y:0}, b:{x:0,y:0}, bl:{x:0,y:0}, l:{x:0,y:0}};
 let activeEnvPin = null;
 let envCanvasOffscreen = null;
@@ -6704,7 +6689,6 @@ function applyEnvelopeWarp() {
     }, 50);
 }
 
-/* ========== SHAPE TOOL (BENTUK) ========== */
 function openPanelAddShape() {
     const html = `
     <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">PILIH BENTUK:</div>
@@ -6764,20 +6748,6 @@ function addNewShape(type) {
     closeToolPanel();
 }
 
-function openPanelShapeColor() {
-    const el = getActiveElement();
-    if(!el || el.type !== 'shape') return;
-    let html = getColorPickerHTML(el.color || '#D4AF37', 'setShapeColor', true);
-    openToolPanel('🎨 Warna Bentuk', html);
-}
-
-function setShapeColor(c) {
-    const el = getActiveElement(); if(!el) return;
-    el.color = c;
-    renderAll(); pushHistoryState(); openPanelShapeColor();
-}
-
-/* ========== TANGKAP AJAIB DENGAN INDIKATOR KUAS CANVA ========== */
 let isPaintingGrab=false;
 let grabMaskCanvas=null;
 let grabPaintMode=true;
@@ -8127,7 +8097,7 @@ function deleteActiveElement(){const el=getActiveElement();if(!el)return;deleteE
 
 function deleteElementById(id){
 const s=getCurrentSlide();
-s.elements=s.elements.filter(e=>e.id!==id && e.fromId!==id && e.toId!==id); // Clean up connectors too
+s.elements=s.elements.filter(e=>e.id!==id && e.fromId!==id && e.toId!==id);
 deselectElement();
 renderAll();
 pushHistoryState();
@@ -8142,7 +8112,6 @@ function generateSlideThumb(slide) {
     tctx.scale(108 / preset.width, 108 / preset.width);
     renderBackground(slide.background, preset.width, preset.height, tctx);
     
-    // Connectors first
     if(slide.elements) {
         slide.elements.filter(e => e.type === 'connector').forEach(el => renderConnectorElement(tctx, el));
         slide.elements.forEach(el => {
