@@ -1,5 +1,5 @@
 <!--
-Berikut adalah perbaikan komprehensif (Update v1.1.7) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan 4 poin instruksi ketat Anda. 
+Berikut adalah perbaikan komprehensif (Update v1.1.8) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan 4 poin instruksi ketat Anda. 
 
 Semua fitur baru (Smart Alignment Neon Solid, Equidistant Guides, Tabel Excel-style, dan Bagan Organisasi) telah saya rancang secara *native* menyatu ke dalam Canvas 2D engine tanpa mengganggu fitur lain (Zero Regression).
 
@@ -859,7 +859,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.1.7'; 
+const APP_VERSION = 'v1.1.8'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -2049,6 +2049,7 @@ function getElHash(el) {
         } else if(el.type === 'table') {
             str += '_' + el.rows + '_' + el.cols + '_' + JSON.stringify(el.colWidths) + '_' + JSON.stringify(el.rowHeights) + '_' + JSON.stringify(el.cells) + '_' + el.borderWidth + '_' + el.borderColor;
         }
+        if(el.type==='table'||el.type==='shape') str += '_'+el.tBold+'_'+el.tItalic+'_'+el.tAlign+'_'+el.tFont+'_'+el.tPad+'_'+el.fontSize+'_'+el.colorOverlay;
         str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.transparency||{});
         return str;
     } catch(e) {
@@ -3105,20 +3106,17 @@ function renderShapeElement(targetCtx, el) {
     }
 
     if (el.text) {
-        octx.fillStyle = el.colorOverlay || '#111111';
         const fontSize = el.fontSize || 22;
-        octx.font = `bold ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-        octx.textAlign = 'center';
+        const padX = el.tPad !== undefined ? el.tPad : (el.orgNode ? 14 : 10);
+        const lineH = fontSize * 1.2;
+        const tAlign = el.tAlign || 'center';
+        const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: el.tBold ? 'bold' : 'normal', fontStyle: el.tItalic ? 'italic' : 'normal'};
+        const lines = getWrappedLines(octx, el.text, Math.max(10, w - padX * 2), pseudoEl);
+        octx.fillStyle = el.colorOverlay || '#111111';
+        octx.font = `${pseudoEl.fontStyle} ${pseudoEl.fontWeight} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
         octx.textBaseline = 'middle';
-        
-        const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: 'center'};
-        const lines = getWrappedLines(octx, el.text, w - 20, pseudoEl);
-        const totalTextHeight = lines.length * (fontSize * 1.2);
-        let startTextY = -(totalTextHeight / 2) + (fontSize / 2);
-        
-        lines.forEach((line, lIdx) => {
-            octx.fillText(line.words.join(' '), 0, startTextY + (lIdx * fontSize * 1.2));
-        });
+        const startTextY = -(lines.length * lineH / 2) + (fontSize / 2);
+        drawBoxTextLines(octx, lines, tAlign, -w / 2 + padX, w / 2 - padX, startTextY, lineH);
     }
 
     if(el.innerShadow && el.innerShadow.color !== 'transparent'){
@@ -3201,6 +3199,24 @@ function renderFadeElement(targetCtx, el) {
     targetCtx.restore();
 }
 
+function drawBoxTextLines(c, lines, align, x0, x1, y0, lineH) {
+    const mid = (x0 + x1) / 2;
+    lines.forEach((line, i) => {
+        const y = y0 + i * lineH, ws = line.words;
+        if (align === 'justify' && !line.isLastLineOfPara && ws.length > 1) {
+            c.textAlign = 'left';
+            const wid = ws.map(w => c.measureText(w).width);
+            const gap = Math.max(0, ((x1 - x0) - wid.reduce((a, b) => a + b, 0)) / (ws.length - 1));
+            let x = x0;
+            ws.forEach((w, j) => { c.fillText(w, x, y); x += wid[j] + gap; });
+        } else {
+            const a = align === 'justify' ? 'left' : (align || 'center');
+            c.textAlign = a;
+            c.fillText(ws.join(' '), a === 'left' ? x0 : (a === 'right' ? x1 : mid), y);
+        }
+    });
+}
+
 function renderTableElement(targetCtx, el) {
     targetCtx.save();
     targetCtx.translate(el.x, el.y);
@@ -3246,21 +3262,19 @@ function renderTableElement(targetCtx, el) {
             }
             
             if (cell.text) {
+                const fontSize = el.tFont || cell.fontSize || Math.min(24, rowH * 0.4);
+                const padX = el.tPad !== undefined ? el.tPad : 14;
+                const padY = Math.round(padX * 0.7);
+                const lineH = fontSize * 1.3;
+                const tAlign = el.tAlign || 'center';
+                const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: el.tBold ? 'bold' : 'normal', fontStyle: el.tItalic ? 'italic' : 'normal'};
+                const lines = getWrappedLines(octx, cell.text, Math.max(10, colW - padX * 2), pseudoEl);
                 octx.fillStyle = cell.color || '#fff';
-                const fontSize = cell.fontSize || Math.min(24, rowH * 0.4);
-                const isBold = cell.fontWeight || 'bold';
-                octx.font = `${isBold} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                octx.textAlign = 'center';
+                octx.font = `${pseudoEl.fontStyle} ${pseudoEl.fontWeight} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
                 octx.textBaseline = 'middle';
-                
-                const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: 'center'};
-                const lines = getWrappedLines(octx, cell.text, colW - 16, pseudoEl);
-                const totalTextHeight = lines.length * (fontSize * 1.3);
-                let startTextY = currentY + (rowH / 2) - (totalTextHeight / 2) + (fontSize / 2);
-                
-                lines.forEach((line, lIdx) => {
-                    octx.fillText(line.words.join(' '), currentX + (colW / 2), startTextY + (lIdx * fontSize * 1.3));
-                });
+                const totalTextHeight = lines.length * lineH;
+                const startTextY = currentY + Math.max(padY, (rowH - totalTextHeight) / 2) + (fontSize / 2);
+                drawBoxTextLines(octx, lines, tAlign, currentX + padX, currentX + colW - padX, startTextY, lineH);
             }
             currentX += colW;
         }
@@ -3591,66 +3605,62 @@ snapGuideV.style.display='none';
 drawSmartGuides([]);
 }
 
+var _sgLines = [], _sgRaf = 0; // var: aman dipanggil sebelum baris ini dieksekusi (hindari TDZ)
 function drawSmartGuides(lines) {
-    sgCtx.clearRect(0,0, smartGuideCanvas.width, smartGuideCanvas.height);
-    if(lines.length === 0) return;
-    sgCtx.save();
-    
-    // NEON GLOW EFFECT
-    sgCtx.shadowColor = '#d400ff';
-    sgCtx.shadowBlur = 12;
-    sgCtx.strokeStyle = '#b026ff'; 
-    sgCtx.lineWidth = 1.5;
-    sgCtx.setLineDash([6, 4]);
-    
-    const drawMeasurementPill = (x, y, text) => {
+    if (!lines || lines.length === 0) {
+        if (_sgRaf) { cancelAnimationFrame(_sgRaf); _sgRaf = 0; }
+        _sgLines = [];
+        sgCtx.clearRect(0, 0, smartGuideCanvas.width, smartGuideCanvas.height);
+        return;
+    }
+    _sgLines = lines;
+    if (!_sgRaf) _sgRaf = requestAnimationFrame(paintSmartGuides);
+}
+
+function paintSmartGuides() {
+    _sgRaf = 0;
+    sgCtx.clearRect(0, 0, smartGuideCanvas.width, smartGuideCanvas.height);
+    if (!_sgLines.length) return;
+    const k = 1 / Math.max(0.05, canvasScale * userZoomScale); // ukuran konstan di layar
+    const NEON = '#b026ff', GLOW = '#d400ff', HOT = '#ff7bff';
+    const pA = new Path2D(), pG = new Path2D(), pills = [], tk = 6 * k;
+    _sgLines.forEach(line => {
+        if (line.gapIndicator) {
+            pG.moveTo(line.x - tk, line.y1); pG.lineTo(line.x + tk, line.y1);
+            pG.moveTo(line.x, line.y1); pG.lineTo(line.x, line.y2);
+            pG.moveTo(line.x - tk, line.y2); pG.lineTo(line.x + tk, line.y2);
+            pills.push([line.x, (line.y1 + line.y2) / 2, Math.round(Math.abs(line.y2 - line.y1)) + 'px']);
+        } else if (line.gapIndicatorX) {
+            pG.moveTo(line.x1, line.y - tk); pG.lineTo(line.x1, line.y + tk);
+            pG.moveTo(line.x1, line.y); pG.lineTo(line.x2, line.y);
+            pG.moveTo(line.x2, line.y - tk); pG.lineTo(line.x2, line.y + tk);
+            pills.push([(line.x1 + line.x2) / 2, line.y, Math.round(Math.abs(line.x2 - line.x1)) + 'px']);
+        } else {
+            pA.moveTo(line.x1, line.y1); pA.lineTo(line.x2, line.y2);
+        }
+    });
+    const glow = (p, dash) => {
         sgCtx.save();
-        sgCtx.setLineDash([]);
-        // Multi-layered shadow for neon text pill
-        sgCtx.shadowBlur = 8;
-        sgCtx.shadowColor = '#d400ff';
-        sgCtx.font = "bold 11px 'Plus Jakarta Sans', sans-serif";
-        const tw = sgCtx.measureText(text).width;
-        
-        // Semi-transparent background
-        sgCtx.fillStyle = 'rgba(20, 0, 40, 0.85)';
-        sgCtx.beginPath();
-        sgCtx.roundRect(x - tw/2 - 8, y - 12, tw + 16, 24, 12);
-        sgCtx.fill();
-        sgCtx.lineWidth = 1;
-        sgCtx.strokeStyle = '#b026ff';
-        sgCtx.stroke();
-        
-        sgCtx.shadowBlur = 10;
-        sgCtx.shadowColor = '#ff55ff';
-        sgCtx.fillStyle = '#ffffff';
-        sgCtx.textAlign = 'center';
-        sgCtx.textBaseline = 'middle';
-        sgCtx.fillText(text, x, y);
+        sgCtx.lineCap = 'round';
+        sgCtx.setLineDash(dash ? [6 * k, 4 * k] : []);
+        sgCtx.shadowColor = GLOW;
+        sgCtx.shadowBlur = 18 * k; sgCtx.strokeStyle = 'rgba(176,38,255,0.45)'; sgCtx.lineWidth = 4 * k; sgCtx.stroke(p);
+        sgCtx.shadowBlur = 8 * k; sgCtx.strokeStyle = NEON; sgCtx.lineWidth = 2 * k; sgCtx.stroke(p);
+        sgCtx.shadowBlur = 0; sgCtx.strokeStyle = '#f3c9ff'; sgCtx.lineWidth = 0.8 * k; sgCtx.stroke(p);
         sgCtx.restore();
     };
-
-    lines.forEach(line => {
-        sgCtx.beginPath();
-        if(line.gapIndicator) {
-            sgCtx.moveTo(line.x - 6, line.y1); sgCtx.lineTo(line.x + 6, line.y1);
-            sgCtx.moveTo(line.x, line.y1); sgCtx.lineTo(line.x, line.y2);
-            sgCtx.moveTo(line.x - 6, line.y2); sgCtx.lineTo(line.x + 6, line.y2);
-            sgCtx.stroke();
-            const gapVal = Math.round(Math.abs(line.y2 - line.y1));
-            drawMeasurementPill(line.x, (line.y1 + line.y2)/2, gapVal + 'px');
-        } else if (line.gapIndicatorX) {
-            sgCtx.moveTo(line.x1, line.y - 6); sgCtx.lineTo(line.x1, line.y + 6);
-            sgCtx.moveTo(line.x1, line.y); sgCtx.lineTo(line.x2, line.y);
-            sgCtx.moveTo(line.x2, line.y - 6); sgCtx.lineTo(line.x2, line.y + 6);
-            sgCtx.stroke();
-            const gapVal = Math.round(Math.abs(line.x2 - line.x1));
-            drawMeasurementPill((line.x1 + line.x2)/2, line.y, gapVal + 'px');
-        } else {
-            sgCtx.moveTo(line.x1, line.y1);
-            sgCtx.lineTo(line.x2, line.y2);
-            sgCtx.stroke();
-        }
+    glow(pA, true); glow(pG, false);
+    sgCtx.save();
+    sgCtx.font = `bold ${11 * k}px 'Plus Jakarta Sans', sans-serif`;
+    sgCtx.textAlign = 'center'; sgCtx.textBaseline = 'middle';
+    pills.forEach(([x, y, text]) => {
+        const pw = sgCtx.measureText(text).width + 16 * k, ph = 22 * k;
+        sgCtx.shadowColor = GLOW; sgCtx.shadowBlur = 12 * k;
+        sgCtx.fillStyle = 'rgba(20,0,40,0.78)'; sgCtx.strokeStyle = NEON; sgCtx.lineWidth = 1.2 * k;
+        sgCtx.beginPath(); (sgCtx.roundRect || sgCtx.rect).call(sgCtx, x - pw / 2, y - ph / 2, pw, ph, ph / 2);
+        sgCtx.fill(); sgCtx.stroke();
+        sgCtx.shadowColor = HOT; sgCtx.shadowBlur = 8 * k; sgCtx.fillStyle = '#ffffff';
+        sgCtx.fillText(text, x, y);
     });
     sgCtx.restore();
 }
@@ -3716,7 +3726,9 @@ canvasDirectTextEditor.style.left=`${domX}px`;
 canvasDirectTextEditor.style.top=`${domY}px`;
 canvasDirectTextEditor.style.fontFamily=getCleanFont(el.fontFamily);
 canvasDirectTextEditor.style.fontSize=`${Math.max(14,(el.fontSize||20)*canvasScale)}px`;
-canvasDirectTextEditor.style.textAlign=el.textAlign||'center';
+canvasDirectTextEditor.style.textAlign=el.orgNode?(el.tAlign||'center'):(el.textAlign||'center');
+canvasDirectTextEditor.style.fontWeight=(el.orgNode&&el.tBold)?'bold':'';
+canvasDirectTextEditor.style.fontStyle=(el.orgNode&&el.tItalic)?'italic':'';
 canvasDirectTextEditor.style.color=el.orgNode ? (el.colorOverlay || '#111') : (el.color||'#fff');
 canvasDirectTextEditor.style.transform=el.rotation?`rotate(${el.rotation}deg)`:'none';
 canvasDirectTextEditor.innerText=el.text||'';
@@ -3951,7 +3963,7 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
     let lineGroupY = {};
 
     for (let other of s.elements) {
-        if (other.id === el.id || other.groupId === el.groupId || other.type === 'connector') continue;
+        if (other.id === el.id || (el.groupId && other.groupId === el.groupId) || other.type === 'connector') continue;
         const ob = getElementBounds(other);
         otherElementsY.push(ob);
         otherElementsX.push(ob);
@@ -4132,14 +4144,45 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
         }
     }
 
-    if (isGapSnapY) {
-        smartLines = smartLines.filter(l => !l.gapIndicator && !l.gapIndicatorX);
-        smartLines.push(...gapLinesY);
+    {   // Equal spacing: elemen aktif DI ANTARA dua elemen (A | aktif | B) -> jarak kiri = jarak kanan
+        const aw = activeBounds.w, ah = activeBounds.h;
+        const vOv = otherElementsX.filter(o => o.t < activeBounds.b && o.b > activeBounds.t);
+        let bx = null;
+        for (const A of vOv) for (const B of vOv) {
+            if (A === B || B.l - A.r - aw < 2) continue;
+            const nx = (A.r + B.l) / 2, d = Math.abs(activeBounds.cx - nx);
+            if (d <= minDiffX && (!bx || d < bx.d)) bx = {A, B, nx, d};
+        }
+        if (bx) {
+            minDiffX = bx.d; bestSnapX = bx.nx - cxOffset; isGapSnapX = true;
+            const yM = (bx.A.cy + bx.B.cy + activeBounds.cy) / 3;
+            gapLinesX = [
+                {y: yM, x1: bx.A.r, x2: bx.nx - aw / 2, gapIndicatorX: true},
+                {y: yM, x1: bx.nx + aw / 2, x2: bx.B.l, gapIndicatorX: true}
+            ];
+        }
+        const hOv = otherElementsY.filter(o => o.l < activeBounds.r && o.r > activeBounds.l);
+        let by = null;
+        for (const A of hOv) for (const B of hOv) {
+            if (A === B || B.t - A.b - ah < 2) continue;
+            const ny = (A.b + B.t) / 2, d = Math.abs(activeBounds.cy - ny);
+            if (d <= minDiffY && (!by || d < by.d)) by = {A, B, ny, d};
+        }
+        if (by) {
+            minDiffY = by.d; bestSnapY = by.ny - cyOffset; isGapSnapY = true;
+            const xM = (by.A.cx + by.B.cx + activeBounds.cx) / 3;
+            gapLinesY = [
+                {x: xM, y1: by.A.b, y2: by.ny - ah / 2, gapIndicator: true},
+                {x: xM, y1: by.ny + ah / 2, y2: by.B.t, gapIndicator: true}
+            ];
+        }
     }
-    if (isGapSnapX) {
-        smartLines = smartLines.filter(l => !l.gapIndicator && !l.gapIndicatorX);
-        smartLines.push(...gapLinesX);
-    }
+
+    // buang garis sejajar yang sudah usang pada sumbu yang dimenangkan snap jarak, lalu tambahkan garis jarak
+    if (isGapSnapX) smartLines = smartLines.filter(l => l.isY !== false);
+    if (isGapSnapY) smartLines = smartLines.filter(l => l.isY !== true);
+    if (isGapSnapY) smartLines.push(...gapLinesY);
+    if (isGapSnapX) smartLines.push(...gapLinesX);
 
     if (bestSnapX !== null) targetX = bestSnapX;
     if (bestSnapY !== null) targetY = bestSnapY;
@@ -4246,6 +4289,7 @@ bar.innerHTML=`
 <button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
 <button class="tool-btn" onclick="openTableEditor()"><span class="icon">✏️</span><span>Edit Data</span></button>
 <button class="tool-btn" onclick="openPanelTableStyle()"><span class="icon">🎨</span><span>Warna & Garis</span></button>
+<button class="tool-btn" onclick="openPanelBoxTextFormat()"><span class="icon"><b>B</b><i>I</i></span><span>Format Teks</span></button>
 <button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
@@ -4264,6 +4308,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openDirectCanvasTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit Teks</span></button>
 <button class="tool-btn" onclick="addOrgChild()"><span class="icon">⬇️</span><span>Tambah Anak</span></button>
 <button class="tool-btn" onclick="addOrgSibling()"><span class="icon">➡️</span><span>Tambah Samping</span></button>
+<button class="tool-btn" onclick="openPanelBoxTextFormat()"><span class="icon"><b>B</b><i>I</i></span><span>Format Teks</span></button>
 <button class="tool-btn" onclick="openPanelShapeColor()"><span class="icon">🎨</span><span>Warna Kotak</span></button>
 <button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
@@ -4502,6 +4547,52 @@ function openPanelTableStyle() {
 
 function updateTableBorderColor(c) { const el = getActiveElement(); if(el) el.borderColor = c; renderAll(); pushHistoryState(); openPanelTableStyle(); }
 function updateTableBorderWidth(v) { const el = getActiveElement(); if(el) el.borderWidth = parseInt(v); const l = document.getElementById('valTableBorderW'); if(l) l.innerText=v+'px'; renderAll(); debouncedPushHistory(); }
+
+function openPanelBoxTextFormat() {
+    const el = getActiveElement();
+    if (!el || !(el.type === 'table' || (el.type === 'shape' && el.orgNode))) return;
+    const al = el.tAlign || 'center';
+    const size = el.type === 'table' ? (el.tFont || (el.cells[0] && el.cells[0][0] && el.cells[0][0].fontSize) || 24) : (el.fontSize || 16);
+    const pad = el.tPad !== undefined ? el.tPad : 14;
+    const html = `
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;">FORMAT TEKS:</div>
+    <div class="ctrl-grid-btns" style="margin-top:6px;">
+        <button class="btn-sub-tool ${el.tBold?'active':''}" onclick="setBoxText('tBold',!getActiveElement().tBold)"><b>B</b> Tebal</button>
+        <button class="btn-sub-tool ${el.tItalic?'active':''}" onclick="setBoxText('tItalic',!getActiveElement().tItalic)"><i>I</i> Miring</button>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-top:12px;">PERATAAN TEKS:</div>
+    <div class="ctrl-grid-btns" style="margin-top:6px;">
+        <button class="btn-sub-tool ${al==='left'?'active':''}" onclick="setBoxText('tAlign','left')">⬅️ Kiri</button>
+        <button class="btn-sub-tool ${al==='center'?'active':''}" onclick="setBoxText('tAlign','center')">↔️ Tengah</button>
+        <button class="btn-sub-tool ${al==='right'?'active':''}" onclick="setBoxText('tAlign','right')">➡️ Kanan</button>
+        <button class="btn-sub-tool ${al==='justify'?'active':''}" onclick="setBoxText('tAlign','justify')">📑 Padat Kotak</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Ukuran Font:</span><span class="ctrl-val" id="valBoxFont">${size}px</span></div>
+    <div class="stepper-row">
+        <button class="btn-step" onclick="stepSliderVal('boxFontSlider',-1,setBoxFont)">-</button>
+        <input type="range" class="ctrl-slider" id="boxFontSlider" min="8" max="120" value="${size}" oninput="setBoxFont(this.value)">
+        <button class="btn-step" onclick="stepSliderVal('boxFontSlider',1,setBoxFont)">+</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Jarak Teks ke Garis:</span><span class="ctrl-val" id="valBoxPad">${pad}px</span></div>
+    <div class="stepper-row">
+        <button class="btn-step" onclick="stepSliderVal('boxPadSlider',-1,setBoxPad)">-</button>
+        <input type="range" class="ctrl-slider" id="boxPadSlider" min="0" max="60" value="${pad}" oninput="setBoxPad(this.value)">
+        <button class="btn-step" onclick="stepSliderVal('boxPadSlider',1,setBoxPad)">+</button>
+    </div>`;
+    openToolPanel('🔠 Format Teks', html);
+}
+function setBoxText(prop, val) { const el = getActiveElement(); if (!el) return; el[prop] = val; renderAll(); pushHistoryState(); openPanelBoxTextFormat(); }
+function setBoxFont(v) {
+    const el = getActiveElement(); if (!el) return; v = parseInt(v);
+    if (el.type === 'table') el.tFont = v; else el.fontSize = v;
+    const l = document.getElementById('valBoxFont'); if (l) l.innerText = v + 'px';
+    requestRender(); debouncedPushHistory();
+}
+function setBoxPad(v) {
+    const el = getActiveElement(); if (!el) return; v = parseInt(v); el.tPad = v;
+    const l = document.getElementById('valBoxPad'); if (l) l.innerText = v + 'px';
+    requestRender(); debouncedPushHistory();
+}
 
 function generateOrgChart() {
     const s = getCurrentSlide();
