@@ -1,5 +1,5 @@
 <!--
-Berikut adalah perbaikan komprehensif (Update v1.1.8) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan 4 poin instruksi ketat Anda. 
+Berikut adalah perbaikan komprehensif (Update v1.1.9) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan 4 poin instruksi ketat Anda. 
 
 Semua fitur baru (Smart Alignment Neon Solid, Equidistant Guides, Tabel Excel-style, dan Bagan Organisasi) telah saya rancang secara *native* menyatu ke dalam Canvas 2D engine tanpa mengganggu fitur lain (Zero Regression).
 
@@ -859,7 +859,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.1.8'; 
+const APP_VERSION = 'v1.1.9'; 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -1028,6 +1028,7 @@ const img=new Image();
 img.crossOrigin="anonymous";
 img.src=src;
 img.onload=()=>{
+    invalidateCachesForSrc(src);
     renderPending=false;
     requestRender();
 };
@@ -1161,6 +1162,47 @@ if(!renderPending){
 renderPending=true;
 requestAnimationFrame(()=>{renderPending=false;renderAll();});
 }
+}
+
+function invalidateAllRenderCaches() {
+    if (typeof slides === 'undefined' || !slides) return;
+    slides.forEach(s => {
+        if (s.elements) s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; el._calculatedHeight = null; el._renderedW = null; });
+    });
+}
+function invalidateCachesForSrc(src) {
+    if (typeof slides === 'undefined' || !slides) return;
+    slides.forEach(s => (s.elements || []).forEach(el => {
+        let hit = el.textSkinSrc === src || el.imageSkinSrc === src || el.warpSrc === src || el.src === src || el.imgSrc === src;
+        if (!hit && el.type === 'table' && el.cells) hit = el.cells.some(r => r.some(c => c && c.bgImgSrc === src));
+        if (hit) { el._cachedCanvas = null; el._cachedHash = null; }
+    }));
+}
+var _rfTimer = 0;
+function scheduleFullRerender(delay, withThumbs) {
+    clearTimeout(_rfTimer);
+    _rfTimer = setTimeout(() => {
+        invalidateAllRenderCaches();
+        renderPending = false;
+        requestRender();
+        try { updateCurrentSlideThumb(); if (withThumbs) renderCarouselThumbs(); } catch (e) {}
+    }, delay === undefined ? 120 : delay);
+}
+function preloadSlideFonts() {
+    if (!document.fonts || !document.fonts.load || typeof slides === 'undefined' || !slides) return Promise.resolve();
+    const seen = new Set(), jobs = [];
+    slides.forEach(s => (s.elements || []).forEach(el => {
+        if (el.type !== 'text' || !el.fontFamily) return;
+        const fam = getCleanFont(el.fontFamily), st = new Set([(el.fontStyle || 'normal') + ' ' + (el.fontWeight || 'normal')]);
+        Object.values(el.wordStyles || {}).forEach(w => st.add((w.fontStyle || el.fontStyle || 'normal') + ' ' + (w.fontWeight || el.fontWeight || 'normal')));
+        st.forEach(v => {
+            const spec = v + ' 32px ' + fam;
+            if (seen.has(spec)) return;
+            seen.add(spec);
+            try { jobs.push(document.fonts.load(spec, el.text || undefined).catch(() => {})); } catch (e) {}
+        });
+    }));
+    return Promise.all(jobs);
 }
 
 function rawSerializeSlides(slidesList){
@@ -1361,6 +1403,7 @@ adjustArtboardSize();
 renderAll();
 pushHistoryState();
 
+if (document.fonts && document.fonts.addEventListener) { document.fonts.addEventListener('loadingdone', () => scheduleFullRerender(150)); }
 document.fonts.ready.then(() => {
     slides.forEach(s => {
         if(s.elements) {
@@ -3106,17 +3149,27 @@ function renderShapeElement(targetCtx, el) {
     }
 
     if (el.text) {
-        const fontSize = el.fontSize || 22;
         const padX = el.tPad !== undefined ? el.tPad : (el.orgNode ? 14 : 10);
-        const lineH = fontSize * 1.2;
+        const padY = el.orgNode ? Math.round(padX * 0.7) : 0;
         const tAlign = el.tAlign || 'center';
-        const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: el.tBold ? 'bold' : 'normal', fontStyle: el.tItalic ? 'italic' : 'normal'};
-        const lines = getWrappedLines(octx, el.text, Math.max(10, w - padX * 2), pseudoEl);
+        const availW = Math.max(10, w - padX * 2), availH = Math.max(10, h - padY * 2);
+        const layout = (fs) => {
+            const pe = {fontSize: fs, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: el.tBold ? 'bold' : 'normal', fontStyle: el.tItalic ? 'italic' : 'normal'};
+            const raw = getWrappedLines(octx, el.text, availW, pe);
+            octx.font = `${pe.fontStyle} ${pe.fontWeight} ${fs}px "Plus Jakarta Sans", sans-serif`;
+            return breakLongBoxWords(octx, raw, availW);
+        };
+        let fontSize = el.fontSize || 22, lines = layout(fontSize);
+        if (el.orgNode) {   // bagan: teks mengecil otomatis (hanya saat tampil) bila tinggi kotak tidak cukup
+            for (let g = 0; g < 40 && fontSize > 8 && lines.length * fontSize * 1.2 > availH; g++) {
+                fontSize = Math.max(8, Math.min(fontSize - 1, Math.floor(availH / (lines.length * 1.2))));
+                lines = layout(fontSize);
+            }
+        }
+        const lineH = fontSize * 1.2;
         octx.fillStyle = el.colorOverlay || '#111111';
-        octx.font = `${pseudoEl.fontStyle} ${pseudoEl.fontWeight} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
         octx.textBaseline = 'middle';
-        const startTextY = -(lines.length * lineH / 2) + (fontSize / 2);
-        drawBoxTextLines(octx, lines, tAlign, -w / 2 + padX, w / 2 - padX, startTextY, lineH);
+        drawBoxTextLines(octx, lines, tAlign, -w / 2 + padX, w / 2 - padX, -(lines.length * lineH / 2) + (fontSize / 2), lineH);
     }
 
     if(el.innerShadow && el.innerShadow.color !== 'transparent'){
@@ -3197,6 +3250,21 @@ function renderFadeElement(targetCtx, el) {
     if(rScale === 1) { el._cachedCanvas = off; el._cachedHash = hash; }
     targetCtx.drawImage(off, -w/2, -h/2, w, h);
     targetCtx.restore();
+}
+
+function breakLongBoxWords(c, lines, maxW) {
+    const out = [];
+    lines.forEach(line => {
+        const ws = line.words;
+        if (ws.length !== 1 || !ws[0] || c.measureText(ws[0]).width <= maxW) { out.push(line); return; }
+        const parts = []; let cur = '';
+        Array.from(ws[0]).forEach(ch => {
+            if (cur && c.measureText(cur + ch).width > maxW) { parts.push(cur); cur = ch; } else cur += ch;
+        });
+        if (cur) parts.push(cur);
+        parts.forEach((p, i) => out.push({words: [p], isLastLineOfPara: i === parts.length - 1 ? line.isLastLineOfPara : false, wordIndices: line.wordIndices}));
+    });
+    return out;
 }
 
 function drawBoxTextLines(c, lines, align, x0, x1, y0, lineH) {
@@ -3639,14 +3707,13 @@ function paintSmartGuides() {
             pA.moveTo(line.x1, line.y1); pA.lineTo(line.x2, line.y2);
         }
     });
-    const glow = (p, dash) => {
+    const glow = (p, dash) => {   // inti 1px = sama dengan garis emas seleksi; kesan neon hanya dari glow
         sgCtx.save();
-        sgCtx.lineCap = 'round';
+        sgCtx.lineCap = 'butt';
         sgCtx.setLineDash(dash ? [6 * k, 4 * k] : []);
-        sgCtx.shadowColor = GLOW;
-        sgCtx.shadowBlur = 18 * k; sgCtx.strokeStyle = 'rgba(176,38,255,0.45)'; sgCtx.lineWidth = 4 * k; sgCtx.stroke(p);
-        sgCtx.shadowBlur = 8 * k; sgCtx.strokeStyle = NEON; sgCtx.lineWidth = 2 * k; sgCtx.stroke(p);
-        sgCtx.shadowBlur = 0; sgCtx.strokeStyle = '#f3c9ff'; sgCtx.lineWidth = 0.8 * k; sgCtx.stroke(p);
+        sgCtx.strokeStyle = NEON; sgCtx.lineWidth = 1 * k;
+        sgCtx.shadowColor = 'rgba(212,0,255,0.55)'; sgCtx.shadowBlur = 12 * k; sgCtx.stroke(p);
+        sgCtx.shadowColor = 'rgba(212,0,255,0.9)'; sgCtx.shadowBlur = 4 * k; sgCtx.stroke(p);
         sgCtx.restore();
     };
     glow(pA, true); glow(pG, false);
@@ -3656,7 +3723,7 @@ function paintSmartGuides() {
     pills.forEach(([x, y, text]) => {
         const pw = sgCtx.measureText(text).width + 16 * k, ph = 22 * k;
         sgCtx.shadowColor = GLOW; sgCtx.shadowBlur = 12 * k;
-        sgCtx.fillStyle = 'rgba(20,0,40,0.78)'; sgCtx.strokeStyle = NEON; sgCtx.lineWidth = 1.2 * k;
+        sgCtx.fillStyle = 'rgba(20,0,40,0.78)'; sgCtx.strokeStyle = NEON; sgCtx.lineWidth = 1 * k;
         sgCtx.beginPath(); (sgCtx.roundRect || sgCtx.rect).call(sgCtx, x - pw / 2, y - ph / 2, pw, ph, ph / 2);
         sgCtx.fill(); sgCtx.stroke();
         sgCtx.shadowColor = HOT; sgCtx.shadowBlur = 8 * k; sgCtx.fillStyle = '#ffffff';
@@ -3764,6 +3831,7 @@ let dragMode=null;
 let activeHandle=null;
 let startPointer={x:0,y:0};
 let startElementState={};
+let dragPointerId=null;let dragMoved=false;const DRAG_DEAD_ZONE=6;
 let rotateCenter={x:0,y:0};
 let lastTapTime=0;
 let lastTapId=null;
@@ -3784,7 +3852,7 @@ const el=getActiveElement();
 if(!el||el.locked)return;
 e.stopPropagation();
 stalkMove.setPointerCapture(e.pointerId);
-dragMode='stalk-move';
+dragMode='stalk-move';dragMoved=false;
 startPointer={x:e.clientX,y:e.clientY};
 startElementState={x:el.x,y:el.y};
 prepareGroupMove(el);
@@ -3882,6 +3950,7 @@ if(!hitEl.locked){
 dragMode='move';
 startPointer={x:e.clientX,y:e.clientY};
 startElementState={x:hitEl.x,y:hitEl.y};
+dragPointerId=e.pointerId;dragMoved=false;
 prepareGroupMove(hitEl);
 }
 }else{
@@ -3913,8 +3982,14 @@ return(px>=centerX-halfW && px<=centerX+halfW && py>=centerY-halfH && py<=center
 
 function handleWindowPointerMove(e) {
 if(!dragMode) return;
+if(dragMode === 'move' && dragPointerId !== null && e.pointerId !== dragPointerId) return;
+if(e.pointerType === 'mouse' && e.buttons === 0) { handleWindowPointerUp(e); return; }
 const el = getActiveElement();
 if(!el || el.locked) return;
+if((dragMode === 'move' || dragMode === 'stalk-move') && !dragMoved) {
+    if(Math.hypot(e.clientX - startPointer.x, e.clientY - startPointer.y) < DRAG_DEAD_ZONE) return;
+    dragMoved = true;
+}
 const currentCanvasScale = canvasScale * userZoomScale;
 const deltaX = (e.clientX - startPointer.x) / currentCanvasScale;
 const deltaY = (e.clientY - startPointer.y) / currentCanvasScale;
@@ -4058,87 +4133,46 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
     let gapLinesY = [];
     let gapLinesX = [];
 
-    if (otherElementsY.length >= 1) {
-        otherElementsY.sort((a,b) => a.cy - b.cy);
-        for(let i=0; i<otherElementsY.length; i++) {
-            const gapRef = Math.abs(otherElementsY[i].t - activeBounds.b);
-            if (gapRef > 5) {
-                for(let j=0; j<otherElementsY.length; j++) {
-                    if (i === j) continue;
-                    const testGap = Math.abs(otherElementsY[j].t - otherElementsY[i].b);
-                    if (Math.abs(testGap - gapRef) < snapThreshold && Math.abs(testGap - gapRef) <= minDiffY) {
-                        minDiffY = Math.abs(testGap - gapRef);
-                        bestSnapY = otherElementsY[i].t - testGap - activeBounds.h/2;
-                        isGapSnapY = true;
-                        const testB = getElementBounds({ ...el, x: targetX, y: bestSnapY });
-                        const avgX = (otherElementsY[i].cx + otherElementsY[j].cx + testB.cx) / 3;
-                        gapLinesY = [
-                            {x: avgX, y1: testB.b, y2: otherElementsY[i].t, gapIndicator: true},
-                            {x: avgX, y1: otherElementsY[i].b, y2: otherElementsY[j].t, gapIndicator: true}
-                        ];
-                    }
+    // Equal spacing berantai (arah & sisi dicek): jarak elemen aktif ke tetangga = celah yang sudah ada antara dua elemen lain.
+    // Geseran snap selalu <= ambang, jadi elemen tidak pernah melompat ke sisi seberang / keluar kanvas.
+    const aB = activeBounds;
+    for (const P of otherElementsY) for (const Q of otherElementsY) {
+        if (P === Q) continue;
+        const gy = Q.t - P.b;                                    // P di atas Q
+        if (gy >= 2 && P.l < Q.r && P.r > Q.l) {
+            if (Q.l < aB.r && Q.r > aB.l) {                      // aktif di bawah Q
+                const ny = Q.b + gy + aB.h / 2, d = Math.abs(ny - aB.cy);
+                if (d <= minDiffY) {
+                    minDiffY = d; bestSnapY = ny - cyOffset; isGapSnapY = true;
+                    const xM = (P.cx + Q.cx + aB.cx) / 3;
+                    gapLinesY = [{x: xM, y1: P.b, y2: Q.t, gapIndicator: true}, {x: xM, y1: Q.b, y2: ny - aB.h / 2, gapIndicator: true}];
                 }
             }
-            
-            const gapRef2 = Math.abs(activeBounds.t - otherElementsY[i].b);
-            if (gapRef2 > 5) {
-                for(let j=0; j<otherElementsY.length; j++) {
-                    if (i === j) continue;
-                    const testGap = Math.abs(otherElementsY[i].t - otherElementsY[j].b);
-                    if (Math.abs(testGap - gapRef2) < snapThreshold && Math.abs(testGap - gapRef2) <= minDiffY) {
-                        minDiffY = Math.abs(testGap - gapRef2);
-                        bestSnapY = otherElementsY[i].b + testGap + activeBounds.h/2;
-                        isGapSnapY = true;
-                        const testB = getElementBounds({ ...el, x: targetX, y: bestSnapY });
-                        const avgX = (otherElementsY[i].cx + otherElementsY[j].cx + testB.cx) / 3;
-                        gapLinesY = [
-                            {x: avgX, y1: otherElementsY[j].b, y2: otherElementsY[i].t, gapIndicator: true},
-                            {x: avgX, y1: otherElementsY[i].b, y2: testB.t, gapIndicator: true}
-                        ];
-                    }
+            if (P.l < aB.r && P.r > aB.l) {                      // aktif di atas P
+                const ny = P.t - gy - aB.h / 2, d = Math.abs(ny - aB.cy);
+                if (d <= minDiffY) {
+                    minDiffY = d; bestSnapY = ny - cyOffset; isGapSnapY = true;
+                    const xM = (P.cx + Q.cx + aB.cx) / 3;
+                    gapLinesY = [{x: xM, y1: ny + aB.h / 2, y2: P.t, gapIndicator: true}, {x: xM, y1: P.b, y2: Q.t, gapIndicator: true}];
                 }
             }
         }
-    }
-
-    if (otherElementsX.length >= 1) {
-        otherElementsX.sort((a,b) => a.cx - b.cx);
-        for(let i=0; i<otherElementsX.length; i++) {
-            const gapRef = Math.abs(otherElementsX[i].l - activeBounds.r);
-            if (gapRef > 5) {
-                for(let j=0; j<otherElementsX.length; j++) {
-                    if (i === j) continue;
-                    const testGap = Math.abs(otherElementsX[j].l - otherElementsX[i].r);
-                    if (Math.abs(testGap - gapRef) < snapThreshold && Math.abs(testGap - gapRef) <= minDiffX) {
-                        minDiffX = Math.abs(testGap - gapRef);
-                        bestSnapX = otherElementsX[i].l - testGap - activeBounds.w/2;
-                        isGapSnapX = true;
-                        const testB = getElementBounds({ ...el, x: bestSnapX, y: targetY });
-                        const avgY = (otherElementsX[i].cy + otherElementsX[j].cy + testB.cy) / 3;
-                        gapLinesX = [
-                            {y: avgY, x1: testB.r, x2: otherElementsX[i].l, gapIndicatorX: true},
-                            {y: avgY, x1: otherElementsX[i].r, x2: otherElementsX[j].l, gapIndicatorX: true}
-                        ];
-                    }
+        const gx = Q.l - P.r;                                    // P di kiri Q
+        if (gx >= 2 && P.t < Q.b && P.b > Q.t) {
+            if (Q.t < aB.b && Q.b > aB.t) {                      // aktif di kanan Q
+                const nx = Q.r + gx + aB.w / 2, d = Math.abs(nx - aB.cx);
+                if (d <= minDiffX) {
+                    minDiffX = d; bestSnapX = nx - cxOffset; isGapSnapX = true;
+                    const yM = (P.cy + Q.cy + aB.cy) / 3;
+                    gapLinesX = [{y: yM, x1: P.r, x2: Q.l, gapIndicatorX: true}, {y: yM, x1: Q.r, x2: nx - aB.w / 2, gapIndicatorX: true}];
                 }
             }
-            
-            const gapRef2 = Math.abs(activeBounds.l - otherElementsX[i].r);
-            if (gapRef2 > 5) {
-                for(let j=0; j<otherElementsX.length; j++) {
-                    if (i === j) continue;
-                    const testGap = Math.abs(otherElementsX[i].l - otherElementsX[j].r);
-                    if (Math.abs(testGap - gapRef2) < snapThreshold && Math.abs(testGap - gapRef2) <= minDiffX) {
-                        minDiffX = Math.abs(testGap - gapRef2);
-                        bestSnapX = otherElementsX[i].r + testGap + activeBounds.w/2;
-                        isGapSnapX = true;
-                        const testB = getElementBounds({ ...el, x: bestSnapX, y: targetY });
-                        const avgY = (otherElementsX[i].cy + otherElementsX[j].cy + testB.cy) / 3;
-                        gapLinesX = [
-                            {y: avgY, x1: otherElementsX[j].r, x2: otherElementsX[i].l, gapIndicatorX: true},
-                            {y: avgY, x1: otherElementsX[i].r, x2: testB.l, gapIndicatorX: true}
-                        ];
-                    }
+            if (P.t < aB.b && P.b > aB.t) {                      // aktif di kiri P
+                const nx = P.l - gx - aB.w / 2, d = Math.abs(nx - aB.cx);
+                if (d <= minDiffX) {
+                    minDiffX = d; bestSnapX = nx - cxOffset; isGapSnapX = true;
+                    const yM = (P.cy + Q.cy + aB.cy) / 3;
+                    gapLinesX = [{y: yM, x1: nx + aB.w / 2, x2: P.l, gapIndicatorX: true}, {y: yM, x1: P.r, x2: Q.l, gapIndicatorX: true}];
                 }
             }
         }
@@ -4184,8 +4218,9 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
     if (isGapSnapY) smartLines.push(...gapLinesY);
     if (isGapSnapX) smartLines.push(...gapLinesX);
 
-    if (bestSnapX !== null) targetX = bestSnapX;
-    if (bestSnapY !== null) targetY = bestSnapY;
+    // pengaman: snap tidak boleh menggeser elemen lebih jauh dari ambang
+    if (bestSnapX !== null && Math.abs(bestSnapX - targetX) <= snapThreshold + 0.5) targetX = bestSnapX;
+    if (bestSnapY !== null && Math.abs(bestSnapY - targetY) <= snapThreshold + 0.5) targetY = bestSnapY;
 
     drawSmartGuides(smartLines);
 
@@ -4248,10 +4283,11 @@ requestRender();
 }
 }
 
-function handleWindowPointerUp(){
+function handleWindowPointerUp(e){
+if(e && dragMode === 'move' && dragPointerId !== null && e.pointerId !== dragPointerId) return;
 hideSnapGuides();
 if(dragMode){
-dragMode=null;
+dragMode=null;dragPointerId=null;dragMoved=false;
 const el=getActiveElement();
 if(el){el.x=Math.round(el.x);el.y=Math.round(el.y);}
 const s=getCurrentSlide();
@@ -8578,6 +8614,9 @@ if(p.fonts && p.fonts.length > 0) {
 }
 
 adjustArtboardSize();renderAll();renderCarouselThumbs();renderBottomToolbar();pushHistoryState();closeProjectModal();showToast(`✅ Membuka: ${p.name}`);
+scheduleFullRerender(0, true);
+preloadSlideFonts().then(() => scheduleFullRerender(0, true));
+setTimeout(() => scheduleFullRerender(0, true), 700);
 }
 
 async function deleteProjectById(id){
