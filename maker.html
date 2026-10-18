@@ -1,7 +1,12 @@
 <!--
-Studio Poster Maker Pro - Update v1.2.0
+Studio Poster Maker Pro - Update v1.2.1
 
-PERBAIKAN:
+v1.2.1:
+- Panel WARNA untuk Bentuk dan Kotak Bagan (tombol "Warna" / "Warna Kotak") dibuat: warna isi kotak
+  (termasuk transparan) dan, khusus kotak bagan, warna teks. Sebelumnya tombol ini tidak berfungsi
+  karena fungsi panelnya tidak ada.
+
+v1.2.0:
 1. TABEL
    - Duplikat slide: data tiap slide kini benar-benar terpisah (isi sel, lebar kolom, tinggi baris, pengaturan).
      Slide lama yang sudah terlanjur "terhubung" otomatis dipisahkan saat projek dimuat.
@@ -887,7 +892,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.2.0';
+const APP_VERSION = 'v1.2.1';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -4860,6 +4865,48 @@ function openPanelConnectorColor() {
 }
 function updateConnectorColor(c) { const el = getActiveElement(); if(el) el.color = c; renderAll(); pushHistoryState(); openPanelConnectorColor(); }
 function updateConnectorWidth(v) { const el = getActiveElement(); if(el) el.borderWidth = parseInt(v); const l = document.getElementById('valConnBorderW'); if(l) l.innerText=v+'px'; renderAll(); debouncedPushHistory(); }
+
+/* ===== Panel Warna Bentuk & Kotak Bagan (v1.2.1) ===== */
+/* Rapikan masukan warna: terima "#RRGGBB", "RRGGBB", "#RGB", nama warna CSS, "transparent". Kembalikan null bila tidak valid. */
+function normalizePanelColor(v) {
+    let c = String(v === undefined || v === null ? '' : v).trim();
+    if (!c) return null;
+    if (c.toLowerCase() === 'transparent') return 'transparent';
+    if (/^([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(c)) c = '#' + c;
+    if (/^#[0-9a-f]{3}$/i.test(c)) c = '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3];
+    if (window.CSS && CSS.supports && !CSS.supports('color', c)) return null;
+    return c;
+}
+
+function openPanelShapeColor() {
+    const el = getActiveElement(); if (!el || el.type !== 'shape') return;
+    const hasText = !!(el.orgNode || el.text);
+    const fill = el.color || '#D4AF37';
+    const html = `
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">${el.orgNode ? 'WARNA KOTAK:' : 'WARNA BENTUK:'}</div>
+    ${getColorPickerHTML(fill, 'updateShapeColor', true)}
+    ${hasText ? `
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin:16px 0 8px;">WARNA TEKS:</div>
+    ${getColorPickerHTML(el.colorOverlay || '#111111', 'updateShapeTextColor', false)}` : ''}
+    `;
+    openToolPanel(el.orgNode ? '🎨 Warna Kotak' : '🎨 Warna Bentuk', html);
+}
+
+function updateShapeColor(c) {
+    const el = getActiveElement(); if (!el || el.type !== 'shape') return;
+    const col = normalizePanelColor(c);
+    if (col === null) { showToast('⚠️ Kode warna tidak valid'); openPanelShapeColor(); return; }
+    el.color = col;
+    renderAll(); pushHistoryState(); openPanelShapeColor();
+}
+
+function updateShapeTextColor(c) {
+    const el = getActiveElement(); if (!el || el.type !== 'shape') return;
+    const col = normalizePanelColor(c);
+    if (col === null || col === 'transparent') { showToast('⚠️ Kode warna tidak valid'); openPanelShapeColor(); return; }
+    el.colorOverlay = col;
+    renderAll(); pushHistoryState(); openPanelShapeColor();
+}
 
 function openPanelFadeEdge() {
     let el = getActiveElement();
