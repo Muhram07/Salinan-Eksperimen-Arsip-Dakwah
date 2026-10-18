@@ -1,14 +1,16 @@
 <!--
-Berikut adalah perbaikan komprehensif (Update v1.2.0) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan instruksi ketat Anda. 
+Studio Poster Maker Pro - Update v1.2.0
 
-Perbaikan meliputi:
-1. Deep Cloning Tabel: Tabel tidak akan saling terkait lagi ketika diduplikat antar slide.
-2. Format Cell Tabel & Indeks Tabel: Penambahan bold/italic untuk tiap kotak dan penomoran (baris/kolom) agar tidak bingung.
-3. Editor Teks Bagan (OrgNode): `#canvasDirectTextEditor` kini mewarisi warna background, border, dan padding dari node aslinya sehingga teks terbaca sangat jelas saat diedit.
-
-*(Karena ukuran kode yang masif, jika output ini terpotong, cukup ketik **"Lanjut"**).*
+PERBAIKAN:
+1. TABEL
+   - Duplikat slide: data tiap slide kini benar-benar terpisah (isi sel, lebar kolom, tinggi baris, pengaturan).
+     Slide lama yang sudah terlanjur "terhubung" otomatis dipisahkan saat projek dimuat.
+   - Format Bold & Miring per kotak (sel) di Editor Data Tabel.
+   - Nomor Baris & Kolom (tetap terlihat saat digulir) di Editor Data Tabel.
+   - Jarak teks kiri-kanan dalam kotak dilebarkan.
+2. BAGAN
+   - Saat mengetik teks, kotak bagan diberi latar sementara (warna kotak) agar teks selalu terlihat.
 -->
-
 
 <!DOCTYPE html>
 <html lang="id">
@@ -298,6 +300,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 #svCanvas { touch-action: none; }
 #hueCanvas { touch-action: none; }
 #alphaCanvas { touch-action: none; }
+
+/* ===== Editor Data Tabel (v1.2.0): nomor baris & kolom tetap terlihat saat digulir + Bold/Miring per kotak ===== */
+#tableEditorScroll{background:#0b0b0b;border-radius:8px;scroll-padding:52px 0 0 58px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.tbl-ed-corner,.tbl-ed-colh,.tbl-ed-rowh{background:#1b1b1b;color:#D4AF37;font-weight:800;display:flex;align-items:center;justify-content:center;border:1px solid rgba(212,175,55,.45);border-radius:6px;user-select:none;-webkit-user-select:none;}
+.tbl-ed-corner{position:sticky;top:0;left:0;z-index:4;font-size:14px;box-shadow:0 4px 0 #0b0b0b,4px 0 0 #0b0b0b,4px 4px 0 #0b0b0b;}
+.tbl-ed-colh{position:sticky;top:0;z-index:3;font-size:12px;padding:8px 4px;box-shadow:0 4px 0 #0b0b0b;}
+.tbl-ed-rowh{position:sticky;left:0;z-index:2;flex-direction:column;font-size:16px;line-height:1.1;box-shadow:4px 0 0 #0b0b0b;}
+.tbl-ed-rowh small{font-size:8px;font-weight:700;letter-spacing:.5px;opacity:.85;}
+.tbl-ed-colh.on,.tbl-ed-rowh.on{background:#D4AF37;color:#111;border-color:#FFE259;}
+.tbl-ed-cell{display:flex;flex-direction:column;gap:5px;background:rgba(255,255,255,.05);padding:6px;border:1px solid #D4AF37;border-radius:6px;min-width:0;}
+.tbl-ed-cell:focus-within{background:rgba(212,175,55,.14);border-color:#FFE259;}
+.tbl-ed-tag{font-size:9px;font-weight:700;color:#D4AF37;opacity:.85;text-align:left;}
+.tbl-ed-input{background:#111;color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 4px;font-size:12px;width:100%;border-radius:4px;text-align:center;user-select:text;-webkit-user-select:text;}
+.tbl-ed-ctrls{display:flex;gap:6px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;margin-top:2px;}
+.tbl-ed-grp{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.tbl-ed-grp>span{font-size:9px;color:#aaa;}
+.tbl-ed-fmt-row{display:flex;gap:3px;}
+.tbl-ed-fmt{width:24px;height:22px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:#222;color:#fff;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+.tbl-ed-fmt.active{background:#D4AF37;color:#111;border-color:#FFE259;}
+.tbl-ed-color{width:22px;height:22px;border:none;padding:0;cursor:pointer;background:transparent;}
+.tbl-ed-size{width:34px;height:22px;background:#222;color:#fff;border:1px solid #D4AF37;border-radius:4px;font-size:11px;text-align:center;padding:0;}
 </style>
 </head>
 <body>
@@ -401,14 +424,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <div style="font-weight:800;color:#D4AF37;font-size:13px;">✏️ Editor Data Tabel</div>
         <button class="panel-close" onclick="closeTableEditor()">✕</button>
     </div>
-    <div class="fmodal-body" id="tableModalBody" style="flex-direction:column; padding:16px; align-items:flex-start; justify-content:flex-start; overflow:auto; width: 100%; touch-action: pan-x pan-y;">
-        <div style="display:flex; gap:10px; margin-bottom:10px; width: 100%; flex-wrap: wrap;">
+    <div class="fmodal-body" id="tableModalBody" style="flex-direction:column; padding:16px; align-items:flex-start; justify-content:flex-start; overflow:hidden; width: 100%; touch-action: pan-x pan-y;">
+        <div style="display:flex; gap:10px; margin-bottom:10px; width: 100%; flex-wrap: wrap; flex-shrink:0; align-items:center;">
             <button class="btn-sub-tool" onclick="addTableRow()">➕ Baris Bawah</button>
             <button class="btn-sub-tool" onclick="addTableCol()">➕ Kolom Kanan</button>
             <button class="btn-sub-tool" style="color:#ff6b6b;" onclick="removeTableRow()">➖ Hapus Baris</button>
             <button class="btn-sub-tool" style="color:#ff6b6b;" onclick="removeTableCol()">➖ Hapus Kolom</button>
+            <span id="tableEditorInfo" style="font-size:10px; color:#9CA3AF; font-weight:700; margin-left:auto;"></span>
         </div>
-        <div style="width:100%; overflow-x:auto; touch-action: pan-x pan-y; padding-bottom: 20px;">
+        <div id="tableEditorScroll" style="width:100%; flex:1 1 auto; min-height:0; overflow:auto; touch-action: pan-x pan-y; padding-bottom: 20px;">
             <div id="tableEditorGrid" style="display:grid; gap:4px; width:max-content; min-width:100%;"></div>
         </div>
     </div>
@@ -863,7 +887,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.2.0'; 
+const APP_VERSION = 'v1.2.0';
+const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
 const QUICK_COLORS=['#FFFFFF','#D4AF37','#FFE259','#E5E7EB','#9CA3AF','#000000','#1F2937','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#14B8A6','#6366F1'];
@@ -1209,24 +1234,27 @@ function preloadSlideFonts() {
     return Promise.all(jobs);
 }
 
+/* Salin mendalam data polos (array/objek). Objek non-polos (Image, Canvas, dll) dibiarkan sebagai referensi. */
+function deepCopyData(v){
+    if(v===null||typeof v!=='object')return v;
+    if(Array.isArray(v)){
+        const a=new Array(v.length);
+        for(let i=0;i<v.length;i++)a[i]=deepCopyData(v[i]);
+        return a;
+    }
+    const proto=Object.getPrototypeOf(v);
+    if(proto!==Object.prototype&&proto!==null)return v;
+    const o={};
+    for(const k in v){if(Object.prototype.hasOwnProperty.call(v,k))o[k]=deepCopyData(v[k]);}
+    return o;
+}
+
 function rawSerializeSlides(slidesList){
     return slidesList.map(s=>({
         ...s,
         background:{...s.background,imgSrc:s.background.img?s.background.img.src:(s.background.imgSrc||null),img:undefined},
         elements:s.elements.map(el=>{
             const copy={...el};
-            
-            if(el.cells) copy.cells = JSON.parse(JSON.stringify(el.cells));
-            if(el.colWidths) copy.colWidths = [...el.colWidths];
-            if(el.rowHeights) copy.rowHeights = [...el.rowHeights];
-            if(el.wordStyles) copy.wordStyles = JSON.parse(JSON.stringify(el.wordStyles));
-            if(el.colorStops) copy.colorStops = JSON.parse(JSON.stringify(el.colorStops));
-            if(el.filters) copy.filters = {...el.filters};
-            if(el.shadow) copy.shadow = {...el.shadow};
-            if(el.innerShadow) copy.innerShadow = {...el.innerShadow};
-            if(el.transparency) copy.transparency = JSON.parse(JSON.stringify(el.transparency));
-            if(el.advancedColor) copy.advancedColor = JSON.parse(JSON.stringify(el.advancedColor));
-
             if(el.type==='image'){
                 copy.imgSrc=el.src||(el.img?el.img.src:copy.imgSrc);
                 delete copy.img;
@@ -1256,7 +1284,7 @@ function serializeSlides(slidesList){
 function deserializeSlides(rawSlides){
 return rawSlides.map(s=>{
 const bgSrc=s.background.imgSrc||(s.background.img&&s.background.img.src);
-let parsedBg = {...s.background, imgSrc:bgSrc, img:bgSrc?getImageFromCache(bgSrc):null};
+let parsedBg = {...deepCopyData(s.background), imgSrc:bgSrc, img:bgSrc?getImageFromCache(bgSrc):null};
 if(!parsedBg.bgType) {
     if(parsedBg.img || parsedBg.imgSrc) parsedBg.bgType = 'image';
     else parsedBg.bgType = 'fountain';
@@ -1267,7 +1295,7 @@ return{
 ...s,
 background:parsedBg,
 elements:s.elements.map(el=>{
-const copy={...el};
+const copy=deepCopyData(el);
 if(copy.type==='image'){
 const src=copy.imgSrc||copy.src;
 copy.src=src;
@@ -3176,7 +3204,7 @@ function renderShapeElement(targetCtx, el) {
             return breakLongBoxWords(octx, raw, availW);
         };
         let fontSize = el.fontSize || 22, lines = layout(fontSize);
-        if (el.orgNode) {   
+        if (el.orgNode) {   // bagan: teks mengecil otomatis (hanya saat tampil) bila tinggi kotak tidak cukup
             for (let g = 0; g < 40 && fontSize > 8 && lines.length * fontSize * 1.2 > availH; g++) {
                 fontSize = Math.max(8, Math.min(fontSize - 1, Math.floor(availH / (lines.length * 1.2))));
                 lines = layout(fontSize);
@@ -3332,7 +3360,7 @@ function renderTableElement(targetCtx, el) {
         const rowH = (el.rowHeights[r] / 100) * H;
         for (let c = 0; c < el.cols; c++) {
             const colW = (el.colWidths[c] / 100) * W;
-            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', bgColor:'transparent', color:'#fff', bgImgSrc:null, fontSize:24, fontWeight:'bold', isBold:false, isItalic:false};
+            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', bgColor:'transparent', color:'#fff', bgImgSrc:null, fontSize:24, fontWeight:'bold'};
             
             if (cell.bgColor && cell.bgColor !== 'transparent') {
                 octx.fillStyle = cell.bgColor;
@@ -3347,15 +3375,13 @@ function renderTableElement(targetCtx, el) {
             
             if (cell.text) {
                 const fontSize = el.tFont || cell.fontSize || Math.min(24, rowH * 0.4);
-                const padX = el.tPad !== undefined ? el.tPad : 14;
-                const padY = Math.round(padX * 0.7);
+                // Jarak kiri-kanan: bila belum diatur manual, pakai bawaan lebar (menyesuaikan lebar kolom agar kolom sempit tidak sesak)
+                const padX = el.tPad !== undefined ? el.tPad : Math.round(Math.max(14, Math.min(TABLE_DEFAULT_PAD_X, colW * 0.14)));
+                const padY = Math.round((el.tPad !== undefined ? el.tPad : 14) * 0.7);
                 const lineH = fontSize * 1.3;
                 const tAlign = el.tAlign || 'center';
-                
-                // FIX: Support Bold/Italic per cell
-                const cellBold = cell.isBold !== undefined ? cell.isBold : el.tBold;
-                const cellItalic = cell.isItalic !== undefined ? cell.isItalic : el.tItalic;
-
+                const cellBold = cell.bold !== undefined ? !!cell.bold : !!el.tBold;
+                const cellItalic = cell.italic !== undefined ? !!cell.italic : !!el.tItalic;
                 const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: cellBold ? 'bold' : 'normal', fontStyle: cellItalic ? 'italic' : 'normal'};
                 const lines = getWrappedLines(octx, cell.text, Math.max(10, colW - padX * 2), pseudoEl);
                 octx.fillStyle = cell.color || '#fff';
@@ -3694,7 +3720,7 @@ snapGuideV.style.display='none';
 drawSmartGuides([]);
 }
 
-var _sgLines = [], _sgRaf = 0;
+var _sgLines = [], _sgRaf = 0; // var: aman dipanggil sebelum baris ini dieksekusi (hindari TDZ)
 function drawSmartGuides(lines) {
     if (!lines || lines.length === 0) {
         if (_sgRaf) { cancelAnimationFrame(_sgRaf); _sgRaf = 0; }
@@ -3710,7 +3736,7 @@ function paintSmartGuides() {
     _sgRaf = 0;
     sgCtx.clearRect(0, 0, smartGuideCanvas.width, smartGuideCanvas.height);
     if (!_sgLines.length) return;
-    const k = 1 / Math.max(0.05, canvasScale * userZoomScale);
+    const k = 1 / Math.max(0.05, canvasScale * userZoomScale); // ukuran konstan di layar
     const NEON = '#b026ff', GLOW = '#d400ff', HOT = '#ff7bff';
     const pA = new Path2D(), pG = new Path2D(), pills = [], tk = 6 * k;
     _sgLines.forEach(line => {
@@ -3728,7 +3754,7 @@ function paintSmartGuides() {
             pA.moveTo(line.x1, line.y1); pA.lineTo(line.x2, line.y2);
         }
     });
-    const glow = (p, dash) => {
+    const glow = (p, dash) => {   // inti 1px = sama dengan garis emas seleksi; kesan neon hanya dari glow
         sgCtx.save();
         sgCtx.lineCap = 'butt';
         sgCtx.setLineDash(dash ? [6 * k, 4 * k] : []);
@@ -3796,6 +3822,19 @@ closeDirectCanvasTextEditor();
 });
 }
 
+/* Warna latar sementara editor teks untuk kotak bagan: ikut warna kotak; bila kotak transparan, pilih warna yang kontras dengan warna teks */
+function getOrgEditorBackground(el){
+    const txt=el.colorOverlay || '#111111';
+    const fill=el.color;
+    if(fill && fill!=='transparent'){
+        const p=parseColorToRGBAObj(String(fill));
+        if(p.a>=0.6) return fill;
+    }
+    const t=parseColorToRGBAObj(String(txt));
+    const lum=(0.299*t.r+0.587*t.g+0.114*t.b)/255;
+    return lum<0.5 ? '#E5E7EB' : '#1F2937';
+}
+
 function openDirectCanvasTextEditor(el){
 if(!el||(el.type!=='text' && !el.orgNode))return;
 isEditingText=true;
@@ -3818,6 +3857,16 @@ canvasDirectTextEditor.style.textAlign=el.orgNode?(el.tAlign||'center'):(el.text
 canvasDirectTextEditor.style.fontWeight=(el.orgNode&&el.tBold)?'bold':'';
 canvasDirectTextEditor.style.fontStyle=(el.orgNode&&el.tItalic)?'italic':'';
 canvasDirectTextEditor.style.color=el.orgNode ? (el.colorOverlay || '#111') : (el.color||'#fff');
+if(el.orgNode){
+    // Bagan: kotak aslinya disembunyikan selama mengetik, jadi beri latar sementara (warna kotak) agar teks selalu terlihat
+    canvasDirectTextEditor.style.background=getOrgEditorBackground(el);
+    canvasDirectTextEditor.style.borderRadius=Math.max(4,(el.cornerRadius||0)*canvasScale)+'px';
+    canvasDirectTextEditor.style.caretColor=el.colorOverlay || '#111';
+}else{
+    canvasDirectTextEditor.style.background='';
+    canvasDirectTextEditor.style.borderRadius='';
+    canvasDirectTextEditor.style.caretColor='';
+}
 canvasDirectTextEditor.style.transform=el.rotation?`rotate(${el.rotation}deg)`:'none';
 canvasDirectTextEditor.innerText=el.text||'';
 canvasDirectTextEditor.style.display='block';
@@ -3844,6 +3893,9 @@ el.text=canvasDirectTextEditor.innerText;
 }
 editingElementId=null;
 canvasDirectTextEditor.style.display='none';
+canvasDirectTextEditor.style.background='';
+canvasDirectTextEditor.style.borderRadius='';
+canvasDirectTextEditor.style.caretColor='';
 requestRender();
 pushHistoryState();
 }
@@ -4154,12 +4206,14 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
     let gapLinesY = [];
     let gapLinesX = [];
 
+    // Equal spacing berantai (arah & sisi dicek): jarak elemen aktif ke tetangga = celah yang sudah ada antara dua elemen lain.
+    // Geseran snap selalu <= ambang, jadi elemen tidak pernah melompat ke sisi seberang / keluar kanvas.
     const aB = activeBounds;
     for (const P of otherElementsY) for (const Q of otherElementsY) {
         if (P === Q) continue;
-        const gy = Q.t - P.b;                                    
+        const gy = Q.t - P.b;                                    // P di atas Q
         if (gy >= 2 && P.l < Q.r && P.r > Q.l) {
-            if (Q.l < aB.r && Q.r > aB.l) {                      
+            if (Q.l < aB.r && Q.r > aB.l) {                      // aktif di bawah Q
                 const ny = Q.b + gy + aB.h / 2, d = Math.abs(ny - aB.cy);
                 if (d <= minDiffY) {
                     minDiffY = d; bestSnapY = ny - cyOffset; isGapSnapY = true;
@@ -4167,7 +4221,7 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
                     gapLinesY = [{x: xM, y1: P.b, y2: Q.t, gapIndicator: true}, {x: xM, y1: Q.b, y2: ny - aB.h / 2, gapIndicator: true}];
                 }
             }
-            if (P.l < aB.r && P.r > aB.l) {                      
+            if (P.l < aB.r && P.r > aB.l) {                      // aktif di atas P
                 const ny = P.t - gy - aB.h / 2, d = Math.abs(ny - aB.cy);
                 if (d <= minDiffY) {
                     minDiffY = d; bestSnapY = ny - cyOffset; isGapSnapY = true;
@@ -4176,9 +4230,9 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
                 }
             }
         }
-        const gx = Q.l - P.r;                                    
+        const gx = Q.l - P.r;                                    // P di kiri Q
         if (gx >= 2 && P.t < Q.b && P.b > Q.t) {
-            if (Q.t < aB.b && Q.b > aB.t) {                      
+            if (Q.t < aB.b && Q.b > aB.t) {                      // aktif di kanan Q
                 const nx = Q.r + gx + aB.w / 2, d = Math.abs(nx - aB.cx);
                 if (d <= minDiffX) {
                     minDiffX = d; bestSnapX = nx - cxOffset; isGapSnapX = true;
@@ -4186,7 +4240,7 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
                     gapLinesX = [{y: yM, x1: P.r, x2: Q.l, gapIndicatorX: true}, {y: yM, x1: Q.r, x2: nx - aB.w / 2, gapIndicatorX: true}];
                 }
             }
-            if (P.t < aB.b && P.b > aB.t) {                      
+            if (P.t < aB.b && P.b > aB.t) {                      // aktif di kiri P
                 const nx = P.l - gx - aB.w / 2, d = Math.abs(nx - aB.cx);
                 if (d <= minDiffX) {
                     minDiffX = d; bestSnapX = nx - cxOffset; isGapSnapX = true;
@@ -4197,7 +4251,7 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
         }
     }
 
-    {   
+    {   // Equal spacing: elemen aktif DI ANTARA dua elemen (A | aktif | B) -> jarak kiri = jarak kanan
         const aw = activeBounds.w, ah = activeBounds.h;
         const vOv = otherElementsX.filter(o => o.t < activeBounds.b && o.b > activeBounds.t);
         let bx = null;
@@ -4231,11 +4285,13 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
         }
     }
 
+    // buang garis sejajar yang sudah usang pada sumbu yang dimenangkan snap jarak, lalu tambahkan garis jarak
     if (isGapSnapX) smartLines = smartLines.filter(l => l.isY !== false);
     if (isGapSnapY) smartLines = smartLines.filter(l => l.isY !== true);
     if (isGapSnapY) smartLines.push(...gapLinesY);
     if (isGapSnapX) smartLines.push(...gapLinesX);
 
+    // pengaman: snap tidak boleh menggeser elemen lebih jauh dari ambang
     if (bestSnapX !== null && Math.abs(bestSnapX - targetX) <= snapThreshold + 0.5) targetX = bestSnapX;
     if (bestSnapY !== null && Math.abs(bestSnapY - targetY) <= snapThreshold + 0.5) targetY = bestSnapY;
 
@@ -4479,6 +4535,106 @@ function addNewTable() {
     showToast('📊 Tabel ditambahkan');
 }
 
+function tblEscAttr(v) {
+    return String(v === undefined || v === null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function tableCellIsBold(el, cell) { return (cell && cell.bold !== undefined) ? !!cell.bold : !!el.tBold; }
+function tableCellIsItalic(el, cell) { return (cell && cell.italic !== undefined) ? !!cell.italic : !!el.tItalic; }
+
+function openTableEditor(keepScroll) {
+    const el = getActiveElement(); if(!el || el.type !== 'table') return;
+    const grid = document.getElementById('tableEditorGrid');
+    const scroller = document.getElementById('tableEditorScroll');
+    const prevTop = scroller ? scroller.scrollTop : 0;
+    const prevLeft = scroller ? scroller.scrollLeft : 0;
+    grid.style.gridTemplateColumns = `48px repeat(${el.cols}, minmax(172px, 1fr))`;
+
+    // Bangun seluruh HTML sekali jalan (jauh lebih ringan daripada innerHTML += di dalam perulangan)
+    const h = [];
+    h.push('<div class="tbl-ed-corner">#</div>');
+    for(let c=0; c<el.cols; c++) h.push(`<div class="tbl-ed-colh" data-c="${c}">Kolom ${c+1}</div>`);
+    for(let r=0; r<el.rows; r++) {
+        h.push(`<div class="tbl-ed-rowh" data-r="${r}"><small>BARIS</small>${r+1}</div>`);
+        for(let c=0; c<el.cols; c++) {
+            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', color:'#ffffff', bgColor:'transparent', fontSize:24};
+            const isB = tableCellIsBold(el, cell), isI = tableCellIsItalic(el, cell);
+            const txtHex = (!cell.color || cell.color === 'transparent') ? '#ffffff' : parseColorToHex(cell.color);
+            const bgHex = (!cell.bgColor || cell.bgColor === 'transparent') ? '#000000' : parseColorToHex(cell.bgColor);
+            h.push(`
+            <div class="tbl-ed-cell">
+                <div class="tbl-ed-tag">Baris ${r+1} · Kolom ${c+1}</div>
+                <input type="text" class="tbl-ed-input" value="${tblEscAttr(cell.text)}" oninput="updateTableCellText(${r}, ${c}, this.value)" onfocus="tblEdFocus(${r}, ${c})" style="${isB ? 'font-weight:700;' : ''}${isI ? 'font-style:italic;' : ''}">
+                <div class="tbl-ed-ctrls">
+                    <div class="tbl-ed-grp">
+                        <span>Gaya</span>
+                        <div class="tbl-ed-fmt-row">
+                            <button type="button" class="tbl-ed-fmt ${isB ? 'active' : ''}" onclick="toggleTableCellStyle(${r}, ${c}, 'bold', this)" style="font-weight:800;">B</button>
+                            <button type="button" class="tbl-ed-fmt ${isI ? 'active' : ''}" onclick="toggleTableCellStyle(${r}, ${c}, 'italic', this)" style="font-style:italic;font-family:serif;">I</button>
+                        </div>
+                    </div>
+                    <div class="tbl-ed-grp">
+                        <span>Teks</span>
+                        <input type="color" class="tbl-ed-color" value="${txtHex}" onchange="updateTableCellColor(${r}, ${c}, this.value)">
+                    </div>
+                    <div class="tbl-ed-grp">
+                        <span>Bg</span>
+                        <input type="color" class="tbl-ed-color" value="${bgHex}" onchange="updateTableCellBg(${r}, ${c}, this.value)">
+                    </div>
+                    <div class="tbl-ed-grp">
+                        <span>Size</span>
+                        <input type="number" class="tbl-ed-size" value="${cell.fontSize || 24}" onchange="updateTableCellFontSize(${r}, ${c}, this.value)">
+                    </div>
+                    <div class="tbl-ed-grp">
+                        <span>Foto</span>
+                        <button type="button" class="btn-sub-tool" style="padding:0; width:22px; height:22px; font-size:11px; justify-content:center;" onclick="uploadCellBgImage(${r}, ${c})">📷</button>
+                    </div>
+                </div>
+            </div>`);
+        }
+    }
+    grid.innerHTML = h.join('');
+
+    const info = document.getElementById('tableEditorInfo');
+    if(info) info.textContent = `${el.rows} baris × ${el.cols} kolom`;
+
+    document.getElementById('tableEditorModal').classList.add('active');
+    if(scroller) {   // modal harus tampil dulu agar posisi gulir bisa diatur
+        scroller.scrollTop = keepScroll ? prevTop : 0;
+        scroller.scrollLeft = keepScroll ? prevLeft : 0;
+    }
+}
+
+/* Sorot nomor baris & kolom dari kotak yang sedang diketik, supaya tidak ragu saat menggulir */
+function tblEdFocus(r, c) {
+    const grid = document.getElementById('tableEditorGrid'); if(!grid) return;
+    const old = grid.querySelectorAll('.tbl-ed-colh.on, .tbl-ed-rowh.on');
+    for(let i=0; i<old.length; i++) old[i].classList.remove('on');
+    const ch = grid.querySelector('.tbl-ed-colh[data-c="' + c + '"]');
+    const rh = grid.querySelector('.tbl-ed-rowh[data-r="' + r + '"]');
+    if(ch) ch.classList.add('on');
+    if(rh) rh.classList.add('on');
+}
+
+/* Bold / Miring untuk SATU kotak (sel). Nilai kotak menimpa pengaturan "Format Teks" tabel. */
+function toggleTableCellStyle(r, c, prop, btn) {
+    const el = getActiveElement();
+    if(!el || el.type !== 'table' || !el.cells[r] || !el.cells[r][c]) return;
+    if(prop !== 'bold' && prop !== 'italic') return;
+    const cell = el.cells[r][c];
+    const cur = prop === 'bold' ? tableCellIsBold(el, cell) : tableCellIsItalic(el, cell);
+    cell[prop] = !cur;
+    if(btn) {
+        btn.classList.toggle('active', !!cell[prop]);
+        const card = btn.closest ? btn.closest('.tbl-ed-cell') : null;
+        const inp = card ? card.querySelector('.tbl-ed-input') : null;
+        if(inp) {
+            if(prop === 'bold') inp.style.fontWeight = cell.bold ? '700' : '';
+            else inp.style.fontStyle = cell.italic ? 'italic' : '';
+        }
+    }
+    requestRender(); debouncedPushHistory();
+}
+
 function closeTableEditor() { document.getElementById('tableEditorModal').classList.remove('active'); }
 
 function updateTableCellText(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].text = val; requestRender(); debouncedPushHistory(); } }
@@ -4521,7 +4677,8 @@ function addTableRow() {
     el.rows++;
     el.rowHeights = Array(el.rows).fill(100 / el.rows);
     el.cells.push(Array(el.cols).fill(0).map(() => ({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24})));
-    renderAll(); pushHistoryState(); openTableEditor();
+    renderAll(); pushHistoryState(); openTableEditor(true);
+    const sc = document.getElementById('tableEditorScroll'); if(sc) sc.scrollTop = sc.scrollHeight;
 }
 
 function addTableCol() {
@@ -4529,7 +4686,8 @@ function addTableCol() {
     el.cols++;
     el.colWidths = Array(el.cols).fill(100 / el.cols);
     el.cells.forEach(row => row.push({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24}));
-    renderAll(); pushHistoryState(); openTableEditor();
+    renderAll(); pushHistoryState(); openTableEditor(true);
+    const sc = document.getElementById('tableEditorScroll'); if(sc) sc.scrollLeft = sc.scrollWidth;
 }
 
 function removeTableRow() {
@@ -4537,7 +4695,7 @@ function removeTableRow() {
     el.rows--;
     el.rowHeights = Array(el.rows).fill(100 / el.rows);
     el.cells.pop();
-    renderAll(); pushHistoryState(); openTableEditor();
+    renderAll(); pushHistoryState(); openTableEditor(true);
 }
 
 function removeTableCol() {
@@ -4545,7 +4703,7 @@ function removeTableCol() {
     el.cols--;
     el.colWidths = Array(el.cols).fill(100 / el.cols);
     el.cells.forEach(row => row.pop());
-    renderAll(); pushHistoryState(); openTableEditor();
+    renderAll(); pushHistoryState(); openTableEditor(true);
 }
 
 function openPanelTableStyle() {
@@ -4571,13 +4729,14 @@ function openPanelBoxTextFormat() {
     if (!el || !(el.type === 'table' || (el.type === 'shape' && el.orgNode))) return;
     const al = el.tAlign || 'center';
     const size = el.type === 'table' ? (el.tFont || (el.cells[0] && el.cells[0][0] && el.cells[0][0].fontSize) || 24) : (el.fontSize || 16);
-    const pad = el.tPad !== undefined ? el.tPad : 14;
+    const pad = el.tPad !== undefined ? el.tPad : (el.type === 'table' ? TABLE_DEFAULT_PAD_X : 14);
     const html = `
     <div style="font-size:11px;font-weight:700;color:#D4AF37;">FORMAT TEKS:</div>
     <div class="ctrl-grid-btns" style="margin-top:6px;">
         <button class="btn-sub-tool ${el.tBold?'active':''}" onclick="setBoxText('tBold',!getActiveElement().tBold)"><b>B</b> Tebal</button>
         <button class="btn-sub-tool ${el.tItalic?'active':''}" onclick="setBoxText('tItalic',!getActiveElement().tItalic)"><i>I</i> Miring</button>
     </div>
+    ${el.type==='table' ? `<div style="font-size:10px;color:#9CA3AF;margin-top:6px;line-height:1.4;">ℹ️ Tombol ini berlaku untuk <b>semua</b> kotak. Untuk 1 kotak saja, buka <b>Edit Data</b> lalu pakai tombol <b>B</b> / <i>I</i> pada kotak tersebut.</div>` : ''}
     <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-top:12px;">PERATAAN TEKS:</div>
     <div class="ctrl-grid-btns" style="margin-top:6px;">
         <button class="btn-sub-tool ${al==='left'?'active':''}" onclick="setBoxText('tAlign','left')">⬅️ Kiri</button>
@@ -4599,7 +4758,15 @@ function openPanelBoxTextFormat() {
     </div>`;
     openToolPanel('🔠 Format Teks', html);
 }
-function setBoxText(prop, val) { const el = getActiveElement(); if (!el) return; el[prop] = val; renderAll(); pushHistoryState(); openPanelBoxTextFormat(); }
+function setBoxText(prop, val) {
+    const el = getActiveElement(); if (!el) return; el[prop] = val;
+    // Tabel: tombol Tebal/Miring global berlaku untuk semua kotak -> hapus pengaturan per-kotak agar semuanya mengikuti
+    if (el.type === 'table' && (prop === 'tBold' || prop === 'tItalic') && el.cells) {
+        const k = prop === 'tBold' ? 'bold' : 'italic';
+        el.cells.forEach(row => row.forEach(cell => { if (cell) delete cell[k]; }));
+    }
+    renderAll(); pushHistoryState(); openPanelBoxTextFormat();
+}
 function setBoxFont(v) {
     const el = getActiveElement(); if (!el) return; v = parseInt(v);
     if (el.type === 'table') el.tFont = v; else el.fontSize = v;
@@ -8328,7 +8495,8 @@ pushHistoryState();
 function duplicateCurrentSlide(){
 deselectElement();
 const curr=getCurrentSlide();
-const serialized=rawSerializeSlides([curr])[0];
+// Salin MENDALAM (JSON) agar isi tabel/pengaturan slide baru terpisah total dari slide asal
+const serialized=JSON.parse(JSON.stringify(rawSerializeSlides([curr])[0]));
 const newSlide = deserializeSlides([serialized])[0];
 newSlide.isDemo = false;
 slides.push(newSlide);
