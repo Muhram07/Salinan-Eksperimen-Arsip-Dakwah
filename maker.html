@@ -1,5 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v1.2.2
+Studio Poster Maker Pro - Update v1.2.3
+
+v1.2.3:
+1. Penanda KUNCI: saat elemen terkunci, muncul kotak kuning pada emote gembok di bar bawah, pada tombol
+   gembok di Daftar Lapisan, serta penanda gembok kuning pada item di Kelola Multi-Grup. Daftar Lapisan /
+   Multi-Grup juga langsung ikut diperbarui setelah Kunci/Buka ditekan (sebelumnya ikon baru berubah
+   setelah panel dibuka ulang).
+2. Bar bawah di slide Demo: tulisan "Slide Demo - Tidak dapat diedit" (dan sebaliknya bar tool normal)
+   kini langsung berganti saat pindah slide, tidak lagi telat satu langkah. Penyebab: bar digambar sebelum
+   nomor slide aktif diperbarui. Kini digambar ulang setelah slide aktif berganti.
 
 v1.2.2:
 - Perbaikan bug tombol +/- pada "Ukuran & Dimensi" (Foto, Bentuk, Tabel, Bagan): ukuran kotak tidak lagi
@@ -223,6 +232,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .layer-btn:hover{color:#fff;border-color:#D4AF37;}
 .group-select-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);margin-bottom:8px;cursor:pointer;}
 .group-select-item.current-item{border-color:#D4AF37;background:rgba(212,175,55,.15);box-shadow:0 0 10px rgba(212,175,55,.2);}
+/* ===== Penanda KUNCI (v1.2.3) ===== */
+.tool-btn.lock-on{border:1px solid #D4AF37;background:rgba(212,175,55,.18);color:#D4AF37;box-shadow:0 0 8px rgba(212,175,55,.35);}
+.tool-btn.lock-btn:not(.lock-on):hover{background:transparent;color:#aaa;}
+.layer-btn.lock-on{border-color:#D4AF37;background:rgba(212,175,55,.2);color:#D4AF37;box-shadow:0 0 6px rgba(212,175,55,.4);}
+.layer-btn.lock-btn:not(.lock-on):hover{color:#aaa;border-color:rgba(255,255,255,.1);}
+.layer-item.locked:not(.active){border-style:dashed;border-color:rgba(212,175,55,.55);}
+.group-select-item.locked-item:not(.current-item){border-style:dashed;border-color:rgba(212,175,55,.6);}
+.group-lock-badge{margin-left:auto;font-size:11px;line-height:1;padding:3px 6px;border-radius:4px;border:1px solid #D4AF37;background:rgba(212,175,55,.2);color:#D4AF37;box-shadow:0 0 6px rgba(212,175,55,.4);}
 .group-checkbox{width:18px;height:18px;accent-color:#D4AF37;}
 .toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(20,20,20,.92);border:1px solid #D4AF37;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999999;pointer-events:none;opacity:0;transition:.25s;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -898,7 +915,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.2.2';
+const APP_VERSION = 'v1.2.3';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -4455,7 +4472,7 @@ ${el.warpSrc ? `<button class="tool-btn" onclick="resetTextWarp()"><span class="
 <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'🔗':'⛓️'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
-<button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
+<button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
@@ -4485,7 +4502,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'🔗':'⛓️'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
-<button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
+<button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
@@ -4503,7 +4520,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
 <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
-<button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
+<button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
@@ -4518,7 +4535,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
-<button class="tool-btn" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
+<button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon">📄</span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon">📑</span><span>Duplikat</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon">🗑️</span><span>Hapus</span></button>
@@ -6052,9 +6069,10 @@ const isCurrent=curr&&el.id===curr.id;
 const groupBadge = el.groupId ? `<span style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:4px;font-size:9px;margin-left:4px;">${el.groupId}</span>` : '';
 let typeLabel = el.type === 'image' ? 'Gambar' : (el.type === 'shape' ? 'Bentuk' : (el.type === 'fade' ? 'Fade' : 'Teks'));
 const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:16px;height:16px;object-fit:cover;border-radius:3px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : (el.type === 'fade' ? '🌫️' : '📝'));
-html+=`<label class="group-select-item ${isCurrent?'current-item':''}">
+html+=`<label class="group-select-item ${isCurrent?'current-item':''} ${el.locked?'locked-item':''}">
 <input type="checkbox" class="group-checkbox" value="${el.id}" ${isCurrent?'checked':''}>
 <span>${thumb} ${el.text?el.text.substring(0,15):typeLabel} ${groupBadge}</span>
+${el.locked?'<span class="group-lock-badge">🔒</span>':''}
 </label>`;
 });
 html+=`
@@ -6090,14 +6108,14 @@ for(let i=s.elements.length-1;i>=0;i--){
 const el=s.elements[i];
 let typeLabel = el.type === 'image' ? 'Gambar' : (el.type === 'shape' ? 'Bentuk' : (el.type === 'fade' ? 'Fade' : 'Teks'));
 const thumb = el.type === 'image' ? `<img src="${el.src}" style="width:20px;height:20px;object-fit:cover;border-radius:4px;display:inline-block;vertical-align:middle;">` : (el.type === 'shape' ? '🔶' : (el.type === 'fade' ? '🌫️' : '📝'));
-html+=`<div class="layer-item ${el.id===activeElementId?'active':''}" onclick="selectElement('${el.id}');openPanelLayers();">
+html+=`<div class="layer-item ${el.id===activeElementId?'active':''} ${el.locked?'locked':''}" onclick="selectElement('${el.id}');openPanelLayers();">
 <span>${thumb} ${el.text?el.text.substring(0,18):typeLabel}</span>
 <div class="layer-actions">
 <button class="layer-btn" onclick="event.stopPropagation();moveLayerToExtreme(${i},'top')" title="Paling Depan">⏫</button>
 <button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},1)">▲</button>
 <button class="layer-btn" onclick="event.stopPropagation();moveLayer(${i},-1)">▼</button>
 <button class="layer-btn" onclick="event.stopPropagation();moveLayerToExtreme(${i},'bottom')" title="Paling Belakang">⏬</button>
-<button class="layer-btn" onclick="event.stopPropagation();toggleElementLockById('${el.id}')">${el.locked?'🔒':'🔓'}</button>
+<button class="layer-btn lock-btn ${el.locked?'lock-on':''}" onclick="event.stopPropagation();toggleElementLockById('${el.id}')">${el.locked?'🔒':'🔓'}</button>
 <button class="layer-btn" onclick="event.stopPropagation();deleteElementById('${el.id}')">🗑️</button>
 </div></div>`;
 }
@@ -8420,8 +8438,16 @@ pushHistoryState();
 openDirectCanvasTextEditor(newEl);
 }
 
-function toggleElementLock(){const el=getActiveElement();if(!el)return;el.locked=!el.locked;renderAll();renderBottomToolbar();pushHistoryState();}
-function toggleElementLockById(id){const s=getCurrentSlide();const el=s.elements.find(e=>e.id===id);if(el){el.locked=!el.locked;renderAll();renderBottomToolbar();pushHistoryState();}}
+function refreshLockPanels(){
+    if(currentActivePanel==='Daftar Lapisan'){ openPanelLayers(); }
+    else if(currentActivePanel==='Kelola Multi-Grup'){
+        const checked=Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb=>cb.value);
+        openPanelGroup();
+        document.querySelectorAll('.group-checkbox').forEach(cb=>{cb.checked=checked.includes(cb.value);});
+    }
+}
+function toggleElementLock(){const el=getActiveElement();if(!el)return;el.locked=!el.locked;renderAll();renderBottomToolbar();pushHistoryState();refreshLockPanels();}
+function toggleElementLockById(id){const s=getCurrentSlide();const el=s.elements.find(e=>e.id===id);if(el){el.locked=!el.locked;renderAll();renderBottomToolbar();pushHistoryState();refreshLockPanels();}}
 function deleteActiveElement(){const el=getActiveElement();if(!el)return;deleteElementById(el.id);}
 
 function deleteElementById(id){
@@ -8532,6 +8558,7 @@ function switchSlide(idx){
 if(idx===currentSlideIndex)return;
 deselectElement();
 currentSlideIndex=idx;
+renderBottomToolbar();
 renderCarouselThumbs();
 renderAll();
 updateDemoFloatingBtn();
@@ -8541,6 +8568,7 @@ function addNewSlide(){
 deselectElement();
 slides.push(createDefaultSlide());
 currentSlideIndex=slides.length-1;
+renderBottomToolbar();
 renderCarouselThumbs();
 renderAll();
 pushHistoryState();
@@ -8554,6 +8582,7 @@ const newSlide = deserializeSlides([serialized])[0];
 newSlide.isDemo = false;
 slides.push(newSlide);
 currentSlideIndex=slides.length-1;
+renderBottomToolbar();
 renderCarouselThumbs();
 renderAll();
 pushHistoryState();
@@ -8567,6 +8596,7 @@ if(confirm(`Hapus Slide ${actualNumber}?`)){
     deselectElement();
     slides.splice(currentSlideIndex,1);
     if(currentSlideIndex>=slides.length)currentSlideIndex=slides.length-1;
+    renderBottomToolbar();
     renderCarouselThumbs();
     renderAll();
     pushHistoryState();
