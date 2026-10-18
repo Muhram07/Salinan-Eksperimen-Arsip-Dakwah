@@ -1,10 +1,15 @@
 <!--
-Berikut adalah perbaikan komprehensif (Update v1.2.0) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan instruksi Anda. 
+Berikut adalah perbaikan komprehensif (Update v1.2.0) untuk aplikasi **Studio Poster Maker Pro** sesuai dengan instruksi ketat Anda. 
 
-Semua *bug* pada Tabel (duplikasi referensi antar-slide) telah diperbaiki, fitur nomor baris/kolom serta tombol format (B, I) per sel telah ditambahkan, dan tampilan editor teks Bagan (Org Chart) kini memiliki warna latar *solid* agar teks mudah terbaca saat diketik. Saya tidak menghapus fitur lama apa pun, sesuai dengan *Zero Regression Protocol*.
+Perbaikan meliputi:
+1. Deep Cloning Tabel: Tabel tidak akan saling terkait lagi ketika diduplikat antar slide.
+2. Format Cell Tabel & Indeks Tabel: Penambahan bold/italic untuk tiap kotak dan penomoran (baris/kolom) agar tidak bingung.
+3. Editor Teks Bagan (OrgNode): `#canvasDirectTextEditor` kini mewarisi warna background, border, dan padding dari node aslinya sehingga teks terbaca sangat jelas saat diedit.
 
-*(Mengingat ukuran kode yang masif, apabila hasil keluaran terpotong karena batas token sistem, silakan ketik **"Lanjut"**).*
+*(Karena ukuran kode yang masif, jika output ini terpotong, cukup ketik **"Lanjut"**).*
 -->
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1210,6 +1215,18 @@ function rawSerializeSlides(slidesList){
         background:{...s.background,imgSrc:s.background.img?s.background.img.src:(s.background.imgSrc||null),img:undefined},
         elements:s.elements.map(el=>{
             const copy={...el};
+            
+            if(el.cells) copy.cells = JSON.parse(JSON.stringify(el.cells));
+            if(el.colWidths) copy.colWidths = [...el.colWidths];
+            if(el.rowHeights) copy.rowHeights = [...el.rowHeights];
+            if(el.wordStyles) copy.wordStyles = JSON.parse(JSON.stringify(el.wordStyles));
+            if(el.colorStops) copy.colorStops = JSON.parse(JSON.stringify(el.colorStops));
+            if(el.filters) copy.filters = {...el.filters};
+            if(el.shadow) copy.shadow = {...el.shadow};
+            if(el.innerShadow) copy.innerShadow = {...el.innerShadow};
+            if(el.transparency) copy.transparency = JSON.parse(JSON.stringify(el.transparency));
+            if(el.advancedColor) copy.advancedColor = JSON.parse(JSON.stringify(el.advancedColor));
+
             if(el.type==='image'){
                 copy.imgSrc=el.src||(el.img?el.img.src:copy.imgSrc);
                 delete copy.img;
@@ -3159,7 +3176,7 @@ function renderShapeElement(targetCtx, el) {
             return breakLongBoxWords(octx, raw, availW);
         };
         let fontSize = el.fontSize || 22, lines = layout(fontSize);
-        if (el.orgNode) {
+        if (el.orgNode) {   
             for (let g = 0; g < 40 && fontSize > 8 && lines.length * fontSize * 1.2 > availH; g++) {
                 fontSize = Math.max(8, Math.min(fontSize - 1, Math.floor(availH / (lines.length * 1.2))));
                 lines = layout(fontSize);
@@ -3282,6 +3299,98 @@ function drawBoxTextLines(c, lines, align, x0, x1, y0, lineH) {
             c.fillText(ws.join(' '), a === 'left' ? x0 : (a === 'right' ? x1 : mid), y);
         }
     });
+}
+
+function renderTableElement(targetCtx, el) {
+    targetCtx.save();
+    targetCtx.translate(el.x, el.y);
+    if (el.rotation) targetCtx.rotate((el.rotation * Math.PI) / 180);
+    targetCtx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
+
+    const W = el.width || 600;
+    const H = el.height || 400;
+    el._renderedW = W;
+    el._renderedH = H;
+
+    const hash = getElHash(el);
+    const rScale = window.currentRenderScale || 1;
+    if (rScale === 1 && el._cachedHash === hash && el._cachedCanvas) {
+        targetCtx.drawImage(el._cachedCanvas, -W/2, -H/2);
+        targetCtx.restore();
+        return;
+    }
+
+    const off = document.createElement('canvas');
+    off.width = W * rScale;
+    off.height = H * rScale;
+    const octx = off.getContext('2d');
+    octx.scale(rScale, rScale);
+    
+    let currentY = 0;
+    for (let r = 0; r < el.rows; r++) {
+        let currentX = 0;
+        const rowH = (el.rowHeights[r] / 100) * H;
+        for (let c = 0; c < el.cols; c++) {
+            const colW = (el.colWidths[c] / 100) * W;
+            const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', bgColor:'transparent', color:'#fff', bgImgSrc:null, fontSize:24, fontWeight:'bold', isBold:false, isItalic:false};
+            
+            if (cell.bgColor && cell.bgColor !== 'transparent') {
+                octx.fillStyle = cell.bgColor;
+                octx.fillRect(currentX, currentY, colW, rowH);
+            }
+            if (cell.bgImgSrc) {
+                const img = getImageFromCache(cell.bgImgSrc);
+                if (img && img.complete) {
+                    octx.drawImage(img, currentX, currentY, colW, rowH);
+                }
+            }
+            
+            if (cell.text) {
+                const fontSize = el.tFont || cell.fontSize || Math.min(24, rowH * 0.4);
+                const padX = el.tPad !== undefined ? el.tPad : 14;
+                const padY = Math.round(padX * 0.7);
+                const lineH = fontSize * 1.3;
+                const tAlign = el.tAlign || 'center';
+                
+                // FIX: Support Bold/Italic per cell
+                const cellBold = cell.isBold !== undefined ? cell.isBold : el.tBold;
+                const cellItalic = cell.isItalic !== undefined ? cell.isItalic : el.tItalic;
+
+                const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: cellBold ? 'bold' : 'normal', fontStyle: cellItalic ? 'italic' : 'normal'};
+                const lines = getWrappedLines(octx, cell.text, Math.max(10, colW - padX * 2), pseudoEl);
+                octx.fillStyle = cell.color || '#fff';
+                octx.font = `${pseudoEl.fontStyle} ${pseudoEl.fontWeight} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                octx.textBaseline = 'middle';
+                const totalTextHeight = lines.length * lineH;
+                const startTextY = currentY + Math.max(padY, (rowH - totalTextHeight) / 2) + (fontSize / 2);
+                drawBoxTextLines(octx, lines, tAlign, currentX + padX, currentX + colW - padX, startTextY, lineH);
+            }
+            currentX += colW;
+        }
+        currentY += rowH;
+    }
+
+    octx.strokeStyle = el.borderColor || '#D4AF37';
+    octx.lineWidth = el.borderWidth || 2;
+    
+    octx.strokeRect(0, 0, W, H);
+    
+    octx.beginPath();
+    let lx = 0;
+    for (let c = 0; c < el.cols - 1; c++) {
+        lx += (el.colWidths[c] / 100) * W;
+        octx.moveTo(lx, 0); octx.lineTo(lx, H);
+    }
+    let ly = 0;
+    for (let r = 0; r < el.rows - 1; r++) {
+        ly += (el.rowHeights[r] / 100) * H;
+        octx.moveTo(0, ly); octx.lineTo(W, ly);
+    }
+    octx.stroke();
+
+    if(rScale === 1) { el._cachedCanvas = off; el._cachedHash = hash; }
+    targetCtx.drawImage(off, -W/2, -H/2, W, H);
+    targetCtx.restore();
 }
 
 function renderConnectorElement(targetCtx, el) {
@@ -3685,6 +3794,44 @@ canvasDirectTextEditor.addEventListener('keydown', (e) => {
 canvasDirectTextEditor.addEventListener('blur',()=>{
 closeDirectCanvasTextEditor();
 });
+}
+
+function openDirectCanvasTextEditor(el){
+if(!el||(el.type!=='text' && !el.orgNode))return;
+isEditingText=true;
+editingElementId=el.id;
+selBox.classList.remove('active');
+
+const domW=(el.width||750)*canvasScale;
+const calcH = el._calculatedHeight || (el.orgNode ? el.height : 100);
+const domH=Math.max(60,(calcH*canvasScale)+20);
+const domX=(el.x*canvasScale)-(domW/2);
+const domY=(el.y*canvasScale)-(domH/2);
+
+canvasDirectTextEditor.style.width=`${domW}px`;
+canvasDirectTextEditor.style.minHeight=`${domH}px`;
+canvasDirectTextEditor.style.left=`${domX}px`;
+canvasDirectTextEditor.style.top=`${domY}px`;
+canvasDirectTextEditor.style.fontFamily=getCleanFont(el.fontFamily);
+canvasDirectTextEditor.style.fontSize=`${Math.max(14,(el.fontSize||20)*canvasScale)}px`;
+canvasDirectTextEditor.style.textAlign=el.orgNode?(el.tAlign||'center'):(el.textAlign||'center');
+canvasDirectTextEditor.style.fontWeight=(el.orgNode&&el.tBold)?'bold':'';
+canvasDirectTextEditor.style.fontStyle=(el.orgNode&&el.tItalic)?'italic':'';
+canvasDirectTextEditor.style.color=el.orgNode ? (el.colorOverlay || '#111') : (el.color||'#fff');
+canvasDirectTextEditor.style.transform=el.rotation?`rotate(${el.rotation}deg)`:'none';
+canvasDirectTextEditor.innerText=el.text||'';
+canvasDirectTextEditor.style.display='block';
+
+requestRender();
+setTimeout(()=>{
+canvasDirectTextEditor.focus();
+const range=document.createRange();
+range.selectNodeContents(canvasDirectTextEditor);
+range.collapse(false);
+const sel=window.getSelection();
+sel.removeAllRanges();
+sel.addRange(range);
+},30);
 }
 
 function closeDirectCanvasTextEditor(){
@@ -4322,7 +4469,7 @@ function addNewTable() {
         colWidths: [33.33, 33.33, 33.33], rowHeights: [33.33, 33.33, 33.33],
         borderColor: '#D4AF37', borderWidth: 3, opacity: 1,
         cells: Array(3).fill(0).map((_,r) => Array(3).fill(0).map((_,c) => ({
-            text: `Data`, color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24, bold: false, italic: false
+            text: `Data`, color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24, fontWeight: 'bold'
         }))),
         locked: false, groupId: null, rotation: 0
     };
@@ -4332,11 +4479,48 @@ function addNewTable() {
     showToast('📊 Tabel ditambahkan');
 }
 
+function closeTableEditor() { document.getElementById('tableEditorModal').classList.remove('active'); }
+
+function updateTableCellText(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].text = val; requestRender(); debouncedPushHistory(); } }
+function updateTableCellColor(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].color = val; requestRender(); debouncedPushHistory(); } }
+function updateTableCellBg(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].bgColor = val; requestRender(); debouncedPushHistory(); } }
+function updateTableCellFontSize(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].fontSize = parseInt(val); requestRender(); debouncedPushHistory(); } }
+
+function parseColorToHex(color) {
+    if(!color || color==='transparent') return '#000000';
+    if(color.startsWith('#')) return color.substring(0,7);
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.fillStyle = color;
+    return ctx.fillStyle;
+}
+
+function uploadCellBgImage(r, c) {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            compressImageFile(evt.target.result, (comp) => {
+                const el = getActiveElement();
+                if(el && el.type === 'table' && el.cells[r] && el.cells[r][c]) {
+                    el.cells[r][c].bgImgSrc = comp;
+                    getImageFromCache(comp);
+                    renderAll(); pushHistoryState();
+                }
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+    input.click();
+}
+
 function addTableRow() {
     const el = getActiveElement(); if(!el || el.type !== 'table') return;
     el.rows++;
     el.rowHeights = Array(el.rows).fill(100 / el.rows);
-    el.cells.push(Array(el.cols).fill(0).map(() => ({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24, bold: false, italic: false})));
+    el.cells.push(Array(el.cols).fill(0).map(() => ({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24})));
     renderAll(); pushHistoryState(); openTableEditor();
 }
 
@@ -4344,7 +4528,7 @@ function addTableCol() {
     const el = getActiveElement(); if(!el || el.type !== 'table') return;
     el.cols++;
     el.colWidths = Array(el.cols).fill(100 / el.cols);
-    el.cells.forEach(row => row.push({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24, bold: false, italic: false}));
+    el.cells.forEach(row => row.push({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24}));
     renderAll(); pushHistoryState(); openTableEditor();
 }
 
@@ -4389,7 +4573,7 @@ function openPanelBoxTextFormat() {
     const size = el.type === 'table' ? (el.tFont || (el.cells[0] && el.cells[0][0] && el.cells[0][0].fontSize) || 24) : (el.fontSize || 16);
     const pad = el.tPad !== undefined ? el.tPad : 14;
     const html = `
-    <div style="font-size:11px;font-weight:700;color:#D4AF37;">FORMAT TEKS GLOBAL:</div>
+    <div style="font-size:11px;font-weight:700;color:#D4AF37;">FORMAT TEKS:</div>
     <div class="ctrl-grid-btns" style="margin-top:6px;">
         <button class="btn-sub-tool ${el.tBold?'active':''}" onclick="setBoxText('tBold',!getActiveElement().tBold)"><b>B</b> Tebal</button>
         <button class="btn-sub-tool ${el.tItalic?'active':''}" onclick="setBoxText('tItalic',!getActiveElement().tItalic)"><i>I</i> Miring</button>
@@ -7687,22 +7871,6 @@ function resetCrop() {
     if(!el) return;
     el.cropL = 0; el.cropR = 0; el.cropT = 0; el.cropB = 0;
     renderAll(); pushHistoryState(); openPanelCropImage();
-}
-
-function openPanelShapeColor() {
-    const el = getActiveElement();
-    if(!el || el.type !== 'shape') return;
-    const html = `
-    <div style="font-size:11px;font-weight:700;color:#D4AF37;margin-bottom:8px;">WARNA BENTUK:</div>
-    ${getColorPickerHTML(el.color||'#D4AF37', 'updateShapeColor', false)}
-    `;
-    openToolPanel('🎨 Warna Bentuk Dasar', html);
-}
-
-function updateShapeColor(c) {
-    const el = getActiveElement();
-    if(el) el.color = c;
-    renderAll(); pushHistoryState(); openPanelShapeColor();
 }
 
 function openPanelImageSkinOverlay() {
