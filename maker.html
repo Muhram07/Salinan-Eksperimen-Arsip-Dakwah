@@ -1,34 +1,19 @@
 <!--
-Studio Poster Maker Pro - Update v1.2.7
+Studio Poster Maker Pro - Update v1.2.8
+
+v1.2.8:
+1. NOTEBOOK SITUS SUNNAH: tambah catatan materi yang dapat dibuat, diedit, disalin, dan dihapus; data tersimpan lokal di perangkat.
+2. UPSCALE HD: jarak kontrol dirapikan, panel dibuat lebih tinggi dan mudah discroll, pratinjau tidak berubah menjadi zoom saat skala diubah, area dapat digeser, serta tersedia estimasi dan ukuran output.
+3. CARI GAMBAR: hapus pilihan Lukisan/Seni dan Openverse; tambah koleksi The Met Open Access (CC0), dan unduhan mempertahankan format gambar sumber bila tersedia.
+4. FEED GAMBAR: setiap ubin menampilkan poster penuh dengan rasio potret, bukan memotong isi poster.
+5. TANGKAP AJAIB: koreksi koordinat kanvas saat zoom/drag dan sesuaikan kaca pembesar dengan ukuran kuas.
 
 v1.2.7:
-1. BOOKMARK SITUS SUNNAH: tombol 🔖 (daftar) & "🔖 Simpan" (simpan pencarian/halaman yang sedang dibuka, atau tempel link
-   halaman tertentu). Tiap bookmark punya judul yang bisa diedit (✏️), dibuka lagi (Buka), atau dihapus (🗑️).
-   Tersimpan di perangkat, tidak hilang saat ditutup/ditutup aplikasi.
-2. UPSCALE HD: tampilan dirapikan (tombol tidak lagi dempet) + pratinjau SEBELUM/SESUDAH dengan garis pembanding vertikal
-   yang bisa digeser kiri-kanan, ditambah tombol "Pratinjau Penuh" (layar penuh).
-3. HALAMAN 1,2,3...: Cari Gambar kini per halaman (3 kolom x 10 baris = 30 gambar, bisa discroll) dengan bar Prev/Next
-   dan nomor halaman yang selalu terlihat di bawah (tidak lagi tertutup/mentok di halaman 1). Situs Sunnah juga punya
-   bar halaman hasil pencarian (Prev/Next/nomor) yang selalu terlihat.
-4. CARI GAMBAR: sumber Lukisan/Seni (Art Institute of Chicago) diperbaiki (ukuran gambar resmi 843px + cadangan otomatis +
-   batas waktu muat). Tampilan seperti feed Instagram: kotak rapat 2px, penuh lebar, gambar jelas.
-5. STATUS LOADING + PERSEN: bar "Tunggu, memuat... N%" pada Cari Gambar (pencarian, pemuatan gambar, buka/unduh gambar)
-   dan Situs Sunnah (pembukaan situs/hasil) agar tidak terlihat diam.
-6. SITUS SUNNAH: Ustadz Aris Munandar dihapus. Ditambahkan di kategori Website Pribadi Para Ustadz: KHB Official
-   (khbofficial.com) dan Syafiq Riza Basalamah (syafiqrizabasalamah.id) lengkap dengan info tombol ℹ️.
-
-v1.2.6:
-1. UPSCALE HD (tool baru di bar Foto/PNG, di tengah setelah "Cahaya & Warna"): memperbesar & menajamkan foto burik/blur/
-   resolusi rendah (PNG/JPG) di dalam aplikasi, tanpa internet. Tingkat bisa diatur: Skala (1.5x-4x), Hapus Noise &
-   Artefak JPEG, Ketajaman, Detail Tepi, ada pratinjau Asli vs HD. Ukuran kotak di kanvas tidak berubah, hanya
-   resolusinya naik (batas aman 3600px agar HP tidak hang). Tidak puas? Tekan Undo lalu atur ulang.
-2. CARI GAMBAR: sumber Openverse diperbaiki (batas 20 per permintaan) + sumber baru NASA & Art Institute of Chicago
-   (selain Wikimedia). Tampilan kini seperti feed: 3 kolom, scroll ke bawah tanpa batas, 30 gambar per halaman,
-   penanda "Halaman N" + tombol "Cari lagi · Halaman N+1". DuckDuckGo diganti Wikimedia Web. Google & Bing tetap.
-3. SITUS SUNNAH (tool baru di sebelah Cari Gambar): pencarian materi dakwah Google/Bing yang difilter hanya dari
-   situs Sunnah (manhaj salaf). Pilihan Indonesia / Luar Negeri, per kategori atau Semua, cari di satu situs,
-   tombol info (identitas & isi) tiap situs.
+1. SITUS SUNNAH: bookmark judul dan URL bisa disimpan, diedit, dibuka, dan dihapus di perangkat.
+2. UPSCALE HD: perbandingan sebelum/sesudah dengan garis yang dapat digeser dan pratinjau layar penuh.
+3. CARI GAMBAR: feed 3 kolom, 30 gambar per halaman, navigasi halaman, serta status pemuatan.
 -->
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -399,18 +384,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ss-il{font-size:10px;font-weight:800;color:#D4AF37;text-transform:uppercase;letter-spacing:.5px;margin-top:8px;}
 .ss-it{font-size:12px;color:#ddd;}
 .ss-note{margin-top:12px;font-size:10px;color:#999;line-height:1.5;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px;}
+#ssNoteWrap{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden;}
+.ss-notebook-editor{display:none;flex-direction:column;gap:8px;padding:10px;border-bottom:1px solid rgba(212,175,55,.28);flex-shrink:0;}
+.ss-notebook-editor.on{display:flex;}
+.ss-note-title{width:100%;height:40px;border-radius:10px;border:1px solid #D4AF37;background:#0b0b0b;color:#fff;padding:0 12px;font-size:15px;user-select:text;-webkit-user-select:text;}
+.ss-note-body{width:100%;min-height:140px;max-height:32dvh;resize:vertical;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0b0b0b;color:#fff;padding:10px 12px;font:13px/1.55 'Plus Jakarta Sans',sans-serif;white-space:pre-wrap;user-select:text;-webkit-user-select:text;}
+.ss-note-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.ss-note-actions button{min-height:36px;}
+.ss-note-hint{font-size:10px;line-height:1.45;color:#999;}
+.ss-note-row{display:flex;align-items:flex-start;gap:7px;background:#1c1c1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px;}
+.ss-note-row .nm{flex:1;min-width:0;}
+.ss-note-row .nm b{display:block;font-size:12px;line-height:1.35;color:#fff;overflow-wrap:anywhere;}
+.ss-note-row .nm span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:10px;line-height:1.45;color:#aaa;margin-top:3px;white-space:pre-wrap;overflow-wrap:anywhere;}
+.ss-note-row .ss-ibtn{margin-top:1px;}
 
 /* ===== v1.2.7: feed ala Instagram, bar halaman, loading persen, bookmark, upscale pembanding ===== */
 .bib-status{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
 .bib-status.wrap{display:block;overflow:visible;}
 .bib-grid{position:absolute;left:0;right:0;top:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding:0 0 8px;align-content:start;touch-action:pan-y;overscroll-behavior:contain;}
 .bib-body{overflow:hidden;}
-.bib-item{border-radius:0;border:0;background:#1b1b1b;}
+.bib-item{border-radius:0;border:0;background:#0b0b0b;aspect-ratio:3/4;}
 .bib-item.sel{box-shadow:none;}
 .bib-item.sel::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:3px solid #D4AF37;pointer-events:none;}
 .bib-item.sk{background:linear-gradient(110deg,#1b1b1b 30%,#2b2b2b 50%,#1b1b1b 70%);background-size:200% 100%;animation:bibSk 1.2s linear infinite;}
 @keyframes bibSk{to{background-position:-200% 0;}}
-.bib-item img{opacity:0;transition:opacity .25s;}
+.bib-item img{opacity:0;transition:opacity .25s;object-fit:contain;background:#0b0b0b;}
 .bib-item.ok img{opacity:1;}
 .bib-item.bad::before{content:'⚠️';position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.45;}
 .ld{display:none;position:relative;height:18px;margin:2px 10px 4px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;flex-shrink:0;}
@@ -452,6 +450,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .up-full{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);height:24px;padding:0 10px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:800;cursor:pointer;}
 .up-sec{font-size:11px;font-weight:800;color:#D4AF37;margin:2px 0 -4px;}
 .up-grid{gap:10px;}
+.tool-panel.upscale-panel{max-height:min(78vh,760px);max-height:min(78dvh,760px);gap:15px;padding:16px 18px calc(20px + env(safe-area-inset-bottom,0px));}
+.tool-panel.upscale-panel .ctrl-row{gap:12px;min-height:22px;}
+.tool-panel.upscale-panel .ctrl-label{min-width:94px;flex-shrink:0;}
+.tool-panel.upscale-panel .stepper-row{gap:10px;margin-top:0;min-height:36px;}
+.tool-panel.upscale-panel .ctrl-slider{min-width:0;}
+.tool-panel.upscale-panel .up-sec{margin:3px 0 0;line-height:1.45;}
+.tool-panel.upscale-panel .up-actions{gap:12px;flex-wrap:wrap;margin-top:6px;}
+.tool-panel.upscale-panel .up-btn{min-height:44px;height:auto;min-width:0;white-space:normal;line-height:1.25;padding:10px 14px;}
+.tool-panel.upscale-panel .up-btn.gold,.tool-panel.upscale-panel .up-btn.ghost{flex:1 1 135px;}
+.up-size-monitor{padding:9px 11px;border:1px solid rgba(212,175,55,.42);background:rgba(212,175,55,.08);border-radius:9px;color:#FFE259;font-size:11px;line-height:1.5;font-weight:800;overflow-wrap:anywhere;}
+.up-pan-toggle{align-self:center;min-height:32px;padding:0 13px;}
+.up-pan-toggle.on{background:#D4AF37;color:#111;border-color:#FFE259;}
 .up-grid .btn-sub-tool{min-height:46px;justify-content:center;padding:8px 6px;font-size:12px;line-height:1.2;}
 .up-actions{display:flex;gap:10px;margin-top:2px;}
 .up-btn{height:44px;border-radius:22px;font-size:13px;font-weight:800;cursor:pointer;padding:0 12px;}
@@ -875,7 +885,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="panel-close" onclick="closeMagicGrabModal()">✕</button>
 </div>
 <div class="fmodal-body" id="magicGrabBody" style="overflow:hidden; position:relative;">
-    <div id="magicGrabCanvasWrapper" style="transform-origin: center center; transition: transform 0.1s;">
+    <div id="magicGrabCanvasWrapper" style="display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:fit-content;max-width:none;line-height:0;transform-origin:center center;transition:transform 0.1s;">
         <canvas id="magicGrabCanvas" style="box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
     </div>
     <div style="position:absolute; top:10px; right:10px; display:flex; flex-direction:column; gap:5px; z-index:105;">
@@ -994,10 +1004,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <div class="bib-chips">
             <button class="bib-chip on" data-src="wiki" onclick="bibSetSource('wiki')">Wikimedia</button>
             <button class="bib-chip" data-src="nasa" onclick="bibSetSource('nasa')">NASA (antariksa)</button>
-            <button class="bib-chip" data-src="aic" onclick="bibSetSource('aic')">Lukisan / Seni</button>
-            <button class="bib-chip" data-src="openverse" onclick="bibSetSource('openverse')">Openverse</button>
+            <button class="bib-chip" data-src="met" onclick="bibSetSource('met')">The Met (CC0)</button>
         </div>
-        <div class="bib-status" id="bibStatus">Ketik kata kunci lalu tekan Cari. 30 gambar per halaman (3 kolom × 10 baris), geser ke bawah, ganti halaman lewat Prev/Next. Ketuk gambar untuk opsi, atau TAHAN lalu SERET ke kanvas.</div>
+        <div class="bib-status" id="bibStatus">Ketik kata kunci lalu tekan Cari. 30 gambar per halaman (3 kolom × 10 baris). Poster tampil utuh seperti grid Instagram; geser ke bawah atau ganti halaman lewat Prev/Next. Ketuk gambar untuk opsi, atau TAHAN lalu SERET ke kanvas.</div>
         <div class="ld" id="bibLoad"><div class="ld-fill"></div><span class="ld-txt"></span></div>
         <div class="bib-body"><div class="bib-grid" id="bibGrid"></div></div>
         <div class="pg-bar" id="bibPager">
@@ -1050,6 +1059,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="bib-tab on" id="ssTabId" onclick="ssSetRegion('id')">🇮🇩 Indonesia</button>
         <button class="bib-tab" id="ssTabWorld" onclick="ssSetRegion('world')">🌐 Luar Negeri</button>
         <button class="bib-ico" onclick="ssOpenBookmarks()" aria-label="Bookmark">🔖</button>
+        <button class="bib-ico" onclick="ssOpenNotes()" aria-label="Notebook materi" title="Notebook materi">📝</button>
         <button class="bib-ico" id="ssSizeBtn" onclick="ssToggleSize()" aria-label="Besar / kecil">⬆️</button>
         <button class="bib-ico" onclick="closeSunnahBrowser()" aria-label="Tutup">✕</button>
     </div>
@@ -1088,6 +1098,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         </div>
         <div class="ss-list" id="ssBmList"></div>
     </div>
+    <div id="ssNoteWrap">
+        <div class="ss-batch" style="justify-content:space-between;gap:8px;padding-top:7px;padding-bottom:7px;">
+            <span id="ssNoteCount">📝 Notebook (0)</span>
+            <span style="display:flex;gap:6px;">
+                <button class="bib-chip" onclick="ssNoteNew()">➕ Catatan Baru</button>
+                <button class="bib-chip" onclick="ssNoteClose()">✕ Tutup</button>
+            </span>
+        </div>
+        <div class="ss-notebook-editor" id="ssNoteEditor">
+            <input class="ss-note-title" id="ssNoteTitle" type="text" maxlength="120" placeholder="Nama catatan / judul materi" autocomplete="off" spellcheck="false">
+            <textarea class="ss-note-body" id="ssNoteContent" maxlength="12000" placeholder="Tempel atau tulis materi di sini. Catatan tersimpan di perangkat setelah menekan Simpan."></textarea>
+            <div class="ss-note-actions">
+                <button class="bib-go" onclick="ssNoteSave()">💾 Simpan</button>
+                <button class="bib-chip" onclick="ssNoteCopyDraft()">📋 Salin Materi</button>
+                <button class="bib-chip" onclick="ssNoteCancel()">Batal</button>
+            </div>
+            <div class="ss-note-hint">Materi disimpan lokal di perangkat ini dan tetap tersedia saat aplikasi dibuka kembali. Bukan sinkronisasi cloud.</div>
+        </div>
+        <div class="ss-list" id="ssNoteList"></div>
+    </div>
+
     <div id="ssBmEdit" onclick="if(event.target===this)ssBmCloseSheet()">
         <div class="ss-infobox">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -1225,7 +1256,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.2.7';
+const APP_VERSION = 'v1.2.8';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -5357,10 +5388,12 @@ function toggleUITransparency() {
 function openToolPanel(title,htmlContent){
 document.getElementById('panelTitle').innerText=title;
 document.getElementById('panelContent').innerHTML=htmlContent;
-document.getElementById('toolPanel').classList.add('active');
+const panel=document.getElementById('toolPanel');
+panel.classList.remove('upscale-panel');
+panel.classList.add('active');
 currentActivePanel = title;
 }
-function closeToolPanel(){document.getElementById('toolPanel').classList.remove('active'); if(typeof upCleanup==='function'&&UP.srcC)upCleanup(); currentActivePanel='';}
+function closeToolPanel(){const panel=document.getElementById('toolPanel');panel.classList.remove('active','upscale-panel'); if(typeof upCleanup==='function'&&UP.srcC)upCleanup(); currentActivePanel='';}
 
 let eyedropperCallback=null;
 let loupeCurrentHex='#FFFFFF';
@@ -7582,20 +7615,30 @@ modal.classList.add('active');
 const canvas=document.getElementById('magicGrabCanvas');
 const maxW=Math.min(window.innerWidth*0.88,480);
 const aspect=(el.img.height||300)/(el.img.width||300);
-canvas.width=maxW;
-canvas.height=Math.round(maxW*aspect);
+canvas.width=Math.max(1,Math.round(maxW));
+canvas.height=Math.max(1,Math.round(maxW*aspect));
+canvas.style.width=canvas.width+'px';
+canvas.style.height=canvas.height+'px';
 
 grabMaskCanvas=document.createElement('canvas');
 grabMaskCanvas.width=canvas.width;
 grabMaskCanvas.height=canvas.height;
-
+const stalk=document.getElementById('magicGrabStalk');
+if(stalk){stalk.style.left='50%';stalk.style.top='';stalk.style.bottom='20px';stalk.style.transform='translateX(-50%)';}
+const monitor=document.getElementById('brushMonitor');
+if(monitor) monitor.style.display='none';
 resetMagicGrabZoom();
 renderMagicGrabDisplay();
+updateBrushMonitorPreview(document.getElementById('magicBrushSize').value, canvas.width/2, canvas.height/2, true);
 }
 
 function closeMagicGrabModal(){
 document.getElementById('magicGrabModal').classList.remove('active');
 document.getElementById('brushMonitor').style.display='none';
+if(grabMaskCanvas){grabMaskCanvas.width=0;grabMaskCanvas.height=0;grabMaskCanvas=null;}
+const canvas=document.getElementById('magicGrabCanvas');
+if(canvas){canvas.width=0;canvas.height=0;canvas.style.width='';canvas.style.height='';}
+lastGrabX=null;lastGrabY=null;
 }
 
 function clearMagicGrabMask(){
@@ -7621,25 +7664,22 @@ function updateMagicGrabTransform() {
 
 function updateBrushMonitorPreview(size, x, y, fromSlider = false){
 const mon=document.getElementById('brushMonitor');
-mon.style.width=(size * magicGrabZoom)+'px';
-mon.style.height=(size * magicGrabZoom)+'px';
+const canvas=document.getElementById('magicGrabCanvas');
+if(!mon||!canvas||!canvas.width||!canvas.height)return;
+const canvasRect=canvas.getBoundingClientRect();
+const scaleX=canvasRect.width/canvas.width;
+const scaleY=canvasRect.height/canvas.height;
+const diameter=Math.max(2,Number(size||35)*Math.min(scaleX,scaleY));
+mon.style.width=diameter+'px';
+mon.style.height=diameter+'px';
 mon.style.display='block';
-
-if(x !== undefined && y !== undefined) {
-    const canvasRect = document.getElementById('magicGrabCanvas').getBoundingClientRect();
-    mon.style.left=(canvasRect.left + (x * magicGrabZoom))+'px';
-    mon.style.top=(canvasRect.top + (y * magicGrabZoom))+'px';
-} else {
-    mon.style.left='50%';
-    mon.style.top='50%';
-}
-
+const px=(x!==undefined)?x:canvas.width/2;
+const py=(y!==undefined)?y:canvas.height/2;
+mon.style.left=(canvasRect.left+px*scaleX)+'px';
+mon.style.top=(canvasRect.top+py*scaleY)+'px';
 clearTimeout(mon._timer);
-if(fromSlider) {
-    mon._timer=setTimeout(()=>{mon.style.display='none';},1200);
-} else {
-    mon._timer=setTimeout(()=>{mon.style.display='none';},300);
-}
+if(fromSlider) mon._timer=setTimeout(()=>{mon.style.display='none';},1200);
+else mon._timer=setTimeout(()=>{mon.style.display='none';},300);
 }
 
 function toggleGrabPaintMode() {
@@ -7658,55 +7698,79 @@ function setupMagicGrabEvents(){
 const canvas=document.getElementById('magicGrabCanvas');
 const stalk=document.getElementById('magicGrabStalk');
 const dragHandle=document.getElementById('grabDragHandle');
+const body=document.getElementById('magicGrabBody');
 let isDraggingStalk=false;
 let stalkOffset={x:0,y:0};
 
+function pointFromClient(clientX,clientY){
+    const rect=canvas.getBoundingClientRect();
+    if(!rect.width||!rect.height||!canvas.width||!canvas.height)return null;
+    return {x:(clientX-rect.left)*(canvas.width/rect.width),y:(clientY-rect.top)*(canvas.height/rect.height),rect:rect};
+}
+function inCanvas(point){return !!point&&point.x>=0&&point.y>=0&&point.x<=canvas.width&&point.y<=canvas.height;}
+
 dragHandle.addEventListener('pointerdown',(e)=>{
-isDraggingStalk=true;
-dragHandle.setPointerCapture(e.pointerId);
-const rect=stalk.getBoundingClientRect();
-stalkOffset={x:e.clientX-rect.left,y:e.clientY-rect.top};
-e.stopPropagation();
+    isDraggingStalk=true;
+    try{dragHandle.setPointerCapture(e.pointerId);}catch(err){}
+    const rect=stalk.getBoundingClientRect();
+    const parentRect=body.getBoundingClientRect();
+    stalkOffset={x:e.clientX-rect.left,y:e.clientY-rect.top};
+    stalk.style.left=(rect.left-parentRect.left)+'px';
+    stalk.style.top=(rect.top-parentRect.top)+'px';
+    stalk.style.right='auto';
+    stalk.style.bottom='auto';
+    stalk.style.transform='none';
+    e.preventDefault();
+    e.stopPropagation();
 });
 
 window.addEventListener('pointermove',(e)=>{
-if(isDraggingStalk){
-    const canvasRect=canvas.getBoundingClientRect();
-    const stalkX = e.clientX - stalkOffset.x;
-    const stalkY = e.clientY - stalkOffset.y;
-    
-    stalk.style.left = stalkX + 'px';
-    stalk.style.top = stalkY + 'px';
-    stalk.style.transform = 'none';
-    
-    if(grabPaintMode) {
-        const brushX = (stalkX - canvasRect.left + (stalk.offsetWidth/2)) / magicGrabZoom;
-        const brushY = (stalkY - canvasRect.top - 20) / magicGrabZoom;
-        paintGrabAtCoords(brushX, brushY);
+    if(isDraggingStalk){
+        const bodyRect=body.getBoundingClientRect();
+        const localX=e.clientX-bodyRect.left-stalkOffset.x;
+        const localY=e.clientY-bodyRect.top-stalkOffset.y;
+        stalk.style.left=localX+'px';
+        stalk.style.top=localY+'px';
+        const stalkRect=stalk.getBoundingClientRect();
+        const brushClientX=stalkRect.left+stalkRect.width/2;
+        const brushClientY=stalkRect.top+28;
+        const point=pointFromClient(brushClientX,brushClientY);
+        if(grabPaintMode&&inCanvas(point)) paintGrabAtCoords(point.x,point.y,brushClientX,brushClientY);
+        else updateBrushMonitorPreview(document.getElementById('magicBrushSize').value, point ? point.x : canvas.width/2, point ? point.y : canvas.height/2);
+    } else if(isPaintingGrab&&grabPaintMode){
+        const point=pointFromClient(e.clientX,e.clientY);
+        if(inCanvas(point)) paintGrabAtCoords(point.x,point.y,e.clientX,e.clientY);
     }
-} else if(isPaintingGrab && grabPaintMode){
-    const rect=canvas.getBoundingClientRect();
-    paintGrabAtCoords((e.clientX-rect.left)/magicGrabZoom, (e.clientY-rect.top)/magicGrabZoom);
-}
 });
 
 window.addEventListener('pointerup',()=>{
-isDraggingStalk=false;
-isPaintingGrab=false;
-lastGrabX = null;
-lastGrabY = null;
-document.getElementById('brushMonitor').style.display='none';
+    isDraggingStalk=false;
+    isPaintingGrab=false;
+    lastGrabX=null;
+    lastGrabY=null;
+    const mon=document.getElementById('brushMonitor');
+    if(mon) mon.style.display='none';
+});
+window.addEventListener('pointercancel',()=>{
+    isDraggingStalk=false;
+    isPaintingGrab=false;
+    lastGrabX=null;
+    lastGrabY=null;
 });
 
 canvas.addEventListener('pointerdown',(e)=>{
-if(!grabPaintMode) return;
-isPaintingGrab=true;
-const rect=canvas.getBoundingClientRect();
-paintGrabAtCoords((e.clientX-rect.left)/magicGrabZoom, (e.clientY-rect.top)/magicGrabZoom);
+    if(!grabPaintMode||!grabMaskCanvas)return;
+    const point=pointFromClient(e.clientX,e.clientY);
+    if(!inCanvas(point))return;
+    isPaintingGrab=true;
+    try{canvas.setPointerCapture(e.pointerId);}catch(err){}
+    paintGrabAtCoords(point.x,point.y,e.clientX,e.clientY);
+    e.preventDefault();
 });
 }
 
-function paintGrabAtCoords(x, y){
+function paintGrabAtCoords(x, y, screenX, screenY){
+if(!grabMaskCanvas)return;
 const bSize=parseInt(document.getElementById('magicBrushSize').value||35);
 const mctx=grabMaskCanvas.getContext('2d');
 mctx.save();
@@ -7731,7 +7795,7 @@ mctx.restore();
 lastGrabX = x;
 lastGrabY = y;
 
-updateBrushMonitorPreview(bSize, x, y);
+if(screenX!==undefined&&screenY!==undefined){const mon=document.getElementById('brushMonitor');const canvas=document.getElementById('magicGrabCanvas');const r=canvas.getBoundingClientRect();const d=Math.max(2,bSize*Math.min(r.width/canvas.width,r.height/canvas.height));mon.style.width=d+'px';mon.style.height=d+'px';mon.style.left=screenX+'px';mon.style.top=screenY+'px';mon.style.display='block';clearTimeout(mon._timer);mon._timer=setTimeout(()=>{mon.style.display='none';},300);}else updateBrushMonitorPreview(bSize,x,y);
 renderMagicGrabDisplay();
 }
 
@@ -7750,10 +7814,11 @@ ctxG.restore();
 
 function applyMagicGrabExtraction(){
 const el=getActiveElement();
-if(!el||el.type!=='image')return;
+if(!el||el.type!=='image'||!grabMaskCanvas)return;
 showToast('✂️ Mengambil subjek potongan HD...');
 
 setTimeout(() => {
+    if(!grabMaskCanvas)return;
     const origW = el.img.width;
     const origH = el.img.height;
 
@@ -7769,27 +7834,31 @@ setTimeout(() => {
     maskScaled.width = origW;
     maskScaled.height = origH;
     maskScaled.getContext('2d').drawImage(grabMaskCanvas, 0, 0, origW, origH);
-    
     hdCtx.drawImage(maskScaled, 0, 0, origW, origH);
+    maskScaled.width = 0; maskScaled.height = 0;
 
     const trimmed = trimCanvas(hdOff);
+    hdOff.width = 0; hdOff.height = 0;
     if(!trimmed) {
         showToast('⚠️ Area tangkapan kosong!');
         return;
     }
 
+    const trimmedUrl=trimmed.toDataURL('image/png');
+    const trimmedWidth=trimmed.width, trimmedHeight=trimmed.height;
+    trimmed.width=0; trimmed.height=0;
     const s=getCurrentSlide();
     const newEl={
     id:'el_'+Date.now(),
     type:'image',
-    img:getImageFromCache(trimmed.toDataURL('image/png')),
-    src:trimmed.toDataURL('image/png'),
+    img:getImageFromCache(trimmedUrl),
+    src:trimmedUrl,
     x:el.x,
     y:el.y,
-    width:trimmed.width,
-    height:trimmed.height,
-    origWidth:trimmed.width,
-    origHeight:trimmed.height,
+    width:trimmedWidth,
+    height:trimmedHeight,
+    origWidth:trimmedWidth,
+    origHeight:trimmedHeight,
     flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'rgba(0,0,0,0.5)',blur:20,angle:45,distance:10},opacity:1,locked:false,groupId:null,
     transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false }
     };
@@ -9798,7 +9867,7 @@ function updateDemoFloatingBtn() {
 }
 
 /* ===== UPSCALE HD (v1.2.6) ===== */
-const UP = { scale: 2, denoise: 30, sharp: 45, detail: 25, region: 'c', busy: false, token: 0, timer: null, srcC: null, alpha: false, elId: null };
+const UP = { scale: 2, denoise: 30, sharp: 45, detail: 25, region: 'c', panX: 0.5, panY: 0.5, panMode: false, busy: false, token: 0, timer: null, srcC: null, alpha: false, elId: null };
 const UP_MAX_SIDE = 3600, UP_MAX_PX = 9000000, UP_MAX_PX_ALPHA = 6000000;
 const UP_PRESETS = {
     ringan: { scale: 2, denoise: 15, sharp: 35, detail: 15 },
@@ -9992,8 +10061,10 @@ function openPanelUpscale() {
 <span class="up-tag l">SEBELUM</span><span class="up-tag r">SESUDAH (HD)</span>
 <button class="up-full" onclick="upOpenFull()">⛶ Penuh</button>
 </div>
-<div class="up-cap">Geser garis putih ke kiri/kanan untuk membandingkan</div>
+<div class="up-cap">Geser garis putih untuk membandingkan sebelum/sesudah. Saat mode Geser Area aktif, seret foto untuk memilih bagian pratinjau.</div>
 </div>
+<button class="bib-chip up-pan-toggle" id="upPanToggle" onclick="upTogglePanMode()">✋ Geser Area: OFF</button>
+<div class="up-size-monitor" id="upSizeMonitor">Perkiraan ukuran output: menghitung…</div>
 <div class="up-sec">Preset cepat:</div>
 <div class="ctrl-grid-btns up-grid" style="grid-template-columns:repeat(3,1fr);">
 <button class="btn-sub-tool" onclick="upPreset('ringan')"><span>🌤️</span><span>Ringan</span></button>
@@ -10029,6 +10100,8 @@ function openPanelUpscale() {
 </div>
 <div style="font-size:10px;color:#888;line-height:1.5;">💡 Foto sangat blur: pakai Kuat. Foto sudah tajam tapi kecil: Ringan. Jika berlebihan/berbulu, kurangi Ketajaman &amp; Detail. Tidak puas setelah terapkan? Tekan Undo ↶ lalu atur ulang. Menerapkan berulang akan menambah efek.</div>`;
     openToolPanel('🔬 Upscale HD', html);
+    document.getElementById('toolPanel').classList.add('upscale-panel');
+    UP.panMode = false; UP.panX = 0.5; UP.panY = 0.5; UP.region = 'c';
     upRefreshLabels();
     upSchedulePreview();
 }
@@ -10044,6 +10117,9 @@ function upRefreshLabels() {
         const mp = (t.W * t.H / 1e6).toFixed(1);
         const cap = t.s < UP.scale - 0.01 ? ' (dibatasi aman, maks ' + t.s.toFixed(2) + 'x)' : '';
         set('upInfo', 'Asli ' + UP.srcC.width + '×' + UP.srcC.height + ' → HD ' + t.W + '×' + t.H + ' · ' + mp + ' MP' + cap);
+        const bytesPerPixel = UP.alpha ? 1.8 : 0.85;
+        const estimateMB = (t.W * t.H * bytesPerPixel) / (1024 * 1024);
+        set('upSizeMonitor', 'Perkiraan output: ' + estimateMB.toFixed(2) + ' MB · ' + (UP.alpha ? 'PNG (transparansi dipertahankan)' : 'JPEG kualitas 94%') + ' · hasil sebenarnya bergantung detail foto.');
     }
 }
 function upSetScale(v) { UP.scale = Math.max(1.5, Math.min(4, parseInt(v, 10) / 10)); upRefreshLabels(); upSchedulePreview(); }
@@ -10052,6 +10128,9 @@ function upSetSharp(v) { UP.sharp = parseInt(v, 10); upRefreshLabels(); upSchedu
 function upSetDetail(v) { UP.detail = parseInt(v, 10); upRefreshLabels(); upSchedulePreview(); }
 function upSetRegion(r) {
     UP.region = r;
+    if(r === 'tl') { UP.panX = 0; UP.panY = 0; }
+    else if(r === 'br') { UP.panX = 1; UP.panY = 1; }
+    else { UP.panX = 0.5; UP.panY = 0.5; }
     [['c', 'upRegC'], ['tl', 'upRegTL'], ['br', 'upRegBR']].forEach(([k, id]) => { const b = upEl(id); if (b) b.classList.toggle('active', k === r); });
     upSchedulePreview();
 }
@@ -10081,10 +10160,12 @@ async function upPreview() {
 /* Bagian foto yang dipratinjau: seluruh foto bila cukup kecil, jika besar diambil potongan sesuai pilihan (Tengah/Kiri Atas/Kanan Bawah) */
 function upPreviewGeom(src, cap) {
     const s = Math.max(1.5, UP.scale);
-    const maxSrc = Math.max(24, Math.floor(cap / s));
+    // Ukuran area sumber tetap saat skala diubah agar komposisi pratinjau tidak ikut zoom.
+    const maxSrc = Math.max(24, Math.floor(cap > 600 ? cap / 4 : cap / 2.2));
     const cw = Math.min(src.width, maxSrc), ch = Math.min(src.height, maxSrc);
-    let sx = Math.round((src.width - cw) / 2), sy = Math.round((src.height - ch) / 2);
-    if (UP.region === 'tl') { sx = 0; sy = 0; } else if (UP.region === 'br') { sx = src.width - cw; sy = src.height - ch; }
+    const maxX = Math.max(0, src.width - cw), maxY = Math.max(0, src.height - ch);
+    const sx = Math.round(maxX * Math.max(0, Math.min(1, UP.panX)));
+    const sy = Math.round(maxY * Math.max(0, Math.min(1, UP.panY)));
     return { sx: sx, sy: sy, cw: cw, ch: ch, W: Math.max(1, Math.round(cw * s)), H: Math.max(1, Math.round(ch * s)) };
 }
 
@@ -10112,6 +10193,19 @@ async function upRenderPair(src, a, b, cap, token) {
     return ok;
 }
 
+/* Mode geser foto untuk memilih area pratinjau tanpa mengubah skala pembanding. */
+function upTogglePanMode() {
+    UP.panMode = !UP.panMode;
+    const b = upEl('upPanToggle');
+    if(b) {
+        b.classList.toggle('on', UP.panMode);
+        b.textContent = UP.panMode ? '✋ Geser Area: ON' : '✋ Geser Area: OFF';
+    }
+    const cmp = upEl('upCmp');
+    if(cmp) cmp.style.cursor = UP.panMode ? 'grab' : 'ew-resize';
+    showToast(UP.panMode ? 'Geser foto untuk memilih area; skala tetap stabil' : 'Mode pembanding aktif: geser garis putih');
+}
+
 /* Garis pembanding vertikal yang bisa digeser */
 function upBindCompare(box) {
     if (!box) return;
@@ -10119,13 +10213,33 @@ function upBindCompare(box) {
     const fromEvt = (e) => { const r = box.getBoundingClientRect(); if (r.width > 0) setP((e.clientX - r.left) / r.width * 100); };
     box.addEventListener('pointerdown', (e) => {
         if (e.target.closest && e.target.closest('.up-full')) return;
-        box._drag = true;
+        if(box.id === 'upCmp' && UP.panMode) {
+            const r = box.getBoundingClientRect();
+            box._panDrag = { x: e.clientX, y: e.clientY, panX: UP.panX, panY: UP.panY, w: Math.max(1, r.width), h: Math.max(1, r.height) };
+            box.style.cursor = 'grabbing';
+        } else {
+            box._drag = true;
+            fromEvt(e);
+        }
         try { box.setPointerCapture(e.pointerId); } catch (err) {}
-        fromEvt(e);
         e.preventDefault();
     });
-    box.addEventListener('pointermove', (e) => { if (box._drag) fromEvt(e); });
-    const end = (e) => { box._drag = false; try { box.releasePointerCapture(e.pointerId); } catch (err) {} };
+    box.addEventListener('pointermove', (e) => {
+        if(box._panDrag) {
+            const d = box._panDrag;
+            UP.panX = Math.max(0, Math.min(1, d.panX - (e.clientX - d.x) / d.w));
+            UP.panY = Math.max(0, Math.min(1, d.panY - (e.clientY - d.y) / d.h));
+            box.style.setProperty('--pan-x', UP.panX);
+            box.style.setProperty('--pan-y', UP.panY);
+        } else if (box._drag) fromEvt(e);
+    });
+    const end = (e) => {
+        const wasPan = !!box._panDrag;
+        box._drag = false; box._panDrag = null;
+        if(box.id === 'upCmp') box.style.cursor = UP.panMode ? 'grab' : 'ew-resize';
+        try { box.releasePointerCapture(e.pointerId); } catch (err) {}
+        if(wasPan) { UP.region = 'custom'; upSchedulePreview(); }
+    };
     box.addEventListener('pointerup', end);
     box.addEventListener('pointercancel', end);
     setP(50);
@@ -10178,6 +10292,10 @@ async function upApply() {
         const out = await upRun(src, t.W, t.H, upParams(), token);
         if (!out) throw new Error('dibatalkan');
         const dataUrl = UP.alpha ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.94);
+        const commaAt = dataUrl.indexOf(',');
+        const payloadLength = commaAt >= 0 ? dataUrl.length - commaAt - 1 : dataUrl.length;
+        const padding = dataUrl.endsWith('==') ? 2 : (dataUrl.endsWith('=') ? 1 : 0);
+        const actualMB = Math.max(0, (Math.floor(payloadLength * 3 / 4) - padding) / (1024 * 1024));
         out.width = 0; out.height = 0;
         el.src = dataUrl;
         el.img = getImageFromCache(el.src);
@@ -10188,7 +10306,7 @@ async function upApply() {
         requestRender();
         pushHistoryState();
         closeToolPanel();
-        showToast('✅ Upscale HD selesai (' + t.W + '×' + t.H + ')');
+        showToast('✅ Upscale HD selesai (' + t.W + '×' + t.H + ') · ' + actualMB.toFixed(2) + ' MB');
     } catch (err) {
         if (btn) { btn.disabled = false; btn.textContent = '✨ Terapkan Upscale HD'; }
         if (!(err && err.message === 'dibatalkan')) showToast('⚠️ Upscale gagal (memori kurang). Kecilkan skala lalu coba lagi.');
@@ -10266,9 +10384,9 @@ const BIB_PAGE_SIZE = 30;
 const BIB_SOURCES = {
     wiki: { name: 'Wikimedia', start: 0, fetch: bibFetchWiki },
     nasa: { name: 'NASA', start: 1, fetch: bibFetchNasa },
-    aic: { name: 'Art Institute Chicago', start: 1, fetch: bibFetchAic },
-    openverse: { name: 'Openverse', start: 1, fetch: bibFetchOpenverse }
+    met: { name: 'The Met Open Access (CC0)', start: 0, fetch: bibFetchMet }
 };
+const BIB_MET_CACHE = new Map();
 
 function bibEl(id) { return document.getElementById(id); }
 
@@ -10330,7 +10448,7 @@ function bibSetSource(src) {
 function bibSetStatus(t) { const s = bibEl('bibStatus'); if(s) s.textContent = t; }
 
 /* ---------- Pencarian (feed 3 kolom, 30 gambar per halaman) ---------- */
-function bibThumbProxy(u) { return 'https://wsrv.nl/?url=' + encodeURIComponent(u) + '&w=480&h=480&fit=cover&output=jpg'; }
+function bibThumbProxy(u) { return 'https://wsrv.nl/?url=' + encodeURIComponent(u) + '&w=480&h=640&fit=contain&output=jpg'; }
 
 /* Satu kotak gambar: rantai cadangan (thumb -> thumbAlt -> proxy), batas waktu 12 detik per percobaan, selalu melapor selesai */
 function bibMakeTile(it, idx, settle) {
@@ -10539,6 +10657,7 @@ async function bibFetchWiki(q, offset, signal) {
         list.push({
             thumb: thumb,
             fulls: [big, ii.url].filter(Boolean),
+            mimeHint: ii.mime || '',
             title: (pg.title || 'Gambar').replace(/^File:/, '').replace(/\.[a-z0-9]+$/i, '').replace(/_/g, ' ')
         });
     });
@@ -10559,11 +10678,57 @@ async function bibFetchNasa(q, page, signal) {
         const mk = (kind) => thumb.replace(/~(thumb|small|medium|large|orig)(\.[a-z0-9]+)$/i, '~' + kind + '$2');
         const fulls = /~(thumb|small|medium|large|orig)\./i.test(thumb) ? [mk('large'), mk('medium'), mk('orig')] : [thumb];
         const dd = x.data && x.data[0] || {};
-        list.push({ thumb: thumb, fulls: fulls, title: dd.title || 'Gambar NASA' });
+        list.push({ thumb: thumb, fulls: fulls, mimeHint: /\.png(?:$|[?#])/i.test(thumb) ? 'image/png' : (/\.webp(?:$|[?#])/i.test(thumb) ? 'image/webp' : 'image/jpeg'), title: dd.title || 'Gambar NASA' });
     });
     const total = (col.metadata && col.metadata.total_hits) || 0;
     const hasMore = its.length > 0 && page * 50 < total && page < 100;
     return { items: list, next: hasMore ? page + 1 : null };
+}
+
+async function bibFetchMet(q, cursor, signal) {
+    const key = String(q || '').trim().toLowerCase();
+    let state = BIB_MET_CACHE.get(key);
+    if(!state) {
+        const searchUrl = 'https://collectionapi.metmuseum.org/public/collection/v1.1/search?hasImages=true&isPublicDomain=true&limit=100&offset=0&q=' + encodeURIComponent(q);
+        const search = await bibFetchJson(searchUrl, signal);
+        state = { ids: Array.isArray(search.objectIDs) ? search.objectIDs : [], total: Number(search.total) || 0 };
+        BIB_MET_CACHE.set(key, state);
+        if(BIB_MET_CACHE.size > 5) BIB_MET_CACHE.delete(BIB_MET_CACHE.keys().next().value);
+    }
+    let offset = Math.max(0, Number(cursor) || 0);
+    while(offset >= state.ids.length && state.ids.length < state.total && state.ids.length < 10000) {
+        const url = 'https://collectionapi.metmuseum.org/public/collection/v1.1/search?hasImages=true&isPublicDomain=true&limit=100&offset=' + state.ids.length + '&q=' + encodeURIComponent(q);
+        const nextPage = await bibFetchJson(url, signal);
+        const ids = Array.isArray(nextPage.objectIDs) ? nextPage.objectIDs : [];
+        if(!ids.length) { state.total = state.ids.length; break; }
+        state.ids.push(...ids);
+        state.total = Number(nextPage.total) || state.total;
+        if(signal && signal.aborted) return { items: [], next: null };
+    }
+    const ids = state.ids.slice(offset, offset + BIB_PAGE_SIZE);
+    const objects = [];
+    for(let i = 0; i < ids.length; i += 5) {
+        if(signal && signal.aborted) return { items: [], next: null };
+        const batch = ids.slice(i, i + 5);
+        const records = await Promise.all(batch.map(async id => {
+            try {
+                return await bibFetchJson('https://collectionapi.metmuseum.org/public/collection/v1/objects/' + id, signal);
+            } catch(e) {
+                if(e && e.name === 'AbortError') throw e;
+                return null;
+            }
+        }));
+        records.forEach(rec => { if(rec && rec.isPublicDomain === true && rec.primaryImage) objects.push(rec); });
+    }
+    const items = objects.map(rec => ({
+        thumb: rec.primaryImageSmall || rec.primaryImage,
+        fulls: [rec.primaryImage].filter(Boolean),
+        mimeHint: 'image/jpeg',
+        title: [rec.title || 'Karya The Met', rec.artistDisplayName ? ('— ' + rec.artistDisplayName) : ''].join(' ').trim()
+    })).filter(it => it.thumb);
+    const nextOffset = offset + ids.length;
+    const next = nextOffset < state.total && nextOffset < 10000 && ids.length ? nextOffset : null;
+    return { items, next };
 }
 
 async function bibFetchAic(q, page, signal) {
@@ -10584,12 +10749,12 @@ async function bibFetchAic(q, page, signal) {
 }
 
 /* ---------- Mengambil file gambar (dengan cadangan proxy bila situs memblokir CORS) ---------- */
-function bibProxy(u) { return 'https://wsrv.nl/?url=' + encodeURIComponent(u) + '&w=1600&we'; }
+function bibProxy(u, mimeHint) { const fmt = mimeHint === 'image/png' ? '&output=png' : (mimeHint === 'image/webp' ? '&output=webp' : ''); return 'https://wsrv.nl/?url=' + encodeURIComponent(u) + '&w=1600&we' + fmt; }
 
 function bibCandidates(item) {
     const out = [];
     (item.fulls || []).forEach(u => out.push(u));
-    (item.fulls || []).forEach(u => { if(!/wsrv\.nl/.test(u)) out.push(bibProxy(u)); });
+    (item.fulls || []).forEach(u => { if(!/wsrv\.nl/.test(u)) out.push(bibProxy(u, item.mimeHint)); });
     if(item.thumb) out.push(item.thumb);
     return out;
 }
@@ -10708,7 +10873,7 @@ async function bibDownloadSelected() {
     BIB_LD2.start('⏳ Tunggu, mengunduh gambar —', 85, 0.05);
     try {
         const blob = item.blob || await bibFetchBlob(bibCandidates(item));
-        const extMap = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg' };
+        const extMap = { 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/avif': 'avif', 'image/bmp': 'bmp', 'image/svg+xml': 'svg' };
         const ext = extMap[blob.type] || 'png';
         const slug = (item.title || 'gambar').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'gambar';
         const url = URL.createObjectURL(blob);
@@ -11065,7 +11230,7 @@ const SS_DATA = {
 };
 
 const SS = { region: 'id', cat: 'all', engine: 'google', batch: 0, view: 'list', q: '', only: null, bound: false,
-    page: 1, mode: 'search', lastUrl: '', lastScope: '', prevView: 'list', bm: [], bmId: null, bmEditId: null, bmTitle: '', loadTok: 0, ldTimer: 0, armTimer: 0 };
+    page: 1, mode: 'search', lastUrl: '', lastScope: '', prevView: 'list', bm: [], bmId: null, bmEditId: null, bmTitle: '', notes: [], noteEditId: null, loadTok: 0, ldTimer: 0, armTimer: 0 };
 const SS_ENGINES = {
     google: 'https://www.google.com/search?igu=1&q=',
     bing: 'https://www.bing.com/search?q='
@@ -11090,7 +11255,7 @@ function openSunnahBrowser() {
     ssBind();
     SS.bm = ssBmLoad();
     ssRenderCats();
-    if(SS.view === 'web' || SS.view === 'bm') { /* bingkai dibuang saat ditutup; tampilkan daftar lagi */ SS.view = 'list'; }
+    if(SS.view === 'web' || SS.view === 'bm' || SS.view === 'note') { /* bingkai dibuang saat ditutup; tampilkan daftar lagi */ SS.view = 'list'; }
     ssShowView(SS.view);
     ssRenderList();
     ssFit();
@@ -11180,8 +11345,9 @@ function ssShowView(v) {
     ssEl('ssListWrap').style.display = v === 'list' ? 'flex' : 'none';
     ssEl('ssWebWrap').style.display = v === 'web' ? 'flex' : 'none';
     ssEl('ssBmWrap').style.display = v === 'bm' ? 'flex' : 'none';
+    ssEl('ssNoteWrap').style.display = v === 'note' ? 'flex' : 'none';
     ssEl('ssToggleBtn').textContent = v === 'web' ? '📚 Daftar Situs' : '🌐 Hasil';
-    ssEl('ssToggleBtn').style.display = (v === 'web' || SS.q) ? '' : 'none';
+    ssEl('ssToggleBtn').style.display = (v === 'web' || (v === 'list' && SS.q)) ? '' : 'none';
     if(v !== 'web') { ssDestroyFrame(); ssEl('ssStatus').textContent = ''; }
 }
 
@@ -11536,6 +11702,169 @@ function ssBmCommit() {
     showToast(SS.bmEditId ? '✅ Bookmark diperbarui' : '✅ Bookmark disimpan');
 }
 
+
+/* ---------- Notebook materi Situs Sunnah (v1.2.8) ---------- */
+const SS_NOTE_KEY = 'spm_sunnah_notebook_v1';
+
+function ssNoteLoad() {
+    try {
+        const a = JSON.parse(localStorage.getItem(SS_NOTE_KEY) || '[]');
+        return Array.isArray(a) ? a.filter(x => x && typeof x.id === 'string' && typeof x.title === 'string' && typeof x.content === 'string').slice(0, 100) : [];
+    } catch(e) { return []; }
+}
+
+function ssNoteStore() {
+    try {
+        localStorage.setItem(SS_NOTE_KEY, JSON.stringify(SS.notes));
+        return true;
+    } catch(e) {
+        showToast('⚠️ Catatan gagal disimpan. Penyimpanan perangkat mungkin penuh; salin materi dahulu.');
+        return false;
+    }
+}
+
+function ssOpenNotes() {
+    SS.notes = ssNoteLoad();
+    SS.noteEditId = null;
+    SS.prevView = SS.view;
+    ssShowView('note');
+    ssNoteCancel();
+    ssRenderNotes();
+}
+
+function ssNoteClose() {
+    SS.noteEditId = null;
+    ssNoteCancel();
+    ssShowView('list');
+    ssRenderList();
+}
+
+function ssNoteNew() {
+    SS.noteEditId = null;
+    ssEl('ssNoteTitle').value = '';
+    ssEl('ssNoteContent').value = '';
+    ssEl('ssNoteEditor').classList.add('on');
+    ssEl('ssNoteTitle').focus();
+    ssEl('ssNoteList').scrollTop = 0;
+}
+
+function ssNoteEdit(id) {
+    const note = SS.notes.find(x => x.id === id);
+    if(!note) return;
+    SS.noteEditId = note.id;
+    ssEl('ssNoteTitle').value = note.title;
+    ssEl('ssNoteContent').value = note.content;
+    ssEl('ssNoteEditor').classList.add('on');
+    ssEl('ssNoteTitle').focus();
+}
+
+function ssNoteCancel() {
+    const editor = ssEl('ssNoteEditor');
+    if(editor) editor.classList.remove('on');
+    const title = ssEl('ssNoteTitle'), content = ssEl('ssNoteContent');
+    if(title) title.value = '';
+    if(content) content.value = '';
+    SS.noteEditId = null;
+}
+
+function ssNoteSave() {
+    const titleInput = ssEl('ssNoteTitle');
+    const contentInput = ssEl('ssNoteContent');
+    const content = (contentInput.value || '').trim();
+    let title = (titleInput.value || '').trim();
+    if(!title && !content) { showToast('⚠️ Isi judul atau materi catatan dulu'); titleInput.focus(); return; }
+    if(!title) title = 'Materi tanpa judul';
+    SS.notes = ssNoteLoad();
+    if(SS.noteEditId) {
+        const existing = SS.notes.find(x => x.id === SS.noteEditId);
+        if(existing) { existing.title = title; existing.content = content; existing.updatedAt = Date.now(); }
+        else SS.notes.unshift({ id: SS.noteEditId, title, content, createdAt: Date.now(), updatedAt: Date.now() });
+    } else {
+        if(SS.notes.length >= 100) { showToast('⚠️ Maksimal 100 catatan. Hapus catatan lama dahulu.'); return; }
+        SS.notes.unshift({ id: 'note' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), title, content, createdAt: Date.now(), updatedAt: Date.now() });
+    }
+    if(!ssNoteStore()) return;
+    ssNoteCancel();
+    ssRenderNotes();
+    showToast('✅ Catatan tersimpan di perangkat');
+}
+
+function ssNoteText(note) {
+    return (note.title || 'Catatan') + (note.content ? '\n\n' + note.content : '');
+}
+
+async function ssNoteCopyText(textToCopy) {
+    const value = String(textToCopy || '');
+    if(!value.trim()) { showToast('⚠️ Catatan belum berisi materi untuk disalin'); return; }
+    try {
+        if(navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(value);
+            showToast('📋 Materi berhasil disalin');
+            return;
+        }
+    } catch(e) { /* coba cara salin cadangan di bawah */ }
+    const t = document.createElement('textarea');
+    t.value = value;
+    t.setAttribute('readonly', '');
+    t.style.position = 'fixed'; t.style.left = '-9999px'; t.style.top = '0';
+    document.body.appendChild(t);
+    t.focus(); t.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(e) { ok = false; }
+    t.remove();
+    showToast(ok ? '📋 Materi berhasil disalin' : '⚠️ Salin otomatis ditolak. Pilih teks lalu salin manual.');
+}
+
+function ssNoteCopyDraft() {
+    ssNoteCopyText((ssEl('ssNoteTitle').value || '').trim() + ((ssEl('ssNoteContent').value || '').trim() ? '\n\n' + ssEl('ssNoteContent').value.trim() : ''));
+}
+
+function ssNoteDelete(id, button) {
+    if(!button.classList.contains('arm')) {
+        button.classList.add('arm'); button.textContent = 'Hapus?';
+        clearTimeout(SS.armTimer);
+        SS.armTimer = setTimeout(() => { button.classList.remove('arm'); button.textContent = '🗑️'; }, 3000);
+        return;
+    }
+    clearTimeout(SS.armTimer);
+    SS.notes = ssNoteLoad().filter(x => x.id !== id);
+    if(!ssNoteStore()) return;
+    if(SS.noteEditId === id) ssNoteCancel();
+    ssRenderNotes();
+    showToast('🗑️ Catatan dihapus');
+}
+
+function ssRenderNotes() {
+    const box = ssEl('ssNoteList');
+    if(!box) return;
+    SS.notes = ssNoteLoad();
+    box.innerHTML = '';
+    ssEl('ssNoteCount').textContent = '📝 Notebook (' + SS.notes.length + ')';
+    if(!SS.notes.length) {
+        const empty = document.createElement('div');
+        empty.className = 'bib-status wrap';
+        empty.textContent = 'Notebook masih kosong. Tekan “Catatan Baru”, tempel materi dakwah, beri judul, lalu Simpan. Catatan akan tetap ada di perangkat untuk dilanjutkan nanti.';
+        box.appendChild(empty);
+        return;
+    }
+    SS.notes.forEach(note => {
+        const row = document.createElement('div');
+        row.className = 'ss-note-row';
+        const nm = document.createElement('div'); nm.className = 'nm';
+        const title = document.createElement('b'); title.textContent = note.title || 'Catatan';
+        const preview = document.createElement('span');
+        preview.textContent = (note.content || '').trim() || 'Belum ada isi materi.';
+        nm.appendChild(title); nm.appendChild(preview);
+        const edit = document.createElement('button'); edit.className = 'ss-ibtn'; edit.textContent = '✏️'; edit.setAttribute('aria-label', 'Edit catatan');
+        edit.onclick = () => ssNoteEdit(note.id);
+        const copy = document.createElement('button'); copy.className = 'ss-ibtn'; copy.textContent = '📋'; copy.setAttribute('aria-label', 'Salin catatan');
+        copy.onclick = () => ssNoteCopyText(ssNoteText(note));
+        const del = document.createElement('button'); del.className = 'ss-ibtn'; del.textContent = '🗑️'; del.setAttribute('aria-label', 'Hapus catatan');
+        del.onclick = () => ssNoteDelete(note.id, del);
+        row.appendChild(nm); row.appendChild(edit); row.appendChild(copy); row.appendChild(del);
+        box.appendChild(row);
+    });
+}
 
 /* ===== INSTALL APLIKASI / PWA (v1.2.4) ===== */
 let deferredPrompt=null;
