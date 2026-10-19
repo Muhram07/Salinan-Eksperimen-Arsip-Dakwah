@@ -1,5 +1,22 @@
 <!--
-Studio Poster Maker Pro - Update v1.2.4
+Studio Poster Maker Pro - Update v1.2.5
+
+v1.2.5:
+1. ANTI-SCREENSHOT MODE TRIAL: deteksi diperkuat. Layar langsung menjadi HITAM sebelum tangkapan terjadi saat
+   terdeteksi tombol PrintScreen, kombinasi Win/Cmd+Shift (Snipping Tool, Cmd+Shift+3/4/5), Ctrl+P / cetak,
+   aplikasi lain mengambil fokus, tab disembunyikan, atau perekaman layar via panel sistem. Muncul notifikasi
+   "Tidak bisa screenshot pada Mode Trial". Pendengar tidak lagi menumpuk saat trial diulang. Klik di dalam
+   Browser Gambar tidak salah memicu layar hitam. (Catatan: web tidak bisa membaca tombol fisik screenshot HP;
+   pada HP, deteksi bergantung pada sinyal sistem yang diberikan browser.)
+2. BROWSER GAMBAR (tool baru "Cari Gambar" di bar bawah): kotak pencarian + hasil gambar (Openverse & Wikimedia
+   Commons), tab Web (halaman internet di dalam aplikasi, ketik alamat/kata kunci), tempel URL gambar / tempel
+   gambar dari clipboard. Setiap gambar bisa: ketuk -> Tambah ke Kanvas, Download, atau TAHAN lalu SERET ke
+   kanvas. Panel bisa kecil (kanvas tetap terlihat) atau besar.
+3. TOMBOL DOWNLOAD TERPILIH: kini langsung memberi efek tekan, tombol berubah "Sedang Proses Download...",
+   muncul notifikasi, dan penekanan ganda diabaikan. Proses berat baru jalan setelah layar sempat digambar.
+4. URUTAN BAR BAWAH: Teks -> Posisi, Edit Teks, Font, Ukuran, Jarak, Format, Warna, Bayangan, Stabilo, lalu
+   sisanya. Foto/PNG -> Posisi, Ukuran, Crop Presisi, Crop Jari, Blur, Warna Siluet, Hapus BG, Cermin,
+   Transparansi, Cahaya & Warna, lalu sisanya. Fungsi tiap tombol tidak berubah.
 
 v1.2.4:
 1. GRUP: saat satu elemen dalam grup digeser, elemen lain kini ikut kaku (selisih geser sama persis,
@@ -333,6 +350,65 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     padding: 20px;
 }
 
+#antiScreenshotOverlay .ss-notice {
+    margin-top: 16px; padding: 10px 16px; border-radius: 20px;
+    background: rgba(255,107,107,0.15); border: 1px solid #ff6b6b;
+    color: #ff6b6b; font-size: 13px; font-weight: 800;
+}
+.toast.toast-top { z-index: 10000001; }
+@media print {
+    html, body { background: #000 !important; }
+    body * { visibility: hidden !important; }
+}
+.btn-download { transition: transform .08s ease, filter .08s ease, opacity .15s ease; }
+.btn-download:active { transform: scale(0.94); filter: brightness(0.82); }
+.btn-download.pressed { transform: scale(0.94); filter: brightness(0.82); }
+.btn-download.is-busy { opacity: 0.85; pointer-events: none; cursor: progress; }
+.btn-download .dl-spin { display:inline-block; width:12px; height:12px; border:2px solid rgba(0,0,0,.25); border-top-color:#111; border-radius:50%; animation: dlSpin .7s linear infinite; margin-right:6px; vertical-align:-2px; }
+@keyframes dlSpin { to { transform: rotate(360deg); } }
+
+/* ===== BROWSER GAMBAR (v1.2.5) ===== */
+#bibPanel{position:fixed;left:0;right:0;bottom:0;height:52vh;height:52dvh;z-index:9500;background:#141414;border-top:1px solid rgba(212,175,55,.55);border-radius:16px 16px 0 0;box-shadow:0 -12px 34px rgba(0,0,0,.9);display:none;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px);-webkit-user-select:text;user-select:text;}
+#bibPanel.active{display:flex;}
+#bibPanel.bib-big{height:calc(100vh - 12px);height:calc(100dvh - 12px);}
+.bib-head{display:flex;align-items:center;gap:6px;padding:8px 10px 4px;flex-shrink:0;}
+.bib-tab{flex:1;height:32px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#bbb;font-size:11px;font-weight:800;cursor:pointer;}
+.bib-tab.on{background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;border-color:transparent;}
+.bib-ico{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#ddd;font-size:14px;cursor:pointer;flex-shrink:0;}
+.bib-row{display:flex;gap:6px;padding:4px 10px;flex-shrink:0;align-items:center;}
+.bib-input{flex:1;min-width:0;height:38px;border-radius:19px;border:1px solid #D4AF37;background:#0b0b0b;color:#fff;padding:0 14px;font-size:16px;outline:none;-webkit-user-select:text;user-select:text;-webkit-appearance:none;appearance:none;}
+.bib-go{height:38px;padding:0 14px;border-radius:19px;border:none;background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;}
+.bib-go:active{transform:scale(.94);}
+.bib-chip{height:26px;padding:0 10px;border-radius:13px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#aaa;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.bib-chip.on{border-color:#D4AF37;color:#D4AF37;background:rgba(212,175,55,.12);}
+.bib-chips{display:flex;gap:6px;padding:2px 10px 4px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.bib-chips::-webkit-scrollbar{display:none;}
+.bib-status{font-size:11px;color:#999;padding:2px 12px;flex-shrink:0;line-height:1.4;}
+.bib-body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;}
+.bib-grid{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px 10px;align-content:start;}
+.bib-grid.frozen{overflow-y:hidden;}
+.bib-item{position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:#1e1e1e;border:2px solid transparent;cursor:grab;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.bib-item.sel{border-color:#D4AF37;box-shadow:0 0 8px rgba(212,175,55,.5);}
+.bib-item img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;}
+.bib-more{grid-column:1/-1;height:36px;border-radius:18px;border:1px solid #D4AF37;background:transparent;color:#D4AF37;font-size:12px;font-weight:800;cursor:pointer;}
+.bib-sel{display:none;align-items:center;gap:8px;padding:6px 10px;border-top:1px solid rgba(212,175,55,.3);background:#181818;flex-shrink:0;}
+.bib-sel.on{display:flex;}
+.bib-sel img{width:44px;height:44px;border-radius:6px;object-fit:cover;background:#222;flex-shrink:0;}
+.bib-sel .t{flex:1;min-width:0;font-size:11px;color:#ddd;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.bib-act{height:36px;padding:0 12px;border-radius:18px;border:none;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;}
+.bib-act.add{background:linear-gradient(135deg,#FFE259,#D4AF37);color:#111;}
+.bib-act.dl{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.bib-act:active{transform:scale(.94);}
+.bib-act:disabled{opacity:.5;}
+.bib-pane{flex:1;min-height:0;display:none;flex-direction:column;}
+.bib-pane.on{display:flex;}
+#bibFrameWrap{flex:1;min-height:0;position:relative;background:#fff;margin:0 10px 6px;border-radius:8px;overflow:hidden;}
+#bibFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;}
+.bib-hint{font-size:11px;color:#aaa;line-height:1.5;padding:6px 12px;}
+#bibGhost{position:fixed;left:0;top:0;width:84px;height:84px;border-radius:10px;overflow:hidden;z-index:10002;pointer-events:none;display:none;border:2px solid #D4AF37;box-shadow:0 8px 24px rgba(0,0,0,.7);opacity:.92;will-change:transform;}
+#bibGhost.ok{border-color:#00ff88;}
+#bibGhost img{width:100%;height:100%;object-fit:cover;display:block;}
+
 #trialTimerDisplay {
     position: fixed;
     top: 60px;
@@ -648,7 +724,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <div id="downloadSizeHint" style="font-size:11px;color:#888;margin-top:10px;line-height:1.5;"></div>
     </div>
     <div class="fmodal-footer">
-        <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="executeDownload()">⬇️ Download Terpilih</button>
+        <button class="btn-nav btn-download" id="btnExecuteDownload" style="width:100%; justify-content:center; height:40px;" onpointerdown="pressDownloadBtn(true)" onpointerup="pressDownloadBtn(false)" onpointerleave="pressDownloadBtn(false)" onpointercancel="pressDownloadBtn(false)" onclick="executeDownload()">⬇️ Download Terpilih</button>
     </div>
 </div>
 
@@ -845,6 +921,65 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     </div>
 </div>
 
+<!-- ===== BROWSER GAMBAR (v1.2.5) ===== -->
+<div id="bibPanel">
+    <div class="bib-head">
+        <button class="bib-tab on" id="bibTabImg" onclick="bibSetTab('img')">🖼️ Gambar</button>
+        <button class="bib-tab" id="bibTabWeb" onclick="bibSetTab('web')">🌐 Web</button>
+        <button class="bib-tab" id="bibTabUrl" onclick="bibSetTab('url')">🔗 URL / Tempel</button>
+        <button class="bib-ico" id="bibSizeBtn" onclick="bibToggleSize()" aria-label="Besar / kecil">⬆️</button>
+        <button class="bib-ico" onclick="closeImageBrowser()" aria-label="Tutup">✕</button>
+    </div>
+
+    <div class="bib-pane on" id="bibPaneImg">
+        <div class="bib-row">
+            <input class="bib-input" id="bibInput" type="search" enterkeyhint="search" placeholder="Cari gambar (mis. bunga mawar)" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button class="bib-go" onclick="bibSearch(true)">Cari</button>
+        </div>
+        <div class="bib-chips">
+            <button class="bib-chip on" id="bibSrcOv" onclick="bibSetSource('openverse')">Openverse</button>
+            <button class="bib-chip" id="bibSrcWk" onclick="bibSetSource('wiki')">Wikimedia</button>
+        </div>
+        <div class="bib-status" id="bibStatus">Ketik kata kunci lalu tekan Cari. Ketuk gambar untuk opsi, atau TAHAN lalu SERET ke kanvas.</div>
+        <div class="bib-body"><div class="bib-grid" id="bibGrid"></div></div>
+    </div>
+
+    <div class="bib-pane" id="bibPaneWeb">
+        <div class="bib-row">
+            <input class="bib-input" id="bibWebInput" type="search" enterkeyhint="go" placeholder="Ketik kata kunci atau alamat situs" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button class="bib-go" onclick="bibWebGo()">Buka</button>
+        </div>
+        <div class="bib-chips">
+            <button class="bib-chip on" id="bibEngGoogle" onclick="bibSetEngine('google')">Google Gambar</button>
+            <button class="bib-chip" id="bibEngBing" onclick="bibSetEngine('bing')">Bing Gambar</button>
+            <button class="bib-chip" id="bibEngDdg" onclick="bibSetEngine('ddg')">DuckDuckGo</button>
+            <button class="bib-chip" onclick="bibOpenExternal()">↗ Tab Baru</button>
+        </div>
+        <div class="bib-status">Tahan gambar di halaman &rarr; salin alamat gambar &rarr; buka tab URL / Tempel. Jika halaman kosong, situs itu memblokir tampil di dalam aplikasi: pakai tab Gambar atau ↗.</div>
+        <div id="bibFrameWrap"></div>
+    </div>
+
+    <div class="bib-pane" id="bibPaneUrl">
+        <div class="bib-row">
+            <input class="bib-input" id="bibUrlInput" type="url" enterkeyhint="go" placeholder="Tempel alamat gambar (https://...)" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button class="bib-go" onclick="bibUrlFetch()">Ambil</button>
+        </div>
+        <div class="bib-chips">
+            <button class="bib-chip" onclick="bibPasteClipboard()">📋 Tempel dari Clipboard</button>
+            <button class="bib-chip" onclick="triggerImageUpload()">🖼️ Dari Galeri</button>
+        </div>
+        <div class="bib-hint">Tempel alamat gambar, atau tempel gambar yang sudah disalin (tahan di kolom lalu pilih Tempel). Setelah muncul di bawah, ketuk <b>Ke Kanvas</b> atau <b>⬇️</b> untuk menyimpan.</div>
+    </div>
+
+    <div class="bib-sel" id="bibSel">
+        <img id="bibSelImg" alt="">
+        <div class="t" id="bibSelTitle"></div>
+        <button class="bib-act add" id="bibSelAdd" onclick="bibAddSelected()">➕ Ke Kanvas</button>
+        <button class="bib-act dl" id="bibSelDl" onclick="bibDownloadSelected()" aria-label="Download">⬇️</button>
+    </div>
+</div>
+<div id="bibGhost"><img id="bibGhostImg" alt=""></div>
+
 <div class="brush-monitor-circle" id="brushMonitor"></div>
 <div class="toast" id="toast"></div>
 
@@ -856,6 +991,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     <div style="font-size:50px; margin-bottom:15px;">🚫</div>
     <h2 style="margin-bottom:10px;">Akses Perekaman Ditolak</h2>
     <p style="font-size:13px; color:#aaa;">Tangkapan layar (Screenshot) dan perekaman layar dinonaktifkan selama Mode Trial.<br><br>Silakan aktifkan langganan untuk akses tanpa batas.</p>
+    <div class="ss-notice" id="ssNoticeText">🚫 Tidak bisa screenshot pada Mode Trial</div>
 </div>
 
 <!-- PWA Install Prompt -->
@@ -951,7 +1087,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.2.4';
+const APP_VERSION = 'v1.2.5';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -4464,6 +4600,7 @@ if(!el){
 bar.innerHTML=`
 <button class="tool-btn" onclick="addNewText()"><span class="icon">➕📝</span><span>Teks</span></button>
 <button class="tool-btn" onclick="triggerImageUpload()"><span class="icon">➕🖼️</span><span>Foto/PNG</span></button>
+<button class="tool-btn" onclick="openImageBrowser()"><span class="icon">🔍</span><span>Cari Gambar</span></button>
 <button class="tool-btn" onclick="openPanelAddShape()"><span class="icon">🔶</span><span>Bentuk</span></button>
 <button class="tool-btn" onclick="addNewTable()"><span class="icon">📊</span><span>Tabel</span></button>
 <button class="tool-btn" onclick="generateOrgChart()"><span class="icon">🗂️</span><span>Bagan</span></button>
@@ -4508,23 +4645,23 @@ bar.innerHTML=`
 }else if(el.type==='text'){
 bar.innerHTML=`
 <button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
+<button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 ${el.warpSrc ? `<button class="tool-btn" onclick="resetTextWarp()"><span class="icon">↺</span><span>Reset 3D</span></button>` : `<button class="tool-btn" onclick="openDirectCanvasTextEditor(getActiveElement())"><span class="icon">✏️</span><span>Edit Teks</span></button>`}
 <button class="tool-btn" onclick="openPanelFontFamily()"><span class="icon">🔤</span><span>Font</span></button>
 <button class="tool-btn" onclick="openPanelTextSizeFull()"><span class="icon">📏</span><span>Ukuran</span></button>
-<button class="tool-btn" onclick="openPanelTextColor()"><span class="icon">🎨</span><span>Warna</span></button>
-<button class="tool-btn" onclick="openPanelAdjustLight()"><span class="icon">💡</span><span>Cahaya</span></button>
 <button class="tool-btn" onclick="openPanelSpacing()"><span class="icon">↔️</span><span>Jarak</span></button>
+<button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i></span><span>Format</span></button>
+<button class="tool-btn" onclick="openPanelTextColor()"><span class="icon">🎨</span><span>Warna</span></button>
+<button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
+<button class="tool-btn" onclick="openPanelHighlight()"><span class="icon">🖍️</span><span>Stabilo</span></button>
+<button class="tool-btn" onclick="openPanelAdjustLight()"><span class="icon">💡</span><span>Cahaya</span></button>
 <button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
 <button class="tool-btn" onclick="openPanelCurveAndSlant()"><span class="icon">🌀</span><span>Lengkung</span></button>
 <button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openEnvelopeModal()"><span class="icon">🌊</span><span>Envelope</span></button>
-<button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i></span><span>Format</span></button>
-<button class="tool-btn" onclick="openPanelHighlight()"><span class="icon">🖍️</span><span>Stabilo</span></button>
 <button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Teks</span></button>
-<button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
 <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
-<button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'🔗':'⛓️'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
 <button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
@@ -4535,26 +4672,26 @@ ${el.warpSrc ? `<button class="tool-btn" onclick="resetTextWarp()"><span class="
 }else if(el.type==='image'){
 bar.innerHTML=`
 <button class="tool-btn home-btn" onclick="deselectElement()"><span class="icon">🏠</span><span>Beranda</span></button>
+<button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
+<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openPanelCropImage()"><span class="icon">✂️</span><span>Crop Presisi</span></button>
 <button class="tool-btn" onclick="openFreeCropModal()"><span class="icon">✍️</span><span>Crop Jari</span></button>
-<button class="tool-btn" onclick="openPanelImageSkinOverlay()"><span class="icon">🎭</span><span>Skin Foto</span></button>
+<button class="tool-btn" onclick="openPanelImageBlur()"><span class="icon">💧</span><span>Blur</span></button>
+<button class="tool-btn" onclick="openPanelPngColorOverlay()"><span class="icon">🎨</span><span>Warna Siluet</span></button>
+<button class="tool-btn" onclick="openMagicWandModal()"><span class="icon">🪄</span><span>Hapus BG</span></button>
+<button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon">🪞</span><span>Cermin</span></button>
+<button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
 <button class="tool-btn" onclick="openPanelAdjustLight()"><span class="icon">💡</span><span>Cahaya & Warna</span></button>
+<button class="tool-btn" onclick="openPanelImageSkinOverlay()"><span class="icon">🎭</span><span>Skin Foto</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedColor()"><span class="icon">🌈</span><span>Warna HSL</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openEnvelopeModal()"><span class="icon">🌊</span><span>Envelope</span></button>
-<button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon">📏</span><span>Ukuran</span></button>
-<button class="tool-btn" onclick="openMagicWandModal()"><span class="icon">🪄</span><span>Hapus BG</span></button>
 <button class="tool-btn" onclick="openMagicGrabModal()"><span class="icon">✨</span><span>Tangkap Ajaib</span></button>
 <button class="tool-btn" onclick="openPanelDepthFocus()"><span class="icon">📷</span><span>Fokus DSLR</span></button>
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
-<button class="tool-btn" onclick="openPanelPngColorOverlay()"><span class="icon">🎨</span><span>Warna Siluet</span></button>
-<button class="tool-btn" onclick="openPanelImageBlur()"><span class="icon">💧</span><span>Blur</span></button>
 <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis Tepi</span></button>
 <button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
-<button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon">🪞</span><span>Cermin</span></button>
-<button class="tool-btn" onclick="openPanelOpacity()"><span class="icon">🏁</span><span>Transparansi</span></button>
-<button class="tool-btn" onclick="openPanelPosition()"><span class="icon">🎯</span><span>Posisi</span></button>
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'🔗':'⛓️'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon">🥞</span><span>Lapisan</span></button>
 <button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'🔒':'🔓'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
@@ -9259,12 +9396,47 @@ function canvasToBlobSafe(canvas, mime, quality) {
     });
 }
 
+let _isDownloadingNow = false;
+
+function pressDownloadBtn(on) {
+    const b = document.getElementById('btnExecuteDownload');
+    if(!b || _isDownloadingNow) return;
+    b.classList.toggle('pressed', !!on);
+}
+
+function setDownloadBtnBusy(busy) {
+    const b = document.getElementById('btnExecuteDownload');
+    if(!b) return;
+    b.classList.remove('pressed');
+    if(busy) {
+        b.classList.add('is-busy');
+        b.setAttribute('aria-busy', 'true');
+        b.innerHTML = '<span class="dl-spin"></span>Sedang Proses Download...';
+    } else {
+        b.classList.remove('is-busy');
+        b.removeAttribute('aria-busy');
+        b.innerHTML = '⬇️ Download Terpilih';
+    }
+}
+
+function waitForPaint() {
+    // Beri browser kesempatan menggambar efek tekan + notifikasi sebelum render berat dimulai
+    return new Promise(resolve => {
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 30)));
+    });
+}
+
 async function executeDownload() {
+    if(_isDownloadingNow) return; // abaikan tekan ganda
     const cbs = document.querySelectorAll('.download-slide-cb:checked');
     if(cbs.length === 0) {
         showToast('⚠️ Pilih minimal 1 slide!');
         return;
     }
+    _isDownloadingNow = true;
+    setDownloadBtnBusy(true);
+    showToast('⏳ Sedang Proses Download...');
+    await waitForPaint();
     
     const format = document.getElementById('downloadFormat').value; // jpg | pngbg | png
     const requestedMult = parseFloat(document.getElementById('downloadQuality').value) || 2;
@@ -9274,7 +9446,7 @@ async function executeDownload() {
     const mime = isJpg ? 'image/jpeg' : 'image/png';
     const W = mainCanvas.width, H = mainCanvas.height;
     
-    showToast(mult < requestedMult ? '⏳ Ukuran disesuaikan agar aman di perangkat ini...' : '⏳ Menyiapkan gambar resolusi tinggi...');
+    showToast(mult < requestedMult ? '⏳ Sedang Proses Download... (ukuran disesuaikan agar aman)' : '⏳ Sedang Proses Download...');
     
     window.currentRenderScale = mult;
     let failed = false;
@@ -9333,6 +9505,8 @@ async function executeDownload() {
         showToast('⚠️ Gagal membuat gambar. Coba turunkan kualitas.');
     } finally {
         window.currentRenderScale = 1;
+        _isDownloadingNow = false;
+        setDownloadBtnBusy(false);
     }
     
     if(!failed) {
@@ -9479,6 +9653,571 @@ function updateDemoFloatingBtn() {
         btn.style.display = 'block';
     } else {
         if(btn) btn.style.display = 'none';
+    }
+}
+
+/* ===== BROWSER GAMBAR (v1.2.5) ===== */
+const BIB = {
+    tab: 'img', source: 'openverse', engine: 'google', q: '', page: 1,
+    items: [], busy: false, exhausted: false, abort: null,
+    sel: null, selEl: null, objUrl: null, press: null, drag: null,
+    bound: false, adding: false, webUrl: ''
+};
+const BIB_ENGINES = {
+    google: 'https://www.google.com/search?igu=1&tbm=isch&q=',
+    bing: 'https://www.bing.com/images/search?q=',
+    ddg: 'https://duckduckgo.com/?iax=images&ia=images&q='
+};
+const BIB_PAGE_SIZE = 24;
+
+function bibEl(id) { return document.getElementById(id); }
+
+function openImageBrowser() {
+    const p = bibEl('bibPanel');
+    if(!p) return;
+    p.classList.add('active');
+    bibBind();
+    bibFitViewport();
+    if(BIB.tab === 'img') setTimeout(() => { const i = bibEl('bibInput'); if(i) i.focus(); }, 60);
+}
+
+function closeImageBrowser() {
+    const p = bibEl('bibPanel');
+    if(!p) return;
+    p.classList.remove('active');
+    p.style.bottom = '';
+    p.style.maxHeight = '';
+    if(BIB.abort) { try { BIB.abort.abort(); } catch(e) {} BIB.abort = null; }
+    BIB.busy = false;
+    bibPtrCleanup();
+    bibEndDragUI();
+    bibDestroyFrame();
+    bibClearSelection();
+    const ae = document.activeElement;
+    if(ae && ae.blur && p.contains(ae)) ae.blur();
+}
+
+function bibToggleSize() {
+    const p = bibEl('bibPanel');
+    const big = p.classList.toggle('bib-big');
+    bibEl('bibSizeBtn').textContent = big ? '⬇️' : '⬆️';
+}
+
+function bibSetTab(t) {
+    BIB.tab = t;
+    [['img', 'bibTabImg', 'bibPaneImg'], ['web', 'bibTabWeb', 'bibPaneWeb'], ['url', 'bibTabUrl', 'bibPaneUrl']].forEach(([k, tab, pane]) => {
+        bibEl(tab).classList.toggle('on', k === t);
+        bibEl(pane).classList.toggle('on', k === t);
+    });
+    bibEl('bibSel').classList.toggle('on', t !== 'web' && !!BIB.sel);
+    if(t === 'web') {
+        if(!bibEl('bibFrame') && BIB.webUrl) bibLoadFrame(BIB.webUrl);
+        setTimeout(() => { const i = bibEl('bibWebInput'); if(i && !BIB.webUrl) i.focus(); }, 60);
+    } else {
+        bibDestroyFrame(); // hemat memori: halaman web dibuang saat pindah tab
+        if(t === 'img') setTimeout(() => { const i = bibEl('bibInput'); if(i && !BIB.items.length) i.focus(); }, 60);
+    }
+}
+
+function bibSetSource(src) {
+    BIB.source = src;
+    bibEl('bibSrcOv').classList.toggle('on', src === 'openverse');
+    bibEl('bibSrcWk').classList.toggle('on', src === 'wiki');
+    if(bibEl('bibInput').value.trim()) bibSearch(true);
+}
+
+function bibSetStatus(t) { const s = bibEl('bibStatus'); if(s) s.textContent = t; }
+
+/* ---------- Pencarian ---------- */
+async function bibSearch(reset) {
+    const input = bibEl('bibInput');
+    const q = (reset ? input.value : BIB.q).trim();
+    if(!q) { showToast('⚠️ Ketik kata kunci dulu'); return; }
+    if(BIB.busy && !reset) return;
+    if(BIB.abort) { try { BIB.abort.abort(); } catch(e) {} }
+    BIB.abort = new AbortController();
+    const signal = BIB.abort.signal;
+    const grid = bibEl('bibGrid');
+    if(reset) {
+        BIB.q = q; BIB.page = 1; BIB.items = []; BIB.exhausted = false;
+        bibClearSelection();
+        grid.innerHTML = '';
+        grid.scrollTop = 0;
+        input.blur();
+    }
+    BIB.busy = true;
+    bibSetStatus('⏳ Mencari "' + q + '"...');
+    const oldMore = grid.querySelector('.bib-more');
+    if(oldMore) oldMore.remove();
+    try {
+        const res = BIB.source === 'wiki' ? await bibFetchWiki(q, BIB.page, signal) : await bibFetchOpenverse(q, BIB.page, signal);
+        if(signal.aborted) return;
+        const fresh = res.items;
+        const frag = document.createDocumentFragment();
+        fresh.forEach(it => {
+            const idx = BIB.items.length;
+            BIB.items.push(it);
+            const d = document.createElement('div');
+            d.className = 'bib-item';
+            d.dataset.i = String(idx);
+            const im = document.createElement('img');
+            im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.draggable = false;
+            im.referrerPolicy = 'no-referrer';
+            im.onerror = () => { d.style.display = 'none'; };
+            im.src = it.thumb;
+            d.appendChild(im);
+            frag.appendChild(d);
+        });
+        grid.appendChild(frag);
+        BIB.exhausted = res.exhausted || fresh.length === 0;
+        if(!BIB.exhausted) {
+            const more = document.createElement('button');
+            more.className = 'bib-more';
+            more.textContent = 'Muat lebih banyak';
+            more.onclick = () => { BIB.page++; bibSearch(false); };
+            grid.appendChild(more);
+        }
+        bibSetStatus(BIB.items.length ? (BIB.items.length + ' gambar · ketuk untuk opsi, TAHAN lalu SERET ke kanvas') : 'Tidak ada hasil. Coba kata kunci lain atau sumber Wikimedia.');
+    } catch(err) {
+        if(err && err.name === 'AbortError') return;
+        bibSetStatus('⚠️ Gagal memuat hasil (' + (BIB.source === 'wiki' ? 'Wikimedia' : 'Openverse') + '). Periksa koneksi atau coba sumber lain.');
+        if(BIB.page > 1) BIB.page--;
+    } finally {
+        if(BIB.abort && BIB.abort.signal === signal) BIB.busy = false;
+    }
+}
+
+async function bibFetchOpenverse(q, page, signal) {
+    const url = 'https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page=' + page + '&page_size=' + BIB_PAGE_SIZE;
+    const r = await fetch(url, { signal, credentials: 'omit' });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const list = (j.results || []).filter(x => x && (x.thumbnail || x.url)).map(x => ({
+        thumb: x.thumbnail || x.url,
+        fulls: [x.url].filter(Boolean),
+        title: [x.title || 'Gambar', x.creator ? ('— ' + x.creator) : ''].join(' ').trim()
+    }));
+    return { items: list, exhausted: !j.page_count || page >= j.page_count || (j.results || []).length === 0 };
+}
+
+async function bibFetchWiki(q, page, signal) {
+    const url = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6'
+        + '&gsrsearch=' + encodeURIComponent(q + ' filetype:bitmap') + '&gsrlimit=' + BIB_PAGE_SIZE
+        + '&gsroffset=' + ((page - 1) * BIB_PAGE_SIZE) + '&prop=imageinfo&iiprop=url|mime&iiurlwidth=360';
+    const r = await fetch(url, { signal, credentials: 'omit' });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const pages = (j.query && j.query.pages) ? Object.values(j.query.pages) : [];
+    pages.sort((a, b) => (a.index || 0) - (b.index || 0));
+    const okMime = /^image\/(jpeg|png|webp|gif)$/;
+    const list = [];
+    pages.forEach(pg => {
+        const ii = pg.imageinfo && pg.imageinfo[0];
+        if(!ii || !okMime.test(ii.mime || '')) return;
+        const thumb = ii.thumburl || ii.url;
+        const big = thumb && /\/\d+px-/.test(thumb) ? thumb.replace(/\/\d+px-/, '/1200px-') : null;
+        list.push({
+            thumb: thumb,
+            fulls: [big, ii.url].filter(Boolean),
+            title: (pg.title || 'Gambar').replace(/^File:/, '').replace(/\.[a-z0-9]+$/i, '').replace(/_/g, ' ')
+        });
+    });
+    return { items: list, exhausted: !j.continue || pages.length === 0 };
+}
+
+/* ---------- Mengambil file gambar (dengan cadangan proxy bila situs memblokir CORS) ---------- */
+function bibProxy(u) { return 'https://wsrv.nl/?url=' + encodeURIComponent(u) + '&w=1600&we'; }
+
+function bibCandidates(item) {
+    const out = [];
+    (item.fulls || []).forEach(u => out.push(u));
+    (item.fulls || []).forEach(u => { if(!/wsrv\.nl/.test(u)) out.push(bibProxy(u)); });
+    if(item.thumb) out.push(item.thumb);
+    return out;
+}
+
+async function bibFetchBlob(urls) {
+    let lastErr = null;
+    for(const u of urls) {
+        if(!u) continue;
+        const ctrl = new AbortController();
+        const to = setTimeout(() => ctrl.abort(), 25000);
+        try {
+            const r = await fetch(u, { signal: ctrl.signal, mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
+            if(!r.ok) throw new Error('HTTP ' + r.status);
+            const b = await r.blob();
+            if(!/^image\//.test(b.type)) throw new Error('Bukan gambar');
+            if(b.size > 40 * 1024 * 1024) throw new Error('Terlalu besar');
+            return b;
+        } catch(e) {
+            lastErr = e;
+        } finally {
+            clearTimeout(to);
+        }
+    }
+    throw lastErr || new Error('Gagal mengambil gambar');
+}
+
+function bibBlobToDataURL(blob) {
+    return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = () => reject(new Error('Gagal membaca gambar'));
+        fr.readAsDataURL(blob);
+    });
+}
+
+/* ---------- Menaruh gambar di kanvas ---------- */
+async function bibPlaceBlob(blob, cx, cy) {
+    if(/svg/i.test(blob.type)) { showToast('⚠️ Format SVG belum didukung, pilih gambar lain'); return false; }
+    const dataUrl = await bibBlobToDataURL(blob);
+    const src = await new Promise((resolve, reject) => {
+        const t = new Image();
+        t.onload = () => compressImageFile(dataUrl, resolve);
+        t.onerror = () => reject(new Error('Gambar tidak valid'));
+        t.src = dataUrl;
+    });
+    const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error('Gagal memuat gambar'));
+        i.src = src;
+    });
+    const s = getCurrentSlide();
+    if(!s || s.isDemo) { showToast('⚠️ Slide Demo tidak dapat diedit'); return false; }
+    const maxInit = 550;
+    let initW = img.width, initH = img.height;
+    if(initW > maxInit || initH > maxInit) {
+        const ratio = Math.min(maxInit / initW, maxInit / initH);
+        initW *= ratio; initH *= ratio;
+    }
+    const px = (typeof cx === 'number') ? cx : mainCanvas.width / 2;
+    const py = (typeof cy === 'number') ? cy : mainCanvas.height / 2;
+    const newEl = {
+        id: 'el_' + Date.now() + '_bib',
+        type: 'image',
+        img: img,
+        src: src,
+        x: px, y: py,
+        width: Math.round(initW), height: Math.round(initH),
+        origWidth: img.width, origHeight: img.height,
+        flipH: false, flipV: false, cornerRadius: 0, borderWidth: 0, borderColor: '#D4AF37', colorOverlay: 'none', blur: 0, blendMode: 'normal', cropL: 0, cropR: 0, cropT: 0, cropB: 0, shadow: {color: 'transparent', blur: 0, angle: 45, distance: 0}, opacity: 1, locked: false, groupId: null,
+        filters: { brightness: 100, contrast: 100, saturate: 100, hue: 0 },
+        transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false }
+    };
+    s.elements.push(newEl);
+    selectElement(newEl.id);
+    renderAll();
+    pushHistoryState();
+    return true;
+}
+
+function bibSetAddBusy(b) {
+    const a = bibEl('bibSelAdd'), d = bibEl('bibSelDl');
+    if(a) { a.disabled = b; a.textContent = b ? '⏳ Memproses...' : '➕ Ke Kanvas'; }
+    if(d) d.disabled = b;
+}
+
+async function bibPlaceItem(item, cx, cy) {
+    if(BIB.adding) return;
+    BIB.adding = true;
+    bibSetAddBusy(true);
+    showToast('⏳ Mengambil gambar...');
+    try {
+        const blob = item.blob || await bibFetchBlob(bibCandidates(item));
+        const ok = await bibPlaceBlob(blob, cx, cy);
+        if(ok) showToast('✅ Gambar ditambahkan ke kanvas');
+    } catch(err) {
+        showToast('⚠️ Gagal mengambil gambar ini. Coba gambar lain atau pakai tab URL / Tempel.');
+    } finally {
+        BIB.adding = false;
+        bibSetAddBusy(false);
+    }
+}
+
+function bibAddSelected() { if(BIB.sel) bibPlaceItem(BIB.sel); }
+
+async function bibDownloadSelected() {
+    const item = BIB.sel;
+    if(!item || BIB.adding) return;
+    BIB.adding = true;
+    bibSetAddBusy(true);
+    showToast('⏳ Sedang Proses Download...');
+    try {
+        const blob = item.blob || await bibFetchBlob(bibCandidates(item));
+        const extMap = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg' };
+        const ext = extMap[blob.type] || 'png';
+        const slug = (item.title || 'gambar').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'gambar';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'gambar-' + slug + '-' + Date.now() + '.' + ext;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        showToast('✅ Gambar diunduh');
+    } catch(err) {
+        const fallback = (item.fulls && item.fulls[0]) || item.thumb;
+        if(fallback) {
+            window.open(fallback, '_blank', 'noopener');
+            showToast('ℹ️ Situs menolak unduhan langsung, gambar dibuka di tab baru (tahan lalu simpan)');
+        } else {
+            showToast('⚠️ Gagal mengunduh gambar');
+        }
+    } finally {
+        BIB.adding = false;
+        bibSetAddBusy(false);
+    }
+}
+
+/* ---------- Pilihan gambar ---------- */
+function bibSelect(item, el) {
+    if(BIB.objUrl && item.thumb !== BIB.objUrl) { URL.revokeObjectURL(BIB.objUrl); BIB.objUrl = null; }
+    if(BIB.selEl) BIB.selEl.classList.remove('sel');
+    BIB.sel = item;
+    BIB.selEl = el || null;
+    if(el) el.classList.add('sel');
+    bibEl('bibSelImg').src = item.thumb;
+    bibEl('bibSelTitle').textContent = item.title || 'Gambar';
+    bibEl('bibSel').classList.toggle('on', BIB.tab !== 'web');
+}
+
+function bibClearSelection() {
+    if(BIB.selEl) BIB.selEl.classList.remove('sel');
+    BIB.sel = null; BIB.selEl = null;
+    const s = bibEl('bibSel'); if(s) s.classList.remove('on');
+    const im = bibEl('bibSelImg'); if(im) im.removeAttribute('src');
+    if(BIB.objUrl) { URL.revokeObjectURL(BIB.objUrl); BIB.objUrl = null; }
+}
+
+/* ---------- Tahan & seret ke kanvas ---------- */
+function bibBind() {
+    if(BIB.bound) return;
+    BIB.bound = true;
+    const grid = bibEl('bibGrid');
+    grid.addEventListener('pointerdown', bibPtrDown);
+    grid.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('touchmove', e => { if(BIB.drag) e.preventDefault(); }, { passive: false });
+    bibEl('bibPanel').addEventListener('paste', bibOnPaste);
+    bibEl('bibInput').addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); bibSearch(true); } });
+    bibEl('bibWebInput').addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); bibWebGo(); e.target.blur(); } });
+    bibEl('bibUrlInput').addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); bibUrlFetch(); e.target.blur(); } });
+    if(window.visualViewport) {
+        window.visualViewport.addEventListener('resize', bibFitViewport);
+        window.visualViewport.addEventListener('scroll', bibFitViewport);
+    }
+}
+
+function bibFitViewport() {
+    const p = bibEl('bibPanel');
+    if(!p || !p.classList.contains('active')) return;
+    const vv = window.visualViewport;
+    if(!vv) return;
+    const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    p.style.bottom = kb + 'px';
+    p.style.maxHeight = Math.max(160, vv.height - 8) + 'px';
+}
+
+function bibPtrDown(e) {
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    const it = e.target.closest ? e.target.closest('.bib-item') : null;
+    if(!it) return;
+    const item = BIB.items[parseInt(it.dataset.i, 10)];
+    if(!item) return;
+    bibPtrCleanup();
+    const st = { id: e.pointerId, x: e.clientX, y: e.clientY, item: item, el: it, touch: e.pointerType !== 'mouse', timer: null };
+    BIB.press = st;
+    if(st.touch) {
+        st.timer = setTimeout(() => { if(BIB.press === st && !BIB.drag) bibDragStart(st, st.x, st.y); }, 360);
+    }
+    window.addEventListener('pointermove', bibPtrMove);
+    window.addEventListener('pointerup', bibPtrUp);
+    window.addEventListener('pointercancel', bibPtrCancel);
+}
+
+function bibPtrCleanup() {
+    const st = BIB.press;
+    if(st && st.timer) clearTimeout(st.timer);
+    BIB.press = null;
+    window.removeEventListener('pointermove', bibPtrMove);
+    window.removeEventListener('pointerup', bibPtrUp);
+    window.removeEventListener('pointercancel', bibPtrCancel);
+}
+
+function bibPtrMove(e) {
+    const st = BIB.press;
+    if(!st || e.pointerId !== st.id) return;
+    if(!BIB.drag) {
+        const dist = Math.hypot(e.clientX - st.x, e.clientY - st.y);
+        if(st.touch) {
+            if(dist > 10) bibPtrCleanup(); // jari bergeser sebelum ditahan = menggulir daftar
+        } else if(dist > 6) {
+            bibDragStart(st, e.clientX, e.clientY);
+        }
+        return;
+    }
+    bibDragMove(e.clientX, e.clientY);
+}
+
+function bibDragStart(st, x, y) {
+    const p = bibEl('bibPanel');
+    if(p.classList.contains('bib-big')) {
+        bibPtrCleanup();
+        showToast('ℹ️ Kecilkan panel (tombol ⬇️) agar kanvas terlihat, atau ketuk gambar lalu "Ke Kanvas"');
+        return;
+    }
+    if(st.timer) { clearTimeout(st.timer); st.timer = null; }
+    BIB.drag = { item: st.item, gx: x, gy: y - 70 };
+    bibEl('bibGrid').classList.add('frozen');
+    const g = bibEl('bibGhost');
+    bibEl('bibGhostImg').src = st.item.thumb;
+    g.style.display = 'block';
+    try { if(navigator.vibrate) navigator.vibrate(15); } catch(err) {}
+    bibDragMove(x, y);
+}
+
+function bibDropPoint(x, y) {
+    const pr = bibEl('bibPanel').getBoundingClientRect();
+    if(y >= pr.top) return null;
+    const r = mainCanvas.getBoundingClientRect();
+    if(x < r.left || x > r.right || y < r.top || y > r.bottom) return null;
+    return { cx: (x - r.left) * mainCanvas.width / r.width, cy: (y - r.top) * mainCanvas.height / r.height };
+}
+
+function bibDragMove(x, y) {
+    const d = BIB.drag;
+    if(!d) return;
+    d.gx = x; d.gy = y - 70;
+    const g = bibEl('bibGhost');
+    g.style.transform = 'translate(' + (d.gx - 42) + 'px,' + (d.gy - 42) + 'px)';
+    g.classList.toggle('ok', !!bibDropPoint(d.gx, d.gy));
+}
+
+function bibEndDragUI() {
+    BIB.drag = null;
+    const g = bibEl('bibGhost');
+    if(g) { g.style.display = 'none'; g.classList.remove('ok'); }
+    const gi = bibEl('bibGhostImg'); if(gi) gi.removeAttribute('src');
+    const grid = bibEl('bibGrid'); if(grid) grid.classList.remove('frozen');
+}
+
+function bibPtrUp(e) {
+    const st = BIB.press;
+    if(!st || e.pointerId !== st.id) return;
+    const drag = BIB.drag;
+    bibPtrCleanup();
+    if(drag) {
+        const pt = bibDropPoint(drag.gx, drag.gy);
+        bibEndDragUI();
+        if(pt) bibPlaceItem(drag.item, pt.cx, pt.cy);
+        else showToast('ℹ️ Lepas gambar di atas area kanvas (bagian yang tidak tertutup panel)');
+    } else {
+        bibSelect(st.item, st.el); // ketukan biasa
+    }
+}
+
+function bibPtrCancel(e) {
+    const st = BIB.press;
+    if(!st || e.pointerId !== st.id) return;
+    bibPtrCleanup();
+    bibEndDragUI();
+}
+
+/* ---------- Tab Web ---------- */
+function bibSetEngine(k) {
+    BIB.engine = k;
+    bibEl('bibEngGoogle').classList.toggle('on', k === 'google');
+    bibEl('bibEngBing').classList.toggle('on', k === 'bing');
+    bibEl('bibEngDdg').classList.toggle('on', k === 'ddg');
+}
+
+function bibWebGo() {
+    const v = bibEl('bibWebInput').value.trim();
+    if(!v) { showToast('⚠️ Ketik kata kunci atau alamat situs'); return; }
+    let url;
+    if(/^https?:\/\//i.test(v)) url = v;
+    else if(/^[^\s]+\.[a-z]{2,}([\/?#].*)?$/i.test(v)) url = 'https://' + v;
+    else url = BIB_ENGINES[BIB.engine] + encodeURIComponent(v);
+    bibLoadFrame(url);
+}
+
+function bibLoadFrame(url) {
+    const wrap = bibEl('bibFrameWrap');
+    if(!wrap) return;
+    BIB.webUrl = url;
+    let f = bibEl('bibFrame');
+    if(!f) {
+        f = document.createElement('iframe');
+        f.id = 'bibFrame';
+        f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-downloads');
+        f.setAttribute('referrerpolicy', 'no-referrer');
+        wrap.appendChild(f);
+    }
+    f.src = url;
+}
+
+function bibDestroyFrame() {
+    const f = bibEl('bibFrame');
+    if(f) { try { f.src = 'about:blank'; } catch(e) {} f.remove(); }
+}
+
+function bibOpenExternal() {
+    let url = BIB.webUrl;
+    if(!url) {
+        const v = bibEl('bibWebInput').value.trim() || bibEl('bibInput').value.trim();
+        url = v ? (/^https?:\/\//i.test(v) ? v : BIB_ENGINES[BIB.engine] + encodeURIComponent(v)) : 'https://www.google.com/imghp';
+    }
+    window.open(url, '_blank', 'noopener');
+}
+
+/* ---------- Tab URL / Tempel ---------- */
+function bibSetBlobSelection(blob, label) {
+    if(BIB.objUrl) { URL.revokeObjectURL(BIB.objUrl); BIB.objUrl = null; }
+    if(BIB.selEl) { BIB.selEl.classList.remove('sel'); BIB.selEl = null; }
+    const u = URL.createObjectURL(blob);
+    BIB.objUrl = u;
+    bibSelect({ thumb: u, fulls: [], blob: blob, title: label || 'Gambar' }, null);
+}
+
+async function bibUrlFetch() {
+    const v = bibEl('bibUrlInput').value.trim();
+    if(!/^https?:\/\//i.test(v)) { showToast('⚠️ Masukkan alamat gambar yang diawali http:// atau https://'); return; }
+    showToast('⏳ Mengambil gambar...');
+    try {
+        const blob = await bibFetchBlob([v, bibProxy(v)]);
+        bibSetBlobSelection(blob, v);
+        showToast('✅ Gambar siap: ketuk Ke Kanvas atau Download');
+    } catch(err) {
+        showToast('⚠️ Alamat itu bukan gambar langsung atau situs menolak. Coba salin "alamat gambar".');
+    }
+}
+
+async function bibPasteClipboard() {
+    try {
+        if(navigator.clipboard && navigator.clipboard.read) {
+            const items = await navigator.clipboard.read();
+            for(const it of items) {
+                const t = it.types.find(x => x.indexOf('image/') === 0);
+                if(t) { const b = await it.getType(t); bibSetBlobSelection(b, 'Gambar dari clipboard'); return; }
+            }
+        }
+        const txt = (await navigator.clipboard.readText() || '').trim();
+        if(/^https?:\/\//i.test(txt)) { bibEl('bibUrlInput').value = txt; bibUrlFetch(); }
+        else showToast('ℹ️ Clipboard tidak berisi gambar atau alamat gambar');
+    } catch(err) {
+        showToast('⚠️ Izin clipboard ditolak. Tahan di kolom alamat lalu pilih Tempel.');
+    }
+}
+
+function bibOnPaste(e) {
+    const items = e.clipboardData && e.clipboardData.items;
+    if(!items) return;
+    for(let i = 0; i < items.length; i++) {
+        if(items[i].type && items[i].type.indexOf('image/') === 0) {
+            const f = items[i].getAsFile();
+            if(f) { e.preventDefault(); bibSetTab('url'); bibSetBlobSelection(f, 'Gambar tempelan'); return; }
+        }
     }
 }
 
@@ -9857,32 +10596,138 @@ function retryTrial() {
     }
 }
 
-function setupAntiScreenshot() {
+let _ssBound = false;
+let _ssBlurred = false;
+let _ssHoldUntil = 0;
+let _ssComboHeld = false;
+let _ssLastToast = 0;
+
+function ssIsInsideSafeFrame() {
+    // Fokus pindah ke iframe milik aplikasi sendiri (Browser Gambar) bukan screenshot
+    const a = document.activeElement;
+    return !!(a && a.tagName === 'IFRAME' && a.id === 'bibFrame');
+}
+
+function ssWipeClipboard() {
+    try {
+        if(navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText('Screenshot dinonaktifkan pada Mode Trial.').catch(() => {});
+        }
+    } catch(err) {}
+}
+
+function ssUpdateOverlay() {
     const overlay = document.getElementById('antiScreenshotOverlay');
-    
+    if(!overlay) return;
+    // Self-heal: jika fokus sudah kembali tetapi event focus terlewat
+    if(_ssBlurred && document.hasFocus() && document.visibilityState === 'visible') _ssBlurred = false;
+    const mustHide = isTrialMode && (
+        document.visibilityState === 'hidden' ||
+        _ssBlurred ||
+        _ssComboHeld ||
+        Date.now() < _ssHoldUntil
+    );
+    const want = mustHide ? 'flex' : 'none';
+    if(overlay.style.display !== want) overlay.style.display = want;
+}
+
+function ssTrigger(holdMs, withNotice) {
+    if(!isTrialMode) return;
+    const now = Date.now();
+    _ssHoldUntil = Math.max(_ssHoldUntil, now + (holdMs || 1800));
+    ssUpdateOverlay();
+    if(withNotice && now - _ssLastToast > 1500) {
+        _ssLastToast = now;
+        ssWipeClipboard();
+        const t = document.getElementById('toast');
+        if(t) {
+            t.classList.add('toast-top');
+            clearTimeout(t._topTimer);
+            t._topTimer = setTimeout(() => t.classList.remove('toast-top'), 3200);
+        }
+        showToast('🚫 Tidak bisa screenshot pada Mode Trial');
+    }
+    setTimeout(ssUpdateOverlay, (holdMs || 1800) + 30);
+}
+
+function setupAntiScreenshot() {
+    if(_ssBound) { ssUpdateOverlay(); return; } // cegah pendengar menumpuk saat trial diulang
+    _ssBound = true;
+
     document.addEventListener('visibilitychange', () => {
-        if(isTrialMode && document.visibilityState === 'hidden') {
-            overlay.style.display = 'flex';
+        if(document.visibilityState === 'hidden') {
+            ssUpdateOverlay();
         } else {
-            setTimeout(() => { overlay.style.display = 'none'; }, 500);
+            _ssHoldUntil = Math.max(_ssHoldUntil, Date.now() + 600);
+            ssUpdateOverlay();
+            setTimeout(ssUpdateOverlay, 650);
         }
     });
 
     window.addEventListener('blur', () => {
-        if(isTrialMode) overlay.style.display = 'flex';
+        if(!isTrialMode) return;
+        // Klik di dalam iframe Browser Gambar menimbulkan blur: bukan screenshot
+        setTimeout(() => {
+            if(ssIsInsideSafeFrame()) return;
+            _ssBlurred = true;
+            ssUpdateOverlay();
+        }, 0);
     });
 
     window.addEventListener('focus', () => {
-        setTimeout(() => { overlay.style.display = 'none'; }, 500);
+        _ssBlurred = false;
+        _ssHoldUntil = Math.max(_ssHoldUntil, Date.now() + 600);
+        ssUpdateOverlay();
+        setTimeout(ssUpdateOverlay, 650);
     });
 
-    document.addEventListener('keyup', (e) => {
-        if(isTrialMode && (e.key === 'PrintScreen' || e.keyCode === 44)) {
-            navigator.clipboard.writeText("Screenshots disabled during trial mode.");
-            overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.display = 'none'; }, 3000);
+    window.addEventListener('pagehide', () => { if(isTrialMode) { _ssHoldUntil = Date.now() + 1500; ssUpdateOverlay(); } });
+    window.addEventListener('beforeprint', () => ssTrigger(2500, true));
+    window.addEventListener('afterprint', () => { setTimeout(ssUpdateOverlay, 300); });
+
+    document.addEventListener('keydown', (e) => {
+        if(!isTrialMode) return;
+        const k = e.key;
+        const isPrintScreen = (k === 'PrintScreen' || e.keyCode === 44 || e.code === 'PrintScreen');
+        // Win+Shift+S (Snipping Tool) dan Cmd+Shift+3/4/5 (macOS): layar digelapkan begitu Win/Cmd + Shift ditahan
+        const combo = ((e.metaKey && e.shiftKey) || (k === 'Meta' && e.shiftKey) || (k === 'Shift' && e.metaKey)) && !(k === 'z' || k === 'Z');
+        const printCombo = (e.ctrlKey || e.metaKey) && (k === 'p' || k === 'P');
+        const ffShot = e.ctrlKey && e.shiftKey && (k === 's' || k === 'S');
+        if(isPrintScreen || printCombo || ffShot) {
+            if(printCombo || ffShot) e.preventDefault();
+            ssTrigger(2500, true);
+            return;
         }
+        if(combo) {
+            _ssComboHeld = true;
+            ssUpdateOverlay();
+            ssTrigger(1200, true);
+        }
+    }, true);
+
+    document.addEventListener('keyup', (e) => {
+        if(!isTrialMode) return;
+        const k = e.key;
+        if(k === 'PrintScreen' || e.keyCode === 44 || e.code === 'PrintScreen') {
+            ssTrigger(2500, true);
+        }
+        if(k === 'Meta' || k === 'Shift' || k === 'OS') {
+            if(!(e.metaKey && e.shiftKey)) {
+                _ssComboHeld = false;
+                _ssHoldUntil = Math.max(_ssHoldUntil, Date.now() + 500);
+                ssUpdateOverlay();
+                setTimeout(ssUpdateOverlay, 550);
+            }
+        }
+    }, true);
+
+    // Cegah menu klik-kanan "Simpan gambar" / "Cetak" selama trial
+    document.addEventListener('contextmenu', (e) => {
+        if(isTrialMode && !(e.target && e.target.closest && e.target.closest('#bibPanel'))) e.preventDefault();
     });
+
+    // Pemeriksa ringan: memulihkan overlay bila event terlewat (tanpa beban render)
+    setInterval(() => { if(isTrialMode || document.getElementById('antiScreenshotOverlay').style.display === 'flex') ssUpdateOverlay(); }, 400);
 }
 
 async function verifyLicenseStatus() {
