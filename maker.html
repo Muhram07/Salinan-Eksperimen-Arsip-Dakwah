@@ -1,5 +1,23 @@
 <!--
-Studio Poster Maker Pro - Update v1.2.3
+Studio Poster Maker Pro - Update v1.2.4
+
+v1.2.4:
+1. GRUP: saat satu elemen dalam grup digeser, elemen lain kini ikut kaku (selisih geser sama persis,
+   termasuk saat elemen aktif tersnap ke garis bantu). Tool POSISI (joystick, tengah H/V, perataan sudut)
+   sekarang menggerakkan seluruh grup, bukan hanya elemen yang dipilih.
+2. INSTALL APLIKASI (PWA): manifest, service worker (offline) dan ikon lengkap (192/512/maskable/iOS 180).
+   Panduan install otomatis per perangkat (iPhone/iPad Safari, Android, Windows/Mac/Linux). Jalur
+   cadangan jika berkas manifest tidak ditemukan. Wajib diunggah bersama berkas pendamping
+   (sw.js, postermaker.manifest.json, pwa-icon-*.png, apple-touch-icon.png) di akar situs (/),
+   sejajar dengan demo.json. Halaman aplikasi tetap di /maker.
+3. CROP JARI: ujung pena kini selalu tampak (lingkaran garis putus-putus) dan ukurannya bisa diatur lewat
+   slider "Ukuran Ujung". Tangkai ✋ tidak lagi melompat turun saat ditekan/digeser (sebelumnya posisi
+   dihitung terhadap layar padahal tangkai berposisi relatif terhadap kotak). Koordinat digambar kini
+   dikonversi dengan benar, hasil crop memakai resolusi asli gambar (bukan 480px).
+4. DOWNLOAD: format JPG sekarang benar-benar JPEG (sebelumnya "image/jpg" tidak dikenal browser sehingga
+   hasilnya PNG). Ditambah opsi PNG (Normal Background). Nama berkas & ekstensi selalu sama dengan format
+   asli, nomor slide di nama berkas mengikuti label Slide di daftar. Render memakai pemulusan kualitas tinggi,
+   JPEG kualitas 92% (jauh lebih kecil dari PNG), opsi Ultra 3x, batas piksel aman untuk HP.
 
 v1.2.3:
 1. Penanda KUNCI: saat elemen terkunci, muncul kotak kuning pada emote gembok di bar bawah, pada tombol
@@ -39,11 +57,15 @@ v1.2.0:
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Maker Pro">
+<meta name="application-name" content="Maker Pro">
+<meta name="msapplication-TileColor" content="#0b0b0b">
 <title>Maker Pro - Mix Canva, PixelLab, CorelDraw, MS Excel, PhotoShop & Affinity Designer Suite</title>
 <link rel="manifest" href="/postermaker.manifest.json" id="appManifest">
-<link rel="icon" href="/icon.png" type="image/png">
-<link rel="apple-touch-icon" href="/icon.png">
+<link rel="icon" href="/pwa-icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#0b0b0b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -239,6 +261,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .layer-btn.lock-btn:not(.lock-on):hover{color:#aaa;border-color:rgba(255,255,255,.1);}
 .layer-item.locked:not(.active){border-style:dashed;border-color:rgba(212,175,55,.55);}
 .group-select-item.locked-item:not(.current-item){border-style:dashed;border-color:rgba(212,175,55,.6);}
+.free-crop-tip{position:absolute;left:0;top:0;border:2px dashed #00ff88;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);z-index:99;background:rgba(0,255,136,.08);box-shadow:0 0 0 1px rgba(0,0,0,.65);display:none;will-change:left,top;}
+.free-crop-tip.off{border-color:#ff6b6b;background:rgba(255,107,107,.08);}
+.free-crop-tip::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #000;}
+.pwa-guide-step{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:#ddd;margin-bottom:8px;}
+.pwa-guide-step b.n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#D4AF37;color:#111;display:flex;align-items:center;justify-content:center;font-size:11px;}
 .group-lock-badge{margin-left:auto;font-size:11px;line-height:1;padding:3px 6px;border-radius:4px;border:1px solid #D4AF37;background:rgba(212,175,55,.2);color:#D4AF37;box-shadow:0 0 6px rgba(212,175,55,.4);}
 .group-checkbox{width:18px;height:18px;accent-color:#D4AF37;}
 .toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(20,20,20,.92);border:1px solid #D4AF37;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999999;pointer-events:none;opacity:0;transition:.25s;}
@@ -602,20 +629,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         
         <div class="ctrl-row" style="margin-bottom:10px;">
             <span class="ctrl-label">Format:</span>
-            <select id="downloadFormat" class="select-quality" style="flex:1;">
+            <select id="downloadFormat" class="select-quality" style="flex:1;" onchange="updateDownloadHint()">
                 <option value="jpg">JPG (Normal Background)</option>
+                <option value="pngbg">PNG (Normal Background)</option>
                 <option value="png">PNG (Transparan/Tanpa BG)</option>
             </select>
         </div>
         <div class="ctrl-row">
             <span class="ctrl-label">Kualitas:</span>
-            <select id="downloadQuality" class="select-quality" style="flex:1;">
+            <select id="downloadQuality" class="select-quality" style="flex:1;" onchange="updateDownloadHint()">
                 <option value="0.75">SD (Standar)</option>
                 <option value="1.0">HD (High Definition)</option>
-                <option value="1.5" selected>FHD (Full HD)</option>
-                <option value="2.0">4K (Ultra HD)</option>
+                <option value="1.5">FHD (Full HD)</option>
+                <option value="2.0" selected>4K (Ultra HD)</option>
+                <option value="3.0">Ultra 3x (Maksimal)</option>
             </select>
         </div>
+        <div id="downloadSizeHint" style="font-size:11px;color:#888;margin-top:10px;line-height:1.5;"></div>
     </div>
     <div class="fmodal-footer">
         <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px;" onclick="executeDownload()">⬇️ Download Terpilih</button>
@@ -686,12 +716,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="panel-close" onclick="closeFreeCropModal()">✕</button>
 </div>
 <div class="fmodal-body" id="freeCropBody" style="position:relative; overflow:hidden;">
-<canvas id="freeCropCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
+<canvas id="freeCropCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;touch-action:none;"></canvas>
+<div class="free-crop-tip" id="freeCropTip"></div>
 <div class="handled-loupe-stalk" id="freeCropStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
     <span id="freeCropDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
     <div style="width:20px; height:1px; background:#D4AF37;"></div>
     <span id="freeCropPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer; font-size:14px;" onclick="toggleFreeCropPaintMode()" title="Gunting ON/OFF">✂️</span>
 </div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px;background:#141414;border-top:1px solid rgba(255,255,255,.08);">
+<span style="font-size:11px;color:#aaa;white-space:nowrap;">⭕ Ukuran Ujung:</span>
+<input type="range" class="ctrl-slider" id="freeCropTipSize" min="12" max="120" value="40" oninput="updateFreeCropTipSize(this.value)" style="flex:1;">
+<span id="freeCropTipSizeVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">40px</span>
 </div>
 <div class="fmodal-footer">
 <button class="btn-nav" onclick="clearFreeCropPath()">Bersihkan</button>
@@ -824,8 +860,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <!-- PWA Install Prompt -->
 <div id="pwaInstallPrompt" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.95);border:1px solid #D4AF37;padding:16px;border-radius:12px;z-index:10000;color:#fff;width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.8);flex-direction:column;gap:10px;backdrop-filter:blur(10px);">
-    <div style="font-weight:bold;font-size:14px;color:#D4AF37;">📲 Install Aplikasi Studio Poster</div>
-    <div style="font-size:11px;color:#ddd;">Pasang ke layar utama HP agar bisa edit offline tanpa sinyal internet dan lebih cepat!</div>
+    <div style="font-weight:bold;font-size:14px;color:#D4AF37;">📲 Install Aplikasi Maker Pro</div>
+    <div style="font-size:11px;color:#ddd;">Pasang ke layar utama / desktop agar bisa edit offline tanpa sinyal internet dan lebih cepat!</div>
     <div style="display:flex;gap:8px;margin-top:4px;">
         <button class="btn-nav btn-download" style="flex:1;justify-content:center;height:36px;" onclick="installPWA()">Install Sekarang</button>
         <button class="btn-nav" style="width:40px;justify-content:center;" onclick="dismissPWA()">✕</button>
@@ -915,7 +951,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.2.3';
+const APP_VERSION = 'v1.2.4';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3992,6 +4028,16 @@ startElementState={width:el.width||300,height:el.height||300,fontSize:el.fontSiz
 });
 }
 
+function getGroupPeers(el){
+if(!el||!el.groupId)return [];
+const s=getCurrentSlide();
+if(!s||!s.elements)return [];
+return s.elements.filter(o=>o.id!==el.id&&o.groupId===el.groupId&&typeof o.x==='number'&&typeof o.y==='number');
+}
+function moveGroupPeersBy(el,dx,dy){
+getGroupPeers(el).forEach(o=>{o.x+=dx;o.y+=dy;});
+}
+
 function prepareGroupMove(hitEl){
 if(hitEl&&hitEl.groupId){
 const s=getCurrentSlide();
@@ -4329,11 +4375,14 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
     el.y = targetY;
 
     if(el.groupId){
-        const s = getCurrentSlide();
-        s.elements.forEach(other => {
+        // Selisih geser yang SEBENARNYA dipakai elemen aktif (sudah termasuk snap), agar seluruh grup kaku
+        const groupDX = el.x - startElementState.x;
+        const groupDY = el.y - startElementState.y;
+        const groupSlide = getCurrentSlide();
+        groupSlide.elements.forEach(other => {
             if(other.groupId === el.groupId && other.id !== el.id && other._startGroupPos){
-                other.x = Math.round(other._startGroupPos.x + deltaX);
-                other.y = Math.round(other._startGroupPos.y + deltaY);
+                other.x = other._startGroupPos.x + groupDX;
+                other.y = other._startGroupPos.y + groupDY;
             }
         });
     }
@@ -4388,9 +4437,15 @@ function handleWindowPointerUp(e){
 if(e && dragMode === 'move' && dragPointerId !== null && e.pointerId !== dragPointerId) return;
 hideSnapGuides();
 if(dragMode){
+const wasMoveDrag=(dragMode==='move'||dragMode==='stalk-move');
 dragMode=null;dragPointerId=null;dragMoved=false;
 const el=getActiveElement();
-if(el){el.x=Math.round(el.x);el.y=Math.round(el.y);}
+if(el){
+const roundedX=Math.round(el.x),roundedY=Math.round(el.y);
+// Pembulatan akhir diterapkan sama persis ke seluruh anggota grup agar jarak antar elemen tidak berubah
+if(wasMoveDrag&&el.groupId)moveGroupPeersBy(el,roundedX-el.x,roundedY-el.y);
+el.x=roundedX;el.y=roundedY;
+}
 const s=getCurrentSlide();
 s.elements.forEach(other=>delete other._startGroupPos);
 pushHistoryState();
@@ -6021,6 +6076,7 @@ const el=getActiveElement();
 if(!el||el.locked)return;
 el.x+=dx*nudgeStep;
 el.y+=dy*nudgeStep;
+moveGroupPeersBy(el,dx*nudgeStep,dy*nudgeStep);
 const lbl=document.getElementById('posCoordLabel');
 if(lbl)lbl.innerHTML=`X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}`;
 renderAll();
@@ -6034,6 +6090,33 @@ const W=mainCanvas.width,H=mainCanvas.height;
 const elW=el._renderedW||el.width||300;
 const elH=el._renderedH||el._calculatedHeight||el.height||100;
 const pX=70,pY=90;
+const alignPeers=getGroupPeers(el);
+if(alignPeers.length){
+// Elemen ini bagian dari grup: ratakan kotak pembatas SELURUH grup lalu geser semua anggota bersama
+const members=[el,...alignPeers];
+let gl=Infinity,gr=-Infinity,gt=Infinity,gb=-Infinity;
+members.forEach(m=>{const bd=getElementBounds(m);gl=Math.min(gl,bd.l);gr=Math.max(gr,bd.r);gt=Math.min(gt,bd.t);gb=Math.max(gb,bd.b);});
+const gcx=(gl+gr)/2,gcy=(gt+gb)/2;
+let gdx=0,gdy=0;
+switch(pos){
+case 'top-left':gdx=pX-gl;gdy=pY-gt;break;
+case 'top':gdx=W/2-gcx;gdy=pY-gt;break;
+case 'top-right':gdx=(W-pX)-gr;gdy=pY-gt;break;
+case 'left':gdx=pX-gl;gdy=H/2-gcy;break;
+case 'center':gdx=W/2-gcx;gdy=H/2-gcy;break;
+case 'center-h':gdx=W/2-gcx;break;
+case 'center-v':gdy=H/2-gcy;break;
+case 'right':gdx=(W-pX)-gr;gdy=H/2-gcy;break;
+case 'bottom-left':gdx=pX-gl;gdy=(H-pY)-gb;break;
+case 'bottom':gdx=W/2-gcx;gdy=(H-pY)-gb;break;
+case 'bottom-right':gdx=(W-pX)-gr;gdy=(H-pY)-gb;break;
+}
+members.forEach(m=>{m.x+=gdx;m.y+=gdy;});
+renderAll();
+pushHistoryState();
+openPanelPosition();
+return;
+}
 switch(pos){
 case 'top-left':el.x=pX+(elW/2);el.y=pY+(elH/2);break;
 case 'top':el.x=W/2;el.y=pY+(elH/2);break;
@@ -6145,25 +6228,112 @@ showToast(pos==='top'?'⏫ Dipindah ke paling depan':'⏬ Dipindah ke paling bel
 let freeCropPoints=[];
 let isDrawingFreeCrop=false;
 let freeCropPaintMode=true;
+let freeCropTipSize=40;
+let freeCropRaf=0;
+let freeCropStalkPtr=null;
+let freeCropCanvasPtr=null;
+const FREE_CROP_TIP_GAP=14;
+
+function freeCropTipOffsetY(){return freeCropTipSize/2+FREE_CROP_TIP_GAP;}
+
+function placeFreeCropStalkDefault(){
+const body=document.getElementById('freeCropBody');
+const stalk=document.getElementById('freeCropStalk');
+if(!body||!stalk)return;
+const bw=body.clientWidth,bh=body.clientHeight;
+stalk.style.transform='none';
+stalk.style.bottom='auto';
+stalk.style.left=Math.max(0,Math.round((bw-stalk.offsetWidth)/2))+'px';
+stalk.style.top=Math.max(freeCropTipOffsetY(),bh-stalk.offsetHeight-20)+'px';
+}
+
+function updateFreeCropTip(){
+const tip=document.getElementById('freeCropTip');
+const stalk=document.getElementById('freeCropStalk');
+const modal=document.getElementById('freeCropModal');
+if(!tip||!stalk||!modal)return;
+if(!modal.classList.contains('active')){tip.style.display='none';return;}
+tip.style.display='block';
+tip.style.width=freeCropTipSize+'px';
+tip.style.height=freeCropTipSize+'px';
+tip.style.left=(stalk.offsetLeft+stalk.offsetWidth/2)+'px';
+tip.style.top=(stalk.offsetTop-freeCropTipOffsetY())+'px';
+tip.classList.toggle('off',!freeCropPaintMode);
+}
+
+function updateFreeCropTipSize(v){
+freeCropTipSize=Math.max(12,Math.min(120,parseInt(v)||40));
+const lbl=document.getElementById('freeCropTipSizeVal');
+if(lbl)lbl.innerText=freeCropTipSize+'px';
+const stalk=document.getElementById('freeCropStalk');
+if(stalk&&stalk.offsetTop<freeCropTipOffsetY())stalk.style.top=freeCropTipOffsetY()+'px';
+updateFreeCropTip();
+}
+
+function clientToFreeCropCanvas(clientX,clientY){
+const canvas=document.getElementById('freeCropCanvas');
+const r=canvas.getBoundingClientRect();
+const sx=r.width?canvas.width/r.width:1;
+const sy=r.height?canvas.height/r.height:1;
+return{
+x:Math.max(0,Math.min(canvas.width,(clientX-r.left)*sx)),
+y:Math.max(0,Math.min(canvas.height,(clientY-r.top)*sy))
+};
+}
+
+function getFreeCropTipCanvasPoint(){
+const body=document.getElementById('freeCropBody');
+const stalk=document.getElementById('freeCropStalk');
+const br=body.getBoundingClientRect();
+return clientToFreeCropCanvas(br.left+stalk.offsetLeft+stalk.offsetWidth/2,br.top+stalk.offsetTop-freeCropTipOffsetY());
+}
+
+function scheduleFreeCropRender(){
+if(freeCropRaf)return;
+freeCropRaf=requestAnimationFrame(()=>{freeCropRaf=0;renderFreeCropDisplay();});
+}
 
 function openFreeCropModal(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
+if(!el.img||!el.img.complete){showToast('⏳ Gambar belum siap, coba lagi sebentar');return;}
 const modal=document.getElementById('freeCropModal');
 modal.classList.add('active');
 
+const body=document.getElementById('freeCropBody');
 const canvas=document.getElementById('freeCropCanvas');
-const maxW=Math.min(window.innerWidth*0.88,480);
-const aspect=(el.img.height||300)/(el.img.width||300);
-canvas.width=maxW;
-canvas.height=Math.round(maxW*aspect);
+const iw=el.img.naturalWidth||el.img.width||300;
+const ih=el.img.naturalHeight||el.img.height||300;
+const availW=Math.max(120,body.clientWidth*0.9);
+const availH=Math.max(120,body.clientHeight*0.85);
+const k=Math.min(availW/iw,availH/ih,1000/Math.max(iw,ih));
+canvas.width=Math.max(1,Math.round(iw*k));
+canvas.height=Math.max(1,Math.round(ih*k));
 
 freeCropPoints=[];
+isDrawingFreeCrop=false;
+freeCropStalkPtr=null;
+freeCropCanvasPtr=null;
+freeCropPaintMode=true;
+const btn=document.getElementById('freeCropPaintToggle');
+if(btn){btn.innerText='✂️';btn.style.color='#00ff88';}
+const sizeSlider=document.getElementById('freeCropTipSize');
+if(sizeSlider)sizeSlider.value=freeCropTipSize;
+const sizeLbl=document.getElementById('freeCropTipSizeVal');
+if(sizeLbl)sizeLbl.innerText=freeCropTipSize+'px';
+
+placeFreeCropStalkDefault();
+updateFreeCropTip();
 renderFreeCropDisplay();
 }
 
 function closeFreeCropModal(){
 document.getElementById('freeCropModal').classList.remove('active');
+if(freeCropRaf){cancelAnimationFrame(freeCropRaf);freeCropRaf=0;}
+freeCropStalkPtr=null;
+freeCropCanvasPtr=null;
+isDrawingFreeCrop=false;
+updateFreeCropTip();
 }
 
 function clearFreeCropPath(){
@@ -6181,69 +6351,84 @@ function toggleFreeCropPaintMode() {
         btn.innerText = '🚫';
         btn.style.color = '#ff6b6b';
     }
+    updateFreeCropTip();
 }
 
 function setupFreeCropEvents(){
 const canvas=document.getElementById('freeCropCanvas');
 const stalk=document.getElementById('freeCropStalk');
 const dragHandle=document.getElementById('freeCropDragHandle');
-let isDraggingStalk=false;
-let stalkOffset={x:0,y:0};
+const body=document.getElementById('freeCropBody');
 
 if(dragHandle) {
     dragHandle.addEventListener('pointerdown',(e)=>{
-        isDraggingStalk=true;
-        dragHandle.setPointerCapture(e.pointerId);
-        const rect=stalk.getBoundingClientRect();
-        stalkOffset={x:e.clientX-rect.left,y:e.clientY-rect.top};
+        if(freeCropStalkPtr)return;
+        e.preventDefault();
         e.stopPropagation();
+        try{dragHandle.setPointerCapture(e.pointerId);}catch(_){}
+        // Tangkai berposisi relatif terhadap kotak (bukan layar): pakai posisi tersimpan + selisih gerak jari
+        freeCropStalkPtr={id:e.pointerId,x:e.clientX,y:e.clientY,left:stalk.offsetLeft,top:stalk.offsetTop};
+        if(freeCropPaintMode&&freeCropPoints.length===0){
+            const p0=getFreeCropTipCanvasPoint();
+            freeCropPoints.push({x:p0.x,y:p0.y});
+            scheduleFreeCropRender();
+        }
     });
 }
 
 window.addEventListener('pointermove',(e)=>{
-    if(isDraggingStalk){
-        const stalkX = e.clientX - stalkOffset.x;
-        const stalkY = e.clientY - stalkOffset.y;
-        stalk.style.left = stalkX + 'px';
-        stalk.style.top = stalkY + 'px';
-        stalk.style.transform = 'none';
-        
-        if(freeCropPaintMode) {
-            const canvasRect = canvas.getBoundingClientRect();
-            const brushX = (stalkX - canvasRect.left + (stalk.offsetWidth/2));
-            const brushY = (stalkY - canvasRect.top - 20);
-            addFreeCropPoint(brushX, brushY);
+    if(freeCropStalkPtr&&e.pointerId===freeCropStalkPtr.id){
+        const maxLeft=Math.max(0,body.clientWidth-stalk.offsetWidth);
+        const maxTop=Math.max(freeCropTipOffsetY(),body.clientHeight-stalk.offsetHeight);
+        const left=Math.max(0,Math.min(maxLeft,freeCropStalkPtr.left+(e.clientX-freeCropStalkPtr.x)));
+        const top=Math.max(freeCropTipOffsetY(),Math.min(maxTop,freeCropStalkPtr.top+(e.clientY-freeCropStalkPtr.y)));
+        stalk.style.left=left+'px';
+        stalk.style.top=top+'px';
+        updateFreeCropTip();
+        if(freeCropPaintMode){
+            const p=getFreeCropTipCanvasPoint();
+            addFreeCropPoint(p.x,p.y);
         }
-    } else if(isDrawingFreeCrop && freeCropPaintMode){
-        const rect=canvas.getBoundingClientRect();
-        addFreeCropPoint(e.clientX-rect.left, e.clientY-rect.top);
+    } else if(isDrawingFreeCrop&&freeCropPaintMode&&e.pointerId===freeCropCanvasPtr){
+        const pc=clientToFreeCropCanvas(e.clientX,e.clientY);
+        addFreeCropPoint(pc.x,pc.y);
     }
 });
 
-window.addEventListener('pointerup',()=>{
-    isDraggingStalk=false;
-    isDrawingFreeCrop=false;
-    renderFreeCropDisplay();
-});
+const endFreeCropPointer=(e)=>{
+    if(freeCropStalkPtr&&e.pointerId===freeCropStalkPtr.id)freeCropStalkPtr=null;
+    if(freeCropCanvasPtr!==null&&e.pointerId===freeCropCanvasPtr){
+        freeCropCanvasPtr=null;
+        isDrawingFreeCrop=false;
+    }
+    if(document.getElementById('freeCropModal').classList.contains('active'))scheduleFreeCropRender();
+};
+window.addEventListener('pointerup',endFreeCropPointer);
+window.addEventListener('pointercancel',endFreeCropPointer);
 
 canvas.addEventListener('pointerdown',(e)=>{
-    if(!freeCropPaintMode) return;
+    if(!freeCropPaintMode||freeCropCanvasPtr!==null)return;
+    e.preventDefault();
+    freeCropCanvasPtr=e.pointerId;
+    try{canvas.setPointerCapture(e.pointerId);}catch(_){}
     isDrawingFreeCrop=true;
-    const rect=canvas.getBoundingClientRect();
-    freeCropPoints=[{x:e.clientX-rect.left,y:e.clientY-rect.top}];
-    renderFreeCropDisplay();
+    const p=clientToFreeCropCanvas(e.clientX,e.clientY);
+    freeCropPoints=[{x:p.x,y:p.y}];
+    scheduleFreeCropRender();
 });
 }
 
 function addFreeCropPoint(x, y) {
+    const last=freeCropPoints[freeCropPoints.length-1];
+    if(last&&Math.hypot(x-last.x,y-last.y)<1.2)return;
     freeCropPoints.push({x, y});
-    renderFreeCropDisplay();
+    scheduleFreeCropRender();
 }
 
 function renderFreeCropDisplay(){
 const el=getActiveElement();
 const canvas=document.getElementById('freeCropCanvas');
-if(!canvas||!el)return;
+if(!canvas||!el||!el.img)return;
 const ctxF=canvas.getContext('2d');
 ctxF.clearRect(0,0,canvas.width,canvas.height);
 ctxF.drawImage(el.img,0,0,canvas.width,canvas.height);
@@ -6275,27 +6460,35 @@ showToast('⏳ Memotong gambar...');
 
 setTimeout(() => {
     const canvas=document.getElementById('freeCropCanvas');
+    // Potong pada resolusi asli gambar (bukan resolusi kanvas pratinjau) agar hasil tetap tajam
+    const iw=el.img.naturalWidth||el.img.width||canvas.width;
+    const ih=el.img.naturalHeight||el.img.height||canvas.height;
+    const k=Math.min(1,1600/Math.max(iw,ih));
     const off=document.createElement('canvas');
-    off.width=canvas.width;
-    off.height=canvas.height;
+    off.width=Math.max(1,Math.round(iw*k));
+    off.height=Math.max(1,Math.round(ih*k));
+    const sx=off.width/canvas.width;
+    const sy=off.height/canvas.height;
     const octx=off.getContext('2d');
+    octx.imageSmoothingEnabled=true;
+    octx.imageSmoothingQuality='high';
+    const tracePath=(c)=>{
+        c.beginPath();
+        c.moveTo(freeCropPoints[0].x*sx,freeCropPoints[0].y*sy);
+        for(let i=1;i<freeCropPoints.length;i++)c.lineTo(freeCropPoints[i].x*sx,freeCropPoints[i].y*sy);
+        c.closePath();
+    };
 
     if(mode==='keep_inside'){
     octx.save();
-    octx.beginPath();
-    octx.moveTo(freeCropPoints[0].x,freeCropPoints[0].y);
-    for(let i=1;i<freeCropPoints.length;i++)octx.lineTo(freeCropPoints[i].x,freeCropPoints[i].y);
-    octx.closePath();
+    tracePath(octx);
     octx.clip();
     octx.drawImage(el.img,0,0,off.width,off.height);
     octx.restore();
     }else{
     octx.drawImage(el.img,0,0,off.width,off.height);
     octx.globalCompositeOperation='destination-out';
-    octx.beginPath();
-    octx.moveTo(freeCropPoints[0].x,freeCropPoints[0].y);
-    for(let i=1;i<freeCropPoints.length;i++)octx.lineTo(freeCropPoints[i].x,freeCropPoints[i].y);
-    octx.closePath();
+    tracePath(octx);
     octx.fill();
     }
 
@@ -8998,6 +9191,7 @@ function openDownloadModal() {
         `;
         nonDemoCounter++;
     });
+    updateDownloadHint();
     document.getElementById('downloadModal').classList.add('active');
 }
 
@@ -9012,6 +9206,59 @@ function toggleAllDownloadSlides(selectAll) {
     });
 }
 
+const EXPORT_MAX_PIXELS = 16000000; // batas aman canvas di HP (iOS ~16,7 juta piksel)
+const EXPORT_JPEG_QUALITY = 0.92;
+
+function getSafeExportScale(mult) {
+    const W = mainCanvas.width, H = mainCanvas.height;
+    if(W * H * mult * mult <= EXPORT_MAX_PIXELS) return mult;
+    return Math.floor(Math.sqrt(EXPORT_MAX_PIXELS / (W * H)) * 100) / 100;
+}
+
+function updateDownloadHint() {
+    const q = document.getElementById('downloadQuality');
+    const f = document.getElementById('downloadFormat');
+    const hint = document.getElementById('downloadSizeHint');
+    if(!q || !f || !hint) return;
+    const preset = RATIO_PRESETS[currentRatio] || RATIO_PRESETS['4:5'];
+    const names = {'0.75':'SD (Standar)','1':'HD (High Definition)','1.5':'FHD (Full HD)','2':'4K (Ultra HD)','3':'Ultra 3x (Maksimal)'};
+    Array.from(q.options).forEach(o => {
+        const m = parseFloat(o.value);
+        const label = names[String(m)] || o.textContent.split(' — ')[0];
+        o.textContent = `${label} — ${Math.round(preset.width * m)}×${Math.round(preset.height * m)} px`;
+    });
+    const selected = parseFloat(q.value) || 2;
+    const safe = (preset.width * preset.height * selected * selected <= EXPORT_MAX_PIXELS)
+        ? selected : Math.floor(Math.sqrt(EXPORT_MAX_PIXELS / (preset.width * preset.height)) * 100) / 100;
+    const fmtText = {
+        jpg: 'JPG: ukuran file paling kecil (kualitas 92%), cocok untuk unggah/WhatsApp/Instagram. Tidak mendukung transparan.',
+        pngbg: 'PNG dengan background: sangat tajam tanpa artefak kompresi, ukuran file lebih besar dari JPG.',
+        png: 'PNG transparan: tanpa background, cocok ditempel di desain lain. Ukuran file lebih besar dari JPG.'
+    }[f.value] || '';
+    let extra = '';
+    if(safe < selected) {
+        extra = `<br>⚠️ Ukuran terlalu besar untuk perangkat, otomatis diturunkan ke ${Math.round(preset.width * safe)}×${Math.round(preset.height * safe)} px.`;
+    }
+    hint.innerHTML = fmtText + extra;
+}
+
+function canvasToBlobSafe(canvas, mime, quality) {
+    return new Promise((resolve, reject) => {
+        const done = (blob) => {
+            if(!blob) { reject(new Error('Gagal membuat berkas gambar')); return; }
+            // Ekstensi mengikuti format yang BENAR-BENAR dihasilkan browser
+            resolve({ blob, ext: blob.type === 'image/jpeg' ? 'jpg' : 'png' });
+        };
+        if(canvas.toBlob) {
+            canvas.toBlob(done, mime, quality);
+        } else {
+            try {
+                fetch(canvas.toDataURL(mime, quality)).then(r => r.blob()).then(done).catch(reject);
+            } catch(err) { reject(err); }
+        }
+    });
+}
+
 async function executeDownload() {
     const cbs = document.querySelectorAll('.download-slide-cb:checked');
     if(cbs.length === 0) {
@@ -9019,55 +9266,79 @@ async function executeDownload() {
         return;
     }
     
-    const format = document.getElementById('downloadFormat').value;
-    const mult = parseFloat(document.getElementById('downloadQuality').value) || 1.5;
+    const format = document.getElementById('downloadFormat').value; // jpg | pngbg | png
+    const requestedMult = parseFloat(document.getElementById('downloadQuality').value) || 2;
+    const mult = getSafeExportScale(requestedMult);
+    const isJpg = format === 'jpg';
+    const withBackground = format !== 'png';
+    const mime = isJpg ? 'image/jpeg' : 'image/png';
+    const W = mainCanvas.width, H = mainCanvas.height;
     
-    showToast('⏳ Menyiapkan gambar resolusi tinggi...');
+    showToast(mult < requestedMult ? '⏳ Ukuran disesuaikan agar aman di perangkat ini...' : '⏳ Menyiapkan gambar resolusi tinggi...');
     
     window.currentRenderScale = mult;
+    let failed = false;
     
-    for(let cb of cbs) {
-        const idx = parseInt(cb.value);
-        const s = slides[idx];
-        
-        const expC = document.createElement('canvas');
-        expC.width = mainCanvas.width * mult;
-        expC.height = mainCanvas.height * mult;
-        const ectx = expC.getContext('2d');
-        ectx.scale(mult, mult);
-        
-        if(format === 'jpg') {
-            renderBackground(s.background, mainCanvas.width, mainCanvas.height, ectx);
-        } else {
-            ectx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+    try {
+        for(let cb of cbs) {
+            const idx = parseInt(cb.value);
+            const s = slides[idx];
+            const slideNumber = slides.slice(0, idx).filter(sl => !sl.isDemo).length + 1;
+            
+            const expC = document.createElement('canvas');
+            expC.width = Math.round(W * mult);
+            expC.height = Math.round(H * mult);
+            const ectx = expC.getContext('2d');
+            ectx.imageSmoothingEnabled = true;
+            ectx.imageSmoothingQuality = 'high';
+            ectx.scale(mult, mult);
+            
+            if(withBackground) {
+                renderBackground(s.background, W, H, ectx);
+            } else {
+                ectx.clearRect(0, 0, W, H);
+            }
+            
+            if(s.elements) {
+                s.elements.filter(e => e.type === 'connector').forEach(el => renderConnectorElement(ectx, el));
+                s.elements.forEach(el => {
+                    if(el.type === 'connector') return;
+                    if(el.type === 'text') renderTextElement(ectx, el);
+                    else if(el.type === 'image') renderImageElement(ectx, el);
+                    else if(el.type === 'shape') renderShapeElement(ectx, el);
+                    else if(el.type === 'fade') renderFadeElement(ectx, el);
+                    else if(el.type === 'table') renderTableElement(ectx, el);
+                });
+            }
+            
+            const result = await canvasToBlobSafe(expC, mime, isJpg ? EXPORT_JPEG_QUALITY : undefined);
+            // lepas memori canvas besar secepatnya
+            expC.width = 1; expC.height = 1;
+            
+            const url = URL.createObjectURL(result.blob);
+            const a = document.createElement('a');
+            const suffix = format === 'png' ? '-transparan' : '';
+            a.download = `poster-slide${slideNumber}-${currentRatio.replace(':','-')}${suffix}-${Date.now()}.${result.ext}`;
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+            
+            await new Promise(r => setTimeout(r, 400));
         }
-        
-        if(s.elements) {
-            s.elements.filter(e => e.type === 'connector').forEach(el => renderConnectorElement(ectx, el));
-            s.elements.forEach(el => {
-                if(el.type === 'connector') return;
-                if(el.type === 'text') renderTextElement(ectx, el);
-                else if(el.type === 'image') renderImageElement(ectx, el);
-                else if(el.type === 'shape') renderShapeElement(ectx, el);
-                else if(el.type === 'fade') renderFadeElement(ectx, el);
-                else if(el.type === 'table') renderTableElement(ectx, el);
-            });
-        }
-        
-        const a = document.createElement('a');
-        a.download = `poster-slide${idx+1}-${currentRatio.replace(':','-')}-${Date.now()}.${format}`;
-        a.href = expC.toDataURL(`image/${format}`, format === 'jpg' ? 1.0 : undefined);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        await new Promise(r => setTimeout(r, 400));
+    } catch(err) {
+        failed = true;
+        console.error('Gagal ekspor', err);
+        showToast('⚠️ Gagal membuat gambar. Coba turunkan kualitas.');
+    } finally {
+        window.currentRenderScale = 1;
     }
     
-    window.currentRenderScale = 1;
-    
-    closeDownloadModal();
-    showToast('✅ Berhasil diunduh!');
+    if(!failed) {
+        closeDownloadModal();
+        showToast('✅ Berhasil diunduh!');
+    }
 }
 
 let previewZoom = 1.0;
@@ -9211,49 +9482,237 @@ function updateDemoFloatingBtn() {
     }
 }
 
-let deferredPrompt;
+/* ===== INSTALL APLIKASI / PWA (v1.2.4) ===== */
+let deferredPrompt=null;
+
+function isStandaloneMode(){
+    try{
+        return window.matchMedia('(display-mode: standalone)').matches
+            || window.matchMedia('(display-mode: minimal-ui)').matches
+            || window.matchMedia('(display-mode: window-controls-overlay)').matches
+            || window.navigator.standalone === true
+            || (document.referrer||'').startsWith('android-app://');
+    }catch(e){ return false; }
+}
+
+function getPWAPlatform(){
+    const ua=navigator.userAgent||'';
+    const iPadOS=/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1;
+    const ios=/iPhone|iPad|iPod/i.test(ua)||iPadOS;
+    const android=/Android/i.test(ua);
+    const edge=/Edg\/|EdgA|EdgiOS/i.test(ua);
+    const firefox=/Firefox|FxiOS/i.test(ua);
+    const samsung=/SamsungBrowser/i.test(ua);
+    const chrome=/Chrome|CriOS/i.test(ua)&&!edge&&!samsung;
+    const safari=/Safari/i.test(ua)&&!/Chrome|CriOS|FxiOS|EdgiOS|EdgA|Edg\/|OPiOS|OPR|SamsungBrowser/i.test(ua);
+    const mac=/Macintosh/i.test(ua)&&!iPadOS;
+    return {ios,iPadOS,android,edge,firefox,samsung,chrome,safari,mac,desktop:!ios&&!android};
+}
+
+function canShowPWABanner(){
+    const wall=document.getElementById('subscriptionWall');
+    return !(wall && wall.style.display && wall.style.display!=='none') && !isStandaloneMode();
+}
+
+function buildPWAGuideHTML(){
+    const pf=getPWAPlatform();
+    const step=(n,t)=>`<div class="pwa-guide-step"><b class="n">${n}</b><div>${t}</div></div>`;
+    let title='', steps='', note='';
+    if(pf.ios){
+        title=pf.iPadOS?'iPad':'iPhone';
+        if(pf.safari){
+            steps=step(1,`Ketuk tombol <b>Bagikan</b> ⬆️ (ikon kotak dengan panah ke atas) di bar ${pf.iPadOS?'atas':'bawah'} Safari.`)
+                 +step(2,'Gulir daftar menu lalu pilih <b>“Tambah ke Layar Utama”</b> (Add to Home Screen).')
+                 +step(3,'Ketuk <b>“Tambah”</b>. Ikon Poster Maker muncul di layar utama — buka dari ikon itu agar tampil layar penuh.');
+        } else {
+            steps=step(1,'Ketuk tombol <b>Bagikan</b> ⬆️ atau menu (⋯) di browser ini.')
+                 +step(2,'Pilih <b>“Tambah ke Layar Utama”</b> (tersedia di iOS 16.4 ke atas).')
+                 +step(3,'Jika pilihan itu tidak muncul, salin tautan situs ini lalu buka di <b>Safari</b>, kemudian ulangi langkah di Safari.');
+        }
+        note='Di iPhone/iPad, pemasangan hanya lewat menu Bagikan (iOS tidak punya tombol install otomatis).';
+    } else if(pf.android){
+        title='Android';
+        if(pf.firefox){
+            steps=step(1,'Ketuk menu <b>⋮</b> di pojok browser.')+step(2,'Pilih <b>“Instal”</b> atau <b>“Tambahkan ke layar utama”</b>.')+step(3,'Konfirmasi dengan <b>“Tambah”</b>.');
+        } else {
+            steps=step(1,'Ketuk menu <b>⋮</b> di pojok kanan atas browser.')
+                 +step(2,'Pilih <b>“Instal aplikasi”</b> (atau <b>“Tambahkan ke layar utama”</b>).')
+                 +step(3,'Ketuk <b>“Instal”</b>. Aplikasi muncul di laci aplikasi dan layar utama.');
+        }
+    } else {
+        title=pf.mac?'Mac':'Laptop / PC';
+        if(pf.firefox){
+            steps=step(1,'Firefox versi desktop belum mendukung pemasangan aplikasi web.')+step(2,'Buka situs ini di <b>Chrome</b> atau <b>Edge</b>, lalu ikuti petunjuk install di sana.');
+        } else if(pf.mac&&pf.safari){
+            steps=step(1,'Di Safari 17 ke atas, buka menu <b>Berkas</b> (File).')+step(2,'Pilih <b>“Tambahkan ke Dock”</b>.')+step(3,'Klik <b>“Tambah”</b>.');
+        } else if(pf.edge){
+            steps=step(1,'Klik ikon <b>Instal</b> (🖥️ dengan tanda +) di ujung kanan bar alamat.')
+                 +step(2,'Atau buka menu <b>⋯</b> → <b>Aplikasi</b> → <b>“Instal situs ini sebagai aplikasi”</b>.')
+                 +step(3,'Klik <b>“Instal”</b>. Aplikasi terbuka di jendela sendiri dan ada di menu Start/Dock.');
+        } else {
+            steps=step(1,'Klik ikon <b>Instal</b> (🖥️ dengan tanda +) di ujung kanan bar alamat Chrome.')
+                 +step(2,'Atau buka menu <b>⋮</b> → <b>“Transmisikan, simpan, dan bagikan”</b> → <b>“Instal Maker Pro”</b>.')
+                 +step(3,'Klik <b>“Instal”</b>. Aplikasi terbuka di jendela sendiri dan ada di menu Start/Dock.');
+        }
+    }
+    if(!window.isSecureContext){
+        note='⚠️ Halaman ini tidak dibuka lewat HTTPS, sehingga browser tidak mengizinkan install. Buka lewat alamat https://.';
+    }
+    return `<div style="font-size:13px;font-weight:800;color:#D4AF37;margin-bottom:12px;">Cara memasang di ${title}</div>`
+        + steps
+        + (note?`<div style="font-size:11px;color:#ffb347;margin-top:10px;line-height:1.5;">${note}</div>`:'')
+        + `<div style="font-size:11px;color:#888;margin-top:12px;line-height:1.5;">Setelah terpasang, buka aplikasi sekali saat online agar semua berkas tersimpan dan bisa dipakai offline.</div>`;
+}
+
+function openPWAGuide(){
+    let m=document.getElementById('pwaGuideModal');
+    if(!m){
+        m=document.createElement('div');
+        m.id='pwaGuideModal';
+        m.className='feature-modal';
+        m.style.zIndex='10020';
+        m.innerHTML=`<div class="fmodal-header"><div style="font-weight:800;color:#D4AF37;font-size:13px;">📲 Install Aplikasi</div><button class="panel-close" onclick="closePWAGuide()">✕</button></div>
+<div class="fmodal-body" style="flex-direction:column;align-items:stretch;justify-content:flex-start;padding:18px;overflow-y:auto;touch-action:pan-y;"><div id="pwaGuideBody"></div></div>
+<div class="fmodal-footer"><button class="btn-nav btn-download" style="width:100%;justify-content:center;height:40px;" onclick="closePWAGuide()">Mengerti</button></div>`;
+        document.body.appendChild(m);
+    }
+    document.getElementById('pwaGuideBody').innerHTML=buildPWAGuideHTML();
+    m.classList.add('active');
+}
+function closePWAGuide(){
+    const m=document.getElementById('pwaGuideModal');
+    if(m)m.classList.remove('active');
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    
-    if(!document.getElementById('subscriptionWall').style.display || document.getElementById('subscriptionWall').style.display === 'none') {
+    if(canShowPWABanner()){
         document.getElementById('pwaInstallPrompt').style.display = 'flex';
     }
 });
 
+window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    const b=document.getElementById('pwaInstallPrompt');
+    if(b)b.style.display='none';
+    closePWAGuide();
+    showToast('✅ Aplikasi berhasil diinstall!');
+});
+
 function installPWA() {
-    if(deferredPrompt) {
-        document.getElementById('pwaInstallPrompt').style.display = 'none';
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                showToast('✅ Aplikasi berhasil diinstall!');
-            }
-            deferredPrompt = null;
-        });
-    } else {
-        document.getElementById('pwaInstallPrompt').style.display = 'none';
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            showToast('✅ Aplikasi sudah terinstal di HP Anda!');
-        } else {
-            showToast('💡 Buka menu browser (titik 3) lalu pilih "Tambahkan ke Layar Utama" / "Install"');
-        }
+    const banner=document.getElementById('pwaInstallPrompt');
+    if(banner)banner.style.display='none';
+    if(isStandaloneMode()){
+        showToast('✅ Aplikasi sudah terpasang dan sedang dibuka sebagai aplikasi');
+        return;
     }
+    if(deferredPrompt){
+        const dp=deferredPrompt;
+        deferredPrompt=null;
+        try{
+            dp.prompt();
+            dp.userChoice.then((choice)=>{
+                if(choice&&choice.outcome==='accepted')showToast('✅ Aplikasi berhasil diinstall!');
+            }).catch(()=>{});
+        }catch(err){
+            openPWAGuide();
+        }
+        return;
+    }
+    openPWAGuide();
 }
 
 function dismissPWA() {
     document.getElementById('pwaInstallPrompt').style.display = 'none';
 }
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(reg => {
-            console.log('Service Worker Registered!', reg);
-        }).catch(err => {
-            console.log('Service Worker Registration Failed!', err);
-        });
+/* Manifest: pakai berkas bila ada; jika tidak ditemukan, buat manifest cadangan secara dinamis */
+function drawFallbackPWAIcon(size){
+    const c=document.createElement('canvas');
+    c.width=c.height=size;
+    const g=c.getContext('2d');
+    g.fillStyle='#141414';
+    g.fillRect(0,0,size,size);
+    const pw=size*0.46,ph=size*0.58;
+    g.fillStyle='#D4AF37';
+    g.fillRect((size-pw)/2,(size-ph)/2,pw,ph);
+    g.fillStyle='#101010';
+    g.font='800 '+Math.round(size*0.4)+'px sans-serif';
+    g.textAlign='center';
+    g.textBaseline='middle';
+    g.fillText('P',size/2,size*0.5);
+    return c.toDataURL('image/png');
+}
+
+async function ensureManifestLink(){
+    const link=document.getElementById('appManifest');
+    if(!link||!/^https?:$/.test(location.protocol))return;
+    const candidates=['/postermaker.manifest.json','postermaker.manifest.json'];
+    for(const c of candidates){
+        try{
+            const r=await fetch(c,{cache:'no-cache'});
+            if(!r.ok)continue;
+            const j=await r.json();
+            if(j&&Array.isArray(j.icons)){
+                if(link.getAttribute('href')!==c)link.setAttribute('href',c);
+                return;
+            }
+        }catch(e){}
+    }
+    try{
+        const pageUrl=location.origin+location.pathname;
+        const scopeUrl=location.origin+'/';
+        const m={
+            id:pageUrl,name:'Maker Pro',short_name:'Maker Pro',lang:'id',
+            start_url:pageUrl,scope:scopeUrl,display:'standalone',orientation:'any',
+            background_color:'#0b0b0b',theme_color:'#D4AF37',
+            icons:[
+                {src:drawFallbackPWAIcon(192),sizes:'192x192',type:'image/png',purpose:'any'},
+                {src:drawFallbackPWAIcon(512),sizes:'512x512',type:'image/png',purpose:'any'},
+                {src:drawFallbackPWAIcon(512),sizes:'512x512',type:'image/png',purpose:'maskable'}
+            ]
+        };
+        link.setAttribute('href',URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'})));
+    }catch(e){ console.warn('Manifest cadangan gagal dibuat', e); }
+}
+
+function registerAppSW(){
+    if(!('serviceWorker' in navigator)||!window.isSecureContext)return;
+    navigator.serviceWorker.register('/sw.js').catch(()=>{
+        return navigator.serviceWorker.register('sw.js');
+    }).then(reg=>{
+        if(reg)console.log('Service Worker Registered!', reg.scope);
+    }).catch(err=>{
+        console.log('Service Worker Registration Failed!', err);
     });
 }
+
+ensureManifestLink();
+window.addEventListener('load', () => {
+    registerAppSW();
+    if(isStandaloneMode()){
+        document.querySelectorAll('.nav-right button[onclick="installPWA()"]').forEach(b=>{b.style.display='none';});
+        return;
+    }
+    // iPhone/iPad tidak punya prompt install otomatis: tampilkan petunjuk sekali saja
+    const pf=getPWAPlatform();
+    if(pf.ios){
+        let shown=false;
+        try{shown=localStorage.getItem('PWA_IOS_HINT_SHOWN')==='1';}catch(e){}
+        if(!shown){
+            setTimeout(()=>{
+                if(canShowPWABanner()){
+                    const b=document.getElementById('pwaInstallPrompt');
+                    if(b){
+                        b.style.display='flex';
+                        try{localStorage.setItem('PWA_IOS_HINT_SHOWN','1');}catch(e){}
+                    }
+                }
+            },5000);
+        }
+    }
+});
 
 const TRIAL_DURATION = 7 * 60 * 1000; 
 const LIC_KEY = 'MAKER_PRO_LICENSE_V2';
