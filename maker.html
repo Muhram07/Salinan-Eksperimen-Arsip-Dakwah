@@ -1,17 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v1.2.8
+Studio Poster Maker Pro - Update v1.2.9
+
+v1.2.9:
+1. IMAGE SEARCH: ubah layout dari 3x10 padat menjadi Instagram feed style responsive, setiap poster terlihat full dan jelas tanpa tertutup.
+2. PEN TOOL (TANGKAP AJAIB): tambah lingkaran "keker" agak jauh dari jari, hanya lingkaran yang berfungsi capture (tidak garis), ukuran sesuai brush setting.
 
 v1.2.8:
 1. NOTEBOOK SITUS SUNNAH: tambah catatan materi yang dapat dibuat, diedit, disalin, dan dihapus; data tersimpan lokal di perangkat.
 2. UPSCALE HD: jarak kontrol dirapikan, panel dibuat lebih tinggi dan mudah discroll, pratinjau tidak berubah menjadi zoom saat skala diubah, area dapat digeser, serta tersedia estimasi dan ukuran output.
 3. CARI GAMBAR: hapus pilihan Lukisan/Seni dan Openverse; tambah koleksi The Met Open Access (CC0), dan unduhan mempertahankan format gambar sumber bila tersedia.
-4. FEED GAMBAR: setiap ubin menampilkan poster penuh dengan rasio potret, bukan memotong isi poster.
-5. TANGKAP AJAIB: koreksi koordinat kanvas saat zoom/drag dan sesuaikan kaca pembesar dengan ukuran kuas.
-
-v1.2.7:
-1. SITUS SUNNAH: bookmark judul dan URL bisa disimpan, diedit, dibuka, dan dihapus di perangkat.
-2. UPSCALE HD: perbandingan sebelum/sesudah dengan garis yang dapat digeser dan pratinjau layar penuh.
-3. CARI GAMBAR: feed 3 kolom, 30 gambar per halaman, navigasi halaman, serta status pemuatan.
 -->
 
 
@@ -242,7 +239,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .fmodal-footer{height:66px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#141414;}
 .persp-pin{position:absolute;width:28px;height:28px;border-radius:50%;background:#D4AF37;border:3px solid #fff;box-shadow:0 0 10px rgba(0,0,0,.8);cursor:pointer;touch-action:none;transform:translate(-50%,-50%);z-index:10;}
 .env-pin{position:absolute;width:20px;height:20px;border-radius:50%;background:#00ff88;border:2px solid #fff;box-shadow:0 0 8px rgba(0,0,0,.8);cursor:pointer;touch-action:none;transform:translate(-50%,-50%);z-index:10;}
-.brush-monitor-circle{position:fixed;border:2px dashed #00ff88;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;z-index:10010;background:rgba(0,255,136,.1);}
+.brush-monitor-circle{position:fixed;border:3px solid #D4AF37;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;z-index:10010;background:rgba(212,175,55,.08);box-shadow:0 0 12px rgba(212,175,55,.5),inset 0 0 8px rgba(212,175,55,.2);}
 .tag-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:4px 10px;font-size:11px;color:#ddd;cursor:pointer;white-space:nowrap;}
 .tag-pill:hover,.tag-pill.active{background:#D4AF37;color:#111;font-weight:bold;}
 
@@ -399,18 +396,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ss-note-row .ss-ibtn{margin-top:1px;}
 
 /* ===== v1.2.7: feed ala Instagram, bar halaman, loading persen, bookmark, upscale pembanding ===== */
+/* === v1.2.9: ubah layout menjadi Instagram feed style responsive, setiap poster terlihat full === */
 .bib-status{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
 .bib-status.wrap{display:block;overflow:visible;}
-.bib-grid{position:absolute;left:0;right:0;top:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding:0 0 8px;align-content:start;touch-action:pan-y;overscroll-behavior:contain;}
+.bib-grid{position:absolute;left:0;right:0;top:0;bottom:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px;align-content:start;touch-action:pan-y;overscroll-behavior:contain;}
 .bib-body{overflow:hidden;}
-.bib-item{border-radius:0;border:0;background:#0b0b0b;aspect-ratio:3/4;}
-.bib-item.sel{box-shadow:none;}
-.bib-item.sel::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:3px solid #D4AF37;pointer-events:none;}
+.bib-item{border-radius:8px;border:1px solid rgba(212,175,55,.2);background:#0b0b0b;aspect-ratio:9/16;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.bib-item:hover{border-color:rgba(212,175,55,.5);box-shadow:0 4px 12px rgba(212,175,55,.2);}
+.bib-item.sel{box-shadow:0 0 12px rgba(212,175,55,.6);}
+.bib-item.sel::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:3px solid #D4AF37;pointer-events:none;border-radius:8px;}
 .bib-item.sk{background:linear-gradient(110deg,#1b1b1b 30%,#2b2b2b 50%,#1b1b1b 70%);background-size:200% 100%;animation:bibSk 1.2s linear infinite;}
 @keyframes bibSk{to{background-position:-200% 0;}}
-.bib-item img{opacity:0;transition:opacity .25s;object-fit:contain;background:#0b0b0b;}
+.bib-item img{opacity:0;transition:opacity .25s;object-fit:cover;background:#0b0b0b;width:100%;height:100%;display:block;border-radius:8px;}
 .bib-item.ok img{opacity:1;}
-.bib-item.bad::before{content:'⚠️';position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.45;}
+.bib-item.bad::before{content:'⚠️';position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.45;border-radius:8px;}
 .ld{display:none;position:relative;height:18px;margin:2px 10px 4px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;flex-shrink:0;}
 .ld.on{display:block;}
 .ld-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#FFE259,#D4AF37);transition:width .18s linear;}
