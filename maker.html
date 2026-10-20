@@ -1,13 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.9
+Studio Poster Maker Pro - Update v1.4.1
 
-v1.3.9:
-1. HAPUS BG AI tanpa upload model: bila file "Remove BG AI.onnx" tidak ada di root repo, model RMBG-1.4 (versi kuantisasi ±44 MB) otomatis diunduh dari Hugging Face (briaai/RMBG-1.4) saat pertama kali memakai mode AI, lalu disimpan di browser sehingga berikutnya OFFLINE. Jenis model bawaan kini 'rmbg14'. Lisensi RMBG-1.4: non-komersial (cek ketentuan BRIA).
+v1.4.1:
+1. HAPUS BG: urutan opsi baru -> [AI 1 Cepat] [AI 2 Halus] lalu opsi manual [Auto Dominan] [Manual Garis] [Global Warna]. Tidak ada lagi proses otomatis saat jendela dibuka; setiap opsi baru berjalan ketika ditekan.
+2. AI 1 (rendah, cepat): u2netp ±4,7 MB, boleh ditaruh di root repo dengan nama "remove-bg-ai1.onnx" (huruf kecil, tanpa spasi). Bila file tidak ada, diunduh otomatis lalu disimpan untuk offline. Nama lama "Remove BG AI.onnx" tetap terbaca.
+3. AI 2 (halus, lambat): silueta ±44 MB (input 320 px, bukan 1024 px seperti RMBG-1.4 sehingga tidak membuat layar macet). Tidak perlu masuk repo: diunduh sekali dari Hugging Face lalu disimpan di browser (offline). Pindah AI 1/AI 2 otomatis melepas model sebelumnya dari memori.
 
-v1.3.8:
-1. HAPUS BG AI: tool Hapus BG punya mode baru "🧠 AI (Pro)" yang otomatis mendeteksi objek (orang/benda/barang) vs latar memakai model ISNet/RMBG (ONNX) langsung di browser, tanpa server/API. Taruh file model bernama "Remove BG AI.onnx" di ROOT repo (bersebelahan dengan file HTML). Unduhan pertama (model + mesin ONNX Runtime Web) disimpan di penyimpanan browser (Cache API) sehingga berikutnya bisa OFFLINE. Tombol 🗑️ Model menghapus simpanan itu. Jenis model diatur lewat konstanta AI_BG_MODEL_TYPE ('isnet' / 'rmbg14' / 'rmbg2'). Hasil AI bisa dirapikan: kuas ➕ Pulihkan / ➖ Hapus + Undo; slider Toleransi = ketegasan tepi, Halus = penghalusan tepi. Mode Magic Wand lama (Auto/Manual/Global) tidak diubah.
-2. Sinkronisasi/Update aplikasi tidak lagi menghapus simpanan model AI.
-
+v1.3.10:
+1. HAPUS BG AI JAUH LEBIH RINGAN: model bawaan u2netp (±4,7 MB, input 320 px) sehingga proses cuma beberapa detik dan tidak lagi membuat layar macet seperti RMBG-1.4 (input 1024 px, terlalu berat untuk HP).
 
 -->
 
@@ -1027,11 +1027,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <canvas id="magicWandCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
 </div>
 <div class="fmodal-footer" style="flex-direction:column; height:auto; padding:10px 16px; gap:10px;">
-<div class="ctrl-grid-btns" style="width:100%;">
-<button class="btn-sub-tool active" id="btnWandAuto" onclick="setWandMode('auto')">🤖 Auto Dominan</button>
+<div class="ctrl-grid-btns" style="width:100%;grid-template-columns:repeat(2,1fr);">
+<button class="btn-sub-tool" id="btnWandAI1" onclick="setWandMode('ai1')">🧠 AI 1 (Cepat)</button>
+<button class="btn-sub-tool" id="btnWandAI2" onclick="setWandMode('ai2')">✨ AI 2 (Halus)</button>
+</div>
+<div class="ctrl-grid-btns" style="width:100%;grid-template-columns:repeat(3,1fr);">
+<button class="btn-sub-tool" id="btnWandAuto" onclick="setWandMode('auto')">🤖 Auto Dominan</button>
 <button class="btn-sub-tool" id="btnWandManual" onclick="setWandMode('manual')">👆 Manual Garis</button>
 <button class="btn-sub-tool" id="btnWandGlobal" onclick="setWandMode('global')">🌍 Global Warna</button>
-<button class="btn-sub-tool" id="btnWandAI" onclick="setWandMode('ai')">🧠 AI (Pro)</button>
 </div>
 <div id="wandAiPanel" style="display:none;width:100%;flex-direction:column;gap:8px;">
 <div id="wandAiStatus" style="font-size:11px;color:#D4AF37;line-height:1.4;">Mode AI siap.</div>
@@ -1385,7 +1388,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.3.9';
+    return 'v1.4.1';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -9413,7 +9416,7 @@ canvas.width=maxW;
 canvas.height=Math.round(maxW*aspect);
 
 resetMagicWand();
-setWandMode('auto');
+setWandMode('none');
 }
 
 function closeMagicWandModal(){
@@ -9433,18 +9436,28 @@ if(wandMode==='ai' && wandAi.base){ wandAi.strokes=[]; wandAiRebuild(); }
 
 function setWandMode(mode){
 const prevMode = wandMode;
+let aiVar = null;
+if(mode==='ai1' || mode==='ai2'){ aiVar = mode; mode = 'ai'; }
+if(aiVar){
+    if(prevMode==='ai' && wandAiVariant!==aiVar){
+        /* ganti AI 1 <-> AI 2: lepas model & hasil lama dari memori, kanvas kembali ke gambar asli */
+        wandAiDispose();
+        wandMode = 'none';
+        resetMagicWand();
+    }
+    wandAiVariant = aiVar;
+}
 wandMode = mode;
-document.getElementById('btnWandAI').classList.remove('active');
-if(mode==='ai') document.getElementById('btnWandAI').classList.add('active');
-const aiPanelEl=document.getElementById('wandAiPanel');
-if(aiPanelEl) aiPanelEl.style.display=(mode==='ai')?'flex':'none';
-if(prevMode==='ai' && mode!=='ai'){ resetMagicWand(); }
-document.getElementById('btnWandAuto').classList.remove('active');
-document.getElementById('btnWandManual').classList.remove('active');
-document.getElementById('btnWandGlobal').classList.remove('active');
+['btnWandAI1','btnWandAI2','btnWandAuto','btnWandManual','btnWandGlobal'].forEach(function(id){
+    const b=document.getElementById(id); if(b) b.classList.remove('active');
+});
+if(mode==='ai') document.getElementById(wandAiVariant==='ai2'?'btnWandAI2':'btnWandAI1').classList.add('active');
 if(mode==='auto') document.getElementById('btnWandAuto').classList.add('active');
 if(mode==='manual') document.getElementById('btnWandManual').classList.add('active');
 if(mode==='global') document.getElementById('btnWandGlobal').classList.add('active');
+const aiPanelEl=document.getElementById('wandAiPanel');
+if(aiPanelEl) aiPanelEl.style.display=(mode==='ai')?'flex':'none';
+if(prevMode==='ai' && mode!=='ai'){ resetMagicWand(); }
 
 if(mode==='auto'){
     const canvas=document.getElementById('magicWandCanvas');
@@ -9453,6 +9466,8 @@ if(mode==='auto'){
     applyGlobalColorRemoval(canvas.getContext('2d'), 0, 0, tol, feather);
     showToast('🤖 Background dominan dihapus otomatis');
 }
+if(mode==='manual'){ showToast('👆 Sentuh area background pada gambar'); }
+if(mode==='global'){ showToast('🌍 Sentuh warna yang ingin dihapus'); }
 if(mode==='ai'){ wandAiEnter(); }
 }
 
@@ -9551,6 +9566,7 @@ ctx.putImageData(imgData, 0, 0);
 function applyMagicWand(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
+if(wandMode==='none'){ showToast('Pilih salah satu opsi hapus BG dulu'); return; }
 if(wandMode==='ai' && !wandAi.base){ showToast('🧠 Tunggu AI selesai memproses dulu'); return; }
 showToast('⏳ Menerapkan penghapusan background HD...');
 
@@ -9591,12 +9607,19 @@ setTimeout(() => {
 
 /* ========== v1.3.8: HAPUS BG AI (ISNet / RMBG via ONNX Runtime Web) ==========
    Model: file "Remove BG AI.onnx" di root repo. Unduhan pertama disimpan di Cache API -> berikutnya offline. */
-const AI_BG_MODEL_FILES = ['Remove BG AI.onnx', 'Remove BG AI', 'https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model_quantized.onnx'];
-const AI_BG_MODEL_TYPE = 'rmbg14';   // 'isnet' (isnet-general-use) | 'rmbg14' (RMBG-1.4) | 'rmbg2' (RMBG-2.0)
+/* v1.4.1: dua varian AI. AI 1 = u2netp (cepat, boleh di repo). AI 2 = silueta (±44 MB, halus, diunduh sekali & disimpan di browser). */
+const AI_BG_VARIANTS = {
+    ai1: {type:'u2netp',  name:'AI 1', files:['remove-bg-ai1.onnx', 'Remove BG AI.onnx', 'https://huggingface.co/Heliosoph/u2net-onnx/resolve/main/u2netp.onnx']},
+    ai2: {type:'silueta', name:'AI 2', files:['https://huggingface.co/jellybox/silueta/resolve/main/silueta_320.onnx', 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/silueta.onnx']}
+};
+var wandAiVariant = 'ai1';
+function wandAiCfg(){ return AI_BG_VARIANTS[wandAiVariant] || AI_BG_VARIANTS.ai1; }
 const AI_BG_SIZE = 1024;            // ukuran input model
 const AI_BG_CACHE = 'maker-ai-bg-v1';
 const AI_ORT_BASE = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/';
 const AI_BG_PRESETS = {
+    u2netp: {size:320, mean:[0.485,0.456,0.406], std:[0.229,0.224,0.225], maxNorm:true, sigmoid:false},
+    silueta:{size:320, mean:[0.485,0.456,0.406], std:[0.229,0.224,0.225], maxNorm:true, sigmoid:false},
     isnet:  {mean:[0.485,0.456,0.406], std:[1,1,1],             maxNorm:true,  sigmoid:false},
     rmbg14: {mean:[0.5,0.5,0.5],       std:[1,1,1],             maxNorm:false, sigmoid:false},
     rmbg2:  {mean:[0.485,0.456,0.406], std:[0.229,0.224,0.225], maxNorm:false, sigmoid:true}
@@ -9669,18 +9692,19 @@ async function wandAiLoadOrt(){
 }
 
 async function wandAiLoadModelBuf(){
-    const urls=AI_BG_MODEL_FILES.map(function(n){ return encodeURI(n); });
+    const cfg=wandAiCfg();
+    const urls=cfg.files.map(function(n){ return encodeURI(n); });
     const valid=function(b){
         const u=new Uint8Array(b,0,Math.min(16,b.byteLength));
         if(b.byteLength<500000 || u[0]===0x3C) throw new Error('bukan model');
     };
     for(let i=0;i<urls.length;i++){
-        const b=await wandAiFetch(urls[i],'Model AI',true,valid);
+        const b=await wandAiFetch(urls[i],'Model '+cfg.name,true,valid);
         if(b) return b;
     }
     for(let i=0;i<urls.length;i++){
         try{
-            const b=await wandAiFetch(urls[i],'Mengunduh model AI',false,valid);
+            const b=await wandAiFetch(urls[i],'Mengunduh model '+cfg.name+(wandAiVariant==='ai2'?' (sekali saja)':''),false,valid);
             if(b) return b;
         }catch(e){ /* coba nama berikutnya */ }
     }
@@ -9688,34 +9712,46 @@ async function wandAiLoadModelBuf(){
 }
 
 async function wandAiInfer(session, img){
-    const S=AI_BG_SIZE, P=AI_BG_PRESETS[AI_BG_MODEL_TYPE]||AI_BG_PRESETS.isnet;
-    const c=document.createElement('canvas'); c.width=S; c.height=S;
-    const g=c.getContext('2d',{willReadFrequently:true});
-    g.imageSmoothingQuality='high';
-    g.fillStyle='#ffffff'; g.fillRect(0,0,S,S);
-    g.drawImage(img,0,0,S,S);
-    const d=g.getImageData(0,0,S,S).data;
-    const n=S*S;
-    let sc=1/255;
-    if(P.maxNorm){
-        let mx=1;
-        for(let i=0;i<n;i++){
-            const k=i*4; const r=d[k], gg=d[k+1], b=d[k+2];
-            if(r>mx) mx=r; if(gg>mx) mx=gg; if(b>mx) mx=b;
+    const P=AI_BG_PRESETS[wandAiCfg().type]||AI_BG_PRESETS.u2netp;
+    let S=P.size||AI_BG_SIZE;
+    const runOnce=async function(S){
+        const c=document.createElement('canvas'); c.width=S; c.height=S;
+        const g=c.getContext('2d',{willReadFrequently:true});
+        g.imageSmoothingQuality='high';
+        g.fillStyle='#ffffff'; g.fillRect(0,0,S,S);
+        g.drawImage(img,0,0,S,S);
+        const d=g.getImageData(0,0,S,S).data;
+        const n=S*S;
+        let sc=1/255;
+        if(P.maxNorm){
+            let mx=1;
+            for(let i=0;i<n;i++){
+                const k=i*4; const r=d[k], gg=d[k+1], b=d[k+2];
+                if(r>mx) mx=r; if(gg>mx) mx=gg; if(b>mx) mx=b;
+            }
+            sc=1/mx;
         }
-        sc=1/mx;
+        const f=new Float32Array(3*n);
+        for(let i=0;i<n;i++){
+            const k=i*4;
+            f[i]=(d[k]*sc-P.mean[0])/P.std[0];
+            f[n+i]=(d[k+1]*sc-P.mean[1])/P.std[1];
+            f[2*n+i]=(d[k+2]*sc-P.mean[2])/P.std[2];
+        }
+        c.width=1; c.height=1;
+        const tensor=new ort.Tensor('float32',f,[1,3,S,S]);
+        const feeds={}; feeds[session.inputNames[0]]=tensor;
+        return await session.run(feeds);
+    };
+    let out;
+    try{
+        out=await runOnce(S);
+    }catch(e){
+        /* ukuran input tidak cocok dengan model -> baca ukuran yang diminta lalu ulangi sekali */
+        const m=/Expected:\s*(\d+)/.exec(String((e&&e.message)||e));
+        const want=m?parseInt(m[1]):0;
+        if(want>=64 && want!==S){ S=want; out=await runOnce(S); } else throw e;
     }
-    const f=new Float32Array(3*n);
-    for(let i=0;i<n;i++){
-        const k=i*4;
-        f[i]=(d[k]*sc-P.mean[0])/P.std[0];
-        f[n+i]=(d[k+1]*sc-P.mean[1])/P.std[1];
-        f[2*n+i]=(d[k+2]*sc-P.mean[2])/P.std[2];
-    }
-    c.width=1; c.height=1;
-    const tensor=new ort.Tensor('float32',f,[1,3,S,S]);
-    const feeds={}; feeds[session.inputNames[0]]=tensor;
-    const out=await session.run(feeds);
     const o=out[session.outputNames[0]];
     const dims=o.dims; const W=dims[dims.length-1], H=dims[dims.length-2];
     const len=W*H; const arr=o.data;
@@ -9753,7 +9789,7 @@ async function wandAiEnter(){
             if(rid!==st.rid){ try{ const r=sess.release(); if(r&&r.catch) r.catch(function(){}); }catch(e){} return; }
             st.session=sess;
         }
-        wandAiStatus('AI sedang memproses gambar… (layar bisa diam beberapa detik)',100);
+        wandAiStatus(wandAiVariant==='ai2'?'AI 2 sedang memproses gambar… (lebih lama, harap tunggu)':'AI 1 sedang memproses gambar… (beberapa detik)',100);
         await wandAiSleep(80);
         const base=await wandAiInfer(st.session,el.img);
         if(rid!==st.rid) return;
@@ -9764,7 +9800,7 @@ async function wandAiEnter(){
     }catch(e){
         console.error('Hapus BG AI', e);
         const msg=(e&&e.message==='MODEL_404')
-            ? '❌ Model AI tidak bisa diunduh. Periksa koneksi internet, atau taruh file "Remove BG AI.onnx" di root repo.'
+            ? '❌ Model AI tidak bisa diunduh. Periksa koneksi internet, lalu coba lagi (AI 1 juga bisa memakai file "remove-bg-ai1.onnx" di root repo).'
             : '❌ Gagal: '+String((e&&e.message)||e);
         wandAiStatus(msg,0);
         showToast(msg.length>70?msg.slice(0,70)+'…':msg);
