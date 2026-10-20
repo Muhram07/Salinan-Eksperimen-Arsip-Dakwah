@@ -1,15 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.2
+Studio Poster Maker Pro - Update v1.3.3
+
+v1.3.3:
+1. TEKS: tool baru "Layer Mask" (menu Teks, di tengah): gosok bagian huruf yang harus tampil DI DEPAN objek PNG, sehingga objek terlihat melilit / masuk ke belakang huruf. Ada mode Lilit/Hapus Patch, Undo/Redo, ukuran kuas & kelembutan (+/-), zoom, geser, panduan hijau. Ikut tersimpan, ter-undo, dan ikut ke thumbnail, preview & export.
 
 v1.3.2:
 1. TANGKAP AJAIB: tambah Undo/Redo per goresan (Bersihkan juga bisa di-undo), tombol +/- beserta angka ukuran kuas, tombol dipindah ke sebelah kiri "Warna Siluet".
 2. CROP JARI: tampilan & opsi disamakan dengan Tangkap Ajaib: geser kiri/kanan/atas/bawah, Buang Luar / Buang Dalam, Undo/Redo, zoom +/-, garis hijau halus (kurva) terutama di lengkungan, tombol +/- pada Ukuran Ujung.
 3. PERFORMA: kanvas pratinjau memakai cache offscreen + render per frame (rAF) agar tidak lag.
 
-v1.3.1:
-1. GARIS TEPI FOTO/PNG: batas kanvas efek neon/blur garis tepi dilebarkan (pad ikut borderBlur) sehingga blur tidak terpotong kotak.
-2. VERSI: nomor versi di bar atas dibaca otomatis dari catatan teratas file, selalu sinkron.
-3. TANGKAP AJAIB: geser kanvas, kuas lebih kecil (min 1), goresan halus, hasil sama persis dengan foto asal, opsi Ambil Dalam / Ambil Luar.
+
 -->
 
 
@@ -953,6 +953,61 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 </div>
 
+<div class="feature-modal" id="layerMaskModal">
+<div class="fmodal-header">
+<div style="font-weight:800;color:#D4AF37;font-size:13px;">🧶 Layer Mask (Teks Melilit Objek)</div>
+<button class="panel-close" onclick="closeLayerMaskModal()">✕</button>
+</div>
+<div class="fmodal-body" id="lmBody" style="overflow:hidden; position:relative;">
+    <div id="lmCanvasWrapper" style="display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:fit-content;max-width:none;line-height:0;transform-origin:center center;transition:transform 0.1s;">
+        <canvas id="lmCanvas" style="box-shadow:0 0 20px #000;border-radius:4px;background:#222;"></canvas>
+    </div>
+    <div style="position:absolute; top:10px; right:10px; display:flex; flex-direction:column; gap:5px; z-index:105;">
+        <button class="btn-nav" onclick="zoomLm(0.25)" style="width:34px;justify-content:center;">➕</button>
+        <button class="btn-nav" onclick="zoomLm(-0.25)" style="width:34px;justify-content:center;">➖</button>
+        <button class="btn-nav" onclick="resetLmZoom()" style="width:34px;justify-content:center;">🎯</button>
+        <button class="btn-nav fm-undo" id="lmUndoBtn" onclick="undoLm()" style="width:34px;justify-content:center;" aria-label="Undo">↩️</button>
+        <button class="btn-nav fm-undo" id="lmRedoBtn" onclick="redoLm()" style="width:34px;justify-content:center;" aria-label="Redo">↪️</button>
+    </div>
+    <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
+        <button class="btn-nav" id="lmModeBtn" onclick="toggleLmErase()" style="justify-content:center;">🖌️ Lilit (Depan)</button>
+        <button class="btn-nav" id="lmGuideBtn" onclick="toggleLmGuide()" style="justify-content:center;">👁️ Panduan ON</button>
+        <div style="display:grid; grid-template-columns:repeat(3,34px); gap:4px; margin-top:4px;">
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startLmPan(0,1)" onpointerup="stopLmPan()" onpointerleave="stopLmPan()" onpointercancel="stopLmPan()" aria-label="Geser ke atas">⬆️</button>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startLmPan(1,0)" onpointerup="stopLmPan()" onpointerleave="stopLmPan()" onpointercancel="stopLmPan()" aria-label="Geser ke kiri">⬅️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startLmPan(0,-1)" onpointerup="stopLmPan()" onpointerleave="stopLmPan()" onpointercancel="stopLmPan()" aria-label="Geser ke bawah">⬇️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startLmPan(-1,0)" onpointerup="stopLmPan()" onpointerleave="stopLmPan()" onpointercancel="stopLmPan()" aria-label="Geser ke kanan">➡️</button>
+</div>
+    </div>
+    <div class="grab-reticle" id="lmReticle"></div>
+    <div class="handled-loupe-stalk" id="lmStalk" style="position:absolute; bottom:20px; left:50%; z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
+        <span id="lmDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
+        <div style="width:20px; height:1px; background:#D4AF37;"></div>
+        <span id="lmPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer; font-size:14px;" onclick="toggleLmPaintMode()" title="Kuas ON/OFF">✏️</span>
+    </div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;padding:6px 16px;background:#141414;border-top:1px solid rgba(255,255,255,.08);">
+<span style="font-size:11px;color:#aaa;white-space:nowrap;min-width:64px;">🖌️ Kuas:</span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(lmBrushDown)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➖</button>
+<input type="range" class="ctrl-slider" id="lmBrushSize" min="4" max="200" value="40" style="flex:1;min-width:40px;" oninput="onLmBrushInput(this.value)">
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(lmBrushUp)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
+<span id="lmBrushSizeVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">40px</span>
+</div>
+<div style="display:flex;align-items:center;gap:8px;padding:6px 16px;background:#141414;border-top:1px solid rgba(255,255,255,.08);">
+<span style="font-size:11px;color:#aaa;white-space:nowrap;min-width:64px;">🌫️ Lembut:</span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(lmFeatherDown)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➖</button>
+<input type="range" class="ctrl-slider" id="lmFeather" min="0" max="100" value="35" style="flex:1;min-width:40px;" oninput="onLmFeatherInput(this.value)">
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(lmFeatherUp)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
+<span id="lmFeatherVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">35%</span>
+</div>
+<div class="fmodal-footer">
+<button class="btn-nav" onclick="clearLm()">Bersihkan</button>
+<button class="btn-nav btn-download" onclick="applyLayerMask()">✅ Terapkan</button>
+</div>
+</div>
+
 <div class="feature-modal" id="magicWandModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">🪄 Hapus BG (Magic Wand)</div>
@@ -1307,7 +1362,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.3.2';
+    return 'v1.3.3';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -1693,6 +1748,8 @@ function rawSerializeSlides(slidesList){
             delete copy._curveCacheCanvas;
             delete copy._curveCacheKey;
             delete copy.warpImg;
+            delete copy._lmCanvas;
+            delete copy._lmCache;
             return copy;
         })
     }));
@@ -1900,6 +1957,7 @@ setupMagicGrabEvents();
 setupFreeCropEvents();
 setupHandledLoupeEvents();
 setupMagicWandEvents();
+setupLayerMaskEvents();
 setupPenToolEvents();
 
 document.getElementById('dzikirBtn').onclick = () => {
@@ -2645,8 +2703,98 @@ if(s.elements) {
         else if(el.type==='fade')renderFadeElement(ctx,el);
         else if(el.type==='table')renderTableElement(ctx,el);
     });
+    renderLayerMaskPatches(ctx,s.elements);
 }
 updateSelectionBox();
+}
+
+
+/* ========== v1.3.3: LAYER MASK (patch teks di atas objek) ==========
+   Teks yang punya mask (el.lmMaskSrc / el._lmCanvas) digambar ulang di lapisan paling atas,
+   hanya pada area yang digosok, sehingga objek PNG terlihat "masuk ke belakang" huruf.
+   Catatan: hanya memakai properti window.* & var lokal agar aman dipanggil saat startup. */
+function lmGetMaskCanvas(el){
+    if(el._lmCanvas && el._lmCanvas.getContext) return el._lmCanvas;
+    if(el.lmMaskSrc){
+        window.__lmLoading = window.__lmLoading || new WeakSet();
+        if(window.__lmLoading.has(el)) return null;
+        window.__lmLoading.add(el);
+        const im = new Image();
+        im.onload = function(){
+            try{
+                const c = document.createElement('canvas');
+                c.width = el.lmW || im.width; c.height = el.lmH || im.height;
+                c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+                c._lmId = (window.__lmIdCounter = (window.__lmIdCounter||0) + 1);
+                el._lmCanvas = c; el._lmCache = null;
+            }catch(e){}
+            requestRender();
+        };
+        im.src = el.lmMaskSrc;
+    }
+    return null;
+}
+
+function lmPatchSource(el){
+    return (el.blendMode && el.blendMode !== 'normal') ? Object.assign({}, el, {blendMode:'normal'}) : el;
+}
+
+function lmBuildPatch(c, el, mask, reuse){
+    const cv = c.canvas;
+    let off = reuse;
+    if(!off || off.width !== cv.width || off.height !== cv.height){
+        off = document.createElement('canvas');
+        off.width = cv.width; off.height = cv.height;
+    }
+    const o = off.getContext('2d');
+    o.setTransform(1,0,0,1,0,0);
+    o.globalCompositeOperation = 'source-over';
+    o.globalAlpha = 1;
+    o.clearRect(0,0,off.width,off.height);
+    const t = c.getTransform();
+    o.setTransform(t);
+    renderTextElement(o, lmPatchSource(el));
+    o.globalCompositeOperation = 'destination-in';
+    o.globalAlpha = 1;
+    o.drawImage(mask, 0, 0, el.lmW || mask.width, el.lmH || mask.height);
+    o.globalCompositeOperation = 'source-over';
+    o.setTransform(1,0,0,1,0,0);
+    return off;
+}
+
+function renderLayerMaskPatches(c, elements, skipEl){
+    if(!elements || !elements.length) return;
+    for(let i=0;i<elements.length;i++){
+        const el = elements[i];
+        if(el.type !== 'text' || el === skipEl) continue;
+        if(!el.lmMaskSrc && !el._lmCanvas) continue;
+        if(el.id === editingElementId) continue;
+        const mask = lmGetMaskCanvas(el);
+        if(!mask) continue;
+        try{
+            const isMain = (c.canvas === mainCanvas);
+            let patch;
+            if(isMain){
+                const t = c.getTransform();
+                const key = getElHash(el) + '|' + el.x + '|' + el.y + '|' + el.rotation + '|' + mask._lmId + '|' + c.canvas.width + 'x' + c.canvas.height + '|' + t.a + ',' + t.d + ',' + t.e + ',' + t.f + '|' + (window.currentRenderScale||1);
+                const cache = el._lmCache;
+                if(cache && cache.key === key && cache.canvas){
+                    patch = cache.canvas;
+                } else {
+                    const reuse = (cache && cache.owner === el) ? cache.canvas : null;
+                    patch = lmBuildPatch(c, el, mask, reuse);
+                    el._lmCache = {key:key, canvas:patch, owner:el};
+                }
+            } else {
+                patch = lmBuildPatch(c, el, mask, null);
+            }
+            c.save();
+            c.setTransform(1,0,0,1,0,0);
+            c.drawImage(patch, 0, 0);
+            c.restore();
+            if(!isMain){ patch.width = 1; patch.height = 1; }
+        }catch(e){ console.error('LM patch', e); window.__lmErr=String(e&&e.stack||e); }
+    }
 }
 
 function applyAdvancedTransparency(targetCtx, w, h, t) {
@@ -4888,6 +5036,7 @@ ${el.warpSrc ? `<button class="tool-btn" onclick="resetTextWarp()"><span class="
 <button class="tool-btn" onclick="openPanelAdjustLight()"><span class="icon">💡</span><span>Cahaya</span></button>
 <button class="tool-btn" onclick="openPanelRotation()"><span class="icon">🔄</span><span>Rotasi</span></button>
 <button class="tool-btn" onclick="openPanelCurveAndSlant()"><span class="icon">🌀</span><span>Lengkung</span></button>
+<button class="tool-btn" onclick="openLayerMaskModal()"><span class="icon">🧶</span><span>Layer Mask</span></button>
 <button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openEnvelopeModal()"><span class="icon">🌊</span><span>Envelope</span></button>
 <button class="tool-btn" onclick="openPanelTextSkin()"><span class="icon">🖼️</span><span>Skin Teks</span></button>
@@ -8403,6 +8552,450 @@ setTimeout(() => {
 }, 50);
 }
 
+/* ========== v1.3.3: LAYER MASK MODAL ========== */
+let lmEl=null, lmMask=null, lmBase=null, lmTextOnly=null, lmScratch=null, lmGuide=null, lmBaseMask=null;
+let lmK=1, lmPW=0, lmPH=0;
+let lmStrokes=[], lmRedoStack=[], lmCur=null, lmCarry=0;
+let lmErase=false, lmGuideOn=true, lmPaintMode=true;
+let lmZoom=1.0, lmPanX=0, lmPanY=0, lmPanTimer=0, lmPanDrag=null;
+let lmRaf=0, lmPainting=false, lmLastX=null, lmLastY=null;
+let lmTips=new Map();
+const LM_MAX_UNDO=100;
+
+function lmActive(){const m=document.getElementById('layerMaskModal');return !!(m&&m.classList.contains('active')&&lmMask);}
+function lmBrushPx(){const sl=document.getElementById('lmBrushSize');return Math.max(2,(parseInt(sl&&sl.value)||40)*lmK);}
+function lmFeatherVal(){const sl=document.getElementById('lmFeather');const v=parseInt(sl&&sl.value);return isNaN(v)?35:Math.max(0,Math.min(100,v));}
+
+function onLmBrushInput(v){
+    const l=document.getElementById('lmBrushSizeVal'); if(l) l.innerText=(parseInt(v)||40)+'px';
+    lmUpdateReticle();
+}
+function onLmFeatherInput(v){
+    const l=document.getElementById('lmFeatherVal'); if(l) l.innerText=(parseInt(v)||0)+'%';
+}
+function lmAdjust(id,d,cb){
+    const sl=document.getElementById(id); if(!sl) return;
+    const v=Math.max(parseInt(sl.min),Math.min(parseInt(sl.max),(parseInt(sl.value)||0)+d));
+    sl.value=v; cb(v);
+}
+function lmBrushDown(){lmAdjust('lmBrushSize',-1,onLmBrushInput);}
+function lmBrushUp(){lmAdjust('lmBrushSize',1,onLmBrushInput);}
+function lmFeatherDown(){lmAdjust('lmFeather',-1,onLmFeatherInput);}
+function lmFeatherUp(){lmAdjust('lmFeather',1,onLmFeatherInput);}
+
+/* ujung kuas (stempel) beresolusi tinggi, di-cache per ukuran+kelembutan */
+function lmGetTip(size,feather){
+    const key=Math.round(size*10)+'|'+feather;
+    let t=lmTips.get(key); if(t) return t;
+    const d=Math.max(2,Math.ceil(size));
+    t=document.createElement('canvas'); t.width=d; t.height=d;
+    const g=t.getContext('2d'); const r=d/2;
+    if(feather<=0){
+        g.fillStyle='#000'; g.beginPath(); g.arc(r,r,r,0,Math.PI*2); g.fill();
+    }else{
+        const grad=g.createRadialGradient(r,r,0,r,r,r);
+        grad.addColorStop(0,'rgba(0,0,0,1)');
+        grad.addColorStop(Math.max(0,Math.min(0.999,1-feather/100)),'rgba(0,0,0,1)');
+        grad.addColorStop(1,'rgba(0,0,0,0)');
+        g.fillStyle=grad; g.fillRect(0,0,d,d);
+    }
+    if(lmTips.size>=8){const first=lmTips.keys().next().value; const old=lmTips.get(first); if(old){old.width=1;old.height=1;} lmTips.delete(first);}
+    lmTips.set(key,t);
+    return t;
+}
+function lmSpacing(size){return Math.max(1,size*0.1);}
+function lmStampLine(ctx,tip,x0,y0,x1,y1,spacing,carry){
+    const dx=x1-x0, dy=y1-y0, len=Math.hypot(dx,dy);
+    if(len===0) return carry;
+    let d=carry;
+    while(d<=len){
+        const t=d/len;
+        ctx.drawImage(tip,x0+dx*t-tip.width/2,y0+dy*t-tip.height/2);
+        d+=spacing;
+    }
+    return d-len;
+}
+function lmDrawStroke(ctx,st){
+    if(st.clear){ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);return;}
+    const p=st.pts; if(!p||!p.length) return;
+    const tip=lmGetTip(st.size,st.feather), sp=lmSpacing(st.size);
+    ctx.save();
+    ctx.globalCompositeOperation=st.erase?'destination-out':'source-over';
+    ctx.drawImage(tip,p[0].x-tip.width/2,p[0].y-tip.height/2);
+    let carry=sp;
+    for(let i=1;i<p.length;i++) carry=lmStampLine(ctx,tip,p[i-1].x,p[i-1].y,p[i].x,p[i].y,sp,carry);
+    ctx.restore();
+}
+
+function lmUpdateUndoUI(){
+    const u=document.getElementById('lmUndoBtn'), r=document.getElementById('lmRedoBtn');
+    if(u) u.disabled=lmStrokes.length===0;
+    if(r) r.disabled=lmRedoStack.length===0;
+}
+function lmCommit(st){
+    lmStrokes.push(st); lmRedoStack.length=0;
+    while(lmStrokes.length>LM_MAX_UNDO){
+        const old=lmStrokes.shift();
+        if(!lmBaseMask){lmBaseMask=document.createElement('canvas');lmBaseMask.width=lmMask.width;lmBaseMask.height=lmMask.height;}
+        lmDrawStroke(lmBaseMask.getContext('2d'),old);
+    }
+    lmUpdateUndoUI();
+}
+function lmRebuildMask(){
+    if(!lmMask) return;
+    const g=lmMask.getContext('2d');
+    g.clearRect(0,0,lmMask.width,lmMask.height);
+    if(lmBaseMask&&lmBaseMask.width) g.drawImage(lmBaseMask,0,0);
+    for(let i=0;i<lmStrokes.length;i++) lmDrawStroke(g,lmStrokes[i]);
+    lmRender();
+}
+function undoLm(){
+    if(!lmMask) return; lmEndStroke();
+    if(!lmStrokes.length) return;
+    lmRedoStack.push(lmStrokes.pop()); lmRebuildMask(); lmUpdateUndoUI();
+}
+function redoLm(){
+    if(!lmMask) return; lmEndStroke();
+    if(!lmRedoStack.length) return;
+    lmStrokes.push(lmRedoStack.pop()); lmRebuildMask(); lmUpdateUndoUI();
+}
+function clearLm(){
+    if(!lmMask) return; lmEndStroke();
+    const last=lmStrokes[lmStrokes.length-1];
+    if(last&&last.clear) return;
+    if(!lmStrokes.length&&!(lmBaseMask&&lmBaseMask.width)) return;
+    lmMask.getContext('2d').clearRect(0,0,lmMask.width,lmMask.height);
+    lmCommit({clear:true});
+    lmRender();
+}
+
+function lmSchedule(){ if(lmRaf) return; lmRaf=requestAnimationFrame(()=>{lmRaf=0;lmRender();}); }
+
+function lmRender(){
+    const cv=document.getElementById('lmCanvas');
+    if(!cv||!cv.width||!lmMask||!lmBase) return;
+    const g=cv.getContext('2d');
+    g.clearRect(0,0,cv.width,cv.height);
+    g.drawImage(lmBase,0,0);
+    const s=lmScratch.getContext('2d');
+    s.globalCompositeOperation='source-over';
+    s.clearRect(0,0,lmScratch.width,lmScratch.height);
+    s.drawImage(lmTextOnly,0,0);
+    s.globalCompositeOperation='destination-in';
+    s.drawImage(lmMask,0,0);
+    s.globalCompositeOperation='source-over';
+    g.drawImage(lmScratch,0,0);
+    if(lmGuideOn){
+        const gg=lmGuide.getContext('2d');
+        gg.globalCompositeOperation='source-over';
+        gg.clearRect(0,0,lmGuide.width,lmGuide.height);
+        gg.drawImage(lmMask,0,0);
+        gg.globalCompositeOperation='source-in';
+        gg.fillStyle='#00ff88';
+        gg.fillRect(0,0,lmGuide.width,lmGuide.height);
+        gg.globalCompositeOperation='source-over';
+        g.save(); g.globalAlpha=0.3; g.drawImage(lmGuide,0,0); g.restore();
+    }
+}
+
+function lmRenderPosterBase(c,s,skipEl){
+    renderBackground(s.background,lmPW,lmPH,c);
+    if(s.elements){
+        s.elements.filter(e=>e.type==='connector').forEach(el=>renderConnectorElement(c,el));
+        s.elements.forEach(el=>{
+            if(el.type==='connector') return;
+            if(el.id===editingElementId) return;
+            if(el.type==='text') renderTextElement(c,el);
+            else if(el.type==='image') renderImageElement(c,el);
+            else if(el.type==='shape') renderShapeElement(c,el);
+            else if(el.type==='fade') renderFadeElement(c,el);
+            else if(el.type==='table') renderTableElement(c,el);
+        });
+        renderLayerMaskPatches(c,s.elements,skipEl);
+    }
+}
+
+function openLayerMaskModal(){
+    const el=getActiveElement();
+    if(!el||el.type!=='text') return;
+    const s=getCurrentSlide(); if(!s) return;
+    closeLayerMaskModal(true);
+    lmEl=el;
+    lmPW=mainCanvas.width; lmPH=mainCanvas.height;
+    const modal=document.getElementById('layerMaskModal');
+    modal.classList.add('active');
+    const body=document.getElementById('lmBody');
+    const cv=document.getElementById('lmCanvas');
+    const availW=Math.max(120,body.clientWidth*0.92), availH=Math.max(120,body.clientHeight*0.9);
+    const ck=Math.min(availW/lmPW,availH/lmPH);
+    cv.style.width=Math.max(1,Math.round(lmPW*ck))+'px';
+    cv.style.height=Math.max(1,Math.round(lmPH*ck))+'px';
+    lmK=Math.min(1,1400/Math.max(lmPW,lmPH));
+    const cw=Math.max(1,Math.round(lmPW*lmK)), ch=Math.max(1,Math.round(lmPH*lmK));
+    cv.width=cw; cv.height=ch;
+    const mk=()=>{const c=document.createElement('canvas');c.width=cw;c.height=ch;return c;};
+    lmMask=mk(); lmScratch=mk(); lmGuide=mk(); lmBase=mk(); lmTextOnly=mk();
+
+    /* lapisan statis: poster tanpa patch teks ini + teks ini sendirian (digambar sekali, di-cache) */
+    const bctx=lmBase.getContext('2d'); bctx.scale(lmK,lmK);
+    try{ lmRenderPosterBase(bctx,s,el); }catch(e){}
+    const tctx=lmTextOnly.getContext('2d'); tctx.scale(lmK,lmK);
+    try{ renderTextElement(tctx,lmPatchSource(el)); }catch(e){}
+
+    lmStrokes=[]; lmRedoStack=[]; lmCur=null; lmBaseMask=null; lmCarry=0;
+    lmPainting=false; lmLastX=null; lmLastY=null; lmPanDrag=null;
+    lmErase=false; lmPaintMode=true; lmGuideOn=true;
+    const mb=document.getElementById('lmModeBtn'); if(mb) mb.textContent='🖌️ Lilit (Depan)';
+    const gb=document.getElementById('lmGuideBtn'); if(gb) gb.textContent='👁️ Panduan ON';
+    const pt=document.getElementById('lmPaintToggle'); if(pt){pt.innerText='✏️';pt.style.color='#00ff88';}
+    onLmBrushInput(document.getElementById('lmBrushSize').value);
+    onLmFeatherInput(document.getElementById('lmFeather').value);
+    const stalk=document.getElementById('lmStalk');
+    if(stalk){stalk.style.left='50%';stalk.style.top='';stalk.style.bottom='20px';stalk.style.transform='translateX(-50%)';}
+    lmUpdateUndoUI();
+    resetLmZoom();
+
+    /* mask lama (jika sudah pernah dibuat) dimuat sebagai dasar yang masih bisa dihapus/ditambah */
+    const loadExisting=(src)=>{
+        if(!src||!lmMask||lmEl!==el) return;
+        lmBaseMask=document.createElement('canvas'); lmBaseMask.width=cw; lmBaseMask.height=ch;
+        lmBaseMask.getContext('2d').drawImage(src,0,0,cw,ch);
+        lmRebuildMask();
+    };
+    const ex=(el._lmCanvas&&el._lmCanvas.getContext)?el._lmCanvas:null;
+    if(ex) loadExisting(ex);
+    else if(el.lmMaskSrc){
+        const im=new Image();
+        im.onload=()=>loadExisting(im);
+        im.src=el.lmMaskSrc;
+    }
+    lmRender();
+    setTimeout(lmUpdateReticle,60);
+    showToast('🧶 Gosok bagian huruf yang harus tampil DI DEPAN objek');
+}
+
+function closeLayerMaskModal(silent){
+    const modal=document.getElementById('layerMaskModal');
+    if(modal) modal.classList.remove('active');
+    if(lmRaf){cancelAnimationFrame(lmRaf);lmRaf=0;}
+    stopStepHold(); stopLmPan();
+    const ret=document.getElementById('lmReticle'); if(ret) ret.style.display='none';
+    [lmMask,lmBase,lmTextOnly,lmScratch,lmGuide,lmBaseMask].forEach(c=>{if(c){c.width=0;c.height=0;}});
+    lmTips.forEach(t=>{t.width=1;t.height=1;}); lmTips.clear();
+    lmMask=lmBase=lmTextOnly=lmScratch=lmGuide=lmBaseMask=null;
+    lmStrokes=[]; lmRedoStack=[]; lmCur=null; lmEl=null; lmPainting=false; lmLastX=null; lmLastY=null; lmPanDrag=null;
+    const cv=document.getElementById('lmCanvas');
+    if(cv){cv.width=0;cv.height=0;cv.style.width='';cv.style.height='';}
+}
+
+function applyLayerMask(){
+    const el=lmEl;
+    if(!el||!lmMask) return;
+    lmEndStroke();
+    let painted=false;
+    try{
+        const d=lmMask.getContext('2d').getImageData(0,0,lmMask.width,lmMask.height).data;
+        for(let i=3;i<d.length;i+=4){ if(d[i]>6){painted=true;break;} }
+    }catch(e){painted=true;}
+    if(!painted){
+        delete el.lmMaskSrc; delete el.lmW; delete el.lmH; delete el._lmCanvas; el._lmCache=null;
+        requestRender(); pushHistoryState(); closeLayerMaskModal();
+        showToast('🧶 Layer Mask dikosongkan');
+        return;
+    }
+    const out=document.createElement('canvas');
+    out.width=lmPW; out.height=lmPH;
+    const o=out.getContext('2d');
+    o.imageSmoothingEnabled=true; o.imageSmoothingQuality='high';
+    o.drawImage(lmMask,0,0,lmPW,lmPH);
+    out._lmId=(window.__lmIdCounter=(window.__lmIdCounter||0)+1);
+    el._lmCanvas=out; el._lmCache=null;
+    el.lmW=lmPW; el.lmH=lmPH;
+    el.lmMaskSrc=out.toDataURL('image/png');
+    requestRender(); pushHistoryState(); closeLayerMaskModal();
+    showToast('✅ Layer Mask diterapkan');
+}
+
+/* ---- zoom & geser ---- */
+function clampLmPan(){
+    const body=document.getElementById('lmBody'), cv=document.getElementById('lmCanvas');
+    if(!body||!cv) return;
+    const bw=body.clientWidth, bh=body.clientHeight;
+    const cw=(parseFloat(cv.style.width)||0)*lmZoom, ch=(parseFloat(cv.style.height)||0)*lmZoom;
+    const mx=Math.max(0,cw/2+bw/2-50), my=Math.max(0,ch/2+bh/2-50);
+    lmPanX=Math.max(-mx,Math.min(mx,lmPanX)); lmPanY=Math.max(-my,Math.min(my,lmPanY));
+}
+function updateLmTransform(immediate){
+    const w=document.getElementById('lmCanvasWrapper');
+    clampLmPan();
+    if(w) w.style.transform='translate('+lmPanX+'px,'+lmPanY+'px) scale('+lmZoom+')';
+    if(immediate) lmUpdateReticle(); else setTimeout(lmUpdateReticle,140);
+}
+function zoomLm(d){ lmZoom=Math.max(0.5,Math.min(4.0,lmZoom+d)); updateLmTransform(); }
+function resetLmZoom(){ lmZoom=1.0; lmPanX=0; lmPanY=0; updateLmTransform(); }
+function startLmPan(dx,dy){
+    stopLmPan();
+    const step=()=>{lmPanX+=dx*10;lmPanY+=dy*10;updateLmTransform(true);};
+    step(); lmPanTimer=setInterval(step,60);
+}
+function stopLmPan(){ if(lmPanTimer){clearInterval(lmPanTimer);lmPanTimer=0;} }
+function endLmPanDrag(){
+    if(!lmPanDrag) return;
+    lmPanDrag=null;
+    const w=document.getElementById('lmCanvasWrapper'); if(w) w.style.transition='transform 0.1s';
+}
+
+function toggleLmErase(){
+    lmErase=!lmErase;
+    const b=document.getElementById('lmModeBtn');
+    if(b) b.textContent=lmErase?'🧽 Hapus Patch':'🖌️ Lilit (Depan)';
+    showToast(lmErase?'🧽 Mode HAPUS: gosok untuk mengembalikan objek ke depan':'🖌️ Mode LILIT: bagian huruf yang digosok tampil di depan objek');
+    lmUpdateReticle();
+}
+function toggleLmGuide(){
+    lmGuideOn=!lmGuideOn;
+    const b=document.getElementById('lmGuideBtn'); if(b) b.textContent=lmGuideOn?'👁️ Panduan ON':'👁️ Panduan OFF';
+    lmRender();
+}
+function toggleLmPaintMode(){
+    lmPaintMode=!lmPaintMode;
+    const b=document.getElementById('lmPaintToggle');
+    if(b){ b.innerText=lmPaintMode?'✏️':'🚫'; b.style.color=lmPaintMode?'#00ff88':'#ff6b6b'; }
+    if(!lmPaintMode) lmEndStroke();
+    lmUpdateReticle();
+}
+
+/* keker di depan jari */
+function getLmBrushClient(){
+    const stalk=document.getElementById('lmStalk'), cv=document.getElementById('lmCanvas');
+    if(!stalk||!cv||!cv.width||!cv.height) return null;
+    const sr=stalk.getBoundingClientRect(), cr=cv.getBoundingClientRect();
+    const sc=Math.min(cr.width/cv.width,cr.height/cv.height);
+    const r=Math.max(1,lmBrushPx()*sc)/2;
+    const dist=Math.max(95,r+45);
+    return {x:sr.left+sr.width/2,y:sr.top+28-dist,r:r};
+}
+function lmUpdateReticle(){
+    const ret=document.getElementById('lmReticle'), body=document.getElementById('lmBody');
+    if(!ret||!body||!lmActive()) return;
+    const b=getLmBrushClient();
+    if(!b){ret.style.display='none';return;}
+    const br=body.getBoundingClientRect(), d=Math.max(8,b.r*2);
+    ret.style.width=d+'px'; ret.style.height=d+'px';
+    ret.style.left=(b.x-br.left)+'px'; ret.style.top=(b.y-br.top)+'px';
+    ret.style.display='block';
+    ret.classList.toggle('off',!lmPaintMode);
+    ret.classList.toggle('live',lmPaintMode&&!lmErase);
+    ret.style.borderColor=(lmPaintMode&&lmErase)?'#ff6b6b':'';
+}
+
+/* ---- goresan ---- */
+function lmPaintAt(x,y){
+    if(!lmMask) return;
+    const g=lmMask.getContext('2d');
+    if(!lmCur){
+        const size=lmBrushPx(), feather=lmFeatherVal();
+        lmCur={erase:lmErase,size:size,feather:feather,pts:[{x:x,y:y}]};
+        const tip=lmGetTip(size,feather);
+        g.save(); g.globalCompositeOperation=lmErase?'destination-out':'source-over';
+        g.drawImage(tip,x-tip.width/2,y-tip.height/2); g.restore();
+        lmCarry=lmSpacing(size);
+    }else{
+        const last=lmCur.pts[lmCur.pts.length-1];
+        if(Math.hypot(x-last.x,y-last.y)<0.5) return;
+        const tip=lmGetTip(lmCur.size,lmCur.feather);
+        g.save(); g.globalCompositeOperation=lmCur.erase?'destination-out':'source-over';
+        lmCarry=lmStampLine(g,tip,last.x,last.y,x,y,lmSpacing(lmCur.size),lmCarry);
+        g.restore();
+        lmCur.pts.push({x:x,y:y});
+    }
+    lmSchedule();
+}
+function lmEndStroke(){
+    if(lmCur){
+        const st=lmCur; lmCur=null;
+        if(lmMask&&st.pts.length) lmCommit(st);
+    }
+    lmLastX=null; lmLastY=null;
+}
+
+function setupLayerMaskEvents(){
+    const cv=document.getElementById('lmCanvas');
+    const stalk=document.getElementById('lmStalk');
+    const handle=document.getElementById('lmDragHandle');
+    const body=document.getElementById('lmBody');
+    if(!cv||!stalk||!handle||!body) return;
+    let draggingStalk=false, stalkOffset={x:0,y:0};
+
+    function pointFromClient(cx,cy){
+        const r=cv.getBoundingClientRect();
+        if(!r.width||!r.height||!cv.width||!cv.height) return null;
+        return {x:(cx-r.left)*(cv.width/r.width),y:(cy-r.top)*(cv.height/r.height)};
+    }
+    function inCanvas(p){return !!p&&p.x>=0&&p.y>=0&&p.x<=cv.width&&p.y<=cv.height;}
+
+    handle.addEventListener('pointerdown',(e)=>{
+        if(!lmActive()) return;
+        draggingStalk=true;
+        try{handle.setPointerCapture(e.pointerId);}catch(_){}
+        const rect=stalk.getBoundingClientRect(), pr=body.getBoundingClientRect();
+        stalkOffset={x:e.clientX-rect.left,y:e.clientY-rect.top};
+        stalk.style.left=(rect.left-pr.left)+'px'; stalk.style.top=(rect.top-pr.top)+'px';
+        stalk.style.right='auto'; stalk.style.bottom='auto'; stalk.style.transform='none';
+        e.preventDefault(); e.stopPropagation();
+    });
+
+    window.addEventListener('pointermove',(e)=>{
+        if(!lmActive()) return;
+        if(draggingStalk){
+            const br=body.getBoundingClientRect();
+            stalk.style.left=(e.clientX-br.left-stalkOffset.x)+'px';
+            stalk.style.top=(e.clientY-br.top-stalkOffset.y)+'px';
+            const bp=getLmBrushClient();
+            const p=bp?pointFromClient(bp.x,bp.y):null;
+            lmUpdateReticle();
+            if(lmPaintMode&&inCanvas(p)) lmPaintAt(p.x,p.y); else lmEndStroke();
+        } else if(lmPanDrag){
+            lmPanX=lmPanDrag.px+(e.clientX-lmPanDrag.x);
+            lmPanY=lmPanDrag.py+(e.clientY-lmPanDrag.y);
+            updateLmTransform(true);
+        } else if(lmPainting&&lmPaintMode){
+            const p=pointFromClient(e.clientX,e.clientY);
+            if(inCanvas(p)) lmPaintAt(p.x,p.y); else lmEndStroke();
+        }
+    });
+    const up=()=>{
+        if(!lmMask&&!lmPanDrag&&!lmCur) { draggingStalk=false; lmPainting=false; return; }
+        draggingStalk=false; lmPainting=false;
+        lmEndStroke(); endLmPanDrag();
+    };
+    window.addEventListener('pointerup',up);
+    window.addEventListener('pointercancel',up);
+    window.addEventListener('resize',()=>{setTimeout(lmUpdateReticle,120);});
+
+    function startPanDrag(e){
+        if(lmPanDrag) return;
+        const w=document.getElementById('lmCanvasWrapper');
+        lmPanDrag={x:e.clientX,y:e.clientY,px:lmPanX,py:lmPanY};
+        if(w) w.style.transition='none';
+        try{e.target.setPointerCapture(e.pointerId);}catch(_){}
+        e.preventDefault();
+    }
+    body.addEventListener('pointerdown',(e)=>{
+        if(e.target===body||e.target===document.getElementById('lmCanvasWrapper')) startPanDrag(e);
+    });
+    cv.addEventListener('pointerdown',(e)=>{
+        if(!lmMask) return;
+        if(!lmPaintMode){ startPanDrag(e); return; }
+        const p=pointFromClient(e.clientX,e.clientY);
+        if(!inCanvas(p)) return;
+        lmPainting=true;
+        try{cv.setPointerCapture(e.pointerId);}catch(_){}
+        lmPaintAt(p.x,p.y);
+        e.preventDefault();
+    });
+}
+
 /* ========== HAPUS BG (MAGIC WAND / FLOOD FILL) ========== */
 function openMagicWandModal(){
 const el=getActiveElement();
@@ -9549,6 +10142,7 @@ function generateSlideThumb(slide) {
             else if(el.type === 'fade') renderFadeElement(tctx, el);
             else if(el.type === 'table') renderTableElement(tctx, el);
         });
+        renderLayerMaskPatches(tctx, slide.elements);
     }
     return tempC.toDataURL('image/jpeg', 0.5);
 }
@@ -10223,6 +10817,7 @@ async function executeDownload() {
                     else if(el.type === 'fade') renderFadeElement(ectx, el);
                     else if(el.type === 'table') renderTableElement(ectx, el);
                 });
+                renderLayerMaskPatches(ectx, s.elements);
             }
             
             const result = await canvasToBlobSafe(expC, mime, isJpg ? EXPORT_JPEG_QUALITY : undefined);
@@ -10302,6 +10897,7 @@ function openPreviewModal() {
             else if(el.type === 'fade') renderFadeElement(pctx, el);
             else if(el.type === 'table') renderTableElement(pctx, el);
         });
+        renderLayerMaskPatches(pctx, s.elements);
     }
     
     resetPreviewZoom();
