@@ -1,11 +1,11 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.6
+Studio Poster Maker Pro - Update v1.3.7
+
+v1.3.7:
+1. LAYER MASK (render awal): teks lapisan depan kini otomatis ter-refresh saat aplikasi / proyek pertama dibuka. Penyebabnya, cache patch teks depan tidak ikut dihapus saat font, foto skin teks, atau ukuran selesai dimuat, sehingga masih menampilkan hasil lama (belum lengkap) sampai ada perubahan manual. Sekarang cache patch ikut dinyalakan ulang setiap kali cache render teks di-invalidate.
 
 v1.3.6:
 1. LAYER MASK: lapisan teks terdepan (hasil sapuan kuas hijau) kini digambar TANPA outer shadow, sehingga tidak ada lagi bayangan luar yang terpotong di tepi sapuan. Inner shadow teks depan tetap ada, dan teks lapisan belakang tetap lengkap dengan inner + outer shadow. Berlaku sama di kanvas utama, panel Layer Mask, thumbnail, preview, dan export.
-
-v1.3.5:
-1. TABEL: Lebar & Tinggi kini BISA DIATUR (menu Ukuran, handle, maupun slider). Teks otomatis dibungkus ulang mengikuti lebar yang diatur; tinggi yang lebih besar dari isi merenggangkan baris secara proporsional. Tanpa pengaturan, lebar otomatis pas isi tetapi dibatasi sekitar 90% lebar kanvas (tidak lagi kepanjangan). Menambah kolom/baris mengembalikan ukuran ke otomatis. Padding kiri-kanan-atas-bawah tetap terjaga.
 
 
 -->
@@ -1371,7 +1371,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.3.6';
+    return 'v1.3.7';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -1678,10 +1678,12 @@ requestAnimationFrame(()=>{renderPending=false;renderAll();});
 }
 }
 
+/* v1.3.7: tandai cache patch Layer Mask kedaluwarsa (kanvas dipertahankan untuk dipakai ulang, tanpa alokasi baru) */
+function lmInvalidate(el){ if(el && el._lmCache) el._lmCache.key = null; }
 function invalidateAllRenderCaches() {
     if (typeof slides === 'undefined' || !slides) return;
     slides.forEach(s => {
-        if (s.elements) s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; el._calculatedHeight = null; el._renderedW = null; if (el._tbl) { el._tbl.layout = null; el._tbl.meas = null; } });
+        if (s.elements) s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; lmInvalidate(el); el._calculatedHeight = null; el._renderedW = null; if (el._tbl) { el._tbl.layout = null; el._tbl.meas = null; } });
     });
 }
 function invalidateCachesForSrc(src) {
@@ -1689,7 +1691,7 @@ function invalidateCachesForSrc(src) {
     slides.forEach(s => (s.elements || []).forEach(el => {
         let hit = el.textSkinSrc === src || el.imageSkinSrc === src || el.warpSrc === src || el.src === src || el.imgSrc === src;
         if (!hit && el.type === 'table' && el.cells) hit = el.cells.some(r => r.some(c => c && c.bgImgSrc === src));
-        if (hit) { el._cachedCanvas = null; el._cachedHash = null; }
+        if (hit) { el._cachedCanvas = null; el._cachedHash = null; lmInvalidate(el); }
     }));
 }
 var _rfTimer = 0;
@@ -1943,6 +1945,7 @@ document.fonts.ready.then(() => {
             s.elements.forEach(el => { 
                 el._cachedCanvas = null; 
                 el._cachedHash = null; 
+                lmInvalidate(el);
                 el._calculatedHeight = null;
                 el._renderedW = null;
             });
@@ -2735,7 +2738,7 @@ function lmGetMaskCanvas(el){
                 c.width = el.lmW || im.width; c.height = el.lmH || im.height;
                 c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
                 c._lmId = (window.__lmIdCounter = (window.__lmIdCounter||0) + 1);
-                el._lmCanvas = c; el._lmCache = null;
+                el._lmCanvas = c; el._lmCache = null; el._cachedCanvas = null; el._cachedHash = null;
             }catch(e){}
             requestRender();
         };
@@ -9797,6 +9800,7 @@ async function setFontFamily(font) {
         await document.fonts.load(`16px ${font}`);
         el._cachedCanvas = null; 
         el._cachedHash = null;
+        lmInvalidate(el);
         el._calculatedHeight = null;
         el._renderedW = null;
         renderAll();
@@ -9829,6 +9833,7 @@ function handleFontUpload(e) {
                 el.fontFamily = fontName;
                 el._cachedCanvas = null;
                 el._cachedHash = null;
+                lmInvalidate(el);
                 renderAll();
                 pushHistoryState();
             }
