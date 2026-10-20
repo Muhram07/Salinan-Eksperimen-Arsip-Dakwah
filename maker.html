@@ -1,14 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.2.9
+Studio Poster Maker Pro - Update v1.3.0
+
+v1.3.0:
+1. GARIS TEPI FOTO/PNG: garis tidak lagi hilang saat kelengkungan (corner radius) dipakai; clip hanya untuk gambar, garis digambar di luar clip.
+2. CARI GAMBAR: grid feed Instagram 3 kolom, 30 poster per halaman, tidak saling menutupi, bisa digulir.
+3. TANGKAP AJAIB: keker lingkaran garis putus-putus selalu aktif di depan jari (di atas pegangan); tinta hijau keluar dari keker, bukan dari bawah jari.
+4. SITUS SUNNAH: tombol Simpan mengisi link otomatis (baca alamat bingkai / alamat terakhir / clipboard); tombol kembali dari Bookmark/Notebook memulihkan situs yang tadi dibaca tanpa muat ulang.
 
 v1.2.9:
 1. IMAGE SEARCH: ubah layout dari 3x10 padat menjadi Instagram feed style responsive, setiap poster terlihat full dan jelas tanpa tertutup.
 2. PEN TOOL (TANGKAP AJAIB): tambah lingkaran "keker" agak jauh dari jari, hanya lingkaran yang berfungsi capture (tidak garis), ukuran sesuai brush setting.
-
-v1.2.8:
-1. NOTEBOOK SITUS SUNNAH: tambah catatan materi yang dapat dibuat, diedit, disalin, dan dihapus; data tersimpan lokal di perangkat.
-2. UPSCALE HD: jarak kontrol dirapikan, panel dibuat lebih tinggi dan mudah discroll, pratinjau tidak berubah menjadi zoom saat skala diubah, area dapat digeser, serta tersedia estimasi dan ukuran output.
-3. CARI GAMBAR: hapus pilihan Lukisan/Seni dan Openverse; tambah koleksi The Met Open Access (CC0), dan unduhan mempertahankan format gambar sumber bila tersedia.
 -->
 
 
@@ -193,6 +194,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .handled-loupe-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;border:1.5px solid #fff;border-radius:50%;pointer-events:none;}
 .handled-loupe-stalk{width:36px;height:65px;background:linear-gradient(180deg,#242424,#111);border:2px solid #D4AF37;border-radius:18px;margin:-8px auto 0;box-shadow:0 5px 15px rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;color:#D4AF37;font-size:16px;cursor:grab;pointer-events:auto;touch-action:none;}
 .handled-loupe-stalk:active{cursor:grabbing;background:#D4AF37;color:#111;}
+.grab-reticle{position:absolute;display:none;border:2px dashed #FFE259;border-radius:50%;pointer-events:none;z-index:99;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(0,0,0,.65),inset 0 0 0 1px rgba(0,0,0,.45);box-sizing:border-box;}
+.grab-reticle::before,.grab-reticle::after{content:'';position:absolute;left:50%;top:50%;background:#FFE259;box-shadow:0 0 2px #000;transform:translate(-50%,-50%);}
+.grab-reticle::before{width:11px;height:1px;}
+.grab-reticle::after{width:1px;height:11px;}
+.grab-reticle.off{border-color:#888;}
+.grab-reticle.off::before,.grab-reticle.off::after{background:#888;}
+.grab-reticle.live{background:rgba(0,255,136,.18);}
 .handled-loupe-footer{background:rgba(18,18,18,.95);border:1px solid #D4AF37;border-radius:14px;padding:4px 10px;display:flex;align-items:center;gap:6px;margin-top:6px;pointer-events:auto;}
 
 .project-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:999;display:none;align-items:center;justify-content:center;padding:16px;}
@@ -399,15 +407,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 /* === v1.2.9: ubah layout menjadi Instagram feed style responsive, setiap poster terlihat full === */
 .bib-status{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
 .bib-status.wrap{display:block;overflow:visible;}
-.bib-grid{position:absolute;left:0;right:0;top:0;bottom:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px;align-content:start;touch-action:pan-y;overscroll-behavior:contain;}
+.bib-grid{position:absolute;left:0;right:0;top:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;gap:3px;padding:3px;align-content:start;align-items:start;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
 .bib-body{overflow:hidden;}
-.bib-item{border-radius:8px;border:1px solid rgba(212,175,55,.2);background:#0b0b0b;aspect-ratio:9/16;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.bib-item{border-radius:8px;border:1px solid rgba(212,175,55,.2);background:#0b0b0b;aspect-ratio:auto;height:0;padding-bottom:125%;width:100%;box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .bib-item:hover{border-color:rgba(212,175,55,.5);box-shadow:0 4px 12px rgba(212,175,55,.2);}
 .bib-item.sel{box-shadow:0 0 12px rgba(212,175,55,.6);}
 .bib-item.sel::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:3px solid #D4AF37;pointer-events:none;border-radius:8px;}
 .bib-item.sk{background:linear-gradient(110deg,#1b1b1b 30%,#2b2b2b 50%,#1b1b1b 70%);background-size:200% 100%;animation:bibSk 1.2s linear infinite;}
 @keyframes bibSk{to{background-position:-200% 0;}}
-.bib-item img{opacity:0;transition:opacity .25s;object-fit:cover;background:#0b0b0b;width:100%;height:100%;display:block;border-radius:8px;}
+.bib-item img{opacity:0;transition:opacity .25s;object-fit:cover;background:#0b0b0b;position:absolute;left:0;top:0;width:100%;height:100%;display:block;border-radius:8px;}
 .bib-item.ok img{opacity:1;}
 .bib-item.bad::before{content:'⚠️';position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.45;border-radius:8px;}
 .ld{display:none;position:relative;height:18px;margin:2px 10px 4px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;flex-shrink:0;}
@@ -892,6 +900,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="btn-nav" onclick="zoomMagicGrab(-0.25)" style="width:34px;justify-content:center;">➖</button>
         <button class="btn-nav" onclick="resetMagicGrabZoom()" style="width:34px;justify-content:center;">🎯</button>
     </div>
+    <div class="grab-reticle" id="magicGrabReticle"></div>
     <div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
         <span id="grabDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
         <div style="width:20px; height:1px; background:#D4AF37;"></div>
@@ -1128,7 +1137,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
             <input class="bib-input" id="ssBmTitle" type="text" maxlength="120" placeholder="Nama bookmark (mis. Hukum tahlilan)" autocomplete="off" spellcheck="false">
             <div class="ss-il">Alamat (link)</div>
             <input class="bib-input" id="ssBmUrl" type="url" placeholder="https://..." autocomplete="off" autocapitalize="off" spellcheck="false">
-            <div class="ss-note" style="border-top:0;margin-top:8px;padding-top:0;">Ingin menyimpan halaman/artikel tertentu? Tekan ↗ Tab Baru, salin alamat halaman itu, lalu tempel di kolom Alamat. (Browser tidak mengizinkan aplikasi membaca alamat halaman di dalam bingkai situs lain.)</div>
+            <div class="ss-note" style="border-top:0;margin-top:8px;padding-top:0;">Alamat terisi otomatis dari situs yang sedang dibuka. Jika masih berupa alamat pencarian, browser memblokir pembacaan alamat halaman di dalam situs lain: salin alamat halaman itu (↗ Tab Baru) lalu tekan 📋 Tempel, atau akan terisi otomatis dari clipboard.</div>
             <div style="display:flex;gap:8px;margin-top:12px;">
                 <button class="bib-chip" style="height:40px;padding:0 14px;" onclick="ssBmPaste()">📋 Tempel</button>
                 <button class="bib-go" style="flex:1;height:40px;" onclick="ssBmCommit()">💾 Simpan</button>
@@ -3236,6 +3245,7 @@ octx.translate(cW/2, cH/2);
 
 const radius=Math.min(el.cornerRadius||0,Math.min(finalDrawW,finalDrawH)/2);
 if(radius>0){
+octx.save();
 octx.beginPath();
 if(octx.roundRect) octx.roundRect(-finalDrawW/2,-finalDrawH/2,finalDrawW,finalDrawH,radius);
 else octx.rect(-finalDrawW/2,-finalDrawH/2,finalDrawW,finalDrawH);
@@ -3288,6 +3298,11 @@ if(el.innerShadow&&el.innerShadow.color&&el.innerShadow.color!=='transparent'){
 applySilhouetteInnerShadow(octx,off.width,off.height,el.innerShadow);
 }
 
+if(radius>0){
+const _prevOp=octx.globalCompositeOperation;
+octx.restore();
+octx.globalCompositeOperation=_prevOp;
+}
 if(el.borderWidth&&el.borderWidth>0&&el.borderColor){
 renderContourStrokePNG(octx,off,finalDrawW,finalDrawH,el);
 }
@@ -7629,11 +7644,13 @@ if(monitor) monitor.style.display='none';
 resetMagicGrabZoom();
 renderMagicGrabDisplay();
 updateBrushMonitorPreview(document.getElementById('magicBrushSize').value, canvas.width/2, canvas.height/2, true);
+setTimeout(updateGrabReticle,60);
 }
 
 function closeMagicGrabModal(){
 document.getElementById('magicGrabModal').classList.remove('active');
 document.getElementById('brushMonitor').style.display='none';
+const _ret=document.getElementById('magicGrabReticle');if(_ret)_ret.style.display='none';
 if(grabMaskCanvas){grabMaskCanvas.width=0;grabMaskCanvas.height=0;grabMaskCanvas=null;}
 const canvas=document.getElementById('magicGrabCanvas');
 if(canvas){canvas.width=0;canvas.height=0;canvas.style.width='';canvas.style.height='';}
@@ -7659,6 +7676,38 @@ function resetMagicGrabZoom() {
 function updateMagicGrabTransform() {
     const wrapper = document.getElementById('magicGrabCanvasWrapper');
     if(wrapper) wrapper.style.transform = `scale(${magicGrabZoom})`;
+    setTimeout(updateGrabReticle,140);
+}
+
+/* v1.3.0: titik kuas (keker) berada di depan jari, bukan di bawah jari */
+function getGrabBrushClient(){
+    const stalk=document.getElementById('magicGrabStalk');
+    const canvas=document.getElementById('magicGrabCanvas');
+    const slider=document.getElementById('magicBrushSize');
+    if(!stalk||!canvas||!canvas.width||!canvas.height)return null;
+    const sr=stalk.getBoundingClientRect();
+    const cr=canvas.getBoundingClientRect();
+    const size=parseInt((slider&&slider.value)||35);
+    const sc=Math.min(cr.width/canvas.width,cr.height/canvas.height);
+    const r=Math.max(2,size*sc)/2;
+    const dist=Math.max(95,r+45);
+    return {x:sr.left+sr.width/2,y:sr.top+28-dist,r:r};
+}
+function updateGrabReticle(){
+    const ret=document.getElementById('magicGrabReticle');
+    const modal=document.getElementById('magicGrabModal');
+    const body=document.getElementById('magicGrabBody');
+    if(!ret||!modal||!body||!modal.classList.contains('active'))return;
+    const b=getGrabBrushClient();
+    if(!b){ret.style.display='none';return;}
+    const br=body.getBoundingClientRect();
+    const d=Math.max(20,b.r*2);
+    ret.style.width=d+'px';
+    ret.style.height=d+'px';
+    ret.style.left=(b.x-br.left)+'px';
+    ret.style.top=(b.y-br.top)+'px';
+    ret.style.display='block';
+    ret.classList.toggle('off',!grabPaintMode);
 }
 
 function updateBrushMonitorPreview(size, x, y, fromSlider = false){
@@ -7679,6 +7728,7 @@ mon.style.top=(canvasRect.top+py*scaleY)+'px';
 clearTimeout(mon._timer);
 if(fromSlider) mon._timer=setTimeout(()=>{mon.style.display='none';},1200);
 else mon._timer=setTimeout(()=>{mon.style.display='none';},300);
+updateGrabReticle();
 }
 
 function toggleGrabPaintMode() {
@@ -7691,6 +7741,7 @@ function toggleGrabPaintMode() {
         btn.innerText = '🚫';
         btn.style.color = '#ff6b6b';
     }
+    updateGrabReticle();
 }
 
 function setupMagicGrabEvents(){
@@ -7730,12 +7781,13 @@ window.addEventListener('pointermove',(e)=>{
         const localY=e.clientY-bodyRect.top-stalkOffset.y;
         stalk.style.left=localX+'px';
         stalk.style.top=localY+'px';
-        const stalkRect=stalk.getBoundingClientRect();
-        const brushClientX=stalkRect.left+stalkRect.width/2;
-        const brushClientY=stalkRect.top+28;
-        const point=pointFromClient(brushClientX,brushClientY);
+        const bp=getGrabBrushClient();
+        const brushClientX=bp?bp.x:0;
+        const brushClientY=bp?bp.y:0;
+        const point=bp?pointFromClient(brushClientX,brushClientY):null;
+        updateGrabReticle();
         if(grabPaintMode&&inCanvas(point)) paintGrabAtCoords(point.x,point.y,brushClientX,brushClientY);
-        else updateBrushMonitorPreview(document.getElementById('magicBrushSize').value, point ? point.x : canvas.width/2, point ? point.y : canvas.height/2);
+        else { lastGrabX=null; lastGrabY=null; }
     } else if(isPaintingGrab&&grabPaintMode){
         const point=pointFromClient(e.clientX,e.clientY);
         if(inCanvas(point)) paintGrabAtCoords(point.x,point.y,e.clientX,e.clientY);
@@ -7750,6 +7802,7 @@ window.addEventListener('pointerup',()=>{
     const mon=document.getElementById('brushMonitor');
     if(mon) mon.style.display='none';
 });
+window.addEventListener('resize',()=>{setTimeout(updateGrabReticle,120);});
 window.addEventListener('pointercancel',()=>{
     isDraggingStalk=false;
     isPaintingGrab=false;
@@ -11340,6 +11393,7 @@ function ssSetEngine(k) {
 }
 
 function ssShowView(v) {
+    const prevV = SS.view;
     SS.view = v;
     ssEl('ssListWrap').style.display = v === 'list' ? 'flex' : 'none';
     ssEl('ssWebWrap').style.display = v === 'web' ? 'flex' : 'none';
@@ -11347,7 +11401,12 @@ function ssShowView(v) {
     ssEl('ssNoteWrap').style.display = v === 'note' ? 'flex' : 'none';
     ssEl('ssToggleBtn').textContent = v === 'web' ? '📚 Daftar Situs' : '🌐 Hasil';
     ssEl('ssToggleBtn').style.display = (v === 'web' || (v === 'list' && SS.q)) ? '' : 'none';
-    if(v !== 'web') { ssDestroyFrame(); ssEl('ssStatus').textContent = ''; }
+    if(v !== 'web') {
+        if(prevV === 'web') SS.webStatus = ssEl('ssStatus').textContent;
+        /* v1.3.0: saat membuka Bookmark/Notebook, situs yang sedang dibaca tetap disimpan (disembunyikan), tidak dibuang */
+        if(v !== 'bm' && v !== 'note') ssDestroyFrame();
+        ssEl('ssStatus').textContent = '';
+    }
 }
 
 function ssToggleView() {
@@ -11571,12 +11630,23 @@ function ssBmHost(u) { try { return new URL(u).hostname.replace(/^www\./, ''); }
 
 function ssOpenBookmarks() {
     SS.bm = ssBmLoad();
-    if(SS.view !== 'bm') SS.prevView = SS.view;
+    if(SS.view === 'web' || SS.view === 'list') SS.prevView = SS.view;
     ssShowView('bm');
     ssRenderBm();
 }
 
+/* v1.3.0: kembali ke situs yang tadi dibaca (bingkai masih hidup, tanpa memuat ulang) */
+function ssRestoreWebView() {
+    if(SS.prevView === 'web' && ssEl('ssFrame') && SS.lastUrl) {
+        ssShowView('web');
+        ssEl('ssStatus').textContent = SS.webStatus || '';
+        return true;
+    }
+    return false;
+}
+
 function ssBmBack() {
+    if(ssRestoreWebView()) return;
     const pv = SS.prevView;
     if(pv === 'web' && SS.mode === 'search' && SS.q) { ssRun(); return; }
     if(pv === 'web' && SS.mode === 'bm' && SS.bmId) { ssBmOpen(SS.bmId); return; }
@@ -11643,13 +11713,55 @@ function ssBmOpen(id) {
     ssEl('ssStatus').textContent = '🔖 ' + (b.title || ssBmHost(b.url)) + ' · jika halaman kosong, situs memblokir tampil di dalam aplikasi: ketuk ↗ Tab Baru.';
 }
 
+/* v1.3.0: deteksi otomatis alamat halaman yang sedang dibuka di bingkai.
+   Jika situs berasal dari domain lain, browser memblokir pembacaan alamatnya (cross-origin); maka dipakai alamat terakhir yang diketahui. */
+function ssGuessCurrentPage() {
+    const f = ssEl('ssFrame');
+    let url = '', title = '', exact = false;
+    if(f) {
+        try {
+            const h = f.contentWindow.location.href;
+            if(/^https?:\/\//i.test(h)) { url = h; exact = true; }
+            const t = f.contentDocument && f.contentDocument.title;
+            if(t) title = t.trim();
+        } catch(e) {}
+    }
+    if(!url) url = SS.lastUrl || '';
+    return { url: url, title: title, exact: exact };
+}
+
+function ssIsSearchUrl(u) {
+    try {
+        const x = new URL(u);
+        return /(^|\.)(google|bing)\.[a-z.]+$/i.test(x.hostname) && /^\/(search|url)/i.test(x.pathname);
+    } catch(e) { return false; }
+}
+
+async function ssBmAutoClipboard(fallbackUrl) {
+    try {
+        if(!navigator.clipboard || !navigator.clipboard.readText) return;
+        const t = await navigator.clipboard.readText();
+        const u = ssBmNormUrl((t || '').split(/\s+/)[0]);
+        const inp = ssEl('ssBmUrl');
+        if(u && !ssIsSearchUrl(u) && ssEl('ssBmEdit').classList.contains('active') && inp.value === fallbackUrl) {
+            inp.value = u;
+            const ti = ssEl('ssBmTitle');
+            if(ti && /hal\.\s*\d+$/.test(ti.value)) ti.value = ssBmHost(u);
+            showToast('📋 Link halaman terisi otomatis dari clipboard');
+        }
+    } catch(e) {}
+}
+
 function ssSaveBookmark() {
-    if(SS.view === 'web' && SS.lastUrl) {
-        if(SS.mode === 'bm') {
+    if((SS.view === 'web' || ssEl('ssFrame')) && SS.lastUrl) {
+        if(SS.mode === 'bm' && SS.view === 'web') {
             const cur = SS.bm.find(x => x.id === SS.bmId);
             if(cur) { showToast('🔖 Sudah tersimpan: ' + (cur.title || 'bookmark')); return; }
         }
-        ssBmOpenSheet({ id: null, title: SS.q + ' · ' + SS.lastScope + ' · hal. ' + SS.page, url: SS.lastUrl, q: SS.q });
+        const g = ssGuessCurrentPage();
+        let ttl = g.title || (SS.mode === 'bm' && SS.bmTitle ? SS.bmTitle : (SS.q + ' · ' + SS.lastScope + ' · hal. ' + SS.page));
+        ssBmOpenSheet({ id: null, title: ttl, url: g.url, q: SS.q });
+        if(!g.exact && ssIsSearchUrl(g.url)) ssBmAutoClipboard(g.url);
     } else {
         ssBmOpenSheet({ id: null, title: '', url: '', q: '' });
     }
@@ -11725,7 +11837,7 @@ function ssNoteStore() {
 function ssOpenNotes() {
     SS.notes = ssNoteLoad();
     SS.noteEditId = null;
-    SS.prevView = SS.view;
+    if(SS.view === 'web' || SS.view === 'list') SS.prevView = SS.view;
     ssShowView('note');
     ssNoteCancel();
     ssRenderNotes();
@@ -11734,6 +11846,7 @@ function ssOpenNotes() {
 function ssNoteClose() {
     SS.noteEditId = null;
     ssNoteCancel();
+    if(ssRestoreWebView()) return;
     ssShowView('list');
     ssRenderList();
 }
