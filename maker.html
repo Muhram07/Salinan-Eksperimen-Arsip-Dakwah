@@ -1,13 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.3
+Studio Poster Maker Pro - Update v1.3.4
+
+v1.3.4:
+1. TABEL AUTO-FIT: ukuran kotak kini otomatis membungkus padat sesuai isi. Lebar tiap kolom mengikuti teks terpanjang di kolom itu, tinggi tiap baris mengikuti teks tertinggi di baris itu, tetap memakai jarak (padding) kiri-kanan-atas-bawah agar teks tidak dempet. Mengubah ukuran tabel lewat handle / slider kini berarti skala (semua isi ikut membesar/mengecil proporsional).
+2. TABEL GABUNG SEL: di Editor Data Tabel tekan tombol ☑ pada kotak pertama lalu ☑ pada kotak terakhir (atau ketuk judul Baris/Kolom untuk memilih satu baris/kolom penuh), lalu tekan "Gabung Sel" (mirip MS Excel, garis penghalang hilang & teks memakai seluruh area). "Pisah Sel" mengembalikan seperti semula. Ikut tersimpan, ter-undo, dan ikut ke thumbnail, preview & export.
+3. PERFORMA: tanda tangan (hash) cache tabel tidak lagi memproses data foto latar base64 setiap frame; hasil hitung ukuran tabel di-cache sehingga geser/zoom tetap ringan.
 
 v1.3.3:
 1. TEKS: tool baru "Layer Mask" (menu Teks, di tengah): gosok bagian huruf yang harus tampil DI DEPAN objek PNG, sehingga objek terlihat melilit / masuk ke belakang huruf. Ada mode Lilit/Hapus Patch, Undo/Redo, ukuran kuas & kelembutan (+/-), zoom, geser, panduan hijau. Ikut tersimpan, ter-undo, dan ikut ke thumbnail, preview & export.
-
-v1.3.2:
-1. TANGKAP AJAIB: tambah Undo/Redo per goresan (Bersihkan juga bisa di-undo), tombol +/- beserta angka ukuran kuas, tombol dipindah ke sebelah kiri "Warna Siluet".
-2. CROP JARI: tampilan & opsi disamakan dengan Tangkap Ajaib: geser kiri/kanan/atas/bawah, Buang Luar / Buang Dalam, Undo/Redo, zoom +/-, garis hijau halus (kurva) terutama di lengkungan, tombol +/- pada Ukuran Ujung.
-3. PERFORMA: kanvas pratinjau memakai cache offscreen + render per frame (rAF) agar tidak lag.
 
 
 -->
@@ -525,6 +525,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .tbl-ed-fmt.active{background:#D4AF37;color:#111;border-color:#FFE259;}
 .tbl-ed-color{width:22px;height:22px;border:none;padding:0;cursor:pointer;background:transparent;}
 .tbl-ed-size{width:34px;height:22px;background:#222;color:#fff;border:1px solid #D4AF37;border-radius:4px;font-size:11px;text-align:center;padding:0;}
+/* v1.3.4: pilih & gabung sel */
+.tbl-ed-tag{display:flex;align-items:center;justify-content:space-between;gap:4px;}
+.tbl-ed-pick{width:24px;height:20px;border-radius:5px;border:1px solid rgba(255,255,255,.3);background:#222;color:#D4AF37;font-size:12px;line-height:1;padding:0;cursor:pointer;flex-shrink:0;}
+.tbl-ed-cell.sel{background:rgba(59,130,246,.22);border-color:#60A5FA;box-shadow:0 0 0 2px #60A5FA inset;}
+.tbl-ed-cell.sel .tbl-ed-pick{background:#60A5FA;color:#0b0b0b;border-color:#93C5FD;}
+.tbl-ed-cell.merged{border-style:dashed;}
+.tbl-ed-colh,.tbl-ed-rowh{cursor:pointer;}
 </style>
 </head>
 <body>
@@ -634,8 +641,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
             <button class="btn-sub-tool" onclick="addTableCol()">➕ Kolom Kanan</button>
             <button class="btn-sub-tool" style="color:#ff6b6b;" onclick="removeTableRow()">➖ Hapus Baris</button>
             <button class="btn-sub-tool" style="color:#ff6b6b;" onclick="removeTableCol()">➖ Hapus Kolom</button>
+            <button class="btn-sub-tool" style="color:#D4AF37;" onclick="tblMergeSelected()">🔗 Gabung Sel</button>
+            <button class="btn-sub-tool" style="color:#D4AF37;" onclick="tblUnmergeSelected()">✂️ Pisah Sel</button>
+            <button class="btn-sub-tool" onclick="tblSelClear()">☐ Batal Pilih</button>
             <span id="tableEditorInfo" style="font-size:10px; color:#9CA3AF; font-weight:700; margin-left:auto;"></span>
         </div>
+        <div style="font-size:10px; color:#9CA3AF; line-height:1.4; margin-bottom:8px; flex-shrink:0;">ℹ️ Gabung: tekan <b>☑</b> di kotak pertama, lalu <b>☑</b> di kotak terakhir (atau ketuk judul Baris/Kolom), kemudian <b>Gabung Sel</b>. Ukuran kotak otomatis menyesuaikan isi.</div>
         <div id="tableEditorScroll" style="width:100%; flex:1 1 auto; min-height:0; overflow:auto; touch-action: pan-x pan-y; padding-bottom: 20px;">
             <div id="tableEditorGrid" style="display:grid; gap:4px; width:max-content; min-width:100%;"></div>
         </div>
@@ -1362,7 +1373,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.3.3';
+    return 'v1.3.4';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -1672,7 +1683,7 @@ requestAnimationFrame(()=>{renderPending=false;renderAll();});
 function invalidateAllRenderCaches() {
     if (typeof slides === 'undefined' || !slides) return;
     slides.forEach(s => {
-        if (s.elements) s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; el._calculatedHeight = null; el._renderedW = null; });
+        if (s.elements) s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; el._calculatedHeight = null; el._renderedW = null; if (el._tbl) el._tbl.layout = null; });
     });
 }
 function invalidateCachesForSrc(src) {
@@ -2615,7 +2626,7 @@ function getElHash(el) {
         } else if(el.type === 'fade') {
             str += '_' + el.fadeDir + '_' + el.fadeDepth;
         } else if(el.type === 'table') {
-            str += '_' + el.rows + '_' + el.cols + '_' + JSON.stringify(el.colWidths) + '_' + JSON.stringify(el.rowHeights) + '_' + JSON.stringify(el.cells) + '_' + el.borderWidth + '_' + el.borderColor;
+            str += '_' + el.rows + '_' + el.cols + '_' + JSON.stringify(el.colWidths) + '_' + JSON.stringify(el.rowHeights) + '_' + tblCellsSig(el) + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.tScale;
         }
         if(el.type==='table'||el.type==='shape') str += '_'+el.tBold+'_'+el.tItalic+'_'+el.tAlign+'_'+el.tFont+'_'+el.tPad+'_'+el.fontSize+'_'+el.colorOverlay;
         str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.transparency||{});
@@ -3907,16 +3918,179 @@ function drawBoxTextLines(c, lines, align, x0, x1, y0, lineH) {
     });
 }
 
+/* ========== v1.3.4: TABEL AUTO-FIT (kotak membungkus padat sesuai isi) + GABUNG SEL ==========
+   - Lebar tiap kolom = teks terpanjang di kolom itu + padding kiri/kanan.
+   - Tinggi tiap baris = teks tertinggi di baris itu + padding atas/bawah.
+   - Sel gabungan (rs/cs pada sel induk) tidak digambar garis penghalangnya & teksnya memakai seluruh area.
+   - Hasil hitung disimpan di cache tersembunyi (_tbl, non-enumerable) sehingga tidak ikut tersimpan/ter-copy dan tidak berat saat digeser. */
+var _tblMeasureCtx = null;
+function tblGetMeasureCtx() {
+    if (!_tblMeasureCtx) {
+        const cv = document.createElement('canvas');
+        cv.width = 1; cv.height = 1;
+        _tblMeasureCtx = cv.getContext('2d');
+    }
+    return _tblMeasureCtx;
+}
+function tblState(el) {
+    if (!el._tbl) Object.defineProperty(el, '_tbl', { value: { layout: null, lastW: undefined, lastH: undefined }, writable: true, configurable: true, enumerable: false });
+    return el._tbl;
+}
+/* Tanda tangan ringan isi sel (foto latar diringkas supaya hash tidak memproses data base64 yang besar tiap frame) */
+function tblCellsSig(el) {
+    if (!el.cells) return '';
+    const out = [];
+    for (let r = 0; r < el.cells.length; r++) {
+        const row = el.cells[r], rr = [];
+        for (let c = 0; c < (row ? row.length : 0); c++) {
+            const k = row[c];
+            if (!k) { rr.push('~'); continue; }
+            const bi = k.bgImgSrc;
+            const biSig = bi ? (bi.length + ':' + bi.slice(-24) + bi.slice(bi.length >> 1, (bi.length >> 1) + 16)) : '';
+            rr.push([k.text, k.color, k.bgColor, k.fontSize, k.fontWeight, k.bold, k.italic, k.rs, k.cs, biSig].join('\u0001'));
+        }
+        out.push(rr.join('\u0002'));
+    }
+    return out.join('\u0003');
+}
+function tblLayoutKey(el) {
+    const p = [el.rows, el.cols, el.tFont, el.tPad, el.tBold ? 1 : 0, el.tItalic ? 1 : 0, el.tAlign, (document.fonts && document.fonts.status) || '', mainCanvas.width];
+    for (let r = 0; r < el.rows; r++) {
+        const row = el.cells[r];
+        for (let c = 0; c < el.cols; c++) {
+            const k = row && row[c];
+            if (!k) { p.push('~'); continue; }
+            p.push(k.text, k.fontSize, k.bold, k.italic, k.rs, k.cs);
+        }
+    }
+    return p.join('\u0001');
+}
+/* Peta kepemilikan sel: setiap sel menunjuk ke sel induknya ({r,c,rs,cs}). Sel biasa menunjuk dirinya sendiri. */
+function tblOwnerMap(el) {
+    const R = el.rows, C = el.cols, own = [];
+    for (let r = 0; r < R; r++) own.push(new Array(C).fill(null));
+    for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C; c++) {
+            if (own[r][c]) continue;
+            const cell = el.cells[r] && el.cells[r][c];
+            let rs = (cell && cell.rs > 1) ? Math.floor(cell.rs) : 1;
+            let cs = (cell && cell.cs > 1) ? Math.floor(cell.cs) : 1;
+            rs = Math.min(rs, R - r); cs = Math.min(cs, C - c);
+            let free = true;
+            for (let i = 0; i < rs && free; i++) for (let j = 0; j < cs; j++) { if (own[r + i][c + j]) { free = false; break; } }
+            if (!free) { rs = 1; cs = 1; }
+            const o = { r: r, c: c, rs: rs, cs: cs };
+            for (let i = 0; i < rs; i++) for (let j = 0; j < cs; j++) own[r + i][c + j] = o;
+        }
+    }
+    return own;
+}
+/* Rapikan rs/cs agar tidak melewati batas tabel (dipanggil setelah baris/kolom dihapus) */
+function tblClampSpans(el) {
+    for (let r = 0; r < el.rows; r++) {
+        for (let c = 0; c < el.cols; c++) {
+            const cell = el.cells[r] && el.cells[r][c];
+            if (!cell) continue;
+            if (cell.rs > 1) { cell.rs = Math.min(Math.floor(cell.rs), el.rows - r); if (cell.rs <= 1) delete cell.rs; } else if (cell.rs !== undefined) delete cell.rs;
+            if (cell.cs > 1) { cell.cs = Math.min(Math.floor(cell.cs), el.cols - c); if (cell.cs <= 1) delete cell.cs; } else if (cell.cs !== undefined) delete cell.cs;
+        }
+    }
+}
+function tblComputeLayout(el) {
+    const st = tblState(el);
+    const key = tblLayoutKey(el);
+    if (st.layout && st.layout.key === key) return st.layout;
+
+    const R = el.rows, C = el.cols;
+    const own = tblOwnerMap(el);
+    const mctx = tblGetMeasureCtx();
+    // Padding sama seperti sebelumnya: kiri-kanan bawaan 32px, atas-bawah 70% dari nilai jarak
+    const padX = el.tPad !== undefined ? el.tPad : TABLE_DEFAULT_PAD_X;
+    const padY = Math.round((el.tPad !== undefined ? el.tPad : 20) * 0.7);
+    const tAlign = el.tAlign || 'center';
+    const maxTextW = Math.max(160, Math.round((mainCanvas.width || 1080) * 0.8) - padX * 2);
+
+    const colW = new Array(C).fill(padX * 2 + 24);
+    const rowH = new Array(R).fill(Math.ceil(24 * 1.3 + padY * 2));
+    const infos = [];
+    for (let r = 0; r < R; r++) infos.push(new Array(C).fill(null));
+    const spans = [];
+
+    for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C; c++) {
+            const o = own[r][c];
+            if (o.r !== r || o.c !== c) continue;
+            const cell = (el.cells[r] && el.cells[r][c]) || {};
+            const fontSize = el.tFont || cell.fontSize || 24;
+            const bold = cell.bold !== undefined ? !!cell.bold : !!el.tBold;
+            const italic = cell.italic !== undefined ? !!cell.italic : !!el.tItalic;
+            const lineH = fontSize * 1.3;
+            const fStyle = italic ? 'italic' : 'normal', fWeight = bold ? 'bold' : 'normal';
+            const font = `${fStyle} ${fWeight} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+            let lines = [], lw = 0;
+            if (cell.text) {
+                const pseudoEl = { fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: fWeight, fontStyle: fStyle };
+                lines = getWrappedLines(mctx, cell.text, maxTextW, pseudoEl);
+                mctx.font = font;
+                lines = breakLongBoxWords(mctx, lines, maxTextW);
+                for (let i = 0; i < lines.length; i++) {
+                    const w = mctx.measureText(lines[i].words.join(' ')).width;
+                    if (w > lw) lw = w;
+                }
+            }
+            const info = {
+                r: r, c: c, rs: o.rs, cs: o.cs, lines: lines, fontSize: fontSize, lineH: lineH, font: font,
+                wNeed: Math.ceil(lw + padX * 2),
+                hNeed: Math.ceil(Math.max(1, lines.length) * lineH + padY * 2)
+            };
+            infos[r][c] = info;
+            if (o.cs === 1) colW[c] = Math.max(colW[c], info.wNeed);
+            if (o.rs === 1) rowH[r] = Math.max(rowH[r], info.hNeed);
+            if (o.cs > 1 || o.rs > 1) spans.push(info);
+        }
+    }
+    // Sel gabungan: bila kolom/baris yang dilewati belum cukup, kekurangannya dibagi rata
+    spans.filter(i => i.cs > 1).sort((a, b) => a.cs - b.cs).forEach(i => {
+        let cur = 0;
+        for (let k = 0; k < i.cs; k++) cur += colW[i.c + k];
+        if (cur < i.wNeed) { const add = (i.wNeed - cur) / i.cs; for (let k = 0; k < i.cs; k++) colW[i.c + k] += add; }
+    });
+    spans.filter(i => i.rs > 1).sort((a, b) => a.rs - b.rs).forEach(i => {
+        let cur = 0;
+        for (let k = 0; k < i.rs; k++) cur += rowH[i.r + k];
+        if (cur < i.hNeed) { const add = (i.hNeed - cur) / i.rs; for (let k = 0; k < i.rs; k++) rowH[i.r + k] += add; }
+    });
+    for (let c = 0; c < C; c++) colW[c] = Math.ceil(colW[c]);
+    for (let r = 0; r < R; r++) rowH[r] = Math.ceil(rowH[r]);
+    const xs = [0], ys = [0];
+    for (let c = 0; c < C; c++) xs.push(xs[c] + colW[c]);
+    for (let r = 0; r < R; r++) ys.push(ys[r] + rowH[r]);
+
+    st.layout = { key: key, colW: colW, rowH: rowH, xs: xs, ys: ys, W: xs[C], H: ys[R], own: own, infos: infos, padX: padX, padY: padY, tAlign: tAlign };
+    return st.layout;
+}
+
 function renderTableElement(targetCtx, el) {
+    const L = tblComputeLayout(el);
+    const st = tblState(el);
+
+    // Ukuran akhir = ukuran alami (dari isi) x skala. Jika ukuran diubah pengguna (handle / slider), nilainya dibaca sebagai skala baru.
+    let S = (el.tScale > 0) ? el.tScale : 1;
+    if (st.lastW !== undefined && el.width > 0 && Math.abs(el.width - st.lastW) >= 1) S = el.width / L.W;
+    else if (st.lastH !== undefined && el.height > 0 && Math.abs(el.height - st.lastH) >= 1) S = el.height / L.H;
+    S = Math.max(0.1, Math.min(12, S));
+    el.tScale = S;
+    const W = Math.max(1, Math.round(L.W * S));
+    const H = Math.max(1, Math.round(L.H * S));
+    el.width = W; el.height = H;
+    st.lastW = W; st.lastH = H;
+    el._renderedW = W;
+    el._renderedH = H;
+
     targetCtx.save();
     targetCtx.translate(el.x, el.y);
     if (el.rotation) targetCtx.rotate((el.rotation * Math.PI) / 180);
     targetCtx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
-
-    const W = el.width || 600;
-    const H = el.height || 400;
-    el._renderedW = W;
-    el._renderedH = H;
 
     const hash = getElHash(el);
     const rScale = window.currentRenderScale || 1;
@@ -3930,67 +4104,71 @@ function renderTableElement(targetCtx, el) {
     off.width = W * rScale;
     off.height = H * rScale;
     const octx = off.getContext('2d');
-    octx.scale(rScale, rScale);
-    
-    let currentY = 0;
-    for (let r = 0; r < el.rows; r++) {
-        let currentX = 0;
-        const rowH = (el.rowHeights[r] / 100) * H;
-        for (let c = 0; c < el.cols; c++) {
-            const colW = (el.colWidths[c] / 100) * W;
+    octx.scale(rScale * (W / L.W), rScale * (H / L.H));
+
+    const R = el.rows, C = el.cols;
+    for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C; c++) {
+            const o = L.own[r][c];
+            if (o.r !== r || o.c !== c) continue;   // sel yang tergabung ke sel lain tidak digambar sendiri
+            const x = L.xs[c], y = L.ys[r];
+            const w = L.xs[c + o.cs] - x, h = L.ys[r + o.rs] - y;
             const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', bgColor:'transparent', color:'#fff', bgImgSrc:null, fontSize:24, fontWeight:'bold'};
-            
+
             if (cell.bgColor && cell.bgColor !== 'transparent') {
                 octx.fillStyle = cell.bgColor;
-                octx.fillRect(currentX, currentY, colW, rowH);
+                octx.fillRect(x, y, w, h);
             }
             if (cell.bgImgSrc) {
                 const img = getImageFromCache(cell.bgImgSrc);
                 if (img && img.complete) {
-                    octx.drawImage(img, currentX, currentY, colW, rowH);
+                    octx.drawImage(img, x, y, w, h);
                 }
             }
-            
-            if (cell.text) {
-                const fontSize = el.tFont || cell.fontSize || Math.min(24, rowH * 0.4);
-                // Jarak kiri-kanan: bila belum diatur manual, pakai bawaan lebar (menyesuaikan lebar kolom agar kolom sempit tidak sesak)
-                const padX = el.tPad !== undefined ? el.tPad : Math.round(Math.max(14, Math.min(TABLE_DEFAULT_PAD_X, colW * 0.14)));
-                const padY = Math.round((el.tPad !== undefined ? el.tPad : 14) * 0.7);
-                const lineH = fontSize * 1.3;
-                const tAlign = el.tAlign || 'center';
-                const cellBold = cell.bold !== undefined ? !!cell.bold : !!el.tBold;
-                const cellItalic = cell.italic !== undefined ? !!cell.italic : !!el.tItalic;
-                const pseudoEl = {fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: cellBold ? 'bold' : 'normal', fontStyle: cellItalic ? 'italic' : 'normal'};
-                const lines = getWrappedLines(octx, cell.text, Math.max(10, colW - padX * 2), pseudoEl);
+
+            const info = L.infos[r][c];
+            if (cell.text && info && info.lines.length) {
                 octx.fillStyle = cell.color || '#fff';
-                octx.font = `${pseudoEl.fontStyle} ${pseudoEl.fontWeight} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                octx.font = info.font;
                 octx.textBaseline = 'middle';
-                const totalTextHeight = lines.length * lineH;
-                const startTextY = currentY + Math.max(padY, (rowH - totalTextHeight) / 2) + (fontSize / 2);
-                drawBoxTextLines(octx, lines, tAlign, currentX + padX, currentX + colW - padX, startTextY, lineH);
+                const totalTextHeight = info.lines.length * info.lineH;
+                const startTextY = y + Math.max(L.padY, (h - totalTextHeight) / 2) + (info.fontSize / 2);
+                drawBoxTextLines(octx, info.lines, L.tAlign, x + L.padX, x + w - L.padX, startTextY, info.lineH);
             }
-            currentX += colW;
         }
-        currentY += rowH;
     }
 
+    const bw = el.borderWidth || 2;
     octx.strokeStyle = el.borderColor || '#D4AF37';
-    octx.lineWidth = el.borderWidth || 2;
-    
-    octx.strokeRect(0, 0, W, H);
-    
+    octx.fillStyle = el.borderColor || '#D4AF37';
+    octx.lineWidth = bw;
+    octx.lineCap = 'butt';
+
+    octx.strokeRect(0, 0, L.W, L.H);
+
+    // Garis dalam digambar per ruas; ruas di dalam sel gabungan dilewati (tanpa garis penghalang)
     octx.beginPath();
-    let lx = 0;
-    for (let c = 0; c < el.cols - 1; c++) {
-        lx += (el.colWidths[c] / 100) * W;
-        octx.moveTo(lx, 0); octx.lineTo(lx, H);
+    for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C - 1; c++) {
+            if (L.own[r][c] !== L.own[r][c + 1]) { octx.moveTo(L.xs[c + 1], L.ys[r]); octx.lineTo(L.xs[c + 1], L.ys[r + 1]); }
+        }
     }
-    let ly = 0;
-    for (let r = 0; r < el.rows - 1; r++) {
-        ly += (el.rowHeights[r] / 100) * H;
-        octx.moveTo(0, ly); octx.lineTo(W, ly);
+    for (let r = 0; r < R - 1; r++) {
+        for (let c = 0; c < C; c++) {
+            if (L.own[r][c] !== L.own[r + 1][c]) { octx.moveTo(L.xs[c], L.ys[r + 1]); octx.lineTo(L.xs[c + 1], L.ys[r + 1]); }
+        }
     }
     octx.stroke();
+    // Tambal sudut pertemuan garis tegak & datar agar sambungan tidak bergerigi
+    for (let i = 1; i < R; i++) {
+        for (let j = 1; j < C; j++) {
+            const n = L.own[i - 1][j - 1] !== L.own[i - 1][j];
+            const s = L.own[i][j - 1] !== L.own[i][j];
+            const wv = L.own[i - 1][j - 1] !== L.own[i][j - 1];
+            const e = L.own[i - 1][j] !== L.own[i][j];
+            if ((n || s) && (wv || e)) octx.fillRect(L.xs[j] - bw / 2, L.ys[i] - bw / 2, bw, bw);
+        }
+    }
 
     if(rScale === 1) { el._cachedCanvas = off; el._cachedHash = hash; }
     targetCtx.drawImage(off, -W/2, -H/2, W, H);
@@ -5124,7 +5302,7 @@ function addNewTable() {
         width: 800, height: 400,
         rows: 3, cols: 3,
         colWidths: [33.33, 33.33, 33.33], rowHeights: [33.33, 33.33, 33.33],
-        borderColor: '#D4AF37', borderWidth: 3, opacity: 1,
+        borderColor: '#D4AF37', borderWidth: 3, opacity: 1, tScale: 1.5,
         cells: Array(3).fill(0).map((_,r) => Array(3).fill(0).map((_,c) => ({
             text: `Data`, color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24, fontWeight: 'bold'
         }))),
@@ -5142,28 +5320,172 @@ function tblEscAttr(v) {
 function tableCellIsBold(el, cell) { return (cell && cell.bold !== undefined) ? !!cell.bold : !!el.tBold; }
 function tableCellIsItalic(el, cell) { return (cell && cell.italic !== undefined) ? !!cell.italic : !!el.tItalic; }
 
+/* ===== v1.3.4: pilihan sel untuk Gabung / Pisah (mirip MS Excel) ===== */
+var tblSel = null, tblAnchor = null, tblFocus = null;
+
+function tblGetCell(el, r, c) {
+    if (!el.cells[r]) el.cells[r] = [];
+    if (!el.cells[r][c]) el.cells[r][c] = {text: '', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24};
+    return el.cells[r][c];
+}
+function tblExpandRect(own, rc) {
+    let ch = true;
+    while (ch) {
+        ch = false;
+        for (let r = rc.r1; r <= rc.r2; r++) {
+            for (let c = rc.c1; c <= rc.c2; c++) {
+                const o = own[r][c];
+                if (o.r < rc.r1) { rc.r1 = o.r; ch = true; }
+                if (o.c < rc.c1) { rc.c1 = o.c; ch = true; }
+                if (o.r + o.rs - 1 > rc.r2) { rc.r2 = o.r + o.rs - 1; ch = true; }
+                if (o.c + o.cs - 1 > rc.c2) { rc.c2 = o.c + o.cs - 1; ch = true; }
+            }
+        }
+    }
+    return rc;
+}
+function tblUpdateInfo(el) {
+    const info = document.getElementById('tableEditorInfo');
+    if (!info || !el) return;
+    let t = `${el.rows} baris × ${el.cols} kolom`;
+    if (tblSel) {
+        const rr = tblSel.r1 === tblSel.r2 ? `${tblSel.r1 + 1}` : `${tblSel.r1 + 1}-${tblSel.r2 + 1}`;
+        const cc = tblSel.c1 === tblSel.c2 ? `${tblSel.c1 + 1}` : `${tblSel.c1 + 1}-${tblSel.c2 + 1}`;
+        t += ` · Dipilih: Baris ${rr}, Kolom ${cc}`;
+    }
+    info.textContent = t;
+}
+function tblPaintSel() {
+    const grid = document.getElementById('tableEditorGrid'); if (!grid) return;
+    const cards = grid.querySelectorAll('.tbl-ed-cell');
+    for (let i = 0; i < cards.length; i++) {
+        const d = cards[i].dataset;
+        const r = +d.r, c = +d.c, rs = +d.rs || 1, cs = +d.cs || 1;
+        const inSel = !!tblSel && r >= tblSel.r1 && r + rs - 1 <= tblSel.r2 && c >= tblSel.c1 && c + cs - 1 <= tblSel.c2;
+        cards[i].classList.toggle('sel', inSel);
+    }
+    tblUpdateInfo(getActiveElement());
+}
+function tblSelClear() {
+    tblSel = null; tblAnchor = null;
+    tblPaintSel();
+}
+function tblPick(r, c) {
+    const el = getActiveElement(); if (!el || el.type !== 'table') return;
+    if (r >= el.rows || c >= el.cols) return;
+    const own = tblOwnerMap(el);
+    const o = own[r][c];
+    const area = {r1: o.r, c1: o.c, r2: o.r + o.rs - 1, c2: o.c + o.cs - 1};
+    const a = tblAnchor && own[tblAnchor.r] ? own[tblAnchor.r][tblAnchor.c] : null;
+    if (!tblSel || !a) {
+        tblAnchor = {r: o.r, c: o.c}; tblSel = area;
+    } else {
+        const single = tblSel.r1 === a.r && tblSel.c1 === a.c && tblSel.r2 === a.r + a.rs - 1 && tblSel.c2 === a.c + a.cs - 1;
+        if (a === o && single) { tblSel = null; tblAnchor = null; }
+        else if (a === o) { tblSel = area; }
+        else {
+            tblSel = tblExpandRect(own, {
+                r1: Math.min(a.r, o.r), c1: Math.min(a.c, o.c),
+                r2: Math.max(a.r + a.rs - 1, o.r + o.rs - 1), c2: Math.max(a.c + a.cs - 1, o.c + o.cs - 1)
+            });
+        }
+    }
+    tblPaintSel();
+}
+function tblPickRow(r) {
+    const el = getActiveElement(); if (!el || el.type !== 'table' || r >= el.rows) return;
+    const own = tblOwnerMap(el);
+    tblAnchor = {r: r, c: 0};
+    tblSel = tblExpandRect(own, {r1: r, r2: r, c1: 0, c2: el.cols - 1});
+    tblPaintSel();
+}
+function tblPickCol(c) {
+    const el = getActiveElement(); if (!el || el.type !== 'table' || c >= el.cols) return;
+    const own = tblOwnerMap(el);
+    tblAnchor = {r: 0, c: c};
+    tblSel = tblExpandRect(own, {r1: 0, r2: el.rows - 1, c1: c, c2: c});
+    tblPaintSel();
+}
+function tblMergeSelected() {
+    const el = getActiveElement(); if (!el || el.type !== 'table') return;
+    if (!tblSel) { showToast('Tekan ☑ di kotak pertama, lalu ☑ di kotak terakhir'); return; }
+    const s = tblSel;
+    if (s.r1 === s.r2 && s.c1 === s.c2) { showToast('Pilih minimal 2 kotak untuk digabung'); return; }
+    if (s.r2 >= el.rows || s.c2 >= el.cols) { tblSelClear(); return; }
+    const master = tblGetCell(el, s.r1, s.c1);
+    // Jika kotak utama kosong, teks pertama yang ditemukan dipindahkan ke kotak utama
+    if (!master.text) {
+        outer: for (let r = s.r1; r <= s.r2; r++) {
+            for (let c = s.c1; c <= s.c2; c++) {
+                const k = tblGetCell(el, r, c);
+                if ((r !== s.r1 || c !== s.c1) && k.text) { master.text = k.text; k.text = ''; break outer; }
+            }
+        }
+    }
+    for (let r = s.r1; r <= s.r2; r++) {
+        for (let c = s.c1; c <= s.c2; c++) {
+            if (r === s.r1 && c === s.c1) continue;
+            const k = tblGetCell(el, r, c);
+            delete k.rs; delete k.cs;
+        }
+    }
+    master.rs = s.r2 - s.r1 + 1;
+    master.cs = s.c2 - s.c1 + 1;
+    if (master.rs <= 1) delete master.rs;
+    if (master.cs <= 1) delete master.cs;
+    tblAnchor = {r: s.r1, c: s.c1};
+    renderAll(); pushHistoryState(); openTableEditor(true);
+    showToast('🔗 Kotak digabung');
+}
+function tblUnmergeSelected() {
+    const el = getActiveElement(); if (!el || el.type !== 'table') return;
+    let rc = null;
+    if (tblSel) rc = tblSel;
+    else if (tblFocus && tblFocus.r < el.rows && tblFocus.c < el.cols) {
+        const o = tblOwnerMap(el)[tblFocus.r][tblFocus.c];
+        rc = {r1: o.r, c1: o.c, r2: o.r + o.rs - 1, c2: o.c + o.cs - 1};
+    }
+    if (!rc) { showToast('Pilih kotak gabungan dulu (tekan ☑)'); return; }
+    let n = 0;
+    for (let r = rc.r1; r <= rc.r2 && r < el.rows; r++) {
+        for (let c = rc.c1; c <= rc.c2 && c < el.cols; c++) {
+            const k = el.cells[r] && el.cells[r][c];
+            if (k && (k.rs > 1 || k.cs > 1)) { delete k.rs; delete k.cs; n++; }
+        }
+    }
+    if (!n) { showToast('Tidak ada kotak gabungan pada pilihan'); return; }
+    renderAll(); pushHistoryState(); openTableEditor(true);
+    showToast('✂️ Gabungan dipisah');
+}
+
 function openTableEditor(keepScroll) {
     const el = getActiveElement(); if(!el || el.type !== 'table') return;
+    if (!keepScroll) { tblSel = null; tblAnchor = null; tblFocus = null; }
     const grid = document.getElementById('tableEditorGrid');
     const scroller = document.getElementById('tableEditorScroll');
     const prevTop = scroller ? scroller.scrollTop : 0;
     const prevLeft = scroller ? scroller.scrollLeft : 0;
     grid.style.gridTemplateColumns = `48px repeat(${el.cols}, minmax(172px, 1fr))`;
+    const own = tblOwnerMap(el);
 
     // Bangun seluruh HTML sekali jalan (jauh lebih ringan daripada innerHTML += di dalam perulangan)
     const h = [];
-    h.push('<div class="tbl-ed-corner">#</div>');
-    for(let c=0; c<el.cols; c++) h.push(`<div class="tbl-ed-colh" data-c="${c}">Kolom ${c+1}</div>`);
+    h.push('<div class="tbl-ed-corner" style="grid-row:1;grid-column:1;">#</div>');
+    for(let c=0; c<el.cols; c++) h.push(`<div class="tbl-ed-colh" data-c="${c}" style="grid-row:1;grid-column:${c+2};" onclick="tblPickCol(${c})">Kolom ${c+1}</div>`);
     for(let r=0; r<el.rows; r++) {
-        h.push(`<div class="tbl-ed-rowh" data-r="${r}"><small>BARIS</small>${r+1}</div>`);
+        h.push(`<div class="tbl-ed-rowh" data-r="${r}" style="grid-row:${r+2};grid-column:1;" onclick="tblPickRow(${r})"><small>BARIS</small>${r+1}</div>`);
         for(let c=0; c<el.cols; c++) {
+            const o = own[r][c];
+            if (o.r !== r || o.c !== c) continue;   // sel yang sudah tergabung tidak punya kartu sendiri
             const cell = el.cells[r] && el.cells[r][c] ? el.cells[r][c] : {text:'', color:'#ffffff', bgColor:'transparent', fontSize:24};
             const isB = tableCellIsBold(el, cell), isI = tableCellIsItalic(el, cell);
             const txtHex = (!cell.color || cell.color === 'transparent') ? '#ffffff' : parseColorToHex(cell.color);
             const bgHex = (!cell.bgColor || cell.bgColor === 'transparent') ? '#000000' : parseColorToHex(cell.bgColor);
+            const merged = (o.rs > 1 || o.cs > 1);
+            const tag = `Baris ${r+1}${o.rs > 1 ? '–' + (r + o.rs) : ''} · Kolom ${c+1}${o.cs > 1 ? '–' + (c + o.cs) : ''}${merged ? ' 🔗' : ''}`;
             h.push(`
-            <div class="tbl-ed-cell">
-                <div class="tbl-ed-tag">Baris ${r+1} · Kolom ${c+1}</div>
+            <div class="tbl-ed-cell${merged ? ' merged' : ''}" data-r="${r}" data-c="${c}" data-rs="${o.rs}" data-cs="${o.cs}" style="grid-row:${r+2} / span ${o.rs};grid-column:${c+2} / span ${o.cs};">
+                <div class="tbl-ed-tag"><span>${tag}</span><button type="button" class="tbl-ed-pick" title="Pilih kotak ini (untuk Gabung / Pisah)" onclick="tblPick(${r}, ${c})">☑</button></div>
                 <input type="text" class="tbl-ed-input" value="${tblEscAttr(cell.text)}" oninput="updateTableCellText(${r}, ${c}, this.value)" onfocus="tblEdFocus(${r}, ${c})" style="${isB ? 'font-weight:700;' : ''}${isI ? 'font-style:italic;' : ''}">
                 <div class="tbl-ed-ctrls">
                     <div class="tbl-ed-grp">
@@ -5195,8 +5517,7 @@ function openTableEditor(keepScroll) {
     }
     grid.innerHTML = h.join('');
 
-    const info = document.getElementById('tableEditorInfo');
-    if(info) info.textContent = `${el.rows} baris × ${el.cols} kolom`;
+    tblPaintSel();   // sekaligus memperbarui teks info (jumlah baris/kolom + pilihan)
 
     document.getElementById('tableEditorModal').classList.add('active');
     if(scroller) {   // modal harus tampil dulu agar posisi gulir bisa diatur
@@ -5207,6 +5528,7 @@ function openTableEditor(keepScroll) {
 
 /* Sorot nomor baris & kolom dari kotak yang sedang diketik, supaya tidak ragu saat menggulir */
 function tblEdFocus(r, c) {
+    tblFocus = {r: r, c: c};
     const grid = document.getElementById('tableEditorGrid'); if(!grid) return;
     const old = grid.querySelectorAll('.tbl-ed-colh.on, .tbl-ed-rowh.on');
     for(let i=0; i<old.length; i++) old[i].classList.remove('on');
@@ -5278,6 +5600,7 @@ function addTableRow() {
     el.rows++;
     el.rowHeights = Array(el.rows).fill(100 / el.rows);
     el.cells.push(Array(el.cols).fill(0).map(() => ({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24})));
+    tblSel = null; tblAnchor = null; tblFocus = null;
     renderAll(); pushHistoryState(); openTableEditor(true);
     const sc = document.getElementById('tableEditorScroll'); if(sc) sc.scrollTop = sc.scrollHeight;
 }
@@ -5287,6 +5610,7 @@ function addTableCol() {
     el.cols++;
     el.colWidths = Array(el.cols).fill(100 / el.cols);
     el.cells.forEach(row => row.push({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24}));
+    tblSel = null; tblAnchor = null; tblFocus = null;
     renderAll(); pushHistoryState(); openTableEditor(true);
     const sc = document.getElementById('tableEditorScroll'); if(sc) sc.scrollLeft = sc.scrollWidth;
 }
@@ -5296,6 +5620,7 @@ function removeTableRow() {
     el.rows--;
     el.rowHeights = Array(el.rows).fill(100 / el.rows);
     el.cells.pop();
+    tblClampSpans(el); tblSel = null; tblAnchor = null; tblFocus = null;
     renderAll(); pushHistoryState(); openTableEditor(true);
 }
 
@@ -5304,6 +5629,7 @@ function removeTableCol() {
     el.cols--;
     el.colWidths = Array(el.cols).fill(100 / el.cols);
     el.cells.forEach(row => row.pop());
+    tblClampSpans(el); tblSel = null; tblAnchor = null; tblFocus = null;
     renderAll(); pushHistoryState(); openTableEditor(true);
 }
 
