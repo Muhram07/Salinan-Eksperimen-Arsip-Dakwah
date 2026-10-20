@@ -1,15 +1,17 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.0
+Studio Poster Maker Pro - Update v1.3.1
+
+v1.3.1:
+1. GARIS TEPI FOTO/PNG: batas kanvas efek neon/blur garis tepi dilebarkan (pad ikut borderBlur) sehingga blur tidak terpotong kotak.
+2. VERSI: nomor versi di bar atas dibaca otomatis dari catatan teratas file, selalu sinkron.
+3. TANGKAP AJAIB: geser kanvas (tombol panah / seret saat kuas OFF), kuas lebih kecil (min 1), goresan halus (kurva + mask resolusi tinggi), hasil berukuran & posisi sama persis dengan foto asal, opsi Ambil Dalam / Ambil Luar.
+4. GARIS BANTU: warna default Tepi jadi hijau; label menjadi "Warna Garis Tepi".
 
 v1.3.0:
 1. GARIS TEPI FOTO/PNG: garis tidak lagi hilang saat kelengkungan (corner radius) dipakai; clip hanya untuk gambar, garis digambar di luar clip.
 2. CARI GAMBAR: grid feed Instagram 3 kolom, 30 poster per halaman, tidak saling menutupi, bisa digulir.
-3. TANGKAP AJAIB: keker lingkaran garis putus-putus selalu aktif di depan jari (di atas pegangan); tinta hijau keluar dari keker, bukan dari bawah jari.
-4. SITUS SUNNAH: tombol Simpan mengisi link otomatis (baca alamat bingkai / alamat terakhir / clipboard); tombol kembali dari Bookmark/Notebook memulihkan situs yang tadi dibaca tanpa muat ulang.
-
-v1.2.9:
-1. IMAGE SEARCH: ubah layout dari 3x10 padat menjadi Instagram feed style responsive, setiap poster terlihat full dan jelas tanpa tertutup.
-2. PEN TOOL (TANGKAP AJAIB): tambah lingkaran "keker" agak jauh dari jari, hanya lingkaran yang berfungsi capture (tidak garis), ukuran sesuai brush setting.
+3. TANGKAP AJAIB: keker lingkaran garis putus-putus selalu aktif di depan jari; tinta hijau keluar dari keker.
+4. SITUS SUNNAH: tombol Simpan mengisi link otomatis; tombol kembali dari Bookmark/Notebook memulihkan situs yang tadi dibaca.
 -->
 
 
@@ -900,6 +902,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="btn-nav" onclick="zoomMagicGrab(-0.25)" style="width:34px;justify-content:center;">➖</button>
         <button class="btn-nav" onclick="resetMagicGrabZoom()" style="width:34px;justify-content:center;">🎯</button>
     </div>
+    <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
+        <button class="btn-nav" id="grabModeBtn" onclick="toggleGrabInside()" style="justify-content:center;">🎯 Ambil Dalam</button>
+        <div style="display:grid; grid-template-columns:repeat(3,34px); gap:4px; margin-top:4px;">
+            <span></span>
+            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(0,1)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke atas">⬆️</button>
+            <span></span>
+            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(1,0)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke kiri">⬅️</button>
+            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(0,-1)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke bawah">⬇️</button>
+            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(-1,0)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke kanan">➡️</button>
+        </div>
+    </div>
     <div class="grab-reticle" id="magicGrabReticle"></div>
     <div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
         <span id="grabDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
@@ -910,7 +923,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="fmodal-footer">
 <div style="display:flex;align-items:center;gap:10px;">
 <span style="font-size:11px;color:#aaa;">Kuas:</span>
-<input type="range" class="ctrl-slider" id="magicBrushSize" min="10" max="90" value="35" style="width:90px;" oninput="updateBrushMonitorPreview(this.value, undefined, undefined, true)">
+<input type="range" class="ctrl-slider" id="magicBrushSize" min="1" max="90" value="35" style="width:90px;" oninput="updateBrushMonitorPreview(this.value, undefined, undefined, true)">
 <button class="btn-nav" onclick="clearMagicGrabMask()">Bersihkan</button>
 </div>
 <button class="btn-nav btn-download" onclick="applyMagicGrabExtraction()">✂️ Pisahkan Subjek</button>
@@ -1264,7 +1277,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = 'v1.2.8';
+const APP_VERSION = (function(){
+    /* v1.3.1: versi dibaca otomatis dari catatan teratas file ("Update vX.Y.Z") agar bar atas selalu sinkron */
+    try {
+        for(let n = document.firstChild; n; n = n.nextSibling) {
+            if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
+        }
+    } catch(e) {}
+    return 'v1.3.1';
+})();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -1401,7 +1422,7 @@ let isEditingText=false;
 let currentProjectId='proj_default';
 let currentProjectName='Projek 1';
 let currentProjectFonts=[];
-let bleedSettings={margin:5,color:'#D4AF37'};
+let bleedSettings={margin:5,color:'#00E676'};
 let activeGuideMode='none';
 let nudgeStep=10;
 let lockRelativeRatio=true;
@@ -1765,6 +1786,8 @@ async function syncAppVersion() {
 }
 
 function checkAppVersion() {
+    const _vd = document.getElementById('appVersionDisplay');
+    if(_vd) _vd.innerText = APP_VERSION;
     const storedVer = localStorage.getItem('APP_VERSION_STORED');
     if(storedVer && storedVer !== APP_VERSION) {
         syncAppVersion();
@@ -2178,7 +2201,7 @@ const html=`
 <input type="range" class="ctrl-slider" id="bleedSlider" min="2" max="15" value="${bleedSettings.margin}" oninput="updateBleedMargin(this.value)">
 <button class="btn-step" onclick="stepSliderVal('bleedSlider',1,updateBleedMargin)">+</button>
 </div>
-<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Warna Garis:</span>
+<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Warna Garis Tepi:</span>
 <button class="btn-sub-tool" style="width:40px;height:30px;background:${bleedSettings.color};border:1px solid #fff;border-radius:4px;padding:0;" onclick="openCustomColorPicker('${bleedSettings.color}', 'updateBleedColor')"></button>
 </div>
 `;
@@ -3231,7 +3254,7 @@ if (rScale === 1 && el._cachedHash === hash && el._cachedCanvas) {
     return;
 }
 
-const pad = (el.blur || 0) * 3 + (el.borderWidth || 0) * 2 + 20;
+const pad = (el.blur || 0) * 3 + (el.borderWidth || 0) * 2 + (el.borderBlur || 0) * 3 + 20;
 const cW = finalDrawW + pad * 2;
 const cH = finalDrawH + pad * 2;
 
@@ -7619,6 +7642,13 @@ let grabPaintMode=true;
 let lastGrabX = null;
 let lastGrabY = null;
 let magicGrabZoom = 1.0;
+let grabRes = 1;
+let grabPanX = 0, grabPanY = 0;
+let grabInside = true;
+let isPanningGrab = false;
+let grabPanStart = null;
+let grabMidX = null, grabMidY = null;
+let grabPanTimer = 0;
 
 function openMagicGrabModal(){
 const el=getActiveElement();
@@ -7629,10 +7659,17 @@ modal.classList.add('active');
 const canvas=document.getElementById('magicGrabCanvas');
 const maxW=Math.min(window.innerWidth*0.88,480);
 const aspect=(el.img.height||300)/(el.img.width||300);
-canvas.width=Math.max(1,Math.round(maxW));
-canvas.height=Math.max(1,Math.round(maxW*aspect));
-canvas.style.width=canvas.width+'px';
-canvas.style.height=canvas.height+'px';
+const cssW=Math.max(1,Math.round(maxW));
+const cssH=Math.max(1,Math.round(maxW*aspect));
+/* v1.3.1: resolusi kanvas & mask dinaikkan (maks 1600px) agar tepi hasil halus saat di-zoom dan diterapkan */
+grabRes=Math.max(1,Math.min(3,1600/Math.max(cssW,cssH)));
+canvas.width=Math.max(1,Math.round(cssW*grabRes));
+canvas.height=Math.max(1,Math.round(cssH*grabRes));
+canvas.style.width=cssW+'px';
+canvas.style.height=cssH+'px';
+grabInside=true;
+const _gm=document.getElementById('grabModeBtn');if(_gm)_gm.textContent='🎯 Ambil Dalam';
+lastGrabX=null;lastGrabY=null;grabMidX=null;grabMidY=null;isPanningGrab=false;
 
 grabMaskCanvas=document.createElement('canvas');
 grabMaskCanvas.width=canvas.width;
@@ -7654,7 +7691,8 @@ const _ret=document.getElementById('magicGrabReticle');if(_ret)_ret.style.displa
 if(grabMaskCanvas){grabMaskCanvas.width=0;grabMaskCanvas.height=0;grabMaskCanvas=null;}
 const canvas=document.getElementById('magicGrabCanvas');
 if(canvas){canvas.width=0;canvas.height=0;canvas.style.width='';canvas.style.height='';}
-lastGrabX=null;lastGrabY=null;
+lastGrabX=null;lastGrabY=null;grabMidX=null;grabMidY=null;
+stopGrabPan();
 }
 
 function clearMagicGrabMask(){
@@ -7670,13 +7708,53 @@ function zoomMagicGrab(delta) {
 
 function resetMagicGrabZoom() {
     magicGrabZoom = 1.0;
+    grabPanX = 0; grabPanY = 0;
     updateMagicGrabTransform();
 }
 
-function updateMagicGrabTransform() {
+function clampGrabPan() {
+    const body = document.getElementById('magicGrabBody');
+    const canvas = document.getElementById('magicGrabCanvas');
+    if(!body || !canvas) return;
+    const bw = body.clientWidth, bh = body.clientHeight;
+    const cw = (parseFloat(canvas.style.width) || 0) * magicGrabZoom;
+    const ch = (parseFloat(canvas.style.height) || 0) * magicGrabZoom;
+    const mx = Math.max(0, cw / 2 + bw / 2 - 50);
+    const my = Math.max(0, ch / 2 + bh / 2 - 50);
+    grabPanX = Math.max(-mx, Math.min(mx, grabPanX));
+    grabPanY = Math.max(-my, Math.min(my, grabPanY));
+}
+
+function updateMagicGrabTransform(immediate) {
     const wrapper = document.getElementById('magicGrabCanvasWrapper');
-    if(wrapper) wrapper.style.transform = `scale(${magicGrabZoom})`;
-    setTimeout(updateGrabReticle,140);
+    clampGrabPan();
+    if(wrapper) wrapper.style.transform = `translate(${grabPanX}px,${grabPanY}px) scale(${magicGrabZoom})`;
+    if(immediate) updateGrabReticle(); else setTimeout(updateGrabReticle,140);
+}
+
+/* v1.3.1: geser kanvas (kanan/kiri/atas/bawah) lewat tombol panah, atau seret kanvas saat kuas OFF */
+function startGrabPan(dx, dy) {
+    stopGrabPan();
+    const step = () => { grabPanX += dx * 10; grabPanY += dy * 10; updateMagicGrabTransform(true); };
+    step();
+    grabPanTimer = setInterval(step, 60);
+}
+function stopGrabPan() { if(grabPanTimer) { clearInterval(grabPanTimer); grabPanTimer = 0; } }
+
+function endGrabPanDrag() {
+    if(!isPanningGrab) return;
+    isPanningGrab = false;
+    grabPanStart = null;
+    const wrapper = document.getElementById('magicGrabCanvasWrapper');
+    if(wrapper) wrapper.style.transition = 'transform 0.1s';
+}
+
+function toggleGrabInside() {
+    grabInside = !grabInside;
+    const b = document.getElementById('grabModeBtn');
+    if(b) b.textContent = grabInside ? '🎯 Ambil Dalam' : '🎯 Ambil Luar';
+    showToast(grabInside ? '🎯 Ambil DALAM: bagian yang diwarnai hijau diambil' : '🎯 Ambil LUAR: bagian yang diwarnai (merah) dibuang, sisanya diambil');
+    renderMagicGrabDisplay();
 }
 
 /* v1.3.0: titik kuas (keker) berada di depan jari, bukan di bawah jari */
@@ -7689,7 +7767,7 @@ function getGrabBrushClient(){
     const cr=canvas.getBoundingClientRect();
     const size=parseInt((slider&&slider.value)||35);
     const sc=Math.min(cr.width/canvas.width,cr.height/canvas.height);
-    const r=Math.max(2,size*sc)/2;
+    const r=Math.max(1,size*grabRes*sc)/2;
     const dist=Math.max(95,r+45);
     return {x:sr.left+sr.width/2,y:sr.top+28-dist,r:r};
 }
@@ -7701,7 +7779,7 @@ function updateGrabReticle(){
     const b=getGrabBrushClient();
     if(!b){ret.style.display='none';return;}
     const br=body.getBoundingClientRect();
-    const d=Math.max(20,b.r*2);
+    const d=Math.max(8,b.r*2);
     ret.style.width=d+'px';
     ret.style.height=d+'px';
     ret.style.left=(b.x-br.left)+'px';
@@ -7717,7 +7795,7 @@ if(!mon||!canvas||!canvas.width||!canvas.height)return;
 const canvasRect=canvas.getBoundingClientRect();
 const scaleX=canvasRect.width/canvas.width;
 const scaleY=canvasRect.height/canvas.height;
-const diameter=Math.max(2,Number(size||35)*Math.min(scaleX,scaleY));
+const diameter=Math.max(2,Number(size||35)*grabRes*Math.min(scaleX,scaleY));
 mon.style.width=diameter+'px';
 mon.style.height=diameter+'px';
 mon.style.display='block';
@@ -7787,18 +7865,23 @@ window.addEventListener('pointermove',(e)=>{
         const point=bp?pointFromClient(brushClientX,brushClientY):null;
         updateGrabReticle();
         if(grabPaintMode&&inCanvas(point)) paintGrabAtCoords(point.x,point.y,brushClientX,brushClientY);
-        else { lastGrabX=null; lastGrabY=null; }
+        else endGrabStroke();
+    } else if(isPanningGrab&&grabPanStart){
+        grabPanX=grabPanStart.px+(e.clientX-grabPanStart.x);
+        grabPanY=grabPanStart.py+(e.clientY-grabPanStart.y);
+        updateMagicGrabTransform(true);
     } else if(isPaintingGrab&&grabPaintMode){
         const point=pointFromClient(e.clientX,e.clientY);
         if(inCanvas(point)) paintGrabAtCoords(point.x,point.y,e.clientX,e.clientY);
+        else endGrabStroke();
     }
 });
 
 window.addEventListener('pointerup',()=>{
     isDraggingStalk=false;
     isPaintingGrab=false;
-    lastGrabX=null;
-    lastGrabY=null;
+    endGrabStroke();
+    endGrabPanDrag();
     const mon=document.getElementById('brushMonitor');
     if(mon) mon.style.display='none';
 });
@@ -7806,12 +7889,25 @@ window.addEventListener('resize',()=>{setTimeout(updateGrabReticle,120);});
 window.addEventListener('pointercancel',()=>{
     isDraggingStalk=false;
     isPaintingGrab=false;
-    lastGrabX=null;
-    lastGrabY=null;
+    endGrabStroke();
+    endGrabPanDrag();
+});
+
+function startGrabPanDrag(e){
+    const wrapper=document.getElementById('magicGrabCanvasWrapper');
+    isPanningGrab=true;
+    grabPanStart={x:e.clientX,y:e.clientY,px:grabPanX,py:grabPanY};
+    if(wrapper) wrapper.style.transition='none';
+    try{e.target.setPointerCapture(e.pointerId);}catch(err){}
+    e.preventDefault();
+}
+body.addEventListener('pointerdown',(e)=>{
+    if(e.target===body||e.target===document.getElementById('magicGrabCanvasWrapper')) startGrabPanDrag(e);
 });
 
 canvas.addEventListener('pointerdown',(e)=>{
-    if(!grabPaintMode||!grabMaskCanvas)return;
+    if(!grabMaskCanvas)return;
+    if(!grabPaintMode){ startGrabPanDrag(e); return; }
     const point=pointFromClient(e.clientX,e.clientY);
     if(!inCanvas(point))return;
     isPaintingGrab=true;
@@ -7821,9 +7917,32 @@ canvas.addEventListener('pointerdown',(e)=>{
 });
 }
 
+/* v1.3.1: goresan dihaluskan dengan kurva kuadratik (titik tengah) pada mask beresolusi tinggi */
+function endGrabStroke(){
+    if(grabMaskCanvas && lastGrabX!==null && grabMidX!==null){
+        const mctx=grabMaskCanvas.getContext('2d');
+        mctx.save();
+        mctx.lineCap='round'; mctx.lineJoin='round';
+        mctx.lineWidth=grabBrushCanvasPx();
+        mctx.strokeStyle='#00ff88';
+        mctx.beginPath();
+        mctx.moveTo(grabMidX,grabMidY);
+        mctx.lineTo(lastGrabX,lastGrabY);
+        mctx.stroke();
+        mctx.restore();
+        renderMagicGrabDisplay();
+    }
+    lastGrabX=null; lastGrabY=null; grabMidX=null; grabMidY=null;
+}
+
+function grabBrushCanvasPx(){
+    const sl=document.getElementById('magicBrushSize');
+    return Math.max(1,parseInt((sl&&sl.value)||35))*grabRes;
+}
+
 function paintGrabAtCoords(x, y, screenX, screenY){
 if(!grabMaskCanvas)return;
-const bSize=parseInt(document.getElementById('magicBrushSize').value||35);
+const bSize=grabBrushCanvasPx();
 const mctx=grabMaskCanvas.getContext('2d');
 mctx.save();
 mctx.lineCap = 'round';
@@ -7832,22 +7951,25 @@ mctx.lineWidth = bSize;
 mctx.strokeStyle = '#00ff88';
 
 if(lastGrabX !== null && lastGrabY !== null) {
+    const mx=(lastGrabX+x)/2, my=(lastGrabY+y)/2;
     mctx.beginPath();
-    mctx.moveTo(lastGrabX, lastGrabY);
-    mctx.lineTo(x, y);
+    if(grabMidX!==null) mctx.moveTo(grabMidX,grabMidY); else mctx.moveTo(lastGrabX,lastGrabY);
+    mctx.quadraticCurveTo(lastGrabX,lastGrabY,mx,my);
     mctx.stroke();
+    grabMidX=mx; grabMidY=my;
 } else {
     mctx.beginPath();
     mctx.arc(x,y,bSize/2,0,Math.PI*2);
     mctx.fillStyle='#00ff88';
     mctx.fill();
+    grabMidX=null; grabMidY=null;
 }
 mctx.restore();
 
 lastGrabX = x;
 lastGrabY = y;
 
-if(screenX!==undefined&&screenY!==undefined){const mon=document.getElementById('brushMonitor');const canvas=document.getElementById('magicGrabCanvas');const r=canvas.getBoundingClientRect();const d=Math.max(2,bSize*Math.min(r.width/canvas.width,r.height/canvas.height));mon.style.width=d+'px';mon.style.height=d+'px';mon.style.left=screenX+'px';mon.style.top=screenY+'px';mon.style.display='block';clearTimeout(mon._timer);mon._timer=setTimeout(()=>{mon.style.display='none';},300);}else updateBrushMonitorPreview(bSize,x,y);
+if(screenX!==undefined&&screenY!==undefined){const mon=document.getElementById('brushMonitor');const canvas=document.getElementById('magicGrabCanvas');const r=canvas.getBoundingClientRect();const d=Math.max(2,bSize*Math.min(r.width/canvas.width,r.height/canvas.height));mon.style.width=d+'px';mon.style.height=d+'px';mon.style.left=screenX+'px';mon.style.top=screenY+'px';mon.style.display='block';clearTimeout(mon._timer);mon._timer=setTimeout(()=>{mon.style.display='none';},300);}
 renderMagicGrabDisplay();
 }
 
@@ -7860,6 +7982,7 @@ ctxG.clearRect(0,0,canvas.width,canvas.height);
 ctxG.drawImage(el.img,0,0,canvas.width,canvas.height);
 ctxG.save();
 ctxG.globalAlpha=0.45;
+try{ctxG.filter=grabInside?'none':'hue-rotate(210deg)';}catch(e){}
 ctxG.drawImage(grabMaskCanvas,0,0);
 ctxG.restore();
 }
@@ -7867,6 +7990,15 @@ ctxG.restore();
 function applyMagicGrabExtraction(){
 const el=getActiveElement();
 if(!el||el.type!=='image'||!grabMaskCanvas)return;
+
+/* cek ada area yang diwarnai */
+let painted=false;
+try{
+    const md=grabMaskCanvas.getContext('2d').getImageData(0,0,grabMaskCanvas.width,grabMaskCanvas.height).data;
+    for(let i=3;i<md.length;i+=4){ if(md[i]>8){painted=true;break;} }
+}catch(e){painted=true;}
+if(!painted){ showToast('⚠️ Area tangkapan kosong!'); return; }
+
 showToast('✂️ Mengambil subjek potongan HD...');
 
 setTimeout(() => {
@@ -7874,44 +8006,44 @@ setTimeout(() => {
     const origW = el.img.width;
     const origH = el.img.height;
 
+    /* v1.3.1: hasil memakai ukuran kanvas asli (tanpa trim) dan geometri elemen asal, sehingga posisinya tepat di tempat semula */
     const hdOff = document.createElement('canvas');
     hdOff.width = origW;
     hdOff.height = origH;
     const hdCtx = hdOff.getContext('2d');
-
+    hdCtx.imageSmoothingEnabled = true;
+    hdCtx.imageSmoothingQuality = 'high';
     hdCtx.drawImage(el.img, 0, 0, origW, origH);
-    hdCtx.globalCompositeOperation = 'destination-in';
-    
+    hdCtx.globalCompositeOperation = grabInside ? 'destination-in' : 'destination-out';
+
     const maskScaled = document.createElement('canvas');
     maskScaled.width = origW;
     maskScaled.height = origH;
-    maskScaled.getContext('2d').drawImage(grabMaskCanvas, 0, 0, origW, origH);
+    const msc = maskScaled.getContext('2d');
+    msc.imageSmoothingEnabled = true;
+    msc.imageSmoothingQuality = 'high';
+    msc.drawImage(grabMaskCanvas, 0, 0, origW, origH);
     hdCtx.drawImage(maskScaled, 0, 0, origW, origH);
     maskScaled.width = 0; maskScaled.height = 0;
 
-    const trimmed = trimCanvas(hdOff);
-    hdOff.width = 0; hdOff.height = 0;
-    if(!trimmed) {
-        showToast('⚠️ Area tangkapan kosong!');
-        return;
-    }
-
-    const trimmedUrl=trimmed.toDataURL('image/png');
-    const trimmedWidth=trimmed.width, trimmedHeight=trimmed.height;
-    trimmed.width=0; trimmed.height=0;
+    const outUrl=hdOff.toDataURL('image/png');
+    hdOff.width=0; hdOff.height=0;
     const s=getCurrentSlide();
     const newEl={
     id:'el_'+Date.now(),
     type:'image',
-    img:getImageFromCache(trimmedUrl),
-    src:trimmedUrl,
+    img:getImageFromCache(outUrl),
+    src:outUrl,
     x:el.x,
     y:el.y,
-    width:trimmedWidth,
-    height:trimmedHeight,
-    origWidth:trimmedWidth,
-    origHeight:trimmedHeight,
-    flipH:false,flipV:false,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',cropL:0,cropR:0,cropT:0,cropB:0,shadow:{color:'rgba(0,0,0,0.5)',blur:20,angle:45,distance:10},opacity:1,locked:false,groupId:null,
+    width:el.width,
+    height:el.height,
+    origWidth:el.origWidth||origW,
+    origHeight:el.origHeight||origH,
+    rotation:el.rotation||0,
+    flipH:!!el.flipH,flipV:!!el.flipV,cornerRadius:0,borderWidth:0,borderColor:'#D4AF37',colorOverlay:'none',blur:0,blendMode:'normal',
+    cropL:el.cropL||0,cropR:el.cropR||0,cropT:el.cropT||0,cropB:el.cropB||0,
+    shadow:{color:'rgba(0,0,0,0.5)',blur:20,angle:45,distance:10},opacity:1,locked:false,groupId:null,
     transparency: { type: 'uniform', alpha: 100, gradType: 'linear', angle: 90, scale: 100, offsetX: 0, offsetY: 0, invert: false }
     };
     s.elements.push(newEl);
@@ -7919,7 +8051,7 @@ setTimeout(() => {
     renderAll();
     pushHistoryState();
     closeMagicGrabModal();
-    showToast('✅ Subjek berhasil dipisahkan!');
+    showToast('✅ Subjek berhasil dipisahkan di posisi aslinya!');
 }, 50);
 }
 
