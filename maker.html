@@ -1,13 +1,11 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.5
+Studio Poster Maker Pro - Update v1.3.6
+
+v1.3.6:
+1. LAYER MASK: lapisan teks terdepan (hasil sapuan kuas hijau) kini digambar TANPA outer shadow, sehingga tidak ada lagi bayangan luar yang terpotong di tepi sapuan. Inner shadow teks depan tetap ada, dan teks lapisan belakang tetap lengkap dengan inner + outer shadow. Berlaku sama di kanvas utama, panel Layer Mask, thumbnail, preview, dan export.
 
 v1.3.5:
 1. TABEL: Lebar & Tinggi kini BISA DIATUR (menu Ukuran, handle, maupun slider). Teks otomatis dibungkus ulang mengikuti lebar yang diatur; tinggi yang lebih besar dari isi merenggangkan baris secara proporsional. Tanpa pengaturan, lebar otomatis pas isi tetapi dibatasi sekitar 90% lebar kanvas (tidak lagi kepanjangan). Menambah kolom/baris mengembalikan ukuran ke otomatis. Padding kiri-kanan-atas-bawah tetap terjaga.
-
-v1.3.4:
-1. TABEL AUTO-FIT: ukuran kotak kini otomatis membungkus padat sesuai isi. Lebar tiap kolom mengikuti teks terpanjang di kolom itu, tinggi tiap baris mengikuti teks tertinggi di baris itu, tetap memakai jarak (padding) kiri-kanan-atas-bawah agar teks tidak dempet. Mengubah ukuran tabel lewat handle / slider kini berarti skala (semua isi ikut membesar/mengecil proporsional).
-2. TABEL GABUNG SEL: di Editor Data Tabel tekan tombol ☑ pada kotak pertama lalu ☑ pada kotak terakhir (atau ketuk judul Baris/Kolom untuk memilih satu baris/kolom penuh), lalu tekan "Gabung Sel" (mirip MS Excel, garis penghalang hilang & teks memakai seluruh area). "Pisah Sel" mengembalikan seperti semula. Ikut tersimpan, ter-undo, dan ikut ke thumbnail, preview & export.
-3. PERFORMA: tanda tangan (hash) cache tabel tidak lagi memproses data foto latar base64 setiap frame; hasil hitung ukuran tabel di-cache sehingga geser/zoom tetap ringan.
 
 
 -->
@@ -1373,7 +1371,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.3.5';
+    return 'v1.3.6';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -2747,7 +2745,10 @@ function lmGetMaskCanvas(el){
 }
 
 function lmPatchSource(el){
-    return (el.blendMode && el.blendMode !== 'normal') ? Object.assign({}, el, {blendMode:'normal'}) : el;
+    /* v1.3.6: patch teks depan tanpa outer shadow (inner shadow tetap). Salinan dangkal, elemen asli tidak diubah */
+    const o = {shadow:null};
+    if(el.blendMode && el.blendMode !== 'normal') o.blendMode = 'normal';
+    return Object.assign({}, el, o);
 }
 
 function lmBuildPatch(c, el, mask, reuse){
