@@ -1,17 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.1
+Studio Poster Maker Pro - Update v1.3.2
+
+v1.3.2:
+1. TANGKAP AJAIB: tambah Undo/Redo per goresan (Bersihkan juga bisa di-undo), tombol +/- beserta angka ukuran kuas, tombol dipindah ke sebelah kiri "Warna Siluet".
+2. CROP JARI: tampilan & opsi disamakan dengan Tangkap Ajaib: geser kiri/kanan/atas/bawah, Buang Luar / Buang Dalam, Undo/Redo, zoom +/-, garis hijau halus (kurva) terutama di lengkungan, tombol +/- pada Ukuran Ujung.
+3. PERFORMA: kanvas pratinjau memakai cache offscreen + render per frame (rAF) agar tidak lag.
 
 v1.3.1:
 1. GARIS TEPI FOTO/PNG: batas kanvas efek neon/blur garis tepi dilebarkan (pad ikut borderBlur) sehingga blur tidak terpotong kotak.
 2. VERSI: nomor versi di bar atas dibaca otomatis dari catatan teratas file, selalu sinkron.
-3. TANGKAP AJAIB: geser kanvas (tombol panah / seret saat kuas OFF), kuas lebih kecil (min 1), goresan halus (kurva + mask resolusi tinggi), hasil berukuran & posisi sama persis dengan foto asal, opsi Ambil Dalam / Ambil Luar.
-4. GARIS BANTU: warna default Tepi jadi hijau; label menjadi "Warna Garis Tepi".
-
-v1.3.0:
-1. GARIS TEPI FOTO/PNG: garis tidak lagi hilang saat kelengkungan (corner radius) dipakai; clip hanya untuk gambar, garis digambar di luar clip.
-2. CARI GAMBAR: grid feed Instagram 3 kolom, 30 poster per halaman, tidak saling menutupi, bisa digulir.
-3. TANGKAP AJAIB: keker lingkaran garis putus-putus selalu aktif di depan jari; tinta hijau keluar dari keker.
-4. SITUS SUNNAH: tombol Simpan mengisi link otomatis; tombol kembali dari Bookmark/Notebook memulihkan situs yang tadi dibaca.
+3. TANGKAP AJAIB: geser kanvas, kuas lebih kecil (min 1), goresan halus, hasil sama persis dengan foto asal, opsi Ambil Dalam / Ambil Luar.
 -->
 
 
@@ -195,6 +193,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .handled-loupe-glass{width:86px;height:86px;border-radius:50%;border:3px solid #D4AF37;box-shadow:0 6px 25px rgba(0,0,0,.9);position:relative;background:#000;overflow:hidden;}
 .handled-loupe-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;border:1.5px solid #fff;border-radius:50%;pointer-events:none;}
 .handled-loupe-stalk{width:36px;height:65px;background:linear-gradient(180deg,#242424,#111);border:2px solid #D4AF37;border-radius:18px;margin:-8px auto 0;box-shadow:0 5px 15px rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;color:#D4AF37;font-size:16px;cursor:grab;pointer-events:auto;touch-action:none;}
+.fm-undo:disabled{opacity:.35;pointer-events:none;}
 .handled-loupe-stalk:active{cursor:grabbing;background:#D4AF37;color:#111;}
 .grab-reticle{position:absolute;display:none;border:2px dashed #FFE259;border-radius:50%;pointer-events:none;z-index:99;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(0,0,0,.65),inset 0 0 0 1px rgba(0,0,0,.45);box-sizing:border-box;}
 .grab-reticle::before,.grab-reticle::after{content:'';position:absolute;left:50%;top:50%;background:#FFE259;box-shadow:0 0 2px #000;transform:translate(-50%,-50%);}
@@ -866,25 +865,44 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="panel-close" onclick="closeFreeCropModal()">✕</button>
 </div>
 <div class="fmodal-body" id="freeCropBody" style="position:relative; overflow:hidden;">
-<canvas id="freeCropCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;touch-action:none;"></canvas>
-<div class="free-crop-tip" id="freeCropTip"></div>
-<div class="handled-loupe-stalk" id="freeCropStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
-    <span id="freeCropDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
-    <div style="width:20px; height:1px; background:#D4AF37;"></div>
-    <span id="freeCropPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer; font-size:14px;" onclick="toggleFreeCropPaintMode()" title="Gunting ON/OFF">✂️</span>
+    <div id="freeCropCanvasWrapper" style="display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:fit-content;max-width:none;line-height:0;transform-origin:center center;transition:transform 0.1s;">
+        <canvas id="freeCropCanvas" style="box-shadow:0 0 20px #000;border-radius:6px;touch-action:none;"></canvas>
+    </div>
+    <div style="position:absolute; top:10px; right:10px; display:flex; flex-direction:column; gap:5px; z-index:105;">
+        <button class="btn-nav" onclick="zoomFreeCrop(0.25)" style="width:34px;justify-content:center;">➕</button>
+        <button class="btn-nav" onclick="zoomFreeCrop(-0.25)" style="width:34px;justify-content:center;">➖</button>
+        <button class="btn-nav" onclick="resetFreeCropZoom()" style="width:34px;justify-content:center;">🎯</button>
+        <button class="btn-nav fm-undo" id="fcUndoBtn" onclick="undoFreeCrop()" style="width:34px;justify-content:center;" aria-label="Undo">↩️</button>
+        <button class="btn-nav fm-undo" id="fcRedoBtn" onclick="redoFreeCrop()" style="width:34px;justify-content:center;" aria-label="Redo">↪️</button>
+    </div>
+    <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
+        <button class="btn-nav" id="freeCropModeBtn" onclick="toggleFreeCropMode()" style="justify-content:center;">🎯 Buang Luar</button>
+        <div style="display:grid; grid-template-columns:repeat(3,34px); gap:4px; margin-top:4px;">
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startFreeCropPan(0,1)" onpointerup="stopFreeCropPan()" onpointerleave="stopFreeCropPan()" onpointercancel="stopFreeCropPan()" aria-label="Geser ke atas">⬆️</button>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startFreeCropPan(1,0)" onpointerup="stopFreeCropPan()" onpointerleave="stopFreeCropPan()" onpointercancel="stopFreeCropPan()" aria-label="Geser ke kiri">⬅️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startFreeCropPan(0,-1)" onpointerup="stopFreeCropPan()" onpointerleave="stopFreeCropPan()" onpointercancel="stopFreeCropPan()" aria-label="Geser ke bawah">⬇️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startFreeCropPan(-1,0)" onpointerup="stopFreeCropPan()" onpointerleave="stopFreeCropPan()" onpointercancel="stopFreeCropPan()" aria-label="Geser ke kanan">➡️</button>
 </div>
+    </div>
+    <div class="free-crop-tip" id="freeCropTip"></div>
+    <div class="handled-loupe-stalk" id="freeCropStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
+        <span id="freeCropDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
+        <div style="width:20px; height:1px; background:#D4AF37;"></div>
+        <span id="freeCropPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer; font-size:14px;" onclick="toggleFreeCropPaintMode()" title="Gunting ON/OFF">✂️</span>
+    </div>
 </div>
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px;background:#141414;border-top:1px solid rgba(255,255,255,.08);">
+<div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:#141414;border-top:1px solid rgba(255,255,255,.08);">
 <span style="font-size:11px;color:#aaa;white-space:nowrap;">⭕ Ukuran Ujung:</span>
-<input type="range" class="ctrl-slider" id="freeCropTipSize" min="12" max="120" value="40" oninput="updateFreeCropTipSize(this.value)" style="flex:1;">
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(adjustFreeCropTipDown)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➖</button>
+<input type="range" class="ctrl-slider" id="freeCropTipSize" min="12" max="120" value="40" oninput="updateFreeCropTipSize(this.value)" style="flex:1;min-width:40px;">
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(adjustFreeCropTipUp)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
 <span id="freeCropTipSizeVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">40px</span>
 </div>
 <div class="fmodal-footer">
 <button class="btn-nav" onclick="clearFreeCropPath()">Bersihkan</button>
-<div style="display:flex;gap:8px;">
-<button class="btn-nav btn-download" onclick="applyFreeCrop('keep_inside')">🎯 Ambil Dalam</button>
-<button class="btn-nav" style="border-color:#ff6b6b;color:#ff6b6b;" onclick="applyFreeCrop('cut_hole')">🗑️ Buang Dalam (Lubang)</button>
-</div>
+<button class="btn-nav btn-download" onclick="applyFreeCrop()">✂️ Terapkan Crop</button>
 </div>
 </div>
 
@@ -901,17 +919,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="btn-nav" onclick="zoomMagicGrab(0.25)" style="width:34px;justify-content:center;">➕</button>
         <button class="btn-nav" onclick="zoomMagicGrab(-0.25)" style="width:34px;justify-content:center;">➖</button>
         <button class="btn-nav" onclick="resetMagicGrabZoom()" style="width:34px;justify-content:center;">🎯</button>
+        <button class="btn-nav fm-undo" id="grabUndoBtn" onclick="undoMagicGrab()" style="width:34px;justify-content:center;" aria-label="Undo">↩️</button>
+        <button class="btn-nav fm-undo" id="grabRedoBtn" onclick="redoMagicGrab()" style="width:34px;justify-content:center;" aria-label="Redo">↪️</button>
     </div>
     <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
         <button class="btn-nav" id="grabModeBtn" onclick="toggleGrabInside()" style="justify-content:center;">🎯 Ambil Dalam</button>
         <div style="display:grid; grid-template-columns:repeat(3,34px); gap:4px; margin-top:4px;">
-            <span></span>
-            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(0,1)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke atas">⬆️</button>
-            <span></span>
-            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(1,0)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke kiri">⬅️</button>
-            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(0,-1)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke bawah">⬇️</button>
-            <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(-1,0)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke kanan">➡️</button>
-        </div>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(0,1)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke atas">⬆️</button>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(1,0)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke kiri">⬅️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(0,-1)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke bawah">⬇️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startGrabPan(-1,0)" onpointerup="stopGrabPan()" onpointerleave="stopGrabPan()" onpointercancel="stopGrabPan()" aria-label="Geser ke kanan">➡️</button>
+</div>
     </div>
     <div class="grab-reticle" id="magicGrabReticle"></div>
     <div class="handled-loupe-stalk" id="magicGrabStalk" style="position:absolute; bottom:20px; left:50%; z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
@@ -920,12 +940,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <span id="grabPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer; font-size:14px;" onclick="toggleGrabPaintMode()" title="Kuas ON/OFF">✏️</span>
     </div>
 </div>
-<div class="fmodal-footer">
-<div style="display:flex;align-items:center;gap:10px;">
-<span style="font-size:11px;color:#aaa;">Kuas:</span>
-<input type="range" class="ctrl-slider" id="magicBrushSize" min="1" max="90" value="35" style="width:90px;" oninput="updateBrushMonitorPreview(this.value, undefined, undefined, true)">
-<button class="btn-nav" onclick="clearMagicGrabMask()">Bersihkan</button>
+<div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:#141414;border-top:1px solid rgba(255,255,255,.08);">
+<span style="font-size:11px;color:#aaa;white-space:nowrap;">🖌️ Kuas:</span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(adjustGrabBrushDown)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➖</button>
+<input type="range" class="ctrl-slider" id="magicBrushSize" min="1" max="90" value="35" style="flex:1;min-width:40px;" oninput="onGrabBrushInput(this.value)">
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(adjustGrabBrushUp)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
+<span id="magicBrushSizeVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">35px</span>
 </div>
+<div class="fmodal-footer">
+<button class="btn-nav" onclick="clearMagicGrabMask()">Bersihkan</button>
 <button class="btn-nav btn-download" onclick="applyMagicGrabExtraction()">✂️ Pisahkan Subjek</button>
 </div>
 </div>
@@ -1284,7 +1307,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.3.1';
+    return 'v1.3.2';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -4885,6 +4908,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelCropImage()"><span class="icon">✂️</span><span>Crop Presisi</span></button>
 <button class="tool-btn" onclick="openFreeCropModal()"><span class="icon">✍️</span><span>Crop Jari</span></button>
 <button class="tool-btn" onclick="openPanelImageBlur()"><span class="icon">💧</span><span>Blur</span></button>
+<button class="tool-btn" onclick="openMagicGrabModal()"><span class="icon">✨</span><span>Tangkap Ajaib</span></button>
 <button class="tool-btn" onclick="openPanelPngColorOverlay()"><span class="icon">🎨</span><span>Warna Siluet</span></button>
 <button class="tool-btn" onclick="openMagicWandModal()"><span class="icon">🪄</span><span>Hapus BG</span></button>
 <button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon">🪞</span><span>Cermin</span></button>
@@ -4896,7 +4920,6 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon">👥</span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPerspectiveModal()"><span class="icon">📐</span><span>Perspektif 3D</span></button>
 <button class="tool-btn" onclick="openEnvelopeModal()"><span class="icon">🌊</span><span>Envelope</span></button>
-<button class="tool-btn" onclick="openMagicGrabModal()"><span class="icon">✨</span><span>Tangkap Ajaib</span></button>
 <button class="tool-btn" onclick="openPanelDepthFocus()"><span class="icon">📷</span><span>Fokus DSLR</span></button>
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon">🔂</span><span>Blend Mode</span></button>
 <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon">🔲</span><span>Garis Tepi</span></button>
@@ -6580,7 +6603,18 @@ let freeCropTipSize=40;
 let freeCropRaf=0;
 let freeCropStalkPtr=null;
 let freeCropCanvasPtr=null;
+let freeCropMode='keep_inside';
+let freeCropZoom=1.0;
+let freeCropPanX=0, freeCropPanY=0;
+let freeCropRes=1;
+let freeCropBase=null;
+let freeCropHist=[];
+let freeCropRedoStack=[];
+let freeCropGestureSnap=null;
+let freeCropPanDrag=null;
+let freeCropPanTimer=0;
 const FREE_CROP_TIP_GAP=14;
+const FREE_CROP_MAX_UNDO=80;
 
 function freeCropTipOffsetY(){return freeCropTipSize/2+FREE_CROP_TIP_GAP;}
 
@@ -6613,10 +6647,15 @@ function updateFreeCropTipSize(v){
 freeCropTipSize=Math.max(12,Math.min(120,parseInt(v)||40));
 const lbl=document.getElementById('freeCropTipSizeVal');
 if(lbl)lbl.innerText=freeCropTipSize+'px';
+const sl=document.getElementById('freeCropTipSize');
+if(sl&&parseInt(sl.value)!==freeCropTipSize)sl.value=freeCropTipSize;
 const stalk=document.getElementById('freeCropStalk');
 if(stalk&&stalk.offsetTop<freeCropTipOffsetY())stalk.style.top=freeCropTipOffsetY()+'px';
 updateFreeCropTip();
 }
+function adjustFreeCropTip(d){updateFreeCropTipSize(freeCropTipSize+d);}
+function adjustFreeCropTipDown(){adjustFreeCropTip(-1);}
+function adjustFreeCropTipUp(){adjustFreeCropTip(1);}
 
 function clientToFreeCropCanvas(clientX,clientY){
 const canvas=document.getElementById('freeCropCanvas');
@@ -6641,6 +6680,96 @@ if(freeCropRaf)return;
 freeCropRaf=requestAnimationFrame(()=>{freeCropRaf=0;renderFreeCropDisplay();});
 }
 
+/* ---- zoom & geser (sama seperti Tangkap Ajaib) ---- */
+function clampFreeCropPan(){
+const body=document.getElementById('freeCropBody');
+const canvas=document.getElementById('freeCropCanvas');
+if(!body||!canvas)return;
+const bw=body.clientWidth,bh=body.clientHeight;
+const cw=(parseFloat(canvas.style.width)||0)*freeCropZoom;
+const ch=(parseFloat(canvas.style.height)||0)*freeCropZoom;
+const mx=Math.max(0,cw/2+bw/2-50);
+const my=Math.max(0,ch/2+bh/2-50);
+freeCropPanX=Math.max(-mx,Math.min(mx,freeCropPanX));
+freeCropPanY=Math.max(-my,Math.min(my,freeCropPanY));
+}
+function updateFreeCropTransform(){
+const wrapper=document.getElementById('freeCropCanvasWrapper');
+clampFreeCropPan();
+if(wrapper)wrapper.style.transform='translate('+freeCropPanX+'px,'+freeCropPanY+'px) scale('+freeCropZoom+')';
+}
+function zoomFreeCrop(delta){
+freeCropZoom=Math.max(0.5,Math.min(4.0,freeCropZoom+delta));
+updateFreeCropTransform();
+scheduleFreeCropRender();
+}
+function resetFreeCropZoom(){
+freeCropZoom=1.0;freeCropPanX=0;freeCropPanY=0;
+updateFreeCropTransform();
+scheduleFreeCropRender();
+}
+function startFreeCropPan(dx,dy){
+stopFreeCropPan();
+const step=()=>{freeCropPanX+=dx*10;freeCropPanY+=dy*10;updateFreeCropTransform();};
+step();
+freeCropPanTimer=setInterval(step,60);
+}
+function stopFreeCropPan(){if(freeCropPanTimer){clearInterval(freeCropPanTimer);freeCropPanTimer=0;}}
+function startFreeCropPanDrag(e){
+const wrapper=document.getElementById('freeCropCanvasWrapper');
+if(freeCropPanDrag)return;
+freeCropPanDrag={id:e.pointerId,x:e.clientX,y:e.clientY,px:freeCropPanX,py:freeCropPanY};
+if(wrapper)wrapper.style.transition='none';
+try{e.target.setPointerCapture(e.pointerId);}catch(_){}
+e.preventDefault();
+}
+function endFreeCropPanDrag(){
+if(!freeCropPanDrag)return;
+freeCropPanDrag=null;
+const wrapper=document.getElementById('freeCropCanvasWrapper');
+if(wrapper)wrapper.style.transition='transform 0.1s';
+}
+
+/* ---- undo / redo (per gestur gambar) ---- */
+function updateFreeCropUndoUI(){
+const u=document.getElementById('fcUndoBtn'),r=document.getElementById('fcRedoBtn');
+if(u)u.disabled=freeCropHist.length===0;
+if(r)r.disabled=freeCropRedoStack.length===0;
+}
+function beginFreeCropGesture(){freeCropGestureSnap=freeCropPoints.slice();}
+function commitFreeCropGesture(){
+if(!freeCropGestureSnap)return;
+const snap=freeCropGestureSnap;freeCropGestureSnap=null;
+const changed=snap.length!==freeCropPoints.length||(snap.length>0&&snap[snap.length-1]!==freeCropPoints[freeCropPoints.length-1]);
+if(!changed)return;
+freeCropHist.push(snap);
+if(freeCropHist.length>FREE_CROP_MAX_UNDO)freeCropHist.shift();
+freeCropRedoStack.length=0;
+updateFreeCropUndoUI();
+}
+function undoFreeCrop(){
+if(freeCropStalkPtr||freeCropCanvasPtr!==null)return;
+if(!freeCropHist.length)return;
+freeCropRedoStack.push(freeCropPoints);
+freeCropPoints=freeCropHist.pop();
+updateFreeCropUndoUI();scheduleFreeCropRender();
+}
+function redoFreeCrop(){
+if(freeCropStalkPtr||freeCropCanvasPtr!==null)return;
+if(!freeCropRedoStack.length)return;
+freeCropHist.push(freeCropPoints);
+freeCropPoints=freeCropRedoStack.pop();
+updateFreeCropUndoUI();scheduleFreeCropRender();
+}
+
+function toggleFreeCropMode(){
+freeCropMode=freeCropMode==='keep_inside'?'cut_hole':'keep_inside';
+const b=document.getElementById('freeCropModeBtn');
+if(b)b.textContent=freeCropMode==='keep_inside'?'🎯 Buang Luar':'🗑️ Buang Dalam';
+showToast(freeCropMode==='keep_inside'?'🎯 BUANG LUAR: bagian di dalam garis hijau diambil':'🗑️ BUANG DALAM: bagian di dalam garis (merah) dilubangi');
+scheduleFreeCropRender();
+}
+
 function openFreeCropModal(){
 const el=getActiveElement();
 if(!el||el.type!=='image')return;
@@ -6655,21 +6784,44 @@ const ih=el.img.naturalHeight||el.img.height||300;
 const availW=Math.max(120,body.clientWidth*0.9);
 const availH=Math.max(120,body.clientHeight*0.85);
 const k=Math.min(availW/iw,availH/ih,1000/Math.max(iw,ih));
-canvas.width=Math.max(1,Math.round(iw*k));
-canvas.height=Math.max(1,Math.round(ih*k));
+const cssW=Math.max(1,Math.round(iw*k));
+const cssH=Math.max(1,Math.round(ih*k));
+/* resolusi kanvas dinaikkan (maks 1600px) agar garis & tepi halus saat di-zoom */
+freeCropRes=Math.max(1,Math.min(3,1600/Math.max(cssW,cssH)));
+canvas.width=Math.max(1,Math.round(cssW*freeCropRes));
+canvas.height=Math.max(1,Math.round(cssH*freeCropRes));
+canvas.style.width=cssW+'px';
+canvas.style.height=cssH+'px';
+
+/* cache offscreen foto (digambar sekali, dipakai ulang tiap frame) */
+if(freeCropBase){freeCropBase.width=0;freeCropBase.height=0;}
+freeCropBase=document.createElement('canvas');
+freeCropBase.width=canvas.width;
+freeCropBase.height=canvas.height;
+const bctx=freeCropBase.getContext('2d');
+bctx.imageSmoothingEnabled=true;
+bctx.imageSmoothingQuality='high';
+bctx.drawImage(el.img,0,0,canvas.width,canvas.height);
 
 freeCropPoints=[];
+freeCropHist=[];freeCropRedoStack=[];freeCropGestureSnap=null;
 isDrawingFreeCrop=false;
 freeCropStalkPtr=null;
 freeCropCanvasPtr=null;
+freeCropPanDrag=null;
 freeCropPaintMode=true;
+freeCropMode='keep_inside';
+const mb=document.getElementById('freeCropModeBtn');
+if(mb)mb.textContent='🎯 Buang Luar';
 const btn=document.getElementById('freeCropPaintToggle');
 if(btn){btn.innerText='✂️';btn.style.color='#00ff88';}
 const sizeSlider=document.getElementById('freeCropTipSize');
 if(sizeSlider)sizeSlider.value=freeCropTipSize;
 const sizeLbl=document.getElementById('freeCropTipSizeVal');
 if(sizeLbl)sizeLbl.innerText=freeCropTipSize+'px';
+updateFreeCropUndoUI();
 
+resetFreeCropZoom();
 placeFreeCropStalkDefault();
 updateFreeCropTip();
 renderFreeCropDisplay();
@@ -6678,14 +6830,28 @@ renderFreeCropDisplay();
 function closeFreeCropModal(){
 document.getElementById('freeCropModal').classList.remove('active');
 if(freeCropRaf){cancelAnimationFrame(freeCropRaf);freeCropRaf=0;}
+stopFreeCropPan();
+stopStepHold();
+endFreeCropPanDrag();
 freeCropStalkPtr=null;
 freeCropCanvasPtr=null;
+freeCropGestureSnap=null;
 isDrawingFreeCrop=false;
+freeCropHist=[];freeCropRedoStack=[];
+if(freeCropBase){freeCropBase.width=0;freeCropBase.height=0;freeCropBase=null;}
+const canvas=document.getElementById('freeCropCanvas');
+if(canvas){canvas.width=0;canvas.height=0;canvas.style.width='';canvas.style.height='';}
 updateFreeCropTip();
 }
 
 function clearFreeCropPath(){
+if(!freeCropPoints.length)return;
+if(freeCropStalkPtr||freeCropCanvasPtr!==null)return;
+freeCropHist.push(freeCropPoints);
+if(freeCropHist.length>FREE_CROP_MAX_UNDO)freeCropHist.shift();
+freeCropRedoStack.length=0;
 freeCropPoints=[];
+updateFreeCropUndoUI();
 renderFreeCropDisplay();
 }
 
@@ -6716,10 +6882,13 @@ if(dragHandle) {
         try{dragHandle.setPointerCapture(e.pointerId);}catch(_){}
         // Tangkai berposisi relatif terhadap kotak (bukan layar): pakai posisi tersimpan + selisih gerak jari
         freeCropStalkPtr={id:e.pointerId,x:e.clientX,y:e.clientY,left:stalk.offsetLeft,top:stalk.offsetTop};
-        if(freeCropPaintMode&&freeCropPoints.length===0){
-            const p0=getFreeCropTipCanvasPoint();
-            freeCropPoints.push({x:p0.x,y:p0.y});
-            scheduleFreeCropRender();
+        if(freeCropPaintMode){
+            beginFreeCropGesture();
+            if(freeCropPoints.length===0){
+                const p0=getFreeCropTipCanvasPoint();
+                freeCropPoints.push({x:p0.x,y:p0.y});
+                scheduleFreeCropRender();
+            }
         }
     });
 }
@@ -6740,26 +6909,41 @@ window.addEventListener('pointermove',(e)=>{
     } else if(isDrawingFreeCrop&&freeCropPaintMode&&e.pointerId===freeCropCanvasPtr){
         const pc=clientToFreeCropCanvas(e.clientX,e.clientY);
         addFreeCropPoint(pc.x,pc.y);
+    } else if(freeCropPanDrag&&e.pointerId===freeCropPanDrag.id){
+        freeCropPanX=freeCropPanDrag.px+(e.clientX-freeCropPanDrag.x);
+        freeCropPanY=freeCropPanDrag.py+(e.clientY-freeCropPanDrag.y);
+        updateFreeCropTransform();
     }
 });
 
 const endFreeCropPointer=(e)=>{
-    if(freeCropStalkPtr&&e.pointerId===freeCropStalkPtr.id)freeCropStalkPtr=null;
+    if(freeCropStalkPtr&&e.pointerId===freeCropStalkPtr.id){
+        freeCropStalkPtr=null;
+        commitFreeCropGesture();
+    }
     if(freeCropCanvasPtr!==null&&e.pointerId===freeCropCanvasPtr){
         freeCropCanvasPtr=null;
         isDrawingFreeCrop=false;
+        commitFreeCropGesture();
     }
+    if(freeCropPanDrag&&e.pointerId===freeCropPanDrag.id)endFreeCropPanDrag();
     if(document.getElementById('freeCropModal').classList.contains('active'))scheduleFreeCropRender();
 };
 window.addEventListener('pointerup',endFreeCropPointer);
 window.addEventListener('pointercancel',endFreeCropPointer);
 
+body.addEventListener('pointerdown',(e)=>{
+    if(e.target===body||e.target===document.getElementById('freeCropCanvasWrapper'))startFreeCropPanDrag(e);
+});
+
 canvas.addEventListener('pointerdown',(e)=>{
-    if(!freeCropPaintMode||freeCropCanvasPtr!==null)return;
+    if(!freeCropPaintMode){startFreeCropPanDrag(e);return;}
+    if(freeCropCanvasPtr!==null)return;
     e.preventDefault();
     freeCropCanvasPtr=e.pointerId;
     try{canvas.setPointerCapture(e.pointerId);}catch(_){}
     isDrawingFreeCrop=true;
+    beginFreeCropGesture();
     const p=clientToFreeCropCanvas(e.clientX,e.clientY);
     freeCropPoints=[{x:p.x,y:p.y}];
     scheduleFreeCropRender();
@@ -6768,37 +6952,73 @@ canvas.addEventListener('pointerdown',(e)=>{
 
 function addFreeCropPoint(x, y) {
     const last=freeCropPoints[freeCropPoints.length-1];
-    if(last&&Math.hypot(x-last.x,y-last.y)<1.2)return;
+    const minD=Math.max(0.5,1.2*freeCropRes/Math.max(0.5,freeCropZoom));
+    if(last&&Math.hypot(x-last.x,y-last.y)<minD)return;
     freeCropPoints.push({x, y});
     scheduleFreeCropRender();
+}
+
+/* jalur tertutup halus: kurva kuadratik lewat titik-tengah (tanpa sudut patah, terutama di lengkungan).
+   Dipakai sama persis untuk pratinjau dan hasil potong, sehingga garis hijau = batas potongan. */
+function traceFreeCropPath(c,pts,sx,sy){
+    const n=pts.length;
+    if(n<1)return;
+    if(n<3){
+        c.moveTo(pts[0].x*sx,pts[0].y*sy);
+        for(let i=1;i<n;i++)c.lineTo(pts[i].x*sx,pts[i].y*sy);
+        return;
+    }
+    c.moveTo((pts[n-1].x+pts[0].x)/2*sx,(pts[n-1].y+pts[0].y)/2*sy);
+    for(let i=0;i<n;i++){
+        const p=pts[i],q=pts[(i+1)%n];
+        c.quadraticCurveTo(p.x*sx,p.y*sy,(p.x+q.x)/2*sx,(p.y+q.y)/2*sy);
+    }
+    c.closePath();
 }
 
 function renderFreeCropDisplay(){
 const el=getActiveElement();
 const canvas=document.getElementById('freeCropCanvas');
-if(!canvas||!el||!el.img)return;
+if(!canvas||!canvas.width||!canvas.height)return;
 const ctxF=canvas.getContext('2d');
 ctxF.clearRect(0,0,canvas.width,canvas.height);
-ctxF.drawImage(el.img,0,0,canvas.width,canvas.height);
+if(freeCropBase&&freeCropBase.width)ctxF.drawImage(freeCropBase,0,0);
+else if(el&&el.img)ctxF.drawImage(el.img,0,0,canvas.width,canvas.height);
 
-if(freeCropPoints.length>1){
+const pts=freeCropPoints;
+if(pts.length>1){
 ctxF.save();
-ctxF.beginPath();
-ctxF.moveTo(freeCropPoints[0].x,freeCropPoints[0].y);
-for(let i=1;i<freeCropPoints.length;i++){
-ctxF.lineTo(freeCropPoints[i].x,freeCropPoints[i].y);
+if(pts.length>2){
+    if(freeCropMode==='keep_inside'){
+        ctxF.beginPath();
+        ctxF.rect(0,0,canvas.width,canvas.height);
+        traceFreeCropPath(ctxF,pts,1,1);
+        ctxF.fillStyle='rgba(0,0,0,0.55)';
+        ctxF.fill('evenodd');
+        ctxF.beginPath();
+        traceFreeCropPath(ctxF,pts,1,1);
+        ctxF.fillStyle='rgba(0,255,136,0.15)';
+        ctxF.fill();
+    }else{
+        ctxF.beginPath();
+        traceFreeCropPath(ctxF,pts,1,1);
+        ctxF.fillStyle='rgba(255,70,70,0.35)';
+        ctxF.fill();
+    }
 }
-ctxF.closePath();
+ctxF.beginPath();
+traceFreeCropPath(ctxF,pts,1,1);
+ctxF.lineJoin='round';
+ctxF.lineCap='round';
 ctxF.strokeStyle='#00ff88';
-ctxF.lineWidth=3;
+ctxF.lineWidth=Math.max(1,2.5*freeCropRes/freeCropZoom);
 ctxF.stroke();
-ctxF.fillStyle='rgba(0,255,136,0.2)';
-ctxF.fill();
 ctxF.restore();
 }
 }
 
 function applyFreeCrop(mode){
+mode=mode||freeCropMode;
 const el=getActiveElement();
 if(!el||el.type!=='image'||freeCropPoints.length<3){
 alert('Gambar garis pola melingkari bagian foto terlebih dahulu!');
@@ -6808,6 +7028,7 @@ showToast('⏳ Memotong gambar...');
 
 setTimeout(() => {
     const canvas=document.getElementById('freeCropCanvas');
+    if(!canvas||!canvas.width)return;
     // Potong pada resolusi asli gambar (bukan resolusi kanvas pratinjau) agar hasil tetap tajam
     const iw=el.img.naturalWidth||el.img.width||canvas.width;
     const ih=el.img.naturalHeight||el.img.height||canvas.height;
@@ -6822,9 +7043,7 @@ setTimeout(() => {
     octx.imageSmoothingQuality='high';
     const tracePath=(c)=>{
         c.beginPath();
-        c.moveTo(freeCropPoints[0].x*sx,freeCropPoints[0].y*sy);
-        for(let i=1;i<freeCropPoints.length;i++)c.lineTo(freeCropPoints[i].x*sx,freeCropPoints[i].y*sy);
-        c.closePath();
+        traceFreeCropPath(c,freeCropPoints,sx,sy);
     };
 
     if(mode==='keep_inside'){
@@ -6842,6 +7061,7 @@ setTimeout(() => {
 
     el.src=off.toDataURL('image/png');
     el.img=getImageFromCache(el.src);
+    off.width=0;off.height=0;
     requestRender();
     pushHistoryState();
     closeFreeCropModal();
@@ -7649,6 +7869,104 @@ let isPanningGrab = false;
 let grabPanStart = null;
 let grabMidX = null, grabMidY = null;
 let grabPanTimer = 0;
+let grabStrokes = [];
+let grabRedoStack = [];
+let grabCurStroke = null;
+let grabBaseMask = null;
+let grabBaseImg = null;
+let grabRaf = 0;
+const GRAB_MAX_UNDO = 120;
+let stepHoldTimer = 0, stepHoldDelay = 0;
+
+/* v1.3.2: tombol +/- (tahan untuk mengulang) dipakai bersama oleh Tangkap Ajaib & Crop Jari */
+function startStepHold(fn){
+    stopStepHold();
+    fn();
+    stepHoldDelay = setTimeout(()=>{ stepHoldTimer = setInterval(fn, 60); }, 350);
+}
+function stopStepHold(){
+    if(stepHoldDelay){ clearTimeout(stepHoldDelay); stepHoldDelay = 0; }
+    if(stepHoldTimer){ clearInterval(stepHoldTimer); stepHoldTimer = 0; }
+}
+
+function onGrabBrushInput(v){
+    const lbl=document.getElementById('magicBrushSizeVal');
+    if(lbl) lbl.innerText=(parseInt(v)||35)+'px';
+    updateBrushMonitorPreview(v, undefined, undefined, true);
+}
+function adjustGrabBrush(d){
+    const sl=document.getElementById('magicBrushSize');
+    if(!sl) return;
+    const v=Math.max(parseInt(sl.min)||1, Math.min(parseInt(sl.max)||90, (parseInt(sl.value)||35)+d));
+    sl.value=v;
+    onGrabBrushInput(v);
+}
+function adjustGrabBrushDown(){ adjustGrabBrush(-1); }
+function adjustGrabBrushUp(){ adjustGrabBrush(1); }
+
+function updateGrabUndoUI(){
+    const u=document.getElementById('grabUndoBtn'), r=document.getElementById('grabRedoBtn');
+    if(u) u.disabled = grabStrokes.length===0;
+    if(r) r.disabled = grabRedoStack.length===0;
+}
+
+/* gambar ulang satu goresan: kurva titik-tengah, identik dengan goresan langsung */
+function drawGrabStroke(ctx, st){
+    if(st.clear){ ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); return; }
+    const p=st.pts; if(!p||!p.length) return;
+    ctx.save();
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.lineWidth=st.size; ctx.strokeStyle='#00ff88'; ctx.fillStyle='#00ff88';
+    ctx.beginPath(); ctx.arc(p[0].x,p[0].y,st.size/2,0,Math.PI*2); ctx.fill();
+    if(p.length>1){
+        ctx.beginPath(); ctx.moveTo(p[0].x,p[0].y);
+        for(let i=1;i<p.length;i++) ctx.quadraticCurveTo(p[i-1].x,p[i-1].y,(p[i-1].x+p[i].x)/2,(p[i-1].y+p[i].y)/2);
+        ctx.lineTo(p[p.length-1].x,p[p.length-1].y);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function rebuildGrabMask(){
+    if(!grabMaskCanvas) return;
+    const mctx=grabMaskCanvas.getContext('2d');
+    mctx.clearRect(0,0,grabMaskCanvas.width,grabMaskCanvas.height);
+    if(grabBaseMask && grabBaseMask.width) mctx.drawImage(grabBaseMask,0,0);
+    for(let i=0;i<grabStrokes.length;i++) drawGrabStroke(mctx, grabStrokes[i]);
+    renderMagicGrabDisplay();
+}
+
+function commitGrabStroke(st){
+    grabStrokes.push(st);
+    grabRedoStack.length=0;
+    /* batas undo: goresan tertua digabung ke kanvas dasar (tidak bisa di-undo lagi) agar memori & waktu gambar ulang tetap ringan */
+    while(grabStrokes.length>GRAB_MAX_UNDO){
+        const old=grabStrokes.shift();
+        if(!grabBaseMask){ grabBaseMask=document.createElement('canvas'); grabBaseMask.width=grabMaskCanvas.width; grabBaseMask.height=grabMaskCanvas.height; }
+        drawGrabStroke(grabBaseMask.getContext('2d'), old);
+    }
+    updateGrabUndoUI();
+}
+
+function undoMagicGrab(){
+    if(!grabMaskCanvas) return;
+    endGrabStroke();
+    if(!grabStrokes.length) return;
+    grabRedoStack.push(grabStrokes.pop());
+    rebuildGrabMask(); updateGrabUndoUI();
+}
+function redoMagicGrab(){
+    if(!grabMaskCanvas) return;
+    endGrabStroke();
+    if(!grabRedoStack.length) return;
+    grabStrokes.push(grabRedoStack.pop());
+    rebuildGrabMask(); updateGrabUndoUI();
+}
+
+function scheduleMagicGrabRender(){
+    if(grabRaf) return;
+    grabRaf=requestAnimationFrame(()=>{ grabRaf=0; renderMagicGrabDisplay(); });
+}
 
 function openMagicGrabModal(){
 const el=getActiveElement();
@@ -7674,6 +7992,20 @@ lastGrabX=null;lastGrabY=null;grabMidX=null;grabMidY=null;isPanningGrab=false;
 grabMaskCanvas=document.createElement('canvas');
 grabMaskCanvas.width=canvas.width;
 grabMaskCanvas.height=canvas.height;
+grabStrokes=[];grabRedoStack=[];grabCurStroke=null;grabBaseMask=null;
+/* cache offscreen foto asal (digambar sekali, dipakai ulang tiap frame) */
+grabBaseImg=null;
+try{
+    if(el.img&&el.img.complete&&(el.img.naturalWidth||el.img.width)){
+        grabBaseImg=document.createElement('canvas');
+        grabBaseImg.width=canvas.width;grabBaseImg.height=canvas.height;
+        const _bc=grabBaseImg.getContext('2d');
+        _bc.imageSmoothingEnabled=true;_bc.imageSmoothingQuality='high';
+        _bc.drawImage(el.img,0,0,canvas.width,canvas.height);
+    }
+}catch(e){grabBaseImg=null;}
+updateGrabUndoUI();
+{const _sl=document.getElementById('magicBrushSize');const _lb=document.getElementById('magicBrushSizeVal');if(_sl&&_lb)_lb.innerText=(parseInt(_sl.value)||35)+'px';}
 const stalk=document.getElementById('magicGrabStalk');
 if(stalk){stalk.style.left='50%';stalk.style.top='';stalk.style.bottom='20px';stalk.style.transform='translateX(-50%)';}
 const monitor=document.getElementById('brushMonitor');
@@ -7688,7 +8020,12 @@ function closeMagicGrabModal(){
 document.getElementById('magicGrabModal').classList.remove('active');
 document.getElementById('brushMonitor').style.display='none';
 const _ret=document.getElementById('magicGrabReticle');if(_ret)_ret.style.display='none';
+if(grabRaf){cancelAnimationFrame(grabRaf);grabRaf=0;}
+stopStepHold();
 if(grabMaskCanvas){grabMaskCanvas.width=0;grabMaskCanvas.height=0;grabMaskCanvas=null;}
+if(grabBaseMask){grabBaseMask.width=0;grabBaseMask.height=0;grabBaseMask=null;}
+if(grabBaseImg){grabBaseImg.width=0;grabBaseImg.height=0;grabBaseImg=null;}
+grabStrokes=[];grabRedoStack=[];grabCurStroke=null;
 const canvas=document.getElementById('magicGrabCanvas');
 if(canvas){canvas.width=0;canvas.height=0;canvas.style.width='';canvas.style.height='';}
 lastGrabX=null;lastGrabY=null;grabMidX=null;grabMidY=null;
@@ -7697,7 +8034,12 @@ stopGrabPan();
 
 function clearMagicGrabMask(){
 if(!grabMaskCanvas)return;
+endGrabStroke();
+const last=grabStrokes[grabStrokes.length-1];
+if(!grabStrokes.length&&!(grabBaseMask&&grabBaseMask.width)){ return; }
+if(last&&last.clear) return;
 grabMaskCanvas.getContext('2d').clearRect(0,0,grabMaskCanvas.width,grabMaskCanvas.height);
+commitGrabStroke({clear:true});
 renderMagicGrabDisplay();
 }
 
@@ -7930,7 +8272,11 @@ function endGrabStroke(){
         mctx.lineTo(lastGrabX,lastGrabY);
         mctx.stroke();
         mctx.restore();
-        renderMagicGrabDisplay();
+        scheduleMagicGrabRender();
+    }
+    if(grabCurStroke){
+        const st=grabCurStroke; grabCurStroke=null;
+        if(grabMaskCanvas&&st.pts.length) commitGrabStroke(st);
     }
     lastGrabX=null; lastGrabY=null; grabMidX=null; grabMidY=null;
 }
@@ -7957,7 +8303,9 @@ if(lastGrabX !== null && lastGrabY !== null) {
     mctx.quadraticCurveTo(lastGrabX,lastGrabY,mx,my);
     mctx.stroke();
     grabMidX=mx; grabMidY=my;
+    if(grabCurStroke) grabCurStroke.pts.push({x:x,y:y});
 } else {
+    grabCurStroke={pts:[{x:x,y:y}],size:bSize};
     mctx.beginPath();
     mctx.arc(x,y,bSize/2,0,Math.PI*2);
     mctx.fillStyle='#00ff88';
@@ -7970,16 +8318,16 @@ lastGrabX = x;
 lastGrabY = y;
 
 if(screenX!==undefined&&screenY!==undefined){const mon=document.getElementById('brushMonitor');const canvas=document.getElementById('magicGrabCanvas');const r=canvas.getBoundingClientRect();const d=Math.max(2,bSize*Math.min(r.width/canvas.width,r.height/canvas.height));mon.style.width=d+'px';mon.style.height=d+'px';mon.style.left=screenX+'px';mon.style.top=screenY+'px';mon.style.display='block';clearTimeout(mon._timer);mon._timer=setTimeout(()=>{mon.style.display='none';},300);}
-renderMagicGrabDisplay();
+scheduleMagicGrabRender();
 }
 
 function renderMagicGrabDisplay(){
 const el=getActiveElement();
 const canvas=document.getElementById('magicGrabCanvas');
-if(!canvas||!el)return;
+if(!canvas||!el||!grabMaskCanvas||!canvas.width)return;
 const ctxG=canvas.getContext('2d');
 ctxG.clearRect(0,0,canvas.width,canvas.height);
-ctxG.drawImage(el.img,0,0,canvas.width,canvas.height);
+if(grabBaseImg&&grabBaseImg.width) ctxG.drawImage(grabBaseImg,0,0); else ctxG.drawImage(el.img,0,0,canvas.width,canvas.height);
 ctxG.save();
 ctxG.globalAlpha=0.45;
 try{ctxG.filter=grabInside?'none':'hue-rotate(210deg)';}catch(e){}
