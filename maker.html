@@ -1,13 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v1.3.4
+Studio Poster Maker Pro - Update v1.3.5
+
+v1.3.5:
+1. TABEL: Lebar & Tinggi kini BISA DIATUR (menu Ukuran, handle, maupun slider). Teks otomatis dibungkus ulang mengikuti lebar yang diatur; tinggi yang lebih besar dari isi merenggangkan baris secara proporsional. Tanpa pengaturan, lebar otomatis pas isi tetapi dibatasi sekitar 90% lebar kanvas (tidak lagi kepanjangan). Menambah kolom/baris mengembalikan ukuran ke otomatis. Padding kiri-kanan-atas-bawah tetap terjaga.
 
 v1.3.4:
 1. TABEL AUTO-FIT: ukuran kotak kini otomatis membungkus padat sesuai isi. Lebar tiap kolom mengikuti teks terpanjang di kolom itu, tinggi tiap baris mengikuti teks tertinggi di baris itu, tetap memakai jarak (padding) kiri-kanan-atas-bawah agar teks tidak dempet. Mengubah ukuran tabel lewat handle / slider kini berarti skala (semua isi ikut membesar/mengecil proporsional).
 2. TABEL GABUNG SEL: di Editor Data Tabel tekan tombol ☑ pada kotak pertama lalu ☑ pada kotak terakhir (atau ketuk judul Baris/Kolom untuk memilih satu baris/kolom penuh), lalu tekan "Gabung Sel" (mirip MS Excel, garis penghalang hilang & teks memakai seluruh area). "Pisah Sel" mengembalikan seperti semula. Ikut tersimpan, ter-undo, dan ikut ke thumbnail, preview & export.
 3. PERFORMA: tanda tangan (hash) cache tabel tidak lagi memproses data foto latar base64 setiap frame; hasil hitung ukuran tabel di-cache sehingga geser/zoom tetap ringan.
-
-v1.3.3:
-1. TEKS: tool baru "Layer Mask" (menu Teks, di tengah): gosok bagian huruf yang harus tampil DI DEPAN objek PNG, sehingga objek terlihat melilit / masuk ke belakang huruf. Ada mode Lilit/Hapus Patch, Undo/Redo, ukuran kuas & kelembutan (+/-), zoom, geser, panduan hijau. Ikut tersimpan, ter-undo, dan ikut ke thumbnail, preview & export.
 
 
 -->
@@ -1373,7 +1373,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.3.4';
+    return 'v1.3.5';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -1683,7 +1683,7 @@ requestAnimationFrame(()=>{renderPending=false;renderAll();});
 function invalidateAllRenderCaches() {
     if (typeof slides === 'undefined' || !slides) return;
     slides.forEach(s => {
-        if (s.elements) s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; el._calculatedHeight = null; el._renderedW = null; if (el._tbl) el._tbl.layout = null; });
+        if (s.elements) s.elements.forEach(el => { el._cachedCanvas = null; el._cachedHash = null; el._calculatedHeight = null; el._renderedW = null; if (el._tbl) { el._tbl.layout = null; el._tbl.meas = null; } });
     });
 }
 function invalidateCachesForSrc(src) {
@@ -2626,7 +2626,7 @@ function getElHash(el) {
         } else if(el.type === 'fade') {
             str += '_' + el.fadeDir + '_' + el.fadeDepth;
         } else if(el.type === 'table') {
-            str += '_' + el.rows + '_' + el.cols + '_' + JSON.stringify(el.colWidths) + '_' + JSON.stringify(el.rowHeights) + '_' + tblCellsSig(el) + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.tScale;
+            str += '_' + el.rows + '_' + el.cols + '_' + JSON.stringify(el.colWidths) + '_' + JSON.stringify(el.rowHeights) + '_' + tblCellsSig(el) + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.tW + '_' + el.tH;
         }
         if(el.type==='table'||el.type==='shape') str += '_'+el.tBold+'_'+el.tItalic+'_'+el.tAlign+'_'+el.tFont+'_'+el.tPad+'_'+el.fontSize+'_'+el.colorOverlay;
         str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.transparency||{});
@@ -3996,10 +3996,11 @@ function tblClampSpans(el) {
         }
     }
 }
-function tblComputeLayout(el) {
+/* Ukuran alami tiap sel (tanpa pembungkusan & kata terpanjang) -- tidak bergantung pada lebar/tinggi yang diatur pengguna */
+function tblMeasure(el) {
     const st = tblState(el);
     const key = tblLayoutKey(el);
-    if (st.layout && st.layout.key === key) return st.layout;
+    if (st.meas && st.meas.key === key) return st.meas;
 
     const R = el.rows, C = el.cols;
     const own = tblOwnerMap(el);
@@ -4008,14 +4009,12 @@ function tblComputeLayout(el) {
     const padX = el.tPad !== undefined ? el.tPad : TABLE_DEFAULT_PAD_X;
     const padY = Math.round((el.tPad !== undefined ? el.tPad : 20) * 0.7);
     const tAlign = el.tAlign || 'center';
-    const maxTextW = Math.max(160, Math.round((mainCanvas.width || 1080) * 0.8) - padX * 2);
+    const wordCap = Math.max(120, Math.round((mainCanvas.width || 1080) * 0.8) - padX * 2);
 
-    const colW = new Array(C).fill(padX * 2 + 24);
-    const rowH = new Array(R).fill(Math.ceil(24 * 1.3 + padY * 2));
-    const infos = [];
-    for (let r = 0; r < R; r++) infos.push(new Array(C).fill(null));
+    const natCol = new Array(C).fill(padX * 2 + 24);
+    const minCol = new Array(C).fill(padX * 2 + 24);
+    const masters = [];
     const spans = [];
-
     for (let r = 0; r < R; r++) {
         for (let c = 0; c < C; c++) {
             const o = own[r][c];
@@ -4024,64 +4023,122 @@ function tblComputeLayout(el) {
             const fontSize = el.tFont || cell.fontSize || 24;
             const bold = cell.bold !== undefined ? !!cell.bold : !!el.tBold;
             const italic = cell.italic !== undefined ? !!cell.italic : !!el.tItalic;
-            const lineH = fontSize * 1.3;
             const fStyle = italic ? 'italic' : 'normal', fWeight = bold ? 'bold' : 'normal';
             const font = `${fStyle} ${fWeight} ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-            let lines = [], lw = 0;
+            let natW = 0, minW = 0;
             if (cell.text) {
-                const pseudoEl = { fontSize: fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: tAlign, fontWeight: fWeight, fontStyle: fStyle };
-                lines = getWrappedLines(mctx, cell.text, maxTextW, pseudoEl);
                 mctx.font = font;
-                lines = breakLongBoxWords(mctx, lines, maxTextW);
-                for (let i = 0; i < lines.length; i++) {
-                    const w = mctx.measureText(lines[i].words.join(' ')).width;
-                    if (w > lw) lw = w;
-                }
+                String(cell.text).split('\n').forEach(par => {
+                    const w = mctx.measureText(par.split(' ').filter(x => x.length > 0).join(' ')).width;
+                    if (w > natW) natW = w;
+                    par.split(' ').forEach(wd => { const ww = mctx.measureText(wd).width; if (ww > minW) minW = ww; });
+                });
+                if (minW > wordCap) minW = wordCap;
             }
             const info = {
-                r: r, c: c, rs: o.rs, cs: o.cs, lines: lines, fontSize: fontSize, lineH: lineH, font: font,
-                wNeed: Math.ceil(lw + padX * 2),
-                hNeed: Math.ceil(Math.max(1, lines.length) * lineH + padY * 2)
+                r: r, c: c, rs: o.rs, cs: o.cs, text: cell.text || '', fontSize: fontSize, lineH: fontSize * 1.3,
+                fStyle: fStyle, fWeight: fWeight, font: font,
+                natNeed: Math.ceil(natW + padX * 2), minNeed: Math.ceil(minW + padX * 2)
             };
-            infos[r][c] = info;
-            if (o.cs === 1) colW[c] = Math.max(colW[c], info.wNeed);
-            if (o.rs === 1) rowH[r] = Math.max(rowH[r], info.hNeed);
-            if (o.cs > 1 || o.rs > 1) spans.push(info);
+            masters.push(info);
+            if (o.cs === 1) { natCol[c] = Math.max(natCol[c], info.natNeed); minCol[c] = Math.max(minCol[c], info.minNeed); }
+            else spans.push(info);
         }
     }
-    // Sel gabungan: bila kolom/baris yang dilewati belum cukup, kekurangannya dibagi rata
-    spans.filter(i => i.cs > 1).sort((a, b) => a.cs - b.cs).forEach(i => {
-        let cur = 0;
-        for (let k = 0; k < i.cs; k++) cur += colW[i.c + k];
-        if (cur < i.wNeed) { const add = (i.wNeed - cur) / i.cs; for (let k = 0; k < i.cs; k++) colW[i.c + k] += add; }
+    // Sel gabungan lebar: kekurangan dibagi rata ke kolom yang dilewati
+    spans.sort((a, b) => a.cs - b.cs).forEach(i => {
+        [['natNeed', natCol], ['minNeed', minCol]].forEach(pair => {
+            const need = i[pair[0]], arr = pair[1];
+            let cur = 0;
+            for (let k = 0; k < i.cs; k++) cur += arr[i.c + k];
+            if (cur < need) { const add = (need - cur) / i.cs; for (let k = 0; k < i.cs; k++) arr[i.c + k] += add; }
+        });
     });
-    spans.filter(i => i.rs > 1).sort((a, b) => a.rs - b.rs).forEach(i => {
+    for (let c = 0; c < C; c++) { natCol[c] = Math.ceil(natCol[c]); minCol[c] = Math.min(natCol[c], Math.ceil(minCol[c])); }
+    const sum = a => a.reduce((x, y) => x + y, 0);
+    st.meas = { key: key, own: own, masters: masters, padX: padX, padY: padY, tAlign: tAlign, natCol: natCol, minCol: minCol, sumNat: sum(natCol), sumMin: sum(minCol) };
+    return st.meas;
+}
+
+/* Bagi total 'target' ke bobot 'w' (bilangan bulat, jumlah tepat = target) */
+function tblSplitInt(w, target) {
+    const tot = w.reduce((a, b) => a + b, 0) || 1;
+    const out = w.map(x => Math.floor(x * target / tot));
+    let left = Math.round(target) - out.reduce((a, b) => a + b, 0);
+    for (let i = 0; left > 0 && out.length; i = (i + 1) % out.length) { out[i]++; left--; }
+    return out;
+}
+
+function tblComputeLayout(el) {
+    const st = tblState(el);
+    const M = tblMeasure(el);
+    const tW = el.tW > 0 ? Math.round(el.tW) : 0;
+    const tH = el.tH > 0 ? Math.round(el.tH) : 0;
+    const lkey = M.key + '\u0004' + tW + '\u0004' + tH;
+    if (st.layout && st.layout.key === lkey) return st.layout;
+
+    const R = el.rows, C = el.cols;
+    const mctx = tblGetMeasureCtx();
+    const padX = M.padX, padY = M.padY;
+
+    // 1) Lebar kolom. Otomatis: pas isi (dibatasi 90% lebar kanvas, teks dibungkus). Diatur pengguna: ikut lebar yang diatur.
+    const T = tW ? tW : Math.max(M.sumMin, Math.min(M.sumNat, Math.round((mainCanvas.width || 1080) * 0.9)));
+    let colW;
+    if (T >= M.sumNat) colW = (T === M.sumNat) ? M.natCol.slice() : tblSplitInt(M.natCol, T);
+    else if (T <= M.sumMin) colW = M.minCol.slice();
+    else {
+        const k = (T - M.sumMin) / (M.sumNat - M.sumMin);
+        colW = M.natCol.map((n, i) => Math.max(M.minCol[i], Math.floor(M.minCol[i] + (n - M.minCol[i]) * k)));
+        let left = T - colW.reduce((a, b) => a + b, 0);
+        for (let i = 0, guard = 0; left > 0 && guard < 100000; i = (i + 1) % C, guard++) { if (colW[i] < M.natCol[i]) { colW[i]++; left--; } }
+    }
+    const xs = [0];
+    for (let c = 0; c < C; c++) xs.push(xs[c] + colW[c]);
+
+    // 2) Bungkus teks sesuai lebar area sel, lalu hitung tinggi baris
+    const rowH = new Array(R).fill(Math.ceil(24 * 1.3 + padY * 2));
+    const infos = [];
+    for (let r = 0; r < R; r++) infos.push(new Array(C).fill(null));
+    const rspans = [];
+    M.masters.forEach(m => {
+        const aw = xs[m.c + m.cs] - xs[m.c];
+        const maxW = Math.max(10, aw - padX * 2);
+        let lines = [];
+        if (m.text) {
+            const pseudoEl = { fontSize: m.fontSize, fontFamily: "Plus Jakarta Sans", letterSpacing: 0, textAlign: M.tAlign, fontWeight: m.fWeight, fontStyle: m.fStyle };
+            lines = getWrappedLines(mctx, m.text, maxW, pseudoEl);
+            mctx.font = m.font;
+            lines = breakLongBoxWords(mctx, lines, maxW);
+        }
+        const hNeed = Math.ceil(Math.max(1, lines.length) * m.lineH + padY * 2);
+        infos[m.r][m.c] = { lines: lines, fontSize: m.fontSize, lineH: m.lineH, font: m.font };
+        if (m.rs === 1) rowH[m.r] = Math.max(rowH[m.r], hNeed);
+        else rspans.push({ r: m.r, rs: m.rs, hNeed: hNeed });
+    });
+    rspans.sort((a, b) => a.rs - b.rs).forEach(i => {
         let cur = 0;
         for (let k = 0; k < i.rs; k++) cur += rowH[i.r + k];
         if (cur < i.hNeed) { const add = (i.hNeed - cur) / i.rs; for (let k = 0; k < i.rs; k++) rowH[i.r + k] += add; }
     });
-    for (let c = 0; c < C; c++) colW[c] = Math.ceil(colW[c]);
     for (let r = 0; r < R; r++) rowH[r] = Math.ceil(rowH[r]);
-    const xs = [0], ys = [0];
-    for (let c = 0; c < C; c++) xs.push(xs[c] + colW[c]);
-    for (let r = 0; r < R; r++) ys.push(ys[r] + rowH[r]);
+    // 3) Tinggi diatur pengguna: bila lebih besar dari kebutuhan, baris direnggangkan proporsional (tidak bisa lebih kecil dari isi)
+    let rowHFinal = rowH;
+    const sumH = rowH.reduce((a, b) => a + b, 0);
+    if (tH > sumH) rowHFinal = tblSplitInt(rowH, tH);
+    const ys = [0];
+    for (let r = 0; r < R; r++) ys.push(ys[r] + rowHFinal[r]);
 
-    st.layout = { key: key, colW: colW, rowH: rowH, xs: xs, ys: ys, W: xs[C], H: ys[R], own: own, infos: infos, padX: padX, padY: padY, tAlign: tAlign };
+    st.layout = { key: lkey, colW: colW, rowH: rowHFinal, xs: xs, ys: ys, W: xs[C], H: ys[R], own: M.own, infos: infos, padX: padX, padY: padY, tAlign: M.tAlign };
     return st.layout;
 }
 
 function renderTableElement(targetCtx, el) {
-    const L = tblComputeLayout(el);
     const st = tblState(el);
-
-    // Ukuran akhir = ukuran alami (dari isi) x skala. Jika ukuran diubah pengguna (handle / slider), nilainya dibaca sebagai skala baru.
-    let S = (el.tScale > 0) ? el.tScale : 1;
-    if (st.lastW !== undefined && el.width > 0 && Math.abs(el.width - st.lastW) >= 1) S = el.width / L.W;
-    else if (st.lastH !== undefined && el.height > 0 && Math.abs(el.height - st.lastH) >= 1) S = el.height / L.H;
-    S = Math.max(0.1, Math.min(12, S));
-    el.tScale = S;
-    const W = Math.max(1, Math.round(L.W * S));
-    const H = Math.max(1, Math.round(L.H * S));
+    // Lebar/Tinggi yang diubah pengguna (handle / slider Ukuran) dibaca sebagai ukuran tabel yang diinginkan; isi tabel menyesuaikan (teks dibungkus ulang)
+    if (st.lastW !== undefined && el.width > 0 && Math.abs(el.width - st.lastW) >= 1) el.tW = Math.max(40, Math.round(el.width));
+    if (st.lastH !== undefined && el.height > 0 && Math.abs(el.height - st.lastH) >= 1) el.tH = Math.max(40, Math.round(el.height));
+    const L = tblComputeLayout(el);
+    const W = Math.max(1, L.W), H = Math.max(1, L.H);
     el.width = W; el.height = H;
     st.lastW = W; st.lastH = H;
     el._renderedW = W;
@@ -4104,7 +4161,7 @@ function renderTableElement(targetCtx, el) {
     off.width = W * rScale;
     off.height = H * rScale;
     const octx = off.getContext('2d');
-    octx.scale(rScale * (W / L.W), rScale * (H / L.H));
+    octx.scale(rScale, rScale);
 
     const R = el.rows, C = el.cols;
     for (let r = 0; r < R; r++) {
@@ -5302,7 +5359,7 @@ function addNewTable() {
         width: 800, height: 400,
         rows: 3, cols: 3,
         colWidths: [33.33, 33.33, 33.33], rowHeights: [33.33, 33.33, 33.33],
-        borderColor: '#D4AF37', borderWidth: 3, opacity: 1, tScale: 1.5,
+        borderColor: '#D4AF37', borderWidth: 3, opacity: 1, tW: 800, tH: 400,
         cells: Array(3).fill(0).map((_,r) => Array(3).fill(0).map((_,c) => ({
             text: `Data`, color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24, fontWeight: 'bold'
         }))),
@@ -5600,7 +5657,7 @@ function addTableRow() {
     el.rows++;
     el.rowHeights = Array(el.rows).fill(100 / el.rows);
     el.cells.push(Array(el.cols).fill(0).map(() => ({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24})));
-    tblSel = null; tblAnchor = null; tblFocus = null;
+    delete el.tH; tblSel = null; tblAnchor = null; tblFocus = null;
     renderAll(); pushHistoryState(); openTableEditor(true);
     const sc = document.getElementById('tableEditorScroll'); if(sc) sc.scrollTop = sc.scrollHeight;
 }
@@ -5610,7 +5667,7 @@ function addTableCol() {
     el.cols++;
     el.colWidths = Array(el.cols).fill(100 / el.cols);
     el.cells.forEach(row => row.push({text: '-', color: '#ffffff', bgColor: 'transparent', bgImgSrc: null, fontSize: 24}));
-    tblSel = null; tblAnchor = null; tblFocus = null;
+    delete el.tW; tblSel = null; tblAnchor = null; tblFocus = null;
     renderAll(); pushHistoryState(); openTableEditor(true);
     const sc = document.getElementById('tableEditorScroll'); if(sc) sc.scrollLeft = sc.scrollWidth;
 }
