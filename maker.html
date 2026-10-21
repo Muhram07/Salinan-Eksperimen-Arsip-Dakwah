@@ -1,13 +1,12 @@
 <!--
-Studio Poster Maker Pro - Update v1.4.1
+Studio Poster Maker Pro - Update v1.4.3
 
-v1.4.1:
-1. HAPUS BG: urutan opsi baru -> [AI 1 Cepat] [AI 2 Halus] lalu opsi manual [Auto Dominan] [Manual Garis] [Global Warna]. Tidak ada lagi proses otomatis saat jendela dibuka; setiap opsi baru berjalan ketika ditekan.
-2. AI 1 (rendah, cepat): u2netp ±4,7 MB, boleh ditaruh di root repo dengan nama "remove-bg-ai1.onnx" (huruf kecil, tanpa spasi). Bila file tidak ada, diunduh otomatis lalu disimpan untuk offline. Nama lama "Remove BG AI.onnx" tetap terbaca.
-3. AI 2 (halus, lambat): silueta ±44 MB (input 320 px, bukan 1024 px seperti RMBG-1.4 sehingga tidak membuat layar macet). Tidak perlu masuk repo: diunduh sekali dari Hugging Face lalu disimpan di browser (offline). Pindah AI 1/AI 2 otomatis melepas model sebelumnya dari memori.
+v1.4.3:
+1. SITUS SUNNAH > Bookmark dibuat sangat mudah untuk orang awam: (a) tombol emas melayang "Simpan Halaman Ini" di atas situs; (b) link yang sudah disalin otomatis terdeteksi dan terisi (cukup 1 ketukan Simpan); (c) panduan 3 langkah bergambar kata-kata bila belum ada link; (d) "Simpan pencarian ini saja" sebagai jalan pintas yang selalu berhasil; (e) judul otomatis dari alamat artikel.
+2. Anti hilang: Cadangkan (unduh file), Pulihkan, Salin Daftar, cadangan ganda otomatis di penyimpanan, dan permintaan penyimpanan permanen ke browser.
 
-v1.3.10:
-1. HAPUS BG AI JAUH LEBIH RINGAN: model bawaan u2netp (±4,7 MB, input 320 px) sehingga proses cuma beberapa detik dan tidak lagi membuat layar macet seperti RMBG-1.4 (input 1024 px, terlalu berat untuk HP).
+v1.4.2:
+1. TABEL > Edit Data: ukuran teks (Size) per kotak sekarang berfungsi. Nilai per kotak menimpa "Ukuran Font" global (Format Teks) seperti Bold/Miring per kotak; menggeser slider global tetap berlaku untuk semua kotak.
 
 -->
 
@@ -444,6 +443,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 #ssBmEdit.active{display:flex;}
 #ssBmEdit .ss-infobox{border-radius:16px;border:1px solid #D4AF37;max-height:86vh;max-height:86dvh;}
 #ssBmEdit .bib-input{width:100%;flex:none;border-radius:10px;margin-top:4px;}
+/* v1.4.3: bookmark mudah */
+#ssCatch{display:none;align-items:center;gap:8px;margin:0 10px 6px;padding:8px 10px;border-radius:10px;background:rgba(212,175,55,.14);border:1px solid #D4AF37;flex-shrink:0;}
+#ssCatch.on{display:flex;}
+#ssCatch .tx{flex:1;min-width:0;font-size:11px;line-height:1.4;color:#FFE259;font-weight:800;}
+#ssCatch .tx span{display:block;color:#ddd;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#ssFab{position:absolute;right:10px;bottom:10px;z-index:5;height:42px;padding:0 16px;border-radius:21px;border:0;background:linear-gradient(90deg,#FFE259,#D4AF37);color:#111;font-size:12px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.6);cursor:pointer;}
+#ssFab:active{transform:scale(.95);}
+#ssBmGuide{display:none;margin:6px 0 4px;padding:10px;border-radius:10px;background:rgba(212,175,55,.1);border:1px dashed #D4AF37;color:#ddd;}
+#ssBmClipOk{display:none;margin:6px 0 4px;padding:8px 10px;border-radius:10px;background:rgba(34,197,94,.14);border:1px solid #22C55E;color:#86EFAC;font-size:11px;font-weight:800;line-height:1.45;}
 .up-sticky{position:sticky;top:-14px;z-index:3;background:#181818;padding:6px 0 4px;margin-top:-6px;border-bottom:1px solid rgba(255,255,255,.06);}
 .up-cap{font-size:10px;color:#999;text-align:center;margin-top:4px;line-height:1.4;}
 .up-cmp{position:relative;overflow:hidden;background:#222;border-radius:10px;touch-action:none;-webkit-user-select:none;user-select:none;--p:50%;cursor:ew-resize;}
@@ -1209,7 +1217,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
             <span id="ssBatchLbl"></span>
             <button class="bib-chip" id="ssBatchNext" onclick="ssBatchMove(1)">▶</button>
         </div>
-        <div id="ssFrameWrap"></div>
+        <div id="ssCatch">
+            <div class="tx">🔗 Link terdeteksi, simpan?<span id="ssCatchTx"></span></div>
+            <button class="bib-go" style="height:34px;padding:0 14px;" onclick="ssCatchSave()">💾 Simpan</button>
+            <button class="bib-ico" onclick="ssCatchHide()" aria-label="Tutup">✕</button>
+        </div>
+        <div id="ssFrameWrap"><button id="ssFab" onclick="ssSaveBookmark()" aria-label="Simpan halaman ini">🔖 Simpan Halaman Ini</button></div>
         <div class="pg-bar" id="ssPager">
             <button class="pg-btn" id="ssPgPrev" onclick="ssPage(-1)">◀ Prev</button>
             <div class="pg-mid"><div class="pg-chips" id="ssPgChips"></div><div class="pg-info" id="ssPgInfo"></div></div>
@@ -1221,6 +1234,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
             <span id="ssBmCount">🔖 Bookmark (0)</span>
             <span style="display:flex;gap:6px;"><button class="bib-chip" onclick="ssBmNew()">➕ Tambah Link</button><button class="bib-chip" onclick="ssBmBack()">✕ Tutup</button></span>
         </div>
+        <div class="ss-batch" style="gap:6px;flex-wrap:wrap;padding-top:0;">
+            <button class="bib-chip" onclick="ssBackupDownload()">💾 Cadangkan</button>
+            <button class="bib-chip" onclick="ssBackupRestorePick()">📥 Pulihkan</button>
+            <button class="bib-chip" onclick="ssBmCopyAll()">📋 Salin Daftar</button>
+        </div>
+        <div class="bib-status wrap" style="padding:0 12px 4px;font-size:10px;">💡 Bookmark &amp; catatan tersimpan di HP/browser ini. Tekan 💾 Cadangkan sesekali (file ikut tersimpan di HP) supaya aman bila data browser terhapus; 📥 Pulihkan mengembalikannya.</div>
         <div class="ss-list" id="ssBmList"></div>
     </div>
     <div id="ssNoteWrap">
@@ -1250,11 +1269,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
                 <div id="ssBmSheetTitle" style="flex:1;font-size:15px;font-weight:800;color:#D4AF37;">🔖 Simpan Bookmark</div>
                 <button class="bib-ico" onclick="ssBmCloseSheet()" aria-label="Tutup">✕</button>
             </div>
+            <div id="ssBmGuide">
+                <div style="font-weight:800;color:#FFE259;font-size:12px;">📌 Cara simpan halaman (3 langkah mudah)</div>
+                <div style="margin-top:6px;font-size:12px;line-height:1.65;">1️⃣ <b>Tekan &amp; tahan lama</b> judul artikel di hasil pencarian, lalu pilih <b>Salin alamat tautan</b> (Copy link address).<br>2️⃣ Tutup jendela ini, lalu tekan tombol emas <b>🔖 Simpan Halaman Ini</b> lagi.<br>3️⃣ Link terisi sendiri, tekan <b>💾 Simpan</b>. Selesai!</div>
+                <button type="button" class="bib-chip" style="margin-top:8px;height:34px;padding:0 12px;" onclick="ssBmSaveSearchOnly()">📌 Simpan pencarian ini saja</button>
+            </div>
+            <div id="ssBmClipOk">✔ Link halaman terambil otomatis dari yang Anda salin. Tinggal tekan Simpan.</div>
             <div class="ss-il">Judul</div>
             <input class="bib-input" id="ssBmTitle" type="text" maxlength="120" placeholder="Nama bookmark (mis. Hukum tahlilan)" autocomplete="off" spellcheck="false">
             <div class="ss-il">Alamat (link)</div>
             <input class="bib-input" id="ssBmUrl" type="url" placeholder="https://..." autocomplete="off" autocapitalize="off" spellcheck="false">
-            <div class="ss-note" style="border-top:0;margin-top:8px;padding-top:0;">Alamat terisi otomatis dari situs yang sedang dibuka. Jika masih berupa alamat pencarian, browser memblokir pembacaan alamat halaman di dalam situs lain: salin alamat halaman itu (↗ Tab Baru) lalu tekan 📋 Tempel, atau akan terisi otomatis dari clipboard.</div>
+            <div class="ss-note" style="border-top:0;margin-top:8px;padding-top:0;">Link yang baru Anda salin akan terisi otomatis. Browser tidak mengizinkan aplikasi membaca alamat halaman di dalam situs lain, karena itu link perlu disalin dulu (tekan &amp; tahan judul artikel &rarr; Salin alamat tautan).</div>
             <div style="display:flex;gap:8px;margin-top:12px;">
                 <button class="bib-chip" style="height:40px;padding:0 14px;" onclick="ssBmPaste()">📋 Tempel</button>
                 <button class="bib-go" style="flex:1;height:40px;" onclick="ssBmCommit()">💾 Simpan</button>
@@ -1388,7 +1413,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.4.1';
+    return 'v1.4.3';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -3969,7 +3994,7 @@ function tblCellsSig(el) {
             if (!k) { rr.push('~'); continue; }
             const bi = k.bgImgSrc;
             const biSig = bi ? (bi.length + ':' + bi.slice(-24) + bi.slice(bi.length >> 1, (bi.length >> 1) + 16)) : '';
-            rr.push([k.text, k.color, k.bgColor, k.fontSize, k.fontWeight, k.bold, k.italic, k.rs, k.cs, biSig].join('\u0001'));
+            rr.push([k.text, k.color, k.bgColor, k.fontSize, k.fsCustom ? 1 : 0, k.fontWeight, k.bold, k.italic, k.rs, k.cs, biSig].join('\u0001'));
         }
         out.push(rr.join('\u0002'));
     }
@@ -3982,7 +4007,7 @@ function tblLayoutKey(el) {
         for (let c = 0; c < el.cols; c++) {
             const k = row && row[c];
             if (!k) { p.push('~'); continue; }
-            p.push(k.text, k.fontSize, k.bold, k.italic, k.rs, k.cs);
+            p.push(k.text, k.fontSize, k.fsCustom ? 1 : 0, k.bold, k.italic, k.rs, k.cs);
         }
     }
     return p.join('\u0001');
@@ -4042,7 +4067,7 @@ function tblMeasure(el) {
             const o = own[r][c];
             if (o.r !== r || o.c !== c) continue;
             const cell = (el.cells[r] && el.cells[r][c]) || {};
-            const fontSize = el.tFont || cell.fontSize || 24;
+            const fontSize = (cell.fsCustom && cell.fontSize > 0) ? cell.fontSize : (el.tFont || cell.fontSize || 24);
             const bold = cell.bold !== undefined ? !!cell.bold : !!el.tBold;
             const italic = cell.italic !== undefined ? !!cell.italic : !!el.tItalic;
             const fStyle = italic ? 'italic' : 'normal', fWeight = bold ? 'bold' : 'normal';
@@ -5584,7 +5609,7 @@ function openTableEditor(keepScroll) {
                     </div>
                     <div class="tbl-ed-grp">
                         <span>Size</span>
-                        <input type="number" class="tbl-ed-size" value="${cell.fontSize || 24}" onchange="updateTableCellFontSize(${r}, ${c}, this.value)">
+                        <input type="number" class="tbl-ed-size" min="8" max="300" value="${(cell.fsCustom && cell.fontSize > 0) ? cell.fontSize : (el.tFont || cell.fontSize || 24)}" oninput="updateTableCellFontSize(${r}, ${c}, this.value, true)" onchange="updateTableCellFontSize(${r}, ${c}, this.value)">
                     </div>
                     <div class="tbl-ed-grp">
                         <span>Foto</span>
@@ -5642,7 +5667,18 @@ function closeTableEditor() { document.getElementById('tableEditorModal').classL
 function updateTableCellText(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].text = val; requestRender(); debouncedPushHistory(); } }
 function updateTableCellColor(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].color = val; requestRender(); debouncedPushHistory(); } }
 function updateTableCellBg(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].bgColor = val; requestRender(); debouncedPushHistory(); } }
-function updateTableCellFontSize(r, c, val) { const el = getActiveElement(); if(el && el.cells[r] && el.cells[r][c]) { el.cells[r][c].fontSize = parseInt(val); requestRender(); debouncedPushHistory(); } }
+function updateTableCellFontSize(r, c, val, live) {
+    const el = getActiveElement();
+    if (!el || el.type !== 'table' || !el.cells[r] || !el.cells[r][c]) return;
+    let v = parseInt(val);
+    if (isNaN(v)) return;
+    if (live && v < 8) return;   // saat mengetik (mis. "3" menuju "30") jangan dulu diterapkan
+    v = Math.max(8, Math.min(300, v));
+    const cell = el.cells[r][c];
+    cell.fontSize = v;
+    cell.fsCustom = true;        // tandai: ukuran kotak ini diatur sendiri (menimpa Ukuran Font global)
+    requestRender(); debouncedPushHistory();
+}
 
 function parseColorToHex(color) {
     if(!color || color==='transparent') return '#000000';
@@ -5775,7 +5811,11 @@ function setBoxText(prop, val) {
 }
 function setBoxFont(v) {
     const el = getActiveElement(); if (!el) return; v = parseInt(v);
-    if (el.type === 'table') el.tFont = v; else el.fontSize = v;
+    if (el.type === 'table') {
+        el.tFont = v;
+        // Ukuran global berlaku untuk semua kotak -> lepas ukuran per-kotak agar semuanya mengikuti
+        if (el.cells) el.cells.forEach(row => row && row.forEach(cell => { if (cell && cell.fsCustom) delete cell.fsCustom; }));
+    } else el.fontSize = v;
     const l = document.getElementById('valBoxFont'); if (l) l.innerText = v + 'px';
     requestRender(); debouncedPushHistory();
 }
@@ -13205,6 +13245,8 @@ function openSunnahBrowser() {
     if(!p) return;
     p.classList.add('active');
     ssBind();
+    ssClipBind();
+    try { if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e) {}
     SS.bm = ssBmLoad();
     ssRenderCats();
     if(SS.view === 'web' || SS.view === 'bm' || SS.view === 'note') { /* bingkai dibuang saat ditutup; tampilkan daftar lagi */ SS.view = 'list'; }
@@ -13221,6 +13263,7 @@ function closeSunnahBrowser() {
     p.style.maxHeight = '';
     ssCloseInfo();
     ssBmCloseSheet();
+    ssCatchHide();
     ssDestroyFrame();
     SS.view = 'list';
     const ae = document.activeElement;
@@ -13299,6 +13342,7 @@ function ssShowView(v) {
     ssEl('ssWebWrap').style.display = v === 'web' ? 'flex' : 'none';
     ssEl('ssBmWrap').style.display = v === 'bm' ? 'flex' : 'none';
     ssEl('ssNoteWrap').style.display = v === 'note' ? 'flex' : 'none';
+    if(v !== 'web') ssCatchHide();
     ssEl('ssToggleBtn').textContent = v === 'web' ? '📚 Daftar Situs' : '🌐 Hasil';
     ssEl('ssToggleBtn').style.display = (v === 'web' || (v === 'list' && SS.q)) ? '' : 'none';
     if(v !== 'web') {
@@ -13508,14 +13552,18 @@ function ssOpenExternal() {
 const SS_BM_KEY = 'spm_sunnah_bookmarks_v1';
 
 function ssBmLoad() {
+    const pick = raw => { const a = JSON.parse(raw); return Array.isArray(a) ? a.filter(x => x && typeof x.url === 'string' && typeof x.id === 'string') : null; };
     try {
-        const a = JSON.parse(localStorage.getItem(SS_BM_KEY) || '[]');
-        return Array.isArray(a) ? a.filter(x => x && typeof x.url === 'string' && typeof x.id === 'string') : [];
-    } catch(e) { return []; }
+        const raw = localStorage.getItem(SS_BM_KEY);
+        if(raw !== null) { const a = pick(raw); if(a) return a; }
+    } catch(e) {}
+    /* v1.4.3: data utama rusak/hilang -> pakai cadangan ganda otomatis */
+    try { const b = localStorage.getItem(SS_BM_KEY + '_bak'); if(b) { const a = pick(b); if(a) return a; } } catch(e) {}
+    return [];
 }
 
 function ssBmStore() {
-    try { localStorage.setItem(SS_BM_KEY, JSON.stringify(SS.bm)); return true; }
+    try { const js = JSON.stringify(SS.bm); localStorage.setItem(SS_BM_KEY, js); try { localStorage.setItem(SS_BM_KEY + '_bak', js); } catch(e2) {} return true; }
     catch(e) { showToast('⚠️ Bookmark gagal disimpan (penyimpanan penuh atau diblokir)'); return false; }
 }
 
@@ -13658,18 +13706,197 @@ function ssSaveBookmark() {
             const cur = SS.bm.find(x => x.id === SS.bmId);
             if(cur) { showToast('🔖 Sudah tersimpan: ' + (cur.title || 'bookmark')); return; }
         }
-        const g = ssGuessCurrentPage();
-        let ttl = g.title || (SS.mode === 'bm' && SS.bmTitle ? SS.bmTitle : (SS.q + ' · ' + SS.lastScope + ' · hal. ' + SS.page));
-        ssBmOpenSheet({ id: null, title: ttl, url: g.url, q: SS.q });
-        if(!g.exact && ssIsSearchUrl(g.url)) ssBmAutoClipboard(g.url);
+        ssEasySave();
     } else {
         ssBmOpenSheet({ id: null, title: '', url: '', q: '' });
     }
 }
 
+/* ---------- v1.4.3: Bookmark mudah untuk orang awam ---------- */
+function ssBmSameUrl(a, b) {
+    const n = u => { try { const x = new URL(u); return (x.origin + x.pathname.replace(/\/+$/, '') + x.search).toLowerCase(); } catch(e) { return String(u || '').trim().toLowerCase(); } };
+    return n(a) === n(b);
+}
+
+/* Judul otomatis dari alamat artikel: ".../hukum-tahlilan-menurut-islam.html" -> "Hukum tahlilan menurut islam · muslim.or.id" */
+function ssBmTitleFromUrl(u) {
+    const host = ssBmHost(u);
+    try {
+        const segs = new URL(u).pathname.split('/').filter(x => x);
+        let slug = segs.length ? decodeURIComponent(segs[segs.length - 1]) : '';
+        slug = slug.replace(/\.(html?|php|aspx?)$/i, '').replace(/[-_+]+/g, ' ').trim();
+        if(slug.length >= 4 && !/^[\d\s]+$/.test(slug)) {
+            slug = slug.charAt(0).toUpperCase() + slug.slice(1);
+            return (slug.length > 80 ? slug.slice(0, 80) + '…' : slug) + ' · ' + host;
+        }
+    } catch(e) {}
+    return host;
+}
+
+async function ssReadClipUrl() {
+    try {
+        if(!navigator.clipboard || !navigator.clipboard.readText) return '';
+        const t = await navigator.clipboard.readText();
+        const u = ssBmNormUrl((t || '').trim().split(/\s+/)[0]);
+        if(!u || ssIsSearchUrl(u)) return '';
+        if(u.indexOf(location.origin) === 0) return '';   // alamat aplikasi ini sendiri bukan situs yang dicari
+        return u;
+    } catch(e) { return ''; }
+}
+
+/* Simpan langsung tanpa formulir (anti duplikat) */
+function ssBmQuickAdd(title, url, q) {
+    SS.bm = ssBmLoad();
+    const dup = SS.bm.find(x => ssBmSameUrl(x.url, url));
+    if(dup) { showToast('🔖 Sudah tersimpan: ' + (dup.title || ssBmHost(dup.url))); return true; }
+    if(SS.bm.length >= 200) { showToast('⚠️ Maksimal 200 bookmark. Hapus beberapa dulu'); return false; }
+    SS.bm.unshift({ id: 'bm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), title: (title || ssBmHost(url)).slice(0, 120), url: url, q: q || '', t: Date.now() });
+    if(!ssBmStore()) return false;
+    showToast('✅ Bookmark disimpan. Lihat di tombol 🔖 bagian atas');
+    return true;
+}
+
+async function ssEasySave() {
+    ssCatchHide();
+    const g = ssGuessCurrentPage();
+    if(g.exact && g.url && !ssIsSearchUrl(g.url)) {
+        ssBmQuickAdd(g.title || ssBmTitleFromUrl(g.url), g.url, SS.q);
+        return;
+    }
+    const clip = await ssReadClipUrl();
+    if(clip) {
+        SS.lastClip = clip;
+        ssBmOpenSheet({ id: null, title: ssBmTitleFromUrl(clip), url: clip, q: SS.q }, { clip: true });
+        return;
+    }
+    const ttl = (SS.mode === 'bm' && SS.bmTitle) ? SS.bmTitle : (SS.q + ' · ' + SS.lastScope + ' · hal. ' + SS.page);
+    ssBmOpenSheet({ id: null, title: ttl, url: g.url, q: SS.q }, { guide: true });
+}
+
+function ssBmSaveSearchOnly() {
+    if(!SS.lastUrl) { showToast('⚠️ Belum ada pencarian yang dibuka'); return; }
+    let title = ssEl('ssBmTitle').value.trim() || (SS.q + ' · ' + SS.lastScope + ' · hal. ' + SS.page);
+    if(ssBmQuickAdd(title, SS.lastUrl, SS.q)) ssBmCloseSheet();
+}
+
+/* Deteksi link yang baru disalin saat pengguna kembali ke aplikasi (hanya bila izin clipboard sudah diberikan sebelumnya) */
+var ssClipBound = false;
+function ssClipBind() {
+    if(ssClipBound) return;
+    ssClipBound = true;
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) ssClipCheck(); });
+    window.addEventListener('focus', ssClipCheck);
+}
+async function ssClipCheck() {
+    const p = ssEl('ssPanel');
+    if(!p || !p.classList.contains('active') || SS.view !== 'web') return;
+    try {
+        if(!navigator.permissions || !navigator.permissions.query) return;
+        const st = await navigator.permissions.query({ name: 'clipboard-read' });
+        if(st.state !== 'granted') return;
+    } catch(e) { return; }
+    if(!document.hasFocus()) return;
+    const u = await ssReadClipUrl();
+    if(!u || u === SS.lastClip) return;
+    SS.lastClip = u;
+    SS.bm = ssBmLoad();
+    if(SS.bm.some(b => ssBmSameUrl(b.url, u))) return;
+    ssCatchShow(u);
+}
+function ssCatchShow(u) {
+    SS.catchUrl = u;
+    ssEl('ssCatchTx').textContent = ssBmTitleFromUrl(u);
+    ssEl('ssCatch').classList.add('on');
+}
+function ssCatchHide() { const c = ssEl('ssCatch'); if(c) c.classList.remove('on'); SS.catchUrl = ''; }
+function ssCatchSave() {
+    const u = SS.catchUrl;
+    if(!u) { ssCatchHide(); return; }
+    ssBmQuickAdd(ssBmTitleFromUrl(u), u, SS.q);
+    ssCatchHide();
+}
+
+/* ---------- v1.4.3: Cadangan / pemulihan / salin daftar ---------- */
+function ssBackupDownload() {
+    try {
+        const data = { app: 'StudioPosterMakerPro', type: 'sunnah-backup', v: 1, t: Date.now(), bookmarks: ssBmLoad(), notes: ssNoteLoad() };
+        const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+        const d = new Date();
+        const ds = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'cadangan-situs-sunnah-' + ds + '.json';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+        showToast('💾 Cadangan diunduh (' + data.bookmarks.length + ' bookmark, ' + data.notes.length + ' catatan). Simpan file ini baik-baik');
+    } catch(e) { showToast('⚠️ Cadangan gagal dibuat'); }
+}
+
+function ssBackupRestorePick() {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json,application/json';
+    inp.style.display = 'none';
+    inp.onchange = () => {
+        const f = inp.files && inp.files[0];
+        inp.remove();
+        if(!f) return;
+        const rd = new FileReader();
+        rd.onload = () => {
+            try {
+                const d = JSON.parse(String(rd.result || ''));
+                if(!d || d.type !== 'sunnah-backup') { showToast('⚠️ Ini bukan file cadangan Situs Sunnah'); return; }
+                let addB = 0, addN = 0;
+                const curB = ssBmLoad();
+                (Array.isArray(d.bookmarks) ? d.bookmarks : []).forEach(x => {
+                    if(!x || typeof x.url !== 'string' || typeof x.id !== 'string') return;
+                    if(curB.length >= 200) return;
+                    if(curB.some(y => y.id === x.id || ssBmSameUrl(y.url, x.url))) return;
+                    curB.push(x); addB++;
+                });
+                SS.bm = curB; ssBmStore();
+                const curN = ssNoteLoad();
+                (Array.isArray(d.notes) ? d.notes : []).forEach(x => {
+                    if(!x || typeof x.id !== 'string' || typeof x.title !== 'string' || typeof x.content !== 'string') return;
+                    if(curN.length >= 100) return;
+                    if(curN.some(y => y.id === x.id)) return;
+                    curN.push(x); addN++;
+                });
+                SS.notes = curN; ssNoteStore();
+                if(SS.view === 'bm') ssRenderBm();
+                showToast('📥 Dipulihkan: ' + addB + ' bookmark, ' + addN + ' catatan');
+            } catch(e) { showToast('⚠️ File cadangan tidak bisa dibaca'); }
+        };
+        rd.onerror = () => showToast('⚠️ File cadangan tidak bisa dibaca');
+        rd.readAsText(f);
+    };
+    document.body.appendChild(inp);
+    inp.click();
+}
+
+function ssBmCopyAll() {
+    SS.bm = ssBmLoad();
+    if(!SS.bm.length) { showToast('ℹ️ Belum ada bookmark untuk disalin'); return; }
+    const txt = SS.bm.map((b, i) => (i + 1) + '. ' + (b.title || ssBmHost(b.url)) + '\n' + b.url).join('\n\n');
+    const fallback = () => {
+        const ta = document.createElement('textarea');
+        ta.value = txt; ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        let ok = false; try { ok = document.execCommand('copy'); } catch(e) {}
+        ta.remove();
+        showToast(ok ? '📋 Daftar bookmark disalin. Tempel di WhatsApp/Catatan' : '⚠️ Gagal menyalin');
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => showToast('📋 Daftar bookmark disalin. Tempel di WhatsApp/Catatan'), fallback);
+    else fallback();
+}
+
 function ssBmNew() { ssBmOpenSheet({ id: null, title: '', url: '', q: '' }); }
 
-function ssBmOpenSheet(b) {
+function ssBmOpenSheet(b, opt) {
+    opt = opt || {};
+    ssEl('ssBmGuide').style.display = opt.guide ? 'block' : 'none';
+    ssEl('ssBmClipOk').style.display = opt.clip ? 'block' : 'none';
     SS.bmEditId = b.id || null;
     SS.bmDraftQ = b.q || '';
     ssEl('ssBmSheetTitle').textContent = b.id ? '✏️ Edit Bookmark' : '🔖 Simpan Bookmark';
