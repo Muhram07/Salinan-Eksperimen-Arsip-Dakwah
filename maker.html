@@ -1,14 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v1.5.2
+Studio Poster Maker Pro - Update v1.5.3
+
+v1.5.3:
+1. HAPUS BG > AI 1: ekor & jari/kaki tidak mudah terpotong lagi. Objek dianalisis ulang pada area yang diperbesar (pass 2), digabung hanya bila tersambung ke objek hasil pass 1, lalu diselamatkan lagi oleh penyaring warna (pengaman diperlonggar bertahap, tidak langsung dibatalkan).
+2. HAPUS BG > AI: persentase loading kini berbobot sesuai proses nyata (mesin, unduh model, muat model, analisis, pass 2, rapikan). Angka tidak lagi loncat ke 100% di tengah proses.
+3. HAPUS BG > Pulihkan/Hapus: ada zoom +/- (tahan untuk mengulang), geser atas/bawah/kiri/kanan, tombol pusatkan 🎯, dan pen tool keker (pegangan ✋ + ✏️ ON/OFF) seperti Tangkap Ajaib. Kuas kini 2-120 px; pratinjau beresolusi tinggi agar detail kecil (jari, ekor) bisa dikoreksi manual.
 
 v1.5.2:
 1. HAPUS BG > AI 1: bagian tipis yang ikut objek (ekor burung, jari/kaki) kini tidak terpotong lagi. Hasil deteksi AI dilengkapi penyaring warna objek + sambungan area (cara yang sama seperti Snap di Tangkap Ajaib), dengan pengaman agar latar/ranting tidak ikut terambil.
 2. HAPUS BG > AI: kini muncul kartu loading (spinner, garis progres, persentase, keterangan tahap) dan layar dikunci sementara agar tidak dikira macet. Tombol silang tetap bisa dipakai untuk membatalkan.
-
-v1.5.1:
-1. TANGKAP AJAIB > Snap AI: bagian tipis yang sudah dikuas (mis. ekor burung) kini ikut terambil (penyaring warna objek + sambungan area, tidak lagi terpotong). Tepi dilebarkan 1 piksel agar tidak menipis.
-2. Tampilan menu: tombol "✂️ Pisahkan Subjek" kini panjang berwarna kuning dan tidak dempet; tombol berganti nama "(AI) Snap ke Objek".
-3. Saat Snap ditekan: tombol beranimasi (spinner), muncul kartu loading dengan garis progres + keterangan tahap, dan layar dikunci sementara agar tidak dikira macet.
 
 -->
 
@@ -339,6 +339,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .snap-busy .btn-nav:not(.snap-ai-btn){opacity:.45;}
 /* v1.5.2: kunci menu Hapus BG saat AI bekerja */
 .wand-busy .btn-nav,.wand-busy .btn-sub-tool,.wand-busy input{pointer-events:none;opacity:.45;}
+/* v1.5.3: zoom/geser/keker Hapus BG */
+#magicWandCanvasWrapper{display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:fit-content;max-width:none;line-height:0;transform-origin:center center;}
+#magicWandCanvas{box-shadow:0 0 20px #000;border-radius:6px;}
+.wand-view-ui{display:none;}
+.wand-view-ui.on{display:flex;}
+#wandStalk{display:none;}
+#wandStalk.on{display:flex;}
 
 /* ===== BROWSER GAMBAR (v1.2.5, feed v1.2.7) ===== */
 #bibPanel{position:fixed;left:0;right:0;bottom:0;height:62vh;height:62dvh;z-index:9500;background:#141414;border-top:1px solid rgba(212,175,55,.55);border-radius:16px 16px 0 0;box-shadow:0 -12px 34px rgba(0,0,0,.9);display:none;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px);-webkit-user-select:text;user-select:text;}
@@ -1066,7 +1073,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="panel-close" onclick="closeMagicWandModal()">✕</button>
 </div>
 <div class="fmodal-body" id="magicWandBody">
-<canvas id="magicWandCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
+<div id="magicWandCanvasWrapper"><canvas id="magicWandCanvas"></canvas></div>
+<div class="wand-view-ui" id="wandZoomUi" style="position:absolute; top:10px; right:10px; flex-direction:column; gap:5px; z-index:105;">
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startStepHold(function(){zoomMagicWand(1)})" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startStepHold(function(){zoomMagicWand(-1)})" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➖</button>
+<button class="btn-nav" onclick="wandViewReset()" style="width:34px;justify-content:center;" aria-label="Pusatkan">🎯</button>
+</div>
+<div class="wand-view-ui" id="wandPanUi" style="position:absolute; top:10px; left:10px; z-index:105;">
+<div style="display:grid; grid-template-columns:repeat(3,34px); gap:4px;">
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startWandPan(0,1)" onpointerup="stopWandPan()" onpointerleave="stopWandPan()" onpointercancel="stopWandPan()" aria-label="Geser ke atas">⬆️</button>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startWandPan(1,0)" onpointerup="stopWandPan()" onpointerleave="stopWandPan()" onpointercancel="stopWandPan()" aria-label="Geser ke kiri">⬅️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startWandPan(0,-1)" onpointerup="stopWandPan()" onpointerleave="stopWandPan()" onpointercancel="stopWandPan()" aria-label="Geser ke bawah">⬇️</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startWandPan(-1,0)" onpointerup="stopWandPan()" onpointerleave="stopWandPan()" onpointercancel="stopWandPan()" aria-label="Geser ke kanan">➡️</button>
+</div>
+</div>
+<div class="grab-reticle" id="wandReticle"></div>
+<div class="handled-loupe-stalk" id="wandStalk" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; width:44px; height:120px; border-radius:22px; font-size:18px; flex-direction:column; align-items:center; justify-content:center; cursor:grab; gap:10px;">
+    <span id="wandDragHandle" style="padding:5px; cursor:grab;" title="Geser">✋</span>
+    <div style="width:20px; height:1px; background:#D4AF37;"></div>
+    <span id="wandPaintToggle" style="padding:5px; color:#00ff88; cursor:pointer; font-size:14px;" onclick="toggleWandPaint()" title="Kuas ON/OFF">✏️</span>
+</div>
 <div class="snap-ov" id="wandAiOverlay">
     <div class="snap-card">
         <div class="snap-title"><span class="snap-spin"></span><span id="wandAiTitle">AI sedang menghapus background…</span></div>
@@ -1095,7 +1123,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-sub-tool" id="btnWandAiErase" onclick="wandAiSetTool('erase')" style="flex-direction:row;padding:6px 8px;">➖ Hapus</button>
 <button class="btn-nav" onclick="wandAiUndo()" style="padding:6px 10px;">↩️</button>
 <span style="font-size:11px;color:#aaa;">Kuas:</span>
-<input type="range" class="ctrl-slider" id="wandAiBrush" min="4" max="80" value="24" style="width:70px;">
+<input type="range" class="ctrl-slider" id="wandAiBrush" min="2" max="120" value="24" style="width:70px;">
+<span id="wandAiBrushVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:30px;">24px</span>
 <button class="btn-nav" onclick="wandAiClearModel()" style="margin-left:auto;font-size:10px;padding:6px 8px;">🗑️ Model</button>
 </div>
 </div>
@@ -1456,7 +1485,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.5.2';
+    return 'v1.5.3';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -9495,8 +9524,17 @@ modal.classList.add('active');
 const canvas=document.getElementById('magicWandCanvas');
 const maxW=Math.min(window.innerWidth*0.88,480);
 const aspect=(el.img.height||300)/(el.img.width||300);
-canvas.width=maxW;
-canvas.height=Math.round(maxW*aspect);
+wandView.LW=Math.max(1,Math.floor(maxW));
+wandView.LH=Math.max(1,Math.round(maxW*aspect));
+wandView.R=Math.max(1,Math.min(4,1280/Math.max(wandView.LW,wandView.LH)));
+wandView.hi=false; wandView.paint=true; wandView.warned=false;
+const _pt=document.getElementById('wandPaintToggle'); if(_pt){ _pt.innerText='✏️'; _pt.style.color='#00ff88'; }
+const _sk=document.getElementById('wandStalk');
+if(_sk){ _sk.style.left='50%'; _sk.style.top=''; _sk.style.right=''; _sk.style.bottom='20px'; _sk.style.transform='translateX(-50%)'; }
+const _bl=document.getElementById('wandAiBrushVal'); if(_bl) _bl.textContent=wandBrushPx()+'px';
+canvas.width=wandView.LW;
+canvas.height=wandView.LH;
+wandFit();
 
 resetMagicWand();
 setWandMode('none');
@@ -9504,13 +9542,16 @@ setWandMode('none');
 
 function closeMagicWandModal(){
 wandAiDispose();
+stopStepHold();
 document.getElementById('magicWandModal').classList.remove('active');
+const _cv=document.getElementById('magicWandCanvas'); if(_cv){ _cv.width=1; _cv.height=1; }
 }
 
 function resetMagicWand(){
 const el=getActiveElement();
 const canvas=document.getElementById('magicWandCanvas');
 if(!canvas||!el)return;
+if(!(wandMode==='ai' && wandAi.base)) wandSetRes(false);
 const ctxW=canvas.getContext('2d');
 ctxW.clearRect(0,0,canvas.width,canvas.height);
 ctxW.drawImage(el.img,0,0,canvas.width,canvas.height);
@@ -9540,7 +9581,12 @@ if(mode==='manual') document.getElementById('btnWandManual').classList.add('acti
 if(mode==='global') document.getElementById('btnWandGlobal').classList.add('active');
 const aiPanelEl=document.getElementById('wandAiPanel');
 if(aiPanelEl) aiPanelEl.style.display=(mode==='ai')?'flex':'none';
-if(prevMode==='ai' && mode!=='ai'){ resetMagicWand(); }
+if(prevMode==='ai' && mode!=='ai'){
+    resetMagicWand(); wandViewReset();
+    /* bebaskan kanvas cache beresolusi tinggi; dibuat ulang otomatis saat kembali ke mode AI */
+    ['pm','tmp','src','bm'].forEach(function(k){ if(wandAi[k]){ wandAi[k].width=1; wandAi[k].height=1; wandAi[k]=null; } });
+    wandAi.bmKey='';
+}
 
 if(mode==='auto'){
     const canvas=document.getElementById('magicWandCanvas');
@@ -9552,6 +9598,8 @@ if(mode==='auto'){
 if(mode==='manual'){ showToast('👆 Sentuh area background pada gambar'); }
 if(mode==='global'){ showToast('🌍 Sentuh warna yang ingin dihapus'); }
 if(mode==='ai'){ wandAiEnter(); }
+wandFit();
+wandUiSync();
 }
 
 function setupMagicWandEvents(){
@@ -9559,8 +9607,8 @@ const canvas=document.getElementById('magicWandCanvas');
 canvas.addEventListener('pointerdown',(e)=>{
 if(wandMode === 'auto' || wandMode === 'ai') return;
 const rect=canvas.getBoundingClientRect();
-const x=Math.round(e.clientX-rect.left);
-const y=Math.round(e.clientY-rect.top);
+const x=Math.max(0,Math.min(canvas.width-1,Math.round((e.clientX-rect.left)*(canvas.width/(rect.width||canvas.width)))));
+const y=Math.max(0,Math.min(canvas.height-1,Math.round((e.clientY-rect.top)*(canvas.height/(rect.height||canvas.height)))));
 const tol=parseInt(document.getElementById('wandTolerance').value||30);
 const feather=parseInt(document.getElementById('wandFeather').value||1);
 
@@ -9710,15 +9758,24 @@ const AI_BG_PRESETS = {
 var wandAi = {rid:0, busy:false, session:null, base:null, pm:null, tmp:null, strokes:[], tool:null, cur:null, raf:0, needFull:false};
 
 function wandAiSleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+/* v1.5.3: bobot tahap progres sesuai lama proses nyata (persen total 0-100) */
+const WAND_STG={ort:[0,16],model:[16,38],load:[38,50],prep:[50,56],infer:[56,80],refine:[80,93],mask:[93,100]};
+function wandAiAt(stage,frac,txt){
+    const s=WAND_STG[stage]; if(!s) return;
+    const f=Math.max(0,Math.min(1,frac||0));
+    wandAiOv(txt, s[0]+(s[1]-s[0])*f);
+}
 function wandAiStatus(txt, pct){
     const s=document.getElementById('wandAiStatus'); if(s) s.textContent=txt;
-    const b=document.getElementById('wandAiBar'); if(b && pct!==undefined) b.style.width=Math.max(0,Math.min(100,pct))+'%';
-    /* v1.5.2: unduhan mesin/model ikut tampil di kartu loading (persentase digabung ke progres total) */
+    const b=document.getElementById('wandAiBar'); if(b && pct!==undefined && !wandAiProg.on) b.style.width=Math.max(0,Math.min(100,pct))+'%';
+    /* unduhan mesin/model memakai byte nyata dan dipetakan ke rentang tahapnya masing-masing */
     if(wandAiProg.on){
         const t=String(txt);
-        if(pct!==undefined && /Mengunduh/.test(t)){
-            const base=/mesin/i.test(t)?3:(/model/i.test(t)?24:3);
-            wandAiOv(t, base+pct*0.18);
+        const f=(pct===undefined)?undefined:Math.max(0,Math.min(1,pct/100));
+        if(/mesin/i.test(t)){
+            if(f!==undefined) wandAiAt('ort', /wasm/i.test(t)?0.12+0.88*f:0.12*f, t); else wandAiOv(t);
+        } else if(/model/i.test(t)){
+            if(f!==undefined) wandAiAt('model', f, t); else wandAiOv(t);
         } else wandAiOv(t);
     }
 }
@@ -9731,6 +9788,7 @@ function wandAiOv(txt, pct){
     const p=Math.round(wandAiProg.pct);
     const b=document.getElementById('wandAiOvBar'); if(b) b.style.width=p+'%';
     const l=document.getElementById('wandAiOvPct'); if(l) l.textContent=p+'%';
+    const b2=document.getElementById('wandAiBar'); if(b2 && wandAiProg.on) b2.style.width=p+'%';
 }
 function wandAiSetBusy(on){
     wandAiProg.on=!!on; wandAiProg.pct=0;
@@ -9810,9 +9868,8 @@ function wandAiRescue(img, base){
         const st=new Uint8Array(n);        /* 1 objek pasti, 2 kandidat, 3 kandidat diterima */
         const queue=new Int32Array(n);
         const dist=new Uint16Array(n);
-        const maxD=Math.round(Math.max(mw,mh)*0.5);
         let certain=0;
-        const tryRescue=function(T){
+        const tryRescue=function(T,maxD){
             st.fill(0); dist.fill(0);
             let qh=0, qt=0, added=0; certain=0;
             for(let i=0;i<n;i++){
@@ -9837,13 +9894,17 @@ function wandAiRescue(img, base){
             }
             return added;
         };
-        /* pengaman: bila tambahan terlalu besar (bocor ke latar), naikkan keketatan; bila tetap besar, batalkan */
+        /* pengaman: bila tambahan terlalu besar (bocor ke latar), naikkan keketatan & kecilkan jangkauan; terakhir pakai versi paling ketat berjangkauan pendek (tidak langsung dibatalkan) */
         let added=0, ok=false;
-        const tries=[0.6,0.78,0.92];
+        const tries=[[0.6,0.5],[0.78,0.4],[0.92,0.3],[0.97,0.2]];
         for(let k=0;k<tries.length;k++){
-            added=tryRescue(tries[k]);
+            added=tryRescue(tries[k][0],Math.round(Math.max(mw,mh)*tries[k][1]));
             if(certain<64) return base;
             if(added<=certain*0.35){ ok=true; break; }
+        }
+        if(!ok){
+            added=tryRescue(0.97,Math.round(Math.max(mw,mh)*0.08));
+            ok=(added>=4 && added<=certain*0.5);
         }
         if(!ok||added<4) return base;
 
@@ -10007,50 +10068,209 @@ async function wandAiInfer(session, img){
     return base;
 }
 
+/* v1.5.3: pass kedua AI 1 -> objek dipotong dari foto lalu dianalisis ulang (resolusi efektif lebih tinggi)
+   sehingga ekor & jari/kaki yang tipis ikut terdeteksi. Hasil pass 2 HANYA ditambahkan bila tersambung ke objek
+   hasil pass 1 (hysteresis) dan dibatasi agar latar/ranting tidak ikut. Semua kanvas sementara dibebaskan. */
+async function wandAiRefine(img, base0, session, rid){
+    const st=wandAi;
+    const bw=base0.width, bh=base0.height;
+    if(!bw||!bh) return base0;
+    const bd=base0.getContext('2d').getImageData(0,0,bw,bh).data;
+    let x0=bw, y0=bh, x1=-1, y1=-1, fg=0;
+    for(let y=0;y<bh;y++){
+        for(let x=0;x<bw;x++){
+            if(bd[(y*bw+x)*4+3]>=128){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; fg++; }
+        }
+    }
+    if(fg<24||x1<0) return base0;
+    const iw=img.naturalWidth||img.width, ih=img.naturalHeight||img.height;
+    if(!iw||!ih) return base0;
+    const nx0=x0/bw, nx1=(x1+1)/bw, ny0=y0/bh, ny1=(y1+1)/bh;
+    const padX=Math.max(0.06,(nx1-nx0)*0.35), padY=Math.max(0.06,(ny1-ny0)*0.35);
+    const rx0=Math.max(0,nx0-padX), rx1=Math.min(1,nx1+padX);
+    const ry0=Math.max(0,ny0-padY), ry1=Math.min(1,ny1+padY);
+    const rw=rx1-rx0, rh=ry1-ry0;
+
+    /* area objek (+ruang di sekitarnya) dibagi menjadi 1-4 petak yang saling tumpang tindih,
+       tiap petak dianalisis ulang oleh AI sehingga resolusi efektifnya 1,5-3x lebih tinggi */
+    const OV=0.25;
+    const nxT=rw>0.6?2:1, nyT=rh>0.6?2:1;
+    const tw=rw/(nxT-(nxT-1)*OV), th=rh/(nyT-(nyT-1)*OV);
+    const tiles=[];
+    for(let ty=0;ty<nyT;ty++){
+        for(let tx=0;tx<nxT;tx++){
+            let a=rx0+tx*tw*(1-OV), b=ry0+ty*th*(1-OV);
+            a=Math.max(0,Math.min(1-tw,a)); b=Math.max(0,Math.min(1-th,b));
+            tiles.push({x:a,y:b,w:tw,h:th});
+        }
+    }
+
+    const N=768, n=N*N;
+    const RA=new Uint8Array(n);              /* hasil analisis ulang gabungan semua petak */
+    let used=0;
+    for(let ti=0;ti<tiles.length;ti++){
+        const T=tiles[ti];
+        /* petak tanpa bagian objek dilewati (hindari menyorot ranting/latar saja) */
+        let cnt=0;
+        const tbx0=Math.floor(T.x*bw), tbx1=Math.min(bw,Math.ceil((T.x+T.w)*bw)), tby0=Math.floor(T.y*bh), tby1=Math.min(bh,Math.ceil((T.y+T.h)*bh));
+        for(let y=tby0;y<tby1;y++) for(let x=tbx0;x<tbx1;x++) if(bd[(y*bw+x)*4+3]>=128) cnt++;
+        if(cnt<12) continue;
+        let cw=Math.max(8,Math.round(T.w*iw)), ch=Math.max(8,Math.round(T.h*ih));
+        const sc=Math.min(1,1024/Math.max(cw,ch));
+        cw=Math.max(8,Math.round(cw*sc)); ch=Math.max(8,Math.round(ch*sc));
+        const crop=document.createElement('canvas'); crop.width=cw; crop.height=ch;
+        const cg=crop.getContext('2d'); cg.imageSmoothingEnabled=true; cg.imageSmoothingQuality='high';
+        cg.drawImage(img,T.x*iw,T.y*ih,T.w*iw,T.h*ih,0,0,cw,ch);
+        let base2=null;
+        try{ base2=await wandAiInfer(session,crop); } finally { crop.width=1; crop.height=1; }
+        if(rid!==st.rid){ if(base2){ base2.width=1; base2.height=1; } return base0; }
+        if(!base2) continue;
+        const tpx0=Math.max(0,Math.min(N-1,Math.round(T.x*N))), tpy0=Math.max(0,Math.min(N-1,Math.round(T.y*N)));
+        const tpw=Math.max(1,Math.min(N-tpx0,Math.round(T.w*N))), tph=Math.max(1,Math.min(N-tpy0,Math.round(T.h*N)));
+        const rc=document.createElement('canvas'); rc.width=tpw; rc.height=tph;
+        const rg=rc.getContext('2d',{willReadFrequently:true});
+        rg.imageSmoothingEnabled=true; rg.imageSmoothingQuality='high';
+        rg.drawImage(base2,0,0,tpw,tph);
+        const R=rg.getImageData(0,0,tpw,tph).data;
+        base2.width=1; base2.height=1; rc.width=1; rc.height=1;
+        /* tepi petak yang bukan tepi gambar dipudarkan agar potongan objek di tepi petak tidak dianggap objek */
+        const fw=Math.max(2,Math.round(Math.min(tpw,tph)*0.1));
+        const bl=tpx0>0, br=tpx0+tpw<N, bt=tpy0>0, bb=tpy0+tph<N;
+        for(let y=0;y<tph;y++){
+            for(let x=0;x<tpw;x++){
+                let d=1e9;
+                if(bl&&x<d) d=x; if(br&&tpw-1-x<d) d=tpw-1-x; if(bt&&y<d) d=y; if(bb&&tph-1-y<d) d=tph-1-y;
+                const wgt=d>=fw?1:d/fw;
+                const v=Math.round(R[(y*tpw+x)*4+3]*wgt);
+                const i=(tpy0+y)*N+tpx0+x;
+                if(v>RA[i]) RA[i]=v;
+            }
+        }
+        used++;
+        wandAiOv(null, WAND_STG.refine[0]+(WAND_STG.refine[1]-WAND_STG.refine[0])*0.6*((ti+1)/tiles.length));
+        await snapAiYield();
+        if(rid!==st.rid) return base0;
+    }
+    if(!used) return base0;
+
+    const comp=document.createElement('canvas'); comp.width=N; comp.height=N;
+    const cg2=comp.getContext('2d',{willReadFrequently:true});
+    cg2.imageSmoothingEnabled=true; cg2.imageSmoothingQuality='high';
+    cg2.drawImage(base0,0,0,N,N);
+    const cd=cg2.getImageData(0,0,N,N); const A=cd.data;
+
+    const acc=new Uint8Array(n), queue=new Int32Array(n);
+    const grow=function(T2){
+        acc.fill(0);
+        let qh=0, qt=0, added=0, fgc=0;
+        for(let i=0;i<n;i++){ if(A[i*4+3]>=128){ acc[i]=1; queue[qt++]=i; fgc++; } }
+        while(qh<qt){
+            const i=queue[qh++]; const x=i%N, y=(i-x)/N;
+            for(let dy=-1;dy<=1;dy++){
+                const yy=y+dy; if(yy<0||yy>=N) continue;
+                for(let dx=-1;dx<=1;dx++){
+                    if(!dx&&!dy) continue;
+                    const xx=x+dx; if(xx<0||xx>=N) continue;
+                    const j=yy*N+xx; if(acc[j]) continue;
+                    if(RA[j]>=T2){ acc[j]=2; queue[qt++]=j; added++; }
+                }
+            }
+        }
+        return {added:added, fg:fgc};
+    };
+    /* hanya menambah bagian yang tersambung ke objek pass 1; bila tambahan terlalu besar (bocor ke latar) naikkan ambang */
+    const tries=[100,130,165,200];
+    let ok=false, res=null;
+    for(let k=0;k<tries.length;k++){
+        res=grow(tries[k]);
+        if(res.fg<64) break;
+        if(res.added<=res.fg*0.35){ ok=true; break; }
+    }
+    if(!ok||res.added<4){ comp.width=1; comp.height=1; return base0; }
+
+    for(let i=0;i<n;i++){
+        const ra=RA[i];
+        if(acc[i]===2){ if(ra>A[i*4+3]) A[i*4+3]=ra; }
+        else if(acc[i]===0 && ra>=48){
+            const x=i%N;
+            if((x>0&&acc[i-1]===2)||(x<N-1&&acc[i+1]===2)||(i>=N&&acc[i-N]===2)||(i<n-N&&acc[i+N]===2)){
+                const v=Math.round(ra*0.85); if(v>A[i*4+3]) A[i*4+3]=v;
+            }
+        }
+    }
+    cg2.putImageData(cd,0,0);
+    return comp;
+}
+
 async function wandAiEnter(){
     const st=wandAi; const el=getActiveElement();
     const pn=document.getElementById('wandAiPanel'); if(pn) pn.style.display='flex';
     if(!el||el.type!=='image') return;
-    if(st.base){ wandAiRebuild(); return; }
+    /* v1.5.3: kanvas pratinjau dinaikkan resolusinya (zoom tetap tajam untuk koreksi detail) */
+    const _cv=document.getElementById('magicWandCanvas');
+    if(_cv && wandSetRes(true)){ const _g=_cv.getContext('2d'); _g.drawImage(el.img,0,0,_cv.width,_cv.height); }
+    wandFit();
+    if(st.base){ wandAiRebuild(); wandUiSync(); return; }
     if(st.busy) return;
     st.busy=true; const rid=st.rid;
     wandAiSetBusy(true);
+    wandUiSync();
+    const isAi1=(wandAiVariant!=='ai2');
     try{
         wandAiStatus('Menyiapkan mesin AI…',0);
-        wandAiOv('Menyiapkan mesin AI…',2);
+        wandAiAt('ort',0,'Menyiapkan mesin AI…');
         const ortLib=await wandAiLoadOrt(); if(rid!==st.rid) return;
+        wandAiAt('ort',1,'Mesin AI siap');
         if(!st.session){
-            wandAiOv('Memuat model AI…',22);
+            wandAiAt('model',0,'Memuat model AI…');
             let buf=await wandAiLoadModelBuf(); if(rid!==st.rid) return;
+            wandAiAt('model',1,'Model AI siap');
             wandAiStatus('Memuat model ke memori…',100);
-            wandAiOv('Memuat model ke memori… (beberapa detik)',45);
+            wandAiAt('load',0.1,'Memuat model ke memori… (beberapa detik)');
             await wandAiSleep(60);
             const sess=await ortLib.InferenceSession.create(new Uint8Array(buf),{executionProviders:['wasm'],graphOptimizationLevel:'all'});
             buf=null;
             if(rid!==st.rid){ try{ const r=sess.release(); if(r&&r.catch) r.catch(function(){}); }catch(e){} return; }
             st.session=sess;
         }
-        wandAiStatus(wandAiVariant==='ai2'?'AI 2 sedang memproses gambar… (lebih lama, harap tunggu)':'AI 1 sedang memproses gambar… (beberapa detik)',100);
-        wandAiOv(wandAiVariant==='ai2'?'AI 2 menganalisis gambar… (lebih lama, harap tunggu)':'AI 1 menganalisis gambar… (beberapa detik)',55);
+        wandAiAt('load',1,'Model dimuat');
+        wandAiAt('prep',0.3,'Menyiapkan gambar…');
+        await snapAiYield();
+        wandAiStatus(isAi1?'AI 1 sedang memproses gambar… (beberapa detik)':'AI 2 sedang memproses gambar… (lebih lama, harap tunggu)',100);
+        wandAiAt('infer',0,isAi1?'AI 1 menganalisis gambar… (angka bergerak setelah tahap ini selesai)':'AI 2 menganalisis gambar… (lebih lama, harap tunggu)');
         await snapAiYield();
         await wandAiSleep(80);
         const base0=await wandAiInfer(st.session,el.img);
         if(rid!==st.rid){ base0.width=1; base0.height=1; return; }
-        wandAiOv('Menyelamatkan bagian tipis (ekor & jari)…',85);
-        await snapAiYield();
-        if(rid!==st.rid){ base0.width=1; base0.height=1; return; }
+        wandAiAt('infer',1,'Analisis selesai');
         let base=base0;
-        try{
-            if(wandAiVariant==='ai1') base=wandAiRescue(el.img,base0);
-            if(base!==base0){ base0.width=1; base0.height=1; }
-        }catch(re){ console.warn('Penyelamat bagian tipis gagal',re); base=base0; }
+        if(isAi1){
+            /* pass 2: analisis ulang area objek (ekor, jari/kaki) */
+            wandAiAt('refine',0,'Memperjelas ekor & jari (analisis ulang area objek)…');
+            await snapAiYield();
+            if(rid!==st.rid){ base0.width=1; base0.height=1; return; }
+            try{
+                const rf=await wandAiRefine(el.img,base,st.session,rid);
+                if(rid!==st.rid){ if(rf!==base){ rf.width=1; rf.height=1; } base.width=1; base.height=1; return; }
+                if(rf!==base){ base.width=1; base.height=1; base=rf; }
+            }catch(re){ console.warn('Pass 2 AI gagal',re); }
+            wandAiAt('refine',0.6,'Menyelamatkan bagian tipis (ekor & jari)…');
+            await snapAiYield();
+            if(rid!==st.rid){ base.width=1; base.height=1; return; }
+            try{
+                const rs=wandAiRescue(el.img,base);
+                if(rs!==base){ base.width=1; base.height=1; base=rs; }
+            }catch(re){ console.warn('Penyelamat bagian tipis gagal',re); }
+        }
+        wandAiAt('refine',1,'Bagian tipis selesai');
         st.base=base; st.strokes=[]; st.cur=null;
-        wandAiOv('Merapikan hasil…',96);
+        if(st.bm){ st.bm.width=1; st.bm.height=1; st.bm=null; } st.bmKey='';
+        wandAiAt('mask',0,'Merapikan hasil…');
         await snapAiYield();
         if(rid!==st.rid) return;
-        wandAiStatus('✅ Selesai. Pakai ➕ Pulihkan / ➖ Hapus untuk merapikan, lalu Terapkan.',100);
+        wandAiStatus('✅ Selesai. Pakai ➕ Pulihkan / ➖ Hapus untuk merapikan (zoom & geser tersedia), lalu Terapkan.',100);
         wandAiRebuild();
-        wandAiOv('✅ Selesai',100);
+        wandAiAt('mask',1,'✅ Selesai');
         await wandAiSleep(200);
         showToast('🧠 AI selesai mendeteksi objek');
     }catch(e){
@@ -10059,9 +10279,11 @@ async function wandAiEnter(){
             ? '❌ Model AI tidak bisa diunduh. Periksa koneksi internet, lalu coba lagi (AI 1 juga bisa memakai file "remove-bg-ai1.onnx" di root repo).'
             : '❌ Gagal: '+String((e&&e.message)||e);
         wandAiStatus(msg,0);
+        const _eb=document.getElementById('wandAiBar'); if(_eb) _eb.style.width='0%';
         showToast(msg.length>70?msg.slice(0,70)+'…':msg);
     }finally{
         if(rid===st.rid){ st.busy=false; wandAiSetBusy(false); }
+        wandUiSync();
     }
 }
 
@@ -10072,7 +10294,8 @@ function wandAiParams(){
     return {c:0.5+(t-30)/350, hw:0.12, blur:f*0.6};
 }
 
-function wandAiBuildMask(mw, mh){
+/* v1.5.3: masker dasar AI (blur + kurva) dipisah agar bisa di-cache; goresan Pulihkan/Hapus digambar di atasnya */
+function wandAiBuildBaseMask(mw, mh){
     const st=wandAi; const P=wandAiParams();
     mw=Math.max(1,Math.round(mw)); mh=Math.max(1,Math.round(mh));
     const m=document.createElement('canvas'); m.width=mw; m.height=mh;
@@ -10108,16 +10331,40 @@ function wandAiBuildMask(mw, mh){
     const id=g.getImageData(0,0,mw,mh); const d=id.data;
     for(let i=3;i<d.length;i+=4) d[i]=lut[d[i]];
     g.putImageData(id,0,0);
+    return m;
+}
+
+function wandAiDrawStrokes(g, mw, mh){
+    const st=wandAi;
     for(let i=0;i<st.strokes.length;i++){
         const s=st.strokes[i];
         lmDrawStroke(g,{erase:s.erase,size:Math.max(2,s.size*mw),feather:s.feather,pts:s.pts.map(function(q){ return {x:q.x*mw,y:q.y*mh}; })});
     }
+}
+
+function wandAiBuildMask(mw, mh){
+    const m=wandAiBuildBaseMask(mw,mh);
+    wandAiDrawStrokes(m.getContext('2d'),m.width,m.height);
     return m;
 }
 
 function wandAiRebuild(){
-    const cv=document.getElementById('magicWandCanvas'); if(!cv||!wandAi.base) return;
-    wandAi.pm=wandAiBuildMask(cv.width,cv.height);
+    const cv=document.getElementById('magicWandCanvas'); const st=wandAi; if(!cv||!st.base) return;
+    const P=wandAiParams();
+    const key=cv.width+'x'+cv.height+'|'+P.c.toFixed(4)+'|'+P.blur.toFixed(2);
+    if(!st.bm||st.bmKey!==key){
+        if(st.bm){ st.bm.width=1; st.bm.height=1; }
+        st.bm=wandAiBuildBaseMask(cv.width,cv.height); st.bmKey=key;
+    }
+    if(!st.pm||st.pm.width!==cv.width||st.pm.height!==cv.height){
+        if(!st.pm) st.pm=document.createElement('canvas');
+        st.pm.width=cv.width; st.pm.height=cv.height;
+    }
+    const g=st.pm.getContext('2d',{willReadFrequently:true});
+    g.globalCompositeOperation='source-over';
+    g.clearRect(0,0,st.pm.width,st.pm.height);
+    g.drawImage(st.bm,0,0);
+    wandAiDrawStrokes(g,st.pm.width,st.pm.height);
     wandAiRender();
 }
 
@@ -10125,18 +10372,25 @@ function wandAiRender(){
     const cv=document.getElementById('magicWandCanvas'); const el=getActiveElement(); const st=wandAi;
     if(!cv||!el||!st.pm) return;
     const w=cv.width, h=cv.height;
+    /* cache foto asal pada ukuran kanvas (digambar sekali, dipakai tiap frame) */
+    if(!st.src||st.src.width!==w||st.src.height!==h){
+        if(!st.src) st.src=document.createElement('canvas');
+        st.src.width=w; st.src.height=h;
+        const sg=st.src.getContext('2d'); sg.imageSmoothingEnabled=true; sg.imageSmoothingQuality='high';
+        sg.drawImage(el.img,0,0,w,h);
+    }
     if(!st.tmp) st.tmp=document.createElement('canvas');
     if(st.tmp.width!==w||st.tmp.height!==h){ st.tmp.width=w; st.tmp.height=h; }
     const t=st.tmp.getContext('2d');
     t.globalCompositeOperation='source-over';
     t.clearRect(0,0,w,h);
-    t.drawImage(el.img,0,0,w,h);
+    t.drawImage(st.src,0,0);
     t.globalCompositeOperation='destination-in';
     t.drawImage(st.pm,0,0);
     t.globalCompositeOperation='source-over';
     const g=cv.getContext('2d');
     g.clearRect(0,0,w,h);
-    g.globalAlpha=0.18; g.drawImage(el.img,0,0,w,h);
+    g.globalAlpha=0.18; g.drawImage(st.src,0,0);
     g.globalAlpha=1; g.drawImage(st.tmp,0,0);
 }
 
@@ -10159,6 +10413,7 @@ function wandAiSetTool(t){
     const cv=document.getElementById('magicWandCanvas'); if(cv) cv.style.touchAction=st.tool?'none':'';
     if(st.tool==='restore') showToast('➕ Gosok area objek yang ikut terhapus');
     else if(st.tool==='erase') showToast('➖ Gosok area latar yang masih tersisa');
+    updateWandReticle();
 }
 
 function wandAiUndo(){
@@ -10182,38 +10437,230 @@ function wandAiStamp(cur, a, b){
     g.restore();
 }
 
-function setupWandAiEvents(){
-    const cv=document.getElementById('magicWandCanvas'); if(!cv) return;
-    const pos=function(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)/r.width, y:(e.clientY-r.top)/r.height}; };
-    cv.addEventListener('pointerdown',function(e){
-        const st=wandAi;
-        if(wandMode!=='ai'||!st.base||!st.tool||st.busy||!st.pm) return;
-        e.preventDefault();
-        try{ cv.setPointerCapture(e.pointerId); }catch(_){}
-        const p=pos(e);
-        const bs=parseInt((document.getElementById('wandAiBrush')||{}).value)||24;
-        st.cur={erase:st.tool==='erase',size:bs/cv.width,feather:35,pts:[p],carry:0,last:p};
-        wandAiStamp(st.cur,null,p);
-        wandAiSchedule(false);
+/* ===== v1.5.3: tampilan zoom/geser + pen tool (keker) untuk Pulihkan/Hapus ===== */
+var wandView = {LW:0, LH:0, R:1, hi:false, f:1, zoom:1, panX:0, panY:0, paint:true, panning:false, panStart:null, panTimer:0, warned:false};
+
+function wandBrushPx(){ const sl=document.getElementById('wandAiBrush'); return Math.max(1,parseInt(sl&&sl.value)||24); }
+
+/* resolusi kanvas: rendah (asli) untuk mode lain, tinggi untuk AI agar zoom tetap tajam */
+function wandSetRes(hi){
+    const cv=document.getElementById('magicWandCanvas'); const v=wandView;
+    if(!cv||!v.LW) return false;
+    const k=hi?v.R:1;
+    const nw=Math.max(1,Math.round(v.LW*k)), nh=Math.max(1,Math.round(v.LH*k));
+    v.hi=!!hi;
+    if(cv.width===nw&&cv.height===nh) return false;
+    cv.width=nw; cv.height=nh;
+    return true;
+}
+
+/* ukuran tampil (CSS) menyesuaikan ruang yang tersedia; piksel kanvas tidak berubah */
+function wandFit(){
+    const body=document.getElementById('magicWandBody'); const cv=document.getElementById('magicWandCanvas'); const v=wandView;
+    if(!body||!cv||!v.LW) return;
+    const bw=body.clientWidth||window.innerWidth, bh=body.clientHeight||window.innerHeight;
+    const f=Math.min(1,(bw*0.9)/v.LW,(bh*0.85)/v.LH);
+    v.f=(f>0&&isFinite(f))?f:1;
+    cv.style.width=Math.max(1,Math.round(v.LW*v.f))+'px';
+    cv.style.height=Math.max(1,Math.round(v.LH*v.f))+'px';
+    wandApplyTransform();
+}
+
+function wandClampPan(){
+    const body=document.getElementById('magicWandBody'); const cv=document.getElementById('magicWandCanvas'); const v=wandView;
+    if(!body||!cv) return;
+    const bw=body.clientWidth, bh=body.clientHeight;
+    const cw=(parseFloat(cv.style.width)||0)*v.zoom, ch=(parseFloat(cv.style.height)||0)*v.zoom;
+    const mx=Math.max(0,cw/2+bw/2-50), my=Math.max(0,ch/2+bh/2-50);
+    v.panX=Math.max(-mx,Math.min(mx,v.panX));
+    v.panY=Math.max(-my,Math.min(my,v.panY));
+}
+
+function wandApplyTransform(){
+    const wr=document.getElementById('magicWandCanvasWrapper'); const v=wandView;
+    wandClampPan();
+    if(wr) wr.style.transform='translate('+v.panX+'px,'+v.panY+'px) scale('+v.zoom+')';
+    updateWandReticle();
+}
+
+function zoomMagicWand(dir){
+    const v=wandView;
+    v.zoom=Math.max(0.5,Math.min(10,dir>0?v.zoom*1.25:v.zoom/1.25));
+    wandApplyTransform();
+}
+
+function wandViewReset(){
+    const v=wandView;
+    v.zoom=1; v.panX=0; v.panY=0; v.panning=false; v.panStart=null;
+    stopWandPan();
+    wandApplyTransform();
+}
+
+function startWandPan(dx,dy){
+    stopWandPan();
+    const v=wandView;
+    const step=function(){ v.panX+=dx*10; v.panY+=dy*10; wandApplyTransform(); };
+    step();
+    v.panTimer=setInterval(step,60);
+}
+function stopWandPan(){ const v=wandView; if(v.panTimer){ clearInterval(v.panTimer); v.panTimer=0; } }
+
+function toggleWandPaint(){
+    const v=wandView; v.paint=!v.paint;
+    const b=document.getElementById('wandPaintToggle');
+    if(b){ b.innerText=v.paint?'✏️':'🚫'; b.style.color=v.paint?'#00ff88':'#ff6b6b'; }
+    updateWandReticle();
+}
+
+/* titik kuas (keker) berada di depan jari/pegangan, bukan di bawah jari */
+function wandReticleClient(){
+    const sk=document.getElementById('wandStalk'); const cv=document.getElementById('magicWandCanvas'); const v=wandView;
+    if(!sk||!cv||!v.LW) return null;
+    const sr=sk.getBoundingClientRect(), cr=cv.getBoundingClientRect();
+    if(!cr.width) return null;
+    const r=Math.max(1,wandBrushPx()/v.LW*cr.width)/2;
+    const dist=Math.max(95,r+45);
+    return {x:sr.left+sr.width/2, y:sr.top+28-dist, r:r};
+}
+
+function updateWandReticle(){
+    const ret=document.getElementById('wandReticle'); const body=document.getElementById('magicWandBody'); const sk=document.getElementById('wandStalk');
+    if(!ret||!body||!sk) return;
+    if(!sk.classList.contains('on')){ ret.style.display='none'; return; }
+    const b=wandReticleClient(); if(!b){ ret.style.display='none'; return; }
+    const br=body.getBoundingClientRect(); const d=Math.max(8,b.r*2);
+    ret.style.width=d+'px'; ret.style.height=d+'px';
+    ret.style.left=(b.x-br.left)+'px'; ret.style.top=(b.y-br.top)+'px';
+    ret.style.display='block';
+    const live=!!(wandView.paint&&wandAi.tool);
+    ret.classList.toggle('off',!live);
+    ret.style.borderColor=live?(wandAi.tool==='erase'?'#ff6b6b':'#00ff88'):'';
+}
+
+/* tombol zoom/geser & pegangan keker hanya tampil saat hasil AI siap */
+function wandUiSync(){
+    const on=!!(wandMode==='ai'&&wandAi.base&&!wandAi.busy);
+    ['wandZoomUi','wandPanUi','wandStalk'].forEach(function(id){
+        const e=document.getElementById(id); if(e) e.classList.toggle('on',on);
     });
-    cv.addEventListener('pointermove',function(e){
-        const st=wandAi; if(!st.cur) return;
-        e.preventDefault();
-        const p=pos(e);
+    if(!on) stopWandPan();
+    updateWandReticle();
+}
+
+function wandAiPaintPoint(p){
+    const st=wandAi;
+    if(!p||!st.base||!st.pm||st.busy) return;
+    if(!st.tool){
+        if(!wandView.warned){ wandView.warned=true; showToast('➕ Pilih Pulihkan atau ➖ Hapus dulu'); }
+        return;
+    }
+    if(!st.cur){
+        st.cur={erase:st.tool==='erase',size:wandBrushPx()/wandView.LW,feather:35,pts:[p],carry:0,last:p};
+        wandAiStamp(st.cur,null,p);
+    } else {
         wandAiStamp(st.cur,st.cur.last,p);
         st.cur.pts.push(p); st.cur.last=p;
-        wandAiSchedule(false);
-    });
-    const end=function(){
-        const st=wandAi; if(!st.cur) return;
-        const c=st.cur; st.cur=null;
-        if(c.pts.length) st.strokes.push({erase:c.erase,size:c.size,feather:c.feather,pts:c.pts});
+    }
+    wandAiSchedule(false);
+}
+
+function wandAiEndStroke(){
+    const st=wandAi; if(!st.cur) return;
+    const c=st.cur; st.cur=null;
+    if(c.pts.length) st.strokes.push({erase:c.erase,size:c.size,feather:c.feather,pts:c.pts});
+}
+
+function setupWandAiEvents(){
+    const cv=document.getElementById('magicWandCanvas'); if(!cv) return;
+    const body=document.getElementById('magicWandBody');
+    const wrap=document.getElementById('magicWandCanvasWrapper');
+    const stalk=document.getElementById('wandStalk');
+    const handle=document.getElementById('wandDragHandle');
+    const v=wandView;
+    let stalkDrag=false, stalkOff={x:0,y:0};
+    const posFromClient=function(x,y){
+        const r=cv.getBoundingClientRect(); if(!r.width||!r.height) return null;
+        return {x:(x-r.left)/r.width, y:(y-r.top)/r.height};
     };
-    cv.addEventListener('pointerup',end);
-    cv.addEventListener('pointercancel',end);
+    const inside=function(p){ return !!p&&p.x>=0&&p.y>=0&&p.x<=1&&p.y<=1; };
+    const aiReady=function(){ const st=wandAi; return wandMode==='ai'&&st.base&&!st.busy&&st.pm; };
+    const startPan=function(e,target){
+        v.panning=true; v.panStart={x:e.clientX,y:e.clientY,px:v.panX,py:v.panY};
+        try{ target.setPointerCapture(e.pointerId); }catch(_){}
+        e.preventDefault();
+    };
+
+    /* jari langsung di kanvas: melukis (bila kuas ON & alat dipilih), selain itu menggeser tampilan */
+    cv.addEventListener('pointerdown',function(e){
+        if(!aiReady()) return;
+        if(!(wandAi.tool&&v.paint)){ startPan(e,cv); return; }
+        e.preventDefault();
+        try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+        const p=posFromClient(e.clientX,e.clientY);
+        if(inside(p)) wandAiPaintPoint(p);
+    });
+    cv.addEventListener('pointermove',function(e){
+        if(!wandAi.cur||stalkDrag) return;
+        e.preventDefault();
+        const p=posFromClient(e.clientX,e.clientY);
+        if(inside(p)) wandAiPaintPoint(p); else wandAiEndStroke();
+    });
+    if(body) body.addEventListener('pointerdown',function(e){
+        if(!aiReady()) return;
+        if(e.target===body||e.target===wrap) startPan(e,body);
+    });
+
+    /* pegangan keker: geser pegangan, titik kuas di depan jari melukis */
+    if(handle&&stalk&&body){
+        handle.addEventListener('pointerdown',function(e){
+            stalkDrag=true;
+            try{ handle.setPointerCapture(e.pointerId); }catch(_){}
+            const rect=stalk.getBoundingClientRect(); const pr=body.getBoundingClientRect();
+            stalkOff={x:e.clientX-rect.left,y:e.clientY-rect.top};
+            stalk.style.left=(rect.left-pr.left)+'px';
+            stalk.style.top=(rect.top-pr.top)+'px';
+            stalk.style.right='auto'; stalk.style.bottom='auto'; stalk.style.transform='none';
+            v.warned=false;
+            e.preventDefault(); e.stopPropagation();
+        });
+    }
+    window.addEventListener('pointermove',function(e){
+        if(stalkDrag&&stalk&&body){
+            const br=body.getBoundingClientRect();
+            stalk.style.left=(e.clientX-br.left-stalkOff.x)+'px';
+            stalk.style.top=(e.clientY-br.top-stalkOff.y)+'px';
+            updateWandReticle();
+            const b=wandReticleClient();
+            const p=b?posFromClient(b.x,b.y):null;
+            if(v.paint&&inside(p)&&aiReady()) wandAiPaintPoint(p);
+            else wandAiEndStroke();
+        } else if(v.panning&&v.panStart){
+            v.panX=v.panStart.px+(e.clientX-v.panStart.x);
+            v.panY=v.panStart.py+(e.clientY-v.panStart.y);
+            wandApplyTransform();
+        }
+    });
+    const endAll=function(){
+        stalkDrag=false; v.panning=false; v.panStart=null;
+        wandAiEndStroke();
+        v.warned=false;
+    };
+    window.addEventListener('pointerup',endAll);
+    window.addEventListener('pointercancel',endAll);
+    cv.addEventListener('pointerup',endAll);
+    cv.addEventListener('pointercancel',endAll);
+    window.addEventListener('resize',function(){
+        const m=document.getElementById('magicWandModal');
+        if(m&&m.classList.contains('active')) setTimeout(function(){ wandFit(); },120);
+    });
     ['wandTolerance','wandFeather'].forEach(function(id){
         const sl=document.getElementById(id);
         if(sl) sl.addEventListener('input',function(){ if(wandMode==='ai'&&wandAi.base) wandAiSchedule(true); });
+    });
+    const bs=document.getElementById('wandAiBrush');
+    if(bs) bs.addEventListener('input',function(){
+        const l=document.getElementById('wandAiBrushVal'); if(l) l.textContent=wandBrushPx()+'px';
+        updateWandReticle();
     });
 }
 
@@ -10243,13 +10690,16 @@ function wandAiDispose(){
     wandAiSetBusy(false);
     if(st.raf){ cancelAnimationFrame(st.raf); st.raf=0; }
     if(st.session){ try{ const r=st.session.release(); if(r&&r.catch) r.catch(function(){}); }catch(e){} st.session=null; }
-    ['base','pm','tmp'].forEach(function(k){ if(st[k]){ st[k].width=1; st[k].height=1; st[k]=null; } });
+    ['base','pm','tmp','src','bm'].forEach(function(k){ if(st[k]){ st[k].width=1; st[k].height=1; st[k]=null; } });
+    st.bmKey='';
     st.strokes=[]; st.tool=null; st.cur=null; st.needFull=false;
     const pn=document.getElementById('wandAiPanel'); if(pn) pn.style.display='none';
     const a=document.getElementById('btnWandAiRestore'), b=document.getElementById('btnWandAiErase');
     if(a) a.classList.remove('active'); if(b) b.classList.remove('active');
     const cv=document.getElementById('magicWandCanvas'); if(cv) cv.style.touchAction='';
     wandAiStatus('Mode AI siap.',0);
+    wandViewReset();
+    wandUiSync();
 }
 
 /* ========== DUPLIKAT MENDALAM (DEEP CLONE) ========== */
