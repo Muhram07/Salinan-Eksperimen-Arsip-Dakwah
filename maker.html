@@ -1,15 +1,16 @@
 <!--
-Studio Poster Maker Pro - Update v1.5.3
+Studio Poster Maker Pro - Update v1.5.4
+
+v1.5.4:
+1. HAPUS BG > Pulihkan/Hapus: zoom +/- dibuat halus (1 langkah 8%, tahan untuk mengulang lebih pelan) dan geser atas/bawah/kiri/kanan lebih pelan agar tidak liar.
+2. HAPUS BG > AI: teks loading tidak lagi menyebut ekor/jari; berlaku untuk objek apa pun.
+3. HAPUS BG: tombol ✅ Terapkan kini berada di baris paling bawah, memanjang, warna kuning.
+4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.4).
 
 v1.5.3:
-1. HAPUS BG > AI 1: ekor & jari/kaki tidak mudah terpotong lagi. Objek dianalisis ulang pada area yang diperbesar (pass 2), digabung hanya bila tersambung ke objek hasil pass 1, lalu diselamatkan lagi oleh penyaring warna (pengaman diperlonggar bertahap, tidak langsung dibatalkan).
-2. HAPUS BG > AI: persentase loading kini berbobot sesuai proses nyata (mesin, unduh model, muat model, analisis, pass 2, rapikan). Angka tidak lagi loncat ke 100% di tengah proses.
-3. HAPUS BG > Pulihkan/Hapus: ada zoom +/- (tahan untuk mengulang), geser atas/bawah/kiri/kanan, tombol pusatkan 🎯, dan pen tool keker (pegangan ✋ + ✏️ ON/OFF) seperti Tangkap Ajaib. Kuas kini 2-120 px; pratinjau beresolusi tinggi agar detail kecil (jari, ekor) bisa dikoreksi manual.
-
-v1.5.2:
-1. HAPUS BG > AI 1: bagian tipis yang ikut objek (ekor burung, jari/kaki) kini tidak terpotong lagi. Hasil deteksi AI dilengkapi penyaring warna objek + sambungan area (cara yang sama seperti Snap di Tangkap Ajaib), dengan pengaman agar latar/ranting tidak ikut terambil.
-2. HAPUS BG > AI: kini muncul kartu loading (spinner, garis progres, persentase, keterangan tahap) dan layar dikunci sementara agar tidak dikira macet. Tombol silang tetap bisa dipakai untuk membatalkan.
-
+1. HAPUS BG > AI 1: ekor & jari/kaki tidak mudah terpotong lagi. Objek dianalisis ulang pada area yang diperbesar (pass 2), digabung hanya bila tersambung ke objek hasil pass 1, lalu diselamatkan lagi oleh penyaring warna.
+2. HAPUS BG > AI: persentase loading kini berbobot sesuai proses nyata. Angka tidak lagi loncat ke 100% di tengah proses.
+3. HAPUS BG > Pulihkan/Hapus: zoom +/-, geser, tombol pusatkan 🎯, dan pen tool keker (✋ + ✏️ ON/OFF). Kuas 2-120 px; pratinjau beresolusi tinggi.
 -->
 
 
@@ -1075,8 +1076,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="fmodal-body" id="magicWandBody">
 <div id="magicWandCanvasWrapper"><canvas id="magicWandCanvas"></canvas></div>
 <div class="wand-view-ui" id="wandZoomUi" style="position:absolute; top:10px; right:10px; flex-direction:column; gap:5px; z-index:105;">
-<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startStepHold(function(){zoomMagicWand(1)})" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
-<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="startStepHold(function(){zoomMagicWand(-1)})" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➖</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="wandZoomPress(1)" onpointerup="wandZoomRelease()" onpointerleave="wandZoomRelease()" onpointercancel="wandZoomRelease()">➕</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="wandZoomPress(-1)" onpointerup="wandZoomRelease()" onpointerleave="wandZoomRelease()" onpointercancel="wandZoomRelease()">➖</button>
 <button class="btn-nav" onclick="wandViewReset()" style="width:34px;justify-content:center;" aria-label="Pusatkan">🎯</button>
 </div>
 <div class="wand-view-ui" id="wandPanUi" style="position:absolute; top:10px; left:10px; z-index:105;">
@@ -1128,15 +1129,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" onclick="wandAiClearModel()" style="margin-left:auto;font-size:10px;padding:6px 8px;">🗑️ Model</button>
 </div>
 </div>
-<div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-<div style="display:flex;align-items:center;gap:10px;">
+<div style="display:flex;flex-direction:column;align-items:stretch;gap:10px;width:100%;">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 <span style="font-size:11px;color:#aaa;">Toleransi:</span>
 <input type="range" class="ctrl-slider" id="wandTolerance" min="0" max="100" value="30" style="width:60px;">
 <span style="font-size:11px;color:#aaa;margin-left:5px;">Halus:</span>
 <input type="range" class="ctrl-slider" id="wandFeather" min="0" max="10" value="1" style="width:40px;">
 <button class="btn-nav" onclick="resetMagicWand()">Reset</button>
 </div>
-<button class="btn-nav btn-download" onclick="applyMagicWand()">✅ Terapkan</button>
+<button class="btn-download" onclick="applyMagicWand()" style="width:100%;height:44px;border-radius:22px;justify-content:center;display:flex;align-items:center;font-size:14px;font-weight:800;">✅ Terapkan</button>
 </div>
 </div>
 </div>
@@ -1478,15 +1479,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-const APP_VERSION = (function(){
-    /* v1.3.1: versi dibaca otomatis dari catatan teratas file ("Update vX.Y.Z") agar bar atas selalu sinkron */
-    try {
-        for(let n = document.firstChild; n; n = n.nextSibling) {
-            if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
-        }
-    } catch(e) {}
-    return 'v1.5.3';
-})();
+/* v1.5.4: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.5.4';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -10246,7 +10240,7 @@ async function wandAiEnter(){
         let base=base0;
         if(isAi1){
             /* pass 2: analisis ulang area objek (ekor, jari/kaki) */
-            wandAiAt('refine',0,'Memperjelas ekor & jari (analisis ulang area objek)…');
+            wandAiAt('refine',0,'Memperjelas tepi objek (analisis ulang area objek)…');
             await snapAiYield();
             if(rid!==st.rid){ base0.width=1; base0.height=1; return; }
             try{
@@ -10254,7 +10248,7 @@ async function wandAiEnter(){
                 if(rid!==st.rid){ if(rf!==base){ rf.width=1; rf.height=1; } base.width=1; base.height=1; return; }
                 if(rf!==base){ base.width=1; base.height=1; base=rf; }
             }catch(re){ console.warn('Pass 2 AI gagal',re); }
-            wandAiAt('refine',0.6,'Menyelamatkan bagian tipis (ekor & jari)…');
+            wandAiAt('refine',0.6,'Menyelamatkan bagian tipis objek…');
             await snapAiYield();
             if(rid!==st.rid){ base.width=1; base.height=1; return; }
             try{
@@ -10483,10 +10477,22 @@ function wandApplyTransform(){
     updateWandReticle();
 }
 
+/* v1.5.4: zoom Hapus BG halus (1 langkah 8%) dan tahan-untuk-ulang lebih pelan */
+const WAND_ZOOM_STEP=1.08, WAND_ZOOM_HOLD_MS=150;
+let wandZoomHoldT=0, wandZoomHoldD=0;
 function zoomMagicWand(dir){
     const v=wandView;
-    v.zoom=Math.max(0.5,Math.min(10,dir>0?v.zoom*1.25:v.zoom/1.25));
+    v.zoom=Math.max(0.5,Math.min(10,dir>0?v.zoom*WAND_ZOOM_STEP:v.zoom/WAND_ZOOM_STEP));
     wandApplyTransform();
+}
+function wandZoomRelease(){
+    if(wandZoomHoldD){ clearTimeout(wandZoomHoldD); wandZoomHoldD=0; }
+    if(wandZoomHoldT){ clearInterval(wandZoomHoldT); wandZoomHoldT=0; }
+}
+function wandZoomPress(dir){
+    wandZoomRelease();
+    zoomMagicWand(dir);
+    wandZoomHoldD=setTimeout(function(){ wandZoomHoldT=setInterval(function(){ zoomMagicWand(dir); }, WAND_ZOOM_HOLD_MS); },350);
 }
 
 function wandViewReset(){
@@ -10499,7 +10505,7 @@ function wandViewReset(){
 function startWandPan(dx,dy){
     stopWandPan();
     const v=wandView;
-    const step=function(){ v.panX+=dx*10; v.panY+=dy*10; wandApplyTransform(); };
+    const step=function(){ v.panX+=dx*5; v.panY+=dy*5; wandApplyTransform(); };
     step();
     v.panTimer=setInterval(step,60);
 }
