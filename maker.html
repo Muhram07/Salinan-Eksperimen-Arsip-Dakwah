@@ -1,12 +1,12 @@
 <!--
-Studio Poster Maker Pro - Update v1.4.3
+Studio Poster Maker Pro - Update v1.5.0
+
+v1.5.0:
+1. TANGKAP AJAIB > 🧲 Snap ke Objek (AI): cukup coret kasar di sekitar objek, lalu tekan Snap. AI (model yang sama dengan Hapus BG AI, dimuat dari root repo atau cache browser) mencari tepi objek dan memangkas coretan yang melenceng. Tombol ↩ Batal Snap untuk mundur. Hasil tetap di posisi aslinya.
 
 v1.4.3:
 1. SITUS SUNNAH > Bookmark dibuat sangat mudah untuk orang awam: (a) tombol emas melayang "Simpan Halaman Ini" di atas situs; (b) link yang sudah disalin otomatis terdeteksi dan terisi (cukup 1 ketukan Simpan); (c) panduan 3 langkah bergambar kata-kata bila belum ada link; (d) "Simpan pencarian ini saja" sebagai jalan pintas yang selalu berhasil; (e) judul otomatis dari alamat artikel.
 2. Anti hilang: Cadangkan (unduh file), Pulihkan, Salin Daftar, cadangan ganda otomatis di penyimpanan, dan permintaan penyimpanan permanen ke browser.
-
-v1.4.2:
-1. TABEL > Edit Data: ukuran teks (Size) per kotak sekarang berfungsi. Nilai per kotak menimpa "Ukuran Font" global (Format Teks) seperti Bold/Miring per kotak; menggeser slider global tetap berlaku untuk semua kotak.
 
 -->
 
@@ -965,7 +965,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(adjustGrabBrushUp)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
 <span id="magicBrushSizeVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">35px</span>
 </div>
-<div class="fmodal-footer">
+<div class="fmodal-footer" style="flex-wrap:wrap;">
+<button class="btn-nav" onclick="snapMagicGrabToObject()" title="AI mencari tepi objek di dalam area coretan">🧲 Snap ke Objek</button>
+<button class="btn-nav" onclick="undoMagicGrabSnap()">↩ Batal Snap</button>
 <button class="btn-nav" onclick="clearMagicGrabMask()">Bersihkan</button>
 <button class="btn-nav btn-download" onclick="applyMagicGrabExtraction()">✂️ Pisahkan Subjek</button>
 </div>
@@ -1413,7 +1415,7 @@ const APP_VERSION = (function(){
             if(n.nodeType === 8) { const m = /Update\s+(v\d+\.\d+\.\d+)/.exec(n.nodeValue); if(m) return m[1]; }
         }
     } catch(e) {}
-    return 'v1.4.3';
+    return 'v1.5.0';
 })();
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
@@ -14783,6 +14785,172 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 window.onload=initApp;
+</script>
+<script>
+/* ========== v1.5.0: SNAP AI KE OBJEK (Tangkap Ajaib) ==========
+   Memakai ulang sesi ONNX & model dari "Hapus BG AI" (root repo / Cache API).
+   Fungsi lama tidak diubah; open/close hanya dibungkus untuk reset cache. */
+var snapAi = { hist: [], sal: null, salEl: null, busy: false };
+
+async function snapAiEnsureSession(){
+    if (wandAi.session) return wandAi.session;
+    const ortLib = await wandAiLoadOrt();
+    let buf = await wandAiLoadModelBuf();
+    await wandAiSleep(60);
+    const sess = await ortLib.InferenceSession.create(new Uint8Array(buf), {executionProviders:['wasm'], graphOptimizationLevel:'all'});
+    buf = null;
+    wandAi.session = sess;
+    return sess;
+}
+
+/* saliency dihitung sekali per gambar lalu di-cache (hemat CPU & memori) */
+async function snapAiSaliency(el){
+    if (snapAi.sal && snapAi.salEl === el) return snapAi.sal;
+    const sess = await snapAiEnsureSession();
+    const base = await wandAiInfer(sess, el.img);
+    if (snapAi.sal) { snapAi.sal.width = 0; snapAi.sal.height = 0; }
+    snapAi.sal = base;
+    snapAi.salEl = el;
+    return base;
+}
+
+function snapAiOtsu(hist, total){
+    let sum = 0;
+    for (let i = 0; i < 256; i++) sum += i * hist[i];
+    let sumB = 0, wB = 0, best = -1, thr = 128;
+    for (let t = 0; t < 256; t++){
+        wB += hist[t];
+        if (!wB) continue;
+        const wF = total - wB;
+        if (!wF) break;
+        sumB += t * hist[t];
+        const mB = sumB / wB, mF = (sum - sumB) / wF;
+        const between = wB * wF * (mB - mF) * (mB - mF);
+        if (between > best){ best = between; thr = t; }
+    }
+    return thr;
+}
+
+async function snapMagicGrabToObject(){
+    const el = getActiveElement();
+    const mask = grabMaskCanvas;
+    if (!el || el.type !== 'image' || !mask) return;
+    if (snapAi.busy) return;
+
+    const mw = mask.width, mh = mask.height;
+    const mctx = mask.getContext('2d', {willReadFrequently:true});
+    const md = mctx.getImageData(0, 0, mw, mh).data;
+    let painted = false;
+    for (let i = 3; i < md.length; i += 4){ if (md[i] > 8){ painted = true; break; } }
+    if (!painted){ showToast('⚠️ Coret area objek dulu, lalu tekan Snap'); return; }
+
+    snapAi.busy = true;
+    showToast('🧲 AI mencari tepi objek...');
+    const tmpCanvases = [];
+    try{
+        const salBase = await snapAiSaliency(el);
+
+        /* saliency pada resolusi kanvas mask */
+        const sc = document.createElement('canvas'); sc.width = mw; sc.height = mh; tmpCanvases.push(sc);
+        const scx = sc.getContext('2d', {willReadFrequently:true});
+        scx.imageSmoothingEnabled = true; scx.imageSmoothingQuality = 'high';
+        scx.drawImage(salBase, 0, 0, mw, mh);
+        const sd = scx.getImageData(0, 0, mw, mh).data;
+
+        /* area toleransi: coretan diperlebar sebesar ukuran kuas (kuas melenceng tetap tertangkap) */
+        const slider = parseInt((document.getElementById('magicBrushSize') || {}).value) || 35;
+        const gr = (typeof grabRes === 'number' && grabRes > 0) ? grabRes : 1;
+        const r = Math.max(4, Math.min(160, Math.round(slider * gr * 0.5)));
+        const roiC = document.createElement('canvas'); roiC.width = mw; roiC.height = mh; tmpCanvases.push(roiC);
+        const rctx = roiC.getContext('2d', {willReadFrequently:true});
+        const steps = 16;
+        for (let k = 0; k < steps; k++){
+            const a = (k / steps) * Math.PI * 2;
+            rctx.drawImage(mask, Math.cos(a) * r, Math.sin(a) * r);
+        }
+        rctx.drawImage(mask, 0, 0);
+        const rd = rctx.getImageData(0, 0, mw, mh).data;
+
+        /* ambang otomatis (Otsu) hanya dari area toleransi */
+        const hist = new Float64Array(256);
+        let total = 0;
+        const n = mw * mh;
+        for (let i = 0; i < n; i++){
+            const k = i * 4;
+            if (rd[k + 3] > 8){ hist[sd[k + 3]]++; total++; }
+        }
+        if (total < 16){ showToast('⚠️ Area coretan terlalu kecil'); return; }
+        const thr = Math.max(40, Math.min(200, snapAiOtsu(hist, total)));
+
+        /* isi hasil: saliency di atas ambang, di dalam area toleransi; coretan kuat dipertahankan */
+        const out = document.createElement('canvas'); out.width = mw; out.height = mh; tmpCanvases.push(out);
+        const ox = out.getContext('2d');
+        const od = ox.createImageData(mw, mh);
+        const odd = od.data;
+        let kept = 0;
+        for (let i = 0; i < n; i++){
+            const k = i * 4;
+            if (rd[k + 3] <= 8) continue;
+            const s = sd[k + 3];
+            const inHint = md[k + 3] > 8;
+            if (s >= thr || (inHint && s >= thr * 0.5)){
+                odd[k] = 212; odd[k + 1] = 175; odd[k + 2] = 55; odd[k + 3] = 255;
+                kept++;
+            }
+        }
+        if (kept < 16){
+            showToast('⚠️ AI tidak menemukan objek di area ini. Coba coret sedikit lebih luas');
+            return;
+        }
+        ox.putImageData(od, 0, 0);
+
+        /* simpan riwayat untuk Batal Snap (maks 5 langkah agar memori ringan) */
+        snapAi.hist.push(mctx.getImageData(0, 0, mw, mh));
+        if (snapAi.hist.length > 5) snapAi.hist.shift();
+
+        /* tulis ke mask dengan tepi sedikit halus */
+        mctx.save();
+        mctx.clearRect(0, 0, mw, mh);
+        try{ mctx.filter = 'blur(' + Math.max(0.6, gr * 0.6).toFixed(2) + 'px)'; }catch(e){}
+        mctx.drawImage(out, 0, 0);
+        mctx.restore();
+        renderMagicGrabDisplay();
+        showToast('✅ Tepi objek berhasil dideteksi');
+    }catch(e){
+        console.error('Snap AI', e);
+        const msg = (e && e.message === 'MODEL_404')
+            ? '❌ Model AI tidak ditemukan. Taruh "remove-bg-ai1.onnx" di root repo, atau sambungkan internet sekali untuk mengunduh'
+            : '❌ Snap gagal: ' + String((e && e.message) || e);
+        showToast(msg.length > 80 ? msg.slice(0, 80) + '…' : msg);
+    }finally{
+        tmpCanvases.forEach(c => { c.width = 0; c.height = 0; });
+        snapAi.busy = false;
+    }
+}
+
+function undoMagicGrabSnap(){
+    const mask = grabMaskCanvas;
+    if (!mask || !snapAi.hist.length) { showToast('Tidak ada Snap untuk dibatalkan'); return; }
+    const prev = snapAi.hist.pop();
+    mask.getContext('2d').putImageData(prev, 0, 0);
+    renderMagicGrabDisplay();
+    showToast('↩ Snap dibatalkan');
+}
+
+function snapAiReset(){
+    snapAi.hist = [];
+    if (snapAi.sal){ snapAi.sal.width = 0; snapAi.sal.height = 0; }
+    snapAi.sal = null;
+    snapAi.salEl = null;
+}
+
+/* bungkus open/close tanpa mengubah fungsi aslinya */
+(function(){
+    const _openGrab = openMagicGrabModal;
+    openMagicGrabModal = function(){ snapAiReset(); return _openGrab.apply(this, arguments); };
+    const _closeGrab = closeMagicGrabModal;
+    closeMagicGrabModal = function(){ snapAiReset(); return _closeGrab.apply(this, arguments); };
+})();
 </script>
 </body>
 </html>
