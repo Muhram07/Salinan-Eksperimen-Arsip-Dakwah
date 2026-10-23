@@ -1,18 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.6.8
+Studio Poster Maker Pro - Update v1.6.9
+
+v1.6.9:
+1. FONT REPO: repo default sudah terisi (Muhram07/Salinan-Eksperimen-Arsip-Dakwah, folder fonts), tidak lagi bergantung pada alamat GitHub Pages. Repo bisa diganti lewat kolom owner/repo/folder di panel font.
+2. FONT REPO: pindai otomatis saat aplikasi dibuka, plus tombol 🔄 Scan Font Repo untuk memindai ulang.
+3. FONT: ringkasan jumlah di atas daftar (total, default, pribadi, dan repo).
+4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.9).
 
 v1.6.8:
-1. FONT PRIBADI > SCROLL: daftar "Ekspor Font Pribadi" bisa digulir dengan jari di HP/tablet (sebelumnya terblokir touch-action).
-2. FONT PRIBADI > DETEKSI FORMAT OTOMATIS: nama font dibaca dari file aslinya. Label Arab / AA (huruf besar) / Aa (campuran) dan ikonnya ditampilkan otomatis.
-3. FONT PRIBADI > ANTI GANDA: font dengan nama file dan ukuran yang sama tidak dipasang dua kali (yang kedua dilewati), saat impor maupun saat membuka projek.
-4. FONT PRIBADI > HAPUS: tombol 🗑️ pada font pribadi dengan konfirmasi dua kali.
-5. FONT REPO: folder /fonts di repo GitHub dipindai otomatis (ZIP, TTF, OTF, WOFF). Tombol 🔄 Scan Font Repo untuk memindai ulang.
-6. LAG: data font tidak lagi ikut ditulis ulang di setiap autosave. Font disimpan sekali di penyimpanan terpisah.
-7. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.8).
-
-v1.6.7:
-1. Font / ZIP bisa dipilih banyak sekaligus.
-2. Panduan install diperbarui.
+1. Scroll daftar ekspor font pribadi dengan jari.
+2. Deteksi format otomatis (Arab / AA / Aa) dan anti ganda font pribadi.
 -->
 
 
@@ -1516,7 +1513,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.6.8';
+const APP_VERSION = 'v1.6.9';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -11090,7 +11087,7 @@ html+=`
 </div>
 `;
 
-html += scanRowHtml();
+html += scanRowHtml() + fontCountHtml();
 const allFonts = [...currentProjectFonts, ...repoFonts, ...FONT_FAMILIES];
 
 const pinnedList = allFonts.filter(f => pinnedFonts.includes(f.name));
@@ -11585,20 +11582,15 @@ function deletePersonalFont(ev, name) {
 }
 
 /* ---- font repo: pindai folder fonts/ di repo GitHub (otomatis saat dibuka dari GitHub Pages) ---- */
+/* v1.6.9: repo default untuk font; bisa diganti lewat kolom owner/repo/folder di panel font */
+const FONT_REPO_DEFAULT = { owner: 'Muhram07', repo: 'Salinan-Eksperimen-Arsip-Dakwah', path: 'fonts' };
 function getFontRepoCfg() {
     let cfg = null;
     try { cfg = JSON.parse(localStorage.getItem(FONT_REPO_KEY) || 'null'); } catch (e) { cfg = null; }
     if (cfg && cfg.owner && cfg.repo) {
         return { owner: cfg.owner, path: String(cfg.path || 'fonts').replace(/^\/+|\/+$/g, ''), candidates: [cfg.repo] };
     }
-    const m = /^([a-z0-9-]+)\.github\.io$/i.exec(location.hostname || '');
-    if (!m) return null;
-    const owner = m[1];
-    const segs = location.pathname.split('/').filter(Boolean);
-    const cands = [];
-    if (segs.length) cands.push(segs[0]);
-    cands.push(owner + '.github.io');
-    return { owner: owner, path: 'fonts', candidates: Array.from(new Set(cands)) };
+    return { owner: FONT_REPO_DEFAULT.owner, path: FONT_REPO_DEFAULT.path, candidates: [FONT_REPO_DEFAULT.repo] };
 }
 function _updateRepoStatusLine() {
     const el = document.getElementById('fontRepoStatusLine');
@@ -11699,10 +11691,33 @@ async function scanFontRepoUI() {
 }
 function scanRowHtml() {
     const cfg = getFontRepoCfg();
-    const line = fontRepoStatus || (cfg ? ('📦 Repo: ' + cfg.owner + ' · folder /' + cfg.path) : 'Repo font tidak terdeteksi (otomatis aktif saat dibuka dari GitHub Pages).');
+    const val = cfg.owner + '/' + cfg.candidates[0] + '/' + cfg.path;
+    const line = fontRepoStatus || ('📦 Repo: ' + cfg.owner + '/' + cfg.candidates[0] + ' · folder /' + cfg.path);
     return `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+        <div style="display:flex;gap:6px;">
+            <input id="fontRepoInput" type="text" value="${_escHtml(val)}" placeholder="owner/repo/folder" style="flex:1;min-width:0;background:#111;color:#fff;border:1px solid rgba(212,175,55,.35);border-radius:8px;padding:8px;font-size:11px;">
+            <button class="btn-sub-tool" onclick="applyFontRepoInput()" style="flex-direction:row;justify-content:center;padding:8px 10px;">Terapkan</button>
+        </div>
         <button class="btn-sub-tool" onclick="scanFontRepoUI()" style="flex-direction:row;justify-content:center;padding:8px;">🔄 Scan Font Repo</button>
         <div id="fontRepoStatusLine" style="font-size:10px;color:#9CA3AF;">${_escHtml(line)}</div>
+    </div>`;
+}
+function applyFontRepoInput() {
+    const inp = document.getElementById('fontRepoInput');
+    const parts = String((inp && inp.value) || '').trim().replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+    if (parts.length < 2) { showToast('⚠️ Format: owner/repo/folder'); return; }
+    const cfg = { owner: parts[0], repo: parts[1], path: parts.slice(2).join('/') || 'fonts' };
+    try { localStorage.setItem(FONT_REPO_KEY, JSON.stringify(cfg)); } catch (e) { }
+    scanFontRepoUI();
+}
+function fontCountHtml() {
+    const nDef = FONT_FAMILIES.length, nPri = currentProjectFonts.length, nRepo = repoFonts.length;
+    const chip = (t, c) => `<span style="background:rgba(255,255,255,.06);border:1px solid ${c};color:${c};border-radius:999px;padding:3px 9px;">${t}</span>`;
+    return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:11px;font-weight:800;">
+        ${chip('📚 Total: ' + (nDef + nPri + nRepo), '#D4AF37')}
+        ${chip('🧩 Default: ' + nDef, '#60A5FA')}
+        ${chip('👤 Pribadi: ' + nPri, '#8B5CF6')}
+        ${chip('📦 Repo: ' + nRepo, '#00ff88')}
     </div>`;
 }
 
@@ -16865,6 +16880,7 @@ function flushSaveNow(){
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') flushSaveNow(); });
 window.addEventListener('pagehide', flushSaveNow);
 
+    
 /* v1.5.8: Toleransi & Halus Tangkap Ajaib langsung menghitung ulang hasil Snap */
 (function(){
     ['grabTolerance','grabFeather'].forEach(function(id){
@@ -16872,12 +16888,13 @@ window.addEventListener('pagehide', flushSaveNow);
         if(sl) sl.addEventListener('input', scheduleGrabSnapRerun);
     });
 })();
-/* v1.6.8: pindai font repo otomatis sekali saat app dibuka (jika repo terdeteksi) */
+/* v1.6.9: pindai font repo otomatis saat aplikasi dibuka */
 setTimeout(function () {
-    if (getFontRepoCfg()) {
-        scanFontRepo().then(function () { _updateRepoStatusLine(); }).catch(function (e) { console.warn(e); });
-    }
-}, 5000);
+    scanFontRepo().then(function () {
+        _updateRepoStatusLine();
+        if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
+    }).catch(function (e) { console.warn(e); });
+}, 1500);
 </script>
 </body>
 </html>
