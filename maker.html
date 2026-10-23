@@ -1,16 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.5.5
+Studio Poster Maker Pro - Update v1.5.6
+
+v1.5.6:
+1. TANGKAP AJAIB: ditambahkan ➕ Pulihkan / ➖ Hapus (seperti Hapus BG) di bawah tombol Snap. Pulihkan menambah area pilihan, Hapus mengurangi area pilihan, sehingga detail yang cacat bisa diperbaiki manual dengan kuas.
+2. TANGKAP AJAIB: tombol ↩️ Undo, ↪️ Redo, dan 📍 Kuas dipindah ke baris yang sama dengan Pulihkan/Hapus.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.6).
 
 v1.5.5:
-1. HAPUS BG: tombol 📍 Kuas untuk memusatkan kuas/pen ke tengah bawah bila turun keluar area; tombol ↪️ Redo ditambahkan di samping ↩️ Undo.
-2. TANGKAP AJAIB: tombol 📍 Kuas untuk memusatkan kuas/pen ke tengah bawah bila turun keluar area.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.5).
-
-v1.5.4:
-1. HAPUS BG > Pulihkan/Hapus: zoom +/- dibuat halus (1 langkah 8%, tahan untuk mengulang lebih pelan) dan geser atas/bawah/kiri/kanan lebih pelan agar tidak liar.
-2. HAPUS BG > AI: teks loading tidak lagi menyebut ekor/jari; berlaku untuk objek apa pun.
-3. HAPUS BG: tombol ✅ Terapkan kini berada di baris paling bawah, memanjang, warna kuning.
-4. Versi: nomor di bar atas dan di dalam kode disinkronkan.
+1. HAPUS BG: tombol 📍 Kuas untuk memusatkan kuas/pen; tombol ↪️ Redo ditambahkan.
+2. TANGKAP AJAIB: tombol 📍 Kuas untuk memusatkan kuas/pen.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan.
 -->
 
 
@@ -966,9 +965,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="btn-nav" onclick="zoomMagicGrab(0.25)" style="width:34px;justify-content:center;">➕</button>
         <button class="btn-nav" onclick="zoomMagicGrab(-0.25)" style="width:34px;justify-content:center;">➖</button>
         <button class="btn-nav" onclick="resetMagicGrabZoom()" style="width:34px;justify-content:center;">🎯</button>
-        <button class="btn-nav fm-undo" id="grabUndoBtn" onclick="undoMagicGrab()" style="width:34px;justify-content:center;" aria-label="Undo">↩️</button>
-        <button class="btn-nav fm-undo" id="grabRedoBtn" onclick="redoMagicGrab()" style="width:34px;justify-content:center;" aria-label="Redo">↪️</button>
-        <button class="btn-nav" onclick="centerMagicGrabPen()" style="width:34px;justify-content:center;" title="Pusatkan kuas/pen" aria-label="Pusatkan kuas">📍</button>
     </div>
     <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
         <button class="btn-nav" id="grabModeBtn" onclick="toggleGrabInside()" style="justify-content:center;">🎯 Ambil Dalam</button>
@@ -1006,6 +1002,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 <div class="fmodal-footer" id="magicGrabFooter" style="height:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));">
 <button class="btn-nav snap-ai-btn" id="snapAiBtn" onclick="snapMagicGrabToObject()" title="AI mencari tepi objek di dalam area coretan" style="width:100%;height:40px;justify-content:center;font-size:13px;border-radius:20px;border-color:#D4AF37;color:#D4AF37;"><span id="snapAiBtnIco">🧲</span><span id="snapAiBtnLbl">(AI) Snap ke Objek</span></button>
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+<button class="btn-sub-tool active" id="btnGrabRestore" onclick="grabSetTool('restore')" style="flex-direction:row;padding:6px 8px;">➕ Pulihkan</button>
+<button class="btn-sub-tool" id="btnGrabErase" onclick="grabSetTool('erase')" style="flex-direction:row;padding:6px 8px;">➖ Hapus</button>
+<button class="btn-nav fm-undo" id="grabUndoBtn" onclick="undoMagicGrab()" style="padding:6px 10px;" title="Undo">↩️</button>
+<button class="btn-nav fm-undo" id="grabRedoBtn" onclick="redoMagicGrab()" style="padding:6px 10px;" title="Redo">↪️</button>
+<button class="btn-nav" onclick="centerMagicGrabPen()" style="padding:6px 10px;" title="Pusatkan kuas/pen">📍 Kuas</button>
+</div>
 <div style="display:flex;gap:8px;">
 <button class="btn-nav" onclick="undoMagicGrabSnap()" style="flex:1 1 0;justify-content:center;height:36px;">↩ Batal Snap</button>
 <button class="btn-nav" onclick="clearMagicGrabMask()" style="flex:1 1 0;justify-content:center;height:36px;">Bersihkan</button>
@@ -1482,8 +1485,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.5.5: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.5.5';
+/* v1.5.6: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.5.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -8534,6 +8537,8 @@ let grabMidX = null, grabMidY = null;
 let grabPanTimer = 0;
 let grabStrokes = [];
 let grabRedoStack = [];
+/* v1.5.6: 'restore' = menambah area pilihan (perilaku lama), 'erase' = mengurangi area pilihan */
+let grabTool = 'restore';
 let grabCurStroke = null;
 let grabBaseMask = null;
 let grabBaseImg = null;
@@ -8578,6 +8583,7 @@ function drawGrabStroke(ctx, st){
     if(st.clear){ ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); return; }
     const p=st.pts; if(!p||!p.length) return;
     ctx.save();
+    if(st.erase) ctx.globalCompositeOperation='destination-out';
     ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.lineWidth=st.size; ctx.strokeStyle='#00ff88'; ctx.fillStyle='#00ff88';
     ctx.beginPath(); ctx.arc(p[0].x,p[0].y,st.size/2,0,Math.PI*2); ctx.fill();
@@ -8680,6 +8686,17 @@ setTimeout(updateGrabReticle,60);
 }
 
 /* v1.5.5: kembalikan pegangan kuas/pen Tangkap Ajaib ke tengah bawah (posisi awal) */
+/* v1.5.6: pilih alat Pulihkan / Hapus Tangkap Ajaib (sama seperti Hapus BG) */
+function grabSetTool(t){
+grabTool = t;
+const a=document.getElementById('btnGrabRestore'), b=document.getElementById('btnGrabErase');
+if(a) a.classList.toggle('active', t==='restore');
+if(b) b.classList.toggle('active', t==='erase');
+if(t==='erase') showToast('➖ Gosok area yang ingin dihapus dari pilihan');
+else showToast('➕ Gosok area yang ingin dipulihkan ke pilihan');
+updateGrabReticle();
+}
+
 function centerMagicGrabPen(){
 const stalk=document.getElementById('magicGrabStalk'); if(!stalk) return;
 stalk.style.left='50%'; stalk.style.top=''; stalk.style.right=''; stalk.style.bottom='20px'; stalk.style.transform='translateX(-50%)';
@@ -8798,6 +8815,7 @@ function updateGrabReticle(){
     ret.style.top=(b.y-br.top)+'px';
     ret.style.display='block';
     ret.classList.toggle('off',!grabPaintMode);
+    ret.style.borderColor=(grabPaintMode&&grabTool==='erase')?'#ff6b6b':'';
 }
 
 function updateBrushMonitorPreview(size, x, y, fromSlider = false){
@@ -8935,6 +8953,7 @@ function endGrabStroke(){
         const mctx=grabMaskCanvas.getContext('2d');
         mctx.save();
         mctx.lineCap='round'; mctx.lineJoin='round';
+        mctx.globalCompositeOperation=(grabTool==='erase')?'destination-out':'source-over';
         mctx.lineWidth=grabBrushCanvasPx();
         mctx.strokeStyle='#00ff88';
         mctx.beginPath();
@@ -8963,6 +8982,7 @@ const mctx=grabMaskCanvas.getContext('2d');
 mctx.save();
 mctx.lineCap = 'round';
 mctx.lineJoin = 'round';
+mctx.globalCompositeOperation = (grabTool==='erase') ? 'destination-out' : 'source-over';
 mctx.lineWidth = bSize;
 mctx.strokeStyle = '#00ff88';
 
@@ -8975,7 +8995,7 @@ if(lastGrabX !== null && lastGrabY !== null) {
     grabMidX=mx; grabMidY=my;
     if(grabCurStroke) grabCurStroke.pts.push({x:x,y:y});
 } else {
-    grabCurStroke={pts:[{x:x,y:y}],size:bSize};
+    grabCurStroke={pts:[{x:x,y:y}],size:bSize,erase:grabTool==='erase'};
     mctx.beginPath();
     mctx.arc(x,y,bSize/2,0,Math.PI*2);
     mctx.fillStyle='#00ff88';
