@@ -1,14 +1,16 @@
 <!--
-Studio Poster Maker Pro - Update v1.5.9
+Studio Poster Maker Pro - Update v1.6.1
 
-v1.5.9:
-1. SIMPAN SAAT PINDAH APLIKASI: proyek langsung disimpan ketika app disembunyikan atau ditutup (tidak menunggu autosave 2 detik), sehingga keadaan terakhir tidak hilang saat kembali ke app.
-2. GESER TANGKAP AJAIB & HAPUS BG: joystick geser memakai frame browser (requestAnimationFrame) sehingga gerakan lebih halus. Kecepatannya sama seperti sebelumnya.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.9).
+v1.6.1:
+1. TANGKAP AJAIB PAKAI AI KHUSUS OBJEK (MobileSAM): tombol "(AI) Snap ke Objek" kini memakai model pemilih objek dari area kuasan, hasil lebih rapi dan hanya objek di area itu. Decoder dari root repo (sam_mask_decoder_multi.onnx), encoder dari GitHub Releases (tag ai-model-v1) dengan cadangan Hugging Face; diunduh sekali lalu tersimpan di perangkat.
+2. Toleransi, Halus, Batal Snap, dan hitung ulang otomatis tetap sinkron (hasil AI baru memakai alur yang sama). Bila model gagal dimuat, otomatis kembali ke AI lama dengan notifikasi.
+3. Memori ringan: sesi encoder langsung dilepas setelah dipakai, kanvas sementara dibersihkan, embedding disimpan sekali per gambar.
+4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.1).
 
-v1.5.8:
-1. TANGKAP AJAIB: Toleransi dan Halus langsung menghitung ulang hasil Snap saat digeser.
-2. Versi: nomor di bar atas dan di dalam kode disinkronkan.
+v1.6.0:
+1. SELEKSI LANGSUNG: menekan elemen/teks (tanpa menggeser) tidak lagi memicu pencatatan riwayat (gambar ulang thumbnail, salinan seluruh proyek, autosave). Garis emas putus-putus kini muncul seketika. Riwayat/undo tetap dicatat bila elemen benar-benar digeser, diputar, atau diubah ukurannya.
+2. AUTOSAVE RAMAH SENTUHAN: penyimpanan otomatis ditunda singkat selama layar sedang disentuh. Simpan saat app pindah/ditutup tetap langsung.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.0).
 -->
 
 
@@ -1490,8 +1492,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.5.9: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.5.9';
+/* v1.6.1: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.6.1';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2115,16 +2117,32 @@ document.getElementById('dzikirBtn').onclick = () => {
 
 }
 
-function triggerAutoSave(){
-setSaveIndicator(false);
-clearTimeout(autoSaveTimer);
-autoSaveTimer=setTimeout(()=>{
+/* v1.6.0: lacak sentuhan agar autosave (berat) tidak menabrak sentuhan berikutnya */
+var _ptrActive = 0, _lastInputTs = 0, _autoSaveDefer = 0;
+window.addEventListener('pointerdown', () => { _ptrActive++; _lastInputTs = Date.now(); }, { capture: true, passive: true });
+window.addEventListener('pointerup', () => { _ptrActive = Math.max(0, _ptrActive - 1); _lastInputTs = Date.now(); }, { capture: true, passive: true });
+window.addEventListener('pointercancel', () => { _ptrActive = Math.max(0, _ptrActive - 1); _lastInputTs = Date.now(); }, { capture: true, passive: true });
+
+function runAutoSave(){
+    /* tunda singkat bila layar sedang disentuh (maks 5x, lalu tetap simpan) */
+    if(_autoSaveDefer < 5 && (_ptrActive > 0 || (Date.now() - _lastInputTs) < 1000)) {
+        _autoSaveDefer++;
+        autoSaveTimer = setTimeout(runAutoSave, 700);
+        return;
+    }
+    _autoSaveDefer = 0;
     if(window.requestIdleCallback) {
         window.requestIdleCallback(() => saveToStorage());
     } else {
         saveToStorage();
     }
-}, 2000); 
+}
+
+function triggerAutoSave(){
+setSaveIndicator(false);
+clearTimeout(autoSaveTimer);
+_autoSaveDefer = 0;
+autoSaveTimer=setTimeout(runAutoSave, 2000); 
 }
 
 let historyDebounceTimer=null;
@@ -5311,16 +5329,21 @@ if(e && dragMode === 'move' && dragPointerId !== null && e.pointerId !== dragPoi
 hideSnapGuides();
 if(dragMode){
 const wasMoveDrag=(dragMode==='move'||dragMode==='stalk-move');
+const hadRealMove=dragMoved;
 dragMode=null;dragPointerId=null;dragMoved=false;
 const el=getActiveElement();
+let posChanged=false;
 if(el){
 const roundedX=Math.round(el.x),roundedY=Math.round(el.y);
+posChanged=(roundedX!==el.x||roundedY!==el.y);
 // Pembulatan akhir diterapkan sama persis ke seluruh anggota grup agar jarak antar elemen tidak berubah
 if(wasMoveDrag&&el.groupId)moveGroupPeersBy(el,roundedX-el.x,roundedY-el.y);
 el.x=roundedX;el.y=roundedY;
 }
 const s=getCurrentSlide();
 s.elements.forEach(other=>delete other._startGroupPos);
+/* v1.6.0: tekan tanpa geser = hanya seleksi, tidak ada perubahan -> lewati riwayat/thumbnail/autosave yang berat */
+if(wasMoveDrag&&!hadRealMove&&!posChanged)return;
 pushHistoryState();
 }
 }
@@ -15728,6 +15751,241 @@ function snapAiRefine(sal, hint, roi, rgba, mw, mh, thr){
 }
 
 
+/* ========== v1.6.1: AI KHUSUS TANGKAP OBJEK (MobileSAM via ONNX Runtime Web) ==========
+   Encoder (±28 MB) : GitHub Releases repo (tag ai-model-v1), cadangan Hugging Face. Diunduh sekali lalu disimpan di Cache API.
+   Decoder (±16 MB) : file "sam_mask_decoder_multi.onnx" di root repo, cadangan Hugging Face.
+   Hasil AI diubah menjadi peta "saliency" 0-255 yang sama bentuknya dengan AI lama, sehingga Toleransi, Halus,
+   Batal Snap, dan hitung ulang otomatis tetap bekerja tanpa perubahan. Bila model gagal dimuat, AI lama dipakai. */
+const SNAP_SAM_ENC = [
+    'https://github.com/Muhram07/Salinan-Eksperimen-Arsip-Dakwah/releases/download/ai-model-v1/mobile_sam_image_encoder.1.onnx',
+    'https://huggingface.co/comicbox/mobilesam-onnx/resolve/main/mobile_sam_image_encoder.onnx'
+];
+const SNAP_SAM_DEC = [
+    'sam_mask_decoder_multi.onnx',
+    'https://huggingface.co/Acly/MobileSAM/resolve/main/sam_mask_decoder_multi.onnx'
+];
+var snapSam = { dec: null, emb: null, key: '', rw: 0, rh: 0, failed: false };
+
+function snapSamDropEmb(){
+    try{ if (snapSam.emb && snapSam.emb.dispose) snapSam.emb.dispose(); }catch(e){}
+    snapSam.emb = null; snapSam.key = ''; snapSam.rw = 0; snapSam.rh = 0;
+}
+function snapSamRelease(){
+    snapSamDropEmb();
+    const d = snapSam.dec; snapSam.dec = null;
+    if (d && d.release){ try{ d.release(); }catch(e){} }
+    snapSam.failed = false;
+}
+
+async function snapSamLoadBuf(urls){
+    const list = urls.map(function(u){ return encodeURI(u); });
+    const valid = function(b){
+        const u = new Uint8Array(b, 0, Math.min(16, b.byteLength));
+        if (b.byteLength < 500000 || u[0] === 0x3C) throw new Error('bukan model');
+    };
+    for (let i = 0; i < list.length; i++){
+        const b = await wandAiFetch(list[i], 'Model objek', true, valid);
+        if (b) return b;
+    }
+    for (let i = 0; i < list.length; i++){
+        try{
+            const b = await wandAiFetch(list[i], 'Mengunduh model objek (sekali saja)', false, valid);
+            if (b) return b;
+        }catch(e){ /* coba alamat berikutnya */ }
+    }
+    throw new Error('SAM_MODEL_404');
+}
+
+async function snapSamEnsureDecoder(alive){
+    if (snapSam.dec) return snapSam.dec;
+    const ortLib = await wandAiLoadOrt();
+    if (!alive()) return null;
+    snapAiShow('Memuat model pemilih objek…', 8);
+    let buf = await snapSamLoadBuf(SNAP_SAM_DEC);
+    if (!alive()) return null;
+    const sess = await ortLib.InferenceSession.create(new Uint8Array(buf), {executionProviders:['wasm'], graphOptimizationLevel:'all'});
+    buf = null;
+    const need = ['image_embeddings', 'point_coords', 'point_labels', 'orig_im_size'];
+    for (let i = 0; i < need.length; i++){
+        if (sess.inputNames.indexOf(need[i]) < 0){ try{ sess.release(); }catch(e){} throw new Error('SAM_FORMAT'); }
+    }
+    snapSam.dec = sess;
+    return sess;
+}
+
+/* encoder hanya jalan sekali per gambar; embedding (±4 MB) disimpan, sesi encoder langsung dilepas agar memori ringan */
+async function snapSamEnsureEmbedding(el, srcImg, mw, mh, alive){
+    const key = (el.id || '') + ':' + mw + 'x' + mh;
+    if (snapSam.emb && snapSam.key === key) return true;
+    snapSamDropEmb();
+    const ortLib = await wandAiLoadOrt();
+    if (!alive()) return false;
+    snapAiShow('Memuat model objek…', 12);
+    let buf = await snapSamLoadBuf(SNAP_SAM_ENC);
+    if (!alive()) return false;
+    snapAiShow('Memuat model objek ke memori… (beberapa detik)', 40);
+    await snapAiYield();
+    await wandAiSleep(60);
+    const sess = await ortLib.InferenceSession.create(new Uint8Array(buf), {executionProviders:['wasm'], graphOptimizationLevel:'all', enableMemPattern:false});
+    buf = null;
+    let emb = null, rw = 0, rh = 0;
+    try{
+        const s = 1024 / Math.max(mw, mh);
+        rw = Math.max(1, Math.round(mw * s)); rh = Math.max(1, Math.round(mh * s));
+        const c = document.createElement('canvas'); c.width = rw; c.height = rh;
+        const g = c.getContext('2d', {willReadFrequently:true});
+        g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+        g.fillStyle = '#ffffff'; g.fillRect(0, 0, rw, rh);
+        g.drawImage(srcImg, 0, 0, rw, rh);
+        const d = g.getImageData(0, 0, rw, rh).data;
+        c.width = 0; c.height = 0;
+        const f = new Float32Array(rw * rh * 3);
+        for (let i = 0, n = rw * rh; i < n; i++){
+            const k = i * 4, o = i * 3;
+            f[o] = d[k]; f[o + 1] = d[k + 1]; f[o + 2] = d[k + 2];
+        }
+        const tensor = new ortLib.Tensor('float32', f, [rh, rw, 3]);
+        snapAiShow('AI menganalisis objek… (pertama kali agak lama)', 50);
+        await snapAiYield();
+        const feeds = {}; feeds[sess.inputNames[0]] = tensor;
+        const out = await sess.run(feeds);
+        const t = out[sess.outputNames[0]];
+        if (!t || !t.dims || t.dims.length !== 4 || t.dims[1] !== 256) throw new Error('SAM_FORMAT');
+        emb = new ortLib.Tensor('float32', Float32Array.from(t.data), t.dims.slice());
+    } finally {
+        try{ await sess.release(); }catch(e){}
+    }
+    if (!alive()){ try{ emb.dispose(); }catch(e){} return false; }
+    snapSam.emb = emb; snapSam.key = key; snapSam.rw = rw; snapSam.rh = rh;
+    return true;
+}
+
+/* titik petunjuk dari coretan: beberapa titik tersebar di dalam area kuas + kotak pembatas */
+function snapSamPrompts(md, mw, mh, boxPad){
+    const G = 48, cw = mw / G, ch = mh / G;
+    const cnt = new Uint32Array(G * G), sxc = new Float64Array(G * G), syc = new Float64Array(G * G);
+    let minX = mw, minY = mh, maxX = -1, maxY = -1, sx = 0, sy = 0, n = 0;
+    for (let y = 0; y < mh; y++){
+        const cy = Math.min(G - 1, (y / ch) | 0) * G;
+        for (let x = 0; x < mw; x++){
+            if (md[(y * mw + x) * 4 + 3] <= 8) continue;
+            const ci = cy + Math.min(G - 1, (x / cw) | 0);
+            cnt[ci]++; sxc[ci] += x; syc[ci] += y;
+            if (x < minX) minX = x; if (x > maxX) maxX = x;
+            if (y < minY) minY = y; if (y > maxY) maxY = y;
+            sx += x; sy += y; n++;
+        }
+    }
+    if (!n) return null;
+    let cmax = 0;
+    for (let i = 0; i < cnt.length; i++) if (cnt[i] > cmax) cmax = cnt[i];
+    const thr = Math.max(1, cmax * 0.4);
+    const cand = [];
+    for (let i = 0; i < cnt.length; i++){
+        if (cnt[i] >= thr) cand.push([sxc[i] / cnt[i], syc[i] / cnt[i]]);
+    }
+    const gx = sx / n, gy = sy / n;
+    const K = Math.min(9, cand.length);
+    const pts = [];
+    let bi = 0, bd = Infinity;
+    for (let i = 0; i < cand.length; i++){
+        const d = (cand[i][0] - gx) * (cand[i][0] - gx) + (cand[i][1] - gy) * (cand[i][1] - gy);
+        if (d < bd){ bd = d; bi = i; }
+    }
+    pts.push(cand.splice(bi, 1)[0]);
+    while (pts.length < K && cand.length){
+        let best = -1, bestD = -1;
+        for (let i = 0; i < cand.length; i++){
+            let m = Infinity;
+            for (let j = 0; j < pts.length; j++){
+                const d = (cand[i][0] - pts[j][0]) * (cand[i][0] - pts[j][0]) + (cand[i][1] - pts[j][1]) * (cand[i][1] - pts[j][1]);
+                if (d < m) m = d;
+            }
+            if (m > bestD){ bestD = m; best = i; }
+        }
+        pts.push(cand.splice(best, 1)[0]);
+    }
+    const box = [Math.max(0, minX - boxPad), Math.max(0, minY - boxPad), Math.min(mw - 1, maxX + boxPad), Math.min(mh - 1, maxY + boxPad)];
+    return { pts: pts, box: box };
+}
+
+/* hasil: kanvas (resolusi ±1024) dengan alpha = peta saliency 0-255, atau null bila AI objek tidak tersedia (-> AI lama) */
+async function snapSamSaliency(el, mask, md, mw, mh, alive){
+    if (snapSam.failed) return null;
+    try{
+        const slider = parseInt((document.getElementById('magicBrushSize') || {}).value) || 35;
+        const gr = (typeof grabRes === 'number' && grabRes > 0) ? grabRes : 1;
+        const r = Math.max(4, Math.min(160, Math.round(slider * gr * 0.5)));
+        const pr = snapSamPrompts(md, mw, mh, Math.round(r * 0.5));
+        if (!pr) return null;
+
+        snapAiShow('Menyiapkan mesin AI…', 5);
+        const dec = await snapSamEnsureDecoder(alive);
+        if (!dec || !alive()) return null;
+        const srcImg = (grabBaseImg && grabBaseImg.width === mw && grabBaseImg.height === mh) ? grabBaseImg : el.img;
+        const okEmb = await snapSamEnsureEmbedding(el, srcImg, mw, mh, alive);
+        if (!okEmb || !alive()) return null;
+
+        snapAiShow('AI mencari objek di area coretan…', 62);
+        await snapAiYield();
+        const ortLib = window.ort;
+        const rw = snapSam.rw, rh = snapSam.rh;
+        const sx = rw / mw, sy = rh / mh;
+        const N = pr.pts.length + 2;
+        const pc = new Float32Array(N * 2), pl = new Float32Array(N);
+        for (let i = 0; i < pr.pts.length; i++){
+            pc[i * 2] = (pr.pts[i][0] + 0.5) * sx; pc[i * 2 + 1] = (pr.pts[i][1] + 0.5) * sy; pl[i] = 1;
+        }
+        const b0 = pr.pts.length;
+        pc[b0 * 2] = pr.box[0] * sx;       pc[b0 * 2 + 1] = pr.box[1] * sy;       pl[b0] = 2;
+        pc[(b0 + 1) * 2] = pr.box[2] * sx; pc[(b0 + 1) * 2 + 1] = pr.box[3] * sy; pl[b0 + 1] = 3;
+        const feeds = {};
+        feeds.image_embeddings = snapSam.emb;
+        feeds.point_coords = new ortLib.Tensor('float32', pc, [1, N, 2]);
+        feeds.point_labels = new ortLib.Tensor('float32', pl, [1, N]);
+        if (dec.inputNames.indexOf('mask_input') >= 0) feeds.mask_input = new ortLib.Tensor('float32', new Float32Array(256 * 256), [1, 1, 256, 256]);
+        if (dec.inputNames.indexOf('has_mask_input') >= 0) feeds.has_mask_input = new ortLib.Tensor('float32', new Float32Array([0]), [1]);
+        feeds.orig_im_size = new ortLib.Tensor('float32', new Float32Array([rh, rw]), [2]);
+        const out = await dec.run(feeds);
+        if (!alive()) return null;
+
+        let mt = out.masks;
+        if (!mt){
+            for (let i = 0; i < dec.outputNames.length; i++){
+                const t = out[dec.outputNames[i]];
+                if (t && t.dims && t.dims.length === 4 && t.dims[2] === rh && t.dims[3] === rw){ mt = t; break; }
+            }
+        }
+        if (!mt) throw new Error('SAM_FORMAT');
+        const K = mt.dims[1], HW = rh * rw, data = mt.data;
+        /* banyak titik petunjuk -> mask indeks 0 (aturan SAM); bila kosong, pakai yang paling luas */
+        let pick = 0, bestCnt = -1;
+        for (let k = 0; k < K; k++){
+            let c = 0; const base = k * HW;
+            for (let i = 0; i < HW; i++) if (data[base + i] > 0) c++;
+            if (k === 0 && c >= 16){ pick = 0; bestCnt = c; break; }
+            if (c > bestCnt){ bestCnt = c; pick = k; }
+        }
+        const cv = document.createElement('canvas'); cv.width = rw; cv.height = rh;
+        const cx = cv.getContext('2d');
+        const id = cx.createImageData(rw, rh), dd = id.data, base = pick * HW;
+        for (let i = 0; i < HW; i++){
+            dd[i * 4 + 3] = Math.round(255 / (1 + Math.exp(-data[base + i] / 4)));
+        }
+        cx.putImageData(id, 0, 0);
+        return cv;
+    }catch(e){
+        console.warn('Snap AI objek (MobileSAM) gagal, memakai AI lama:', e);
+        if (alive()){
+            snapSam.failed = true;
+            snapSamDropEmb();
+            showToast('⚠️ Model objek belum bisa dimuat, memakai AI lama');
+        }
+        return null;
+    }
+}
+
+
 async function snapMagicGrabToObject(){
     const el = getActiveElement();
     const mask = grabMaskCanvas;
@@ -15749,7 +16007,12 @@ async function snapMagicGrabToObject(){
     try{
         await snapAiYield();
         if (!alive()) return;
-        const salBase = await snapAiSaliency(el, alive);
+        /* v1.6.1: AI objek (MobileSAM) lebih dulu; bila tidak tersedia, AI lama (saliency) dipakai */
+        let usedSam = false;
+        let salBase = await snapSamSaliency(el, mask, md, mw, mh, alive);
+        if (!alive()) return;
+        if (salBase){ usedSam = true; tmpCanvases.push(salBase); }
+        else salBase = await snapAiSaliency(el, alive);
         if (!salBase || !alive()) return;
 
         snapAiShow('Menghitung tepi objek…', 68);
@@ -15806,7 +16069,7 @@ async function snapMagicGrabToObject(){
         /* v1.5.7: Toleransi (default 30) menggeser ambang: makin besar makin banyak yang ikut */
         const _gt = parseInt((document.getElementById('grabTolerance')||{}).value);
         const _tolOff = (isNaN(_gt) ? 30 : _gt) - 30;
-        const otsu0 = snapAiOtsu(hist, total);
+        const otsu0 = usedSam ? 128 : snapAiOtsu(hist, total); /* peta AI objek: batas alami 128 (peluang 50%) */
         const thr = Math.max(40, Math.min(200, otsu0 - _tolOff * 1.2));
 
         const res = snapAiRefine(sal, hint, roi, rgba, mw, mh, thr);
@@ -15848,7 +16111,7 @@ async function snapMagicGrabToObject(){
         renderMagicGrabDisplay();
         snapAiShow('✅ Selesai', 100);
         await wandAiSleep(220);
-        showToast('✅ Tepi objek berhasil dideteksi');
+        showToast(usedSam ? '✅ Objek berhasil diambil (AI Objek)' : '✅ Tepi objek berhasil dideteksi');
     }catch(e){
         console.error('Snap AI', e);
         const msg = (e && e.message === 'MODEL_404')
@@ -15925,6 +16188,7 @@ function snapAiReset(){
     snapAi.sal = null;
     snapAi.salEl = null;
     grabSnapCache = null;
+    snapSamRelease(); /* v1.6.1: lepas decoder & embedding AI objek */
 }
 
 /* bungkus open/close tanpa mengubah fungsi aslinya */
