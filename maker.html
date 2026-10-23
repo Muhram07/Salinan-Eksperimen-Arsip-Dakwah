@@ -1,15 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v1.5.6
+Studio Poster Maker Pro - Update v1.5.9
 
-v1.5.6:
-1. TANGKAP AJAIB: ditambahkan ➕ Pulihkan / ➖ Hapus (seperti Hapus BG) di bawah tombol Snap. Pulihkan menambah area pilihan, Hapus mengurangi area pilihan, sehingga detail yang cacat bisa diperbaiki manual dengan kuas.
-2. TANGKAP AJAIB: tombol ↩️ Undo, ↪️ Redo, dan 📍 Kuas dipindah ke baris yang sama dengan Pulihkan/Hapus.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.6).
+v1.5.9:
+1. SIMPAN SAAT PINDAH APLIKASI: proyek langsung disimpan ketika app disembunyikan atau ditutup (tidak menunggu autosave 2 detik), sehingga keadaan terakhir tidak hilang saat kembali ke app.
+2. GESER TANGKAP AJAIB & HAPUS BG: joystick geser memakai frame browser (requestAnimationFrame) sehingga gerakan lebih halus. Kecepatannya sama seperti sebelumnya.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.9).
 
-v1.5.5:
-1. HAPUS BG: tombol 📍 Kuas untuk memusatkan kuas/pen; tombol ↪️ Redo ditambahkan.
-2. TANGKAP AJAIB: tombol 📍 Kuas untuk memusatkan kuas/pen.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan.
+v1.5.8:
+1. TANGKAP AJAIB: Toleransi dan Halus langsung menghitung ulang hasil Snap saat digeser.
+2. Versi: nomor di bar atas dan di dalam kode disinkronkan.
 -->
 
 
@@ -962,8 +961,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <canvas id="magicGrabCanvas" style="box-shadow:0 0 20px #000;border-radius:6px;"></canvas>
     </div>
     <div style="position:absolute; top:10px; right:10px; display:flex; flex-direction:column; gap:5px; z-index:105;">
-        <button class="btn-nav" onclick="zoomMagicGrab(0.25)" style="width:34px;justify-content:center;">➕</button>
-        <button class="btn-nav" onclick="zoomMagicGrab(-0.25)" style="width:34px;justify-content:center;">➖</button>
+        <button class="btn-nav" onpointerdown="grabZoomPress(1)" onpointerup="grabZoomRelease()" onpointerleave="grabZoomRelease()" onpointercancel="grabZoomRelease()" style="width:34px;justify-content:center;touch-action:none;">➕</button>
+        <button class="btn-nav" onpointerdown="grabZoomPress(-1)" onpointerup="grabZoomRelease()" onpointerleave="grabZoomRelease()" onpointercancel="grabZoomRelease()" style="width:34px;justify-content:center;touch-action:none;">➖</button>
         <button class="btn-nav" onclick="resetMagicGrabZoom()" style="width:34px;justify-content:center;">🎯</button>
     </div>
     <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
@@ -1008,6 +1007,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav fm-undo" id="grabUndoBtn" onclick="undoMagicGrab()" style="padding:6px 10px;" title="Undo">↩️</button>
 <button class="btn-nav fm-undo" id="grabRedoBtn" onclick="redoMagicGrab()" style="padding:6px 10px;" title="Redo">↪️</button>
 <button class="btn-nav" onclick="centerMagicGrabPen()" style="padding:6px 10px;" title="Pusatkan kuas/pen">📍 Kuas</button>
+</div>
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+<span style="font-size:11px;color:#aaa;">Toleransi:</span>
+<input type="range" class="ctrl-slider" id="grabTolerance" min="0" max="100" value="30" style="width:80px;">
+<span style="font-size:11px;color:#aaa;">Halus:</span>
+<input type="range" class="ctrl-slider" id="grabFeather" min="0" max="10" value="1" style="width:60px;">
 </div>
 <div style="display:flex;gap:8px;">
 <button class="btn-nav" onclick="undoMagicGrabSnap()" style="flex:1 1 0;justify-content:center;height:36px;">↩ Batal Snap</button>
@@ -1485,8 +1490,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.5.6: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.5.6';
+/* v1.5.9: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.5.9';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -8544,6 +8549,9 @@ let grabBaseMask = null;
 let grabBaseImg = null;
 let grabRaf = 0;
 const GRAB_MAX_UNDO = 120;
+const GRAB_MAX_SNAP = 5; /* v1.5.7: jumlah checkpoint Snap yang tetap bisa di-undo (memori ringan) */
+/* v1.5.8: hasil perantara Snap terakhir (saliency, koreksi area, warna) agar Toleransi/Halus bisa dihitung ulang tanpa AI */
+let grabSnapCache = null;
 let stepHoldTimer = 0, stepHoldDelay = 0;
 
 /* v1.3.2: tombol +/- (tahan untuk mengulang) dipakai bersama oleh Tangkap Ajaib & Crop Jari */
@@ -8580,6 +8588,7 @@ function updateGrabUndoUI(){
 
 /* gambar ulang satu goresan: kurva titik-tengah, identik dengan goresan langsung */
 function drawGrabStroke(ctx, st){
+    if(st.img){ ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); ctx.drawImage(st.img,0,0); return; }
     if(st.clear){ ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); return; }
     const p=st.pts; if(!p||!p.length) return;
     ctx.save();
@@ -8605,11 +8614,26 @@ function rebuildGrabMask(){
     renderMagicGrabDisplay();
 }
 
+function grabSnapCount(){
+    let n=0; for(let i=0;i<grabStrokes.length;i++){ if(grabStrokes[i].img) n++; }
+    return n;
+}
+
+/* v1.5.7: hasil Snap dicatat sebagai satu langkah undo (salinan mask setelah Snap) */
+function commitGrabCheckpoint(){
+    if(!grabMaskCanvas) return;
+    const c=document.createElement('canvas'); c.width=grabMaskCanvas.width; c.height=grabMaskCanvas.height;
+    c.getContext('2d').drawImage(grabMaskCanvas,0,0);
+    const e={img:c};
+    commitGrabStroke(e);
+    return e;
+}
+
 function commitGrabStroke(st){
     grabStrokes.push(st);
     grabRedoStack.length=0;
     /* batas undo: goresan tertua digabung ke kanvas dasar (tidak bisa di-undo lagi) agar memori & waktu gambar ulang tetap ringan */
-    while(grabStrokes.length>GRAB_MAX_UNDO){
+    while(grabStrokes.length>GRAB_MAX_UNDO || grabSnapCount()>GRAB_MAX_SNAP){
         const old=grabStrokes.shift();
         if(!grabBaseMask){ grabBaseMask=document.createElement('canvas'); grabBaseMask.width=grabMaskCanvas.width; grabBaseMask.height=grabMaskCanvas.height; }
         drawGrabStroke(grabBaseMask.getContext('2d'), old);
@@ -8730,9 +8754,21 @@ commitGrabStroke({clear:true});
 renderMagicGrabDisplay();
 }
 
-function zoomMagicGrab(delta) {
-    magicGrabZoom = Math.max(0.5, Math.min(4.0, magicGrabZoom + delta));
+/* v1.5.7: zoom Tangkap Ajaib disamakan dengan Hapus BG (langkah 8%, maks 40x, tahan untuk mengulang) */
+const ZOOM_MAX_TOOL = 40;
+function zoomMagicGrab(dir) {
+    magicGrabZoom = Math.max(0.5, Math.min(ZOOM_MAX_TOOL, dir>0 ? magicGrabZoom*WAND_ZOOM_STEP : magicGrabZoom/WAND_ZOOM_STEP));
     updateMagicGrabTransform();
+}
+let grabZoomHoldT=0, grabZoomHoldD=0;
+function grabZoomRelease(){
+    if(grabZoomHoldD){ clearTimeout(grabZoomHoldD); grabZoomHoldD=0; }
+    if(grabZoomHoldT){ clearInterval(grabZoomHoldT); grabZoomHoldT=0; }
+}
+function grabZoomPress(dir){
+    grabZoomRelease();
+    zoomMagicGrab(dir);
+    grabZoomHoldD=setTimeout(function(){ grabZoomHoldT=setInterval(function(){ zoomMagicGrab(dir); }, WAND_ZOOM_HOLD_MS); },350);
 }
 
 function resetMagicGrabZoom() {
@@ -8762,13 +8798,19 @@ function updateMagicGrabTransform(immediate) {
 }
 
 /* v1.3.1: geser kanvas (kanan/kiri/atas/bawah) lewat tombol panah, atau seret kanvas saat kuas OFF */
+/* v1.5.9: geser memakai frame browser agar mulus; kecepatan tetap 10 px per 60 ms */
 function startGrabPan(dx, dy) {
     stopGrabPan();
-    const step = () => { grabPanX += dx * 10; grabPanY += dy * 10; updateMagicGrabTransform(true); };
-    step();
-    grabPanTimer = setInterval(step, 60);
+    grabPanX += dx * 10; grabPanY += dy * 10; updateMagicGrabTransform(true);
+    let last = performance.now();
+    const frame = (now) => {
+        const k = Math.min(100, now - last) / 60; last = now;
+        grabPanX += dx * 10 * k; grabPanY += dy * 10 * k; updateMagicGrabTransform(true);
+        grabPanTimer = requestAnimationFrame(frame);
+    };
+    grabPanTimer = requestAnimationFrame(frame);
 }
-function stopGrabPan() { if(grabPanTimer) { clearInterval(grabPanTimer); grabPanTimer = 0; } }
+function stopGrabPan() { if(grabPanTimer) { cancelAnimationFrame(grabPanTimer); grabPanTimer = 0; } }
 
 function endGrabPanDrag() {
     if(!isPanningGrab) return;
@@ -10534,7 +10576,7 @@ const WAND_ZOOM_STEP=1.08, WAND_ZOOM_HOLD_MS=150;
 let wandZoomHoldT=0, wandZoomHoldD=0;
 function zoomMagicWand(dir){
     const v=wandView;
-    v.zoom=Math.max(0.5,Math.min(10,dir>0?v.zoom*WAND_ZOOM_STEP:v.zoom/WAND_ZOOM_STEP));
+    v.zoom=Math.max(0.5,Math.min(ZOOM_MAX_TOOL,dir>0?v.zoom*WAND_ZOOM_STEP:v.zoom/WAND_ZOOM_STEP));
     wandApplyTransform();
 }
 function wandZoomRelease(){
@@ -10554,14 +10596,20 @@ function wandViewReset(){
     wandApplyTransform();
 }
 
+/* v1.5.9: geser memakai frame browser agar mulus; kecepatan tetap 5 px per 60 ms */
 function startWandPan(dx,dy){
     stopWandPan();
     const v=wandView;
-    const step=function(){ v.panX+=dx*5; v.panY+=dy*5; wandApplyTransform(); };
-    step();
-    v.panTimer=setInterval(step,60);
+    v.panX+=dx*5; v.panY+=dy*5; wandApplyTransform();
+    let last=performance.now();
+    const frame=function(now){
+        const k=Math.min(100,now-last)/60; last=now;
+        v.panX+=dx*5*k; v.panY+=dy*5*k; wandApplyTransform();
+        v.panTimer=requestAnimationFrame(frame);
+    };
+    v.panTimer=requestAnimationFrame(frame);
 }
-function stopWandPan(){ const v=wandView; if(v.panTimer){ clearInterval(v.panTimer); v.panTimer=0; } }
+function stopWandPan(){ const v=wandView; if(v.panTimer){ cancelAnimationFrame(v.panTimer); v.panTimer=0; } }
 
 function toggleWandPaint(){
     const v=wandView; v.paint=!v.paint;
@@ -15755,13 +15803,19 @@ async function snapMagicGrabToObject(){
         let total = 0;
         for (let i = 0; i < n; i++){ if (roi[i]){ hist[sal[i]]++; total++; } }
         if (total < 16){ showToast('⚠️ Area coretan terlalu kecil'); return; }
-        const thr = Math.max(40, Math.min(200, snapAiOtsu(hist, total)));
+        /* v1.5.7: Toleransi (default 30) menggeser ambang: makin besar makin banyak yang ikut */
+        const _gt = parseInt((document.getElementById('grabTolerance')||{}).value);
+        const _tolOff = (isNaN(_gt) ? 30 : _gt) - 30;
+        const otsu0 = snapAiOtsu(hist, total);
+        const thr = Math.max(40, Math.min(200, otsu0 - _tolOff * 1.2));
 
         const res = snapAiRefine(sal, hint, roi, rgba, mw, mh, thr);
         if (res.kept < 16){
             showToast('⚠️ AI tidak menemukan objek di area ini. Coba coret sedikit lebih luas');
             return;
         }
+
+        grabSnapCache = {mask:mask, mw:mw, mh:mh, sal:sal, hint:hint, roi:roi, rgba:rgba, otsu:otsu0, ro:res.out, entry:null};
 
         snapAiShow('Merapikan hasil…', 94);
         await snapAiYield();
@@ -15779,16 +15833,18 @@ async function snapMagicGrabToObject(){
         }
         ox.putImageData(od, 0, 0);
 
-        /* simpan riwayat untuk Batal Snap (maks 5 langkah agar memori ringan) */
-        snapAi.hist.push(mctx.getImageData(0, 0, mw, mh));
-        if (snapAi.hist.length > 5) snapAi.hist.shift();
-
-        /* tulis ke mask dengan tepi sedikit halus */
+        /* tulis ke mask dengan tepi halus (Halus default 1 = tepi seperti sebelumnya) */
+        const _gf = parseInt((document.getElementById('grabFeather')||{}).value);
+        const _fe = isNaN(_gf) ? 1 : _gf;
+        const blurPx = Math.max(0.3, Math.max(0.6, gr * 0.6) * (0.5 + _fe * 0.5));
         mctx.save();
         mctx.clearRect(0, 0, mw, mh);
-        try{ mctx.filter = 'blur(' + Math.max(0.6, gr * 0.6).toFixed(2) + 'px)'; }catch(e){}
+        try{ mctx.filter = 'blur(' + blurPx.toFixed(2) + 'px)'; }catch(e){}
         mctx.drawImage(out, 0, 0);
         mctx.restore();
+        /* v1.5.7: Snap jadi satu langkah undo/redo */
+        const _ce = commitGrabCheckpoint();
+        if (grabSnapCache) grabSnapCache.entry = _ce;
         renderMagicGrabDisplay();
         snapAiShow('✅ Selesai', 100);
         await wandAiSleep(220);
@@ -15809,12 +15865,55 @@ async function snapMagicGrabToObject(){
 }
 
 function undoMagicGrabSnap(){
-    const mask = grabMaskCanvas;
-    if (!mask || !snapAi.hist.length) { showToast('Tidak ada Snap untuk dibatalkan'); return; }
-    const prev = snapAi.hist.pop();
-    mask.getContext('2d').putImageData(prev, 0, 0);
-    renderMagicGrabDisplay();
+    if (!grabMaskCanvas) return;
+    endGrabStroke();
+    let idx = -1;
+    for (let i = grabStrokes.length - 1; i >= 0; i--){ if (grabStrokes[i].img){ idx = i; break; } }
+    if (idx < 0) { showToast('Tidak ada Snap untuk dibatalkan'); return; }
+    grabStrokes.splice(idx, 1);
+    rebuildGrabMask(); updateGrabUndoUI();
     showToast('↩ Snap dibatalkan');
+}
+
+/* v1.5.8: hitung ulang hasil Snap terakhir saat Toleransi/Halus digeser (tanpa AI, tanpa mengubah goresan lain) */
+let grabSnapRerunT = 0;
+function grabSnapRerun(){
+    const c = grabSnapCache;
+    if (!c || !c.entry || snapAi.busy || !grabMaskCanvas || grabMaskCanvas !== c.mask) return;
+    if (grabStrokes.indexOf(c.entry) < 0) return;
+    const _gt = parseInt((document.getElementById('grabTolerance')||{}).value);
+    const _tolOff = (isNaN(_gt) ? 30 : _gt) - 30;
+    const thr = Math.max(40, Math.min(200, c.otsu - _tolOff * 1.2));
+    const res = snapAiRefine(c.sal, c.hint, c.roi, c.rgba, c.mw, c.mh, thr);
+    if (res.kept < 16) return;
+    const n = c.mw * c.mh;
+    const out = document.createElement('canvas'); out.width = c.mw; out.height = c.mh;
+    const ox = out.getContext('2d');
+    const od = ox.createImageData(c.mw, c.mh);
+    const odd = od.data;
+    const ro = res.out;
+    for (let i = 0; i < n; i++){
+        if (!ro[i]) continue;
+        const k = i * 4;
+        odd[k] = 212; odd[k + 1] = 175; odd[k + 2] = 55; odd[k + 3] = 255;
+    }
+    ox.putImageData(od, 0, 0);
+    const _gf = parseInt((document.getElementById('grabFeather')||{}).value);
+    const _fe = isNaN(_gf) ? 1 : _gf;
+    const gr = (typeof grabRes === 'number' && grabRes > 0) ? grabRes : 1;
+    const blurPx = Math.max(0.3, Math.max(0.6, gr * 0.6) * (0.5 + _fe * 0.5));
+    const e = document.createElement('canvas'); e.width = c.mw; e.height = c.mh;
+    const eg = e.getContext('2d');
+    try{ eg.filter = 'blur(' + blurPx.toFixed(2) + 'px)'; }catch(err){}
+    eg.drawImage(out, 0, 0);
+    out.width = 0; out.height = 0;
+    c.entry.img = e;
+    rebuildGrabMask();
+    updateGrabUndoUI();
+}
+function scheduleGrabSnapRerun(){
+    clearTimeout(grabSnapRerunT);
+    grabSnapRerunT = setTimeout(grabSnapRerun, 120);
 }
 
 function snapAiReset(){
@@ -15825,6 +15924,7 @@ function snapAiReset(){
     if (snapAi.sal){ snapAi.sal.width = 0; snapAi.sal.height = 0; }
     snapAi.sal = null;
     snapAi.salEl = null;
+    grabSnapCache = null;
 }
 
 /* bungkus open/close tanpa mengubah fungsi aslinya */
@@ -15833,6 +15933,24 @@ function snapAiReset(){
     openMagicGrabModal = function(){ snapAiReset(); return _openGrab.apply(this, arguments); };
     const _closeGrab = closeMagicGrabModal;
     closeMagicGrabModal = function(){ snapAiReset(); return _closeGrab.apply(this, arguments); };
+})();
+
+/* v1.5.9: simpan segera saat aplikasi pindah ke background atau ditutup (tidak menunggu autosave 2 detik).
+   Hanya bila proyek sudah termuat, agar tidak menimpa data dengan keadaan kosong saat startup. */
+function flushSaveNow(){
+    if(typeof slides==='undefined' || !Array.isArray(slides) || !slides.length || !currentProjectId) return;
+    clearTimeout(autoSaveTimer);
+    try{ saveToStorage(); }catch(e){}
+}
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') flushSaveNow(); });
+window.addEventListener('pagehide', flushSaveNow);
+
+/* v1.5.8: Toleransi & Halus Tangkap Ajaib langsung menghitung ulang hasil Snap */
+(function(){
+    ['grabTolerance','grabFeather'].forEach(function(id){
+        const sl=document.getElementById(id);
+        if(sl) sl.addEventListener('input', scheduleGrabSnapRerun);
+    });
 })();
 </script>
 </body>
