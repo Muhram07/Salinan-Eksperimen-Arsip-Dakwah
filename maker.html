@@ -1,16 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.6.1
+Studio Poster Maker Pro - Update v1.6.3
 
-v1.6.1:
-1. TANGKAP AJAIB PAKAI AI KHUSUS OBJEK (MobileSAM): tombol "(AI) Snap ke Objek" kini memakai model pemilih objek dari area kuasan, hasil lebih rapi dan hanya objek di area itu. Decoder dari root repo (sam_mask_decoder_multi.onnx), encoder dari GitHub Releases (tag ai-model-v1) dengan cadangan Hugging Face; diunduh sekali lalu tersimpan di perangkat.
-2. Toleransi, Halus, Batal Snap, dan hitung ulang otomatis tetap sinkron (hasil AI baru memakai alur yang sama). Bila model gagal dimuat, otomatis kembali ke AI lama dengan notifikasi.
-3. Memori ringan: sesi encoder langsung dilepas setelah dipakai, kanvas sementara dibersihkan, embedding disimpan sekali per gambar.
-4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.1).
+v1.6.3:
+1. TANGKAP AJAIB MURNI AI OBJEK: tombol "(AI) Snap ke Objek" hanya memakai MobileSAM. AI lama (Hapus BG) tidak lagi dipakai sebagai cadangan; AI Hapus BG kini khusus untuk menghapus background. Bila AI Objek gagal, Snap dibatalkan dan notifikasi menyebut tahap serta alasannya (8 detik); tekan Snap lagi untuk mencoba ulang.
+2. Toleransi, Halus, Batal Snap, dan hitung ulang otomatis tidak diubah.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.3).
 
-v1.6.0:
-1. SELEKSI LANGSUNG: menekan elemen/teks (tanpa menggeser) tidak lagi memicu pencatatan riwayat (gambar ulang thumbnail, salinan seluruh proyek, autosave). Garis emas putus-putus kini muncul seketika. Riwayat/undo tetap dicatat bila elemen benar-benar digeser, diputar, atau diubah ukurannya.
-2. AUTOSAVE RAMAH SENTUHAN: penyimpanan otomatis ditunda singkat selama layar sedang disentuh. Simpan saat app pindah/ditutup tetap langsung.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.0).
+v1.6.2:
+1. DIAGNOSA AI OBJEK: bila AI Objek (MobileSAM) gagal, notifikasi menyebut tahap yang gagal (mesin, unduh/muat/jalan encoder, decoder) beserta alasannya, tampil 8 detik.
+2. Fungsi dan tampilan lain tidak diubah.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.2).
 -->
 
 
@@ -1492,8 +1491,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.6.1: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.6.1';
+/* v1.6.3: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.6.3';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -1780,13 +1779,13 @@ async function deleteProjectFromDB(id) {
     });
 }
 
-function showToast(msg){
+function showToast(msg, ms){
 const t=document.getElementById('toast');
 if(!t)return;
 t.innerText=msg;
 t.classList.add('show');
 clearTimeout(t._timer);
-t._timer=setTimeout(()=>t.classList.remove('show'),3000);
+t._timer=setTimeout(()=>t.classList.remove('show'),ms||3000);
 }
 
 window.addEventListener('offline', () => showToast('⚠️ Koneksi terputus. Mode offline aktif.'));
@@ -15764,7 +15763,7 @@ const SNAP_SAM_DEC = [
     'sam_mask_decoder_multi.onnx',
     'https://huggingface.co/Acly/MobileSAM/resolve/main/sam_mask_decoder_multi.onnx'
 ];
-var snapSam = { dec: null, emb: null, key: '', rw: 0, rh: 0, failed: false };
+var snapSam = { dec: null, emb: null, key: '', rw: 0, rh: 0, failed: false, stage: '' };
 
 function snapSamDropEmb(){
     try{ if (snapSam.emb && snapSam.emb.dispose) snapSam.emb.dispose(); }catch(e){}
@@ -15787,17 +15786,23 @@ async function snapSamLoadBuf(urls){
         const b = await wandAiFetch(list[i], 'Model objek', true, valid);
         if (b) return b;
     }
+    const errs = [];
     for (let i = 0; i < list.length; i++){
         try{
             const b = await wandAiFetch(list[i], 'Mengunduh model objek (sekali saja)', false, valid);
             if (b) return b;
-        }catch(e){ /* coba alamat berikutnya */ }
+        }catch(e){
+            /* coba alamat berikutnya; alasan dicatat untuk notifikasi */
+            const host = list[i].indexOf('http') === 0 ? list[i].split('/')[2] : list[i];
+            errs.push(host + ': ' + String((e && e.message) || e));
+        }
     }
-    throw new Error('SAM_MODEL_404');
+    throw new Error('model tidak bisa diunduh (' + errs.join(' | ') + ')');
 }
 
 async function snapSamEnsureDecoder(alive){
     if (snapSam.dec) return snapSam.dec;
+    snapSam.stage = 'memuat mesin AI / decoder';
     const ortLib = await wandAiLoadOrt();
     if (!alive()) return null;
     snapAiShow('Memuat model pemilih objek…', 8);
@@ -15821,11 +15826,13 @@ async function snapSamEnsureEmbedding(el, srcImg, mw, mh, alive){
     const ortLib = await wandAiLoadOrt();
     if (!alive()) return false;
     snapAiShow('Memuat model objek…', 12);
+    snapSam.stage = 'mengunduh encoder';
     let buf = await snapSamLoadBuf(SNAP_SAM_ENC);
     if (!alive()) return false;
     snapAiShow('Memuat model objek ke memori… (beberapa detik)', 40);
     await snapAiYield();
     await wandAiSleep(60);
+    snapSam.stage = 'memuat encoder ke memori';
     const sess = await ortLib.InferenceSession.create(new Uint8Array(buf), {executionProviders:['wasm'], graphOptimizationLevel:'all', enableMemPattern:false});
     buf = null;
     let emb = null, rw = 0, rh = 0;
@@ -15848,6 +15855,7 @@ async function snapSamEnsureEmbedding(el, srcImg, mw, mh, alive){
         snapAiShow('AI menganalisis objek… (pertama kali agak lama)', 50);
         await snapAiYield();
         const feeds = {}; feeds[sess.inputNames[0]] = tensor;
+        snapSam.stage = 'menjalankan encoder';
         const out = await sess.run(feeds);
         const t = out[sess.outputNames[0]];
         if (!t || !t.dims || t.dims.length !== 4 || t.dims[1] !== 256) throw new Error('SAM_FORMAT');
@@ -15911,7 +15919,6 @@ function snapSamPrompts(md, mw, mh, boxPad){
 
 /* hasil: kanvas (resolusi ±1024) dengan alpha = peta saliency 0-255, atau null bila AI objek tidak tersedia (-> AI lama) */
 async function snapSamSaliency(el, mask, md, mw, mh, alive){
-    if (snapSam.failed) return null;
     try{
         const slider = parseInt((document.getElementById('magicBrushSize') || {}).value) || 35;
         const gr = (typeof grabRes === 'number' && grabRes > 0) ? grabRes : 1;
@@ -15920,6 +15927,7 @@ async function snapSamSaliency(el, mask, md, mw, mh, alive){
         if (!pr) return null;
 
         snapAiShow('Menyiapkan mesin AI…', 5);
+        snapSam.stage = 'memuat decoder';
         const dec = await snapSamEnsureDecoder(alive);
         if (!dec || !alive()) return null;
         const srcImg = (grabBaseImg && grabBaseImg.width === mw && grabBaseImg.height === mh) ? grabBaseImg : el.img;
@@ -15946,6 +15954,7 @@ async function snapSamSaliency(el, mask, md, mw, mh, alive){
         if (dec.inputNames.indexOf('mask_input') >= 0) feeds.mask_input = new ortLib.Tensor('float32', new Float32Array(256 * 256), [1, 1, 256, 256]);
         if (dec.inputNames.indexOf('has_mask_input') >= 0) feeds.has_mask_input = new ortLib.Tensor('float32', new Float32Array([0]), [1]);
         feeds.orig_im_size = new ortLib.Tensor('float32', new Float32Array([rh, rw]), [2]);
+        snapSam.stage = 'menjalankan decoder';
         const out = await dec.run(feeds);
         if (!alive()) return null;
 
@@ -15975,11 +15984,11 @@ async function snapSamSaliency(el, mask, md, mw, mh, alive){
         cx.putImageData(id, 0, 0);
         return cv;
     }catch(e){
-        console.warn('Snap AI objek (MobileSAM) gagal, memakai AI lama:', e);
+        console.warn('Snap AI objek (MobileSAM) gagal:', e);
         if (alive()){
-            snapSam.failed = true;
             snapSamDropEmb();
-            showToast('⚠️ Model objek belum bisa dimuat, memakai AI lama');
+            const why = String((e && e.message) || e).slice(0, 170);
+            showToast('⚠️ AI Objek gagal saat ' + (snapSam.stage || 'persiapan') + ': ' + why + ' — Snap dibatalkan, coba lagi', 8000);
         }
         return null;
     }
@@ -16007,13 +16016,12 @@ async function snapMagicGrabToObject(){
     try{
         await snapAiYield();
         if (!alive()) return;
-        /* v1.6.1: AI objek (MobileSAM) lebih dulu; bila tidak tersedia, AI lama (saliency) dipakai */
-        let usedSam = false;
-        let salBase = await snapSamSaliency(el, mask, md, mw, mh, alive);
+        /* v1.6.3: hanya AI objek (MobileSAM); tidak ada cadangan AI Hapus BG */
+        const usedSam = true;
+        const salBase = await snapSamSaliency(el, mask, md, mw, mh, alive);
         if (!alive()) return;
-        if (salBase){ usedSam = true; tmpCanvases.push(salBase); }
-        else salBase = await snapAiSaliency(el, alive);
-        if (!salBase || !alive()) return;
+        if (!salBase) return; /* kegagalan sudah ditampilkan lewat notifikasi */
+        tmpCanvases.push(salBase);
 
         snapAiShow('Menghitung tepi objek…', 68);
         await snapAiYield();
@@ -16111,7 +16119,7 @@ async function snapMagicGrabToObject(){
         renderMagicGrabDisplay();
         snapAiShow('✅ Selesai', 100);
         await wandAiSleep(220);
-        showToast(usedSam ? '✅ Objek berhasil diambil (AI Objek)' : '✅ Tepi objek berhasil dideteksi');
+        showToast('✅ Objek berhasil diambil (AI Objek)');
     }catch(e){
         console.error('Snap AI', e);
         const msg = (e && e.message === 'MODEL_404')
