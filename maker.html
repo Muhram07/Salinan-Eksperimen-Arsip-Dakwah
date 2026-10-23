@@ -1,16 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.6.5
+Studio Poster Maker Pro - Update v1.6.6
+
+v1.6.6:
+1. FONT LANGSUNG DARI ZIP: tombol "Font Lokal" kini menerima file .zip (misalnya hasil unduhan dafont) tanpa perlu diekstrak dulu. Semua file .ttf/.otf/.woff/.woff2 di dalam ZIP otomatis dipasang; font pertama langsung diterapkan ke teks yang dipilih. Format .ttf/.otf/.woff/.woff2 biasa tetap berfungsi seperti sebelumnya.
+2. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.6).
 
 v1.6.5:
 1. KOLEKSI FONT DIROMBAK TAMPILANNYA: tiap font kini punya ikon berbeda, lencana jenis huruf (AA = kapital saja, Aa = kapital+kecil, Arab, dll), keterangan gaya, dan contoh teks yang ditulis langsung dengan font aslinya (bentuk font terlihat jelas). Pin favorit lama tetap berfungsi.
 2. 10 font "✨" lama kini punya ikon, jenis huruf, dan keterangan masing-masing.
 3. FONT BARU (default, open-license Google Fonts) bertema RETAK/HANCUR/SLICED (Rubik Broken Fax, Dirt, Distressed, Moonrocks, Gemstones, Glitch, Storm, Burned, Wet Paint, Spray Paint, Special Elite), gaya Pulang (Gochi Hand, Chewy, Delicious Handrawn, Caveat Brush), serta gotik/metal/grunge (Pirata One, Metal Mania, New Rocker, Eater, Sedgwick Ave Display, Lobster Two). Font asli Pulang/Retak Seribu (bukan Google Fonts) tetap bisa dipasang lewat tombol "Font Lokal".
 4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.5).
-
-v1.6.4:
-1. AI OBJEK LEBIH AKURAT: titik petunjuk MobileSAM kini diambil dari INTI coretan (bagian terdalam), bukan dari seluruh area, sehingga kuasan yang melebar ke lantai/latar tidak lagi ikut dianggap objek. Coretan terpisah (maks 4) diproses satu per satu lalu digabung. Mask terbaik dipilih dari skor AI dan harus memuat semua titik petunjuk.
-2. HASIL LEBIH RAPI: pulau kecil dibuang dan lubang kecil di dalam objek ditutup. Toleransi, Halus, Batal Snap, dan hitung ulang otomatis tetap berfungsi.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.4).
 -->
 
 
@@ -733,7 +732,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <input type="file" id="fileImageSkinInput" accept="image/*" style="display:none;" onchange="handleImageSkinUpload(event)">
 <input type="file" id="fileBgInput" accept="image/*" style="display:none;" onchange="handleBgUpload(event)">
 <input type="file" id="fileProjectInput" accept=".poster,.json" multiple style="display:none;" onchange="handleProjectImport(event)">
-<input type="file" id="fileFontInput" accept=".ttf,.otf,.woff,.woff2" style="display:none;" onchange="handleFontUpload(event)">
+<input type="file" id="fileFontInput" accept=".ttf,.otf,.woff,.woff2,.zip,application/zip,application/x-zip-compressed" style="display:none;" onchange="handleFontUpload(event)">
 
 <div class="handled-loupe-container" id="handledLoupe">
 <div class="handled-loupe-glass">
@@ -1513,8 +1512,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.6.5: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.6.5';
+/* v1.6.6: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.6.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -11063,7 +11062,7 @@ if(!el)return;
 let html='<div style="display:flex;flex-direction:column;gap:6px;">';
 html+=`
 <div style="display:flex; gap:8px; margin-bottom:8px;">
-    <button class="btn-sub-tool active" onclick="document.getElementById('fileFontInput').click()" style="flex:1;flex-direction:row;justify-content:center;padding:10px;">📁 Font Lokal (.ttf/.otf)</button>
+    <button class="btn-sub-tool active" onclick="document.getElementById('fileFontInput').click()" style="flex:1;flex-direction:row;justify-content:center;padding:10px;">📁 Font Lokal (.ttf/.otf/.zip)</button>
     <button class="btn-sub-tool" onclick="openFontExportModal()" style="flex:1;flex-direction:row;justify-content:center;padding:10px; border-color:#00ff88; color:#00ff88;">⬇️ Ekspor Font Pribadi</button>
 </div>
 `;
@@ -11137,38 +11136,117 @@ async function setFontFamily(font) {
     }
 }
 
-function handleFontUpload(e) {
+/* v1.6.6: pembaca ZIP bawaan browser (tanpa library) memakai DecompressionStream('deflate-raw') */
+async function _extractFontsFromZip(file) {
+    if (typeof DecompressionStream === 'undefined') throw new Error('NO_DECOMPRESS');
+    const buf = await file.arrayBuffer();
+    const dv = new DataView(buf);
+    const u8 = new Uint8Array(buf);
+    let eocd = -1;
+    for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 22 - 65535); i--) {
+        if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('BAD_ZIP');
+    const total = dv.getUint16(eocd + 10, true);
+    let p = dv.getUint32(eocd + 16, true);
+    const dec = new TextDecoder('utf-8');
+    const out = [];
+    for (let n = 0; n < total; n++) {
+        if (p + 46 > buf.byteLength || dv.getUint32(p, true) !== 0x02014b50) break;
+        const flags = dv.getUint16(p + 8, true);
+        const method = dv.getUint16(p + 10, true);
+        const compSize = dv.getUint32(p + 20, true);
+        const nameLen = dv.getUint16(p + 28, true);
+        const extraLen = dv.getUint16(p + 30, true);
+        const commentLen = dv.getUint16(p + 32, true);
+        const localOff = dv.getUint32(p + 42, true);
+        const entryName = dec.decode(u8.subarray(p + 46, p + 46 + nameLen));
+        p += 46 + nameLen + extraLen + commentLen;
+        if (entryName.endsWith('/') || /(^|\/)(__MACOSX|\.)/.test(entryName)) continue;
+        const m = /([^\/]+)\.(ttf|otf|woff2?|TTF|OTF|WOFF2?)$/.exec(entryName);
+        if (!m || (flags & 1)) continue;
+        if (dv.getUint32(localOff, true) !== 0x04034b50) continue;
+        const lNameLen = dv.getUint16(localOff + 26, true);
+        const lExtraLen = dv.getUint16(localOff + 28, true);
+        const start = localOff + 30 + lNameLen + lExtraLen;
+        const raw = u8.subarray(start, start + compSize);
+        let bytes;
+        if (method === 0) {
+            bytes = raw;
+        } else if (method === 8) {
+            const stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+            bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+        } else {
+            continue;
+        }
+        const ext = m[2].toLowerCase();
+        const mime = ext === 'otf' ? 'font/otf' : (ext === 'woff' ? 'font/woff' : (ext === 'woff2' ? 'font/woff2' : 'font/ttf'));
+        out.push({ base: m[1], blob: new Blob([bytes], { type: mime }) });
+    }
+    return out;
+}
+
+function _blobToDataURL(blob) {
+    return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = () => rej(r.error);
+        r.readAsDataURL(blob);
+    });
+}
+
+async function _registerCustomFont(baseFileName, blob) {
+    const fontData = await _blobToDataURL(blob);
+    let fontName = 'CF_' + baseFileName.replace(/[^a-zA-Z0-9]/g, '');
+    if (fontName === 'CF_') fontName = 'CF_Font' + Date.now();
+    if (currentProjectFonts.some(f => f.name === fontName)) fontName += '_' + (currentProjectFonts.length + 1);
+    const fontFace = new FontFace(fontName, `url(${fontData})`);
+    await fontFace.load();
+    document.fonts.add(fontFace);
+    currentProjectFonts.push({ name: fontName, data: fontData });
+    return fontName;
+}
+
+async function handleFontUpload(e) {
     const file = e.target.files[0];
     if(!file) return;
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-        const fontData = evt.target.result;
-        const baseFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-        const fontName = 'CF_' + baseFileName.replace(/[^a-zA-Z0-9]/g, '');
-        try {
-            const fontFace = new FontFace(fontName, `url(${fontData})`);
-            await fontFace.load();
-            document.fonts.add(fontFace);
-            
-            currentProjectFonts.push({ name: fontName, data: fontData });
-            
-            const el = getActiveElement();
-            if(el && el.type === 'text') {
-                el.fontFamily = fontName;
-                el._cachedCanvas = null;
-                el._cachedHash = null;
-                lmInvalidate(el);
-                renderAll();
-                pushHistoryState();
+    const isZip = /\.zip$/i.test(file.name) || /zip/i.test(file.type || '');
+    try {
+        const added = [];
+        if (isZip) {
+            showToast('⏳ Membaca ZIP...');
+            const entries = await _extractFontsFromZip(file);
+            if (entries.length === 0) {
+                showToast('⚠️ Tidak ada file font (.ttf/.otf) di dalam ZIP!');
+                e.target.value = '';
+                return;
             }
-            openPanelFontFamily();
-            showToast('✅ Font lokal berhasil ditambahkan!');
-        } catch(err) {
-            console.error(err);
-            showToast('⚠️ Gagal memuat font!');
+            for (const it of entries) {
+                try { added.push(await _registerCustomFont(it.base, it.blob)); }
+                catch(errOne) { console.error(errOne); }
+            }
+        } else {
+            const baseFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+            added.push(await _registerCustomFont(baseFileName, file));
         }
-    };
-    reader.readAsDataURL(file);
+        if (added.length === 0) throw new Error('NO_FONT_LOADED');
+        const el = getActiveElement();
+        if(el && el.type === 'text') {
+            el.fontFamily = added[0];
+            el._cachedCanvas = null;
+            el._cachedHash = null;
+            lmInvalidate(el);
+            renderAll();
+            pushHistoryState();
+        }
+        openPanelFontFamily();
+        showToast(added.length > 1 ? ('✅ ' + added.length + ' font dari ZIP berhasil ditambahkan!') : '✅ Font lokal berhasil ditambahkan!');
+    } catch(err) {
+        console.error(err);
+        if (err && err.message === 'NO_DECOMPRESS') showToast('⚠️ Browser belum mendukung ZIP, ekstrak manual dulu.');
+        else if (err && err.message === 'BAD_ZIP') showToast('⚠️ File ZIP tidak valid!');
+        else showToast('⚠️ Gagal memuat font!');
+    }
     e.target.value = '';
 }
 
