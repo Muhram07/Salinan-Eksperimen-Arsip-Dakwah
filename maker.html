@@ -1,15 +1,18 @@
 <!--
-Studio Poster Maker Pro - Update v1.6.7
+Studio Poster Maker Pro - Update v1.6.8
+
+v1.6.8:
+1. FONT PRIBADI > SCROLL: daftar "Ekspor Font Pribadi" bisa digulir dengan jari di HP/tablet (sebelumnya terblokir touch-action).
+2. FONT PRIBADI > DETEKSI FORMAT OTOMATIS: nama font dibaca dari file aslinya. Label Arab / AA (huruf besar) / Aa (campuran) dan ikonnya ditampilkan otomatis.
+3. FONT PRIBADI > ANTI GANDA: font dengan nama file dan ukuran yang sama tidak dipasang dua kali (yang kedua dilewati), saat impor maupun saat membuka projek.
+4. FONT PRIBADI > HAPUS: tombol 🗑️ pada font pribadi dengan konfirmasi dua kali.
+5. FONT REPO: folder /fonts di repo GitHub dipindai otomatis (ZIP, TTF, OTF, WOFF). Tombol 🔄 Scan Font Repo untuk memindai ulang.
+6. LAG: data font tidak lagi ikut ditulis ulang di setiap autosave. Font disimpan sekali di penyimpanan terpisah.
+7. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.8).
 
 v1.6.7:
-1. FONT / ZIP BISA PILIH BANYAK SEKALIGUS: tombol "Font Lokal" kini menerima banyak file (.zip, .ttf, .otf, .woff, .woff2) dalam sekali pilih. File diproses satu per satu secara berantrian (tidak paralel) supaya data tidak rusak/tabrakan; ada indikator proses "n/total", file gagal dilewati tanpa menghentikan antrian, dan ringkasan hasil ditampilkan di akhir. Nama font kembar otomatis diberi nomor unik.
-2. PANDUAN INSTALL DIPERBARUI: tombol "Unduh Aplikasi" kini menampilkan panduan lengkap untuk iPhone/iPad, Android, Windows/Linux, dan Mac (bagian perangkat yang sedang dipakai ditandai dan ditampilkan paling atas). Teks dirapikan dan diperbaiki.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.7).
-
-v1.6.6:
-1. FONT LANGSUNG DARI ZIP: tombol "Font Lokal" kini menerima file .zip (misalnya hasil unduhan dafont) tanpa perlu diekstrak dulu. Semua file .ttf/.otf/.woff/.woff2 di dalam ZIP otomatis dipasang; font pertama langsung diterapkan ke teks yang dipilih. Format .ttf/.otf/.woff/.woff2 biasa tetap berfungsi seperti sebelumnya.
-2. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.6).
-
+1. Font / ZIP bisa dipilih banyak sekaligus.
+2. Panduan install diperbarui.
 -->
 
 
@@ -824,7 +827,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <div style="font-weight:800;color:#00ff88;font-size:13px;">⬇️ Ekspor Font Pribadi</div>
         <button class="panel-close" onclick="closeFontExportModal()">✕</button>
     </div>
-    <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto;" id="fontDownloadList">
+    <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto; touch-action:pan-y; min-height:0; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;" id="fontDownloadList">
     </div>
     <div class="fmodal-footer">
         <button class="btn-nav btn-download" style="width:100%; justify-content:center; height:40px; background:#00ff88; color:#000;" onclick="executeFontExport()">⬇️ Ekspor (.ttf) Terpilih</button>
@@ -1513,7 +1516,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.6.7';
+const APP_VERSION = 'v1.6.8';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -1757,15 +1760,19 @@ window.currentRenderScale = 1;
 
 const DB_NAME = 'StudioPosterDB_v2';
 const STORE_NAME = 'projects';
+const FONT_STORE = 'fontblobs';
 let db;
 
 function initDB() {
     return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, 1);
+        const req = indexedDB.open(DB_NAME, 2);
         req.onupgradeneeded = (e) => {
             db = e.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            }
+            if (!db.objectStoreNames.contains(FONT_STORE)) {
+                db.createObjectStore(FONT_STORE, { keyPath: 'key' });
             }
         };
         req.onsuccess = (e) => { db = e.target.result; resolve(); };
@@ -1814,8 +1821,35 @@ async function getAllProjectsMetaFromDB() {
 
 async function deleteProjectFromDB(id) {
     return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const tx = db.transaction([STORE_NAME, FONT_STORE], 'readwrite');
         tx.objectStore(STORE_NAME).delete(id);
+        const pre = id + '::';
+        tx.objectStore(FONT_STORE).delete(IDBKeyRange.bound(pre, pre + '\uffff'));
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e);
+    });
+}
+
+function putFontBlobToDB(row) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(FONT_STORE, 'readwrite');
+        tx.objectStore(FONT_STORE).put(row);
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e);
+    });
+}
+function getFontBlobFromDB(key) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(FONT_STORE, 'readonly');
+        const req = tx.objectStore(FONT_STORE).get(key);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = (e) => reject(e);
+    });
+}
+function deleteFontBlobFromDB(key) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(FONT_STORE, 'readwrite');
+        tx.objectStore(FONT_STORE).delete(key);
         tx.oncomplete = () => resolve();
         tx.onerror = (e) => reject(e);
     });
@@ -2225,7 +2259,7 @@ try{
         slideIndex: savedIndex,
         slides: serializeSlides(slides),
         slideCount: slides.filter(s => !s.isDemo).length,
-        fonts: currentProjectFonts,
+        fonts: await persistFontsForSave(),
         thumb: (mainCanvas && typeof mainCanvas.toDataURL==='function') ? mainCanvas.toDataURL('image/jpeg',0.2) : '',
         updatedAt: Date.now()
     };
@@ -2254,18 +2288,7 @@ try{
             currentSlideIndex = p.slideIndex || 0;
             slides = deserializeSlides(p.slides || []);
             
-            if(p.fonts && p.fonts.length > 0) {
-                currentProjectFonts = p.fonts;
-                for(let f of currentProjectFonts) {
-                    try {
-                        const fontFace = new FontFace(f.name, `url(${f.data})`);
-                        await fontFace.load();
-                        document.fonts.add(fontFace);
-                    } catch(e) { console.warn("Gagal load custom font", e); }
-                }
-            } else {
-                currentProjectFonts = [];
-            }
+            currentProjectFonts = await hydrateProjectFonts(p);
             return;
         }
     }
@@ -11067,19 +11090,22 @@ html+=`
 </div>
 `;
 
-const allFonts = [...currentProjectFonts, ...FONT_FAMILIES];
+html += scanRowHtml();
+const allFonts = [...currentProjectFonts, ...repoFonts, ...FONT_FAMILIES];
 
 const pinnedList = allFonts.filter(f => pinnedFonts.includes(f.name));
 const unpinnedList = allFonts.filter(f => !pinnedFonts.includes(f.name));
 
 const fontRowHtml = (f, pinned) => {
+    const personalRow = currentProjectFonts.indexOf(f) >= 0;
     const isAct=getCleanFont(el.fontFamily)===getCleanFont(f.font||f.name);
     const fontName = f.font ? f.font.replace(/'/g,"\\'") : f.name;
     const styleFont = f.font ? f.font : "'" + f.name + "'";
     const pm = /\(([^)]+)\)\s*$/.exec(f.name);
     let tag = f.tag || (pm ? pm[1] : (f.font ? 'Aa' : 'Font Pribadi'));
-    let label = f.name.replace(/\s*\([^)]*\)\s*$/,'');
+    let label = (f.label || f.name).replace(/\s*\([^)]*\)\s*$/,'');
     if(f.ico) label = label.replace(/^✨\s*/, f.ico + ' ');
+    if(f.emote) label = f.emote + ' ' + label;
     const isArab = /arab/i.test(tag);
     const sample = (isArab && !/aa/i.test(tag)) ? 'بسم الله الرحمن الرحيم'
         : isArab ? 'أبجد هوز · Aa 123'
@@ -11094,6 +11120,7 @@ const fontRowHtml = (f, pinned) => {
         </div>
         <div style="display:flex; gap:8px;align-items:center;">
             ${isAct?'<span style="color:#00ff88;">✓</span>':''}
+            ${personalRow ? `<span onclick="deletePersonalFont(event,'${f.name}')" title="Hapus font pribadi" style="cursor:pointer;">🗑️</span>` : ''}
             <span onclick="togglePinFont(event, '${f.name}')" style="cursor:pointer;${pinned?'':' opacity:0.4;'}" title="${pinned?'Hapus dari favorit':'Jadikan favorit'}">📌</span>
         </div>
     </div>`;
@@ -11195,24 +11222,258 @@ function _blobToDataURL(blob) {
     });
 }
 
+/* ===== v1.6.8: font pribadi (anti ganda, deteksi format, repo font, hapus aman) ===== */
+let _fontQueueBusy = false;
+let repoFonts = [];
+let repoObjectUrls = [];
+let fontRepoStatus = '';
+let fontRepoBusy = false;
+const FONT_REPO_KEY = 'FONT_REPO_CFG_V1';
+
+function approxBytesFromDataURL(s) {
+    const i = (s || '').indexOf(',');
+    if (i < 0) return 0;
+    const b64 = s.slice(i + 1);
+    const pad = b64.endsWith('==') ? 2 : (b64.endsWith('=') ? 1 : 0);
+    return Math.max(0, Math.floor(b64.length * 3 / 4) - pad);
+}
+function fontSizeOf(f) {
+    return (typeof f.size === 'number' && f.size > 0) ? f.size : approxBytesFromDataURL(f.data || '');
+}
+/* kunci duplikat = nama file (tanpa ekstensi, huruf kecil) + ukuran byte */
+function fontDupKey(base, size) {
+    const b = String(base || '').toLowerCase().replace(/\.(ttf|otf|woff2?|zip)$/, '').replace(/[^a-z0-9]/g, '');
+    return b + '|' + size;
+}
+function _escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ---- pembaca tabel font (TTF/OTF/TTC/WOFF). WOFF2 (brotli) belum didukung browser tanpa library ---- */
+async function _inflateZlib(u8) {
+    if (typeof DecompressionStream === 'undefined') throw new Error('NO_DECOMPRESS');
+    const stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function _fontTables(buf) {
+    if (buf.byteLength < 12) return null;
+    const dv = new DataView(buf);
+    const sig = dv.getUint32(0, false);
+    if (sig === 0x774F4632) return null; /* WOFF2 */
+    const isWoff = (sig === 0x774F4646);
+    const base = (sig === 0x74746366) ? dv.getUint32(12, false) : 0; /* TTC: font pertama */
+    const numTables = isWoff ? dv.getUint16(12, false) : dv.getUint16(base + 4, false);
+    const map = new Map();
+    for (let i = 0; i < numTables; i++) {
+        const r = isWoff ? (44 + i * 20) : (base + 12 + i * 16);
+        if (r + 16 > buf.byteLength) break;
+        const tag = String.fromCharCode(dv.getUint8(r), dv.getUint8(r + 1), dv.getUint8(r + 2), dv.getUint8(r + 3));
+        if (!isWoff) {
+            const off = dv.getUint32(r + 8, false), len = dv.getUint32(r + 12, false);
+            map.set(tag, new Uint8Array(buf, off, len));
+        } else {
+            const off = dv.getUint32(r + 4, false), comp = dv.getUint32(r + 8, false), orig = dv.getUint32(r + 12, false);
+            let bytes = new Uint8Array(buf, off, comp);
+            if (comp < orig) bytes = await _inflateZlib(bytes);
+            map.set(tag, bytes);
+        }
+    }
+    return map;
+}
+function _makeCmapLookup(dv, off, fmt) {
+    if (fmt === 12) {
+        const nG = dv.getUint32(off + 12, false);
+        return function (cp) {
+            let lo = 0, hi = nG - 1;
+            while (lo <= hi) {
+                const mid = (lo + hi) >> 1;
+                const g = off + 16 + mid * 12;
+                const s = dv.getUint32(g, false), e = dv.getUint32(g + 4, false);
+                if (cp < s) hi = mid - 1;
+                else if (cp > e) lo = mid + 1;
+                else return dv.getUint32(g + 8, false) + (cp - s);
+            }
+            return 0;
+        };
+    }
+    const segX2 = dv.getUint16(off + 6, false), seg = segX2 >> 1;
+    const endA = off + 14, startA = off + 16 + segX2, deltaA = off + 16 + segX2 * 2, roA = off + 16 + segX2 * 3;
+    return function (cp) {
+        if (cp > 0xFFFF) return 0;
+        for (let i = 0; i < seg; i++) {
+            const end = dv.getUint16(endA + i * 2, false);
+            if (cp > end) continue;
+            const start = dv.getUint16(startA + i * 2, false);
+            if (cp < start) return 0;
+            const delta = dv.getUint16(deltaA + i * 2, false);
+            const ro = dv.getUint16(roA + i * 2, false);
+            if (ro === 0) return (cp + delta) & 0xFFFF;
+            const gaddr = roA + i * 2 + ro + (cp - start) * 2;
+            if (gaddr + 2 > dv.byteLength) return 0;
+            const g = dv.getUint16(gaddr, false);
+            return g === 0 ? 0 : ((g + delta) & 0xFFFF);
+        }
+        return 0;
+    };
+}
+/* membaca nama font + cakupan huruf (Arab / huruf besar-kecil) dari file font asli */
+async function parseFontInfo(buf) {
+    const info = { name: '', arab: false, latin: false, caps: false, ok: false };
+    try {
+        const tables = await _fontTables(buf);
+        if (!tables) return info;
+        const nm = tables.get('name');
+        if (nm) {
+            const ndv = new DataView(nm.buffer, nm.byteOffset, nm.byteLength);
+            const count = ndv.getUint16(2, false), strOff = ndv.getUint16(4, false);
+            let best = { pri: -1, val: '' };
+            for (let i = 0; i < count; i++) {
+                const r = 6 + i * 12;
+                const plat = ndv.getUint16(r, false), nid = ndv.getUint16(r + 6, false);
+                const len = ndv.getUint16(r + 8, false), off = ndv.getUint16(r + 10, false);
+                if (nid !== 4 && nid !== 1) continue;
+                const bytes = nm.subarray(strOff + off, strOff + off + len);
+                let val = '';
+                if (plat === 3 || plat === 0) {
+                    try { val = new TextDecoder('utf-16be').decode(bytes); } catch (e) { val = ''; }
+                } else if (plat === 1) {
+                    for (let k = 0; k < bytes.length; k++) val += String.fromCharCode(bytes[k]);
+                } else continue;
+                val = val.replace(/\0/g, '').trim();
+                const pri = (nid === 4 ? 2 : 0) + (plat === 3 ? 1 : 0);
+                if (val && pri > best.pri) best = { pri: pri, val: val };
+            }
+            info.name = best.val;
+        }
+        const cm = tables.get('cmap');
+        if (cm) {
+            const cdv = new DataView(cm.buffer, cm.byteOffset, cm.byteLength);
+            const n = cdv.getUint16(2, false);
+            let best = null, bestPri = -1;
+            for (let i = 0; i < n; i++) {
+                const r = 4 + i * 8;
+                const plat = cdv.getUint16(r, false), enc = cdv.getUint16(r + 2, false);
+                const off = cdv.getUint32(r + 4, false);
+                const fmt = cdv.getUint16(off, false);
+                if (fmt !== 4 && fmt !== 12) continue;
+                const pri = (plat === 3 && enc === 10) ? 4 : (plat === 3 && enc === 1) ? 3 : (plat === 0) ? 2 : 1;
+                if (pri > bestPri) { bestPri = pri; best = { off: off, fmt: fmt }; }
+            }
+            if (best) {
+                const look = _makeCmapLookup(cdv, best.off, best.fmt);
+                let arabN = 0;
+                for (let c = 0x0600; c <= 0x06FF; c++) if (look(c)) arabN++;
+                let upN = 0, lowN = 0, lowSame = 0;
+                for (let k = 0; k < 26; k++) {
+                    const u = look(65 + k), l = look(97 + k);
+                    if (u) upN++;
+                    if (l) lowN++;
+                    if (!l || (u && l === u)) lowSame++;
+                }
+                info.arab = arabN >= 8;
+                info.latin = upN >= 20 || lowN >= 20;
+                info.caps = upN >= 20 && lowSame >= 20;
+                info.ok = true;
+            }
+        }
+    } catch (e) {
+        console.warn('Baca font gagal:', e);
+    }
+    return info;
+}
+/* label format: Arab / AA (huruf besar saja) / Aa (campuran) + ikon */
+function fontTagFromInfo(info) {
+    if (!info || !info.ok) return { tag: 'Font Pribadi', emote: '🔤' };
+    const parts = [];
+    let emote = '';
+    if (info.arab) { parts.push('Arab'); emote = '🕌'; }
+    if (info.latin) {
+        parts.push(info.caps ? 'AA' : 'Aa');
+        if (!emote) emote = info.caps ? '🔠' : '🔤';
+    }
+    if (!parts.length) return { tag: 'Font Pribadi', emote: '🔤' };
+    return { tag: parts.join(' '), emote: emote };
+}
+
+/* ---- penyimpanan font: data font disimpan sekali di store terpisah, bukan di tiap autosave ---- */
+async function persistFontsForSave() {
+    const meta = [];
+    for (const f of currentProjectFonts) {
+        if (f.data && !f._stored) {
+            try {
+                await putFontBlobToDB({ key: currentProjectId + '::' + f.name, projId: currentProjectId, name: f.name, data: f.data });
+                f._stored = true;
+            } catch (e) { console.warn('Gagal simpan font', e); }
+        }
+        const m = {};
+        for (const k of Object.keys(f)) {
+            if (k !== 'data' && k.charAt(0) !== '_') m[k] = f[k];
+        }
+        meta.push(m);
+    }
+    return meta;
+}
+async function hydrateProjectFonts(p) {
+    const list = Array.isArray(p.fonts) ? p.fonts : [];
+    const out = [];
+    const seen = new Set();
+    for (const m of list) {
+        const f = Object.assign({}, m);
+        let fromDB = false;
+        if (!f.data) {
+            try {
+                const row = await getFontBlobFromDB(p.id + '::' + f.name);
+                if (row && row.data) { f.data = row.data; fromDB = true; }
+            } catch (e) { }
+        }
+        if (!f.data) continue;
+        f._stored = fromDB;
+        f.size = fontSizeOf(f);
+        const key = fontDupKey(f.file || f.label || f.name, f.size);
+        if (seen.has(key)) {
+            /* anti ganda: yang kedua dibuang, datanya ikut dihapus */
+            if (fromDB) deleteFontBlobFromDB(p.id + '::' + f.name).catch(function () { });
+            continue;
+        }
+        seen.add(key);
+        try {
+            const ff = new FontFace(f.name, `url(${f.data})`);
+            await ff.load();
+            document.fonts.add(ff);
+            f._ff = ff;
+        } catch (e) { console.warn("Gagal load custom font", e); }
+        out.push(f);
+    }
+    return out;
+}
+
+/* ---- pasang font dari file / ZIP; duplikat (nama file + ukuran sama) dilewati, yang kedua dibuang ---- */
 async function _registerCustomFont(baseFileName, blob) {
+    const size = blob.size;
+    const key = fontDupKey(baseFileName, size);
+    if (currentProjectFonts.some(f => fontDupKey(f.file || f.label || f.name, fontSizeOf(f)) === key)) return null;
+    const info = await parseFontInfo(await blob.arrayBuffer());
+    const tg = fontTagFromInfo(info);
     const fontData = await _blobToDataURL(blob);
     let fontName = 'CF_' + baseFileName.replace(/[^a-zA-Z0-9]/g, '');
     if (fontName === 'CF_') fontName = 'CF_Font' + Date.now();
-    if (currentProjectFonts.some(f => f.name === fontName)) {
+    const taken = n => currentProjectFonts.some(f => f.name === n) || repoFonts.some(f => f.name === n);
+    if (taken(fontName)) {
         const baseName = fontName;
         let dupIdx = 2;
-        while (currentProjectFonts.some(f => f.name === baseName + '_' + dupIdx)) dupIdx++;
+        while (taken(baseName + '_' + dupIdx)) dupIdx++;
         fontName = baseName + '_' + dupIdx;
     }
     const fontFace = new FontFace(fontName, `url(${fontData})`);
     await fontFace.load();
     document.fonts.add(fontFace);
-    currentProjectFonts.push({ name: fontName, data: fontData });
+    currentProjectFonts.push({
+        name: fontName, label: info.name || baseFileName, file: baseFileName, size: size,
+        tag: tg.tag, emote: tg.emote, data: fontData, _ff: fontFace, _stored: false
+    });
     return fontName;
 }
 
-let _fontQueueBusy = false;
 async function handleFontUpload(e) {
     const files = Array.from(e.target.files || []);
     e.target.value = '';
@@ -11222,6 +11483,7 @@ async function handleFontUpload(e) {
     const added = [];
     let failed = 0;
     let noFontZip = 0;
+    let dupSkipped = 0;
     let noZipSupport = false;
     try {
         for (let fi = 0; fi < files.length; fi++) {
@@ -11233,15 +11495,17 @@ async function handleFontUpload(e) {
                     showToast('⏳ ' + tag + 'Membaca ZIP...');
                     const entries = await _extractFontsFromZip(file);
                     if (entries.length === 0) { noFontZip++; continue; }
-                    let okInZip = 0;
                     for (const it of entries) {
-                        try { added.push(await _registerCustomFont(it.base, it.blob)); okInZip++; }
-                        catch (errOne) { console.error(errOne); failed++; }
+                        try {
+                            const nm = await _registerCustomFont(it.base, it.blob);
+                            if (nm) added.push(nm); else dupSkipped++;
+                        } catch (errOne) { console.error(errOne); failed++; }
                     }
                 } else {
                     showToast('⏳ ' + tag + 'Memasang font...');
                     const baseFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                    added.push(await _registerCustomFont(baseFileName, file));
+                    const nm = await _registerCustomFont(baseFileName, file);
+                    if (nm) added.push(nm); else dupSkipped++;
                 }
             } catch (errFile) {
                 console.error(errFile);
@@ -11260,12 +11524,16 @@ async function handleFontUpload(e) {
                 renderAll();
                 pushHistoryState();
             }
+            triggerAutoSave();
             openPanelFontFamily();
         }
         let msg;
         if (added.length > 0) {
             msg = '✅ ' + added.length + ' font berhasil ditambahkan!';
+            if (dupSkipped > 0) msg += ' (' + dupSkipped + ' duplikat dilewati)';
             if (failed > 0 || noFontZip > 0) msg += ' (' + (failed + noFontZip) + ' file dilewati)';
+        } else if (dupSkipped > 0 && failed === 0) {
+            msg = '⚠️ Font sudah ada (nama file & ukuran sama), duplikat dilewati';
         } else if (noZipSupport) {
             msg = '⚠️ Browser belum mendukung ZIP, ekstrak manual dulu.';
         } else if (noFontZip > 0 && failed === 0) {
@@ -11280,6 +11548,162 @@ async function handleFontUpload(e) {
     } finally {
         _fontQueueBusy = false;
     }
+}
+
+/* ---- hapus font pribadi: konfirmasi dua kali ---- */
+function deletePersonalFont(ev, name) {
+    if (ev) ev.stopPropagation();
+    const idx = currentProjectFonts.findIndex(f => f.name === name);
+    if (idx < 0) return;
+    const label = currentProjectFonts[idx].label || name;
+    if (!confirm('Hapus font "' + label + '" dari projek ini?')) return;
+    if (!confirm('Konfirmasi ke-2: font "' + label + '" akan dihapus PERMANEN. Lanjutkan?')) return;
+    const f = currentProjectFonts.splice(idx, 1)[0];
+    try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { }
+    deleteFontBlobFromDB(currentProjectId + '::' + name).catch(function () { });
+    const pi = pinnedFonts.indexOf(name);
+    if (pi > -1) pinnedFonts.splice(pi, 1);
+    localStorage.setItem('PINNED_FONTS_V1', JSON.stringify(pinnedFonts));
+    /* elemen yang memakai font ini kembali ke font default */
+    slides.forEach(function (s) {
+        (s.elements || []).forEach(function (el) {
+            if (el.fontFamily === name) {
+                el.fontFamily = 'Plus Jakarta Sans';
+                el._cachedCanvas = null;
+                el._cachedHash = null;
+                lmInvalidate(el);
+                el._calculatedHeight = null;
+                el._renderedW = null;
+            }
+        });
+    });
+    renderAll();
+    pushHistoryState();
+    triggerAutoSave();
+    openPanelFontFamily();
+    showToast('🗑️ Font pribadi dihapus');
+}
+
+/* ---- font repo: pindai folder fonts/ di repo GitHub (otomatis saat dibuka dari GitHub Pages) ---- */
+function getFontRepoCfg() {
+    let cfg = null;
+    try { cfg = JSON.parse(localStorage.getItem(FONT_REPO_KEY) || 'null'); } catch (e) { cfg = null; }
+    if (cfg && cfg.owner && cfg.repo) {
+        return { owner: cfg.owner, path: String(cfg.path || 'fonts').replace(/^\/+|\/+$/g, ''), candidates: [cfg.repo] };
+    }
+    const m = /^([a-z0-9-]+)\.github\.io$/i.exec(location.hostname || '');
+    if (!m) return null;
+    const owner = m[1];
+    const segs = location.pathname.split('/').filter(Boolean);
+    const cands = [];
+    if (segs.length) cands.push(segs[0]);
+    cands.push(owner + '.github.io');
+    return { owner: owner, path: 'fonts', candidates: Array.from(new Set(cands)) };
+}
+function _updateRepoStatusLine() {
+    const el = document.getElementById('fontRepoStatusLine');
+    if (el) el.textContent = fontRepoStatus;
+}
+async function scanFontRepo() {
+    const cfg = getFontRepoCfg();
+    if (!cfg) {
+        fontRepoStatus = 'Repo font tidak terdeteksi. Buka aplikasi dari alamat GitHub Pages repo kamu.';
+        _updateRepoStatusLine();
+        return false;
+    }
+    if (fontRepoBusy) return false;
+    fontRepoBusy = true;
+    fontRepoStatus = '🔄 Memindai folder /' + cfg.path + ' ...';
+    _updateRepoStatusLine();
+    try {
+        let items = null, usedRepo = '';
+        for (const repo of cfg.candidates) {
+            const url = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' + encodeURIComponent(repo) +
+                '/contents/' + cfg.path.split('/').map(encodeURIComponent).join('/');
+            let r;
+            try { r = await fetch(url, { headers: { Accept: 'application/vnd.github+json' } }); }
+            catch (e) { fontRepoStatus = '⚠️ Tidak bisa terhubung ke GitHub (cek koneksi).'; return false; }
+            if (r.status === 404) continue;
+            if (r.status === 403) { fontRepoStatus = '⚠️ Batas akses GitHub tercapai, coba beberapa menit lagi.'; return false; }
+            if (!r.ok) { fontRepoStatus = '⚠️ Gagal membaca repo (HTTP ' + r.status + ').'; return false; }
+            items = await r.json();
+            usedRepo = repo;
+            break;
+        }
+        if (!items || !Array.isArray(items)) {
+            fontRepoStatus = '⚠️ Folder /' + cfg.path + ' tidak ditemukan di repo.';
+            return false;
+        }
+        const files = items.filter(it => it && it.type === 'file' && /\.(zip|ttf|otf|woff2?)$/i.test(it.name));
+        for (const f of repoFonts) { try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { } }
+        for (const u of repoObjectUrls) { try { URL.revokeObjectURL(u); } catch (e) { } }
+        const newRecs = [], newUrls = [], seen = new Set();
+        let dup = 0, bad = 0, idx = 0;
+        for (const it of files) {
+            fontRepoStatus = '🔄 Memproses ' + it.name + ' ...';
+            _updateRepoStatusLine();
+            const ck = 'repo::' + it.name + '::' + it.size;
+            let blob = null;
+            try { const row = await getFontBlobFromDB(ck); if (row && row.data) blob = row.data; } catch (e) { }
+            if (!blob) {
+                try {
+                    const r = await fetch(it.download_url);
+                    if (!r.ok) { bad++; continue; }
+                    blob = await r.blob();
+                    putFontBlobToDB({ key: ck, projId: 'repo', name: it.name, data: blob }).catch(function () { });
+                } catch (e) { bad++; continue; }
+            }
+            let entries = [];
+            try {
+                if (/\.zip$/i.test(it.name)) entries = await _extractFontsFromZip(blob);
+                else entries = [{ base: it.name.replace(/\.[^.]+$/, ''), blob: blob }];
+            } catch (e) { bad++; continue; }
+            for (const en of entries) {
+                const key = fontDupKey(en.base, en.blob.size);
+                if (seen.has(key)) { dup++; continue; }
+                seen.add(key);
+                const info = await parseFontInfo(await en.blob.arrayBuffer());
+                const tg = fontTagFromInfo(info);
+                const internal = 'RF_' + en.base.replace(/[^a-zA-Z0-9]/g, '') + '_' + (++idx);
+                const url = URL.createObjectURL(en.blob);
+                newUrls.push(url);
+                let ff = null;
+                try {
+                    ff = new FontFace(internal, `url(${url})`);
+                    await ff.load();
+                    document.fonts.add(ff);
+                } catch (e) { ff = null; bad++; }
+                if (!ff) continue;
+                newRecs.push({ name: internal, label: info.name || en.base, file: en.base, size: en.blob.size, tag: tg.tag, emote: tg.emote, src: 'repo', _ff: ff });
+            }
+        }
+        repoFonts = newRecs;
+        repoObjectUrls = newUrls;
+        if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO · /' + cfg.path;
+        fontRepoStatus = '✅ ' + cfg.owner + '/' + usedRepo + ' · /' + cfg.path + ': ' + repoFonts.length + ' font' +
+            (dup ? (' · ' + dup + ' ganda dilewati') : '') + (bad ? (' · ' + bad + ' gagal') : '');
+        return true;
+    } catch (e) {
+        console.warn('Scan font repo gagal:', e);
+        fontRepoStatus = '⚠️ Scan repo gagal: ' + (e && e.message ? e.message : 'error');
+        return false;
+    } finally {
+        fontRepoBusy = false;
+    }
+}
+async function scanFontRepoUI() {
+    const ok = await scanFontRepo();
+    _updateRepoStatusLine();
+    showToast(ok ? ('✅ Font repo dipindai: ' + repoFonts.length + ' font') : (fontRepoStatus || 'Gagal memindai repo'));
+    if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
+}
+function scanRowHtml() {
+    const cfg = getFontRepoCfg();
+    const line = fontRepoStatus || (cfg ? ('📦 Repo: ' + cfg.owner + ' · folder /' + cfg.path) : 'Repo font tidak terdeteksi (otomatis aktif saat dibuka dari GitHub Pages).');
+    return `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+        <button class="btn-sub-tool" onclick="scanFontRepoUI()" style="flex-direction:row;justify-content:center;padding:8px;">🔄 Scan Font Repo</button>
+        <div id="fontRepoStatusLine" style="font-size:10px;color:#9CA3AF;">${_escHtml(line)}</div>
+    </div>`;
 }
 
 function openPanelTextColor(){
@@ -12189,7 +12613,7 @@ const dataToSave={
     slideIndex: savedIndex,
     slides: serializeSlides(slides),
     slideCount: slides.filter(s => !s.isDemo).length,
-    fonts: currentProjectFonts,
+    fonts: await persistFontsForSave(),
     thumb: (mainCanvas && typeof mainCanvas.toDataURL==='function') ? mainCanvas.toDataURL('image/jpeg',0.2) : '',
     updatedAt: Date.now()
 };
@@ -12322,18 +12746,7 @@ if(demoSlide) {
     currentSlideIndex++;
 }
 
-if(p.fonts && p.fonts.length > 0) {
-    currentProjectFonts = p.fonts;
-    for(let f of currentProjectFonts) {
-        try {
-            const fontFace = new FontFace(f.name, `url(${f.data})`);
-            await fontFace.load();
-            document.fonts.add(fontFace);
-        } catch(e) { console.warn("Gagal load custom font", e); }
-    }
-} else {
-    currentProjectFonts = [];
-}
+currentProjectFonts = await hydrateProjectFonts(p);
 
 adjustArtboardSize();renderAll();renderCarouselThumbs();renderBottomToolbar();pushHistoryState();closeProjectModal();showToast(`✅ Membuka: ${p.name}`);
 scheduleFullRerender(0, true);
@@ -16459,6 +16872,12 @@ window.addEventListener('pagehide', flushSaveNow);
         if(sl) sl.addEventListener('input', scheduleGrabSnapRerun);
     });
 })();
+/* v1.6.8: pindai font repo otomatis sekali saat app dibuka (jika repo terdeteksi) */
+setTimeout(function () {
+    if (getFontRepoCfg()) {
+        scanFontRepo().then(function () { _updateRepoStatusLine(); }).catch(function (e) { console.warn(e); });
+    }
+}, 5000);
 </script>
 </body>
 </html>
