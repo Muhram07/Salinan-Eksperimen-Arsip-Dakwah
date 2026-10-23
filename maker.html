@@ -1,15 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.6.6
+Studio Poster Maker Pro - Update v1.6.7
+
+v1.6.7:
+1. FONT / ZIP BISA PILIH BANYAK SEKALIGUS: tombol "Font Lokal" kini menerima banyak file (.zip, .ttf, .otf, .woff, .woff2) dalam sekali pilih. File diproses satu per satu secara berantrian (tidak paralel) supaya data tidak rusak/tabrakan; ada indikator proses "n/total", file gagal dilewati tanpa menghentikan antrian, dan ringkasan hasil ditampilkan di akhir. Nama font kembar otomatis diberi nomor unik.
+2. PANDUAN INSTALL DIPERBARUI: tombol "Unduh Aplikasi" kini menampilkan panduan lengkap untuk iPhone/iPad, Android, Windows/Linux, dan Mac (bagian perangkat yang sedang dipakai ditandai dan ditampilkan paling atas). Teks dirapikan dan diperbaiki.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.7).
 
 v1.6.6:
 1. FONT LANGSUNG DARI ZIP: tombol "Font Lokal" kini menerima file .zip (misalnya hasil unduhan dafont) tanpa perlu diekstrak dulu. Semua file .ttf/.otf/.woff/.woff2 di dalam ZIP otomatis dipasang; font pertama langsung diterapkan ke teks yang dipilih. Format .ttf/.otf/.woff/.woff2 biasa tetap berfungsi seperti sebelumnya.
 2. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.6).
 
-v1.6.5:
-1. KOLEKSI FONT DIROMBAK TAMPILANNYA: tiap font kini punya ikon berbeda, lencana jenis huruf (AA = kapital saja, Aa = kapital+kecil, Arab, dll), keterangan gaya, dan contoh teks yang ditulis langsung dengan font aslinya (bentuk font terlihat jelas). Pin favorit lama tetap berfungsi.
-2. 10 font "✨" lama kini punya ikon, jenis huruf, dan keterangan masing-masing.
-3. FONT BARU (default, open-license Google Fonts) bertema RETAK/HANCUR/SLICED (Rubik Broken Fax, Dirt, Distressed, Moonrocks, Gemstones, Glitch, Storm, Burned, Wet Paint, Spray Paint, Special Elite), gaya Pulang (Gochi Hand, Chewy, Delicious Handrawn, Caveat Brush), serta gotik/metal/grunge (Pirata One, Metal Mania, New Rocker, Eater, Sedgwick Ave Display, Lobster Two). Font asli Pulang/Retak Seribu (bukan Google Fonts) tetap bisa dipasang lewat tombol "Font Lokal".
-4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.5).
 -->
 
 
@@ -732,7 +732,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <input type="file" id="fileImageSkinInput" accept="image/*" style="display:none;" onchange="handleImageSkinUpload(event)">
 <input type="file" id="fileBgInput" accept="image/*" style="display:none;" onchange="handleBgUpload(event)">
 <input type="file" id="fileProjectInput" accept=".poster,.json" multiple style="display:none;" onchange="handleProjectImport(event)">
-<input type="file" id="fileFontInput" accept=".ttf,.otf,.woff,.woff2,.zip,application/zip,application/x-zip-compressed" style="display:none;" onchange="handleFontUpload(event)">
+<input type="file" id="fileFontInput" accept=".ttf,.otf,.woff,.woff2,.zip,application/zip,application/x-zip-compressed" multiple style="display:none;" onchange="handleFontUpload(event)">
 
 <div class="handled-loupe-container" id="handledLoupe">
 <div class="handled-loupe-glass">
@@ -1512,8 +1512,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.6.6: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.6.6';
+/* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.6.7';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -11199,7 +11199,12 @@ async function _registerCustomFont(baseFileName, blob) {
     const fontData = await _blobToDataURL(blob);
     let fontName = 'CF_' + baseFileName.replace(/[^a-zA-Z0-9]/g, '');
     if (fontName === 'CF_') fontName = 'CF_Font' + Date.now();
-    if (currentProjectFonts.some(f => f.name === fontName)) fontName += '_' + (currentProjectFonts.length + 1);
+    if (currentProjectFonts.some(f => f.name === fontName)) {
+        const baseName = fontName;
+        let dupIdx = 2;
+        while (currentProjectFonts.some(f => f.name === baseName + '_' + dupIdx)) dupIdx++;
+        fontName = baseName + '_' + dupIdx;
+    }
     const fontFace = new FontFace(fontName, `url(${fontData})`);
     await fontFace.load();
     document.fonts.add(fontFace);
@@ -11207,47 +11212,74 @@ async function _registerCustomFont(baseFileName, blob) {
     return fontName;
 }
 
+let _fontQueueBusy = false;
 async function handleFontUpload(e) {
-    const file = e.target.files[0];
-    if(!file) return;
-    const isZip = /\.zip$/i.test(file.name) || /zip/i.test(file.type || '');
-    try {
-        const added = [];
-        if (isZip) {
-            showToast('⏳ Membaca ZIP...');
-            const entries = await _extractFontsFromZip(file);
-            if (entries.length === 0) {
-                showToast('⚠️ Tidak ada file font (.ttf/.otf) di dalam ZIP!');
-                e.target.value = '';
-                return;
-            }
-            for (const it of entries) {
-                try { added.push(await _registerCustomFont(it.base, it.blob)); }
-                catch(errOne) { console.error(errOne); }
-            }
-        } else {
-            const baseFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            added.push(await _registerCustomFont(baseFileName, file));
-        }
-        if (added.length === 0) throw new Error('NO_FONT_LOADED');
-        const el = getActiveElement();
-        if(el && el.type === 'text') {
-            el.fontFamily = added[0];
-            el._cachedCanvas = null;
-            el._cachedHash = null;
-            lmInvalidate(el);
-            renderAll();
-            pushHistoryState();
-        }
-        openPanelFontFamily();
-        showToast(added.length > 1 ? ('✅ ' + added.length + ' font dari ZIP berhasil ditambahkan!') : '✅ Font lokal berhasil ditambahkan!');
-    } catch(err) {
-        console.error(err);
-        if (err && err.message === 'NO_DECOMPRESS') showToast('⚠️ Browser belum mendukung ZIP, ekstrak manual dulu.');
-        else if (err && err.message === 'BAD_ZIP') showToast('⚠️ File ZIP tidak valid!');
-        else showToast('⚠️ Gagal memuat font!');
-    }
+    const files = Array.from(e.target.files || []);
     e.target.value = '';
+    if (files.length === 0) return;
+    if (_fontQueueBusy) { showToast('⏳ Antrian font masih berjalan, tunggu sebentar...'); return; }
+    _fontQueueBusy = true;
+    const added = [];
+    let failed = 0;
+    let noFontZip = 0;
+    let noZipSupport = false;
+    try {
+        for (let fi = 0; fi < files.length; fi++) {
+            const file = files[fi];
+            const isZip = /\.zip$/i.test(file.name) || /zip/i.test(file.type || '');
+            const tag = files.length > 1 ? ('(' + (fi + 1) + '/' + files.length + ') ') : '';
+            try {
+                if (isZip) {
+                    showToast('⏳ ' + tag + 'Membaca ZIP...');
+                    const entries = await _extractFontsFromZip(file);
+                    if (entries.length === 0) { noFontZip++; continue; }
+                    let okInZip = 0;
+                    for (const it of entries) {
+                        try { added.push(await _registerCustomFont(it.base, it.blob)); okInZip++; }
+                        catch (errOne) { console.error(errOne); failed++; }
+                    }
+                } else {
+                    showToast('⏳ ' + tag + 'Memasang font...');
+                    const baseFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    added.push(await _registerCustomFont(baseFileName, file));
+                }
+            } catch (errFile) {
+                console.error(errFile);
+                if (errFile && errFile.message === 'NO_DECOMPRESS') noZipSupport = true;
+                failed++;
+            }
+            await new Promise(r => setTimeout(r, 0));
+        }
+        if (added.length > 0) {
+            const el = getActiveElement();
+            if (el && el.type === 'text') {
+                el.fontFamily = added[0];
+                el._cachedCanvas = null;
+                el._cachedHash = null;
+                lmInvalidate(el);
+                renderAll();
+                pushHistoryState();
+            }
+            openPanelFontFamily();
+        }
+        let msg;
+        if (added.length > 0) {
+            msg = '✅ ' + added.length + ' font berhasil ditambahkan!';
+            if (failed > 0 || noFontZip > 0) msg += ' (' + (failed + noFontZip) + ' file dilewati)';
+        } else if (noZipSupport) {
+            msg = '⚠️ Browser belum mendukung ZIP, ekstrak manual dulu.';
+        } else if (noFontZip > 0 && failed === 0) {
+            msg = '⚠️ Tidak ada file font (.ttf/.otf) di dalam ZIP!';
+        } else {
+            msg = '⚠️ Gagal memuat font!';
+        }
+        showToast(msg);
+    } catch (err) {
+        console.error(err);
+        showToast('⚠️ Gagal memuat font!');
+    } finally {
+        _fontQueueBusy = false;
+    }
 }
 
 function openPanelTextColor(){
@@ -15067,51 +15099,41 @@ function canShowPWABanner(){
 function buildPWAGuideHTML(){
     const pf=getPWAPlatform();
     const step=(n,t)=>`<div class="pwa-guide-step"><b class="n">${n}</b><div>${t}</div></div>`;
-    let title='', steps='', note='';
-    if(pf.ios){
-        title=pf.iPadOS?'iPad':'iPhone';
-        if(pf.safari){
-            steps=step(1,`Ketuk tombol <b>Bagikan</b> ⬆️ (ikon kotak dengan panah ke atas) di bar ${pf.iPadOS?'atas':'bawah'} Safari.`)
-                 +step(2,'Gulir daftar menu lalu pilih <b>“Tambah ke Layar Utama”</b> (Add to Home Screen).')
-                 +step(3,'Ketuk <b>“Tambah”</b>. Ikon Poster Maker muncul di layar utama — buka dari ikon itu agar tampil layar penuh.');
-        } else {
-            steps=step(1,'Ketuk tombol <b>Bagikan</b> ⬆️ atau menu (⋯) di browser ini.')
-                 +step(2,'Pilih <b>“Tambah ke Layar Utama”</b> (tersedia di iOS 16.4 ke atas).')
-                 +step(3,'Jika pilihan itu tidak muncul, salin tautan situs ini lalu buka di <b>Safari</b>, kemudian ulangi langkah di Safari.');
-        }
-        note='Di iPhone/iPad, pemasangan hanya lewat menu Bagikan (iOS tidak punya tombol install otomatis).';
-    } else if(pf.android){
-        title='Android';
-        if(pf.firefox){
-            steps=step(1,'Ketuk menu <b>⋮</b> di pojok browser.')+step(2,'Pilih <b>“Instal”</b> atau <b>“Tambahkan ke layar utama”</b>.')+step(3,'Konfirmasi dengan <b>“Tambah”</b>.');
-        } else {
-            steps=step(1,'Ketuk menu <b>⋮</b> di pojok kanan atas browser.')
-                 +step(2,'Pilih <b>“Instal aplikasi”</b> (atau <b>“Tambahkan ke layar utama”</b>).')
-                 +step(3,'Ketuk <b>“Instal”</b>. Aplikasi muncul di laci aplikasi dan layar utama.');
-        }
-    } else {
-        title=pf.mac?'Mac':'Laptop / PC';
-        if(pf.firefox){
-            steps=step(1,'Firefox versi desktop belum mendukung pemasangan aplikasi web.')+step(2,'Buka situs ini di <b>Chrome</b> atau <b>Edge</b>, lalu ikuti petunjuk install di sana.');
-        } else if(pf.mac&&pf.safari){
-            steps=step(1,'Di Safari 17 ke atas, buka menu <b>Berkas</b> (File).')+step(2,'Pilih <b>“Tambahkan ke Dock”</b>.')+step(3,'Klik <b>“Tambah”</b>.');
-        } else if(pf.edge){
-            steps=step(1,'Klik ikon <b>Instal</b> (🖥️ dengan tanda +) di ujung kanan bar alamat.')
-                 +step(2,'Atau buka menu <b>⋯</b> → <b>Aplikasi</b> → <b>“Instal situs ini sebagai aplikasi”</b>.')
-                 +step(3,'Klik <b>“Instal”</b>. Aplikasi terbuka di jendela sendiri dan ada di menu Start/Dock.');
-        } else {
-            steps=step(1,'Klik ikon <b>Instal</b> (🖥️ dengan tanda +) di ujung kanan bar alamat Chrome.')
-                 +step(2,'Atau buka menu <b>⋮</b> → <b>“Transmisikan, simpan, dan bagikan”</b> → <b>“Instal Maker Pro”</b>.')
-                 +step(3,'Klik <b>“Instal”</b>. Aplikasi terbuka di jendela sendiri dan ada di menu Start/Dock.');
-        }
-    }
+    const sec=(id,title,body,note,mine)=>`<div style="margin-bottom:16px;padding:10px 12px;border-radius:10px;border:1px solid ${mine?'#D4AF37':'#2a2a2a'};background:${mine?'rgba(212,175,55,0.07)':'transparent'};">`
+        +`<div style="font-size:13px;font-weight:800;color:#D4AF37;margin-bottom:10px;">⭐ ${title}${mine?' <span style="font-size:10px;color:#00ff88;font-weight:700;">• perangkat Anda</span>':''}</div>`
+        +body
+        +(note?`<div style="font-size:11px;color:#ffb347;margin-top:8px;line-height:1.5;">${note}</div>`:'')
+        +`</div>`;
+    const secs=[];
+    secs.push({id:'ios',mine:pf.ios,html:sec('ios','iPhone / iPad (wajib Safari)',
+        step(1,`Buka situs ini di <b>Safari</b>, lalu ketuk tombol <b>Bagikan</b> ⬆️ (di bar bawah untuk iPhone, di bar atas untuk iPad).`)
+        +step(2,'Gulir menu ke bawah, lalu pilih <b>“Tambah ke Layar Utama”</b>.')
+        +step(3,'Ketuk <b>“Tambah”</b>, lalu buka aplikasi dari ikon <b>M</b> di layar utama.'),
+        'iOS tidak punya tombol install otomatis, jadi pemasangan hanya bisa lewat cara ini. Di Chrome atau Edge pada iOS, caranya sama dan baru tersedia di iOS 16.4 ke atas. Jika pilihan itu tidak muncul, buka situs ini di Safari.',pf.ios)});
+    secs.push({id:'android',mine:pf.android,html:sec('android','Android (Chrome / Edge / Samsung Internet)',
+        step(1,'Ketuk menu <b>⋮</b> di pojok kanan atas browser (di Samsung Internet: menu <b>☰</b>).')
+        +step(2,'Pilih <b>“Instal aplikasi”</b> (atau <b>“Tambahkan ke layar utama”</b>).')
+        +step(3,'Ketuk <b>“Instal”</b>.'),
+        'Atau cukup ketuk <b>📲 Unduh Aplikasi</b>; jendela install akan langsung muncul jika browser mengizinkan.',pf.android)});
+    secs.push({id:'desktop',mine:(pf.desktop&&!pf.mac)||(pf.mac&&!pf.safari),html:sec('desktop','Windows / Linux (Chrome atau Edge)',
+        step(1,'Klik ikon <b>Instal</b> (🖥️ monitor dengan tanda +) di ujung kanan bar alamat.')
+        +step(2,'Atau buka menu <b>⋮</b> → <b>“Transmisikan, simpan, dan bagikan”</b> → <b>“Instal Maker Pro”</b>. Di Edge: <b>⋯</b> → <b>“Aplikasi”</b> → <b>“Instal situs ini sebagai aplikasi”</b>.')
+        +step(3,'Klik <b>“Instal”</b>.'),
+        '',(pf.desktop&&!pf.mac)||(pf.mac&&!pf.safari))});
+    secs.push({id:'mac',mine:pf.mac&&pf.safari,html:sec('mac','Mac',
+        step(1,'Di <b>Chrome</b> atau <b>Edge</b>, langkahnya sama seperti Windows/Linux di atas.')
+        +step(2,'Di <b>Safari 17</b> ke atas: menu <b>Berkas</b> → <b>“Tambahkan ke Dock”</b>.'),
+        '',pf.mac&&pf.safari)});
+    secs.sort((x,y)=>(y.mine?1:0)-(x.mine?1:0));
+    let note='<div style="font-size:11px;color:#ffb347;margin-bottom:12px;line-height:1.5;">❗ Firefox desktop belum mendukung install aplikasi web, jadi gunakan <b>Chrome</b> atau <b>Edge</b>.</div>';
     if(!window.isSecureContext){
-        note='⚠️ Halaman ini tidak dibuka lewat HTTPS, sehingga browser tidak mengizinkan install. Buka lewat alamat https://.';
+        note+='<div style="font-size:11px;color:#ffb347;margin-bottom:12px;line-height:1.5;">⚠️ Halaman ini tidak dibuka lewat HTTPS, sehingga browser tidak mengizinkan install. Buka lewat alamat https://.</div>';
     }
-    return `<div style="font-size:13px;font-weight:800;color:#D4AF37;margin-bottom:12px;">Cara memasang di ${title}</div>`
-        + steps
-        + (note?`<div style="font-size:11px;color:#ffb347;margin-top:10px;line-height:1.5;">${note}</div>`:'')
-        + `<div style="font-size:11px;color:#888;margin-top:12px;line-height:1.5;">Setelah terpasang, buka aplikasi sekali saat online agar semua berkas tersimpan dan bisa dipakai offline.</div>`;
+    return `<div style="font-size:13px;font-weight:800;color:#D4AF37;margin-bottom:6px;">Cara install aplikasi di berbagai perangkat</div>`
+        + `<div style="font-size:11px;color:#aaa;margin-bottom:12px;line-height:1.5;">Pilih bagian sesuai perangkat Anda. Jika sebelumnya sudah menginstal aplikasi ini, hapus lalu instal ulang agar pembaruan terbaru terpasang.</div>`
+        + secs.map(x=>x.html).join('')
+        + note
+        + `<div style="font-size:11px;color:#888;margin-top:4px;line-height:1.5;">Setelah terpasang, buka aplikasi sekali saat online agar semua berkas tersimpan dan bisa dipakai offline.</div>`;
 }
 
 function openPWAGuide(){
