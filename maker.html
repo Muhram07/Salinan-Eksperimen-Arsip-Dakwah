@@ -1,15 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v1.6.3
+Studio Poster Maker Pro - Update v1.6.4
+
+v1.6.4:
+1. AI OBJEK LEBIH AKURAT: titik petunjuk MobileSAM kini diambil dari INTI coretan (bagian terdalam), bukan dari seluruh area, sehingga kuasan yang melebar ke lantai/latar tidak lagi ikut dianggap objek. Coretan terpisah (maks 4) diproses satu per satu lalu digabung. Mask terbaik dipilih dari skor AI dan harus memuat semua titik petunjuk.
+2. HASIL LEBIH RAPI: pulau kecil dibuang dan lubang kecil di dalam objek ditutup. Toleransi, Halus, Batal Snap, dan hitung ulang otomatis tetap berfungsi.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.4).
 
 v1.6.3:
-1. TANGKAP AJAIB MURNI AI OBJEK: tombol "(AI) Snap ke Objek" hanya memakai MobileSAM. AI lama (Hapus BG) tidak lagi dipakai sebagai cadangan; AI Hapus BG kini khusus untuk menghapus background. Bila AI Objek gagal, Snap dibatalkan dan notifikasi menyebut tahap serta alasannya (8 detik); tekan Snap lagi untuk mencoba ulang.
-2. Toleransi, Halus, Batal Snap, dan hitung ulang otomatis tidak diubah.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.3).
-
-v1.6.2:
-1. DIAGNOSA AI OBJEK: bila AI Objek (MobileSAM) gagal, notifikasi menyebut tahap yang gagal (mesin, unduh/muat/jalan encoder, decoder) beserta alasannya, tampil 8 detik.
-2. Fungsi dan tampilan lain tidak diubah.
-3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.2).
+1. TANGKAP AJAIB MURNI AI OBJEK: tombol "(AI) Snap ke Objek" hanya memakai MobileSAM; AI Hapus BG khusus untuk hapus background. Bila AI Objek gagal, Snap dibatalkan dan notifikasi menyebut tahap serta alasannya.
+2. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.3).
 -->
 
 
@@ -1491,8 +1490,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.6.3: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.6.3';
+/* v1.6.4: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.6.4';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -15868,63 +15867,138 @@ async function snapSamEnsureEmbedding(el, srcImg, mw, mh, alive){
     return true;
 }
 
-/* titik petunjuk dari coretan: beberapa titik tersebar di dalam area kuas + kotak pembatas */
-function snapSamPrompts(md, mw, mh, boxPad){
-    const G = 48, cw = mw / G, ch = mh / G;
-    const cnt = new Uint32Array(G * G), sxc = new Float64Array(G * G), syc = new Float64Array(G * G);
-    let minX = mw, minY = mh, maxX = -1, maxY = -1, sx = 0, sy = 0, n = 0;
+/* v1.6.4: titik petunjuk diambil dari INTI coretan (bagian terdalam), bukan seluruh area, supaya kuasan yang melebar
+   ke lantai/latar tidak ikut dianggap objek. Tiap coretan terpisah (maks 4) diproses sendiri lalu digabung. */
+function snapSamPrompts(md, mw, mh){
+    const S = 160 / Math.max(mw, mh);
+    const gw = Math.max(1, Math.round(mw * S)), gh = Math.max(1, Math.round(mh * S));
+    const cnt = new Uint32Array(gw * gh);
     for (let y = 0; y < mh; y++){
-        const cy = Math.min(G - 1, (y / ch) | 0) * G;
+        const gy = Math.min(gh - 1, (y * gh / mh) | 0) * gw;
+        const row = y * mw * 4 + 3;
         for (let x = 0; x < mw; x++){
-            if (md[(y * mw + x) * 4 + 3] <= 8) continue;
-            const ci = cy + Math.min(G - 1, (x / cw) | 0);
-            cnt[ci]++; sxc[ci] += x; syc[ci] += y;
-            if (x < minX) minX = x; if (x > maxX) maxX = x;
-            if (y < minY) minY = y; if (y > maxY) maxY = y;
-            sx += x; sy += y; n++;
+            if (md[row + x * 4] > 8) cnt[gy + Math.min(gw - 1, (x * gw / mw) | 0)]++;
         }
     }
-    if (!n) return null;
-    let cmax = 0;
-    for (let i = 0; i < cnt.length; i++) if (cnt[i] > cmax) cmax = cnt[i];
-    const thr = Math.max(1, cmax * 0.4);
-    const cand = [];
-    for (let i = 0; i < cnt.length; i++){
-        if (cnt[i] >= thr) cand.push([sxc[i] / cnt[i], syc[i] / cnt[i]]);
+    const cellA = (mw / gw) * (mh / gh);
+    const bin = new Uint8Array(gw * gh);
+    let any = 0;
+    for (let i = 0; i < bin.length; i++){ if (cnt[i] >= Math.max(1, cellA * 0.5)){ bin[i] = 1; any++; } }
+    if (!any){
+        for (let i = 0; i < bin.length; i++){ if (cnt[i] > 0){ bin[i] = 1; any++; } }
+        if (!any) return null;
     }
-    const gx = sx / n, gy = sy / n;
-    const K = Math.min(9, cand.length);
-    const pts = [];
-    let bi = 0, bd = Infinity;
-    for (let i = 0; i < cand.length; i++){
-        const d = (cand[i][0] - gx) * (cand[i][0] - gx) + (cand[i][1] - gy) * (cand[i][1] - gy);
-        if (d < bd){ bd = d; bi = i; }
+    /* jarak ke tepi coretan (chamfer 3-4) */
+    const dist = new Float32Array(gw * gh);
+    for (let i = 0; i < dist.length; i++) dist[i] = bin[i] ? 1e6 : 0;
+    for (let y = 0; y < gh; y++){
+        for (let x = 0; x < gw; x++){
+            const i = y * gw + x; if (!bin[i]) continue;
+            const l = x > 0 ? dist[i - 1] : 0, u = y > 0 ? dist[i - gw] : 0;
+            const ul = (x > 0 && y > 0) ? dist[i - gw - 1] : 0, ur = (x < gw - 1 && y > 0) ? dist[i - gw + 1] : 0;
+            dist[i] = Math.min(dist[i], l + 3, u + 3, ul + 4, ur + 4);
+        }
     }
-    pts.push(cand.splice(bi, 1)[0]);
-    while (pts.length < K && cand.length){
-        let best = -1, bestD = -1;
-        for (let i = 0; i < cand.length; i++){
-            let m = Infinity;
-            for (let j = 0; j < pts.length; j++){
-                const d = (cand[i][0] - pts[j][0]) * (cand[i][0] - pts[j][0]) + (cand[i][1] - pts[j][1]) * (cand[i][1] - pts[j][1]);
-                if (d < m) m = d;
+    for (let y = gh - 1; y >= 0; y--){
+        for (let x = gw - 1; x >= 0; x--){
+            const i = y * gw + x; if (!bin[i]) continue;
+            const r = x < gw - 1 ? dist[i + 1] : 0, d = y < gh - 1 ? dist[i + gw] : 0;
+            const dr = (x < gw - 1 && y < gh - 1) ? dist[i + gw + 1] : 0, dl = (x > 0 && y < gh - 1) ? dist[i + gw - 1] : 0;
+            dist[i] = Math.min(dist[i], r + 3, d + 3, dr + 4, dl + 4);
+        }
+    }
+    /* komponen coretan terpisah */
+    const comp = new Int32Array(gw * gh), q = new Int32Array(gw * gh);
+    const comps = [];
+    for (let s0 = 0; s0 < bin.length; s0++){
+        if (!bin[s0] || comp[s0]) continue;
+        const id = comps.length + 1; let qh = 0, qt = 0; q[qt++] = s0; comp[s0] = id;
+        while (qh < qt){
+            const i = q[qh++], x = i % gw;
+            if (x > 0 && bin[i - 1] && !comp[i - 1]){ comp[i - 1] = id; q[qt++] = i - 1; }
+            if (x < gw - 1 && bin[i + 1] && !comp[i + 1]){ comp[i + 1] = id; q[qt++] = i + 1; }
+            if (i >= gw && bin[i - gw] && !comp[i - gw]){ comp[i - gw] = id; q[qt++] = i - gw; }
+            if (i < bin.length - gw && bin[i + gw] && !comp[i + gw]){ comp[i + gw] = id; q[qt++] = i + gw; }
+        }
+        comps.push({ id: id, cells: Array.prototype.slice.call(q, 0, qt) });
+    }
+    comps.sort(function(a, b){ return b.cells.length - a.cells.length; });
+    const big = comps[0].cells.length;
+    const groups = [];
+    for (let c = 0; c < comps.length && groups.length < 4; c++){
+        const cells = comps[c].cells;
+        if (cells.length < big * 0.015) break;
+        let maxd = 0, first = cells[0];
+        for (let k = 0; k < cells.length; k++){ if (dist[cells[k]] > maxd){ maxd = dist[cells[k]]; first = cells[k]; } }
+        const core = cells.filter(function(i){ return dist[i] >= maxd * 0.6; });
+        const toXY = function(i){ return [((i % gw) + 0.5) * mw / gw, (((i / gw) | 0) + 0.5) * mh / gh]; };
+        const sel = [first];
+        while (sel.length < 3 && sel.length < core.length){
+            let best = -1, bestD = -1;
+            for (let k = 0; k < core.length; k++){
+                let m = Infinity;
+                for (let j = 0; j < sel.length; j++){
+                    const dx = (core[k] % gw) - (sel[j] % gw), dy = ((core[k] / gw) | 0) - ((sel[j] / gw) | 0);
+                    const d = dx * dx + dy * dy; if (d < m) m = d;
+                }
+                if (m > bestD){ bestD = m; best = k; }
             }
-            if (m > bestD){ bestD = m; best = i; }
+            if (best < 0 || bestD <= 0) break;
+            sel.push(core[best]);
         }
-        pts.push(cand.splice(best, 1)[0]);
+        groups.push(sel.map(toXY));
     }
-    const box = [Math.max(0, minX - boxPad), Math.max(0, minY - boxPad), Math.min(mw - 1, maxX + boxPad), Math.min(mh - 1, maxY + boxPad)];
-    return { pts: pts, box: box };
+    return groups;
 }
 
-/* hasil: kanvas (resolusi ±1024) dengan alpha = peta saliency 0-255, atau null bila AI objek tidak tersedia (-> AI lama) */
+/* v1.6.4: penyaring hasil AI objek (murni array): ambang, buang pulau kecil, tutup lubang kecil di dalam objek */
+function snapSamRefine(sal, hint, roi, mw, mh, thr){
+    const n = mw * mh, out = new Uint8Array(n), lo = thr * 0.8;
+    for (let i = 0; i < n; i++){
+        if (roi[i] && (sal[i] >= thr || (hint[i] && sal[i] >= lo))) out[i] = 1;
+    }
+    const lab = new Int32Array(n), q = new Int32Array(n), areas = [0];
+    let nl = 0, maxA = 0;
+    for (let s0 = 0; s0 < n; s0++){
+        if (!out[s0] || lab[s0]) continue;
+        nl++; let qh = 0, qt = 0; q[qt++] = s0; lab[s0] = nl;
+        while (qh < qt){
+            const i = q[qh++], x = i % mw;
+            if (x > 0 && out[i - 1] && !lab[i - 1]){ lab[i - 1] = nl; q[qt++] = i - 1; }
+            if (x < mw - 1 && out[i + 1] && !lab[i + 1]){ lab[i + 1] = nl; q[qt++] = i + 1; }
+            if (i >= mw && out[i - mw] && !lab[i - mw]){ lab[i - mw] = nl; q[qt++] = i - mw; }
+            if (i < n - mw && out[i + mw] && !lab[i + mw]){ lab[i + mw] = nl; q[qt++] = i + mw; }
+        }
+        areas[nl] = qt; if (qt > maxA) maxA = qt;
+    }
+    if (!maxA) return { out: out, kept: 0 };
+    const minKeep = Math.max(16, maxA * 0.01);
+    for (let i = 0; i < n; i++){ if (out[i] && areas[lab[i]] < minKeep) out[i] = 0; }
+    lab.fill(0);
+    const holeMax = maxA * 0.02;
+    for (let s0 = 0; s0 < n; s0++){
+        if (out[s0] || lab[s0]) continue;
+        let qh = 0, qt = 0, border = false; q[qt++] = s0; lab[s0] = 1;
+        while (qh < qt){
+            const i = q[qh++], x = i % mw, y = (i - x) / mw;
+            if (x === 0 || y === 0 || x === mw - 1 || y === mh - 1) border = true;
+            if (x > 0 && !out[i - 1] && !lab[i - 1]){ lab[i - 1] = 1; q[qt++] = i - 1; }
+            if (x < mw - 1 && !out[i + 1] && !lab[i + 1]){ lab[i + 1] = 1; q[qt++] = i + 1; }
+            if (i >= mw && !out[i - mw] && !lab[i - mw]){ lab[i - mw] = 1; q[qt++] = i - mw; }
+            if (i < n - mw && !out[i + mw] && !lab[i + mw]){ lab[i + mw] = 1; q[qt++] = i + mw; }
+        }
+        if (!border && qt <= holeMax){ for (let k = 0; k < qt; k++){ if (roi[q[k]]) out[q[k]] = 1; } }
+    }
+    let kept = 0;
+    for (let i = 0; i < n; i++) if (out[i]) kept++;
+    return { out: out, kept: kept };
+}
+
+/* hasil: kanvas (resolusi ±1024) dengan alpha = peta saliency 0-255 (gabungan semua coretan terpisah) */
 async function snapSamSaliency(el, mask, md, mw, mh, alive){
     try{
-        const slider = parseInt((document.getElementById('magicBrushSize') || {}).value) || 35;
-        const gr = (typeof grabRes === 'number' && grabRes > 0) ? grabRes : 1;
-        const r = Math.max(4, Math.min(160, Math.round(slider * gr * 0.5)));
-        const pr = snapSamPrompts(md, mw, mh, Math.round(r * 0.5));
-        if (!pr) return null;
+        const groups = snapSamPrompts(md, mw, mh);
+        if (!groups || !groups.length) return null;
 
         snapAiShow('Menyiapkan mesin AI…', 5);
         snapSam.stage = 'memuat decoder';
@@ -15934,53 +16008,60 @@ async function snapSamSaliency(el, mask, md, mw, mh, alive){
         const okEmb = await snapSamEnsureEmbedding(el, srcImg, mw, mh, alive);
         if (!okEmb || !alive()) return null;
 
-        snapAiShow('AI mencari objek di area coretan…', 62);
-        await snapAiYield();
         const ortLib = window.ort;
-        const rw = snapSam.rw, rh = snapSam.rh;
+        const rw = snapSam.rw, rh = snapSam.rh, HW = rw * rh;
         const sx = rw / mw, sy = rh / mh;
-        const N = pr.pts.length + 2;
-        const pc = new Float32Array(N * 2), pl = new Float32Array(N);
-        for (let i = 0; i < pr.pts.length; i++){
-            pc[i * 2] = (pr.pts[i][0] + 0.5) * sx; pc[i * 2 + 1] = (pr.pts[i][1] + 0.5) * sy; pl[i] = 1;
-        }
-        const b0 = pr.pts.length;
-        pc[b0 * 2] = pr.box[0] * sx;       pc[b0 * 2 + 1] = pr.box[1] * sy;       pl[b0] = 2;
-        pc[(b0 + 1) * 2] = pr.box[2] * sx; pc[(b0 + 1) * 2 + 1] = pr.box[3] * sy; pl[b0 + 1] = 3;
-        const feeds = {};
-        feeds.image_embeddings = snapSam.emb;
-        feeds.point_coords = new ortLib.Tensor('float32', pc, [1, N, 2]);
-        feeds.point_labels = new ortLib.Tensor('float32', pl, [1, N]);
-        if (dec.inputNames.indexOf('mask_input') >= 0) feeds.mask_input = new ortLib.Tensor('float32', new Float32Array(256 * 256), [1, 1, 256, 256]);
-        if (dec.inputNames.indexOf('has_mask_input') >= 0) feeds.has_mask_input = new ortLib.Tensor('float32', new Float32Array([0]), [1]);
-        feeds.orig_im_size = new ortLib.Tensor('float32', new Float32Array([rh, rw]), [2]);
-        snapSam.stage = 'menjalankan decoder';
-        const out = await dec.run(feeds);
-        if (!alive()) return null;
+        const salAll = new Uint8Array(HW);
+        for (let g = 0; g < groups.length; g++){
+            snapAiShow('AI mencari objek di area coretan…' + (groups.length > 1 ? ' (' + (g + 1) + '/' + groups.length + ')' : ''), 62 + (g / groups.length) * 5);
+            await snapAiYield();
+            const pts = groups[g];
+            const N = pts.length + 1;
+            const pc = new Float32Array(N * 2), pl = new Float32Array(N);
+            for (let i = 0; i < pts.length; i++){ pc[i * 2] = pts[i][0] * sx; pc[i * 2 + 1] = pts[i][1] * sy; pl[i] = 1; }
+            pc[pts.length * 2] = 0; pc[pts.length * 2 + 1] = 0; pl[pts.length] = -1; /* titik pengisi standar SAM (tanpa kotak) */
+            const feeds = {};
+            feeds.image_embeddings = snapSam.emb;
+            feeds.point_coords = new ortLib.Tensor('float32', pc, [1, N, 2]);
+            feeds.point_labels = new ortLib.Tensor('float32', pl, [1, N]);
+            if (dec.inputNames.indexOf('mask_input') >= 0) feeds.mask_input = new ortLib.Tensor('float32', new Float32Array(256 * 256), [1, 1, 256, 256]);
+            if (dec.inputNames.indexOf('has_mask_input') >= 0) feeds.has_mask_input = new ortLib.Tensor('float32', new Float32Array([0]), [1]);
+            feeds.orig_im_size = new ortLib.Tensor('float32', new Float32Array([rh, rw]), [2]);
+            snapSam.stage = 'menjalankan decoder';
+            const out = await dec.run(feeds);
+            if (!alive()) return null;
 
-        let mt = out.masks;
-        if (!mt){
-            for (let i = 0; i < dec.outputNames.length; i++){
-                const t = out[dec.outputNames[i]];
-                if (t && t.dims && t.dims.length === 4 && t.dims[2] === rh && t.dims[3] === rw){ mt = t; break; }
+            let mt = out.masks;
+            if (!mt){
+                for (let i = 0; i < dec.outputNames.length; i++){
+                    const t = out[dec.outputNames[i]];
+                    if (t && t.dims && t.dims.length === 4 && t.dims[2] === rh && t.dims[3] === rw){ mt = t; break; }
+                }
             }
-        }
-        if (!mt) throw new Error('SAM_FORMAT');
-        const K = mt.dims[1], HW = rh * rw, data = mt.data;
-        /* banyak titik petunjuk -> mask indeks 0 (aturan SAM); bila kosong, pakai yang paling luas */
-        let pick = 0, bestCnt = -1;
-        for (let k = 0; k < K; k++){
-            let c = 0; const base = k * HW;
-            for (let i = 0; i < HW; i++) if (data[base + i] > 0) c++;
-            if (k === 0 && c >= 16){ pick = 0; bestCnt = c; break; }
-            if (c > bestCnt){ bestCnt = c; pick = k; }
+            if (!mt) throw new Error('SAM_FORMAT');
+            const K = mt.dims[1], data = mt.data;
+            const sc = out.iou_predictions ? out.iou_predictions.data : null;
+            /* pilih mask berskor terbaik (indeks 1..3) yang memuat semua titik petunjuk; cadangan: indeks 0 */
+            let pick = 0, bestS = -1;
+            for (let k = 1; k < K; k++){
+                let ok = true;
+                for (let i = 0; i < pts.length && ok; i++){
+                    const px = Math.min(rw - 1, Math.max(0, Math.round(pts[i][0] * sx))), py = Math.min(rh - 1, Math.max(0, Math.round(pts[i][1] * sy)));
+                    if (!(data[k * HW + py * rw + px] > 0)) ok = false;
+                }
+                const s = sc ? sc[k] : 0;
+                if (ok && s > bestS){ bestS = s; pick = k; }
+            }
+            const base = pick * HW;
+            for (let i = 0; i < HW; i++){
+                const v = Math.round(255 / (1 + Math.exp(-data[base + i] / 4)));
+                if (v > salAll[i]) salAll[i] = v;
+            }
         }
         const cv = document.createElement('canvas'); cv.width = rw; cv.height = rh;
         const cx = cv.getContext('2d');
-        const id = cx.createImageData(rw, rh), dd = id.data, base = pick * HW;
-        for (let i = 0; i < HW; i++){
-            dd[i * 4 + 3] = Math.round(255 / (1 + Math.exp(-data[base + i] / 4)));
-        }
+        const id = cx.createImageData(rw, rh), dd = id.data;
+        for (let i = 0; i < HW; i++) dd[i * 4 + 3] = salAll[i];
         cx.putImageData(id, 0, 0);
         return cv;
     }catch(e){
@@ -16080,7 +16161,7 @@ async function snapMagicGrabToObject(){
         const otsu0 = usedSam ? 128 : snapAiOtsu(hist, total); /* peta AI objek: batas alami 128 (peluang 50%) */
         const thr = Math.max(40, Math.min(200, otsu0 - _tolOff * 1.2));
 
-        const res = snapAiRefine(sal, hint, roi, rgba, mw, mh, thr);
+        const res = snapSamRefine(sal, hint, roi, mw, mh, thr);
         if (res.kept < 16){
             showToast('⚠️ AI tidak menemukan objek di area ini. Coba coret sedikit lebih luas');
             return;
@@ -16155,7 +16236,7 @@ function grabSnapRerun(){
     const _gt = parseInt((document.getElementById('grabTolerance')||{}).value);
     const _tolOff = (isNaN(_gt) ? 30 : _gt) - 30;
     const thr = Math.max(40, Math.min(200, c.otsu - _tolOff * 1.2));
-    const res = snapAiRefine(c.sal, c.hint, c.roi, c.rgba, c.mw, c.mh, thr);
+    const res = snapSamRefine(c.sal, c.hint, c.roi, c.mw, c.mh, thr);
     if (res.kept < 16) return;
     const n = c.mw * c.mh;
     const out = document.createElement('canvas'); out.width = c.mw; out.height = c.mh;
