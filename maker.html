@@ -1,18 +1,17 @@
 <!--
-Studio Poster Maker Pro - Update v1.7.0
+Studio Poster Maker Pro - Update v1.7.1
+
+v1.7.1:
+1. DOWNLOAD: daftar slide di jendela Download bisa di-scroll dengan jari (misal 10 poster atau lebih).
+2. BRAND: logo bulat diganti huruf "M", plus animasi kilau berjalan pada logo dan teks (tempo 5,5 detik, pelan dan elegan).
+3. FONT: setelah scan repo selesai, teks yang memakai font repo langsung dirender ulang otomatis (tanpa perlu menyentuh tool lain).
+4. SLIDE: posisi slide terakhir disimpan setiap pindah slide, jadi saat aplikasi dibuka lagi kembali ke slide terakhir.
+5. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.7.1).
 
 v1.7.0:
-1. FONT: alamat repo GitHub tidak lagi ditampilkan (kolom alamat dan tombol Terapkan dihapus), tersisa tombol 🔄 Scan Font Repo.
-2. FONT: font ganda (bentuk huruf sama walau nama berbeda, mis. berakhiran 2) otomatis dipilih satu saja di daftar.
-3. FONT: file ganda di repo dihapus otomatis lewat GitHub Token (disimpan hanya di perangkat ini); tanpa token muncul tombol 🧹 Hapus File Ganda di Repo.
-4. BRAND: "Digital Dakwah Developer © 2026 Muhram Nur Surisma" di ujung kanan bar atas dan bar bawah.
-5. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.7.0).
-
-v1.6.9:
-1. FONT REPO: repo default sudah terisi, tidak lagi bergantung pada alamat GitHub Pages.
-2. FONT REPO: pindai otomatis saat aplikasi dibuka, plus tombol 🔄 Scan Font Repo untuk memindai ulang.
-3. FONT: ringkasan jumlah di atas daftar (total, default, pribadi, dan repo).
-4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.9).
+1. FONT: alamat repo GitHub tidak ditampilkan; tersisa tombol Scan Font Repo.
+2. FONT: font ganda (bentuk huruf sama, nama berbeda) dipilih satu saja; file ganda di repo bisa dihapus otomatis lewat GitHub Token.
+3. BRAND: "Digital Dakwah Developer © 2026 Muhram Nur Surisma" di ujung kanan bar atas dan bar bawah.
 -->
 
 
@@ -78,10 +77,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .top-navbar{height:50px;background:#141414;border-bottom:1px solid rgba(212,175,55,.25);display:flex;align-items:center;padding:0 10px;gap:8px;z-index:200;position:relative;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;}
 .top-navbar::-webkit-scrollbar{display:none;}
 .brand-tail{flex-shrink:0;margin-left:auto;display:flex;align-items:center;gap:9px;height:36px;padding:0 18px 0 14px;border-left:1px solid rgba(212,175,55,.3);user-select:none;-webkit-user-select:none;white-space:nowrap;}
-.brand-tail .bt-mark{width:25px;height:25px;border-radius:50%;border:1px solid rgba(212,175,55,.75);box-shadow:0 0 6px rgba(212,175,55,.25) inset;display:flex;align-items:center;justify-content:center;font:700 9px/1 Georgia,'Times New Roman',serif;letter-spacing:.03em;color:#D4AF37;flex-shrink:0;}
+.brand-tail .bt-mark{position:relative;overflow:hidden;width:26px;height:26px;border-radius:50%;border:1px solid rgba(212,175,55,.75);box-shadow:0 0 6px rgba(212,175,55,.25) inset;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-tail .bt-mark b{font:700 13px/1 Georgia,'Times New Roman',serif;letter-spacing:0;background:linear-gradient(105deg,#9c7a1e 0%,#D4AF37 30%,#fff3b8 46%,#ffffff 50%,#fff3b8 54%,#D4AF37 70%,#9c7a1e 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:btShine 5.5s ease-in-out infinite;}
+.brand-tail .bt-mark::after{content:'';position:absolute;top:-10%;left:-70%;width:45%;height:120%;background:linear-gradient(90deg,transparent,rgba(255,244,200,.7),transparent);transform:skewX(-20deg);animation:btSweep 5.5s ease-in-out infinite;pointer-events:none;}
 .brand-tail .bt-text{display:flex;flex-direction:column;gap:3px;}
-.brand-tail .bt-name{font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;line-height:1.1;background:linear-gradient(90deg,#9c7a1e 0%,#f6e3a0 45%,#D4AF37 70%,#9c7a1e 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
-.brand-tail .bt-copy{font-size:8.5px;font-weight:600;letter-spacing:.1em;color:#8f8256;line-height:1.1;}
+.brand-tail .bt-name{font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;line-height:1.1;background:linear-gradient(105deg,#9c7a1e 0%,#D4AF37 30%,#f6e3a0 44%,#ffffff 50%,#f6e3a0 56%,#D4AF37 70%,#9c7a1e 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:btShine 5.5s ease-in-out .35s infinite;}
+.brand-tail .bt-copy{font-size:8.5px;font-weight:600;letter-spacing:.1em;line-height:1.1;background:linear-gradient(105deg,#7d7048 0%,#8f8256 32%,#e9dca8 46%,#fff7d6 50%,#e9dca8 54%,#8f8256 68%,#7d7048 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:btShine 5.5s ease-in-out .6s infinite;}
+@keyframes btShine{0%{background-position:200% 0}34%{background-position:0% 0}100%{background-position:0% 0}}
+@keyframes btSweep{0%,4%{left:-70%}30%{left:125%}100%{left:125%}}
+@media (prefers-reduced-motion:reduce){.brand-tail .bt-mark b,.brand-tail .bt-mark::after,.brand-tail .bt-name,.brand-tail .bt-copy{animation:none;}}
 .nav-left,.nav-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .btn-nav{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#ddd;height:34px;padding:0 10px;border-radius:17px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
 .btn-nav:hover{background:rgba(212,175,55,.15);border-color:#D4AF37;color:#D4AF37;}
@@ -617,7 +621,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" onclick="installPWA()" style="border-color:#00ff88;color:#00ff88;">📲 Unduh Aplikasi</button>
 <button class="btn-nav btn-download" onclick="openDownloadModal()">⬇️ Download</button>
 </div>
-<div class="brand-tail"><span class="bt-mark">DD</span><span class="bt-text"><span class="bt-name">Digital Dakwah Developer</span><span class="bt-copy">© 2026 Muhram Nur Surisma</span></span></div>
+<div class="brand-tail"><span class="bt-mark"><b>M</b></span><span class="bt-text"><span class="bt-name">Digital Dakwah Developer</span><span class="bt-copy">© 2026 Muhram Nur Surisma</span></span></div>
 </header>
 
 <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
@@ -845,7 +849,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <div style="font-weight:800;color:#D4AF37;font-size:13px;">📥 Download Poster</div>
         <button class="panel-close" onclick="closeDownloadModal()">✕</button>
     </div>
-    <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto;">
+    <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto; touch-action:pan-y; min-height:0; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;">
         <div style="display:flex; gap:10px; margin-bottom:15px;">
             <button class="btn-nav" onclick="toggleAllDownloadSlides(true)">Pilih Semua</button>
             <button class="btn-nav" onclick="toggleAllDownloadSlides(false)">Inversi</button>
@@ -1522,7 +1526,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.7.0';
+const APP_VERSION = 'v1.7.1';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2252,8 +2256,23 @@ if(isError){
 }
 }
 
+const LAST_SLIDE_KEY = 'LAST_SLIDE_IDX_V1';
+function rememberSlideIndex(){
+    try{
+        const adj = (slides && slides[0] && slides[0].isDemo) ? Math.max(0, currentSlideIndex - 1) : currentSlideIndex;
+        localStorage.setItem(LAST_SLIDE_KEY, JSON.stringify({ id: currentProjectId, i: adj }));
+    }catch(e){}
+}
+function recallSlideIndex(projectId, fallback, total){
+    try{
+        const m = JSON.parse(localStorage.getItem(LAST_SLIDE_KEY) || 'null');
+        if(m && m.id === projectId && Number.isInteger(m.i) && m.i >= 0 && total > 0) return Math.min(m.i, total - 1);
+    }catch(e){}
+    return fallback;
+}
 async function saveToStorage(){
 try{
+    rememberSlideIndex();
     let savedIndex = currentSlideIndex;
     if(slides[0] && slides[0].isDemo) {
         savedIndex = Math.max(0, currentSlideIndex - 1);
@@ -2293,6 +2312,7 @@ try{
             }
             currentSlideIndex = p.slideIndex || 0;
             slides = deserializeSlides(p.slides || []);
+            currentSlideIndex = recallSlideIndex(p.id, currentSlideIndex, slides.length);
             
             currentProjectFonts = await hydrateProjectFonts(p);
             return;
@@ -5418,7 +5438,7 @@ pushHistoryState();
 }
 }
 
-function _brandHtml(){return '<div class="brand-tail"><span class="bt-mark">DD</span><span class="bt-text"><span class="bt-name">Digital Dakwah Developer</span><span class="bt-copy">© 2026 Muhram Nur Surisma</span></span></div>';}
+function _brandHtml(){return '<div class="brand-tail"><span class="bt-mark"><b>M</b></span><span class="bt-text"><span class="bt-name">Digital Dakwah Developer</span><span class="bt-copy">© 2026 Muhram Nur Surisma</span></span></div>';}
 function renderBottomToolbar(){
     _renderBottomToolbarCore();
     const _bar=document.getElementById('bottomToolbar');
@@ -11768,6 +11788,8 @@ async function scanFontRepo() {
         repoDupDeletable = deletable;
         repoDupCtx = { owner: cfg.owner, repo: usedRepo };
         if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO';
+        /* v1.7.1: font repo baru siap -> render ulang teks yang memakainya otomatis */
+        try { preloadSlideFonts().then(function () { scheduleFullRerender(0, true); }).catch(function () { }); } catch (e) { }
         fontRepoBase = '✅ ' + repoFonts.length + ' font' +
             (dup ? (' · ' + dup + ' ganda dilewati') : '') + (bad ? (' · ' + bad + ' gagal') : '');
         fontRepoStatus = fontRepoBase + (deletable.length ? (' · ' + deletable.length + ' file ganda di repo') : '');
@@ -12628,6 +12650,7 @@ function switchSlide(idx){
 if(idx===currentSlideIndex)return;
 deselectElement();
 currentSlideIndex=idx;
+rememberSlideIndex();
 renderBottomToolbar();
 renderCarouselThumbs();
 renderAll();
@@ -12895,7 +12918,7 @@ localStorage.setItem(CURRENT_PROJ_ID_KEY,currentProjectId);
 currentRatio=p.ratio||'4:5';
 document.getElementById('currentRatioLabel').innerText=currentRatio;
 slides=deserializeSlides(p.slides||[]);
-currentSlideIndex=p.slideIndex||0;
+currentSlideIndex=recallSlideIndex(p.id,p.slideIndex||0,slides.length);
 
 const demoSlide = await loadDemoProject();
 if(demoSlide) {
