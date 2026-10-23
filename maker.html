@@ -1,16 +1,16 @@
 <!--
-Studio Poster Maker Pro - Update v1.5.4
+Studio Poster Maker Pro - Update v1.5.5
+
+v1.5.5:
+1. HAPUS BG: tombol 📍 Kuas untuk memusatkan kuas/pen ke tengah bawah bila turun keluar area; tombol ↪️ Redo ditambahkan di samping ↩️ Undo.
+2. TANGKAP AJAIB: tombol 📍 Kuas untuk memusatkan kuas/pen ke tengah bawah bila turun keluar area.
+3. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.5).
 
 v1.5.4:
 1. HAPUS BG > Pulihkan/Hapus: zoom +/- dibuat halus (1 langkah 8%, tahan untuk mengulang lebih pelan) dan geser atas/bawah/kiri/kanan lebih pelan agar tidak liar.
 2. HAPUS BG > AI: teks loading tidak lagi menyebut ekor/jari; berlaku untuk objek apa pun.
 3. HAPUS BG: tombol ✅ Terapkan kini berada di baris paling bawah, memanjang, warna kuning.
-4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.5.4).
-
-v1.5.3:
-1. HAPUS BG > AI 1: ekor & jari/kaki tidak mudah terpotong lagi. Objek dianalisis ulang pada area yang diperbesar (pass 2), digabung hanya bila tersambung ke objek hasil pass 1, lalu diselamatkan lagi oleh penyaring warna.
-2. HAPUS BG > AI: persentase loading kini berbobot sesuai proses nyata. Angka tidak lagi loncat ke 100% di tengah proses.
-3. HAPUS BG > Pulihkan/Hapus: zoom +/-, geser, tombol pusatkan 🎯, dan pen tool keker (✋ + ✏️ ON/OFF). Kuas 2-120 px; pratinjau beresolusi tinggi.
+4. Versi: nomor di bar atas dan di dalam kode disinkronkan.
 -->
 
 
@@ -968,6 +968,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="btn-nav" onclick="resetMagicGrabZoom()" style="width:34px;justify-content:center;">🎯</button>
         <button class="btn-nav fm-undo" id="grabUndoBtn" onclick="undoMagicGrab()" style="width:34px;justify-content:center;" aria-label="Undo">↩️</button>
         <button class="btn-nav fm-undo" id="grabRedoBtn" onclick="redoMagicGrab()" style="width:34px;justify-content:center;" aria-label="Redo">↪️</button>
+        <button class="btn-nav" onclick="centerMagicGrabPen()" style="width:34px;justify-content:center;" title="Pusatkan kuas/pen" aria-label="Pusatkan kuas">📍</button>
     </div>
     <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
         <button class="btn-nav" id="grabModeBtn" onclick="toggleGrabInside()" style="justify-content:center;">🎯 Ambil Dalam</button>
@@ -1122,7 +1123,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
 <button class="btn-sub-tool" id="btnWandAiRestore" onclick="wandAiSetTool('restore')" style="flex-direction:row;padding:6px 8px;">➕ Pulihkan</button>
 <button class="btn-sub-tool" id="btnWandAiErase" onclick="wandAiSetTool('erase')" style="flex-direction:row;padding:6px 8px;">➖ Hapus</button>
-<button class="btn-nav" onclick="wandAiUndo()" style="padding:6px 10px;">↩️</button>
+<button class="btn-nav" id="btnWandAiUndo" onclick="wandAiUndo()" style="padding:6px 10px;" title="Undo">↩️</button>
+<button class="btn-nav" id="btnWandAiRedo" onclick="wandAiRedo()" style="padding:6px 10px;" title="Redo">↪️</button>
+<button class="btn-nav" onclick="wandCenterPen()" style="padding:6px 10px;" title="Pusatkan kuas/pen">📍 Kuas</button>
 <span style="font-size:11px;color:#aaa;">Kuas:</span>
 <input type="range" class="ctrl-slider" id="wandAiBrush" min="2" max="120" value="24" style="width:70px;">
 <span id="wandAiBrushVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:30px;">24px</span>
@@ -1479,8 +1482,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 
 <script>
-/* v1.5.4: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.5.4';
+/* v1.5.5: satu sumber versi (sinkron dengan catatan atas file) */
+const APP_VERSION = 'v1.5.5';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -8676,6 +8679,13 @@ updateBrushMonitorPreview(document.getElementById('magicBrushSize').value, canva
 setTimeout(updateGrabReticle,60);
 }
 
+/* v1.5.5: kembalikan pegangan kuas/pen Tangkap Ajaib ke tengah bawah (posisi awal) */
+function centerMagicGrabPen(){
+const stalk=document.getElementById('magicGrabStalk'); if(!stalk) return;
+stalk.style.left='50%'; stalk.style.top=''; stalk.style.right=''; stalk.style.bottom='20px'; stalk.style.transform='translateX(-50%)';
+setTimeout(updateGrabReticle,0);
+}
+
 function closeMagicGrabModal(){
 document.getElementById('magicGrabModal').classList.remove('active');
 document.getElementById('brushMonitor').style.display='none';
@@ -9549,7 +9559,7 @@ if(!(wandMode==='ai' && wandAi.base)) wandSetRes(false);
 const ctxW=canvas.getContext('2d');
 ctxW.clearRect(0,0,canvas.width,canvas.height);
 ctxW.drawImage(el.img,0,0,canvas.width,canvas.height);
-if(wandMode==='ai' && wandAi.base){ wandAi.strokes=[]; wandAiRebuild(); }
+if(wandMode==='ai' && wandAi.base){ wandAi.strokes=[]; wandAi.redo=[]; wandAiRebuild(); }
 }
 
 function setWandMode(mode){
@@ -9749,7 +9759,7 @@ const AI_BG_PRESETS = {
     rmbg14: {mean:[0.5,0.5,0.5],       std:[1,1,1],             maxNorm:false, sigmoid:false},
     rmbg2:  {mean:[0.485,0.456,0.406], std:[0.229,0.224,0.225], maxNorm:false, sigmoid:true}
 };
-var wandAi = {rid:0, busy:false, session:null, base:null, pm:null, tmp:null, strokes:[], tool:null, cur:null, raf:0, needFull:false};
+var wandAi = {rid:0, busy:false, session:null, base:null, pm:null, tmp:null, strokes:[], redo:[], tool:null, cur:null, raf:0, needFull:false};
 
 function wandAiSleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 /* v1.5.3: bobot tahap progres sesuai lama proses nyata (persen total 0-100) */
@@ -10257,7 +10267,7 @@ async function wandAiEnter(){
             }catch(re){ console.warn('Penyelamat bagian tipis gagal',re); }
         }
         wandAiAt('refine',1,'Bagian tipis selesai');
-        st.base=base; st.strokes=[]; st.cur=null;
+        st.base=base; st.strokes=[]; st.redo=[]; st.cur=null;
         if(st.bm){ st.bm.width=1; st.bm.height=1; st.bm=null; } st.bmKey='';
         wandAiAt('mask',0,'Merapikan hasil…');
         await snapAiYield();
@@ -10360,6 +10370,7 @@ function wandAiRebuild(){
     g.drawImage(st.bm,0,0);
     wandAiDrawStrokes(g,st.pm.width,st.pm.height);
     wandAiRender();
+    wandAiUpdateHistUI();
 }
 
 function wandAiRender(){
@@ -10412,7 +10423,28 @@ function wandAiSetTool(t){
 
 function wandAiUndo(){
     const st=wandAi; if(!st.base||!st.strokes.length) return;
-    st.strokes.pop(); wandAiRebuild();
+    st.redo.push(st.strokes.pop()); wandAiRebuild();
+}
+
+/* v1.5.5: redo Hapus BG (mengembalikan goresan yang di-undo) */
+function wandAiRedo(){
+    const st=wandAi; if(!st.base||!st.redo.length) return;
+    st.strokes.push(st.redo.pop()); wandAiRebuild();
+}
+
+function wandAiUpdateHistUI(){
+    const st=wandAi;
+    const u=document.getElementById('btnWandAiUndo'), r=document.getElementById('btnWandAiRedo');
+    const ok=!!(st.base&&!st.busy);
+    if(u) u.disabled=!(ok&&st.strokes.length);
+    if(r) r.disabled=!(ok&&st.redo.length);
+}
+
+/* v1.5.5: kembalikan pegangan kuas/pen Hapus BG ke tengah bawah (posisi awal) */
+function wandCenterPen(){
+    const sk=document.getElementById('wandStalk'); if(!sk) return;
+    sk.style.left='50%'; sk.style.top=''; sk.style.right=''; sk.style.bottom='20px'; sk.style.transform='translateX(-50%)';
+    updateWandReticle();
 }
 
 function wandAiStamp(cur, a, b){
@@ -10573,7 +10605,8 @@ function wandAiPaintPoint(p){
 function wandAiEndStroke(){
     const st=wandAi; if(!st.cur) return;
     const c=st.cur; st.cur=null;
-    if(c.pts.length) st.strokes.push({erase:c.erase,size:c.size,feather:c.feather,pts:c.pts});
+    if(c.pts.length){ st.strokes.push({erase:c.erase,size:c.size,feather:c.feather,pts:c.pts}); st.redo.length=0; }
+    wandAiUpdateHistUI();
 }
 
 function setupWandAiEvents(){
@@ -10698,7 +10731,7 @@ function wandAiDispose(){
     if(st.session){ try{ const r=st.session.release(); if(r&&r.catch) r.catch(function(){}); }catch(e){} st.session=null; }
     ['base','pm','tmp','src','bm'].forEach(function(k){ if(st[k]){ st[k].width=1; st[k].height=1; st[k]=null; } });
     st.bmKey='';
-    st.strokes=[]; st.tool=null; st.cur=null; st.needFull=false;
+    st.strokes=[]; st.redo=[]; st.tool=null; st.cur=null; st.needFull=false;
     const pn=document.getElementById('wandAiPanel'); if(pn) pn.style.display='none';
     const a=document.getElementById('btnWandAiRestore'), b=document.getElementById('btnWandAiErase');
     if(a) a.classList.remove('active'); if(b) b.classList.remove('active');
