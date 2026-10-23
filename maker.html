@@ -1,15 +1,18 @@
 <!--
-Studio Poster Maker Pro - Update v1.6.9
+Studio Poster Maker Pro - Update v1.7.0
+
+v1.7.0:
+1. FONT: alamat repo GitHub tidak lagi ditampilkan (kolom alamat dan tombol Terapkan dihapus), tersisa tombol 🔄 Scan Font Repo.
+2. FONT: font ganda (bentuk huruf sama walau nama berbeda, mis. berakhiran 2) otomatis dipilih satu saja di daftar.
+3. FONT: file ganda di repo dihapus otomatis lewat GitHub Token (disimpan hanya di perangkat ini); tanpa token muncul tombol 🧹 Hapus File Ganda di Repo.
+4. BRAND: "Digital Dakwah Developer © 2026 Muhram Nur Surisma" di ujung kanan bar atas dan bar bawah.
+5. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.7.0).
 
 v1.6.9:
-1. FONT REPO: repo default sudah terisi (Muhram07/Salinan-Eksperimen-Arsip-Dakwah, folder fonts), tidak lagi bergantung pada alamat GitHub Pages. Repo bisa diganti lewat kolom owner/repo/folder di panel font.
+1. FONT REPO: repo default sudah terisi, tidak lagi bergantung pada alamat GitHub Pages.
 2. FONT REPO: pindai otomatis saat aplikasi dibuka, plus tombol 🔄 Scan Font Repo untuk memindai ulang.
 3. FONT: ringkasan jumlah di atas daftar (total, default, pribadi, dan repo).
 4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.6.9).
-
-v1.6.8:
-1. Scroll daftar ekspor font pribadi dengan jari.
-2. Deteksi format otomatis (Arab / AA / Aa) dan anti ganda font pribadi.
 -->
 
 
@@ -74,6 +77,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 .top-navbar{height:50px;background:#141414;border-bottom:1px solid rgba(212,175,55,.25);display:flex;align-items:center;padding:0 10px;gap:8px;z-index:200;position:relative;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;}
 .top-navbar::-webkit-scrollbar{display:none;}
+.brand-tail{flex-shrink:0;margin-left:auto;display:flex;align-items:center;gap:9px;height:36px;padding:0 18px 0 14px;border-left:1px solid rgba(212,175,55,.3);user-select:none;-webkit-user-select:none;white-space:nowrap;}
+.brand-tail .bt-mark{width:25px;height:25px;border-radius:50%;border:1px solid rgba(212,175,55,.75);box-shadow:0 0 6px rgba(212,175,55,.25) inset;display:flex;align-items:center;justify-content:center;font:700 9px/1 Georgia,'Times New Roman',serif;letter-spacing:.03em;color:#D4AF37;flex-shrink:0;}
+.brand-tail .bt-text{display:flex;flex-direction:column;gap:3px;}
+.brand-tail .bt-name{font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;line-height:1.1;background:linear-gradient(90deg,#9c7a1e 0%,#f6e3a0 45%,#D4AF37 70%,#9c7a1e 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.brand-tail .bt-copy{font-size:8.5px;font-weight:600;letter-spacing:.1em;color:#8f8256;line-height:1.1;}
 .nav-left,.nav-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .btn-nav{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#ddd;height:34px;padding:0 10px;border-radius:17px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
 .btn-nav:hover{background:rgba(212,175,55,.15);border-color:#D4AF37;color:#D4AF37;}
@@ -609,6 +617,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" onclick="installPWA()" style="border-color:#00ff88;color:#00ff88;">📲 Unduh Aplikasi</button>
 <button class="btn-nav btn-download" onclick="openDownloadModal()">⬇️ Download</button>
 </div>
+<div class="brand-tail"><span class="bt-mark">DD</span><span class="bt-text"><span class="bt-name">Digital Dakwah Developer</span><span class="bt-copy">© 2026 Muhram Nur Surisma</span></span></div>
 </header>
 
 <main class="workspace-viewport" id="workspaceViewport" onclick="handleViewportClick(event)">
@@ -1513,7 +1522,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.6.9';
+const APP_VERSION = 'v1.7.0';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -5409,7 +5418,14 @@ pushHistoryState();
 }
 }
 
+function _brandHtml(){return '<div class="brand-tail"><span class="bt-mark">DD</span><span class="bt-text"><span class="bt-name">Digital Dakwah Developer</span><span class="bt-copy">© 2026 Muhram Nur Surisma</span></span></div>';}
 function renderBottomToolbar(){
+    _renderBottomToolbarCore();
+    const _bar=document.getElementById('bottomToolbar');
+    const _s=getCurrentSlide();
+    if(_bar && !(_s && _s.isDemo)) _bar.insertAdjacentHTML('beforeend',_brandHtml());
+}
+function _renderBottomToolbarCore(){
 const bar=document.getElementById('bottomToolbar');
 const s=getCurrentSlide();
 if(s && s.isDemo) {
@@ -11581,9 +11597,14 @@ function deletePersonalFont(ev, name) {
     showToast('🗑️ Font pribadi dihapus');
 }
 
-/* ---- font repo: pindai folder fonts/ di repo GitHub (otomatis saat dibuka dari GitHub Pages) ---- */
-/* v1.6.9: repo default untuk font; bisa diganti lewat kolom owner/repo/folder di panel font */
+/* ---- font repo: pindai folder fonts/ di repo GitHub ---- */
+/* v1.7.0: alamat repo tidak ditampilkan; font ganda (isi bentuk huruf sama walau nama beda) dipilih satu, file ganda di repo bisa dihapus otomatis */
 const FONT_REPO_DEFAULT = { owner: 'Muhram07', repo: 'Salinan-Eksperimen-Arsip-Dakwah', path: 'fonts' };
+const FONT_REPO_TOKEN_KEY = 'FONT_REPO_TOKEN_V1';
+let repoDupDeletable = [];
+let repoDupCtx = null;
+let repoCleanBusy = false;
+let fontRepoBase = '';
 function getFontRepoCfg() {
     let cfg = null;
     try { cfg = JSON.parse(localStorage.getItem(FONT_REPO_KEY) || 'null'); } catch (e) { cfg = null; }
@@ -11596,16 +11617,50 @@ function _updateRepoStatusLine() {
     const el = document.getElementById('fontRepoStatusLine');
     if (el) el.textContent = fontRepoStatus;
 }
+/* sidik jari bentuk huruf: hash tabel glyph (glyf/loca/CFF), tidak terpengaruh nama font; cadangan: hash seluruh file */
+async function fontGlyphFingerprint(buf) {
+    try {
+        if (!(window.crypto && crypto.subtle)) return null;
+        const t = await _fontTables(buf);
+        const parts = [];
+        if (t) ['glyf', 'loca', 'CFF ', 'CFF2'].forEach(function (tag) { const b = t.get(tag); if (b && b.length) parts.push(b); });
+        let data, kind;
+        if (parts.length) {
+            let total = 0;
+            parts.forEach(function (p) { total += p.length + 4; });
+            data = new Uint8Array(total);
+            let o = 0;
+            parts.forEach(function (p) {
+                data[o] = (p.length >>> 24) & 255; data[o + 1] = (p.length >>> 16) & 255; data[o + 2] = (p.length >>> 8) & 255; data[o + 3] = p.length & 255;
+                data.set(p, o + 4);
+                o += p.length + 4;
+            });
+            kind = 'g';
+        } else {
+            data = new Uint8Array(buf);
+            kind = 'f';
+        }
+        const h = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+        let hex = '';
+        for (let i = 0; i < h.length; i++) hex += h[i].toString(16).padStart(2, '0');
+        return kind + ':' + hex;
+    } catch (e) { return null; }
+}
+function _fontDupSuffix(base) {
+    return /(copy|salinan|\(\d+\)|[\s_\-.]\d+$|\d+$)/i.test(String(base || '')) ? 1 : 0;
+}
 async function scanFontRepo() {
     const cfg = getFontRepoCfg();
     if (!cfg) {
-        fontRepoStatus = 'Repo font tidak terdeteksi. Buka aplikasi dari alamat GitHub Pages repo kamu.';
+        fontRepoStatus = 'Repo font tidak terdeteksi.';
         _updateRepoStatusLine();
         return false;
     }
     if (fontRepoBusy) return false;
     fontRepoBusy = true;
-    fontRepoStatus = '🔄 Memindai folder /' + cfg.path + ' ...';
+    repoDupDeletable = [];
+    repoDupCtx = null;
+    fontRepoStatus = '🔄 Memindai repo font ...';
     _updateRepoStatusLine();
     try {
         let items = null, usedRepo = '';
@@ -11623,14 +11678,13 @@ async function scanFontRepo() {
             break;
         }
         if (!items || !Array.isArray(items)) {
-            fontRepoStatus = '⚠️ Folder /' + cfg.path + ' tidak ditemukan di repo.';
+            fontRepoStatus = '⚠️ Folder font tidak ditemukan di repo.';
             return false;
         }
         const files = items.filter(it => it && it.type === 'file' && /\.(zip|ttf|otf|woff2?)$/i.test(it.name));
-        for (const f of repoFonts) { try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { } }
-        for (const u of repoObjectUrls) { try { URL.revokeObjectURL(u); } catch (e) { } }
-        const newRecs = [], newUrls = [], seen = new Set();
-        let dup = 0, bad = 0, idx = 0;
+        /* tahap 1: ambil semua font + sidik jari bentuk huruf */
+        const ents = [], fileCount = {};
+        let bad = 0;
         for (const it of files) {
             fontRepoStatus = '🔄 Memproses ' + it.name + ' ...';
             _updateRepoStatusLine();
@@ -11650,30 +11704,73 @@ async function scanFontRepo() {
                 if (/\.zip$/i.test(it.name)) entries = await _extractFontsFromZip(blob);
                 else entries = [{ base: it.name.replace(/\.[^.]+$/, ''), blob: blob }];
             } catch (e) { bad++; continue; }
+            fileCount[it.name] = entries.length;
             for (const en of entries) {
-                const key = fontDupKey(en.base, en.blob.size);
-                if (seen.has(key)) { dup++; continue; }
-                seen.add(key);
-                const info = await parseFontInfo(await en.blob.arrayBuffer());
-                const tg = fontTagFromInfo(info);
-                const internal = 'RF_' + en.base.replace(/[^a-zA-Z0-9]/g, '') + '_' + (++idx);
-                const url = URL.createObjectURL(en.blob);
-                newUrls.push(url);
-                let ff = null;
-                try {
-                    ff = new FontFace(internal, `url(${url})`);
-                    await ff.load();
-                    document.fonts.add(ff);
-                } catch (e) { ff = null; bad++; }
-                if (!ff) continue;
-                newRecs.push({ name: internal, label: info.name || en.base, file: en.base, size: en.blob.size, tag: tg.tag, emote: tg.emote, src: 'repo', _ff: ff });
+                let hash = null;
+                try { hash = await fontGlyphFingerprint(await en.blob.arrayBuffer()); } catch (e) { hash = null; }
+                ents.push({ it: it, en: en, hash: hash, gk: hash ? ('h:' + hash) : ('n:' + fontDupKey(en.base, en.blob.size)), keep: false });
             }
+        }
+        /* tahap 2: kelompokkan yang ganda, pilih satu terbaik per kelompok */
+        const groups = new Map();
+        for (const e of ents) {
+            if (!groups.has(e.gk)) groups.set(e.gk, []);
+            groups.get(e.gk).push(e);
+        }
+        let dup = 0;
+        groups.forEach(function (g) {
+            g.sort(function (a, b) {
+                const ca = fileCount[a.it.name] || 1, cb = fileCount[b.it.name] || 1;
+                if (ca !== cb) return cb - ca;
+                const sa = _fontDupSuffix(a.en.base), sb = _fontDupSuffix(b.en.base);
+                if (sa !== sb) return sa - sb;
+                if (a.en.base.length !== b.en.base.length) return a.en.base.length - b.en.base.length;
+                return a.it.name.localeCompare(b.it.name);
+            });
+            g[0].keep = true;
+            dup += g.length - 1;
+        });
+        /* file repo yang seluruh isinya hanya salinan (terbukti sama persis bentuk hurufnya) boleh dihapus */
+        const byFile = new Map();
+        for (const e of ents) {
+            let r = byFile.get(e.it.name);
+            if (!r) { r = { it: e.it, safe: true }; byFile.set(e.it.name, r); }
+            if (e.keep || !e.hash) r.safe = false;
+        }
+        const deletable = [];
+        byFile.forEach(function (r) {
+            if (r.safe && r.it.sha && r.it.path) deletable.push({ name: r.it.name, path: r.it.path, sha: r.it.sha, size: r.it.size });
+        });
+        /* tahap 3: muat font yang dipilih */
+        for (const f of repoFonts) { try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { } }
+        for (const u of repoObjectUrls) { try { URL.revokeObjectURL(u); } catch (e) { } }
+        const newRecs = [], newUrls = [];
+        let idx = 0;
+        for (const e of ents) {
+            if (!e.keep) continue;
+            const en = e.en;
+            const info = await parseFontInfo(await en.blob.arrayBuffer());
+            const tg = fontTagFromInfo(info);
+            const internal = 'RF_' + en.base.replace(/[^a-zA-Z0-9]/g, '') + '_' + (++idx);
+            const url = URL.createObjectURL(en.blob);
+            newUrls.push(url);
+            let ff = null;
+            try {
+                ff = new FontFace(internal, `url(${url})`);
+                await ff.load();
+                document.fonts.add(ff);
+            } catch (er) { ff = null; bad++; }
+            if (!ff) continue;
+            newRecs.push({ name: internal, label: info.name || en.base, file: en.base, size: en.blob.size, tag: tg.tag, emote: tg.emote, src: 'repo', _ff: ff });
         }
         repoFonts = newRecs;
         repoObjectUrls = newUrls;
-        if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO · /' + cfg.path;
-        fontRepoStatus = '✅ ' + cfg.owner + '/' + usedRepo + ' · /' + cfg.path + ': ' + repoFonts.length + ' font' +
+        repoDupDeletable = deletable;
+        repoDupCtx = { owner: cfg.owner, repo: usedRepo };
+        if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO';
+        fontRepoBase = '✅ ' + repoFonts.length + ' font' +
             (dup ? (' · ' + dup + ' ganda dilewati') : '') + (bad ? (' · ' + bad + ' gagal') : '');
+        fontRepoStatus = fontRepoBase + (deletable.length ? (' · ' + deletable.length + ' file ganda di repo') : '');
         return true;
     } catch (e) {
         console.warn('Scan font repo gagal:', e);
@@ -11683,32 +11780,77 @@ async function scanFontRepo() {
         fontRepoBusy = false;
     }
 }
+async function cleanRepoDuplicates(auto) {
+    if (repoCleanBusy || fontRepoBusy || !repoDupDeletable.length || !repoDupCtx) return;
+    let token = '';
+    try { token = localStorage.getItem(FONT_REPO_TOKEN_KEY) || ''; } catch (e) { token = ''; }
+    if (!auto) {
+        const names = repoDupDeletable.map(function (f) { return '- ' + f.name; }).join('\n');
+        if (!window.confirm('Hapus ' + repoDupDeletable.length + ' file ganda dari repo?\n\n' + names + '\n\nSatu salinan terbaik dari tiap font tetap disimpan.')) return;
+    }
+    if (!token) {
+        if (auto) return;
+        const t = window.prompt('Tempel GitHub Token (izin Contents: Read and write). Token hanya disimpan di perangkat ini.', '');
+        if (!t || !t.trim()) { showToast('Dibatalkan'); return; }
+        token = t.trim();
+        try { localStorage.setItem(FONT_REPO_TOKEN_KEY, token); } catch (e) { }
+    }
+    repoCleanBusy = true;
+    let ok = 0, fail = 0, denied = false;
+    try {
+        for (const f of repoDupDeletable.slice()) {
+            fontRepoStatus = '🧹 Menghapus ' + f.name + ' ...';
+            _updateRepoStatusLine();
+            try {
+                const url = 'https://api.github.com/repos/' + encodeURIComponent(repoDupCtx.owner) + '/' + encodeURIComponent(repoDupCtx.repo) +
+                    '/contents/' + f.path.split('/').map(encodeURIComponent).join('/');
+                const r = await fetch(url, {
+                    method: 'DELETE',
+                    headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'Hapus font ganda: ' + f.name, sha: f.sha })
+                });
+                if (r.ok) {
+                    ok++;
+                    const ix = repoDupDeletable.indexOf(f);
+                    if (ix > -1) repoDupDeletable.splice(ix, 1);
+                    try { await deleteFontBlobFromDB('repo::' + f.name + '::' + f.size); } catch (e) { }
+                } else {
+                    fail++;
+                    if (r.status === 401 || r.status === 403) { denied = true; break; }
+                }
+            } catch (e) { fail++; break; }
+        }
+    } finally {
+        repoCleanBusy = false;
+    }
+    if (denied) { try { localStorage.removeItem(FONT_REPO_TOKEN_KEY); } catch (e) { } }
+    fontRepoStatus = fontRepoBase + (ok ? (' · ' + ok + ' file ganda dihapus') : '') +
+        (repoDupDeletable.length ? (' · ' + repoDupDeletable.length + ' file ganda tersisa') : '');
+    _updateRepoStatusLine();
+    showToast(denied ? '⚠️ Token ditolak GitHub (cek izin Contents: Read and write)' :
+        (ok ? ('🧹 ' + ok + ' file ganda dihapus dari repo' + (fail ? (' · ' + fail + ' gagal') : '')) : '⚠️ Gagal menghapus file ganda'));
+    if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
+}
 async function scanFontRepoUI() {
     const ok = await scanFontRepo();
     _updateRepoStatusLine();
     showToast(ok ? ('✅ Font repo dipindai: ' + repoFonts.length + ' font') : (fontRepoStatus || 'Gagal memindai repo'));
+    if (ok && repoDupDeletable.length) {
+        let has = false;
+        try { has = !!localStorage.getItem(FONT_REPO_TOKEN_KEY); } catch (e) { has = false; }
+        if (has) await cleanRepoDuplicates(true);
+    }
     if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
 }
 function scanRowHtml() {
-    const cfg = getFontRepoCfg();
-    const val = cfg.owner + '/' + cfg.candidates[0] + '/' + cfg.path;
-    const line = fontRepoStatus || ('📦 Repo: ' + cfg.owner + '/' + cfg.candidates[0] + ' · folder /' + cfg.path);
+    const line = fontRepoStatus || '📦 Tekan Scan Font Repo untuk memindai font.';
+    const n = repoDupDeletable.length;
+    const clean = n ? `<button class="btn-sub-tool" onclick="cleanRepoDuplicates()" style="flex-direction:row;justify-content:center;padding:8px;border-color:#EF4444;color:#EF4444;">🧹 Hapus ${n} File Ganda di Repo</button>` : '';
     return `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
-        <div style="display:flex;gap:6px;">
-            <input id="fontRepoInput" type="text" value="${_escHtml(val)}" placeholder="owner/repo/folder" style="flex:1;min-width:0;background:#111;color:#fff;border:1px solid rgba(212,175,55,.35);border-radius:8px;padding:8px;font-size:11px;">
-            <button class="btn-sub-tool" onclick="applyFontRepoInput()" style="flex-direction:row;justify-content:center;padding:8px 10px;">Terapkan</button>
-        </div>
         <button class="btn-sub-tool" onclick="scanFontRepoUI()" style="flex-direction:row;justify-content:center;padding:8px;">🔄 Scan Font Repo</button>
+        ${clean}
         <div id="fontRepoStatusLine" style="font-size:10px;color:#9CA3AF;">${_escHtml(line)}</div>
     </div>`;
-}
-function applyFontRepoInput() {
-    const inp = document.getElementById('fontRepoInput');
-    const parts = String((inp && inp.value) || '').trim().replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
-    if (parts.length < 2) { showToast('⚠️ Format: owner/repo/folder'); return; }
-    const cfg = { owner: parts[0], repo: parts[1], path: parts.slice(2).join('/') || 'fonts' };
-    try { localStorage.setItem(FONT_REPO_KEY, JSON.stringify(cfg)); } catch (e) { }
-    scanFontRepoUI();
 }
 function fontCountHtml() {
     const nDef = FONT_FAMILIES.length, nPri = currentProjectFonts.length, nRepo = repoFonts.length;
@@ -16880,7 +17022,6 @@ function flushSaveNow(){
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') flushSaveNow(); });
 window.addEventListener('pagehide', flushSaveNow);
 
-    
 /* v1.5.8: Toleransi & Halus Tangkap Ajaib langsung menghitung ulang hasil Snap */
 (function(){
     ['grabTolerance','grabFeather'].forEach(function(id){
