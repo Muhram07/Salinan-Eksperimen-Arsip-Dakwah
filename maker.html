@@ -1,15 +1,16 @@
 <!--
-Studio Poster Maker Pro - Update v1.7.9
+Studio Poster Maker Pro - Update v1.8.0
+
+v1.8.0:
+1. DZIKIR (overlay saat tambah gambar): huruf Arab memakai font yang sama dengan Peta Dzikir (Noto Naskh Arabic, lebih formal & mudah dibaca), tanpa jarak antar-huruf agar sambungan huruf Arab utuh.
+2. MENU PROJEK: deretan tombol (Baru, Duplikat, Ekspor, Impor, Info) kini rapat & bisa digeser kanan-kiri di layar kecil, tombol Impor tidak terpotong lagi.
+3. DOWNLOAD POSTER: penjelasan lengkap semua opsi Format (JPG, PNG Background, PNG Transparan) dan Kualitas (SD s/d Ultra 3x) beserta ukuran piksel & saran memilih; opsi yang sedang dipilih disorot emas.
+4. UKURAN TEKS: saat lebar kotak dipersempit hingga kata lebih lebar dari kotak, teks terpotong tepat rata dengan garis kotak kiri & kanan (sebelumnya terpotong 32px di luar garis).
+5. FORMAT TEKS (KAPITAL): pembungkus baris kini mengukur lebar sesuai huruf kapital/kecil/judul yang tampil, sehingga huruf tidak keluar dari garis kotak kiri-kanan.
 
 v1.7.9:
-1. IKON ORIGINAL TOTAL: semua emoji yang tersisa di dalam tool, tombol Projek, jendela (Download, Ekspor, Crop, Layer Mask, Hapus BG, dll), toast/pesan, daftar font, bentuk, panah, dan tombol Arsip diganti ikon garis original emas-abu (SVG tajam, tema gelap).
-2. IKON: sprite diperluas (+80 ikon baru). Penggantian otomatis & ringan (satu pengamat DOM, ikon dipakai ulang lewat <use>, tanpa gambar, tanpa lag, tanpa kebocoran memori).
-3. Pesan alert bawaan browser dibersihkan dari emoji. Data font/proyek tidak berubah (aman untuk proyek lama).
-4. Versi: nomor di bar atas dan di dalam kode disinkronkan (v1.7.9).
-
-v1.7.8:
-1. IKON ORIGINAL: emoji umum pada nama tool diganti ikon garis buatan sendiri (SVG, tajam di semua ukuran layar, aksen emas): bar bawah (semua tool), bar atas, bar samping kiri/kanan, dan judul panel tool.
-2. IKON: satu sprite SVG di awal halaman dipakai berulang; warna mengikuti tema tombol (abu, emas saat disentuh).
+1. IKON ORIGINAL TOTAL: semua emoji tersisa di tool, tombol Projek, jendela, toast, daftar font, bentuk, panah diganti ikon garis emas-abu (SVG, tema gelap).
+2. IKON: sprite diperluas (+77 ikon), penggantian otomatis ringan lewat satu pengamat DOM dan <use>.
 -->
 
 
@@ -629,6 +630,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ic-e:last-child{margin-right:0;}
 .btn-sub-tool .ic-e{margin:0;}
 .btn-download,.btn-sub-tool.active,.bib-tab.on,.bib-go,.bib-act.add,.up-btn.gold,.up-pan-toggle.on,.pg-chip.on,.tbl-ed-colh.on,.tbl-ed-rowh.on,.tbl-ed-fmt.active,.btn-step:hover,.dpad-btn:active,.canva-stalk-btn:active,.handled-loupe-stalk:active,.btn-proj-action:hover,.tag-pill:hover,.tag-pill.active{--ic-a:currentColor;}
+/* v1.8.0: deretan tombol menu Projek: rapat & bisa digeser di layar kecil */
+.proj-actions{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x;}
+.proj-actions::-webkit-scrollbar{display:none;}
+.proj-actions>.btn-nav{flex:1 0 auto!important;white-space:nowrap;padding-left:9px;padding-right:9px;}
+.proj-actions>.btn-nav:last-child{flex:0 0 38px!important;padding-left:0;padding-right:0;}
+.dl-guide{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.dl-guide .dl-h{font-size:11px;font-weight:800;color:#D4AF37;margin-top:6px;letter-spacing:.3px;}
+.dl-guide .dl-i{font-size:11px;line-height:1.55;color:#888;border-left:2px solid rgba(255,255,255,.12);padding:3px 0 3px 8px;}
+.dl-guide .dl-i b{color:#bbb;}
+.dl-guide .dl-i.on{color:#ddd;border-left-color:#D4AF37;background:rgba(212,175,55,.08);border-radius:0 6px 6px 0;}
+.dl-guide .dl-i.on b{color:#FFE259;}
+.dl-guide .dl-tip{font-size:11px;line-height:1.55;color:#aaa;background:rgba(255,255,255,.04);border:1px dashed rgba(212,175,55,.35);border-radius:8px;padding:6px 8px;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -971,7 +984,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 </div>
 <button class="panel-close" onclick="closeProjectModal()" style="font-size:20px;">✕</button>
 </div>
-<div style="padding:12px 16px;background:rgba(255,255,255,.03);display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);">
+<div class="proj-actions" style="padding:12px 16px;background:rgba(255,255,255,.03);display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);">
 <button class="btn-nav" onclick="createNewProjectPrompt()" style="flex:1;justify-content:center;">➕ Baru</button>
 <button class="btn-nav" onclick="openProjectDuplicateModal()" style="flex:1;justify-content:center;">💾 Duplikat</button>
 <button class="btn-nav" onclick="openProjectExportModal()" style="flex:1;justify-content:center;color:#00ff88;border-color:#00ff88;">📤 Ekspor</button>
@@ -1489,7 +1502,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div id="dzikirOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999999; flex-direction:column; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(10px);">
     <div style="border: 2px solid #D4AF37; box-shadow: 0 0 15px rgba(212,175,55,0.4); border-radius: 12px; padding: 30px; max-width: 95%; width: 420px; display: flex; flex-direction: column; align-items: center; text-align:center; background:#111;">
         <div style="font-size:12px; color:#aaa; margin-bottom:15px; letter-spacing:1px; text-transform:uppercase;">Dzikir & Istighfar (100x)</div>
-        <div style="font-size:32px; color:#fff; font-weight:normal; letter-spacing:2px; margin-bottom:30px; font-family:'Amiri', serif; line-height:1.4;">أَسْتَغْفِرُ اللَّهَ وَأَتُوْبُ إِلَيْهِ</div>
+        <div style="font-size:32px; color:#fff; font-weight:normal; letter-spacing:0; margin-bottom:30px; font-family:'Noto Naskh Arabic','Traditional Arabic','Arial',serif; line-height:2; direction:rtl;">أَسْتَغْفِرُ اللَّهَ وَأَتُوْبُ إِلَيْهِ</div>
         
         <div style="display:flex; align-items:center; gap:20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:40px; padding:10px 30px; margin-bottom:30px;">
             <button onclick="resetDzikirCounter()" style="background:none; border:none; color:#ff6b6b; font-size:24px; cursor:pointer;">🔄</button>
@@ -1798,7 +1811,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.7.9';
+const APP_VERSION = 'v1.8.0';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3024,6 +3037,13 @@ function getCleanFont(font){
     return font;
 }
 
+function _ttApply(word,tt,wIndex){
+if(tt==='uppercase') return word.toUpperCase();
+if(tt==='lowercase') return word.toLowerCase();
+if(tt==='sentence') return (wIndex===0) ? word.charAt(0).toUpperCase()+word.slice(1).toLowerCase() : word.toLowerCase();
+if(tt==='title') return word.charAt(0).toUpperCase()+word.slice(1).toLowerCase();
+return word;
+}
 function getWrappedLines(targetCtx,text,maxWidth,el){
 if(!maxWidth||maxWidth<=0)maxWidth=750;
 const rawText=text||'';
@@ -3059,7 +3079,9 @@ const wFontStyle = style.fontStyle || el.fontStyle || 'normal';
 targetCtx.font=`${wFontStyle} ${wFontWeight} ${el.fontSize}px ${getCleanFont(el.fontFamily)}`;
 
 const needsSpace = (isOriginalWordEnd && w < words.length - 1);
-const wordWithSpace = needsSpace ? word + ' ' : word;
+const _tt = style.textTransform || el.textTransform || 'none';
+const _shown = _ttApply(word, _tt, globalWordIndex);
+const wordWithSpace = needsSpace ? _shown + ' ' : _shown;
 const addSpacing = (el.letterSpacing||0) * wordWithSpace.length;
 const wordW = targetCtx.measureText(wordWithSpace).width + addSpacing;
 
@@ -3069,7 +3091,8 @@ if(currentLineWidth + wordW > maxWidth && currentLineWords.length > 0){
         let testStr = "";
         for (let c = 0; c < word.length; c++) {
             testStr += word[c];
-            let testW = targetCtx.measureText(testStr + '-').width + (el.letterSpacing||0)*(testStr.length+1);
+            let _tsh = _ttApply(testStr, _tt, globalWordIndex);
+            let testW = targetCtx.measureText(_tsh + '-').width + (el.letterSpacing||0)*(_tsh.length+1);
             if (currentLineWidth + testW <= maxWidth) {
                 fitIndex = c;
             } else {
@@ -3732,6 +3755,9 @@ octx.restore();
 octx.textAlign = 'left';
 octx.textBaseline = 'middle';
 
+const _clipOverflow = linesInfo.some(l => l.drawW > maxBoxWidth + 0.5);
+octx.save();
+if(_clipOverflow){ octx.beginPath(); octx.rect(-maxBoxWidth/2, -cH/2, maxBoxWidth, cH); octx.clip(); }
 linesInfo.forEach(line => {
     line.wordsInfo.forEach(wInfo => {
         const useOffscreen = (el.innerShadow && el.innerShadow.color !== 'transparent') || (el.textSkinImg && el.textSkinImg.complete) || (el.filters && (el.filters.brightness!==100 || el.filters.contrast!==100 || el.filters.saturate!==100 || el.filters.hue!==0));
@@ -3822,6 +3848,7 @@ linesInfo.forEach(line => {
         }
     });
 });
+octx.restore();
 
 if(el.transparency && el.transparency.type !== 'uniform') {
     octx.translate(-cW/2, -cH/2);
@@ -13489,16 +13516,31 @@ function updateDownloadHint() {
     const selected = parseFloat(q.value) || 2;
     const safe = (preset.width * preset.height * selected * selected <= EXPORT_MAX_PIXELS)
         ? selected : Math.floor(Math.sqrt(EXPORT_MAX_PIXELS / (preset.width * preset.height)) * 100) / 100;
-    const fmtText = {
-        jpg: 'JPG: ukuran file paling kecil (kualitas 92%), cocok untuk unggah/WhatsApp/Instagram. Tidak mendukung transparan.',
-        pngbg: 'PNG dengan background: sangat tajam tanpa artefak kompresi, ukuran file lebih besar dari JPG.',
-        png: 'PNG transparan: tanpa background, cocok ditempel di desain lain. Ukuran file lebih besar dari JPG.'
-    }[f.value] || '';
+    const fmtInfo = [
+        ['jpg', 'JPG (Normal Background)', 'File paling kecil (kualitas 92%), cepat diunggah dan dikirim. Cocok untuk WhatsApp, Instagram, Facebook, dan status. Tidak mendukung transparan: area kosong terisi warna background. Ada kompresi halus, jadi tepi teks tipis atau gradasi sangat halus bisa sedikit berkurang ketajamannya jika diperbesar.'],
+        ['pngbg', 'PNG (Normal Background)', 'Sangat tajam tanpa artefak kompresi, aman untuk teks tipis, garis halus, dan gradasi. Background tetap ikut tampil. Ukuran file sekitar 2 sampai 5 kali lebih besar dari JPG. Cocok untuk cetak, arsip kualitas tertinggi, atau diedit lagi di aplikasi lain.'],
+        ['png', 'PNG (Transparan/Tanpa BG)', 'Background dibuang, hanya elemen poster yang tersimpan. Cocok untuk stiker, logo, atau ditempel ke desain lain. Ukuran file besar. Di sebagian galeri, latar transparan tampil hitam atau kotak-kotak, itu normal dan bukan rusak.']
+    ];
+    const qInfo = [
+        [0.75, 'SD (Standar)', 'Paling ringan dan cepat, aman untuk HP lama atau memori kecil. Cukup untuk story dan pratinjau, tetapi kurang tajam bila dizoom atau dicetak.'],
+        [1, 'HD (High Definition)', 'Ukuran asli kanvas. Pas untuk unggah media sosial dengan keseimbangan ukuran file dan ketajaman.'],
+        [1.5, 'FHD (Full HD)', 'Lebih tajam dari HD. Bagus untuk ditampilkan di layar besar, PC, atau dicetak ukuran kecil.'],
+        [2, '4K (Ultra HD)', 'Sangat tajam, enak dizoom, cocok untuk cetak poster A4/A3. File besar, proses lebih lama.'],
+        [3, 'Ultra 3x (Maksimal)', 'Kualitas tertinggi untuk banner atau cetak besar. Butuh memori besar dan file sangat besar; jika melebihi batas perangkat, ukuran otomatis diturunkan agar tidak gagal.']
+    ];
+    const selF = f.value;
+    let gHtml = '<div class="dl-guide"><div class="dl-h">Penjelasan Format</div>';
+    fmtInfo.forEach(x => { gHtml += `<div class="dl-i${x[0]===selF?' on':''}"><b>${x[1]}</b><br>${x[2]}</div>`; });
+    gHtml += '<div class="dl-h">Penjelasan Kualitas</div>';
+    qInfo.forEach(x => {
+        gHtml += `<div class="dl-i${Math.abs(x[0]-selected)<0.001?' on':''}"><b>${x[1]} · ${Math.round(preset.width * x[0])}×${Math.round(preset.height * x[0])} px</b><br>${x[2]}</div>`;
+    });
+    gHtml += '<div class="dl-tip"><b>Saran cepat:</b> unggah ke sosial media: JPG + HD atau FHD. Cetak: PNG (Normal Background) + 4K. Stiker atau logo: PNG Transparan + HD atau FHD. HP sering lag atau gagal download: turunkan kualitas ke HD atau SD.</div></div>';
     let extra = '';
     if(safe < selected) {
-        extra = `<br>⚠️ Ukuran terlalu besar untuk perangkat, otomatis diturunkan ke ${Math.round(preset.width * safe)}×${Math.round(preset.height * safe)} px.`;
+        extra = `<div style="color:#FFE259;margin-bottom:6px;">⚠️ Ukuran terlalu besar untuk perangkat, otomatis diturunkan ke ${Math.round(preset.width * safe)}×${Math.round(preset.height * safe)} px.</div>`;
     }
-    hint.innerHTML = fmtText + extra;
+    hint.innerHTML = extra + gHtml;
 }
 
 function canvasToBlobSafe(canvas, mime, quality) {
