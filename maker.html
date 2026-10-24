@@ -1,5 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v1.8.1
+Studio Poster Maker Pro - Update v1.8.2
+
+v1.8.2:
+1. NOTIF TUNGGU: notif "Tunggu beberapa detik ya" kini tampil di setiap buka aplikasi (setelah notif sinkron bila ada update; langsung bila tanpa update), posisi dinaikkan agar tidak menutupi judul, tampilan dibuat elegan dengan ikon & bilah waktu.
+2. STABILO: melepas centang Blok Kata mereset warna stabilo per-kata; warna global tidak lagi bercampur dengan warna blok lama.
+3. LAYER MASK: tombol Info di bar bawah berisi panduan lengkap (syarat PNG di atas teks, langkah, contoh ular/pedang/tali dll, tips).
+4. BLEND MODE TEKS: slider Blur Efek kini benar-benar mengaburkan teks (sebelumnya error & tidak tersambung ke render teks).
+5. TRANSPARANSI: tombol Invert dihapus dari mode Uniform; di mode Fountain Invert ON kuning/OFF abu, plus tombol ON/OFF mode Fountain (OFF = transparansi biasa).
+6. GRUP: gabung grup memakai nomor grup terkecil yang terlibat, nomor selalu berurutan; bar atas tambah Pilih Semua, Invert, Kosongkan.
+7. KIRIM SLIDE: tiap slide kini punya tombol Preview (kembali ke menu kirim saat ditutup).
 
 v1.8.1:
 1. NOTIF SINKRON: setelah notif "Aplikasi berhasil disinkronkan", muncul notif kedua (hidup lebih lama, 10 dtk, bisa diketuk untuk menutup) yang meminta pengguna menunggu font & teks selesai dipindai dari repo sebelum menyimpulkan teks berubah.
@@ -8,13 +17,6 @@ v1.8.1:
 4. WARNA TEKS: setelah blok kata dibatalkan, warna global kembali bisa diatur (warna per-kata lama dibersihkan saat warna global dipilih).
 5. BAYANGAN (teks & gambar/PNG): tombol Reset (kembali ke default) dan sakelar ON/OFF untuk Bayangan Luar maupun Dalam.
 6. WARNA: tombol kecil Salin & Tempel kode warna di semua tool berkaitan warna (pemilih warna, gradien, garis bantu, pena, spektrum HSL, editor tabel).
-
-v1.8.0:
-1. DZIKIR (overlay saat tambah gambar): huruf Arab memakai font yang sama dengan Peta Dzikir (Noto Naskh Arabic, lebih formal & mudah dibaca), tanpa jarak antar-huruf agar sambungan huruf Arab utuh.
-2. MENU PROJEK: deretan tombol (Baru, Duplikat, Ekspor, Impor, Info) kini rapat & bisa digeser kanan-kiri di layar kecil, tombol Impor tidak terpotong lagi.
-3. DOWNLOAD POSTER: penjelasan lengkap semua opsi Format (JPG, PNG Background, PNG Transparan) dan Kualitas (SD s/d Ultra 3x) beserta ukuran piksel & saran memilih; opsi yang sedang dipilih disorot emas.
-4. UKURAN TEKS: saat lebar kotak dipersempit hingga kata lebih lebar dari kotak, teks terpotong tepat rata dengan garis kotak kiri & kanan (sebelumnya terpotong 32px di luar garis).
-5. FORMAT TEKS (KAPITAL): pembungkus baris kini mengukur lebar sesuai huruf kapital/kecil/judul yang tampil, sehingga huruf tidak keluar dari garis kotak kiri-kanan.
 -->
 
 
@@ -643,9 +645,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .proj-actions{flex:0 0 auto;align-items:center;min-height:58px;box-sizing:border-box;}
 .proj-actions>.btn-nav{height:34px;min-height:34px;flex-shrink:0;}
 .project-grid{flex:1 1 auto;min-height:0;}
-.toast-note{position:fixed;top:104px;left:50%;transform:translateX(-50%) translateY(-20px);width:min(88vw,340px);box-sizing:border-box;background:rgba(20,20,20,.96);border:1px solid #D4AF37;color:#fff;padding:10px 14px;border-radius:14px;font-size:12px;line-height:1.5;font-weight:600;text-align:center;z-index:9999998;opacity:0;pointer-events:none;transition:.35s;box-shadow:0 6px 20px rgba(0,0,0,.6);}
-.toast-note.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
-.toast-note b{display:block;color:#FFE259;margin-bottom:2px;font-size:12.5px;}
+.toast-note{position:fixed;top:56px;left:50%;transform:translateX(-50%) translateY(-14px) scale(.97);width:min(90vw,350px);box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:12px 16px 15px;border-radius:18px;background:linear-gradient(145deg,rgba(36,31,22,.97),rgba(14,14,14,.97));border:1px solid rgba(212,175,55,.6);box-shadow:0 10px 30px rgba(0,0,0,.65),0 0 0 1px rgba(255,226,89,.06) inset,0 0 18px rgba(212,175,55,.18);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#e8e8e8;text-align:left;z-index:9999998;opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease;overflow:hidden;}
+.toast-note.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);pointer-events:auto;}
+.toast-note .tn-ico{flex:0 0 34px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,rgba(255,226,89,.28),rgba(212,175,55,.08));border:1px solid rgba(212,175,55,.55);color:#FFE259;}
+.toast-note .tn-ico svg{width:18px;height:18px;animation:tnSpin 2.4s ease-in-out infinite;}
+.toast-note .tn-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.toast-note .tn-txt b{font-size:13px;font-weight:800;letter-spacing:.2px;background:linear-gradient(90deg,#FFE259,#D4AF37);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.toast-note .tn-txt span{font-size:11.5px;line-height:1.5;font-weight:500;color:#bdbdbd;}
+.toast-note .tn-bar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:linear-gradient(90deg,#D4AF37,#FFE259);transform-origin:left center;transform:scaleX(1);opacity:.9;}
+.toast-note.show .tn-bar{animation:tnBar var(--d,10s) linear forwards;}
+@keyframes tnBar{from{transform:scaleX(1);}to{transform:scaleX(0);}}
+@keyframes tnSpin{0%,35%{transform:rotate(0);}65%,100%{transform:rotate(180deg);}}
 .clr-mini{width:26px;height:26px;padding:0;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(212,175,55,.45);color:#D4AF37;border-radius:6px;cursor:pointer;}
 .clr-mini:active{background:rgba(212,175,55,.28);}
 .clr-mini svg{width:14px;height:14px;pointer-events:none;}
@@ -1326,9 +1336,69 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <span id="lmFeatherVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">35%</span>
 </div>
 <div class="fmodal-footer">
+<button class="btn-nav" onclick="openLmInfo()" style="width:38px;justify-content:center;" aria-label="Info Layer Mask">ℹ️</button>
 <button class="btn-nav" onclick="clearLm()">Bersihkan</button>
 <button class="btn-nav btn-download" onclick="applyLayerMask()">✅ Terapkan</button>
 </div>
+</div>
+
+<div id="lmInfoOverlay" style="display:none;position:fixed;left:0;top:0;right:0;bottom:0;z-index:1000001;background:rgba(0,0,0,.94);flex-direction:column;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(212,175,55,.35);background:#141414;">
+<div style="font-weight:800;color:#D4AF37;font-size:13px;">ℹ️ Panduan Layer Mask</div>
+<button class="panel-close" onclick="closeLmInfo()">✕</button>
+</div>
+<div style="flex:1;overflow-y:auto;padding:16px;font-size:12px;line-height:1.65;color:#cfcfcf;-webkit-overflow-scrolling:touch;">
+<div style="font-weight:800;color:#FFE259;font-size:13px;">Apa itu Layer Mask?</div>
+<p style="margin:4px 0 12px;">Fitur untuk membuat <b style="color:#fff;">sebagian huruf tampil DI DEPAN gambar PNG</b>, sementara huruf lainnya tetap di belakangnya. Hasilnya seolah-olah teks dililit, ditembus, atau dilewati oleh objek (ular, pedang, tali, tangan, dan sebagainya).</p>
+
+<div style="font-weight:800;color:#FFE259;font-size:13px;">Syarat WAJIB sebelum dipakai</div>
+<ol style="margin:4px 0 12px;padding-left:18px;">
+<li><b style="color:#fff;">Yang dipilih harus teks.</b> Tombol Layer Mask hanya bekerja untuk elemen teks.</li>
+<li><b style="color:#fff;">Gambar PNG harus berada DI DEPAN / DI ATAS lapisan teks.</b> Buka <i>Daftar Lapisan</i>, pastikan PNG ada di atas teks (gunakan tombol naik / Paling Depan). Jika PNG masih di bawah teks, tidak akan ada efek lilitan yang terlihat karena teks sudah tampil di depannya.</li>
+<li>Gunakan PNG <b style="color:#fff;">transparan (tanpa background)</b> agar tepinya bersih dan tampak menyatu dengan teks.</li>
+<li>Atur dulu <b style="color:#fff;">ukuran dan posisi</b> teks serta PNG sebelum masuk Layer Mask. Jika sesudahnya digeser, hasil lilitan ikut bergeser dan bisa meleset; buka lagi Layer Mask untuk merapikan.</li>
+</ol>
+
+<div style="font-weight:800;color:#FFE259;font-size:13px;">Cara kerja singkat</div>
+<p style="margin:4px 0 12px;">Karena PNG ada di atas teks, PNG otomatis menutupi huruf. Dengan kuas, Anda menggosok bagian huruf yang ingin <b style="color:#fff;">muncul kembali di depan PNG</b>. Bagian yang tidak digosok tetap tertutup PNG (terlihat berada di belakang objek).</p>
+
+<div style="font-weight:800;color:#FFE259;font-size:13px;">Langkah penggunaan</div>
+<ol style="margin:4px 0 12px;padding-left:18px;">
+<li>Pilih teks, lalu buka tool <b style="color:#fff;">Layer Mask</b>.</li>
+<li>Pakai zoom (+ / -), tombol panah geser, dan tombol target untuk memusatkan kanvas agar area kerja terlihat jelas.</li>
+<li>Mode <b style="color:#fff;">Lilit (Depan)</b>: gosok bagian huruf yang harus tampil di depan PNG.</li>
+<li>Salah gosok? Ketuk tombol mode hingga menjadi <b style="color:#fff;">Hapus Patch</b>, lalu gosok area itu untuk mengembalikannya ke belakang PNG. Bisa juga memakai Undo / Redo.</li>
+<li>Atur <b style="color:#fff;">Kuas</b> (ukuran) dan <b style="color:#fff;">Lembut</b> (kehalusan tepi). Gagang tangan di bawah layar menggeser keker (lingkaran kuas); ikon pensil menyalakan atau mematikan kuas.</li>
+<li><b style="color:#fff;">Panduan ON</b> menampilkan bantuan visual area yang digosok; matikan untuk melihat hasil asli.</li>
+<li>Tekan <b style="color:#fff;">Terapkan</b> bila sudah rapi. <b style="color:#fff;">Bersihkan</b> menghapus semua coretan.</li>
+</ol>
+
+<div style="font-weight:800;color:#FFE259;font-size:13px;">Contoh kasus</div>
+<div style="margin:4px 0 12px;display:flex;flex-direction:column;gap:8px;">
+<div style="border-left:2px solid #D4AF37;padding:2px 0 2px 10px;"><b style="color:#fff;">1. Ular melingkar di teks.</b> Taruh PNG ular melintang di atas teks. Di titik tubuh ular seharusnya lewat <i>di belakang</i> huruf, gosok huruf di titik itu dengan mode Lilit. Di titik ular lewat <i>di depan</i> huruf, jangan digosok. Hasilnya tubuh ular terlihat keluar-masuk di antara huruf.</div>
+<div style="border-left:2px solid #D4AF37;padding:2px 0 2px 10px;"><b style="color:#fff;">2. Pedang selang-seling.</b> Pedang (PNG) menembus tulisan: huruf yang harus berada di depan bilah pedang digosok, huruf yang harus ditembus pedang dibiarkan. Hasilnya pedang tampak menusuk lalu keluar dari kata.</div>
+<div style="border-left:2px solid #D4AF37;padding:2px 0 2px 10px;"><b style="color:#fff;">3. Tali, rantai, sulur, atau akar.</b> Sama seperti ular: gosok huruf di bagian tali yang seharusnya lewat di belakang huruf, biarkan bagian yang melintas di depan.</div>
+<div style="border-left:2px solid #D4AF37;padding:2px 0 2px 10px;"><b style="color:#fff;">4. Orang atau objek berdiri di belakang tulisan.</b> Gosok seluruh bagian huruf yang menutupi badan objek agar teks tampil di depannya; kepala atau bagian lain yang tidak tertutup tetap terlihat utuh.</div>
+<div style="border-left:2px solid #D4AF37;padding:2px 0 2px 10px;"><b style="color:#fff;">5. Tangan memegang atau menahan huruf.</b> Biarkan jari yang menumpuk di depan huruf, lalu gosok huruf di tempat telapak atau jari seharusnya berada di belakang huruf.</div>
+<div style="border-left:2px solid #D4AF37;padding:2px 0 2px 10px;"><b style="color:#fff;">6. Gunung, bulan, atau bangunan di belakang judul.</b> Gosok seluruh teks yang menimpa objek tersebut agar judul tampil di depan, sedangkan objek tetap memenuhi bagian sisanya.</div>
+</div>
+
+<div style="font-weight:800;color:#FFE259;font-size:13px;">Tips rapi</div>
+<ul style="margin:4px 0 12px;padding-left:18px;">
+<li>Perbesar zoom dan pakai kuas kecil di tepi huruf supaya potongan bersih.</li>
+<li>Lembut rendah (0-20%) = tepi tegas; sedang (30-40%) = tepi halus alami.</li>
+<li>Kerjakan bagian demi bagian, lalu periksa hasil dengan mematikan Panduan.</li>
+<li>Mask lama dimuat kembali saat Layer Mask dibuka lagi, jadi bisa diperbaiki kapan saja.</li>
+</ul>
+
+<div style="font-weight:800;color:#FFE259;font-size:13px;">Jika tidak berhasil</div>
+<ul style="margin:4px 0 8px;padding-left:18px;">
+<li><b style="color:#fff;">Tidak ada efek apa pun:</b> PNG kemungkinan masih di bawah teks. Naikkan PNG ke atas teks lewat Daftar Lapisan.</li>
+<li><b style="color:#fff;">Tool tidak bisa dibuka:</b> pastikan elemen yang dipilih adalah teks, bukan gambar.</li>
+<li><b style="color:#fff;">Lilitan meleset setelah digeser:</b> buka lagi Layer Mask lalu rapikan ulang.</li>
+</ul>
+</div>
+<div style="padding:10px 16px;background:#141414;border-top:1px solid rgba(255,255,255,.08);"><button class="btn-nav btn-download" style="width:100%;justify-content:center;height:40px;" onclick="closeLmInfo()">Mengerti</button></div>
 </div>
 
 <div class="feature-modal" id="magicWandModal">
@@ -1834,7 +1904,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.8.1';
+const APP_VERSION = 'v1.8.2';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2395,10 +2465,14 @@ async function syncAppVersion() {
 function showScanNotice(ms) {
     const n = document.getElementById('toastNote');
     if(!n) return;
-    n.innerHTML = '<b>Tunggu beberapa detik ya...</b>Font dan teks sedang dipindai dari repo. Tampilan teks bisa terlihat berubah dulu, tunggu sampai tampil normal.';
+    ms = ms || 10000;
+    n.classList.remove('show');
+    n.innerHTML = '<div class="tn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3v3.5a5 5 0 0 0 2 4L12 12l-3 1.5a5 5 0 0 0-2 4V21M17 3v3.5a5 5 0 0 1-2 4L12 12l3 1.5a5 5 0 0 1 2 4V21"/></svg></div><div class="tn-txt"><b>Tunggu sebentar ya</b><span>Font dan teks sedang dipindai dari repo. Tampilan teks bisa berubah dulu, tunggu beberapa detik sampai normal.</span></div><i class="tn-bar"></i>';
+    n.style.setProperty('--d', (ms/1000) + 's');
+    void n.offsetWidth;
     n.classList.add('show');
     clearTimeout(n._timer);
-    n._timer = setTimeout(() => n.classList.remove('show'), ms || 10000);
+    n._timer = setTimeout(() => n.classList.remove('show'), ms);
 }
 function hideScanNotice() {
     const n = document.getElementById('toastNote');
@@ -2418,8 +2492,13 @@ function checkAppVersion() {
         const verDisplay = document.getElementById('appVersionDisplay');
         if(verDisplay) verDisplay.innerText = APP_VERSION;
         if(localStorage.getItem('APP_SCAN_NOTICE') === '1') {
+            /* ada update: notif sinkron dulu, lalu notif tunggu */
             localStorage.removeItem('APP_SCAN_NOTICE');
-            setTimeout(() => showScanNotice(10000), 700);
+            showToast("✅ Aplikasi berhasil disinkronkan ke versi terbaru!", 2600);
+            setTimeout(() => showScanNotice(10000), 2800);
+        } else {
+            /* tanpa update / buka ulang / pertama kali: notif tunggu tetap tampil */
+            setTimeout(() => showScanNotice(10000), 900);
         }
     }
 }
@@ -3601,7 +3680,32 @@ function renderBackground(bg,W,H,targetCtx){
     if(bg.darken>0){targetCtx.fillStyle=`rgba(0,0,0,${bg.darken})`;targetCtx.fillRect(0,0,W,H);}
 }
 
-function renderTextElement(targetCtx,el, forceRawRender = false){
+/* v1.8.2: blur efek teks (Blend Mode). Satu kanvas sementara dipakai ulang agar tidak ada kebocoran memori */
+let _txtBlurTmp = null;
+function renderTextElement(targetCtx, el, forceRawRender = false){
+    const b = (el && el.blur > 0 && !forceRawRender) ? el.blur : 0;
+    if(!b) return _renderTextElementCore(targetCtx, el, forceRawRender);
+    const W = targetCtx.canvas.width, H = targetCtx.canvas.height;
+    if(!_txtBlurTmp) _txtBlurTmp = document.createElement('canvas');
+    if(_txtBlurTmp.width !== W || _txtBlurTmp.height !== H){ _txtBlurTmp.width = W; _txtBlurTmp.height = H; }
+    const tc = _txtBlurTmp.getContext('2d');
+    tc.setTransform(1,0,0,1,0,0); tc.clearRect(0,0,W,H);
+    const T = targetCtx.getTransform();
+    tc.setTransform(T);
+    const op = el.opacity, bm = el.blendMode;
+    el.opacity = 1; el.blendMode = 'normal';
+    try { _renderTextElementCore(tc, el, false); } finally { el.opacity = op; el.blendMode = bm; }
+    tc.setTransform(1,0,0,1,0,0);
+    const sc = Math.hypot(T.a, T.b) || 1;
+    targetCtx.save();
+    targetCtx.setTransform(1,0,0,1,0,0);
+    targetCtx.globalAlpha = targetCtx.globalAlpha * (op !== undefined ? op : 1);
+    if(bm && bm !== 'normal') targetCtx.globalCompositeOperation = bm;
+    targetCtx.filter = 'blur(' + (b * sc) + 'px)';
+    targetCtx.drawImage(_txtBlurTmp, 0, 0);
+    targetCtx.restore();
+}
+function _renderTextElementCore(targetCtx,el, forceRawRender = false){
 targetCtx.save();
 targetCtx.translate(el.x,el.y);
 if(el.rotation)targetCtx.rotate((el.rotation*Math.PI)/180);
@@ -7205,7 +7309,7 @@ const html=`
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
 <span style="font-size:11px;font-weight:700;color:#D4AF37;">PENGATURAN STABILO:</span>
 <label style="font-size:10px;color:#aaa;display:flex;align-items:center;gap:4px;cursor:pointer;">
-<input type="checkbox" id="chkWordOnlyHi" ${formatWordOnlyMode?'checked':''} onchange="formatWordOnlyMode=this.checked; openPanelHighlight();">
+<input type="checkbox" id="chkWordOnlyHi" ${formatWordOnlyMode?'checked':''} onchange="formatWordOnlyMode=this.checked; if(!this.checked) resetWordHighlights(); openPanelHighlight();">
 <span>Blok Kata Terpilih</span>
 </label>
 </div>
@@ -7250,9 +7354,13 @@ function setHighlightColor(c){
         });
     } else {
         el.highlightColor=c;
+        if(!formatWordOnlyMode) clearWordProp(el,'highlightColor');
     }
     renderAll();pushHistoryState();openPanelHighlight();
 }
+/* v1.8.2: reset warna per-kata agar tidak bercampur dengan warna global */
+function clearWordProp(el,prop){ if(el&&el.wordStyles){ for(const k in el.wordStyles){ if(el.wordStyles[k]) delete el.wordStyles[k][prop]; } } }
+function resetWordHighlights(){ const el=getActiveElement(); if(!el) return; clearWordProp(el,'highlightColor'); renderAll(); pushHistoryState(); }
 function resetHighlight(){
     const el=getActiveElement();if(!el)return;
     if (el.wordStyles) {
@@ -7780,7 +7888,12 @@ s.elements.forEach(e => {
     }
 });
 
-let html=`<div style="font-size:12px;margin-bottom:8px;">Pilih elemen untuk digabung:</div>`;
+let html=`<div style="font-size:12px;margin-bottom:8px;">Pilih elemen untuk digabung:</div>
+<div style="display:flex;gap:6px;margin-bottom:8px;">
+<button class="btn-sub-tool" style="flex:1;flex-direction:row;justify-content:center;padding:6px 4px;" onclick="groupSelectAll(true)">Pilih Semua</button>
+<button class="btn-sub-tool" style="flex:1;flex-direction:row;justify-content:center;padding:6px 4px;" onclick="groupSelectInvert()">Invert</button>
+<button class="btn-sub-tool" style="flex:1;flex-direction:row;justify-content:center;padding:6px 4px;" onclick="groupSelectAll(false)">Kosongkan</button>
+</div>`;
 s.elements.forEach(el=>{
 const isCurrent=curr&&el.id===curr.id;
 const groupBadge = el.groupId ? `<span style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:4px;font-size:9px;margin-left:4px;">${el.groupId}</span>` : '';
@@ -7802,19 +7915,39 @@ openToolPanel('Kelola Multi-Grup',html);
 }
 
 let groupCounter = 1;
+function groupSelectAll(on){ document.querySelectorAll('.group-checkbox').forEach(cb=>{cb.checked=!!on;}); }
+function groupSelectInvert(){ document.querySelectorAll('.group-checkbox').forEach(cb=>{cb.checked=!cb.checked;}); }
+function groupNum(g){ const m=String(g||'').match(/(\d+)\s*$/); return m?parseInt(m[1],10):Infinity; }
+/* v1.8.2: nomor grup selalu berurutan (Grup 1, Grup 2, ...) tanpa lubang */
+function renumberGroups(s){
+    const ids=[];
+    s.elements.forEach(e=>{ if(e.groupId && !ids.includes(e.groupId)) ids.push(e.groupId); });
+    ids.sort((a,b)=>(groupNum(a)-groupNum(b))||0);
+    const map={}; ids.forEach((g,i)=>{ map[g]='Grup '+(i+1); });
+    s.elements.forEach(e=>{ if(e.groupId) e.groupId=map[e.groupId]; });
+}
 function confirmGroupElements(){
 const s=getCurrentSlide();
 const checked=Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb=>cb.value);
 if(checked.length<2){alert('Pilih minimal 2 elemen');return;}
-const gid='Grup '+groupCounter++;
-s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=gid;});
-pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('✅ Grup baru dibuat!');
+const involved=new Set();
+s.elements.forEach(el=>{ if(checked.includes(el.id) && el.groupId) involved.add(el.groupId); });
+if(involved.size===1 && s.elements.filter(el=>checked.includes(el.id)).every(el=>el.groupId===[...involved][0])){
+    showToast('ℹ️ Elemen yang dipilih sudah berada dalam satu grup');return;
+}
+let gid;
+if(involved.size>0){ gid=[...involved].sort((a,b)=>(groupNum(a)-groupNum(b))||0)[0]; }
+else { let mx=0; s.elements.forEach(el=>{ if(el.groupId){ const n=groupNum(el.groupId); if(isFinite(n)) mx=Math.max(mx,n); } }); gid='Grup '+(mx+1); }
+s.elements.forEach(el=>{ if(checked.includes(el.id) || (el.groupId && involved.has(el.groupId))) el.groupId=gid; });
+renumberGroups(s);
+pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('✅ Grup digabung / dibuat!');
 }
 function removeFromGroup(){
 const s=getCurrentSlide();
 const checked=Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb=>cb.value);
 if(checked.length===0) return;
 s.elements.forEach(el=>{if(checked.includes(el.id))el.groupId=null;});
+renumberGroups(s);
 pushHistoryState();renderBottomToolbar();closeToolPanel();showToast('⛓️ Elemen dikeluarkan dari grup!');
 }
 
@@ -10020,6 +10153,8 @@ function endLmPanDrag(){
     const w=document.getElementById('lmCanvasWrapper'); if(w) w.style.transition='transform 0.1s';
 }
 
+function openLmInfo(){ const o=document.getElementById('lmInfoOverlay'); if(o) o.style.display='flex'; }
+function closeLmInfo(){ const o=document.getElementById('lmInfoOverlay'); if(o) o.style.display='none'; }
 function toggleLmErase(){
     lmErase=!lmErase;
     const b=document.getElementById('lmModeBtn');
@@ -12455,7 +12590,7 @@ function setTextColor(color){
     } else {
         el.color=color;
         /* v1.8.1: warna global menimpa warna per-kata lama agar tidak "terkunci" setelah blok kata dibatalkan */
-        if (el.wordStyles) { for (const k in el.wordStyles) { if (el.wordStyles[k]) delete el.wordStyles[k].color; } }
+        if (!formatWordOnlyMode) clearWordProp(el,'color');
     }
     renderAll();pushHistoryState();openPanelTextColor();
 }
@@ -12555,10 +12690,11 @@ const html=`
 <button class="btn-sub-tool ${t.type==='fountain'?'active':''}" onclick="setTransparencyType('fountain')">🌫️ Fountain (Gradien)</button>
 </div>
 
-<div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <span style="font-size:11px;font-weight:700;">Balik Transparansi (Invert)</span>
-    <button class="btn-sub-tool ${t.invert?'active':''}" onclick="toggleTransparencyInvert()" style="padding:4px 12px;">${t.invert?'ON':'OFF'}</button>
-</div>
+${t.type==='fountain' ? `
+<div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;">
+    <button class="btn-sub-tool ${t.invert?'active':''}" onclick="toggleTransparencyInvert()" style="flex:1;flex-direction:row;justify-content:center;padding:6px 8px;">Invert ${t.invert?'ON':'OFF'}</button>
+    <button class="btn-sub-tool active" onclick="setTransparencyType('uniform')" style="flex:1;flex-direction:row;justify-content:center;padding:6px 8px;">Fountain ON</button>
+</div>` : ''}
 
 ${t.type==='fountain' ? `
 <div class="ctrl-grid-btns" style="margin-bottom:12px;">
@@ -12646,7 +12782,7 @@ const html=`<div class="ctrl-row"><span class="ctrl-label">Blur:</span><span cla
 </div>`;
 openToolPanel('Efek Blur Foto',html);
 }
-function updateImageBlur(v){const el=getActiveElement();if(!el)return;el.blur=parseInt(v);document.getElementById('valImgBlurOnly').innerText=v+'px';renderAll();debouncedPushHistory();}
+function updateImageBlur(v){const el=getActiveElement();if(!el)return;el.blur=parseInt(v);const _bl=document.getElementById('valImgBlurOnly');if(_bl)_bl.innerText=v+'px';renderAll();debouncedPushHistory();}
 
 function openPanelImageBorder(){
 const el=getActiveElement();
@@ -13252,11 +13388,14 @@ async function openSendSlideModal() {
         if(s.isDemo) return;
         if(!s._thumbData) s._thumbData = generateSlideThumb(s);
         slideContainer.innerHTML += `
-        <label style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; cursor:pointer;">
-            <input type="checkbox" class="send-slide-cb" value="${i}" ${i===currentSlideIndex?'checked':''} style="width:18px;height:18px;accent-color:#D4AF37;">
-            <img src="${s._thumbData}" style="width:30px;height:40px;object-fit:cover;border-radius:4px;">
-            <span style="font-size:12px;font-weight:bold;">Slide ${nonDemoCounter}</span>
-        </label>
+        <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;">
+                <input type="checkbox" class="send-slide-cb" value="${i}" ${i===currentSlideIndex?'checked':''} style="width:18px;height:18px;accent-color:#D4AF37;">
+                <img src="${s._thumbData}" style="width:30px;height:40px;object-fit:cover;border-radius:4px;">
+                <span style="font-size:12px;font-weight:bold;">Slide ${nonDemoCounter}</span>
+            </label>
+            <button class="btn-nav" style="height:28px; padding:0 8px; font-size:10px;" onclick="previewSendSlide(${i})">👁️ Preview</button>
+        </div>
         `;
         nonDemoCounter++;
     });
@@ -13845,6 +13984,18 @@ function previewSlide(idx) {
     _previewFromDownload = true;
 }
 let _previewFromDownload = false;
+let _previewFromSend = false, _previewReturnIdx = null;
+function previewSendSlide(idx) {
+    if(isTrialMode) {
+        showToast('⚠️ Preview dinonaktifkan di Mode Trial (Keamanan Anti-Screenshot)');
+        return;
+    }
+    _previewReturnIdx = currentSlideIndex;
+    switchSlide(idx);
+    document.getElementById('sendSlideModal').classList.remove('active');
+    openPreviewModal();
+    _previewFromSend = true;
+}
 
 function openPreviewModal() {
     if(isTrialMode) {
@@ -13885,6 +14036,11 @@ function closePreviewModal() {
     if(_previewFromDownload) {
         _previewFromDownload = false;
         document.getElementById('downloadModal').classList.add('active');
+    } else if(_previewFromSend) {
+        _previewFromSend = false;
+        document.getElementById('sendSlideModal').classList.add('active');
+        if(_previewReturnIdx !== null && _previewReturnIdx !== currentSlideIndex) switchSlide(_previewReturnIdx);
+        _previewReturnIdx = null;
     }
 }
 
