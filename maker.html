@@ -1,17 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v1.8.5
+Studio Poster Maker Pro - Update v1.8.6
+
+v1.8.6:
+1. UPSCALE PRATINJAU: perbaikan "Pratinjau dibatalkan / gagal". Penyebab: fungsi Lanczos terhapus saat pembersihan v1.8.5. Fungsi dipulihkan, dan bila gagal otomatis memakai resize bawaan browser.
+2. FOUNTAIN SQUARE INVERT: transparansi kotak kini benar-benar terbalik (dalam <-> luar). Kotak digambar dengan mode copy agar warna transparan ikut menimpa.
+3. FOUNTAIN RESET: tombol Reset Nilai Fountain mengembalikan Linear, sudut 90°, skala 100%, geser X/Y 0, kepekatan 100%, Invert OFF.
 
 v1.8.5:
-1. UPSCALE PRATINJAU: posisi & zoom pratinjau disimpan selama foto yang sama dipakai (tidak reset saat ganti preset, ditutup, atau pratinjau penuh ditutup). Langkah joystick diperkecil.
-2. FOUNTAIN SQUARE: skala default 15%; skala 100% kini tepat sampai tepi gambar; Invert membalik transparansi kotak (dalam <-> luar).
+1. UPSCALE PRATINJAU: posisi & zoom pratinjau tersimpan selama foto yang sama dipakai. Langkah joystick diperkecil.
+2. FOUNTAIN SQUARE: skala default 15%; skala 100% tepat sampai tepi gambar.
 3. FOUNTAIN RADIAL/SQUARE/CONICAL: posisi X dan Y default di tengah gambar.
-4. Pembersihan kode: fungsi pemerbesaran lama (upResize) yang sudah tidak dipakai dihapus.
-
-v1.8.4:
-1. UPSCALE PRATINJAU: opsi bagian foto dan Geser Area diganti joystick + zoom (kecil dan penuh).
-2. GARIS PEMBANDING: bisa digeser kiri-kanan pada pratinjau kecil.
-3. UPSCALE: pemerbesaran Lanczos-3, sadar transparansi.
-4. FOUNTAIN SQUARE: perbaikan dasar blur kotak dan invert.
 -->
 
 
@@ -1912,7 +1910,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.8.5';
+const APP_VERSION = 'v1.8.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3605,6 +3603,8 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
             // Setengah-lebar kotak: skala 100% = tepat sampai tepi gambar
             const size = (Math.max(w, h) / 2) * ((t.scale || 100) / 100);
             const steps = 48;
+            // Mode copy: warna transparan ikut menimpa (source-over tidak menghapus pixel)
+            mctx.globalCompositeOperation = 'copy';
             mctx.fillStyle = getInterpolatedColor(finalStops, 100);
             mctx.fillRect(-w*2, -h*2, w*4, h*4);
             for(let i=steps; i>=0; i--) {
@@ -3613,6 +3613,7 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
                 const sW = Math.max(0.5, size * ratio);
                 mctx.fillRect(-sW, -sW, sW*2, sW*2);
             }
+            mctx.globalCompositeOperation = 'source-over';
         }
     }
     mctx.restore();
@@ -12705,7 +12706,8 @@ ${t.type==='fountain' ? `
 <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;">
     <button class="btn-sub-tool ${t.invert?'active':''}" onclick="toggleTransparencyInvert()" style="flex:1;flex-direction:row;justify-content:center;padding:6px 8px;">Invert ${t.invert?'ON':'OFF'}</button>
     <button class="btn-sub-tool active" onclick="setTransparencyType('uniform')" style="flex:1;flex-direction:row;justify-content:center;padding:6px 8px;">Fountain ON</button>
-</div>` : ''}
+</div>
+<button class="btn-reset-tool" onclick="resetFountainDefaults()" style="margin:0 0 12px auto;display:block;">↺ Reset Nilai Fountain</button>` : ''}
 
 ${t.type==='fountain' ? `
 <div class="ctrl-grid-btns" style="margin-bottom:12px;">
@@ -12741,6 +12743,15 @@ function setTransparencyType(type) {
     el.transparency.type = type;
     if(type === 'uniform') el.opacity = el.transparency.alpha / 100;
     else el.opacity = 1; 
+    renderAll(); pushHistoryState(); openPanelOpacity();
+}
+
+function resetFountainDefaults() {
+    const el = getActiveElement(); if(!el || !el.transparency) return;
+    const t = el.transparency;
+    t.gradType = 'linear'; t.angle = 90; t.scale = 100;
+    t.offsetX = 0; t.offsetY = 0; t.alpha = 100;
+    t.invert = false; t.colorStops = [];
     renderAll(); pushHistoryState(); openPanelOpacity();
 }
 
@@ -14209,6 +14220,105 @@ async function upDenoise(img, strength) {
     }
 }
 
+/* v1.8.6: pemerbesaran Lanczos-3 (resampling kualitas tinggi), sadar transparansi (premultiplied) */
+function upLanczos3(x) {
+    x = Math.abs(x);
+    if (x < 1e-6) return 1;
+    if (x >= 3) return 0;
+    const px = Math.PI * x;
+    return 3 * Math.sin(px) * Math.sin(px / 3) / (px * px);
+}
+
+function upKernel(srcLen, dstLen) {
+    const ratio = srcLen / dstLen;
+    const fs = Math.max(1, ratio);
+    const support = 3 * fs;
+    const taps = Math.ceil(support * 2) + 2;
+    const start = new Int32Array(dstLen), count = new Int32Array(dstLen), wts = new Float32Array(dstLen * taps);
+    for (let d = 0; d < dstLen; d++) {
+        const c = (d + 0.5) * ratio - 0.5;
+        const s0 = Math.max(0, Math.ceil(c - support));
+        const s1 = Math.min(srcLen - 1, Math.floor(c + support));
+        const base = d * taps;
+        let sum = 0;
+        for (let s = s0; s <= s1; s++) {
+            const k = upLanczos3((s - c) / fs);
+            wts[base + (s - s0)] = k;
+            sum += k;
+        }
+        if (sum !== 0) for (let j = 0; j <= s1 - s0; j++) wts[base + j] /= sum;
+        start[d] = s0;
+        count[d] = Math.max(0, s1 - s0 + 1);
+    }
+    return { start: start, count: count, wts: wts, taps: taps };
+}
+
+async function upLanczosResize(srcCanvas, W, H) {
+    const sw = srcCanvas.width, sh = srcCanvas.height;
+    const src = srcCanvas.getContext('2d').getImageData(0, 0, sw, sh).data;
+    const kx = upKernel(sw, W), ky = upKernel(sh, H);
+    const tmp = new Float32Array(W * sh * 4);
+    for (let y = 0; y < sh; y++) {
+        const row = y * sw;
+        for (let x = 0; x < W; x++) {
+            const s0 = kx.start[x], n = kx.count[x], wb = x * kx.taps;
+            let r = 0, g = 0, b = 0, a = 0;
+            for (let j = 0; j < n; j++) {
+                const w = kx.wts[wb + j];
+                const i = (row + s0 + j) * 4;
+                const k = w * src[i + 3];
+                r += src[i] * k; g += src[i + 1] * k; b += src[i + 2] * k; a += k;
+            }
+            const o = (y * W + x) * 4;
+            tmp[o] = r / 255; tmp[o + 1] = g / 255; tmp[o + 2] = b / 255; tmp[o + 3] = a;
+        }
+        if ((y & 31) === 31) await upYield();
+    }
+    const out = new Uint8ClampedArray(W * H * 4);
+    for (let y = 0; y < H; y++) {
+        const ys0 = ky.start[y], n = ky.count[y], hb = y * ky.taps;
+        for (let x = 0; x < W; x++) {
+            let r = 0, g = 0, b = 0, a = 0;
+            for (let j = 0; j < n; j++) {
+                const w = ky.wts[hb + j];
+                const o = ((ys0 + j) * W + x) * 4;
+                r += tmp[o] * w; g += tmp[o + 1] * w; b += tmp[o + 2] * w; a += tmp[o + 3] * w;
+            }
+            const q = (y * W + x) * 4;
+            if (a > 0.5) {
+                const f = 255 / a;
+                out[q] = r * f; out[q + 1] = g * f; out[q + 2] = b * f;
+                out[q + 3] = a;
+            }
+        }
+        if ((y & 31) === 31) await upYield();
+    }
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const cx = c.getContext('2d');
+    const img = cx.createImageData(W, H);
+    img.data.set(out);
+    cx.putImageData(img, 0, 0);
+    return c;
+}
+
+/* Cadangan: resize bertahap bawaan browser (dipakai bila Lanczos gagal) */
+function upResizeFallback(srcCanvas, W, H) {
+    let cur = srcCanvas, cw = srcCanvas.width, ch = srcCanvas.height;
+    while (cw < W || ch < H) {
+        const nw = Math.min(W, Math.round(cw * 1.75)), nh = Math.min(H, Math.round(ch * 1.75));
+        const c = document.createElement('canvas');
+        c.width = nw; c.height = nh;
+        const x = c.getContext('2d');
+        x.imageSmoothingEnabled = true;
+        x.imageSmoothingQuality = 'high';
+        x.drawImage(cur, 0, 0, nw, nh);
+        if (cur !== srcCanvas) { cur.width = 0; cur.height = 0; }
+        cur = c; cw = nw; ch = nh;
+    }
+    return cur;
+}
+
 function upBox(src, dst, w, h, r, horiz) {
     const win = 2 * r + 1, half = win >> 1;
     if (horiz) {
@@ -14266,7 +14376,12 @@ async function upRun(srcCanvas, W, H, p, token) {
         base = tempBase;
     }
     await upYield();
-    let out = (W === base.width && H === base.height) ? base : await upLanczosResize(base, W, H);
+    let out;
+    if (W === base.width && H === base.height) out = base;
+    else {
+        try { out = await upLanczosResize(base, W, H); }
+        catch (err) { console.warn('Lanczos gagal, pakai resize bawaan:', err); out = upResizeFallback(base, W, H); }
+    }
     if (tempBase && out !== tempBase) { tempBase.width = 0; tempBase.height = 0; }
     if (token !== undefined && token !== UP.token) return null;
     if (p.sharp > 0 || p.detail > 0) {
