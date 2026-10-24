@@ -1,22 +1,17 @@
 <!--
-Studio Poster Maker Pro - Update v1.8.2
+Studio Poster Maker Pro - Update v1.8.5
 
-v1.8.2:
-1. NOTIF TUNGGU: notif "Tunggu beberapa detik ya" kini tampil di setiap buka aplikasi (setelah notif sinkron bila ada update; langsung bila tanpa update), posisi dinaikkan agar tidak menutupi judul, tampilan dibuat elegan dengan ikon & bilah waktu.
-2. STABILO: melepas centang Blok Kata mereset warna stabilo per-kata; warna global tidak lagi bercampur dengan warna blok lama.
-3. LAYER MASK: tombol Info di bar bawah berisi panduan lengkap (syarat PNG di atas teks, langkah, contoh ular/pedang/tali dll, tips).
-4. BLEND MODE TEKS: slider Blur Efek kini benar-benar mengaburkan teks (sebelumnya error & tidak tersambung ke render teks).
-5. TRANSPARANSI: tombol Invert dihapus dari mode Uniform; di mode Fountain Invert ON kuning/OFF abu, plus tombol ON/OFF mode Fountain (OFF = transparansi biasa).
-6. GRUP: gabung grup memakai nomor grup terkecil yang terlibat, nomor selalu berurutan; bar atas tambah Pilih Semua, Invert, Kosongkan.
-7. KIRIM SLIDE: tiap slide kini punya tombol Preview (kembali ke menu kirim saat ditutup).
+v1.8.5:
+1. UPSCALE PRATINJAU: posisi & zoom pratinjau disimpan selama foto yang sama dipakai (tidak reset saat ganti preset, ditutup, atau pratinjau penuh ditutup). Langkah joystick diperkecil.
+2. FOUNTAIN SQUARE: skala default 15%; skala 100% kini tepat sampai tepi gambar; Invert membalik transparansi kotak (dalam <-> luar).
+3. FOUNTAIN RADIAL/SQUARE/CONICAL: posisi X dan Y default di tengah gambar.
+4. Pembersihan kode: fungsi pemerbesaran lama (upResize) yang sudah tidak dipakai dihapus.
 
-v1.8.1:
-1. NOTIF SINKRON: setelah notif "Aplikasi berhasil disinkronkan", muncul notif kedua (hidup lebih lama, 10 dtk, bisa diketuk untuk menutup) yang meminta pengguna menunggu font & teks selesai dipindai dari repo sebelum menyimpulkan teks berubah.
-2. MENU PROJEK: deretan tombol Baru/Duplikat/Ekspor/Impor tidak lagi terpotong di bagian bawah (tinggi baris dikunci, tidak ikut menyusut).
-3. DOWNLOAD POSTER: tombol Preview lalu X kini kembali ke menu Download (bukan ke beranda desain), pilihan slide tetap utuh.
-4. WARNA TEKS: setelah blok kata dibatalkan, warna global kembali bisa diatur (warna per-kata lama dibersihkan saat warna global dipilih).
-5. BAYANGAN (teks & gambar/PNG): tombol Reset (kembali ke default) dan sakelar ON/OFF untuk Bayangan Luar maupun Dalam.
-6. WARNA: tombol kecil Salin & Tempel kode warna di semua tool berkaitan warna (pemilih warna, gradien, garis bantu, pena, spektrum HSL, editor tabel).
+v1.8.4:
+1. UPSCALE PRATINJAU: opsi bagian foto dan Geser Area diganti joystick + zoom (kecil dan penuh).
+2. GARIS PEMBANDING: bisa digeser kiri-kanan pada pratinjau kecil.
+3. UPSCALE: pemerbesaran Lanczos-3, sadar transparansi.
+4. FOUNTAIN SQUARE: perbaikan dasar blur kotak dan invert.
 -->
 
 
@@ -668,6 +663,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .dl-guide .dl-i.on{color:#ddd;border-left-color:#D4AF37;background:rgba(212,175,55,.08);border-radius:0 6px 6px 0;}
 .dl-guide .dl-i.on b{color:#FFE259;}
 .dl-guide .dl-tip{font-size:11px;line-height:1.55;color:#aaa;background:rgba(255,255,255,.04);border:1px dashed rgba(212,175,55,.35);border-radius:8px;padding:6px 8px;margin-top:4px;}
+
+/* v1.8.3: garis tombol default emas; blend mode difference otomatis membalik warna di atas latar emas/mirip emas. Transparansi tidak diubah. */
+.btn-nav,.btn-sub-tool,.dpad-btn,.bib-ico,.btn-step,.btn-reset-tool,.btn-pos-cell,.up-full,.bib-chip,.tag-pill,.pg-chip,.tool-btn.home-btn{border-color:#D4AF37 !important;mix-blend-mode:difference;}
+.btn-nav:not(.active):not(:disabled),.btn-sub-tool:not(.active):not(:disabled),.dpad-btn,.bib-ico{border-width:1px;}
+
+/* v1.8.4: joystick & zoom pratinjau Upscale HD */
+.up-joy{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px;flex-shrink:0;}
+.up-joy-pad{display:grid;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:4px;}
+.up-joy-b{width:38px;height:38px;border-radius:50%;border:1px solid #D4AF37;background:rgba(255,255,255,.06);color:#D4AF37;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;touch-action:manipulation;}
+.up-joy-b.c{font-size:13px;}
+.up-zoom{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.up-zoom-val{min-width:44px;text-align:center;font-size:12px;font-weight:800;color:#D4AF37;}
+.upf-joy{justify-content:center;gap:28px;padding:4px 14px 8px;}
 </style>
 </head>
 <body>
@@ -1904,7 +1912,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.8.2';
+const APP_VERSION = 'v1.8.5';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3543,14 +3551,14 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
     
     const alpha = (t.alpha !== undefined ? t.alpha : 100) / 100;
     
-    const stops = t.colorStops || [{pos:0, color:'rgba(0,0,0,1)'}, {pos:100, color:'rgba(0,0,0,0)'}];
+    const stops = (Array.isArray(t.colorStops) && t.colorStops.length >= 2) ? t.colorStops : [{pos:0, color:'rgba(0,0,0,1)'}, {pos:100, color:'rgba(0,0,0,0)'}];
     let finalStops = stops.map(st => {
         let aVal = parseColorToRGBAObj(st.color).a * alpha;
         if(t.invert) aVal = alpha - aVal;
         return {pos: st.pos, color: `rgba(0,0,0,${aVal})`};
     });
     
-    if(!t.colorStops) {
+    if(!(Array.isArray(t.colorStops) && t.colorStops.length >= 2)) {
         finalStops = [
             {pos: 0, color: t.invert ? 'rgba(0,0,0,0)' : `rgba(0,0,0,${alpha})`},
             {pos: 100, color: t.invert ? `rgba(0,0,0,${alpha})` : 'rgba(0,0,0,0)'}
@@ -3593,13 +3601,16 @@ function applyAdvancedTransparency(targetCtx, w, h, t) {
                 mctx.fillRect(-w*2, -h*2, w*4, h*4);
             }
         } else if(t.gradType === 'square') {
-            const size = Math.max(w, h) * ((t.scale || 100) / 100);
-            const steps = 30;
-            for(let i=0; i<=steps; i++) {
+            // Dari luar ke dalam: latar luar = pos 100, pusat = pos 0 (default: pusat buram, tepi memudar = blur kotak)
+            // Setengah-lebar kotak: skala 100% = tepat sampai tepi gambar
+            const size = (Math.max(w, h) / 2) * ((t.scale || 100) / 100);
+            const steps = 48;
+            mctx.fillStyle = getInterpolatedColor(finalStops, 100);
+            mctx.fillRect(-w*2, -h*2, w*4, h*4);
+            for(let i=steps; i>=0; i--) {
                 const ratio = i / steps;
-                let col = getInterpolatedColor(finalStops, ratio*100);
-                mctx.fillStyle = col;
-                const sW = size * (1 - ratio);
+                mctx.fillStyle = getInterpolatedColor(finalStops, ratio*100);
+                const sW = Math.max(0.5, size * ratio);
                 mctx.fillRect(-sW, -sW, sW*2, sW*2);
             }
         }
@@ -12735,6 +12746,8 @@ function setTransparencyType(type) {
 
 function setTransGradientType(gType) {
     const el = getActiveElement(); if(!el) return;
+    if(gType === 'square' && el.transparency.gradType !== 'square') el.transparency.scale = 15;
+    if(gType === 'radial' || gType === 'conical' || gType === 'square') { el.transparency.offsetX = 0; el.transparency.offsetY = 0; }
     el.transparency.gradType = gType;
     renderAll(); pushHistoryState(); openPanelOpacity();
 }
@@ -14131,7 +14144,7 @@ function updateDemoFloatingBtn() {
 }
 
 /* ===== UPSCALE HD (v1.2.6) ===== */
-const UP = { scale: 2, denoise: 30, sharp: 45, detail: 25, region: 'c', panX: 0.5, panY: 0.5, panMode: false, busy: false, token: 0, timer: null, srcC: null, alpha: false, elId: null };
+const UP = { scale: 2, denoise: 30, sharp: 45, detail: 25, region: 'c', panX: 0.5, panY: 0.5, viewZoom: 1, ld: null, viewElId: null, busy: false, token: 0, timer: null, srcC: null, alpha: false, elId: null };
 const UP_MAX_SIDE = 3600, UP_MAX_PX = 9000000, UP_MAX_PX_ALPHA = 6000000;
 const UP_PRESETS = {
     ringan: { scale: 2, denoise: 15, sharp: 35, detail: 15 },
@@ -14196,23 +14209,6 @@ async function upDenoise(img, strength) {
     }
 }
 
-/* Perbesar bertahap (maks 1.75x per langkah) memakai pemulusan kualitas tinggi bawaan browser */
-function upResize(srcCanvas, W, H) {
-    let cur = srcCanvas, cw = srcCanvas.width, ch = srcCanvas.height;
-    while (cw < W || ch < H) {
-        const nw = Math.min(W, Math.round(cw * 1.75)), nh = Math.min(H, Math.round(ch * 1.75));
-        const c = document.createElement('canvas');
-        c.width = nw; c.height = nh;
-        const x = c.getContext('2d');
-        x.imageSmoothingEnabled = true;
-        x.imageSmoothingQuality = 'high';
-        x.drawImage(cur, 0, 0, nw, nh);
-        if (cur !== srcCanvas) { cur.width = 0; cur.height = 0; }
-        cur = c; cw = nw; ch = nh;
-    }
-    return cur;
-}
-
 function upBox(src, dst, w, h, r, horiz) {
     const win = 2 * r + 1, half = win >> 1;
     if (horiz) {
@@ -14270,7 +14266,7 @@ async function upRun(srcCanvas, W, H, p, token) {
         base = tempBase;
     }
     await upYield();
-    let out = (W === base.width && H === base.height) ? base : upResize(base, W, H);
+    let out = (W === base.width && H === base.height) ? base : await upLanczosResize(base, W, H);
     if (tempBase && out !== tempBase) { tempBase.width = 0; tempBase.height = 0; }
     if (token !== undefined && token !== UP.token) return null;
     if (p.sharp > 0 || p.detail > 0) {
@@ -14325,9 +14321,8 @@ function openPanelUpscale() {
 <span class="up-tag l">SEBELUM</span><span class="up-tag r">SESUDAH (HD)</span>
 <button class="up-full" onclick="upOpenFull()">⛶ Penuh</button>
 </div>
-<div class="up-cap">Geser garis putih untuk membandingkan sebelum/sesudah. Saat mode Geser Area aktif, seret foto untuk memilih bagian pratinjau.</div>
+<div class="up-cap">Geser garis putih untuk membandingkan sebelum/sesudah. Gunakan joystick di bawah untuk memilih bagian pratinjau dan zoom.</div>
 </div>
-<button class="bib-chip up-pan-toggle" id="upPanToggle" onclick="upTogglePanMode()">✋ Geser Area: OFF</button>
 <div class="up-size-monitor" id="upSizeMonitor">Perkiraan ukuran output: menghitung…</div>
 <div class="up-sec">Preset cepat:</div>
 <div class="ctrl-grid-btns up-grid" style="grid-template-columns:repeat(3,1fr);">
@@ -14352,12 +14347,8 @@ function openPanelUpscale() {
 <input type="range" class="ctrl-slider" id="upSlDetail" min="0" max="100" value="${UP.detail}" oninput="upSetDetail(this.value)">
 <button class="btn-step" onclick="stepSliderVal('upSlDetail',5,upSetDetail)">+</button></div>
 <div id="upInfo" style="font-size:11px;color:#D4AF37;font-weight:700;"></div>
-<div class="up-sec">Bagian foto yang dipratinjau:</div>
-<div class="ctrl-grid-btns up-grid" style="grid-template-columns:repeat(3,1fr);">
-<button class="btn-sub-tool active" id="upRegC" onclick="upSetRegion('c')">Tengah</button>
-<button class="btn-sub-tool" id="upRegTL" onclick="upSetRegion('tl')">Kiri Atas</button>
-<button class="btn-sub-tool" id="upRegBR" onclick="upSetRegion('br')">Kanan Bawah</button>
-</div>
+<div class="up-sec">Area pratinjau &amp; zoom:</div>
+${upJoyHtml('')}
 <div class="up-actions">
 <button class="up-btn ghost" onclick="upOpenFull()">⛶ Pratinjau Penuh</button>
 <button class="up-btn gold" id="upApplyBtn" onclick="upApply()">✨ Terapkan Upscale HD</button>
@@ -14365,7 +14356,9 @@ function openPanelUpscale() {
 <div style="font-size:10px;color:#888;line-height:1.5;">💡 Foto sangat blur: pakai Kuat. Foto sudah tajam tapi kecil: Ringan. Jika berlebihan/berbulu, kurangi Ketajaman &amp; Detail. Tidak puas setelah terapkan? Tekan Undo ↶ lalu atur ulang. Menerapkan berulang akan menambah efek.</div>`;
     openToolPanel('🔬 Upscale HD', html);
     document.getElementById('toolPanel').classList.add('upscale-panel');
-    UP.panMode = false; UP.panX = 0.5; UP.panY = 0.5; UP.region = 'c';
+    // Posisi & zoom pratinjau hanya direset bila foto yang berbeda dibuka
+    if (UP.viewElId !== el.id) { UP.viewZoom = 1; UP.panX = 0.5; UP.panY = 0.5; UP.viewElId = el.id; }
+    upBindCompare(upEl('upCmp'));
     upRefreshLabels();
     upSchedulePreview();
 }
@@ -14376,6 +14369,7 @@ function upRefreshLabels() {
     set('upValDenoise', UP.denoise + '%');
     set('upValSharp', UP.sharp + '%');
     set('upValDetail', UP.detail + '%');
+    upSyncZoomLabels();
     if (UP.srcC) {
         const t = upTarget(UP.srcC.width, UP.srcC.height, UP.scale, UP.alpha);
         const mp = (t.W * t.H / 1e6).toFixed(1);
@@ -14390,14 +14384,6 @@ function upSetScale(v) { UP.scale = Math.max(1.5, Math.min(4, parseInt(v, 10) / 
 function upSetDenoise(v) { UP.denoise = parseInt(v, 10); upRefreshLabels(); upSchedulePreview(); }
 function upSetSharp(v) { UP.sharp = parseInt(v, 10); upRefreshLabels(); upSchedulePreview(); }
 function upSetDetail(v) { UP.detail = parseInt(v, 10); upRefreshLabels(); upSchedulePreview(); }
-function upSetRegion(r) {
-    UP.region = r;
-    if(r === 'tl') { UP.panX = 0; UP.panY = 0; }
-    else if(r === 'br') { UP.panX = 1; UP.panY = 1; }
-    else { UP.panX = 0.5; UP.panY = 0.5; }
-    [['c', 'upRegC'], ['tl', 'upRegTL'], ['br', 'upRegBR']].forEach(([k, id]) => { const b = upEl(id); if (b) b.classList.toggle('active', k === r); });
-    upSchedulePreview();
-}
 function upPreset(name) {
     const p = UP_PRESETS[name]; if (!p) return;
     UP.scale = p.scale; UP.denoise = p.denoise; UP.sharp = p.sharp; UP.detail = p.detail;
@@ -14423,10 +14409,13 @@ async function upPreview() {
 
 /* Bagian foto yang dipratinjau: seluruh foto bila cukup kecil, jika besar diambil potongan sesuai pilihan (Tengah/Kiri Atas/Kanan Bawah) */
 function upPreviewGeom(src, cap) {
-    const s = Math.max(1.5, UP.scale);
+    const zoom = Math.max(1, Math.min(4, UP.viewZoom || 1));
     // Ukuran area sumber tetap saat skala diubah agar komposisi pratinjau tidak ikut zoom.
-    const maxSrc = Math.max(24, Math.floor(cap > 600 ? cap / 4 : cap / 2.2));
+    const maxSrc = Math.max(24, Math.floor((cap > 600 ? cap / 4 : cap / 2.2) / zoom));
     const cw = Math.min(src.width, maxSrc), ch = Math.min(src.height, maxSrc);
+    let s = Math.max(1.5, UP.scale);
+    // Saat di-zoom, area kecil dirender cukup besar agar tetap tajam di layar.
+    if (zoom > 1) s = Math.min(12, Math.max(s, cap / cw));
     const maxX = Math.max(0, src.width - cw), maxY = Math.max(0, src.height - ch);
     const sx = Math.round(maxX * Math.max(0, Math.min(1, UP.panX)));
     const sy = Math.round(maxY * Math.max(0, Math.min(1, UP.panY)));
@@ -14458,18 +14447,6 @@ async function upRenderPair(src, a, b, cap, token) {
 }
 
 /* Mode geser foto untuk memilih area pratinjau tanpa mengubah skala pembanding. */
-function upTogglePanMode() {
-    UP.panMode = !UP.panMode;
-    const b = upEl('upPanToggle');
-    if(b) {
-        b.classList.toggle('on', UP.panMode);
-        b.textContent = UP.panMode ? '✋ Geser Area: ON' : '✋ Geser Area: OFF';
-    }
-    const cmp = upEl('upCmp');
-    if(cmp) cmp.style.cursor = UP.panMode ? 'grab' : 'ew-resize';
-    showToast(UP.panMode ? 'Geser foto untuk memilih area; skala tetap stabil' : 'Mode pembanding aktif: geser garis putih');
-}
-
 /* Garis pembanding vertikal yang bisa digeser */
 function upBindCompare(box) {
     if (!box) return;
@@ -14477,36 +14454,69 @@ function upBindCompare(box) {
     const fromEvt = (e) => { const r = box.getBoundingClientRect(); if (r.width > 0) setP((e.clientX - r.left) / r.width * 100); };
     box.addEventListener('pointerdown', (e) => {
         if (e.target.closest && e.target.closest('.up-full')) return;
-        if(box.id === 'upCmp' && UP.panMode) {
-            const r = box.getBoundingClientRect();
-            box._panDrag = { x: e.clientX, y: e.clientY, panX: UP.panX, panY: UP.panY, w: Math.max(1, r.width), h: Math.max(1, r.height) };
-            box.style.cursor = 'grabbing';
-        } else {
-            box._drag = true;
-            fromEvt(e);
-        }
+        e.stopPropagation();
+        box._drag = true;
+        fromEvt(e);
         try { box.setPointerCapture(e.pointerId); } catch (err) {}
         e.preventDefault();
     });
-    box.addEventListener('pointermove', (e) => {
-        if(box._panDrag) {
-            const d = box._panDrag;
-            UP.panX = Math.max(0, Math.min(1, d.panX - (e.clientX - d.x) / d.w));
-            UP.panY = Math.max(0, Math.min(1, d.panY - (e.clientY - d.y) / d.h));
-            box.style.setProperty('--pan-x', UP.panX);
-            box.style.setProperty('--pan-y', UP.panY);
-        } else if (box._drag) fromEvt(e);
-    });
-    const end = (e) => {
-        const wasPan = !!box._panDrag;
-        box._drag = false; box._panDrag = null;
-        if(box.id === 'upCmp') box.style.cursor = UP.panMode ? 'grab' : 'ew-resize';
-        try { box.releasePointerCapture(e.pointerId); } catch (err) {}
-        if(wasPan) { UP.region = 'custom'; upSchedulePreview(); }
-    };
+    box.addEventListener('pointermove', (e) => { if (box._drag) fromEvt(e); });
+    const end = () => { box._drag = false; };
     box.addEventListener('pointerup', end);
     box.addEventListener('pointercancel', end);
     setP(50);
+}
+
+/* Joystick + zoom untuk memilih bagian pratinjau (pengganti Geser Area & pilihan bagian) */
+function upJoyHtml(cls) {
+    return '<div class="up-joy' + (cls ? ' ' + cls : '') + '">'
+        + '<div class="up-joy-pad">'
+        + '<span></span><button class="up-joy-b" onclick="upPanBy(0,-1)" aria-label="Atas">↑</button><span></span>'
+        + '<button class="up-joy-b" onclick="upPanBy(-1,0)" aria-label="Kiri">←</button>'
+        + '<button class="up-joy-b c" onclick="upPanCenter()" aria-label="Pusatkan" title="Pusatkan">⊙</button>'
+        + '<button class="up-joy-b" onclick="upPanBy(1,0)" aria-label="Kanan">→</button>'
+        + '<span></span><button class="up-joy-b" onclick="upPanBy(0,1)" aria-label="Bawah">↓</button><span></span>'
+        + '</div>'
+        + '<div class="up-zoom"><button class="up-joy-b" onclick="upZoomBy(0.5)" aria-label="Perbesar">+</button>'
+        + '<span class="up-zoom-val">' + (UP.viewZoom || 1).toFixed(1) + 'x</span>'
+        + '<button class="up-joy-b" onclick="upZoomBy(-0.5)" aria-label="Perkecil">−</button></div>'
+        + '</div>';
+}
+function upSyncZoomLabels() {
+    document.querySelectorAll('.up-zoom-val').forEach(e => { e.textContent = (UP.viewZoom || 1).toFixed(1) + 'x'; });
+}
+function upViewChanged() {
+    upSyncZoomLabels();
+    if (document.getElementById('upFull')) { clearTimeout(UP.timer); UP.timer = setTimeout(upRenderFull, 180); }
+    else upSchedulePreview();
+}
+function upPanBy(dx, dy) {
+    if (!UP.srcC) return;
+    const step = 0.05 / Math.max(1, UP.viewZoom || 1);
+    UP.panX = Math.max(0, Math.min(1, UP.panX + dx * step));
+    UP.panY = Math.max(0, Math.min(1, UP.panY + dy * step));
+    upViewChanged();
+}
+function upPanCenter() {
+    if (!UP.srcC) return;
+    UP.panX = 0.5; UP.panY = 0.5;
+    upViewChanged();
+}
+function upZoomBy(d) {
+    if (!UP.srcC) return;
+    UP.viewZoom = Math.max(1, Math.min(4, Math.round((UP.viewZoom + d) * 2) / 2));
+    upViewChanged();
+}
+async function upRenderFull() {
+    if (UP.busy || !UP.srcC) return;
+    const a = document.getElementById('upFullA'), b = document.getElementById('upFullB');
+    if (!a || !b) return;
+    const token = ++UP.token;
+    const ld = UP.ld;
+    if (ld) ld.start('⏳ Tunggu, memproses pratinjau HD —', 90, 0.05);
+    const ok = await upRenderPair(UP.srcC, a, b, 1200, token);
+    if (!document.getElementById('upFull') || token !== UP.token) return;
+    if (ld) { if (ok) ld.done('✔ Pratinjau siap —'); else ld.fail('⚠️ Pratinjau dibatalkan / gagal'); }
 }
 
 function upCloseFull() {
@@ -14526,10 +14536,13 @@ async function upOpenFull() {
         + '<div class="ld" id="upFullLd"><div class="ld-fill"></div><span class="ld-txt"></span></div>'
         + '<div class="up-cmp upf-cmp" id="upFullCmp"><canvas id="upFullB"></canvas><canvas class="a" id="upFullA"></canvas>'
         + '<div class="up-line"></div><div class="up-knob">⇆</div><span class="up-tag l">SEBELUM</span><span class="up-tag r">SESUDAH (HD)</span></div>'
-        + '<div class="upf-hint">Geser garis putih ke kiri/kanan. Pratinjau memakai pengaturan saat ini (Skala ' + UP.scale.toFixed(1) + 'x). Foto besar dipratinjau pada bagian yang dipilih (Tengah/Kiri Atas/Kanan Bawah).</div>';
+        + upJoyHtml('upf-joy')
+        + '<div class="upf-hint">Geser garis putih ke kiri/kanan. Pratinjau memakai pengaturan saat ini (Skala ' + UP.scale.toFixed(1) + 'x). Gunakan joystick untuk memilih bagian dan zoom.</div>';
     document.body.appendChild(ov);
     upBindCompare(document.getElementById('upFullCmp'));
+    upSyncZoomLabels();
     const ld = makeLoader('upFullLd');
+    UP.ld = ld;
     ld.start('⏳ Tunggu, memproses pratinjau HD —', 90, 0.05);
     const token = ++UP.token;
     await upYield();
