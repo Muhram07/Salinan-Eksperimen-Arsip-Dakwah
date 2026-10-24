@@ -1,5 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v1.8.0
+Studio Poster Maker Pro - Update v1.8.1
+
+v1.8.1:
+1. NOTIF SINKRON: setelah notif "Aplikasi berhasil disinkronkan", muncul notif kedua (hidup lebih lama, 10 dtk, bisa diketuk untuk menutup) yang meminta pengguna menunggu font & teks selesai dipindai dari repo sebelum menyimpulkan teks berubah.
+2. MENU PROJEK: deretan tombol Baru/Duplikat/Ekspor/Impor tidak lagi terpotong di bagian bawah (tinggi baris dikunci, tidak ikut menyusut).
+3. DOWNLOAD POSTER: tombol Preview lalu X kini kembali ke menu Download (bukan ke beranda desain), pilihan slide tetap utuh.
+4. WARNA TEKS: setelah blok kata dibatalkan, warna global kembali bisa diatur (warna per-kata lama dibersihkan saat warna global dipilih).
+5. BAYANGAN (teks & gambar/PNG): tombol Reset (kembali ke default) dan sakelar ON/OFF untuk Bayangan Luar maupun Dalam.
+6. WARNA: tombol kecil Salin & Tempel kode warna di semua tool berkaitan warna (pemilih warna, gradien, garis bantu, pena, spektrum HSL, editor tabel).
 
 v1.8.0:
 1. DZIKIR (overlay saat tambah gambar): huruf Arab memakai font yang sama dengan Peta Dzikir (Noto Naskh Arabic, lebih formal & mudah dibaca), tanpa jarak antar-huruf agar sambungan huruf Arab utuh.
@@ -7,10 +15,6 @@ v1.8.0:
 3. DOWNLOAD POSTER: penjelasan lengkap semua opsi Format (JPG, PNG Background, PNG Transparan) dan Kualitas (SD s/d Ultra 3x) beserta ukuran piksel & saran memilih; opsi yang sedang dipilih disorot emas.
 4. UKURAN TEKS: saat lebar kotak dipersempit hingga kata lebih lebar dari kotak, teks terpotong tepat rata dengan garis kotak kiri & kanan (sebelumnya terpotong 32px di luar garis).
 5. FORMAT TEKS (KAPITAL): pembungkus baris kini mengukur lebar sesuai huruf kapital/kecil/judul yang tampil, sehingga huruf tidak keluar dari garis kotak kiri-kanan.
-
-v1.7.9:
-1. IKON ORIGINAL TOTAL: semua emoji tersisa di tool, tombol Projek, jendela, toast, daftar font, bentuk, panah diganti ikon garis emas-abu (SVG, tema gelap).
-2. IKON: sprite diperluas (+77 ikon), penggantian otomatis ringan lewat satu pengamat DOM dan <use>.
 -->
 
 
@@ -635,6 +639,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .proj-actions::-webkit-scrollbar{display:none;}
 .proj-actions>.btn-nav{flex:1 0 auto!important;white-space:nowrap;padding-left:9px;padding-right:9px;}
 .proj-actions>.btn-nav:last-child{flex:0 0 38px!important;padding-left:0;padding-right:0;}
+/* v1.8.1: baris tombol Projek tidak menyusut (tidak terpotong), notif scan font, tombol mini salin/tempel warna */
+.proj-actions{flex:0 0 auto;align-items:center;min-height:58px;box-sizing:border-box;}
+.proj-actions>.btn-nav{height:34px;min-height:34px;flex-shrink:0;}
+.project-grid{flex:1 1 auto;min-height:0;}
+.toast-note{position:fixed;top:104px;left:50%;transform:translateX(-50%) translateY(-20px);width:min(88vw,340px);box-sizing:border-box;background:rgba(20,20,20,.96);border:1px solid #D4AF37;color:#fff;padding:10px 14px;border-radius:14px;font-size:12px;line-height:1.5;font-weight:600;text-align:center;z-index:9999998;opacity:0;pointer-events:none;transition:.35s;box-shadow:0 6px 20px rgba(0,0,0,.6);}
+.toast-note.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+.toast-note b{display:block;color:#FFE259;margin-bottom:2px;font-size:12.5px;}
+.clr-mini{width:26px;height:26px;padding:0;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(212,175,55,.45);color:#D4AF37;border-radius:6px;cursor:pointer;}
+.clr-mini:active{background:rgba(212,175,55,.28);}
+.clr-mini svg{width:14px;height:14px;pointer-events:none;}
+.shadow-bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px;padding:6px 8px;background:rgba(255,255,255,.04);border-radius:8px;}
+.shadow-bar .btn-sub-tool{flex-direction:row;padding:6px 12px;}
 .dl-guide{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
 .dl-guide .dl-h{font-size:11px;font-weight:800;color:#D4AF37;margin-top:6px;letter-spacing:.3px;}
 .dl-guide .dl-i{font-size:11px;line-height:1.55;color:#888;border-left:2px solid rgba(255,255,255,.12);padding:3px 0 3px 8px;}
@@ -931,6 +947,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <option value="eraser">Penghapus (Tipe-X)</option>
     </select>
     <button class="btn-sub-tool" style="width:30px;height:30px;padding:0;background:#D4AF37;" id="penColorBtn" onclick="openCustomColorPicker(document.getElementById('penColorHidden').value, 'updatePenColor')"></button>
+    <button type="button" class="clr-mini" title="Salin kode warna" onclick="copyColorFromEl('penColorHidden')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+    <button type="button" class="clr-mini" title="Tempel kode warna" onclick="pasteColorTo('updatePenColor')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="2"/><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12h6M9 16h4"/></svg></button>
     <input type="hidden" id="penColorHidden" value="#D4AF37">
     <input type="range" id="penSize" min="2" max="100" value="10" style="width:80px;accent-color:#D4AF37;" oninput="updatePenSettings()">
     <button class="btn-nav" onclick="clearPenCanvas()">🗑️ Bersihkan</button>
@@ -971,6 +989,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
             <div id="cpPreview" style="width:40px; height:40px; border-radius:8px; border:2px solid #D4AF37;"></div>
             <input type="text" id="cpHexInput" style="flex:1; background:#111; color:#fff; border:1px solid #555; padding:10px; border-radius:8px; font-family:monospace; font-size:14px; text-transform:uppercase;" onchange="updateCPFromHex(this.value)">
             <button class="btn-sub-tool" onclick="applyCustomColor()" style="background:#D4AF37; color:#000; font-weight:bold; padding:10px 20px;">PILIH</button>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:10px; width:250px;">
+            <button type="button" class="btn-sub-tool" style="flex:1; flex-direction:row; justify-content:center; padding:8px 4px;" onclick="copyColorFromEl('cpHexInput')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg> Salin kode</button>
+            <button type="button" class="btn-sub-tool" style="flex:1; flex-direction:row; justify-content:center; padding:8px 4px;" onclick="pasteCPHex()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="2"/><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12h6M9 16h4"/></svg> Tempel kode</button>
         </div>
     </div>
 </div>
@@ -1705,6 +1727,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <div class="brush-monitor-circle" id="brushMonitor"></div>
 <div class="toast" id="toast"></div>
+<div class="toast-note" id="toastNote" onclick="hideScanNotice()"></div>
 
 <div id="trialTimerDisplay">
     <span>⚠️</span> <span id="trialTimerText">Trial 07:00</span>
@@ -1811,7 +1834,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.8.0';
+const APP_VERSION = 'v1.8.1';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2358,6 +2381,7 @@ async function syncAppVersion() {
             for(let reg of regs) await reg.unregister();
         }
         localStorage.setItem('APP_VERSION_STORED', APP_VERSION);
+        localStorage.setItem('APP_SCAN_NOTICE', '1');
         showToast("✅ Aplikasi berhasil disinkronkan ke versi terbaru!");
         setTimeout(() => {
             location.href = location.pathname + '?v=' + Date.now();
@@ -2365,6 +2389,22 @@ async function syncAppVersion() {
     } catch(err) {
         showToast("⚠️ Gagal sinkronisasi");
     }
+}
+
+/* v1.8.1: notif kedua (lebih lama) agar pengguna menunggu font/teks selesai dipindai dari repo */
+function showScanNotice(ms) {
+    const n = document.getElementById('toastNote');
+    if(!n) return;
+    n.innerHTML = '<b>Tunggu beberapa detik ya...</b>Font dan teks sedang dipindai dari repo. Tampilan teks bisa terlihat berubah dulu, tunggu sampai tampil normal.';
+    n.classList.add('show');
+    clearTimeout(n._timer);
+    n._timer = setTimeout(() => n.classList.remove('show'), ms || 10000);
+}
+function hideScanNotice() {
+    const n = document.getElementById('toastNote');
+    if(!n) return;
+    clearTimeout(n._timer);
+    n.classList.remove('show');
 }
 
 function checkAppVersion() {
@@ -2377,6 +2417,10 @@ function checkAppVersion() {
         localStorage.setItem('APP_VERSION_STORED', APP_VERSION);
         const verDisplay = document.getElementById('appVersionDisplay');
         if(verDisplay) verDisplay.innerText = APP_VERSION;
+        if(localStorage.getItem('APP_SCAN_NOTICE') === '1') {
+            localStorage.removeItem('APP_SCAN_NOTICE');
+            setTimeout(() => showScanNotice(10000), 700);
+        }
     }
 }
 
@@ -2701,12 +2745,86 @@ function applyCanvasFilters(ctx, filters, blurAmount = 0) {
     ctx.filter = getFilterString(filters, blurAmount);
 }
 
+/* v1.8.1: tombol mini Salin & Tempel kode warna (dipakai semua tool pewarnaan) */
+const CLR_ICON_COPY='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
+const CLR_ICON_PASTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="2"/><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12h6M9 16h4"/></svg>';
+function colorCopyPasteHTML(copyJs, pasteJs){
+    return `<button type="button" class="clr-mini" title="Salin kode warna" onclick="${copyJs}">${CLR_ICON_COPY}</button><button type="button" class="clr-mini" title="Tempel kode warna" onclick="${pasteJs}">${CLR_ICON_PASTE}</button>`;
+}
+function normalizeColorCode(str){
+    let t=String(str||'').trim();
+    if(!t) return null;
+    if(t.toLowerCase()==='transparent') return 'transparent';
+    if(/^([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(t)) t='#'+t;
+    if(/^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(t)){
+        let h=t.slice(1);
+        if(h.length===3||h.length===4) h=h.split('').map(c=>c+c).join('');
+        return '#'+h.toUpperCase();
+    }
+    const m=t.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d*\.?\d+)\s*)?\)$/i);
+    if(m && +m[1]<=255 && +m[2]<=255 && +m[3]<=255){
+        return m[4]!==undefined ? 'rgba('+(+m[1])+','+(+m[2])+','+(+m[3])+','+Math.min(1,+m[4])+')' : '#'+[m[1],m[2],m[3]].map(v=>(+v).toString(16).padStart(2,'0')).join('').toUpperCase();
+    }
+    return null;
+}
+function copyColorText(text){
+    text=String(text||'').trim();
+    if(!text){ showToast('Belum ada kode warna'); return; }
+    const done=()=>showToast('Kode warna disalin: '+text.toUpperCase());
+    const fb=()=>{
+        try{
+            const ta=document.createElement('textarea');
+            ta.value=text; ta.style.cssText='position:fixed;left:-9999px;top:0;opacity:0;';
+            document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,99999);
+            const ok=document.execCommand('copy');
+            document.body.removeChild(ta);
+            if(ok) done(); else showToast('Gagal menyalin kode warna');
+        }catch(e){ showToast('Gagal menyalin kode warna'); }
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(fb);
+    else fb();
+}
+function copyColorFromEl(id){ const e=document.getElementById(id); copyColorText(e?e.value:''); }
+function readColorClipboard(cb){
+    const manual=()=>{ const v=window.prompt('Tempel kode warna di sini (contoh: #D4AF37)',''); if(v!==null) cb(v); };
+    if(navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(t=>cb(t)).catch(manual);
+    else manual();
+}
+function pasteColorTo(fnName){
+    readColorClipboard(t=>{
+        const c=normalizeColorCode(t);
+        if(!c){ showToast('Kode warna tidak valid'); return; }
+        if(typeof window[fnName]==='function') window[fnName](c);
+    });
+}
+function pasteTableColor(btn,fn,r,c){
+    readColorClipboard(t=>{
+        const n=normalizeColorCode(t);
+        if(!n||n==='transparent'){ showToast('Kode warna tidak valid'); return; }
+        const o=parseColorToRGBAObj(n);
+        const hex=rgbToHex(o.r,o.g,o.b,1);
+        const inp=btn.parentNode.querySelector('input');
+        if(inp) inp.value=hex.toLowerCase();
+        if(typeof window[fn]==='function') window[fn](r,c,hex);
+    });
+}
+function pasteCPHex(){
+    readColorClipboard(t=>{
+        const c=normalizeColorCode(t);
+        if(!c){ showToast('Kode warna tidak valid'); return; }
+        const inp=document.getElementById('cpHexInput');
+        if(inp) inp.value=c;
+        updateCPFromHex(c);
+    });
+}
+
 function getColorPickerHTML(currentValue, onChangeFuncName, allowTransparent = true) {
     let html = `
-    <div class="ctrl-row">
+    <div class="ctrl-row" style="flex-wrap:wrap;row-gap:6px;">
         <span class="ctrl-label">Warna:</span>
         <button class="btn-sub-tool" style="width:40px;height:30px;background:${currentValue};border:1px solid #fff;border-radius:4px;padding:0;" onclick="openCustomColorPicker('${currentValue}', '${onChangeFuncName}')"></button>
         <input type="text" value="${currentValue}" onchange="${onChangeFuncName}(this.value)" id="hexInput_${onChangeFuncName}" style="width:75px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:4px; font-size:11px; text-transform:uppercase;">
+        ${colorCopyPasteHTML("copyColorFromEl('hexInput_"+onChangeFuncName+"')", "pasteColorTo('"+onChangeFuncName+"')")}
         <button class="btn-sub-tool active" onclick="openHandledLoupe(${onChangeFuncName})" style="padding:4px 8px;">🧪 Pipet</button>
     </div>
     <div class="color-palette-scroll" style="margin-top:8px;">
@@ -2809,6 +2927,7 @@ const html=`
 </div>
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Warna Garis Tepi:</span>
 <button class="btn-sub-tool" style="width:40px;height:30px;background:${bleedSettings.color};border:1px solid #fff;border-radius:4px;padding:0;" onclick="openCustomColorPicker('${bleedSettings.color}', 'updateBleedColor')"></button>
+${colorCopyPasteHTML("copyColorText('"+bleedSettings.color+"')", "pasteColorTo('updateBleedColor')")}
 </div>
 `;
 openToolPanel('Garis Bantu & Panduan',html);
@@ -2941,6 +3060,7 @@ if(bg.bgType === 'image') {
         html += `
         <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:6px; border-radius:6px;">
             <button class="btn-sub-tool" style="width:30px;height:30px;background:${st.color};border:1px solid #fff;border-radius:4px;padding:0;flex-shrink:0;" onclick="openCustomColorPicker('${st.color}', 'updateBgGradientStopColor_${idx}')"></button>
+            ${colorCopyPasteHTML("copyColorText('"+st.color+"')", "pasteColorTo('updateBgGradientStopColor_"+idx+"')")}
             <div style="flex:1;">
                 <div class="ctrl-row"><span class="ctrl-label" style="min-width:auto;">Posisi:</span><span class="ctrl-val" style="min-width:auto;">${st.pos}%</span></div>
                 <input type="range" class="ctrl-slider" min="0" max="100" value="${st.pos}" oninput="updateBgGradientStopPos(${idx}, this.value)">
@@ -6097,11 +6217,11 @@ function openTableEditor(keepScroll) {
                     </div>
                     <div class="tbl-ed-grp">
                         <span>Teks</span>
-                        <input type="color" class="tbl-ed-color" value="${txtHex}" onchange="updateTableCellColor(${r}, ${c}, this.value)">
+                        <div style="display:flex;align-items:center;gap:3px;"><input type="color" class="tbl-ed-color" value="${txtHex}" onchange="updateTableCellColor(${r}, ${c}, this.value)">${colorCopyPasteHTML("copyColorText(this.parentNode.querySelector('input').value)", `pasteTableColor(this,'updateTableCellColor',${r},${c})`)}</div>
                     </div>
                     <div class="tbl-ed-grp">
                         <span>Bg</span>
-                        <input type="color" class="tbl-ed-color" value="${bgHex}" onchange="updateTableCellBg(${r}, ${c}, this.value)">
+                        <div style="display:flex;align-items:center;gap:3px;"><input type="color" class="tbl-ed-color" value="${bgHex}" onchange="updateTableCellBg(${r}, ${c}, this.value)">${colorCopyPasteHTML("copyColorText(this.parentNode.querySelector('input').value)", `pasteTableColor(this,'updateTableCellBg',${r},${c})`)}</div>
                     </div>
                     <div class="tbl-ed-grp">
                         <span>Size</span>
@@ -7416,6 +7536,7 @@ if(tab==='outer'){
 const sh=el.shadow;
 const curAlpha=Math.round((sh.alpha!==undefined?sh.alpha:0.8)*100);
 container.innerHTML=`
+${shadowBarHTML('outer')}
 ${getColorPickerHTML(sh.color||'rgba(0,0,0,0.8)', 'setOuterShadowColor', false)}
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kepekatan/Alpha:</span><span class="ctrl-val" id="valShAlpha">${curAlpha}%</span></div>
 <div class="stepper-row">
@@ -7446,6 +7567,7 @@ ${getColorPickerHTML(sh.color||'rgba(0,0,0,0.8)', 'setOuterShadowColor', false)}
 const ish=el.innerShadow;
 const curAlpha=Math.round((ish.alpha!==undefined?ish.alpha:0.85)*100);
 container.innerHTML=`
+${shadowBarHTML('inner')}
 ${getColorPickerHTML(ish.color||'transparent', 'setInnerShadowColor')}
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Opasitas/Alpha:</span><span class="ctrl-val" id="valIShAlpha">${curAlpha}%</span></div>
 <div class="stepper-row">
@@ -7475,6 +7597,28 @@ ${getColorPickerHTML(ish.color||'transparent', 'setInnerShadowColor')}
 }
 }
 
+/* v1.8.1: Reset default + ON/OFF bayangan (ON/OFF lewat warna: OFF = transparent, warna lama diingat) */
+const SHADOW_DEF_OUTER={color:'rgba(0,0,0,0.8)',blur:15,distance:8,angle:45,alpha:0.8};
+const SHADOW_DEF_INNER={color:'transparent',blur:8,distance:4,angle:45,alpha:0.85};
+function shadowIsOn(o){ return !!(o && o.color && o.color!=='transparent'); }
+function shadowBarHTML(tab){
+    const el=getActiveElement(); if(!el) return '';
+    const on=shadowIsOn(tab==='outer'?el.shadow:el.innerShadow);
+    return `<div class="shadow-bar"><button class="btn-sub-tool" onclick="resetShadowDefault('${tab}')">↺ Reset Default</button><button class="btn-sub-tool ${on?'active':''}" onclick="toggleShadowOnOff('${tab}')" style="min-width:64px;justify-content:center;">${on?'ON':'OFF'}</button></div>`;
+}
+function resetShadowDefault(tab){
+    const el=getActiveElement(); if(!el) return;
+    if(tab==='outer') el.shadow=Object.assign({},SHADOW_DEF_OUTER);
+    else el.innerShadow=Object.assign({},SHADOW_DEF_INNER);
+    renderAll();pushHistoryState();switchShadowSubTab(tab);
+}
+function toggleShadowOnOff(tab){
+    const el=getActiveElement(); if(!el) return;
+    const o=(tab==='outer')?el.shadow:el.innerShadow; if(!o) return;
+    if(shadowIsOn(o)){ o._lastColor=o.color; o.color='transparent'; }
+    else { o.color=(o._lastColor && o._lastColor!=='transparent')?o._lastColor:(tab==='outer'?SHADOW_DEF_OUTER.color:'rgba(0,0,0,0.85)'); }
+    renderAll();pushHistoryState();switchShadowSubTab(tab);
+}
 function updateShadowProp(p,v){
 const el=getActiveElement();if(!el)return;
 el.shadow[p]=parseInt(v);
@@ -12310,6 +12454,8 @@ function setTextColor(color){
         });
     } else {
         el.color=color;
+        /* v1.8.1: warna global menimpa warna per-kata lama agar tidak "terkunci" setelah blok kata dibatalkan */
+        if (el.wordStyles) { for (const k in el.wordStyles) { if (el.wordStyles[k]) delete el.wordStyles[k].color; } }
     }
     renderAll();pushHistoryState();openPanelTextColor();
 }
@@ -13696,7 +13842,9 @@ function previewSlide(idx) {
     switchSlide(idx);
     closeDownloadModal();
     openPreviewModal();
+    _previewFromDownload = true;
 }
+let _previewFromDownload = false;
 
 function openPreviewModal() {
     if(isTrialMode) {
@@ -13734,6 +13882,10 @@ function openPreviewModal() {
 
 function closePreviewModal() {
     document.getElementById('previewModal').classList.remove('active');
+    if(_previewFromDownload) {
+        _previewFromDownload = false;
+        document.getElementById('downloadModal').classList.add('active');
+    }
 }
 
 function zoomPreview(delta) {
