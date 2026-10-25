@@ -1,15 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v1.8.7
+Studio Poster Maker Pro - Update v1.8.8
+
+v1.8.8:
+1. STABILO LEVEL BLUR: kotak stabilo bisa diblur dari 0 sampai sangat kabur, sehingga menyatu ke background dan teks tampak kontras tanpa kesan stabilo. Area kanvas otomatis diperlebar agar blur tidak terpotong.
+2. LAYER MASK IKUT TEKS: mask sekarang melekat pada posisi dan rotasi teks. Saat teks digeser atau diputar, lilitan ikut bergerak akurat. Mask lama tetap berfungsi, dan akan ikut bergeser setelah dililit ulang.
 
 v1.8.7:
-1. FOUNTAIN SQUARE dihapus, diganti PNG CUSTOM: unggah PNG bentuk apa pun; bentuk diambil dari alpha (transparansi) PNG, bukan warnanya. Bentuk dipakai sebagai gradien transparansi.
-2. PNG CUSTOM: Invert membalik bagian transparan (dalam <-> luar), Skala Bentuk, dan Tingkat Blur Tepi (menggantikan Sudut).
-3. FOUNTAIN RADIAL: Sudut diganti Level Blur Bola agar tingkat blur bola bisa diatur.
-
-v1.8.6:
-1. UPSCALE PRATINJAU: fungsi Lanczos dipulihkan; bila gagal, otomatis memakai resize bawaan.
-2. FOUNTAIN INVERT: kotak digambar dengan mode copy agar transparan benar-benar terbalik.
-3. FOUNTAIN RESET: tombol Reset Nilai Fountain.
+1. FOUNTAIN PNG CUSTOM: bentuk dari alpha PNG, dengan Invert, Skala Bentuk, dan Tingkat Blur Tepi.
+2. FOUNTAIN RADIAL: Sudut diganti Level Blur Bola.
 -->
 
 
@@ -1910,7 +1908,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.8.7';
+const APP_VERSION = 'v1.8.8';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3482,6 +3480,15 @@ function lmPatchSource(el){
     return Object.assign({}, el, o);
 }
 
+/* v1.8.8: mask melekat pada teks. Selisih posisi & rotasi sejak mask dililit dipakai untuk menggeser mask.
+   Mask lama (tanpa catatan posisi) tetap di tempatnya seperti sebelumnya. */
+function lmDeltaOf(el){
+    const has = (el.lmAx !== undefined && el.lmAy !== undefined);
+    const nx = el.x || 0, ny = el.y || 0, nr = el.rotation || 0;
+    if (!has) return { ox: nx, oy: ny, nx: nx, ny: ny, rot: 0 };
+    return { ox: el.lmAx, oy: el.lmAy, nx: nx, ny: ny, rot: nr - (el.lmRot || 0) };
+}
+
 function lmBuildPatch(c, el, mask, reuse){
     const cv = c.canvas;
     let off = reuse;
@@ -3499,7 +3506,11 @@ function lmBuildPatch(c, el, mask, reuse){
     renderTextElement(o, lmPatchSource(el));
     o.globalCompositeOperation = 'destination-in';
     o.globalAlpha = 1;
+    const dl = lmDeltaOf(el);
+    o.save();
+    o.translate(dl.nx, dl.ny); o.rotate(dl.rot * Math.PI / 180); o.translate(-dl.ox, -dl.oy);
     o.drawImage(mask, 0, 0, el.lmW || mask.width, el.lmH || mask.height);
+    o.restore();
     o.globalCompositeOperation = 'source-over';
     o.setTransform(1,0,0,1,0,0);
     return off;
@@ -3945,8 +3956,9 @@ const totalHeight=wrappedData.length*lineHeight;
 el._calculatedHeight=totalHeight;
 el._renderedW = maxBoxWidth;
 
-const padX = (el.highlightPaddingX !== undefined ? el.highlightPaddingX : 12) + 20;
-const padY = (el.highlightPaddingY !== undefined ? el.highlightPaddingY : 4) + 20;
+const hbM = Math.ceil((el.highlightBlur || 0) * 0.8);
+const padX = (el.highlightPaddingX !== undefined ? el.highlightPaddingX : 12) + 20 + hbM;
+const padY = (el.highlightPaddingY !== undefined ? el.highlightPaddingY : 4) + 20 + hbM;
 const cW = maxBoxWidth + padX * 2;
 const cH = totalHeight + padY * 2;
 
@@ -4073,7 +4085,9 @@ for (const color in rectsByColor) {
     });
     octx.fillStyle = color;
     octx.globalAlpha = (el.opacity || 1) * (el.highlightAlpha !== undefined ? el.highlightAlpha : 0.5);
+    octx.filter = (el.highlightBlur || 0) > 0 ? `blur(${el.highlightBlur * 0.5}px)` : 'none';
     octx.fill();
+    octx.filter = 'none';
 }
 octx.restore();
 
@@ -7406,6 +7420,7 @@ const curAlpha=Math.round((el.highlightAlpha!==undefined?el.highlightAlpha:0.5)*
 const curRad=el.highlightRadius!==undefined?el.highlightRadius:6;
 const curPadX=el.highlightPaddingX!==undefined?el.highlightPaddingX:12;
 const curPadY=el.highlightPaddingY!==undefined?el.highlightPaddingY:4;
+const curBlur=el.highlightBlur||0;
 const html=`
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
 <span style="font-size:11px;font-weight:700;color:#D4AF37;">PENGATURAN STABILO:</span>
@@ -7437,12 +7452,19 @@ ${getColorPickerHTML(el.highlightColor||'transparent', 'setHighlightColor')}
 <input type="range" class="ctrl-slider" id="hiPadSlider" min="2" max="35" value="${curPadX}" oninput="updateHighlightPadding(this.value)">
 <button class="btn-step" onclick="stepSliderVal('hiPadSlider',1,updateHighlightPadding)">+</button>
 </div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Level Blur:</span><span class="ctrl-val" id="valHiBlur">${curBlur}</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('hiBlurSlider',-1,updateHighlightBlur)">-</button>
+<input type="range" class="ctrl-slider" id="hiBlurSlider" min="0" max="100" value="${curBlur}" oninput="updateHighlightBlur(this.value)">
+<button class="btn-step" onclick="stepSliderVal('hiBlurSlider',1,updateHighlightBlur)">+</button>
+</div>
 <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="resetHighlight()">↺ Reset Stabilo</button>
 `;
 openToolPanel('🖍️ Pengaturan Lengkap Stabilo',html);
 }
 
 function updateHighlightAlpha(v){const el=getActiveElement();if(!el)return;el.highlightAlpha=parseInt(v)/100;document.getElementById('valHiAlpha').innerText=v+'%';renderAll();debouncedPushHistory();}
+function updateHighlightBlur(v){const el=getActiveElement();if(!el)return;el.highlightBlur=parseInt(v);document.getElementById('valHiBlur').innerText=v;renderAll();debouncedPushHistory();}
 function updateHighlightRadius(v){const el=getActiveElement();if(!el)return;el.highlightRadius=parseInt(v);document.getElementById('valHiRad').innerText=v+'px';renderAll();debouncedPushHistory();}
 function updateHighlightPadding(v){const el=getActiveElement();if(!el)return;el.highlightPaddingX=parseInt(v);el.highlightPaddingY=Math.round(parseInt(v)*0.4);document.getElementById('valHiPad').innerText=v+'px';renderAll();debouncedPushHistory();}
 function setHighlightColor(c){
@@ -7472,6 +7494,7 @@ function resetHighlight(){
     el.highlightColor='transparent';
     el.highlightAlpha=0.5;
     el.highlightRadius=6;
+    el.highlightBlur=0;
     el.highlightPaddingX=12;
     el.highlightPaddingY=4;
     renderAll();pushHistoryState();openPanelHighlight();
@@ -10168,7 +10191,9 @@ function openLayerMaskModal(){
     const loadExisting=(src)=>{
         if(!src||!lmMask||lmEl!==el) return;
         lmBaseMask=document.createElement('canvas'); lmBaseMask.width=cw; lmBaseMask.height=ch;
-        lmBaseMask.getContext('2d').drawImage(src,0,0,cw,ch);
+        const bc = lmBaseMask.getContext('2d'); const dl = lmDeltaOf(el);
+        bc.save(); bc.scale(lmK,lmK); bc.translate(dl.nx,dl.ny); bc.rotate(dl.rot*Math.PI/180); bc.translate(-dl.ox,-dl.oy);
+        bc.drawImage(src,0,0,lmPW,lmPH); bc.restore();
         lmRebuildMask();
     };
     const ex=(el._lmCanvas&&el._lmCanvas.getContext)?el._lmCanvas:null;
@@ -10207,7 +10232,7 @@ function applyLayerMask(){
         for(let i=3;i<d.length;i+=4){ if(d[i]>6){painted=true;break;} }
     }catch(e){painted=true;}
     if(!painted){
-        delete el.lmMaskSrc; delete el.lmW; delete el.lmH; delete el._lmCanvas; el._lmCache=null;
+        delete el.lmMaskSrc; delete el.lmW; delete el.lmH; delete el._lmCanvas; delete el.lmAx; delete el.lmAy; delete el.lmRot; el._lmCache=null;
         requestRender(); pushHistoryState(); closeLayerMaskModal();
         showToast('🧶 Layer Mask dikosongkan');
         return;
@@ -10220,6 +10245,7 @@ function applyLayerMask(){
     out._lmId=(window.__lmIdCounter=(window.__lmIdCounter||0)+1);
     el._lmCanvas=out; el._lmCache=null;
     el.lmW=lmPW; el.lmH=lmPH;
+    el.lmAx=el.x||0; el.lmAy=el.y||0; el.lmRot=el.rotation||0;
     el.lmMaskSrc=out.toDataURL('image/png');
     requestRender(); pushHistoryState(); closeLayerMaskModal();
     showToast('✅ Layer Mask diterapkan');
