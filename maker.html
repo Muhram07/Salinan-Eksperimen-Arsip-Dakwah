@@ -1,13 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v1.8.8
+Studio Poster Maker Pro - Update v1.8.9
+
+v1.8.9:
+1. STABILO LEVEL BLUR REALTIME: perubahan blur langsung terlihat saat slider digeser (sebelumnya cache tidak diperbarui).
+2. LENGKUNG & KEMIRINGAN UNTUK GAMBAR: tombol Lengkung di kanan Rotasi pada toolbar gambar. Gambar (PNG/JPG) bisa melengkung dan dimiringkan, sama seperti teks. Ada tombol Reset.
 
 v1.8.8:
-1. STABILO LEVEL BLUR: kotak stabilo bisa diblur dari 0 sampai sangat kabur, sehingga menyatu ke background dan teks tampak kontras tanpa kesan stabilo. Area kanvas otomatis diperlebar agar blur tidak terpotong.
-2. LAYER MASK IKUT TEKS: mask sekarang melekat pada posisi dan rotasi teks. Saat teks digeser atau diputar, lilitan ikut bergerak akurat. Mask lama tetap berfungsi, dan akan ikut bergeser setelah dililit ulang.
-
-v1.8.7:
-1. FOUNTAIN PNG CUSTOM: bentuk dari alpha PNG, dengan Invert, Skala Bentuk, dan Tingkat Blur Tepi.
-2. FOUNTAIN RADIAL: Sudut diganti Level Blur Bola.
+1. STABILO LEVEL BLUR: kotak stabilo bisa diblur dari 0 sampai sangat kabur.
+2. LAYER MASK IKUT TEKS: lilitan melekat pada posisi dan rotasi teks.
 -->
 
 
@@ -1908,7 +1908,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.8.8';
+const APP_VERSION = 'v1.8.9';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3345,6 +3345,7 @@ function getElHash(el) {
     try {
         let str = el.type + '_' + el.width + '_' + el.height + '_' + el.color + '_' + el.opacity + '_' + el.blendMode;
         if(el.type === 'text') {
+            str += '_hb' + (el.highlightBlur || 0);
             str += '_' + el.text + '_' + el.fontFamily + '_' + el.fontSize + '_' + el.fontWeight + '_' + el.fontStyle + '_' + el.textAlign + '_' + el.lineHeight + '_' + el.letterSpacing + '_' + el.curveAngle + '_' + el.italicSlant + '_' + el.textTransform + '_' + el.textDecoration + '_' + el.highlightColor + '_' + el.highlightAlpha + '_' + el.highlightRadius + '_' + el.highlightPaddingX + '_' + el.highlightPaddingY + '_' + el.textSkinSrc + '_' + el.textSkinOffsetX + '_' + el.textSkinOffsetY + '_' + el.textSkinScale + '_' + el.textSkinBlend + '_' + JSON.stringify(el.skinFilter||{}) + '_' + JSON.stringify(el.wordStyles||{}) + '_' + el.warpSrc;
         } else if(el.type === 'image') {
             str += '_' + el.src + '_' + el.cropL + '_' + el.cropR + '_' + el.cropT + '_' + el.cropB + '_' + el.blur + '_' + el.cornerRadius + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.borderBlur + '_' + el.colorOverlay + '_' + el.imageSkinSrc + '_' + el.imageSkinOffsetX + '_' + el.imageSkinOffsetY + '_' + el.imageSkinScale + '_' + el.imageSkinBlend + '_' + el.imageSkinOpacity + '_' + JSON.stringify(el.advancedColor||{}) + '_' + JSON.stringify(el.depthFocus||{});
@@ -3356,6 +3357,7 @@ function getElHash(el) {
             str += '_' + el.rows + '_' + el.cols + '_' + JSON.stringify(el.colWidths) + '_' + JSON.stringify(el.rowHeights) + '_' + tblCellsSig(el) + '_' + el.borderWidth + '_' + el.borderColor + '_' + el.tW + '_' + el.tH;
         }
         if(el.type==='table'||el.type==='shape') str += '_'+el.tBold+'_'+el.tItalic+'_'+el.tAlign+'_'+el.tFont+'_'+el.tPad+'_'+el.fontSize+'_'+el.colorOverlay;
+        str += '_iw' + (el.imgCurve || 0) + '_' + (el.imgSlant || 0);
         str += '_' + JSON.stringify(el.filters||{}) + '_' + JSON.stringify(el.innerShadow||{}) + '_' + JSON.stringify(el.transparency||{});
         return str;
     } catch(e) {
@@ -4252,6 +4254,37 @@ targetCtx.restore();
 }
 }
 
+/* v1.8.9: Lengkung & Kemiringan gambar. Lengkung = busur (strip vertikal digeser sepanjang lingkaran). Positif: tepi turun (cembung ke atas), negatif: kebalikannya. */
+function imgWarpSagitta(w, c){
+    if(!c) return 0;
+    const th = Math.min(179.9, Math.abs(c)) * Math.PI / 180;
+    const R = (w/2) / Math.sin(th/2);
+    return R * (1 - Math.cos(th/2));
+}
+function imgWarpPad(el, w, h){
+    const s = imgWarpSagitta(w, el.imgCurve || 0);
+    const sl = el.imgSlant ? Math.abs(Math.tan(el.imgSlant * Math.PI / 180)) * h / 2 : 0;
+    return Math.ceil(s + sl);
+}
+function drawImageWarped(octx, img, sx, sy, sw, sh, dx, dy, dw, dh, curve, slant){
+    if(!curve && !slant){ octx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh); return; }
+    octx.save();
+    if(slant) octx.transform(1, 0, Math.tan(slant * Math.PI / 180), 1, 0, 0);
+    if(!curve){ octx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh); octx.restore(); return; }
+    const c = Math.max(-180, Math.min(180, curve));
+    const th = Math.min(179.9, Math.abs(c)) * Math.PI / 180;
+    const R = (dw/2) / Math.sin(th/2);
+    const sign = c > 0 ? 1 : -1;
+    const n = Math.max(2, Math.ceil(dw/2));
+    const stripD = dw / n, stripS = sw / n;
+    for(let i = 0; i < n; i++){
+        const u = -dw/2 + (i + 0.5) * stripD;
+        const lift = R - Math.sqrt(Math.max(0, R*R - u*u));
+        octx.drawImage(img, sx + i*stripS, sy, stripS + 0.5, sh, dx + i*stripD, dy + sign*lift, stripD + 0.5, dh);
+    }
+    octx.restore();
+}
+
 function renderImageElement(targetCtx,el){
 if(!el.img||!el.img.complete){
 if(el.src||el.imgSrc){el.img=getImageFromCache(el.src||el.imgSrc);}
@@ -4306,7 +4339,7 @@ if (rScale === 1 && el._cachedHash === hash && el._cachedCanvas) {
     return;
 }
 
-const pad = (el.blur || 0) * 3 + (el.borderWidth || 0) * 2 + (el.borderBlur || 0) * 3 + 20;
+const pad = (el.blur || 0) * 3 + (el.borderWidth || 0) * 2 + (el.borderBlur || 0) * 3 + 20 + imgWarpPad(el, finalDrawW, finalDrawH);
 const cW = finalDrawW + pad * 2;
 const cH = finalDrawH + pad * 2;
 
@@ -4333,7 +4366,7 @@ renderTiltShiftDepthBlur(octx,el.img,sx,sy,sWidth,sHeight,finalDrawW,finalDrawH,
 octx.filter='none';
 }else{
 octx.filter = getFilterString(el.filters, el.blur);
-octx.drawImage(el.img,sx,sy,sWidth,sHeight,-finalDrawW/2,-finalDrawH/2,finalDrawW,finalDrawH);
+drawImageWarped(octx, el.img, sx, sy, sWidth, sHeight, -finalDrawW/2, -finalDrawH/2, finalDrawW, finalDrawH, el.imgCurve || 0, el.imgSlant || 0);
 octx.filter='none';
 }
 
@@ -6190,6 +6223,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-blend"/></svg></span><span>Blend Mode</span></button>
 <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-border"/></svg></span><span>Garis Tepi</span></button>
 <button class="tool-btn" onclick="openPanelRotation()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-rotate"/></svg></span><span>Rotasi</span></button>
+<button class="tool-btn" onclick="openPanelImageCurve()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-curve"/></svg></span><span>Lengkung</span></button>
 <button class="tool-btn" onclick="openPanelGroup()"><span class="icon">${el.groupId?'<svg class="ic" aria-hidden="true"><use href="#ic-link"/></svg>':'<svg class="ic" aria-hidden="true"><use href="#ic-unlink"/></svg>'}</span><span>Grup</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-layers"/></svg></span><span>Lapisan</span></button>
 <button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'<svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg>':'<svg class="ic" aria-hidden="true"><use href="#ic-unlock"/></svg>'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
@@ -12743,6 +12777,39 @@ openToolPanel('Jarak Baris & Huruf',html);
 }
 function updateLineHeight(val){const el=getActiveElement();if(!el)return;el.lineHeight=parseInt(val)/100;document.getElementById('valLineHeight').innerText=el.lineHeight.toFixed(1);renderAll();debouncedPushHistory();}
 function updateLetterSpacing(val){const el=getActiveElement();if(!el)return;el.letterSpacing=parseInt(val);document.getElementById('valLetterSpacing').innerText=el.letterSpacing+'px';renderAll();debouncedPushHistory();}
+
+function openPanelImageCurve(){
+const el=getActiveElement();
+if(!el||el.type!=='image')return;
+const html=`<div class="ctrl-row">
+<span class="ctrl-label">Lengkung:</span>
+<span class="ctrl-val" id="valImgCurve">${el.imgCurve||0}°</span>
+<button class="btn-reset-tool" onclick="resetImageCurve()">↺ Reset</button>
+</div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('icSlider',-1,updateImgCurve)">-</button>
+<input type="range" class="ctrl-slider" id="icSlider" min="-180" max="180" value="${el.imgCurve||0}" oninput="updateImgCurve(this.value)">
+<button class="btn-step" onclick="stepSliderVal('icSlider',1,updateImgCurve)">+</button>
+</div>
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Miring:</span><span class="ctrl-val" id="valImgSlant">${el.imgSlant||0}°</span></div>
+<div class="stepper-row">
+<button class="btn-step" onclick="stepSliderVal('isSlider',-1,updateImgSlant)">-</button>
+<input type="range" class="ctrl-slider" id="isSlider" min="-35" max="35" value="${el.imgSlant||0}" oninput="updateImgSlant(this.value)">
+<button class="btn-step" onclick="stepSliderVal('isSlider',1,updateImgSlant)">+</button>
+</div>`;
+openToolPanel('Lengkung & Kemiringan Gambar',html);
+}
+function updateImgCurve(val){const el=getActiveElement();if(!el)return;el.imgCurve=parseInt(val);document.getElementById('valImgCurve').innerText=val+'°';renderAll();debouncedPushHistory();}
+function updateImgSlant(val){const el=getActiveElement();if(!el)return;el.imgSlant=parseInt(val);document.getElementById('valImgSlant').innerText=val+'°';renderAll();debouncedPushHistory();}
+function resetImageCurve(){
+    const el=getActiveElement();if(!el)return;
+    el.imgCurve=0; el.imgSlant=0;
+    const a=document.getElementById('icSlider'); if(a) a.value=0;
+    const b=document.getElementById('isSlider'); if(b) b.value=0;
+    const c=document.getElementById('valImgCurve'); if(c) c.innerText='0°';
+    const d=document.getElementById('valImgSlant'); if(d) d.innerText='0°';
+    renderAll(); pushHistoryState();
+}
 
 function openPanelCurveAndSlant(){
 const el=getActiveElement();
