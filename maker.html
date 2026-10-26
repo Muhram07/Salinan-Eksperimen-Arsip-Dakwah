@@ -1,11 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v2.2.0
+Studio Poster Maker Pro - Update v2.3.0
+
+v2.3.0:
+1. OFFLINE LEBIH KUAT: font bawaan (Google Fonts) ikut disimpan saat online, sehingga tetap tampil di mode pesawat. Font repo dimuat setelah penyimpanan siap, lalu teks digambar ulang otomatis.
+2. TOMBOL UPDATE AMAN: saat offline, Update tidak lagi menghapus cache dan tidak memuat ulang halaman. Update hanya dijalankan saat online dan server sudah terjangkau. Versi baru yang tertunda akan dipasang saat online lagi.
 
 v2.2.0:
-1. FONT REPO BISA OFFLINE: font repo diunduh sekali dan disimpan di perangkat. Saat dibuka tanpa internet, font langsung dimuat dari penyimpanan. Pembaruan dari repo dilakukan otomatis saat online.
-2. PROYEK LAMA AMAN: nama internal, label, dan urutan font yang sudah tercatat tidak pernah berubah. Font baru dari repo hanya ditambahkan di akhir daftar, dan font yang dihapus dari repo tetap tersimpan agar teks lama tidak rusak.
-3. NOTIF LEBIH JELAS: notif tunggu hanya muncul saat unduhan pertama. Tombol dan teks status disesuaikan (Perbarui Font, siap dipakai offline).
-4. BLUR GERAK: slider Kehalusan baru untuk teks, gambar, dan shape. Jejak dibuat lebih rapat dan halus, sedangkan nilai 0% tetap seperti tampilan berlapis sebelumnya.
+1. FONT REPO BISA OFFLINE: font repo diunduh sekali dan disimpan di perangkat. Saat dibuka tanpa internet, font langsung dimuat dari penyimpanan.
+2. PROYEK LAMA AMAN: nama, label, dan urutan font yang sudah tercatat tidak berubah. Font baru hanya ditambahkan di akhir.
 -->
 
 
@@ -2028,7 +2030,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.2.0';
+const APP_VERSION = 'v2.3.0';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2377,7 +2379,14 @@ t._timer=setTimeout(()=>t.classList.remove('show'),ms||3000);
 }
 
 window.addEventListener('offline', () => showToast('⚠️ Koneksi terputus. Mode offline aktif.'));
-window.addEventListener('online', () => showToast('✅ Koneksi kembali normal.'));
+window.addEventListener('online', () => {
+    showToast('✅ Koneksi kembali normal.');
+    if (!fontRepoBusy) {
+        cacheGoogleFonts().then(function () { return loadGoogleFontsOffline(); })
+            .then(function () { return scanFontRepo(); })
+            .then(function () { renderAll(); }).catch(function () { });
+    }
+});
 
 function requestRender(){
 if(!renderPending){
@@ -2564,7 +2573,15 @@ async function loadDemoProject() {
 }
 
 async function syncAppVersion() {
+    if (!navigator.onLine) { showToast("📴 Update butuh internet. Aplikasi tetap bisa dipakai offline."); return; }
     showToast("⏳ Memeriksa sinkronisasi versi...");
+    try {
+        const probe = await fetch(location.pathname + "?probe=" + Date.now(), { cache: "no-store" });
+        if (!probe.ok) throw new Error("probe");
+    } catch (e) {
+        showToast("📴 Koneksi tidak stabil. Update dibatalkan, aplikasi tetap aman.");
+        return;
+    }
     try {
         if('caches' in window) {
             const keys = await caches.keys();
@@ -2613,7 +2630,8 @@ function checkAppVersion() {
     if(_vd) _vd.innerText = APP_VERSION;
     const storedVer = localStorage.getItem('APP_VERSION_STORED');
     if(storedVer && storedVer !== APP_VERSION) {
-        syncAppVersion();
+        if(navigator.onLine) syncAppVersion();
+        else showToast('📴 Versi baru menunggu koneksi. Aplikasi tetap bisa dipakai offline.', 2600);
     } else {
         localStorage.setItem('APP_VERSION_STORED', APP_VERSION);
         const verDisplay = document.getElementById('appVersionDisplay');
@@ -13062,6 +13080,85 @@ function migrateRepoFontNames() {
 function _fontDupSuffix(base) {
     return /(copy|salinan|\(\d+\)|[\s_\-.]\d+$|\d+$)/i.test(String(base || '')) ? 1 : 0;
 }
+/* v2.3.0: tunggu IndexedDB siap sebelum membaca font (mencegah font dilewati saat startup) */
+async function waitDbReady() {
+    for (let i = 0; i < 100 && !db; i++) await new Promise(function (r) { setTimeout(r, 100); });
+    return !!db;
+}
+/* v2.3.0: font bawaan (Google Fonts) disimpan ke IndexedDB saat online, lalu dimuat dari sana saat offline */
+const GFONT_CACHE_KEY = 'GFONT_CACHE_V1';
+const _gfLoadedKeys = new Set();
+function _gfontFamilies() {
+    const out = [];
+    try {
+        FONT_FAMILIES.forEach(function (f) {
+            const m = /'([^']+)'/.exec(f.font || '');
+            if (m && out.indexOf(m[1]) < 0) out.push(m[1]);
+        });
+    } catch (e) { }
+    return out;
+}
+function _readGfontRecs() {
+    try { const a = JSON.parse(localStorage.getItem(GFONT_CACHE_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
+function _parseGoogleCss(css) {
+    const out = [];
+    const re = /@font-face\s*\{([^}]*)\}/g;
+    let m;
+    while ((m = re.exec(css))) {
+        const b = m[1];
+        const u = /url\((https:[^)]+)\)/.exec(b);
+        if (!u) continue;
+        const w = /font-weight:\s*(\d+)/.exec(b);
+        const r = /unicode-range:\s*([^;]+)/.exec(b);
+        out.push({ url: u[1], weight: w ? w[1] : '400', unicode: r ? r[1].trim() : '' });
+    }
+    return out;
+}
+async function cacheGoogleFonts() {
+    if (!navigator.onLine) return;
+    await waitDbReady();
+    const recs = _readGfontRecs();
+    const have = new Set(recs.map(function (r) { return r.family + '|' + r.weight; }));
+    for (const fam of _gfontFamilies()) {
+        for (const w of ['400', '700']) {
+            if (have.has(fam + '|' + w)) continue;
+            try {
+                const cssUrl = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(fam).replace(/%20/g, '+') + ':wght@' + w + '&display=swap';
+                const css = await (await fetch(cssUrl)).text();
+                const faces = _parseGoogleCss(css);
+                if (!faces.length) { recs.push({ family: fam, weight: w, none: true }); have.add(fam + '|' + w); continue; }
+                for (let i = 0; i < faces.length; i++) {
+                    const f = faces[i];
+                    const key = 'gfont::' + fam + '::' + w + '::' + i;
+                    const blob = await (await fetch(f.url)).blob();
+                    await putFontBlobToDB({ key: key, projId: 'gfont', name: fam, data: blob });
+                    recs.push({ family: fam, weight: f.weight, unicode: f.unicode, key: key });
+                }
+                have.add(fam + '|' + w);
+            } catch (e) { /* gagal jaringan: dicoba lagi pada koneksi berikutnya */ }
+            try { localStorage.setItem(GFONT_CACHE_KEY, JSON.stringify(recs)); } catch (e) { }
+        }
+    }
+}
+async function loadGoogleFontsOffline() {
+    await waitDbReady();
+    for (const r of _readGfontRecs()) {
+        if (!r.key || _gfLoadedKeys.has(r.key)) continue;
+        try {
+            const row = await getFontBlobFromDB(r.key);
+            if (!row || !row.data) continue;
+            const url = URL.createObjectURL(row.data);
+            const desc = { weight: r.weight };
+            if (r.unicode) desc.unicodeRange = r.unicode;
+            const ff = new FontFace(r.family, `url(${url})`, desc);
+            await ff.load();
+            document.fonts.add(ff);
+            _gfLoadedKeys.add(r.key);
+        } catch (e) { }
+    }
+}
+
 /* v2.2.0: manifest font repo untuk mode offline. Nama internal, label, dan urutan font TIDAK diubah setelah tercatat.
    Font baru dari repo hanya ditambahkan di akhir. Font yang dihapus dari repo tetap disimpan agar projek lama tidak rusak. */
 const FONT_MANIFEST_KEY = 'FONT_REPO_OFFLINE_V2';
@@ -13082,6 +13179,7 @@ function mergeRepoManifest(newRecs) {
     return added;
 }
 async function loadRepoFontsOffline() {
+    await waitDbReady();
     const man = _readFontManifest();
     for (const f of repoFonts) { try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { } }
     for (const u of repoObjectUrls) { try { URL.revokeObjectURL(u); } catch (e) { } }
@@ -20301,10 +20399,19 @@ window.addEventListener('pagehide', flushSaveNow);
 })();
 /* v1.6.9: pindai font repo otomatis saat aplikasi dibuka */
 setTimeout(function () {
-    loadRepoFontsOffline().then(function () {
-        _updateRepoStatusLine();
-        if (navigator.onLine) return scanFontRepo();
+    waitDbReady().then(function () {
+        return loadGoogleFontsOffline();
     }).then(function () {
+        return loadRepoFontsOffline();
+    }).then(function () {
+        renderAll();
+        _updateRepoStatusLine();
+        if (navigator.onLine) {
+            return cacheGoogleFonts().then(function () { return loadGoogleFontsOffline(); })
+                .then(function () { return scanFontRepo(); });
+        }
+    }).then(function () {
+        renderAll();
         _updateRepoStatusLine();
         if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
     }).catch(function (e) { console.warn(e); });
