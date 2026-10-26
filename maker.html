@@ -1,14 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v2.3.2
+Studio Poster Maker Pro - Update v2.3.3
+
+v2.3.3:
+1. FONT OFFLINE LENGKAP: font judul dan teks bernama tanpa tanda kutip (Anton, Bebas Neue, Montserrat, Inter, Lora, Amiri, dll.) sebelumnya tidak ikut disimpan sehingga hancur di mode pesawat. Kini semua font aplikasi, font di link Google Fonts, dan font yang dipakai poster ikut disimpan, termasuk bobot tebal (800/900).
+2. BUKA PROJEK OFFLINE OTOMATIS TERRENDER: font yang dipakai projek dipasang lebih dulu sebelum digambar, teks layer mask ikut digambar ulang, dan thumbnail slide (termasuk Demo) digambar ulang setelah font siap.
+3. TIDAK LAG: font dimuat bertahap (yang dipakai poster dulu), pemindaian repo font tidak lagi menunggu penyimpanan font selesai.
 
 v2.3.2:
 1. FONT OFFLINE STABIL: font dibuat sekali dan tidak pernah dihapus saat memuat ulang, sehingga pindah projek, mode pesawat, dan kembali online tidak lagi merusak judul dan teks.
 2. MASK TEKS IKUT FONT: teks yang memakai layer mask ikut digambar ulang saat font siap.
 3. LAG FONT OFFLINE DIKURANGI: font yang sudah dimuat tidak dimuat ulang, dan render ulang dilakukan sekali per kelompok font.
-
-v2.3.1:
-1. FONT OFFLINE TAMPIL: teks yang sempat digambar sebelum font selesai dimuat tidak lagi tertahan di cache.
-2. PERBARUI FONT LEBIH LENGKAP: juga mengunduh font bawaan (Google Fonts).
 -->
 
 
@@ -2031,7 +2032,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.3.2';
+const APP_VERSION = 'v2.3.3';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2383,9 +2384,8 @@ window.addEventListener('offline', () => showToast('⚠️ Koneksi terputus. Mod
 window.addEventListener('online', () => {
     showToast('✅ Koneksi kembali normal.');
     if (!fontRepoBusy) {
-        cacheGoogleFonts().then(function () { return loadGoogleFontsOffline(); })
-            .then(function () { return scanFontRepo(); })
-            .then(function () { renderAll(); }).catch(function () { });
+        cacheGoogleFonts().then(function () { return loadGoogleFontsOffline(); }).catch(function () { });
+        scanFontRepo().then(function () { renderAll(); }).catch(function () { });
     }
 });
 
@@ -2423,6 +2423,9 @@ function scheduleFullRerender(delay, withThumbs) {
     }, delay === undefined ? 120 : delay);
 }
 function preloadSlideFonts() {
+    return (typeof _ensureUsedGoogleFonts === 'function' ? _ensureUsedGoogleFonts() : Promise.resolve()).then(_preloadSlideFontsCore);
+}
+function _preloadSlideFontsCore() {
     if (!document.fonts || !document.fonts.load || typeof slides === 'undefined' || !slides) return Promise.resolve();
     const seen = new Set(), jobs = [];
     slides.forEach(s => (s.elements || []).forEach(el => {
@@ -13090,62 +13093,157 @@ async function waitDbReady() {
 /* v2.3.0: font bawaan (Google Fonts) disimpan ke IndexedDB saat online, lalu dimuat dari sana saat offline */
 const GFONT_CACHE_KEY = 'GFONT_CACHE_V1';
 const _gfLoadedKeys = new Set();
-function _gfontFamilies() {
-    const out = [];
+/* v2.3.3: font bawaan DAN font yang dipakai poster (termasuk nama tanpa tanda kutip seperti Anton, Montserrat, Inter, Lora)
+   disimpan ke IndexedDB saat online, lalu dimuat dari sana saat offline. Subset aksara yang tidak dipakai dilewati agar hemat. */
+const _GF_SKIP_SUBSET = /^(cyrillic|greek|vietnamese|hebrew|thai|devanagari|korean|japanese|chinese|bengali|tamil|telugu|gujarati|gurmukhi|kannada|khmer|lao|malayalam|myanmar|oriya|sinhala|tibetan|georgian|armenian|ethiopic|symbols|math|emoji)/i;
+const _GF_GENERIC = /^(sans-serif|serif|cursive|fantasy|display|system-ui|monospace|inherit|initial|ui-[a-z-]+|arial|helvetica|times new roman|georgia|verdana|impact|courier new|tahoma|trebuchet ms|comic sans ms|RF_.*|CF_.*)$/i;
+function _firstFamilyName(v) {
+    if (!v) return '';
+    return String(v).split(',')[0].trim().replace(/^['"]+|['"]+$/g, '').trim();
+}
+function _usedFamilyMap() {
+    const out = new Map();
+    function add(v) {
+        const f = _firstFamilyName(v);
+        if (f && !out.has(f.toLowerCase())) out.set(f.toLowerCase(), f);
+    }
     try {
-        FONT_FAMILIES.forEach(function (f) {
-            const m = /'([^']+)'/.exec(f.font || '');
-            if (m && out.indexOf(m[1]) < 0) out.push(m[1]);
-        });
+        if (typeof slides !== 'undefined' && slides) {
+            slides.forEach(function (s) {
+                (s.elements || []).forEach(function (el) {
+                    if (!el) return;
+                    add(el.fontFamily);
+                    if (el.wordStyles) Object.keys(el.wordStyles).forEach(function (k) { const w = el.wordStyles[k]; if (w && w.fontFamily) add(w.fontFamily); });
+                });
+            });
+        }
     } catch (e) { }
     return out;
+}
+/* daftar pekerjaan simpan font: yang dipakai poster dulu, lalu font di <link> Google Fonts, lalu daftar font aplikasi */
+function _gfontJobs() {
+    const linkSpec = new Map();
+    try {
+        document.querySelectorAll('link[href*="fonts.googleapis.com/css2"]').forEach(function (lk) {
+            const href = lk.getAttribute('href') || '';
+            const re = /[?&]family=([^&]+)/g;
+            let m;
+            while ((m = re.exec(href))) {
+                const raw = m[1];
+                let fam = raw.split(':')[0].replace(/\+/g, ' ');
+                try { fam = decodeURIComponent(fam); } catch (e) { }
+                if (fam && !linkSpec.has(fam.toLowerCase())) linkSpec.set(fam.toLowerCase(), { fam: fam, raw: raw });
+            }
+        });
+    } catch (e) { }
+    const order = [], seen = new Set();
+    function push(fam) {
+        if (!fam || _GF_GENERIC.test(fam)) return;
+        const k = fam.toLowerCase();
+        if (seen.has(k)) return;
+        seen.add(k);
+        order.push(fam);
+    }
+    _usedFamilyMap().forEach(function (orig) { push(orig); });
+    linkSpec.forEach(function (v) { push(v.fam); });
+    try { FONT_FAMILIES.forEach(function (f) { push(_firstFamilyName(f.font)); }); } catch (e) { }
+    const jobs = [];
+    order.forEach(function (fam) {
+        const ls = linkSpec.get(fam.toLowerCase());
+        if (ls) {
+            jobs.push({ fam: fam, w: 'L', qs: ls.raw });
+        } else {
+            const e = encodeURIComponent(fam).replace(/%20/g, '+');
+            jobs.push({ fam: fam, w: '400', qs: e + ':wght@400' });
+            jobs.push({ fam: fam, w: '700', qs: e + ':wght@700' });
+        }
+    });
+    return jobs;
 }
 function _readGfontRecs() {
     try { const a = JSON.parse(localStorage.getItem(GFONT_CACHE_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
 }
 function _parseGoogleCss(css) {
-    const out = [];
-    const re = /@font-face\s*\{([^}]*)\}/g;
+    const out = [], idx = new Map(), any = [];
+    const re = /(?:\/\*\s*([^*]*?)\s*\*\/\s*)?@font-face\s*\{([^}]*)\}/g;
     let m;
     while ((m = re.exec(css))) {
-        const b = m[1];
+        const sub = (m[1] || '').trim(), b = m[2];
         const u = /url\((https:[^)]+)\)/.exec(b);
         if (!u) continue;
-        const w = /font-weight:\s*(\d+)/.exec(b);
+        const w = /font-weight:\s*(\d+)(?:\s+(\d+))?/.exec(b);
+        const st = /font-style:\s*(\w+)/.exec(b);
         const r = /unicode-range:\s*([^;]+)/.exec(b);
-        out.push({ url: u[1], weight: w ? w[1] : '400', unicode: r ? r[1].trim() : '' });
+        any.push({ url: u[1], lo: w ? +w[1] : 400, hi: w ? +(w[2] || w[1]) : 400, style: st ? st[1] : 'normal', unicode: r ? r[1].trim() : '', sub: sub });
     }
+    let list = any.filter(function (f) { return !(f.sub && _GF_SKIP_SUBSET.test(f.sub)); });
+    if (!list.length) list = any;
+    list.forEach(function (f) {
+        const k = f.url + '|' + f.style + '|' + f.unicode;
+        const hit = idx.get(k);
+        if (hit) { hit.lo = Math.min(hit.lo, f.lo); hit.hi = Math.max(hit.hi, f.hi); return; }
+        const o = { url: f.url, lo: f.lo, hi: f.hi, style: f.style, unicode: f.unicode };
+        idx.set(k, o);
+        out.push(o);
+    });
+    out.forEach(function (o) { o.weight = o.lo === o.hi ? String(o.lo) : (o.lo + ' ' + o.hi); });
     return out;
 }
-async function cacheGoogleFonts() {
-    if (!navigator.onLine) return;
+async function _cacheGoogleFontsImpl() {
+    if (!navigator.onLine) return 0;
     await waitDbReady();
     const recs = _readGfontRecs();
-    const have = new Set(recs.map(function (r) { return r.family + '|' + r.weight; }));
-    for (const fam of _gfontFamilies()) {
-        for (const w of ['400', '700']) {
-            if (have.has(fam + '|' + w)) continue;
-            try {
-                const cssUrl = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(fam).replace(/%20/g, '+') + ':wght@' + w + '&display=swap';
-                const css = await (await fetch(cssUrl)).text();
-                const faces = _parseGoogleCss(css);
-                if (!faces.length) { recs.push({ family: fam, weight: w, none: true }); have.add(fam + '|' + w); continue; }
-                for (let i = 0; i < faces.length; i++) {
-                    const f = faces[i];
-                    const key = 'gfont::' + fam + '::' + w + '::' + i;
-                    const blob = await (await fetch(f.url)).blob();
-                    await putFontBlobToDB({ key: key, projId: 'gfont', name: fam, data: blob });
-                    recs.push({ family: fam, weight: f.weight, unicode: f.unicode, key: key });
-                }
-                have.add(fam + '|' + w);
-            } catch (e) { /* gagal jaringan: dicoba lagi pada koneksi berikutnya */ }
-            try { localStorage.setItem(GFONT_CACHE_KEY, JSON.stringify(recs)); } catch (e) { }
+    const have = new Set(recs.map(function (r) { return String(r.family).toLowerCase() + '|' + (r.w || r.weight); }));
+    const jobs = _gfontJobs().filter(function (j) { return !have.has(j.fam.toLowerCase() + '|' + j.w); });
+    if (!jobs.length) return 0;
+    let added = 0, next = 0, stop = false;
+    function save() { try { localStorage.setItem(GFONT_CACHE_KEY, JSON.stringify(recs)); } catch (e) { } }
+    if (jobs.length >= 4) { try { showToast('⏳ Menyimpan font untuk mode offline ... biarkan aplikasi terbuka sebentar', 4000); } catch (e) { } }
+    async function runJob(j) {
+        const hk = j.fam.toLowerCase() + '|' + j.w;
+        let r;
+        try { r = await fetch('https://fonts.googleapis.com/css2?family=' + j.qs + '&display=swap'); }
+        catch (e) { if (!navigator.onLine) stop = true; return; }
+        if (r.status >= 400 && r.status < 500) { recs.push({ family: j.fam, weight: j.w, w: j.w, none: true }); have.add(hk); save(); return; }
+        if (!r.ok) return;
+        const faces = _parseGoogleCss(await r.text());
+        if (!faces.length) { recs.push({ family: j.fam, weight: j.w, w: j.w, none: true }); have.add(hk); save(); return; }
+        const out = [];
+        for (let i = 0; i < faces.length; i++) {
+            const f = faces[i];
+            const key = 'gfont::' + j.fam + '::' + j.w + '::' + i;
+            const resp = await fetch(f.url);
+            if (!resp.ok) throw new Error('font ' + resp.status);
+            const blob = await resp.blob();
+            await putFontBlobToDB({ key: key, projId: 'gfont', name: j.fam, data: blob });
+            out.push({ family: j.fam, weight: f.weight, style: f.style, unicode: f.unicode, key: key, w: j.w });
+        }
+        out.forEach(function (x) { recs.push(x); });
+        have.add(hk);
+        added++;
+        save();
+    }
+    async function worker() {
+        while (!stop && next < jobs.length) {
+            if (!navigator.onLine) { stop = true; break; }
+            const j = jobs[next++];
+            try { await runJob(j); } catch (e) { /* gagal jaringan: dicoba lagi pada koneksi berikutnya */ }
         }
     }
+    await Promise.all([worker(), worker(), worker()]);
+    if (added) { try { showToast('✅ Font offline tersimpan (' + added + ' keluarga font baru)', 3500); } catch (e) { } }
+    return added;
+}
+var _gfCachePromise = null;
+function cacheGoogleFonts() {
+    if (_gfCachePromise) return _gfCachePromise;
+    _gfCachePromise = _cacheGoogleFontsImpl().catch(function () { return 0; }).then(function (n) { _gfCachePromise = null; return n; });
+    return _gfCachePromise;
 }
 /* v2.3.2: registri font tunggal. Setiap font dibuat sekali (FontFace + URL) dan TIDAK pernah dihapus atau dicabut.
    Loader hanya MENAMBAH font yang belum ada, sehingga pindah projek, mode pesawat, dan kembali online tidak merusak render. */
 window.__fontReg = window.__fontReg || new Map();
+window.__fontRegBusy = window.__fontRegBusy || new Map();
 let _fontEpochT = 0;
 function _bumpFontEpoch() {
     clearTimeout(_fontEpochT);
@@ -13154,29 +13252,93 @@ function _bumpFontEpoch() {
         try { renderAll(); } catch (e) { }
     }, 120);
 }
-async function _regFont(regKey, family, blob, desc) {
+/* v2.3.3: thumbnail slide digambar ulang sekali setelah font yang dipakai poster siap (tidak dipanggil tiap font dimuat) */
+let _fontThumbT = 0;
+function _refreshThumbsAfterFonts() {
+    clearTimeout(_fontThumbT);
+    _fontThumbT = setTimeout(function () {
+        try {
+            if (typeof slides === 'undefined' || !slides) return;
+            slides.forEach(function (s) { try { s._thumbData = generateSlideThumb(s); } catch (e) { } });
+            renderCarouselThumbs();
+        } catch (e) { }
+    }, 500);
+}
+async function _regFont(regKey, family, blob, desc, quiet) {
     const hit = window.__fontReg.get(regKey);
     if (hit) return hit.ff;
-    const url = URL.createObjectURL(blob);
-    const ff = new FontFace(family, `url(${url})`, desc || {});
-    await ff.load();
-    document.fonts.add(ff);
-    window.__fontReg.set(regKey, { ff: ff, url: url });
-    _bumpFontEpoch();
-    return ff;
+    const pend = window.__fontRegBusy.get(regKey);
+    if (pend) return pend;
+    const p = (async function () {
+        const url = URL.createObjectURL(blob);
+        let ff;
+        try {
+            ff = new FontFace(family, `url(${url})`, desc || {});
+            await ff.load();
+        } catch (e) {
+            try { URL.revokeObjectURL(url); } catch (x) { }
+            throw e;
+        }
+        document.fonts.add(ff);
+        window.__fontReg.set(regKey, { ff: ff, url: url });
+        if (!quiet) _bumpFontEpoch();
+        return ff;
+    })();
+    window.__fontRegBusy.set(regKey, p);
+    try { return await p; } finally { window.__fontRegBusy.delete(regKey); }
+}
+async function _loadGfontRec(r, quiet) {
+    if (!r || !r.key || window.__fontReg.has(r.key)) return false;
+    try {
+        const row = await getFontBlobFromDB(r.key);
+        if (!row || !row.data) return false;
+        const desc = { weight: r.weight || '400' };
+        if (r.style && r.style !== 'normal') desc.style = r.style;
+        if (r.unicode) desc.unicodeRange = r.unicode;
+        await _regFont(r.key, r.family, row.data, desc, quiet);
+        return true;
+    } catch (e) { return false; }
+}
+/* catatan lama (V1, 400/700) dilewati bila keluarga font itu sudah punya catatan lengkap dari <link> */
+function _gfRecsToLoad() {
+    const all = _readGfontRecs().filter(function (r) { return r && r.key; });
+    const full = new Set();
+    all.forEach(function (r) { if (r.w === 'L') full.add(String(r.family).toLowerCase()); });
+    return all.filter(function (r) { return r.w === 'L' || !full.has(String(r.family).toLowerCase()); });
 }
 async function loadGoogleFontsOffline() {
     await waitDbReady();
-    for (const r of _readGfontRecs()) {
-        if (!r.key || window.__fontReg.has(r.key)) continue;
-        try {
-            const row = await getFontBlobFromDB(r.key);
-            if (!row || !row.data) continue;
-            const desc = { weight: r.weight };
-            if (r.unicode) desc.unicodeRange = r.unicode;
-            await _regFont(r.key, r.family, row.data, desc);
-        } catch (e) { }
+    const used = _usedFamilyMap();
+    const isUsed = function (r) { return used.has(String(r.family).toLowerCase()); };
+    const todo = _gfRecsToLoad().filter(function (r) { return !window.__fontReg.has(r.key); });
+    todo.sort(function (a, b) { return (isUsed(b) ? 1 : 0) - (isUsed(a) ? 1 : 0); });
+    let n = 0, usedN = 0, i = 0, phase = true;
+    for (const r of todo) {
+        const u = isUsed(r);
+        if (phase && !u) {
+            phase = false;
+            if (usedN) { _bumpFontEpoch(); _refreshThumbsAfterFonts(); }
+        }
+        if (await _loadGfontRec(r, true)) { n++; if (u) usedN++; }
+        if (++i % 10 === 0) await new Promise(function (res) { setTimeout(res, 0); });
     }
+    if (phase && usedN) { _bumpFontEpoch(); _refreshThumbsAfterFonts(); }
+    return n;
+}
+/* v2.3.3: pastikan font yang dipakai slide saat ini sudah terdaftar sebelum digambar (dipanggil saat membuka projek) */
+async function _ensureUsedGoogleFonts() {
+    try {
+        await waitDbReady();
+        const used = _usedFamilyMap();
+        if (!used.size) return 0;
+        let n = 0;
+        for (const r of _gfRecsToLoad()) {
+            if (!used.has(String(r.family).toLowerCase())) continue;
+            if (await _loadGfontRec(r, true)) n++;
+        }
+        if (n) { _bumpFontEpoch(); _refreshThumbsAfterFonts(); }
+        return n;
+    } catch (e) { return 0; }
 }
 
 /* v2.2.0: manifest font repo untuk mode offline. Nama internal, label, dan urutan font TIDAK diubah setelah tercatat.
@@ -13430,8 +13592,9 @@ async function cleanRepoDuplicates(auto) {
     if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
 }
 async function scanFontRepoUI() {
-    try { await cacheGoogleFonts(); await loadGoogleFontsOffline(); } catch (e) { }
+    const _gp = cacheGoogleFonts().then(function () { return loadGoogleFontsOffline(); }).catch(function () { });
     const ok = await scanFontRepo();
+    await _gp;
     _updateRepoStatusLine();
     showToast(ok ? ('✅ Font siap dipakai offline: ' + repoFonts.length + ' font') : (fontRepoStatus || 'Gagal memindai repo'));
     if (ok && repoDupDeletable.length) {
@@ -16147,6 +16310,7 @@ if(demoSlide) {
 }
 
 currentProjectFonts = await hydrateProjectFonts(p);
+try{ await _ensureUsedGoogleFonts(); }catch(e){}
 
 adjustArtboardSize();renderAll();renderCarouselThumbs();renderBottomToolbar();pushHistoryState();closeProjectModal();showToast(`✅ Membuka: ${p.name}`);
 scheduleFullRerender(0, true);
@@ -20417,15 +20581,17 @@ window.addEventListener('pagehide', flushSaveNow);
 /* v1.6.9: pindai font repo otomatis saat aplikasi dibuka */
 setTimeout(function () {
     waitDbReady().then(function () {
-        return loadGoogleFontsOffline();
-    }).then(function () {
         return loadRepoFontsOffline();
     }).then(function () {
         renderAll();
         _updateRepoStatusLine();
+        return loadGoogleFontsOffline();
+    }).then(function () {
+        renderAll();
+        try { _refreshThumbsAfterFonts(); } catch (e) { }
         if (navigator.onLine) {
-            return cacheGoogleFonts().then(function () { return loadGoogleFontsOffline(); })
-                .then(function () { return scanFontRepo(); });
+            cacheGoogleFonts().then(function () { return loadGoogleFontsOffline(); }).catch(function () { });
+            return scanFontRepo();
         }
     }).then(function () {
         renderAll();
