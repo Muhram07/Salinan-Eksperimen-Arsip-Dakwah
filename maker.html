@@ -1,13 +1,11 @@
 <!--
-Studio Poster Maker Pro - Update v2.0.8
+Studio Poster Maker Pro - Update v2.2.0
 
-v2.0.8:
-1. GARIS BANTU LEBIH LAMA: garis sejajar, garis jarak, dan notif px kini bertahan sekitar 2,5 detik setelah snap berakhir (atau setelah sentuhan/tombol posisi dilepas) sebelum hilang, tidak lagi hilang dalam sekejap.
-2. PIPET DI TOOL PENA: tombol 🧪 Pipet ditambahkan di toolbar pena untuk mengambil warna langsung dari poster, memakai loupe pipet yang sama dengan color picker.
-
-v2.0.7:
-1. TOOL POSISI (tombol dpad) KINI MAGNET: garis sejajar, garis jarak, dan magnet ke tepi/pusat/grid/semua berfungsi saat digeser lewat tombol, sama seperti geser jari di kanvas. Magnet hanya menarik searah gerakan, sehingga elemen yang sudah menempel tidak macet.
-2. MAGNET KE GARIS BANTU: drag dan tombol posisi kini menempel ke garis panduan aktif (Tepi, Pusat, Grid 3x3, Semua), termasuk untuk elemen dan teks. Logika snap dipusatkan dalam satu fungsi (smartSnapMove) agar drag dan tombol selalu konsisten.
+v2.2.0:
+1. FONT REPO BISA OFFLINE: font repo diunduh sekali dan disimpan di perangkat. Saat dibuka tanpa internet, font langsung dimuat dari penyimpanan. Pembaruan dari repo dilakukan otomatis saat online.
+2. PROYEK LAMA AMAN: nama internal, label, dan urutan font yang sudah tercatat tidak pernah berubah. Font baru dari repo hanya ditambahkan di akhir daftar, dan font yang dihapus dari repo tetap tersimpan agar teks lama tidak rusak.
+3. NOTIF LEBIH JELAS: notif tunggu hanya muncul saat unduhan pertama. Tombol dan teks status disesuaikan (Perbarui Font, siap dipakai offline).
+4. BLUR GERAK: slider Kehalusan baru untuk teks, gambar, dan shape. Jejak dibuat lebih rapat dan halus, sedangkan nilai 0% tetap seperti tampilan berlapis sebelumnya.
 -->
 
 
@@ -942,6 +940,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <symbol id="ic-tofront" viewBox="0 0 24 24"><path d='M6 5h12'/><path class='ic-a' d='M12 20V9M7.5 13.5L12 9l4.5 4.5'/></symbol>
 <symbol id="ic-toback" viewBox="0 0 24 24"><path d='M6 19h12'/><path class='ic-a' d='M12 4v11M7.5 10.5L12 15l4.5-4.5'/></symbol>
 <symbol id="ic-mosque" viewBox="0 0 24 24"><path d='M12 3.5c-3 2-4.5 3.8-4.5 6h9c0-2.2-1.5-4-4.5-6z'/><path d='M5 20.5v-8.5h14v8.5M3.5 20.5h17'/><path class='ic-a' d='M10 20.5v-4a2 2 0 0 1 4 0v4'/></symbol>
+<symbol id="ic-motion" viewBox="0 0 24 24"><path d='M3 7 H11'/><path d='M5 12 H15'/><path class='ic-a' d='M3 17 H9'/><path d='M16 9 L21 12 L16 15 Z'/></symbol>
+<symbol id="ic-mirrordup" viewBox="0 0 24 24"><path d='M10.5 5 L4 19 H10.5 Z'/><path d='M13.5 5 L20 19 H13.5 Z'/><path class='ic-a' d='M12 2.5 V21.5' stroke-dasharray='2 2'/></symbol>
 <symbol id="ic-pipette" viewBox="0 0 24 24"><path d='M14.5 4l5.5 5.5-2.5 2.5L12 6.5z'/><path class='ic-a' d='M12.5 8.5L5 16l-.8 3.8L8 19l7.5-7.5'/></symbol>
 </defs></svg>
 
@@ -2028,7 +2028,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.0.8';
+const APP_VERSION = 'v2.2.0';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2585,13 +2585,16 @@ async function syncAppVersion() {
     }
 }
 
+function maybeFontNotice() {
+    if (_readFontManifest().length === 0 && navigator.onLine) showScanNotice(8000);
+}
 /* v1.8.1: notif kedua (lebih lama) agar pengguna menunggu font/teks selesai dipindai dari repo */
 function showScanNotice(ms) {
     const n = document.getElementById('toastNote');
     if(!n) return;
     ms = ms || 10000;
     n.classList.remove('show');
-    n.innerHTML = '<div class="tn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3v3.5a5 5 0 0 0 2 4L12 12l-3 1.5a5 5 0 0 0-2 4V21M17 3v3.5a5 5 0 0 1-2 4L12 12l3 1.5a5 5 0 0 1 2 4V21"/></svg></div><div class="tn-txt"><b>Tunggu sebentar ya</b><span>Font dan teks sedang dipindai dari repo. Tampilan teks bisa berubah dulu, tunggu beberapa detik sampai normal.</span></div><i class="tn-bar"></i>';
+    n.innerHTML = '<div class="tn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3v3.5a5 5 0 0 0 2 4L12 12l-3 1.5a5 5 0 0 0-2 4V21M17 3v3.5a5 5 0 0 1-2 4L12 12l3 1.5a5 5 0 0 1 2 4V21"/></svg></div><div class="tn-txt"><b>Mengunduh font repo untuk dipakai offline (sekali saja). Tampilan teks bisa berubah sementara.</span></div><i class="tn-bar"></i>';
     n.style.setProperty('--d', (ms/1000) + 's');
     void n.offsetWidth;
     n.classList.add('show');
@@ -2619,10 +2622,10 @@ function checkAppVersion() {
             /* ada update: notif sinkron dulu, lalu notif tunggu */
             localStorage.removeItem('APP_SCAN_NOTICE');
             showToast("✅ Aplikasi berhasil disinkronkan ke versi terbaru!", 2600);
-            setTimeout(() => showScanNotice(10000), 2800);
+            setTimeout(() => maybeFontNotice(), 2800);
         } else {
             /* tanpa update / buka ulang / pertama kali: notif tunggu tetap tampil */
-            setTimeout(() => showScanNotice(10000), 900);
+            setTimeout(() => maybeFontNotice(), 900);
         }
     }
 }
@@ -3918,6 +3921,7 @@ function renderBackground(bg,W,H,targetCtx){
 /* v1.8.2: blur efek teks (Blend Mode). Satu kanvas sementara dipakai ulang agar tidak ada kebocoran memori */
 let _txtBlurTmp = null;
 function renderTextElement(targetCtx, el, forceRawRender = false){
+if(el.motionStreak&&el.motionStreak.on&&!_msBusy){ renderMotionStreak(targetCtx,el,renderTextElement,forceRawRender); return; }
     const b = (el && el.blur > 0 && !forceRawRender) ? el.blur : 0;
     if(!b) return _renderTextElementCore(targetCtx, el, forceRawRender);
     const W = targetCtx.canvas.width, H = targetCtx.canvas.height;
@@ -4407,6 +4411,7 @@ function drawImageWarped(octx, img, sx, sy, sw, sh, dx, dy, dw, dh, curve, slant
 }
 
 function renderImageElement(targetCtx,el){
+if(el.motionStreak&&el.motionStreak.on&&!_msBusy){ renderMotionStreak(targetCtx,el,renderImageElement); return; }
 if(!el.img||!el.img.complete){
 if(el.src||el.imgSrc){el.img=getImageFromCache(el.src||el.imgSrc);}
 if(!el.img||!el.img.complete)return;
@@ -4552,9 +4557,12 @@ targetCtx.restore();
 }
 
 function renderShapeElement(targetCtx, el) {
+if(el.motionStreak&&el.motionStreak.on&&!_msBusy){ renderMotionStreak(targetCtx,el,renderShapeElement); return; }
     targetCtx.save();
     targetCtx.translate(el.x, el.y);
     if(el.rotation) targetCtx.rotate((el.rotation * Math.PI) / 180);
+    /* v2.0.9: cermin shape (horizontal/vertikal) */
+    targetCtx.scale(el.flipH ? -1 : 1, el.flipV ? -1 : 1);
     targetCtx.globalAlpha = el.opacity !== undefined ? el.opacity : 1;
     if(el.blendMode && el.blendMode !== 'normal') targetCtx.globalCompositeOperation = el.blendMode;
 
@@ -6387,6 +6395,8 @@ ${el.warpSrc ? `<button class="tool-btn" onclick="resetTextWarp()"><span class="
 <button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'<svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg>':'<svg class="ic" aria-hidden="true"><use href="#ic-unlock"/></svg>'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-copy"/></svg></span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-duplicate"/></svg></span><span>Duplikat</span></button>
+<button class="tool-btn" onclick="openPanelMirrorDup()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-mirrordup"/></svg></span><span>Duplikat Simetris</span></button>
+<button class="tool-btn" onclick="openPanelMotionStreak()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-motion"/></svg></span><span>Blur Gerak</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></span><span>Hapus</span></button>
 `;
 }else if(el.type==='image'){
@@ -6420,6 +6430,8 @@ bar.innerHTML=`
 <button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'<svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg>':'<svg class="ic" aria-hidden="true"><use href="#ic-unlock"/></svg>'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-copy"/></svg></span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-duplicate"/></svg></span><span>Duplikat</span></button>
+<button class="tool-btn" onclick="openPanelMirrorDup()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-mirrordup"/></svg></span><span>Duplikat Simetris</span></button>
+<button class="tool-btn" onclick="openPanelMotionStreak()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-motion"/></svg></span><span>Blur Gerak</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></span><span>Hapus</span></button>
 `;
 }else if(el.type==='shape'){
@@ -6429,6 +6441,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openPanelImageSkinOverlay()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-skinphoto"/></svg></span><span>Skin Foto</span></button>
 <button class="tool-btn" onclick="openPanelRelativeSizeAndPos()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-size"/></svg></span><span>Ukuran</span></button>
 <button class="tool-btn" onclick="openPanelImageBorder()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-border"/></svg></span><span>Garis Tepi</span></button>
+<button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-flip"/></svg></span><span>Cermin</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-shadow"/></svg></span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPanelBlendMode()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-blend"/></svg></span><span>Blend Mode</span></button>
 <button class="tool-btn" onclick="openPanelRotation()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-rotate"/></svg></span><span>Rotasi</span></button>
@@ -6438,6 +6451,8 @@ bar.innerHTML=`
 <button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'<svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg>':'<svg class="ic" aria-hidden="true"><use href="#ic-unlock"/></svg>'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-copy"/></svg></span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-duplicate"/></svg></span><span>Duplikat</span></button>
+<button class="tool-btn" onclick="openPanelMirrorDup()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-mirrordup"/></svg></span><span>Duplikat Simetris</span></button>
+<button class="tool-btn" onclick="openPanelMotionStreak()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-motion"/></svg></span><span>Blur Gerak</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></span><span>Hapus</span></button>
 `;
 }else if(el.type==='fade'){
@@ -6453,9 +6468,230 @@ bar.innerHTML=`
 <button class="tool-btn lock-btn ${el.locked?'lock-on':''}" onclick="toggleElementLock()"><span class="icon">${el.locked?'<svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg>':'<svg class="ic" aria-hidden="true"><use href="#ic-unlock"/></svg>'}</span><span>${el.locked?'Buka':'Kunci'}</span></button>
 <button class="tool-btn" onclick="copyActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-copy"/></svg></span><span>Salin</span></button>
 <button class="tool-btn" onclick="duplicateActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-duplicate"/></svg></span><span>Duplikat</span></button>
+<button class="tool-btn" onclick="openPanelMirrorDup()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-mirrordup"/></svg></span><span>Duplikat Simetris</span></button>
+<button class="tool-btn" onclick="openPanelMotionStreak()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-motion"/></svg></span><span>Blur Gerak</span></button>
 <button class="tool-btn" onclick="deleteActiveElement()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-trash"/></svg></span><span>Hapus</span></button>
 `;
 }
+}
+
+/* v2.0.9: Duplikat Simetris. Salinan dibuat dari elemen terpilih, posisi dicerminkan terhadap tepi kanvas (jarak ke tepi sama). */
+const MIRROR_MODES = {
+    h: { label: '↔️ Cermin Horizontal', desc: 'Sisi kanan, dibalik kiri-kanan', mx: 1, my: 0, fx: 1, fy: 0 },
+    v: { label: '↕️ Cermin Vertikal', desc: 'Sisi bawah, dibalik atas-bawah', mx: 0, my: 1, fx: 0, fy: 1 },
+    d: { label: '⤢ Berlawanan Pojok', desc: 'Pojok seberang, dibalik dua arah', mx: 1, my: 1, fx: 1, fy: 1 },
+    s: { label: '➡️ Sejajar', desc: 'Sisi kanan, arah sama', mx: 1, my: 0, fx: 0, fy: 0 }
+};
+
+function addMirrorDup(mode){
+    const src = getActiveElement();
+    const m = MIRROR_MODES[mode];
+    if(!src || !m) return;
+    const s = getCurrentSlide();
+    if(s.elements.some(e => e.mirrorOf === src.id && e.mirrorMode === mode)){
+        showToast('Duplikat ini sudah ada');
+        return;
+    }
+    const copy = JSON.parse(JSON.stringify(src));
+    copy.id = 'el_' + Date.now() + '_m' + mode;
+    copy.mirrorOf = src.id;
+    copy.mirrorMode = mode;
+    if(src.type === 'image' && src.img) copy.img = src.img;
+    if(src.textSkinImg) copy.textSkinImg = src.textSkinImg;
+    if(src.imageSkinImg) copy.imageSkinImg = src.imageSkinImg;
+    if(src.warpImg) copy.warpImg = src.warpImg;
+    delete copy._cachedCanvas;
+    delete copy._cachedHash;
+    copy.x = m.mx ? mainCanvas.width - src.x : src.x;
+    copy.y = m.my ? mainCanvas.height - src.y : src.y;
+    if(m.fx) copy.flipH = !src.flipH;
+    if(m.fy) copy.flipV = !src.flipV;
+    if(m.fx !== m.fy) copy.rotation = -(src.rotation || 0);
+    s.elements.push(copy);
+    renderAll();
+    pushHistoryState();
+    openPanelMirrorDup();
+    showToast('✅ ' + m.label.replace(/^\S+\s/, '') + ' dibuat');
+}
+
+function removeMirrorDup(mode){
+    const src = getActiveElement();
+    if(!src) return;
+    const s = getCurrentSlide();
+    for(let i = s.elements.length - 1; i >= 0; i--){
+        const e = s.elements[i];
+        if(e.mirrorOf === src.id && (!mode || e.mirrorMode === mode)) s.elements.splice(i, 1);
+    }
+    renderAll();
+    pushHistoryState();
+    openPanelMirrorDup();
+    showToast('🗑️ Duplikat dihapus');
+}
+
+function openPanelMirrorDup(){
+    const el = getActiveElement();
+    if(!el) return;
+    const s = getCurrentSlide();
+    const kids = s.elements.filter(e => e.mirrorOf === el.id);
+    const btns = Object.keys(MIRROR_MODES).map(k => {
+        const m = MIRROR_MODES[k];
+        const on = kids.some(e => e.mirrorMode === k);
+        const act = on ? `removeMirrorDup('${k}')` : `addMirrorDup('${k}')`;
+        return `<button class="btn-sub-tool ${on ? 'active' : ''}" onclick="${act}" style="text-align:left;">${on ? '✓ ' : ''}${m.label}<br><span style="font-size:10px;opacity:.7;">${m.desc}</span></button>`;
+    }).join('');
+    const html = `<div class="ctrl-label" style="margin-bottom:8px;line-height:1.5;">Buat duplikat simetris dari elemen terpilih. Jarak ke tepi kanvas dibuat sama dengan asalnya.</div>
+<div class="ctrl-grid-btns">${btns}</div>
+<div class="ctrl-label" style="margin-top:12px;">Jumlah duplikat: ${kids.length}</div>
+<div class="ctrl-grid-btns" style="margin-top:8px;">
+<button class="btn-sub-tool" onclick="removeMirrorDup()" ${kids.length ? '' : 'disabled'}>🗑️ Hapus Semua Duplikat</button>
+<button class="btn-sub-tool" onclick="openPanelMirrorInfo()">ℹ️ Info</button>
+</div>`;
+    openToolPanel('🪞 Duplikat Simetris', html);
+}
+
+function openPanelMirrorInfo(){
+    const html = `<div class="ctrl-label" style="line-height:1.6;">
+<b>Fungsi:</b> membuat salinan elemen (gambar, teks, atau shape) di sisi lain kanvas, dengan jarak ke tepi yang sama seperti asalnya. Cocok untuk logo kembar, papan nama, atau ornamen simetris.<br><br>
+<b>↔️ Cermin Horizontal:</b> salinan di sisi kanan, dibalik kiri-kanan.<br>
+<b>↕️ Cermin Vertikal:</b> salinan di sisi bawah, dibalik atas-bawah.<br>
+<b>⤢ Berlawanan Pojok:</b> salinan di pojok seberang, dibalik dua arah.<br>
+<b>➡️ Sejajar:</b> salinan di sisi kanan dengan arah sama, tanpa dibalik.<br><br>
+<b>Catatan:</b> tiap mode hanya bisa dibuat sekali per elemen. Tekan mode yang sudah ✓ untuk menghapus salinannya. Hapus Semua Duplikat menghapus semua salinan dari elemen ini. Cermin visual penuh untuk gambar dan shape; teks mengikuti posisi dan sudut cerminnya.
+</div>
+<div class="ctrl-grid-btns" style="margin-top:12px;"><button class="btn-sub-tool" onclick="openPanelMirrorDup()">⬅️ Kembali</button></div>`;
+    openToolPanel('ℹ️ Info Duplikat Simetris', html);
+}
+
+/* v2.1.0: Blur Gerak. Efek jejak bergerak (peluru, bintang jatuh, panah) untuk gambar, teks, dan shape.
+   Jejak digambar dari snapshot offscreen yang di-cache per elemen (WeakMap), tidak mengubah cache render asli. */
+var _msBusy = false;
+const _msSnaps = new WeakMap();
+const MOTION_PRESETS = {
+    peluru:  { label: '🔫 Peluru Melesat', desc: 'Jejak tipis dan cepat', length: 140, strength: 70, steps: 10, pw: 1.4 },
+    bintang: { label: '☄️ Bintang Jatuh', desc: 'Ekor panjang yang berpendar', length: 340, strength: 85, steps: 16, pw: 2.2 },
+    panah:   { label: '🏹 Panah Melesat', desc: 'Kepala tajam, ekor memudar', length: 220, strength: 75, steps: 12, pw: 0.9 }
+};
+
+function getMotionSnap(el, fn, arg, R, sc){
+    const key = [getElHash(el), R, sc, el.rotation || 0, el.width, el.height, (el.img && el.img.complete) ? 1 : 0].join('|');
+    const rec = _msSnaps.get(el);
+    if(rec && rec.key === key) return rec.cv;
+    const cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.ceil(2 * R * sc));
+    cv.height = Math.max(1, Math.ceil(2 * R * sc));
+    const c = cv.getContext('2d');
+    c.setTransform(sc, 0, 0, sc, sc * (R - el.x), sc * (R - el.y));
+    fn(c, el, arg);
+    _msSnaps.set(el, { key: key, cv: cv });
+    return cv;
+}
+
+function renderMotionStreak(targetCtx, el, fn, arg){
+    const ms = el.motionStreak;
+    const pr = MOTION_PRESETS[ms.preset] || MOTION_PRESETS.bintang;
+    const sm = (ms.smooth == null ? 40 : +ms.smooth);
+    const N = Math.min(72, Math.round(pr.steps * (1 + Math.max(0, Math.min(100, sm)) / 100 * 4))), pw = pr.pw;
+    const L = Math.max(0, +ms.length || 0);
+    const S = Math.max(0, Math.min(1, (+ms.strength || 0) / 100));
+    const ang = (+ms.angle || 0) * Math.PI / 180;
+    const R = Math.ceil(Math.hypot(el.width || 200, el.height || 200) / 2) + 40;
+    const sc = window.currentRenderScale || 1;
+    _msBusy = true;
+    try {
+        if(S > 0 && L > 0){
+            const snap = getMotionSnap(el, fn, arg, R, sc);
+            const cs = Math.cos(ang), sn = Math.sin(ang);
+            targetCtx.save();
+            for(let k = N; k >= 1; k--){
+                const t = k / N;
+                const a = Math.min(1, S * Math.pow(1 - t, pw) * (2 / N));
+                if(a <= 0.001) continue;
+                targetCtx.globalAlpha = a;
+                targetCtx.drawImage(snap, el.x - R - cs * L * t, el.y - R - sn * L * t, 2 * R, 2 * R);
+            }
+            targetCtx.restore();
+        }
+        fn(targetCtx, el, arg);
+    } finally {
+        _msBusy = false;
+    }
+}
+
+function setMotionPreset(key){
+    const el = getActiveElement();
+    const p = MOTION_PRESETS[key];
+    if(!el || !p) return;
+    const prevAng = el.motionStreak ? (el.motionStreak.angle || 0) : 0;
+    const prevSm = el.motionStreak && el.motionStreak.smooth != null ? el.motionStreak.smooth : 40;
+    el.motionStreak = { on: true, preset: key, length: p.length, strength: p.strength, angle: prevAng, smooth: prevSm };
+    renderAll();
+    pushHistoryState();
+    openPanelMotionStreak();
+}
+
+function setMotionProp(prop, val){
+    const el = getActiveElement();
+    if(!el || !el.motionStreak) return;
+    el.motionStreak[prop] = Number(val);
+    const lbl = { length: ['valMsLen', 'px'], strength: ['valMsStr', '%'], angle: ['valMsAng', '°'], smooth: ['valMsSmo', '%'] }[prop];
+    if(lbl){ const o = document.getElementById(lbl[0]); if(o) o.innerText = val + lbl[1]; }
+    renderAll();
+}
+
+function commitMotion(){
+    pushHistoryState();
+}
+
+function motionOff(){
+    const el = getActiveElement();
+    if(!el) return;
+    el.motionStreak = null;
+    _msSnaps.delete(el);
+    renderAll();
+    pushHistoryState();
+    openPanelMotionStreak();
+}
+
+function openPanelMotionStreak(){
+    const el = getActiveElement();
+    if(!el) return;
+    const on = !!(el.motionStreak && el.motionStreak.on);
+    const m = el.motionStreak || { preset: 'bintang', length: 0, strength: 0, angle: 0 };
+    const presets = Object.keys(MOTION_PRESETS).map(k => {
+        const p = MOTION_PRESETS[k];
+        const act = on && m.preset === k;
+        return `<button class="btn-sub-tool ${act ? 'active' : ''}" onclick="setMotionPreset('${k}')" style="text-align:left;">${p.label}<br><span style="font-size:10px;opacity:.7;">${p.desc}</span></button>`;
+    }).join('');
+    const sliders = on ? `
+<div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Panjang Jejak:</span><span class="ctrl-val" id="valMsLen">${m.length}px</span></div>
+<input type="range" class="ctrl-slider" min="0" max="500" value="${m.length}" oninput="setMotionProp('length',this.value)" onchange="commitMotion()">
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Kekuatan:</span><span class="ctrl-val" id="valMsStr">${m.strength}%</span></div>
+<input type="range" class="ctrl-slider" min="0" max="100" value="${m.strength}" oninput="setMotionProp('strength',this.value)" onchange="commitMotion()">
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Kehalusan:</span><span class="ctrl-val" id="valMsSmo">${m.smooth != null ? m.smooth : 40}%</span></div>
+<input type="range" class="ctrl-slider" min="0" max="100" value="${m.smooth != null ? m.smooth : 40}" oninput="setMotionProp('smooth',this.value)" onchange="commitMotion()">
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Arah Gerak:</span><span class="ctrl-val" id="valMsAng">${m.angle || 0}°</span></div>
+<input type="range" class="ctrl-slider" min="0" max="359" value="${m.angle || 0}" oninput="setMotionProp('angle',this.value)" onchange="commitMotion()">
+<div class="ctrl-grid-btns" style="margin-top:12px;"><button class="btn-sub-tool" onclick="motionOff()">✖ Matikan Blur Gerak</button></div>` : '';
+    const html = `<div class="ctrl-label" style="margin-bottom:8px;line-height:1.5;">Pilih bentuk jejak, lalu atur panjang, kekuatan, dan arah gerak.</div>
+<div class="ctrl-grid-btns">${presets}</div>${sliders}
+<div class="ctrl-grid-btns" style="margin-top:12px;"><button class="btn-sub-tool" onclick="openPanelMotionInfo()">ℹ️ Info</button></div>`;
+    openToolPanel('💫 Blur Gerak', html);
+}
+
+function openPanelMotionInfo(){
+    const html = `<div class="ctrl-label" style="line-height:1.6;">
+<b>Fungsi:</b> memberi jejak gerak pada gambar, teks, atau shape, seperti peluru, bintang jatuh, atau panah yang melesat. Jejak ditarik ke belakang dari elemen, kepalanya tetap tajam.<br><br>
+<b>🔫 Peluru Melesat:</b> jejak tipis dan cepat, cocok untuk kesan dinamis dan tegas.<br>
+<b>☄️ Bintang Jatuh:</b> ekor panjang yang memudar halus, cocok untuk kesan magis atau romantis.<br>
+<b>🏹 Panah Melesat:</b> kepala sangat tajam dengan ekor pendek, cocok untuk ikon arah atau aksi.<br><br>
+<b>Panjang Jejak:</b> seberapa jauh ekor ditarik dari elemen (px kanvas).<br>
+<b>Kekuatan:</b> seberapa pekat jejaknya. 0% berarti tidak terlihat.<br>
+<b>Kehalusan:</b> jumlah lapisan jejak. 0% terlihat berlapis-lapis (seperti tangga), 100% sangat halus seperti kabut. Nilai tinggi sedikit lebih berat, terutama pada gambar besar.<br>
+<b>Arah Gerak:</b> arah elemen melesat. 0° ke kanan, 90° ke bawah, 180° ke kiri, 270° ke atas. Ekor selalu berada di belakang arah ini.<br><br>
+<b>Tips:</b> pakai pada satu atau dua elemen saja. Jejak yang panjang pada gambar besar membuat tampilan sedikit lebih berat, jadi turunkan panjang bila terasa lambat. Untuk mematikan, tekan Matikan Blur Gerak.
+</div>
+<div class="ctrl-grid-btns" style="margin-top:12px;"><button class="btn-sub-tool" onclick="openPanelMotionStreak()">⬅️ Kembali</button></div>`;
+    openToolPanel('ℹ️ Info Blur Gerak', html);
 }
 
 function addNewTable() {
@@ -12826,6 +13062,49 @@ function migrateRepoFontNames() {
 function _fontDupSuffix(base) {
     return /(copy|salinan|\(\d+\)|[\s_\-.]\d+$|\d+$)/i.test(String(base || '')) ? 1 : 0;
 }
+/* v2.2.0: manifest font repo untuk mode offline. Nama internal, label, dan urutan font TIDAK diubah setelah tercatat.
+   Font baru dari repo hanya ditambahkan di akhir. Font yang dihapus dari repo tetap disimpan agar projek lama tidak rusak. */
+const FONT_MANIFEST_KEY = 'FONT_REPO_OFFLINE_V2';
+function _readFontManifest() {
+    try { const a = JSON.parse(localStorage.getItem(FONT_MANIFEST_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
+function _writeFontManifest(a) {
+    try { localStorage.setItem(FONT_MANIFEST_KEY, JSON.stringify(a)); } catch (e) { }
+}
+function mergeRepoManifest(newRecs) {
+    const man = _readFontManifest();
+    const have = new Set(man.map(function (r) { return r.internal; }));
+    let added = 0;
+    newRecs.forEach(function (r) {
+        if (!have.has(r.internal)) { man.push(r); have.add(r.internal); added++; }
+    });
+    _writeFontManifest(man);
+    return added;
+}
+async function loadRepoFontsOffline() {
+    const man = _readFontManifest();
+    for (const f of repoFonts) { try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { } }
+    for (const u of repoObjectUrls) { try { URL.revokeObjectURL(u); } catch (e) { } }
+    const recs = [], urls = [];
+    for (const r of man) {
+        try {
+            const row = await getFontBlobFromDB(r.key);
+            if (!row || !row.data) continue;
+            const url = URL.createObjectURL(row.data);
+            urls.push(url);
+            const ff = new FontFace(r.internal, `url(${url})`);
+            await ff.load();
+            document.fonts.add(ff);
+            recs.push({ name: r.internal, label: r.label, file: r.file, size: r.size, tag: r.tag, emote: r.emote, src: 'repo', _ff: ff, key: r.key });
+        } catch (e) { }
+    }
+    repoFonts = recs;
+    repoObjectUrls = urls;
+    if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO';
+    try { migrateRepoFontNames(); } catch (e) { }
+    return repoFonts.length > 0;
+}
+
 async function scanFontRepo() {
     const cfg = getFontRepoCfg();
     if (!cfg) {
@@ -12833,11 +13112,17 @@ async function scanFontRepo() {
         _updateRepoStatusLine();
         return false;
     }
+    if (!navigator.onLine) {
+        const okOff = await loadRepoFontsOffline();
+        fontRepoStatus = okOff ? ('📴 Offline: ' + repoFonts.length + ' font dari penyimpanan') : '📴 Offline dan belum ada font tersimpan. Sambungkan internet, lalu tekan Perbarui.';
+        _updateRepoStatusLine();
+        return okOff;
+    }
     if (fontRepoBusy) return false;
     fontRepoBusy = true;
     repoDupDeletable = [];
     repoDupCtx = null;
-    fontRepoStatus = '🔄 Memindai repo font ...';
+    fontRepoStatus = '🔄 Memperbarui font dari repo ...';
     _updateRepoStatusLine();
     try {
         let items = null, usedRepo = '';
@@ -12934,17 +13219,14 @@ async function scanFontRepo() {
             if (usedNames.has(internal)) internal += 'x' + (++idx);
             usedNames.add(internal);
             e.internal = internal;
-            const url = URL.createObjectURL(en.blob);
-            newUrls.push(url);
-            let ff = null;
+            /* v2.2.0: blob disimpan sekali ke IndexedDB (kunci dari SHA file repo) agar bisa dipakai offline */
+            const mkey = 'fblob::' + (e.it.sha || 'x') + '::' + en.base;
             try {
-                ff = new FontFace(internal, `url(${url})`);
-                await ff.load();
-                document.fonts.add(ff);
-            } catch (er) { ff = null; bad++; }
-            if (!ff) continue;
+                const have = await getFontBlobFromDB(mkey);
+                if (!(have && have.data)) await putFontBlobToDB({ key: mkey, projId: 'repo', name: en.base, data: en.blob });
+            } catch (er) { bad++; continue; }
             e.ok = true;
-            newRecs.push({ name: internal, label: info.name || en.base, file: en.base, size: en.blob.size, tag: tg.tag, emote: tg.emote, src: 'repo', _ff: ff });
+            newRecs.push({ internal: internal, label: info.name || en.base, file: en.base, size: en.blob.size, tag: tg.tag, emote: tg.emote, key: mkey });
         }
         /* simpan peta nama file -> nama permanen (untuk migrasi poster lama) */
         try {
@@ -12962,8 +13244,8 @@ async function scanFontRepo() {
             if (keys.length > 1500) keys.slice(0, keys.length - 1500).forEach(function (kk) { delete alias[kk]; });
             localStorage.setItem(REPO_ALIAS_KEY, JSON.stringify(alias));
         } catch (er) { }
-        repoFonts = newRecs;
-        repoObjectUrls = newUrls;
+        mergeRepoManifest(newRecs);
+        await loadRepoFontsOffline();
         repoDupDeletable = deletable;
         repoDupCtx = { owner: cfg.owner, repo: usedRepo };
         if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO';
@@ -13036,7 +13318,7 @@ async function cleanRepoDuplicates(auto) {
 async function scanFontRepoUI() {
     const ok = await scanFontRepo();
     _updateRepoStatusLine();
-    showToast(ok ? ('✅ Font repo dipindai: ' + repoFonts.length + ' font') : (fontRepoStatus || 'Gagal memindai repo'));
+    showToast(ok ? ('✅ Font siap dipakai offline: ' + repoFonts.length + ' font') : (fontRepoStatus || 'Gagal memindai repo'));
     if (ok && repoDupDeletable.length) {
         let has = false;
         try { has = !!localStorage.getItem(FONT_REPO_TOKEN_KEY); } catch (e) { has = false; }
@@ -13045,11 +13327,11 @@ async function scanFontRepoUI() {
     if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
 }
 function scanRowHtml() {
-    const line = fontRepoStatus || '📦 Tekan Scan Font Repo untuk memindai font.';
+    const line = fontRepoStatus || '📦 Tekan Perbarui untuk mengunduh font agar bisa dipakai offline.';
     const n = repoDupDeletable.length;
     const clean = n ? `<button class="btn-sub-tool" onclick="cleanRepoDuplicates()" style="flex-direction:row;justify-content:center;padding:8px;border-color:#EF4444;color:#EF4444;">🧹 Hapus ${n} File Ganda di Repo</button>` : '';
     return `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
-        <button class="btn-sub-tool" onclick="scanFontRepoUI()" style="flex-direction:row;justify-content:center;padding:8px;">🔄 Scan Font Repo</button>
+        <button class="btn-sub-tool" onclick="scanFontRepoUI()" style="flex-direction:row;justify-content:center;padding:8px;">🔄 Perbarui Font (Offline)</button>
         ${clean}
         <div id="fontRepoStatusLine" style="font-size:10px;color:#9CA3AF;">${_escHtml(line)}</div>
     </div>`;
@@ -20019,11 +20301,14 @@ window.addEventListener('pagehide', flushSaveNow);
 })();
 /* v1.6.9: pindai font repo otomatis saat aplikasi dibuka */
 setTimeout(function () {
-    scanFontRepo().then(function () {
+    loadRepoFontsOffline().then(function () {
+        _updateRepoStatusLine();
+        if (navigator.onLine) return scanFontRepo();
+    }).then(function () {
         _updateRepoStatusLine();
         if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
     }).catch(function (e) { console.warn(e); });
-}, 1500);
+}, 300);
 /* v1.7.3: kapsul dzikir (2 pets) yang berjalan pelan, lebih sering di tepi layar hitam di belakang poster */
 var _dzPets = {};
 function _dzAnyModalOpen() {
