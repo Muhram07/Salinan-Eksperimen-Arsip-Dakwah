@@ -1,13 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v1.8.9
+Studio Poster Maker Pro - Update v2.0.6
 
-v1.8.9:
-1. STABILO LEVEL BLUR REALTIME: perubahan blur langsung terlihat saat slider digeser (sebelumnya cache tidak diperbarui).
-2. LENGKUNG & KEMIRINGAN UNTUK GAMBAR: tombol Lengkung di kanan Rotasi pada toolbar gambar. Gambar (PNG/JPG) bisa melengkung dan dimiringkan, sama seperti teks. Ada tombol Reset.
+v2.0.6:
+1. PREVIEW MENGAMBANG TIDAK HILANG SENDIRI: setelah dibuka, preview tetap tampil walau panel tool tertutup (mis. ketuk area kanvas hitam). Hanya tombol ✕ atau tool layar penuh yang menyembunyikannya; muncul lagi saat panel tool dibuka kembali.
+2. PREVIEW LEBIH RESPONSIF: downscale dua tahap dengan kanvas antara yang dipakai ulang (tanpa alokasi per frame), sehingga hasil tetap tajam dan lebih ringan daripada satu langkah berat.
 
-v1.8.8:
-1. STABILO LEVEL BLUR: kotak stabilo bisa diblur dari 0 sampai sangat kabur.
-2. LAYER MASK IKUT TEKS: lilitan melekat pada posisi dan rotasi teks.
+v2.0.5:
+1. TOOL PENA (Sensor Blur/Airbrush): lag saat digerakkan cepat dihilangkan. Filter blur per segmen diganti stempel lembut (sprite offscreen di-cache dan dipakai ulang, dibebaskan saat selesai), sehingga ringan dan mengikuti jari.
+2. PREVIEW MENGAMBANG = MONITOR KEDUA: ukuran/rasio langsung mengikuti poster saat rasio diganti (4:5, 1:1, 9:16, dst). Garis bantu ikut tampil. Preview bisa disentuh seperti kanvas asli (pilih elemen, geser, tombol sudut/tepi/hapus/pindah/rotasi, snap, garis sejajar & garis jarak) lewat jalur event kanvas asli. Penggeser posisi diganti tombol tangan ✋ di sudut kiri bawah.
 -->
 
 
@@ -178,7 +178,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .btn-dup-slide .ic,.btn-del-slide .ic{width:16px;height:16px;}
 .btn-nav .ic{width:16px;height:16px;}
 .vertical-toolbar button .ic{width:18px;height:18px;}
-.vertical-toolbar button:hover{--ic-a:#111;}
+.vertical-toolbar button:hover,.vertical-toolbar button:active{background:#D4AF37;color:#111;}
+.vertical-toolbar button:hover .ic,.vertical-toolbar button:active .ic{--ic-a:#111;}
+/* v2.0.1: .ic punya --ic-a sendiri, jadi aksen emas harus diganti langsung pada ikon di atas latar emas */
+.btn-download .ic,.btn-sub-tool.active .ic,.bib-tab.on .ic,.bib-go .ic,.bib-act.add .ic,.up-btn.gold .ic,.up-pan-toggle.on .ic,.pg-chip.on .ic,.tbl-ed-colh.on .ic,.tbl-ed-rowh.on .ic,.tbl-ed-fmt.active .ic,.btn-step:hover .ic,.dpad-btn:active .ic,.canva-stalk-btn:active .ic,.handled-loupe-stalk:active .ic,.btn-proj-action:hover .ic,.tag-pill:hover .ic,.tag-pill.active .ic{--ic-a:currentColor;}
 .panel-title{--ic-a:currentColor;}
 .ic-i{display:inline-block;vertical-align:-3px;margin-right:6px;width:16px;height:16px;}
 .tool-btn:hover,.tool-btn.active{background:rgba(212,175,55,.15);color:#D4AF37;}
@@ -672,6 +675,114 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .up-zoom{display:flex;flex-direction:column;align-items:center;gap:6px;}
 .up-zoom-val{min-width:44px;text-align:center;font-size:12px;font-weight:800;color:#D4AF37;}
 .upf-joy{justify-content:center;gap:28px;padding:4px 14px 8px;}
+
+/* v1.9.0: roda warna & pengecek keterbacaan */
+.cw-toggle{position:fixed;left:8px;top:120px;z-index:9998;width:40px;height:40px;border-radius:50%;border:1px solid #D4AF37;background:rgba(20,20,20,.9);color:#D4AF37;font-size:18px;cursor:pointer;padding:0;}
+.cw-panel{position:fixed;left:8px;top:168px;width:220px;max-height:70vh;overflow:auto;z-index:9997;background:rgba(18,18,18,.96);border:1px solid #D4AF37;border-radius:12px;padding:10px;color:#eee;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+.cw-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;color:#D4AF37;margin-bottom:8px;}
+.cw-x{background:none;border:1px solid #D4AF37;color:#D4AF37;border-radius:50%;width:24px;height:24px;cursor:pointer;padding:0;}
+.cw-wheelwrap{display:flex;justify-content:center;margin-bottom:8px;}
+#cwWheel{width:180px;height:180px;touch-action:none;cursor:crosshair;border-radius:50%;}
+.cw-row{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:6px 0;}
+.cw-mini{background:rgba(255,255,255,.06);border:1px solid #D4AF37;color:#D4AF37;border-radius:8px;padding:4px 8px;cursor:pointer;}
+.cw-panel select{background:#111;color:#eee;border:1px solid #D4AF37;border-radius:6px;padding:3px;}
+.cw-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0;}
+.cw-sw{height:34px;border-radius:8px;border:1px solid #fff;cursor:pointer;padding:0;}
+.cw-status{margin-top:6px;padding:6px;border-radius:8px;background:rgba(255,255,255,.04);line-height:1.4;}
+.cw-note{font-size:10px;color:#999;margin-top:6px;line-height:1.4;}
+
+/* v1.9.1: roda warna lengkap */
+.cw-panel{width:270px;}
+.cw-headbtns{display:flex;gap:6px;}
+#cwWheel{width:240px;height:240px;border-radius:0;touch-action:none;cursor:crosshair;}
+.cw-sec{font-size:11px;font-weight:700;color:#D4AF37;margin:10px 0 4px;}
+.cw-sec2{font-size:10px;color:#bbb;margin:6px 0 3px;}
+.cw-list{display:flex;flex-direction:column;gap:5px;}
+.cw-row-sw{display:flex;align-items:center;gap:8px;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.35);border-radius:8px;padding:4px 6px;color:#eee;cursor:pointer;font-size:11px;text-align:left;}
+.cw-chip{width:22px;height:22px;border-radius:6px;border:1px solid #fff;flex-shrink:0;}
+.cw-hx{font-weight:700;min-width:64px;}
+.cw-ct{font-size:9px;color:#aaa;}
+.cw-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.cw-chip2{height:24px;border-radius:6px;border:1px solid #fff;cursor:pointer;padding:0;}
+.cw-pal{background:rgba(255,255,255,.04);border-radius:8px;padding:5px;margin-bottom:4px;}
+.cw-pal-h{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:4px;}
+.cw-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+
+/* v1.9.2: scan, paket permanen, peta kontras, tombol roda di tengah atas */
+.cw-toggle{left:50%;top:8px;transform:translateX(-50%);}
+.cw-toggle .ic,.cw-x .ic,.cw-mini .ic{width:16px;height:16px;vertical-align:-3px;}
+.cw-hint{font-size:10px;color:#aaa;line-height:1.5;margin:4px 0 6px;}
+.cw-pal-btns{display:inline-flex;gap:4px;}
+.cw-del{border-color:#f87171 !important;color:#f87171 !important;}
+.cw-map{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-bottom:8px;}
+.cw-cell{height:26px;border-radius:4px;border:1px solid rgba(255,255,255,.25);}
+
+/* v1.9.3: roda di bawah bar atas, mode Manual/Otomatis, rekomendasi */
+.cw-toggle{left:50%;top:152px;transform:translateX(-50%);}
+.cw-panel{top:200px;}
+.cw-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+.cw-segbtn{background:rgba(255,255,255,.05);border:1px solid #D4AF37;color:#D4AF37;border-radius:10px;padding:8px;font-weight:800;cursor:pointer;}
+.cw-segbtn.on{background:#D4AF37;color:#111;}
+.cw-role{background:rgba(255,255,255,.04);border-radius:10px;padding:6px;margin-bottom:6px;}
+.cw-role-h{font-weight:800;color:#D4AF37;font-size:12px;}
+.cw-role-d{display:block;font-size:10px;color:#aaa;font-weight:400;margin:2px 0 5px;}
+.cw-chips3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.cw-chip3{display:flex;flex-direction:column;align-items:center;gap:2px;background:#111;border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:4px;color:#eee;font-size:10px;cursor:pointer;}
+.cw-chip3-c{width:100%;height:26px;border-radius:6px;border:1px solid #fff;display:block;}
+.cw-chip3 small{color:#D4AF37;font-weight:700;}
+
+/* v1.9.4: tombol pilih warna, panel tidak terpotong, rekomendasi lengkap */
+.cw-toggle{left:50%;top:118px;transform:translateX(-50%);width:46px;height:46px;background:rgba(18,18,18,.95);border:1.5px solid #D4AF37;box-shadow:0 4px 14px rgba(0,0,0,.45);}
+.cw-toggle .ic{width:26px;height:26px;}
+.cw-panel{top:168px;bottom:24px;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:18px;}
+.cw-doms{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;}
+.cw-dom{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.05);border-radius:8px;padding:3px 6px;font-size:10px;color:#ddd;}
+.cw-dom .cw-chip{width:14px;height:14px;}
+.cw-chip3{display:flex;flex-direction:column;gap:3px;background:#111;border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:4px;color:#eee;font-size:10px;}
+.cw-apply{background:none;border:0;padding:0;cursor:pointer;}
+.cw-chip3-c{display:block;width:100%;height:30px;border-radius:6px;border:1px solid #fff;}
+.cw-hxrow{display:flex;align-items:center;justify-content:space-between;gap:3px;}
+.cw-hxt{font-weight:700;font-size:10px;}
+.cw-cp{background:rgba(255,255,255,.06);border:1px solid #D4AF37;color:#D4AF37;border-radius:6px;padding:0 4px;font-size:10px;cursor:pointer;line-height:16px;}
+.cw-chip3 small{color:#D4AF37;font-weight:700;font-size:9px;line-height:1.2;}
+.cw-role-h{font-weight:800;color:#D4AF37;font-size:12px;}
+.cw-role-d{display:block;font-size:10px;color:#aaa;font-weight:400;margin:2px 0 5px;}
+.cw-chips3{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;}
+
+/* v1.9.5: kotak warna terbuka, jarak tombol salin, posisi & z-index tombol pilih warna */
+.cw-toggle{top:60px;z-index:10040;}
+.cw-panel{top:112px;z-index:10030;}
+.cw-apply{display:block;width:100%;padding:0;margin:0;background:none;border:0;cursor:pointer;}
+.cw-chip3{gap:6px;padding:6px;}
+.cw-chip3-c{display:block;width:100%;height:40px;border-radius:6px;border:1px solid #fff;}
+.cw-hxrow{margin-top:8px;padding-top:4px;border-top:1px solid rgba(255,255,255,.08);}
+.cw-cp{margin-left:6px;padding:2px 6px;}
+
+/* v1.9.6: bar pilih warna di bawah (HP & desktop), tombol gulir, transparansi tanpa kedip */
+.cw-panel{display:flex;flex-direction:row;top:auto;bottom:70px;left:8px;right:8px;width:auto;max-height:none;height:46vh;height:46dvh;padding:0;overflow:hidden;background:var(--cw-bg, rgba(16,16,16,.82));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:10030;opacity:1;animation:none;transition:none;box-shadow:0 -6px 24px rgba(0,0,0,.45);}
+.cw-rail{display:flex;flex-direction:column;justify-content:center;gap:10px;padding:6px 5px;border-right:1px solid rgba(212,175,55,.3);flex-shrink:0;}
+.cw-rb{width:34px;height:34px;border-radius:8px;border:1px solid #D4AF37;background:rgba(255,255,255,.06);color:#D4AF37;font-size:14px;cursor:pointer;padding:0;}
+.cw-body{flex:1;min-width:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:10px 10px 16px;}
+#cwWheel{width:min(190px,34vh) !important;height:auto !important;aspect-ratio:1/1;}
+.cw-toggle{top:60px;background:var(--cw-bg2, rgba(18,18,18,.82));opacity:1;animation:none;transition:none;}
+@media (min-width:700px){
+  .cw-panel{left:50%;right:auto;width:460px;transform:translateX(-50%);bottom:80px;height:52vh;height:52dvh;}
+  #cwWheel{width:min(240px,36vh) !important;}
+}
+
+/* v1.9.7: ikon piramida polos, tombol info huruf i, bar lebih pendek, penjelasan kontras */
+.cw-toggle{background:transparent;border:none;box-shadow:none;width:auto;height:auto;padding:2px;}
+.cw-toggle .ic{width:32px;height:32px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+.cw-info{background:none;border:none;color:#D4AF37;font-size:20px;font-weight:800;font-family:Georgia,serif;font-style:italic;cursor:pointer;padding:0 6px;line-height:1;}
+.cw-help{font-size:11px;line-height:1.6;color:#ddd;background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.25);border-radius:8px;padding:8px;margin:8px 0;}
+.cw-panel{height:38vh;height:38dvh;bottom:70px;}
+#cwWheel{width:min(170px,30vh) !important;}
+@media (min-width:700px){
+  .cw-panel{height:40vh;height:40dvh;bottom:70px;}
+  #cwWheel{width:min(220px,32vh) !important;}
+}
+
+/* v2.0.0: modal Hapus Objek AI memakai kelas Hapus BG */
 </style>
 </head>
 <body>
@@ -686,6 +797,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <symbol id="ic-fade" viewBox="0 0 24 24"><rect class='ic-a' x='3' y='3.5' width='18' height='17' rx='3.5' stroke-dasharray='1.6 2.6'/><rect x='7.5' y='8' width='9' height='8' rx='2.2'/></symbol>
 <symbol id="ic-pen" viewBox="0 0 24 24"><path d='M12 2.8l5.2 6.4-2.4 6.8H9.2L6.8 9.2z'/><path d='M12 10v6'/><circle class='ic-a' cx='12' cy='8.2' r='1.2'/><path class='ic-a' d='M8 20.5h8'/></symbol>
 <symbol id="ic-cloud" viewBox="0 0 24 24"><path d='M7 19h10.5a3.8 3.8 0 0 0 .6-7.55A6 6 0 0 0 6.6 10 4.5 4.5 0 0 0 7 19z'/><path class='ic-a' d='M12 16.5v-5M9.8 13.7l2.2-2.2 2.2 2.2'/></symbol>
+<symbol id="ic-colorpick" viewBox="0 0 24 24"><path class='ic-a' d='M3 5h18l-9 16z'/><path stroke='#A9A9A9' d='M7 9h10l-5 8.5z'/><path stroke='#A9A9A9' d='M3 2.6h18'/><circle class='ic-af' cx='12' cy='10.8' r='1.1'/></symbol>
+<symbol id="ic-patch" viewBox="0 0 24 24"><rect class='ic-af' x='3' y='3' width='7' height='7' rx='1' stroke-dasharray='2 1.6'/><path class='ic-a' d='M13.5 17.5l5.6-5.6 2.2 2.2-5.6 5.6h-2.2z'/><path stroke='#A9A9A9' d='M12 9.5l1.6-1.6M15.5 6l.6 2.3M18 3.5l-1 1.2M20.8 6.6l1.7-.5'/></symbol>
+<symbol id="ic-bgfill" viewBox="0 0 24 24"><path d='M5.5 10.5L11 5l6.5 6.5-5.5 5.5z'/><path d='M4 12.5h10'/><path class='ic-a' d='M17.8 13.2c0 1.7-1 2.8-1.7 2.8s-1.7-1.1-1.7-2.8c0-1.2 1.7-3.2 1.7-3.2s1.7 2 1.7 3.2z'/><circle class='ic-af' cx='7.2' cy='19.5' r='1.3'/><path class='ic-a' d='M3 21h18'/></symbol>
+<symbol id="ic-readable" viewBox="0 0 24 24"><path d='M3 18L9 6l6 12M5 14h8'/><path d='M14.5 9.5h6.5M14.5 13.5h4'/><path class='ic-a' d='M15.6 18.6l1.9 1.9 3.9-4.2'/></symbol>
+<symbol id="ic-wheel" viewBox="0 0 24 24"><circle cx='12' cy='12' r='9'/><path d='M12 3v18M3 12h18'/><path class='ic-a' d='M12 3a9 9 0 0 1 9 9h-9z'/><circle class='ic-af' cx='7.5' cy='7.5' r='1.3'/></symbol>
+<symbol id="ic-scan" viewBox="0 0 24 24"><path d='M4 9V5h4M16 5h4v4M20 15v4h-4M8 19H4v-4'/><circle class='ic-af' cx='12' cy='12' r='2.6'/></symbol>
 <symbol id="ic-palette" viewBox="0 0 24 24"><path d='M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.1-.5-1.3.2-2.4 1.6-2.4H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z'/><circle class='ic-af' cx='7.6' cy='11.2' r='1.2'/><circle class='ic-af' cx='10.2' cy='7.4' r='1.2'/><circle class='ic-af' cx='14.8' cy='7.4' r='1.2'/></symbol>
 <symbol id="ic-layers" viewBox="0 0 24 24"><path d='M12 3.5l9 4.5-9 4.5L3 8z'/><path d='M3 12.2l9 4.5 9-4.5'/><path class='ic-a' d='M3 16.4l9 4.5 9-4.5'/></symbol>
 <symbol id="ic-guides" viewBox="0 0 24 24"><path d='M4 4v16h16z'/><path class='ic-a' d='M4 9h2.6M4 13.5h2.6M9 20v-2.6M13.5 20v-2.6'/></symbol>
@@ -743,12 +860,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <symbol id="ic-zoomin" viewBox="0 0 24 24"><circle cx='10.5' cy='10.5' r='6.5'/><path d='M15.3 15.3L21 21'/><path class='ic-a' d='M7.8 10.5h5.4M10.5 7.8v5.4'/></symbol>
 <symbol id="ic-zoomout" viewBox="0 0 24 24"><circle cx='10.5' cy='10.5' r='6.5'/><path d='M15.3 15.3L21 21'/><path class='ic-a' d='M7.8 10.5h5.4'/></symbol>
 <symbol id="ic-eye" viewBox="0 0 24 24"><path d='M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z'/><circle class='ic-a' cx='12' cy='12' r='3'/></symbol>
-<symbol id="ic-up" viewBox="0 0 24 24"><path d='M12 19V5M6 11l6-6 6 6'/></symbol>
-<symbol id="ic-down" viewBox="0 0 24 24"><path d='M12 5v14M6 13l6 6 6-6'/></symbol>
-<symbol id="ic-left" viewBox="0 0 24 24"><path d='M19 12H5M11 6l-6 6 6 6'/></symbol>
-<symbol id="ic-right" viewBox="0 0 24 24"><path d='M5 12h14M13 6l6 6-6 6'/></symbol>
+<symbol id="ic-up" viewBox="0 0 24 24"><path d='M12 19V5'/><path class='ic-a' d='M6 11l6-6 6 6'/></symbol>
+<symbol id="ic-down" viewBox="0 0 24 24"><path d='M12 5v14'/><path class='ic-a' d='M6 13l6 6 6-6'/></symbol>
+<symbol id="ic-left" viewBox="0 0 24 24"><path d='M19 12H5'/><path class='ic-a' d='M11 6l-6 6 6 6'/></symbol>
+<symbol id="ic-right" viewBox="0 0 24 24"><path d='M5 12h14'/><path class='ic-a' d='M13 6l6 6-6 6'/></symbol>
 <symbol id="ic-ghost" viewBox="0 0 24 24"><path d='M5 20V11a7 7 0 0 1 14 0v9l-2.3-2-2.3 2-2.4-2-2.4 2-2.3-2z'/><circle class='ic-af' cx='9.4' cy='11.2' r='1.1'/><circle class='ic-af' cx='14.6' cy='11.2' r='1.1'/></symbol>
-<symbol id="ic-fullscreen" viewBox="0 0 24 24"><path d='M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5'/></symbol>
+<symbol id="ic-fullscreen" viewBox="0 0 24 24"><path d='M4 9V4h5M20 15v5h-5'/><path class='ic-a' d='M15 4h5v5M9 20H4v-5'/></symbol>
 <symbol id="ic-warn" viewBox="0 0 24 24"><path d='M12 3.5L2.8 19.5h18.4z'/><path class='ic-a' d='M12 10v4.5'/><circle class='ic-af' cx='12' cy='17' r='.9'/></symbol>
 <symbol id="ic-checkc" viewBox="0 0 24 24"><circle cx='12' cy='12' r='9'/><path class='ic-a' d='M7.8 12.4l3 3 5.6-6'/></symbol>
 <symbol id="ic-check" viewBox="0 0 24 24"><path class='ic-a' d='M4.5 12.5l5 5L19.5 7'/></symbol>
@@ -1185,8 +1302,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="btn-nav" onclick="zoomFreeCrop(0.25)" style="width:34px;justify-content:center;">➕</button>
         <button class="btn-nav" onclick="zoomFreeCrop(-0.25)" style="width:34px;justify-content:center;">➖</button>
         <button class="btn-nav" onclick="resetFreeCropZoom()" style="width:34px;justify-content:center;">🎯</button>
-        <button class="btn-nav fm-undo" id="fcUndoBtn" onclick="undoFreeCrop()" style="width:34px;justify-content:center;" aria-label="Undo">↩️</button>
-        <button class="btn-nav fm-undo" id="fcRedoBtn" onclick="redoFreeCrop()" style="width:34px;justify-content:center;" aria-label="Redo">↪️</button>
     </div>
     <div style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:105; align-items:flex-start;">
         <button class="btn-nav" id="freeCropModeBtn" onclick="toggleFreeCropMode()" style="justify-content:center;">🎯 Buang Luar</button>
@@ -1213,8 +1328,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;flex:0 0 auto;" onpointerdown="startStepHold(adjustFreeCropTipUp)" onpointerup="stopStepHold()" onpointerleave="stopStepHold()" onpointercancel="stopStepHold()">➕</button>
 <span id="freeCropTipSizeVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:38px;text-align:right;">40px</span>
 </div>
-<div class="fmodal-footer">
+<div class="fmodal-footer" style="gap:6px;padding:0 10px;">
+<div style="display:flex;align-items:center;gap:6px;">
+<button class="btn-nav fm-undo" id="fcUndoBtn" onclick="undoFreeCrop()" style="padding:6px 10px;" title="Undo" aria-label="Undo">↩️</button>
+<button class="btn-nav fm-undo" id="fcRedoBtn" onclick="redoFreeCrop()" style="padding:6px 10px;" title="Redo" aria-label="Redo">↪️</button>
 <button class="btn-nav" onclick="clearFreeCropPath()">Bersihkan</button>
+</div>
 <button class="btn-nav btn-download" onclick="applyFreeCrop()">✂️ Terapkan Crop</button>
 </div>
 </div>
@@ -1908,7 +2027,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v1.8.9';
+const APP_VERSION = 'v2.0.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3446,6 +3565,7 @@ if(s.elements) {
     renderLayerMaskPatches(ctx,s.elements);
 }
 updateSelectionBox();
+if(typeof fpvRefresh === 'function') fpvRefresh(true);
 }
 
 
@@ -5273,6 +5393,13 @@ mctx.fillStyle=grad;
 mctx.fillRect(0,0,dw,dh);
 }
 
+if(focusData.invert){
+/* v2.0.3: balik mask (xor dengan kotak penuh): area fokus jadi blur, bagian luar jelas */
+mctx.globalCompositeOperation='xor';
+mctx.fillStyle='#000';
+mctx.fillRect(0,0,dw,dh);
+mctx.globalCompositeOperation='source-over';
+}
 targetCtx.drawImage(sharpCanvas,dx,dy);
 bctx.globalCompositeOperation='destination-in';
 bctx.drawImage(maskCanvas,0,0);
@@ -5428,6 +5555,7 @@ selBox.style.height=`${domH}px`;
 selBox.style.left=`${domX}px`;
 selBox.style.top=`${domY}px`;
 selBox.classList.add('active');
+if(typeof fpvRefresh === 'function') fpvRefresh();
 }
 
 function hideSnapGuides(){
@@ -5442,6 +5570,7 @@ function drawSmartGuides(lines) {
         if (_sgRaf) { cancelAnimationFrame(_sgRaf); _sgRaf = 0; }
         _sgLines = [];
         sgCtx.clearRect(0, 0, smartGuideCanvas.width, smartGuideCanvas.height);
+        if(typeof fpvRefresh === 'function') fpvRefresh();
         return;
     }
     _sgLines = lines;
@@ -5480,6 +5609,7 @@ function paintSmartGuides() {
         sgCtx.restore();
     };
     glow(pA, true); glow(pG, false);
+    if(typeof fpvRefresh === 'function') fpvRefresh();
     sgCtx.save();
     sgCtx.font = `bold ${11 * k}px 'Plus Jakarta Sans', sans-serif`;
     sgCtx.textAlign = 'center'; sgCtx.textBaseline = 'middle';
@@ -6134,9 +6264,9 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="addNewTable()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-table"/></svg></span><span>Tabel</span></button>
 <button class="tool-btn" onclick="generateOrgChart()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-orgchart"/></svg></span><span>Bagan</span></button>
 <button class="tool-btn" onclick="openPanelFadeEdge()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-fade"/></svg></span><span>Fade Tepi</span></button>
-<button class="tool-btn" onclick="openPenToolOverlay()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-pen"/></svg></span><span>Gambar</span></button>
+<button class="tool-btn" onclick="openPenToolOverlay()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-pen"/></svg></span><span>Pena</span></button>
 <button class="tool-btn" onclick="openElementsDrive()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-cloud"/></svg></span><span>Elemen</span></button>
-<button class="tool-btn" onclick="openPanelBackground()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-palette"/></svg></span><span>Background</span></button>
+<button class="tool-btn" onclick="openPanelBackground()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-bgfill"/></svg></span><span>Latar</span></button>
 <button class="tool-btn" onclick="openPanelLayers()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-layers"/></svg></span><span>Lapisan</span></button>
 <button class="tool-btn" onclick="openPanelBleed()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-guides"/></svg></span><span>Garis Bantu</span></button>
 <button class="tool-btn" onclick="openMultiCopyModal()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-copymulti"/></svg></span><span>Copy Massal</span></button>
@@ -6181,6 +6311,7 @@ ${el.warpSrc ? `<button class="tool-btn" onclick="resetTextWarp()"><span class="
 <button class="tool-btn" onclick="openPanelSpacing()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-spacing"/></svg></span><span>Jarak</span></button>
 <button class="tool-btn" onclick="openPanelTextFormat()"><span class="icon"><b>B</b><i>I</i></span><span>Format</span></button>
 <button class="tool-btn" onclick="openPanelTextColor()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-palette"/></svg></span><span>Warna</span></button>
+<button class="tool-btn" onclick="openPanelReadability()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-readable"/></svg></span><span>Mudah Dibaca</span></button>
 <button class="tool-btn" onclick="openPanelAdvancedShadow()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-shadow"/></svg></span><span>Bayangan 3D</span></button>
 <button class="tool-btn" onclick="openPanelHighlight()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-highlighter"/></svg></span><span>Stabilo</span></button>
 <button class="tool-btn" onclick="openPanelAdjustLight()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-bulb"/></svg></span><span>Cahaya</span></button>
@@ -6210,6 +6341,7 @@ bar.innerHTML=`
 <button class="tool-btn" onclick="openMagicGrabModal()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-sparkle"/></svg></span><span>Tangkap Ajaib</span></button>
 <button class="tool-btn" onclick="openPanelPngColorOverlay()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-silhouette"/></svg></span><span>Warna Siluet</span></button>
 <button class="tool-btn" onclick="openMagicWandModal()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-wand"/></svg></span><span>Hapus BG</span></button>
+<button class="tool-btn" onclick="openAiInpaint()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-patch"/></svg></span><span>Hapus Objek</span></button>
 <button class="tool-btn" onclick="openPanelImageFlip()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-flip"/></svg></span><span>Cermin</span></button>
 <button class="tool-btn" onclick="openPanelOpacity()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-opacity"/></svg></span><span>Transparansi</span></button>
 <button class="tool-btn" onclick="openPanelAdjustLight()"><span class="icon"><svg class="ic" aria-hidden="true"><use href="#ic-tone"/></svg></span><span>Cahaya & Warna</span></button>
@@ -6945,7 +7077,8 @@ panel.classList.remove('upscale-panel');
 panel.classList.add('active');
 currentActivePanel = title;
 }
-function closeToolPanel(){const panel=document.getElementById('toolPanel');panel.classList.remove('active','upscale-panel'); if(typeof upCleanup==='function'&&UP.srcC)upCleanup(); currentActivePanel='';}
+function closeToolPanel(){if(window.__fpvKeep && window.__fpvKeepId && window.__fpvKeepId===activeElementId) return; /* v2.0.5: sentuhan dari preview pada elemen yang sama tidak menutup panel */
+const panel=document.getElementById('toolPanel');panel.classList.remove('active','upscale-panel'); if(typeof upCleanup==='function'&&UP.srcC)upCleanup(); currentActivePanel='';}
 
 let eyedropperCallback=null;
 let loupeCurrentHex='#FFFFFF';
@@ -8626,6 +8759,14 @@ setTimeout(() => {
 let isDrawingPen = false;
 let lastPenX = 0;
 let lastPenY = 0;
+/* v2.0.2: spidol digambar sebagai satu goresan utuh di atas salinan kanvas (tanpa tumpang tindih sambungan) */
+let penStrokePts = [];
+let penSnap = null;
+function penFreeSnap(){
+    if(penSnap){ penSnap.width = 0; penSnap.height = 0; penSnap = null; }
+    if(typeof penBlurSprite !== 'undefined' && penBlurSprite){ penBlurSprite.width = 0; penBlurSprite.height = 0; penBlurSprite = null; penBlurKey = ''; }
+    penStrokePts = [];
+}
 
 function openPenToolOverlay() {
     if(checkDemo()) return;
@@ -8635,10 +8776,50 @@ function openPenToolOverlay() {
     drawingCanvasOverlay.style.display = 'block';
     drawingCanvasOverlay.style.pointerEvents = 'auto';
     clearPenCanvas();
-    showToast('✍️ Mode Gambar Aktif');
+    cwSyncVisibility();
+    showToast('✍️ Mode Pena Aktif');
 }
 
-function updatePenSettings() {}
+/* v2.0.3: keker bulat monitor ukuran pena/spidol (satu elemen dipakai ulang, tanpa kanvas tambahan) */
+let penRingEl = null, penRingTimer = 0;
+function penHideRing(){
+    if(penRingTimer){ clearTimeout(penRingTimer); penRingTimer = 0; }
+    if(penRingEl) penRingEl.style.display = 'none';
+}
+function penShowRing(){
+    if(appMode !== 'drawing') return;
+    if(!penRingEl){
+        penRingEl = document.createElement('div');
+        penRingEl.style.cssText = 'position:fixed;border-radius:50%;pointer-events:none;z-index:100000;box-sizing:border-box;display:none;transform:translate(-50%,-50%);';
+        document.body.appendChild(penRingEl);
+    }
+    const size = parseInt(document.getElementById('penSize').value) || 10;
+    const type = document.getElementById('penBrushType').value;
+    const color = document.getElementById('penColorHidden').value;
+    const r = drawingCanvasOverlay.getBoundingClientRect();
+    const k = drawingCanvasOverlay.width ? (r.width / drawingCanvasOverlay.width) : 1;
+    const d = Math.max(2, size * k);
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const L = Math.max(r.left, 0), R = Math.min(r.right, vw), T = Math.max(r.top, 0), B = Math.min(r.bottom, vh);
+    const cx = (R > L) ? (L + R) / 2 : vw / 2, cy = (B > T) ? (T + B) / 2 : vh / 2;
+    const st = penRingEl.style;
+    st.width = d + 'px'; st.height = d + 'px';
+    st.left = cx + 'px'; st.top = cy + 'px';
+    if(type === 'eraser'){
+        st.background = 'rgba(255,255,255,.18)';
+        st.border = '2px dashed #ffffff';
+    } else {
+        st.background = color;
+        st.opacity = '';
+        st.border = '2px solid #D4AF37';
+    }
+    st.boxShadow = '0 0 0 1px rgba(0,0,0,.6)';
+    st.opacity = (type === 'marker') ? '0.55' : '1';
+    st.display = 'block';
+    if(penRingTimer) clearTimeout(penRingTimer);
+    penRingTimer = setTimeout(penHideRing, 900);
+}
+function updatePenSettings() { penShowRing(); }
 
 function clearPenCanvas() {
     dctx.clearRect(0, 0, drawingCanvasOverlay.width, drawingCanvasOverlay.height);
@@ -8649,6 +8830,130 @@ function updatePenColor(color) {
     document.getElementById('penColorBtn').style.background = color;
 }
 
+/* v2.0.4: penghalusan goresan. Garis dibuat kurva kuadratik antar titik-tengah (tangen kontinu), bukan lineTo antar titik sentuh */
+let penMidX = 0, penMidY = 0;
+/* v2.0.5: airbrush memakai stempel lembut (sprite offscreen di-cache) menggantikan ctx.filter blur per segmen yang berat */
+let penBlurSprite = null, penBlurKey = '';
+function penGetBlurSprite(color, size){
+    const key = color + '|' + size;
+    if(penBlurSprite && penBlurKey === key) return penBlurSprite;
+    const pad = 18, d = Math.max(4, Math.ceil(size + pad * 2)), r = d / 2;
+    if(!penBlurSprite) penBlurSprite = document.createElement('canvas');
+    penBlurSprite.width = d; penBlurSprite.height = d;
+    const sx = penBlurSprite.getContext('2d');
+    const inner = Math.max(0, Math.min(0.9, (size / 2 - 8) / r));
+    const g = sx.createRadialGradient(r, r, 0, r, r, r);
+    const span = 1 - inner;
+    g.addColorStop(0, 'rgba(0,0,0,1)');
+    g.addColorStop(inner, 'rgba(0,0,0,1)');
+    g.addColorStop(inner + span * 0.25, 'rgba(0,0,0,0.85)');
+    g.addColorStop(inner + span * 0.5, 'rgba(0,0,0,0.5)');
+    g.addColorStop(inner + span * 0.75, 'rgba(0,0,0,0.15)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    sx.fillStyle = g; sx.fillRect(0, 0, d, d);
+    sx.globalCompositeOperation = 'source-in';
+    sx.fillStyle = color; sx.fillRect(0, 0, d, d);
+    penBlurKey = key;
+    return penBlurSprite;
+}
+function penStampQuad(x0, y0, cx, cy, x1, y1, color, size){
+    const sp = penGetBlurSprite(color, size), h = sp.width / 2;
+    const chord = Math.hypot(cx - x0, cy - y0) + Math.hypot(x1 - cx, y1 - cy);
+    const step = Math.max(1, size * 0.2);
+    const n = Math.max(1, Math.ceil(chord / step));
+    dctx.globalCompositeOperation = 'source-over';
+    for(let i = 1; i <= n; i++){
+        const t = i / n, u = 1 - t;
+        const px = u * u * x0 + 2 * u * t * cx + t * t * x1;
+        const py = u * u * y0 + 2 * u * t * cy + t * t * y1;
+        dctx.drawImage(sp, px - h, py - h);
+    }
+}
+function penApplyStyle(type, color, size){
+    dctx.lineWidth = size;
+    dctx.lineCap = 'round';
+    dctx.lineJoin = 'round';
+    if(type === 'eraser'){
+        dctx.globalCompositeOperation = 'destination-out';
+        return;
+    }
+    dctx.globalCompositeOperation = 'source-over';
+    dctx.strokeStyle = color;
+    dctx.shadowBlur = 0;
+    dctx.globalAlpha = 1.0;
+    if(type === 'glow'){ dctx.shadowBlur = size; dctx.shadowColor = color; }
+    else if(type === 'blur'){ dctx.filter = 'blur(8px)'; }
+}
+function penResetStyle(){
+    dctx.globalCompositeOperation = 'source-over';
+    dctx.globalAlpha = 1.0;
+    dctx.shadowBlur = 0;
+    dctx.filter = 'none';
+}
+function penAddPoint(x, y, type, color, size){
+    if(Math.hypot(x - lastPenX, y - lastPenY) < 0.8) return;
+    if(type === 'marker' && penSnap){
+        penStrokePts.push([x, y]);
+        lastPenX = x; lastPenY = y;
+        return;
+    }
+    const mx = (lastPenX + x) / 2, my = (lastPenY + y) / 2;
+    if(type === 'blur'){
+        penStampQuad(penMidX, penMidY, lastPenX, lastPenY, mx, my, color, size);
+        penMidX = mx; penMidY = my;
+        lastPenX = x; lastPenY = y;
+        return;
+    }
+    penApplyStyle(type, color, size);
+    dctx.beginPath();
+    dctx.moveTo(penMidX, penMidY);
+    dctx.quadraticCurveTo(lastPenX, lastPenY, mx, my);
+    dctx.stroke();
+    penResetStyle();
+    penMidX = mx; penMidY = my;
+    lastPenX = x; lastPenY = y;
+}
+function penTracePath(){
+    const p = penStrokePts, n = p.length;
+    dctx.beginPath();
+    dctx.moveTo(p[0][0], p[0][1]);
+    if(n === 2){ dctx.lineTo(p[1][0], p[1][1]); return; }
+    for(let i = 1; i < n - 1; i++){
+        dctx.quadraticCurveTo(p[i][0], p[i][1], (p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2);
+    }
+    if(n > 2) dctx.lineTo(p[n - 1][0], p[n - 1][1]);
+}
+function penRedrawMarker(color, size){
+    if(penStrokePts.length < 2) return;
+    dctx.save();
+    dctx.globalCompositeOperation = 'source-over';
+    dctx.shadowBlur = 0;
+    dctx.filter = 'none';
+    dctx.clearRect(0, 0, drawingCanvasOverlay.width, drawingCanvasOverlay.height);
+    dctx.drawImage(penSnap, 0, 0);
+    dctx.globalAlpha = 0.5;
+    dctx.strokeStyle = color;
+    dctx.lineWidth = size;
+    dctx.lineCap = 'round';
+    dctx.lineJoin = 'round';
+    penTracePath();
+    dctx.stroke();
+    dctx.restore();
+}
+function penFinishStroke(){
+    const type = document.getElementById('penBrushType').value;
+    if(type === 'marker' && penSnap) return;
+    if(Math.hypot(lastPenX - penMidX, lastPenY - penMidY) < 0.01) return;
+    const color = document.getElementById('penColorHidden').value;
+    const size = parseInt(document.getElementById('penSize').value);
+    if(type === 'blur'){ penStampQuad(penMidX, penMidY, lastPenX, lastPenY, lastPenX, lastPenY, color, size); return; }
+    penApplyStyle(type, color, size);
+    dctx.beginPath();
+    dctx.moveTo(penMidX, penMidY);
+    dctx.lineTo(lastPenX, lastPenY);
+    dctx.stroke();
+    penResetStyle();
+}
 function setupPenToolEvents() {
     drawingCanvasOverlay.onpointerdown = (e) => {
         if(appMode !== 'drawing') return;
@@ -8660,77 +8965,50 @@ function setupPenToolEvents() {
         
         dctx.beginPath();
         dctx.moveTo(lastPenX, lastPenY);
+        penMidX = lastPenX; penMidY = lastPenY;
+        penStrokePts = [[lastPenX, lastPenY]];
+        if(document.getElementById('penBrushType').value === 'marker'){
+            if(!penSnap) penSnap = document.createElement('canvas');
+            if(penSnap.width !== drawingCanvasOverlay.width || penSnap.height !== drawingCanvasOverlay.height){
+                penSnap.width = drawingCanvasOverlay.width; penSnap.height = drawingCanvasOverlay.height;
+            }
+            const sx = penSnap.getContext('2d');
+            sx.clearRect(0, 0, penSnap.width, penSnap.height);
+            sx.drawImage(drawingCanvasOverlay, 0, 0);
+        }
     };
     
     drawingCanvasOverlay.onpointermove = (e) => {
         if(!isDrawingPen || appMode !== 'drawing') return;
         const rect = drawingCanvasOverlay.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / (canvasScale * userZoomScale);
-        const y = (e.clientY - rect.top) / (canvasScale * userZoomScale);
-        
+        const k = canvasScale * userZoomScale;
         const type = document.getElementById('penBrushType').value;
         const color = document.getElementById('penColorHidden').value;
         const size = parseInt(document.getElementById('penSize').value);
-        
-        if(type === 'eraser') {
-            dctx.globalCompositeOperation = 'destination-out';
-            dctx.lineWidth = size;
-            dctx.lineCap = 'round';
-            dctx.lineJoin = 'round';
-            dctx.lineTo(x, y);
-            dctx.stroke();
-            dctx.beginPath();
-            dctx.moveTo(x, y);
-        } else {
-            dctx.globalCompositeOperation = 'source-over';
-            dctx.strokeStyle = color;
-            dctx.lineWidth = size;
-            
-            if(type === 'glow') {
-                dctx.shadowBlur = size;
-                dctx.shadowColor = color;
-                dctx.lineCap = 'round';
-                dctx.lineJoin = 'round';
-            } else if(type === 'blur') {
-                dctx.shadowBlur = 0;
-                dctx.filter = 'blur(8px)';
-                dctx.lineCap = 'round';
-                dctx.lineJoin = 'round';
-            } else if(type === 'marker') {
-                dctx.shadowBlur = 0;
-                dctx.globalAlpha = 0.5;
-                dctx.lineCap = 'round';
-                dctx.lineJoin = 'round';
-            } else {
-                dctx.shadowBlur = 0;
-                dctx.globalAlpha = 1.0;
-                dctx.lineCap = 'round';
-                dctx.lineJoin = 'round';
-            }
-            
-            dctx.lineTo(x, y);
-            dctx.stroke();
-            dctx.beginPath();
-            dctx.moveTo(x, y);
-            
-            dctx.globalAlpha = 1.0;
-            dctx.shadowBlur = 0;
-            dctx.filter = 'none';
+        const evs = (e.getCoalescedEvents && e.getCoalescedEvents().length) ? e.getCoalescedEvents() : [e];
+        for(let i = 0; i < evs.length; i++){
+            penAddPoint((evs[i].clientX - rect.left) / k, (evs[i].clientY - rect.top) / k, type, color, size);
         }
-        
-        lastPenX = x;
-        lastPenY = y;
+        if(type === 'marker' && penSnap) penRedrawMarker(color, size);
     };
     
-    drawingCanvasOverlay.onpointerup = () => { isDrawingPen = false; };
-    drawingCanvasOverlay.onpointercancel = () => { isDrawingPen = false; };
+    const penEnd = () => {
+        if(isDrawingPen) penFinishStroke();
+        isDrawingPen = false;
+        penStrokePts = [];
+    };
+    drawingCanvasOverlay.onpointerup = penEnd;
+    drawingCanvasOverlay.onpointercancel = penEnd;
 }
 
 function finishPenDrawing() {
+    penFreeSnap();
+    penHideRing();
     const trimmed = trimCanvas(drawingCanvasOverlay);
     if(!trimmed) {
         appMode = 'select';
         document.getElementById('penToolbar').classList.remove('active');
+        cwSyncVisibility();
         drawingCanvasOverlay.style.display = 'none';
         drawingCanvasOverlay.style.pointerEvents = 'none';
         showToast('⚠️ Gambar kosong dibatalkan');
@@ -8756,6 +9034,7 @@ function finishPenDrawing() {
     
     appMode = 'select';
     document.getElementById('penToolbar').classList.remove('active');
+    cwSyncVisibility();
     drawingCanvasOverlay.style.display = 'none';
     drawingCanvasOverlay.style.pointerEvents = 'none';
     
@@ -12721,6 +13000,1566 @@ function fontCountHtml() {
     </div>`;
 }
 
+/* v1.9.0: Cek Mudah Dibaca (WCAG 2.x) + Roda Warna & harmoni */
+const CWHEEL = { h: 45, s: 0.7, v: 0.85, harmony: 'complementary' };
+const CWHEEL_OFFSETS = { complementary: [0, 180], analogous: [-30, 0, 30], triadic: [0, 120, 240], split: [0, 150, 210], tetradic: [0, 60, 180, 240], square: [0, 90, 180, 270] };
+let _cwPx = null;
+
+function cwParseColor(c){
+    if(!c || typeof c !== 'string' || c === 'transparent') return null;
+    if(!_cwPx){ _cwPx = document.createElement('canvas'); _cwPx.width = 1; _cwPx.height = 1; }
+    const x = _cwPx.getContext('2d', { willReadFrequently: true });
+    x.fillStyle = '#010203';
+    const before = x.fillStyle;
+    x.fillStyle = c;
+    if(x.fillStyle === before && c.toLowerCase() !== '#010203') return null;
+    x.clearRect(0, 0, 1, 1);
+    x.fillStyle = c;
+    x.fillRect(0, 0, 1, 1);
+    const d = x.getImageData(0, 0, 1, 1).data;
+    if(d[3] < 8) return null;
+    return [d[0], d[1], d[2]];
+}
+function cwLum(r, g, b){
+    const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+}
+function cwRatio(l1, l2){
+    const a = Math.max(l1, l2), b = Math.min(l1, l2);
+    return (a + 0.05) / (b + 0.05);
+}
+function cwHsvToRgb(h, s, v){
+    h = ((h % 360) + 360) % 360;
+    const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+    let r, g, b;
+    if(h < 60){ r = c; g = x; b = 0; }
+    else if(h < 120){ r = x; g = c; b = 0; }
+    else if(h < 180){ r = 0; g = c; b = x; }
+    else if(h < 240){ r = 0; g = x; b = c; }
+    else if(h < 300){ r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+}
+function cwRgbToHsv(r, g, b){
+    r /= 255; g /= 255; b /= 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    let h = 0;
+    if(d){
+        if(mx === r) h = 60 * (((g - b) / d) % 6);
+        else if(mx === g) h = 60 * ((b - r) / d + 2);
+        else h = 60 * ((r - g) / d + 4);
+    }
+    if(h < 0) h += 360;
+    return { h: h, s: mx ? d / mx : 0, v: mx };
+}
+function cwToHex(rgb){ return '#' + rgb.map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase(); }
+
+function cwDrawElements(x, list){
+    list.forEach(e => {
+        if(e.type === 'connector') renderConnectorElement(x, e);
+        else if(e.type === 'text') renderTextElement(x, e);
+        else if(e.type === 'image') renderImageElement(x, e);
+        else if(e.type === 'shape') renderShapeElement(x, e);
+        else if(e.type === 'fade') renderFadeElement(x, e);
+        else if(e.type === 'table') renderTableElement(x, e);
+    });
+}
+/* Data pixel area di bawah teks: render semua elemen SEBELUM teks ini (z-order) */
+function cwRegionData(el){
+    const s = getCurrentSlide(); if(!s || !s.elements) return null;
+    const idx = s.elements.indexOf(el); if(idx < 0) return null;
+    const W = mainCanvas.width, H = mainCanvas.height;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    renderBackground(s.background, W, H, x);
+    cwDrawElements(x, s.elements.slice(0, idx));
+    const b = getElementBounds(el);
+    const l = Math.max(0, Math.floor(b.l)), t = Math.max(0, Math.floor(b.t));
+    const r = Math.min(W, Math.ceil(b.r)), bt = Math.min(H, Math.ceil(b.b));
+    const w = r - l, h = bt - t;
+    if(w < 2 || h < 2) return null;
+    return { d: x.getImageData(l, t, w, h).data, w: w, h: h };
+}
+function cwSampleBackground(el){
+    const reg = cwRegionData(el); if(!reg) return null;
+    const step = Math.max(1, Math.floor(Math.sqrt(reg.w * reg.h / 2500)));
+    const px = [];
+    for(let yy = 0; yy < reg.h; yy += step) for(let xx = 0; xx < reg.w; xx += step){
+        const i = (yy * reg.w + xx) * 4;
+        px.push([reg.d[i], reg.d[i + 1], reg.d[i + 2]]);
+    }
+    return px;
+}
+/* Peta kontras: area teks dibagi kotak (cols x rows), tiap kotak punya warna rata-rata & rasio kontras */
+function cwGridMap(el, cols, rows){
+    const reg = cwRegionData(el); if(!reg) return null;
+    const rgb = cwParseColor(el.color || '#FFFFFF'); if(!rgb) return null;
+    const tl = cwLum(rgb[0], rgb[1], rgb[2]);
+    const cells = [];
+    for(let gy = 0; gy < rows; gy++) for(let gx = 0; gx < cols; gx++){
+        const x0 = Math.floor(gx * reg.w / cols), x1 = Math.max(x0 + 1, Math.floor((gx + 1) * reg.w / cols));
+        const y0 = Math.floor(gy * reg.h / rows), y1 = Math.max(y0 + 1, Math.floor((gy + 1) * reg.h / rows));
+        let r = 0, g = 0, bl = 0, n = 0;
+        for(let yy = y0; yy < y1; yy += 2) for(let xx = x0; xx < x1; xx += 2){
+            const i = (yy * reg.w + xx) * 4;
+            r += reg.d[i]; g += reg.d[i + 1]; bl += reg.d[i + 2]; n++;
+        }
+        const avg = n ? [Math.round(r / n), Math.round(g / n), Math.round(bl / n)] : [0, 0, 0];
+        cells.push({ hex: cwToHex(avg), ratio: cwRatio(tl, cwLum(avg[0], avg[1], avg[2])) });
+    }
+    return cells;
+}
+function cwEvaluate(rgb, samples){
+    const tl = cwLum(rgb[0], rgb[1], rgb[2]);
+    const rs = samples.map(p => cwRatio(tl, cwLum(p[0], p[1], p[2]))).sort((a, b) => a - b);
+    return { p10: rs[Math.floor(rs.length * 0.1)] || rs[0], median: rs[Math.floor(rs.length / 2)] || rs[0] };
+}
+function cwReadability(el){
+    const rgb = cwParseColor(el.color || '#FFFFFF');
+    if(!rgb) return null;
+    const samples = cwSampleBackground(el);
+    if(!samples || !samples.length) return null;
+    const ev = cwEvaluate(rgb, samples);
+    const avg = [0, 1, 2].map(k => Math.round(samples.reduce((a, p) => a + p[k], 0) / samples.length));
+    return { rgb: rgb, textHex: cwToHex(rgb), samples: samples, p10: ev.p10, median: ev.median, bgHex: cwToHex(avg) };
+}
+function cwVerdict(p10){
+    if(p10 >= 4.5) return { txt: 'Lulus WCAG AA (teks normal)', col: '#4ade80' };
+    if(p10 >= 3) return { txt: 'Hanya lulus teks besar (≥3:1)', col: '#facc15' };
+    return { txt: 'Tidak terbaca di area ini', col: '#f87171' };
+}
+function cwHarmonyList(h, s, v, mode){
+    if(mode === 'mono') return [0.25, 0.5, 0.75, 1].map(vv => cwToHex(cwHsvToRgb(h, s, vv)));
+    const offs = CWHEEL_OFFSETS[mode] || [0];
+    return offs.map(o => cwToHex(cwHsvToRgb(h + o, s, v)));
+}
+function cwSuggestions(rep){
+    const hsv = cwRgbToHsv(rep.rgb[0], rep.rgb[1], rep.rgb[2]);
+    let best = null;
+    for(let v = 0; v <= 1.0001; v += 0.02){
+        const c = cwHsvToRgb(hsv.h, hsv.s, v);
+        const p10 = cwEvaluate(c, rep.samples).p10;
+        if(p10 >= 4.5 && (!best || Math.abs(v - hsv.v) < Math.abs(best.v - hsv.v))) best = { v: v, hex: cwToHex(c), p10: p10 };
+    }
+    const cands = [];
+    cwHarmonyList(hsv.h, hsv.s, hsv.v, 'complementary').forEach(hx => cands.push(hx));
+    cwHarmonyList(hsv.h, hsv.s, hsv.v, 'triadic').forEach(hx => cands.push(hx));
+    cands.push('#FFFFFF', '#000000', '#D4AF37');
+    const seen = {}, res = [];
+    cands.forEach(hx => {
+        if(seen[hx]) return; seen[hx] = 1;
+        const p10 = cwEvaluate(cwParseColor(hx), rep.samples).p10;
+        if(p10 >= 4.5) res.push({ hex: hx, p10: p10 });
+    });
+    res.sort((a, b) => b.p10 - a.p10);
+    if(best && !res.some(r => r.hex === best.hex)) res.unshift({ hex: best.hex, p10: best.p10 });
+    return res.slice(0, 4);
+}
+
+function openPanelReadability(){
+    const el = getActiveElement();
+    if(!el || el.type !== 'text'){ showToast('Pilih elemen teks dulu'); return; }
+    const rep = cwReadability(el);
+    if(!rep){
+        openToolPanel('Cek Mudah Dibaca', '<div class="ctrl-row">Warna teks tidak bisa dihitung (transparan atau tidak valid), atau teks berada di luar kanvas.</div>');
+        return;
+    }
+    const v = cwVerdict(rep.p10);
+    const grid = cwGridMap(el, 6, 4) || [];
+    const bad = grid.filter(c => c.ratio < 4.5).length;
+    const gridHtml = grid.length
+        ? '<div class="cw-map">' + grid.map(c => {
+            const col = c.ratio >= 4.5 ? '#4ade80' : (c.ratio >= 3 ? '#facc15' : '#f87171');
+            return '<div class="cw-cell" title="' + c.hex + ' · ' + c.ratio.toFixed(1) + ':1" style="background:' + c.hex + ';border-bottom:4px solid ' + col + '"></div>';
+        }).join('') + '</div>'
+        : '';
+    const sug = cwSuggestions(rep);
+    const sugHtml = sug.length
+        ? sug.map(sg => '<button class="btn-sub-tool" onclick="cwUseColor(\'' + sg.hex + '\')" style="flex-direction:row;justify-content:space-between;width:100%;margin-bottom:6px;"><span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:' + sg.hex + ';border:1px solid #fff;"></span><span>' + sg.hex + '</span><span>' + sg.p10.toFixed(2) + ':1</span></button>').join('')
+        : '<div style="font-size:12px;color:#ccc;">Tidak ada warna yang lulus di area ini. Coba tambahkan stabilo atau bayangan di belakang teks.</div>';
+    const html = `
+<div class="ctrl-row"><span class="ctrl-label">Warna teks:</span><span class="ctrl-val">${rep.textHex}</span></div>
+<div class="ctrl-row"><span class="ctrl-label">Rata-rata background:</span><span class="ctrl-val" style="display:inline-flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:4px;background:${rep.bgHex};display:inline-block;border:1px solid #fff;"></span>${rep.bgHex}</span></div>
+<div class="ctrl-row"><span class="ctrl-label">Kontras minimum (P10):</span><span class="ctrl-val">${rep.p10.toFixed(2)}:1</span></div>
+<div style="margin:10px 0;padding:8px;border-radius:8px;border:1px solid ${v.col};color:${v.col};font-weight:700;">${v.txt}</div>
+<div style="font-size:12px;line-height:1.6;color:#ddd;margin-bottom:8px;">
+<b style="color:#D4AF37;">Apa arti angkanya?</b><br>
+Kontras adalah selisih terang antara teks dan background. Standar umum agar nyaman dibaca adalah <b>4,5:1</b>. Status <i>lulus</i> berarti sekitar 90% area di bawah teks sudah memenuhi standar itu.<br><br>
+<b style="color:#D4AF37;">Kenapa kadang lulus, kadang gagal?</b><br>
+Background poster tidak rata. Peta di bawah membagi area teks menjadi kotak-kotak. Kotak yang diberi garis <span style="color:#4ade80;">hijau</span> aman, <span style="color:#facc15;">kuning</span> pas-pasan, dan <span style="color:#f87171;">merah</span> terlalu mirip dengan warna teks. Jika ada kotak merah, bagian itu sulit dibaca walaupun bagian lain aman.<br><br>
+<b style="color:#D4AF37;">Cara memperbaiki</b><br>
+1. Pilih salah satu saran warna di bawah.<br>
+2. Tambahkan stabilo dengan Level Blur, atau bayangan di belakang teks, agar background di bawah teks lebih rata.<br>
+3. Geser teks ke area yang lebih polos.
+</div>
+<div style="font-size:11px;font-weight:700;color:#D4AF37;margin:6px 0 4px;">PETA KONTRAS (${bad} dari ${grid.length} kotak merah)</div>
+${gridHtml}
+<div style="font-size:11px;font-weight:700;color:#D4AF37;margin:10px 0 6px;">SARAN WARNA:</div>
+${sugHtml}
+<button class="btn-sub-tool" style="width:100%;margin-top:8px;" onclick="cwToggle()"><svg class="ic" aria-hidden="true"><use href="#ic-wheel"/></svg>&nbsp;Buka / Tutup Roda Warna</button>`;
+    openToolPanel('Cek Mudah Dibaca', html);
+}
+
+function cwUseColor(hex){
+    const el = getActiveElement();
+    if(!el || el.type !== 'text'){ showToast('Pilih elemen teks dulu'); return; }
+    el.color = hex;
+    renderAll(); pushHistoryState();
+    cwRefreshStatus();
+    if(currentActivePanel === 'Cek Mudah Dibaca') openPanelReadability();
+}
+
+/* v1.9.1: Roda Warna lengkap (12 hue berlabel, harmoni poligon, tint/tone/shade, pipet, palet, panduan) */
+const CW_R = 90, CW_C = 150, CW_LR = 117;
+const CW_HUE_NAMES = [['Merah',0],['Jingga',30],['Kuning',60],['Kuning Hijau',90],['Hijau',120],['Hijau Toska',150],['Toska',180],['Biru Muda',210],['Biru',240],['Ungu Biru',270],['Magenta',300],['Merah Muda',330]];
+const CW_HARMONY_NAMES = { complementary: 'Komplementer', analogous: 'Analog', triadic: 'Triadik', split: 'Split-komplementer', tetradic: 'Tetradik', square: 'Persegi', mono: 'Monokrom' };
+let cwDiskCache = { key: -1, c: null };
+let cwSavedPalettes = [];
+const CW_LS_KEY = 'spm_paket_warna_v1';
+function cwLoad(){
+    try{ const raw = localStorage.getItem(CW_LS_KEY); cwSavedPalettes = raw ? JSON.parse(raw) : []; if(!Array.isArray(cwSavedPalettes)) cwSavedPalettes = []; }
+    catch(e){ cwSavedPalettes = []; }
+}
+function cwPersist(){
+    try{ localStorage.setItem(CW_LS_KEY, JSON.stringify(cwSavedPalettes)); }
+    catch(e){ showToast('Penyimpanan browser penuh atau diblokir'); }
+}
+cwLoad();
+
+function cwGetDisk(v){
+    const key = Math.round(v * 100);
+    if(cwDiskCache.key === key && cwDiskCache.c) return cwDiskCache.c;
+    const N = CW_R * 2 + 1;
+    const c = document.createElement('canvas'); c.width = N; c.height = N;
+    const x = c.getContext('2d');
+    const img = x.createImageData(N, N); const d = img.data;
+    const cc = N / 2;
+    for(let yy = 0; yy < N; yy++) for(let xx = 0; xx < N; xx++){
+        const dx = xx + 0.5 - cc, dy = yy + 0.5 - cc;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const i = (yy * N + xx) * 4;
+        if(dist > CW_R){ d[i + 3] = 0; continue; }
+        let hue = Math.atan2(dy, dx) * 180 / Math.PI; if(hue < 0) hue += 360;
+        const rgb = cwHsvToRgb(hue, Math.min(1, dist / CW_R), v);
+        d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; d[i + 3] = 255;
+    }
+    x.putImageData(img, 0, 0);
+    cwDiskCache = { key: key, c: c };
+    return c;
+}
+
+function cwDrawWheel(){
+    const cv = document.getElementById('cwWheel'); if(!cv) return;
+    const x = cv.getContext('2d');
+    x.clearRect(0, 0, cv.width, cv.height);
+    const disk = cwGetDisk(CWHEEL.v);
+    x.drawImage(disk, CW_C - disk.width / 2, CW_C - disk.height / 2);
+    x.font = '700 10px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.lineJoin = 'round';
+    CW_HUE_NAMES.forEach(([nm, a]) => {
+        const r = a * Math.PI / 180;
+        const lx = CW_C + Math.cos(r) * CW_LR, ly = CW_C + Math.sin(r) * CW_LR;
+        x.strokeStyle = 'rgba(0,0,0,.85)'; x.lineWidth = 3; x.strokeText(nm, lx, ly);
+        x.fillStyle = '#fff'; x.fillText(nm, lx, ly);
+    });
+    const offs = CWHEEL.harmony === 'mono' ? [0] : (CWHEEL_OFFSETS[CWHEEL.harmony] || [0]);
+    const pts = offs.map(o => {
+        const a = (CWHEEL.h + o) * Math.PI / 180, rr = CWHEEL.s * CW_R;
+        return [CW_C + Math.cos(a) * rr, CW_C + Math.sin(a) * rr];
+    });
+    if(pts.length > 1){
+        x.beginPath();
+        pts.forEach((p, k) => k ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]));
+        if(pts.length > 2) x.closePath();
+        x.strokeStyle = 'rgba(255,255,255,.9)'; x.lineWidth = 1.5;
+        x.setLineDash(pts.length > 2 ? [] : [4, 3]);
+        x.stroke(); x.setLineDash([]);
+    }
+    pts.forEach(p => {
+        x.beginPath(); x.arc(p[0], p[1], 5, 0, Math.PI * 2);
+        x.fillStyle = '#fff'; x.fill(); x.strokeStyle = '#000'; x.lineWidth = 1; x.stroke();
+    });
+    const ba = CWHEEL.h * Math.PI / 180, br = CWHEEL.s * CW_R;
+    x.beginPath(); x.arc(CW_C + Math.cos(ba) * br, CW_C + Math.sin(ba) * br, 2.5, 0, Math.PI * 2);
+    x.fillStyle = '#000'; x.fill();
+}
+
+function cwRowHtml(hx, fn){
+    const w = cwParseColor(hx);
+    const L = cwLum(w[0], w[1], w[2]);
+    const wc = cwRatio(L, cwLum(255, 255, 255));
+    const bc = cwRatio(L, cwLum(0, 0, 0));
+    return '<button class="cw-row-sw" onclick="' + fn + '(\'' + hx + '\')"><span class="cw-chip" style="background:' + hx + '"></span><span class="cw-hx">' + hx + '</span><span class="cw-ct">putih ' + wc.toFixed(1) + ':1 · hitam ' + bc.toFixed(1) + ':1</span></button>';
+}
+
+function cwGenerate(){
+    const box = document.getElementById('cwSwatches'); if(!box) return;
+    const cols = cwHarmonyList(CWHEEL.h, CWHEEL.s, CWHEEL.v, CWHEEL.harmony).concat(['#FFFFFF', '#111111']);
+    box.innerHTML = cols.map(hx => cwRowHtml(hx, 'cwApplySwatch')).join('');
+}
+
+function cwRenderShades(){
+    const box = document.getElementById('cwShades'); if(!box) return;
+    const b = cwHsvToRgb(CWHEEL.h, CWHEEL.s, CWHEEL.v);
+    const steps = [0.2, 0.4, 0.6, 0.8];
+    const mk = (target, label) => '<div class="cw-sec2">' + label + '</div><div class="cw-chips">' + steps.map(t => {
+        const hx = cwToHex(b.map((v, k) => Math.round(v + (target[k] - v) * t)));
+        return '<button class="cw-chip2" title="' + hx + '" style="background:' + hx + '" onclick="cwApplySwatch(\'' + hx + '\')"></button>';
+    }).join('') + '</div>';
+    box.innerHTML = mk([255, 255, 255], 'Tint (+ putih)') + mk([128, 128, 128], 'Tone (+ abu-abu)') + mk([0, 0, 0], 'Shade (+ hitam)');
+}
+
+function cwRenderSaved(){
+    const box = document.getElementById('cwSaved'); if(!box) return;
+    if(!cwSavedPalettes.length){ box.innerHTML = '<div class="cw-note">Belum ada paket tersimpan. Simpan palet harmoni atau hasil scan di atas.</div>'; return; }
+    box.innerHTML = cwSavedPalettes.map((p, i) =>
+        '<div class="cw-pal"><div class="cw-pal-h"><span>' + p.name + '</span><span class="cw-pal-btns">' +
+        '<button class="cw-mini" onclick="cwCopyText(\'' + p.colors.join(', ') + '\')">📋 HEX</button>' +
+        '<button class="cw-mini cw-del" onclick="cwDeletePalette(' + i + ')">🗑 Hapus</button></span></div>' +
+        '<div class="cw-strip">' + p.colors.map(c => '<button class="cw-chip2" title="' + c + '" style="background:' + c + '" onclick="cwApplySwatch(\'' + c + '\')"></button>').join('') + '</div></div>'
+    ).join('');
+}
+function cwDeletePalette(i){
+    if(!cwSavedPalettes[i]) return;
+    cwSavedPalettes.splice(i, 1);
+    cwPersist(); cwRenderSaved();
+    showToast('🗑 Paket dihapus');
+}
+function cwPaletteName(){
+    return (CW_HARMONY_NAMES[CWHEEL.harmony] || 'Palet') + ' · ' + cwToHex(cwHsvToRgb(CWHEEL.h, CWHEEL.s, CWHEEL.v));
+}
+function cwSavePalette(){
+    const cols = cwHarmonyList(CWHEEL.h, CWHEEL.s, CWHEEL.v, CWHEEL.harmony);
+    cwSavedPalettes.unshift({ name: cwPaletteName(), colors: cols });
+    if(cwSavedPalettes.length > 20) cwSavedPalettes.pop();
+    cwPersist(); cwRenderSaved();
+    showToast('💾 Paket disimpan permanen');
+}
+function cwCopyPalette(){
+    const cols = cwHarmonyList(CWHEEL.h, CWHEEL.s, CWHEEL.v, CWHEEL.harmony);
+    cwCopyText(cols.join(', '));
+}
+function cwCopyText(t){
+    const done = () => showToast('📋 Tersalin: ' + t);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(t).then(done).catch(() => showToast('Gagal menyalin. Salin manual: ' + t));
+    } else {
+        showToast('Salin manual: ' + t);
+    }
+}
+
+function cwAfterBaseChange(light){
+    const hex = cwToHex(cwHsvToRgb(CWHEEL.h, CWHEEL.s, CWHEEL.v));
+    const b = document.getElementById('cwBaseHex'); if(b) b.innerText = hex;
+    cwDrawWheel();
+    if(light) return;
+    cwGenerate(); cwRenderShades(); cwRenderSaved(); cwRefreshStatus();
+}
+
+function cwWheelPointer(e, light){
+    const cv = document.getElementById('cwWheel'); if(!cv) return;
+    const r = cv.getBoundingClientRect();
+    const px = (e.clientX - r.left) * (cv.width / r.width) - CW_C;
+    const py = (e.clientY - r.top) * (cv.height / r.height) - CW_C;
+    const dist = Math.min(CW_R, Math.sqrt(px * px + py * py));
+    let hue = Math.atan2(py, px) * 180 / Math.PI; if(hue < 0) hue += 360;
+    CWHEEL.h = hue; CWHEEL.s = dist / CW_R;
+    cwAfterBaseChange(light);
+}
+function cwSetBaseHex(hex){
+    const rgb = cwParseColor(hex); if(!rgb) return;
+    const hsv = cwRgbToHsv(rgb[0], rgb[1], rgb[2]);
+    CWHEEL.h = hsv.h; CWHEEL.s = hsv.s;
+    if(hsv.v > 0.02){ CWHEEL.v = hsv.v; const sl = document.getElementById('cwV'); if(sl) sl.value = Math.round(CWHEEL.v * 100); }
+    cwAfterBaseChange();
+}
+function cwSetV(val){ CWHEEL.v = Math.max(0, Math.min(100, parseInt(val))) / 100; cwAfterBaseChange(); }
+function cwSetHarmony(mode){ CWHEEL.harmony = mode; cwAfterBaseChange(); }
+function cwPickScreen(){
+    const panel = document.getElementById('cwPanel');
+    const wasOpen = !!panel && panel.style.display !== 'none';
+    if(panel) panel.style.display = 'none';
+    openHandledLoupe(function(hex){ cwSetBaseHex(hex); });
+    if(!wasOpen) return;
+    const watch = setInterval(() => {
+        const lp = document.getElementById('handledLoupe');
+        if(!lp || lp.style.display === 'none'){
+            clearInterval(watch);
+            if(panel) panel.style.display = 'flex';
+        }
+    }, 250);
+}
+function cwApplySwatch(hex){
+    const el = getActiveElement();
+    if(el && el.type === 'text') cwUseColor(hex);
+    else { cwSetBaseHex(hex); showToast('Pilih teks untuk memakai warna ini'); }
+}
+function cwRefreshStatus(){
+    const st = document.getElementById('cwStatus'); if(!st) return;
+    const el = getActiveElement();
+    if(!el || el.type !== 'text'){ st.innerText = 'Pilih teks untuk cek kontras.'; return; }
+    const rep = cwReadability(el);
+    if(!rep){ st.innerText = 'Kontras tidak bisa dihitung.'; return; }
+    const v = cwVerdict(rep.p10);
+    st.innerHTML = 'Kontras teks terpilih: <b>' + rep.p10.toFixed(2) + ':1</b> — <span style="color:' + v.col + '">' + v.txt + '</span>';
+}
+
+/* Scan warna dominan: pixel poster dikelompokkan (k-means) lalu diurutkan berdasarkan luas */
+let cwScanResult = null;
+let cwScanSamples = [];
+let cwLastRec = [];
+let cwMode = 'manual';
+function cwPosterPixels(k){
+    const sl = getCurrentSlide(); if(!sl) return null;
+    const W = mainCanvas.width, H = mainCanvas.height;
+    const w = Math.max(40, Math.round(W * k)), h = Math.max(40, Math.round(H * k));
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d');
+    x.setTransform(w / W, 0, 0, h / H, 0, 0);
+    renderBackground(sl.background, W, H, x);
+    cwDrawElements(x, sl.elements || []);
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    return x.getImageData(0, 0, w, h).data;
+}
+function cwDist2(a, b){ const dr = a[0] - b[0], dg = a[1] - b[1], db = a[2] - b[2]; return dr * dr + dg * dg + db * db; }
+function cwKMeans(samples, k, iters){
+    const cnt = {};
+    samples.forEach(p => { const key = ((p[0] >> 4) << 8) | ((p[1] >> 4) << 4) | (p[2] >> 4); cnt[key] = (cnt[key] || 0) + 1; });
+    const keys = Object.keys(cnt).map(Number).sort((a, b) => cnt[b] - cnt[a]);
+    let centers = [];
+    for(const kk of keys){
+        const c = [((kk >> 8) & 15) * 16 + 8, ((kk >> 4) & 15) * 16 + 8, (kk & 15) * 16 + 8];
+        if(centers.every(q => cwDist2(q, c) > 40 * 40)) centers.push(c);
+        if(centers.length >= k) break;
+    }
+    if(!centers.length) return [];
+    const assign = new Int32Array(samples.length);
+    for(let it = 0; it < iters; it++){
+        const sum = centers.map(() => [0, 0, 0, 0]);
+        for(let i = 0; i < samples.length; i++){
+            const p = samples[i]; let best = 0, bd = Infinity;
+            for(let c = 0; c < centers.length; c++){ const d = cwDist2(p, centers[c]); if(d < bd){ bd = d; best = c; } }
+            assign[i] = best;
+            const sm = sum[best]; sm[0] += p[0]; sm[1] += p[1]; sm[2] += p[2]; sm[3]++;
+        }
+        centers = centers.map((c, ci) => sum[ci][3] ? [sum[ci][0] / sum[ci][3], sum[ci][1] / sum[ci][3], sum[ci][2] / sum[ci][3]] : c);
+    }
+    const counts = centers.map(() => 0);
+    for(let i = 0; i < samples.length; i++) counts[assign[i]]++;
+    return centers.map((c, i) => ({ rgb: c.map(Math.round), n: counts[i] })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
+}
+
+/* Rekomendasi cerdas: kandidat warna dicek kontrasnya terhadap seluruh latar poster */
+function cwRecommend(samples, cl){
+    const step = Math.max(1, Math.floor(samples.length / 4000));
+    const sub = [];
+    for(let i = 0; i < samples.length; i += step) sub.push(samples[i]);
+    const bgRgb = cl[0].rgb;
+    const bgL = cwLum(bgRgb[0], bgRgb[1], bgRgb[2]);
+    let base = null;
+    for(const c of cl.slice(1)){
+        const h = cwRgbToHsv(c.rgb[0], c.rgb[1], c.rgb[2]);
+        if(h.s > 0.3){ base = h; break; }
+    }
+    if(!base){
+        const h = cwRgbToHsv(bgRgb[0], bgRgb[1], bgRgb[2]);
+        base = { h: (h.h + 180) % 360, s: 0.75, v: 0.95 };
+    }
+    const offs = [0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180, 240];
+    const seen = {}, pool = [];
+    const add = rgb => {
+        const hx = cwToHex(rgb);
+        if(seen[hx]) return; seen[hx] = 1;
+        const hsv = cwRgbToHsv(rgb[0], rgb[1], rgb[2]);
+        const L = cwLum(rgb[0], rgb[1], rgb[2]);
+        pool.push({
+            hex: hx, rgb: rgb, s: hsv.s, v: hsv.v,
+            p10: cwEvaluate(rgb, sub).p10,
+            onWhite: cwRatio(L, cwLum(255, 255, 255)),
+            onBlack: cwRatio(L, cwLum(0, 0, 0)),
+            vsBg: cwRatio(L, bgL)
+        });
+    };
+    offs.forEach(o => [0.55, 0.8, 1].forEach(v => [0.45, 0.7, 0.95].forEach(s => add(cwHsvToRgb(base.h + o, s, v)))));
+    add([255, 255, 255]); add([0, 0, 0]); add([212, 175, 55]); add([17, 17, 17]); add([120, 120, 120]);
+
+    const txtPick = (f, fb) => {
+        let r = pool.filter(f).sort((a, b) => b.p10 - a.p10).slice(0, 4);
+        if(!r.length && fb) r = pool.filter(fb).sort((a, b) => b.p10 - a.p10).slice(0, 4);
+        return r.map(c => ({ hex: c.hex, ratio: c.p10, mode: 'text' }));
+    };
+    const boxPick = f => pool
+        .filter(c => c.vsBg >= 1.3 && Math.max(c.onWhite, c.onBlack) >= 4.5 && f(c))
+        .sort((a, b) => Math.max(b.onWhite, b.onBlack) - Math.max(a.onWhite, a.onBlack))
+        .slice(0, 4)
+        .map(c => ({ hex: c.hex, ratio: Math.max(c.onWhite, c.onBlack), mode: 'box', txt: c.onWhite >= c.onBlack ? '#FFFFFF' : '#111111', txtRatio: Math.max(c.onWhite, c.onBlack) }));
+
+    return [
+        { group: 'teks', label: 'Judul utama', desc: 'Kalimat paling besar dan paling jelas.', items: txtPick(c => c.p10 >= 4.5 && c.s >= 0.5, c => c.p10 >= 4.5) },
+        { group: 'teks', label: 'Sub judul', desc: 'Pendamping judul. Tidak seramai judul.', items: txtPick(c => c.p10 >= 3 && c.p10 < 8, c => c.p10 >= 3) },
+        { group: 'teks', label: 'Isi / kutipan', desc: 'Teks utama isi poster. Harus paling nyaman dibaca.', items: txtPick(c => c.p10 >= 4.5 && c.s <= 0.5, c => c.p10 >= 4.5) },
+        { group: 'teks', label: 'Footnote, catatan kaki & nomor hadis (dalam kurung)', desc: 'Teks kecil. Wajib kontras kuat agar terbaca.', items: txtPick(c => c.p10 >= 4.5 && c.s <= 0.7, c => c.p10 >= 4.5) },
+        { group: 'teks', label: 'Username / papan nama teks', desc: 'Nama akun atau tulisan kecil di bawah poster.', items: txtPick(c => c.p10 >= 4.5, null) },
+        { group: 'teks', label: 'Ikon kecil (save, share, dll.)', desc: 'Ikon aksi kecil. Cukup jelas, tidak perlu sekeras judul.', items: txtPick(c => c.p10 >= 3 && c.s >= 0.5, c => c.p10 >= 3) },
+        { group: 'teks', label: 'Panah & garis pemisah', desc: 'Penunjuk arah dan garis pembatas.', items: txtPick(c => c.p10 >= 3 && c.s >= 0.4, c => c.p10 >= 3) },
+        { group: 'latar', label: 'Kotak di belakang isi / kutipan', desc: 'Kotak tempat teks isi. Teks putih/hitam di atasnya harus terbaca.', items: boxPick(c => c.s <= 0.7) },
+        { group: 'latar', label: 'Papan nama di belakang judul', desc: 'Label yang menopang judul. Lebih mencolok.', items: boxPick(c => c.s >= 0.55) },
+        { group: 'latar', label: 'Gaya kuas / goresan di belakang judul', desc: 'Sapuan warna tebal di belakang judul.', items: boxPick(c => c.s >= 0.6 && c.v >= 0.6) }
+    ];
+}
+
+function cwSetMode(m){
+    cwMode = m;
+    const a = document.getElementById('cwManual'), b = document.getElementById('cwAuto');
+    if(a) a.style.display = m === 'manual' ? 'block' : 'none';
+    if(b) b.style.display = m === 'auto' ? 'block' : 'none';
+    const mm = document.getElementById('cwModeManual'), ma = document.getElementById('cwModeAuto');
+    if(mm) mm.classList.toggle('on', m === 'manual');
+    if(ma) ma.classList.toggle('on', m === 'auto');
+    if(m === 'auto') cwAutoRun();
+}
+function cwAutoRun(){
+    const box = document.getElementById('cwAuto'); if(!box) return;
+    box.innerHTML = '<div class="cw-note">⏳ Membaca poster dan menyusun rekomendasi...</div>';
+    setTimeout(() => {
+        const px = cwPosterPixels(0.3);
+        if(!px){ box.innerHTML = '<div class="cw-note">Tidak ada poster untuk dibaca.</div>'; return; }
+        const stride = Math.max(1, Math.floor(Math.sqrt((px.length / 4) / 20000)));
+        const samples = [];
+        for(let i = 0; i < px.length; i += 4 * stride){
+            if(px[i + 3] < 128) continue;
+            samples.push([px[i], px[i + 1], px[i + 2]]);
+        }
+        if(samples.length < 10){ box.innerHTML = '<div class="cw-note">Poster terlalu kosong untuk dibaca.</div>'; return; }
+        const cl = cwKMeans(samples, 6, 6)
+            .filter(c => c.n / samples.length >= 0.015)
+            .map(c => ({ hex: cwToHex(c.rgb), rgb: c.rgb, pct: c.n / samples.length * 100 }));
+        cwScanResult = cl;
+        cwScanSamples = samples;
+        cwRenderAuto();
+    }, 30);
+}
+function cwRenderAuto(){
+    const box = document.getElementById('cwAuto'); if(!box) return;
+    const cl = cwScanResult;
+    if(!cl || !cl.length){ box.innerHTML = '<div class="cw-note">Belum ada data.</div>'; return; }
+    const bg = cl[0];
+    const bgL = cwLum(bg.rgb[0], bg.rgb[1], bg.rgb[2]);
+    const tone = bgL < 0.25 ? 'latar GELAP, pakai teks TERANG' : (bgL > 0.5 ? 'latar TERANG, pakai teks GELAP' : 'latar SEDANG, pilih teks yang kontras');
+    const rec = cwRecommend(cwScanSamples, cl);
+    cwLastRec = rec;
+    const colorRow = cl.map(c => '<span class="cw-dom"><span class="cw-chip" style="background:' + c.hex + '"></span>' + c.hex + ' · ' + c.pct.toFixed(0) + '%</span>').join('');
+    let html = '<div class="cw-sec">1. Latar poster</div>';
+    html += '<div class="cw-status">Warna paling dominan: <b>' + bg.hex + '</b> menutupi <b>' + bg.pct.toFixed(0) + '%</b> area.<br>Artinya: ' + tone + '.</div>';
+    html += '<div class="cw-doms">' + colorRow + '</div>';
+    html += cwHelpHtml();
+    const card = r => {
+        const items = r.items.length ? r.items.map(it => {
+            const apply = it.mode === 'text' ? 'cwUseColor(\'' + it.hex + '\')' : 'cwCopyText(\'' + it.hex + '\')';
+            const info = it.mode === 'text'
+                ? it.ratio.toFixed(1) + ':1 terhadap latar'
+                : 'teks ' + it.txt + ' di atasnya: ' + it.txtRatio.toFixed(1) + ':1';
+            return '<div class="cw-chip3"><button class="cw-apply" onclick="' + apply + '" title="' + (it.mode === 'text' ? 'Pakai ke teks terpilih' : 'Salin warna') + '"><span class="cw-chip3-c" style="background:' + it.hex + '"></span></button>' +
+                '<div class="cw-hxrow"><span class="cw-hxt">' + it.hex + '</span><button class="cw-cp" onclick="cwCopyText(\'' + it.hex + '\')" title="Salin kode warna">📋</button></div>' +
+                '<small>' + info + '</small></div>';
+        }).join('') : '<div class="cw-note">Belum ada yang lulus. Tambahkan latar atau stabilo di belakang elemen ini.</div>';
+        return '<div class="cw-role"><div class="cw-role-h">' + r.label + '</div><span class="cw-role-d">' + r.desc + '</span><div class="cw-chips3">' + items + '</div></div>';
+    };
+    html += '<div class="cw-sec">2. Untuk TEKS (ketuk untuk langsung dipakai ke teks yang dipilih)</div>';
+    html += rec.filter(r => r.group === 'teks').map(card).join('');
+    html += '<div class="cw-sec">3. Untuk LATAR & BENTUK (ketuk untuk disalin, lalu pakai di tool Bentuk)</div>';
+    html += rec.filter(r => r.group === 'latar').map(card).join('');
+    const all = [];
+    rec.forEach(r => r.items.forEach(it => { if(all.indexOf(it.hex) < 0) all.push(it.hex); }));
+    html += '<div class="cw-row"><button class="cw-mini" onclick="cwCopyText(\'' + all.join(', ') + '\')">📋 Salin semua HEX</button><button class="cw-mini" onclick="cwSaveRecPaket()">💾 Simpan paket</button></div>';
+    html += '<div class="cw-row"><button class="cw-mini" onclick="cwAutoRun()">🔄 Pindai ulang</button></div>';
+    box.innerHTML = html;
+}
+function cwSaveRecPaket(){
+    if(!cwLastRec || !cwLastRec.length){ showToast('Pindai dulu sebelum menyimpan'); return; }
+    const cols = [];
+    cwLastRec.forEach(r => r.items.forEach(it => { if(cols.indexOf(it.hex) < 0) cols.push(it.hex); }));
+    if(!cols.length){ showToast('Tidak ada warna untuk disimpan'); return; }
+    cwSavedPalettes.unshift({ name: 'Rekomendasi otomatis', colors: cols });
+    if(cwSavedPalettes.length > 20) cwSavedPalettes.pop();
+    cwPersist(); cwRenderSaved();
+    showToast('💾 Rekomendasi disimpan sebagai paket');
+}
+
+function cwInfo(){
+    const html = `
+<div style="font-size:12px;line-height:1.7;color:#eee;">
+<b style="color:#D4AF37;">Cara pakai, langkah demi langkah</b><br>
+<b>1. Pilih teks</b> yang mau diberi warna, misalnya judul. Ketuk teksnya di poster dulu.<br>
+<b>2. Buka tombol pilih warna</b> (lingkaran emas di atas poster).<br>
+<b>3. Tekan Otomatis.</b> Aplikasi membaca poster kamu dan menampilkan latar dominan beserta persentasenya.<br>
+<b>4. Lihat bagian "Untuk TEKS".</b> Setiap jenis teks (judul, isi, footnote, username, ikon) punya 4 pilihan. Angka di bawah warna adalah tingkat kebacaan. Makin besar makin jelas.<br>
+<b>5. Ketuk warna</b> yang kamu suka. Warna langsung dipakai ke teks yang tadi dipilih.<br>
+<b>6. Untuk kotak, papan nama, atau kuas</b> di bagian "Untuk LATAR & BENTUK", ketuk tombol 📋 untuk menyalin kode warna, lalu pakai di tool Bentuk.<br>
+<b>7. Cek hasilnya</b> di poster. Kalau masih sulit terbaca, pilih warna lain, atau tambahkan kotak/latar di belakang teks.<br><br>
+<b style="color:#D4AF37;">Tips cepat</b><br>
+• Teks di atas latar gelap: pakai warna terang.<br>
+• Teks di atas latar terang: pakai warna gelap.<br>
+• Judul boleh pakai warna yang lebih berani. Isi kutipan sebaiknya lebih tenang agar nyaman dibaca.<br><br>
+<b style="color:#D4AF37;">Mode Manual</b><br>
+Untuk yang ingin memilih sendiri. Klik roda 12 warna, pilih harmoni (komplementer, analog, triadik, tetradik, dll.), atau ambil warna dari poster dengan Pipet.<br><br>
+<b style="color:#D4AF37;">Arti angka kontras (mis. 7.0:1)</b><br>
+${cwHelpHtml()}<br>
+<b style="color:#D4AF37;">Catatan</b><br>
+Warna di layar bisa sedikit berbeda saat dicetak. Cek hasil cetak untuk warna yang penting.
+</div>`;
+    openToolPanel('Panduan Pilih Warna', html);
+}
+
+function cwHelpHtml(){
+    return '<div class="cw-help"><b>Arti angka "7.0:1 terhadap latar"</b><br>' +
+    'Angka ini membandingkan seberapa <b>beda terang</b> warna teks dengan warna latar di belakangnya. Skalanya dari <b>1:1</b> (tidak terlihat sama sekali) sampai <b>21:1</b> (hitam di atas putih, paling tajam).<br>' +
+    '• <b>Di bawah 3:1</b>: sulit dibaca. Huruf seperti menyatu dengan latar dan mata cepat lelah.<br>' +
+    '• <b>3:1 sampai 4.5:1</b>: hanya aman untuk teks besar sekali, misalnya judul raksasa.<br>' +
+    '• <b>4.5:1 sampai 7:1</b>: aman untuk teks normal (standar WCAG AA).<br>' +
+    '• <b>7:1 sampai 12:1</b>: ideal. Jelas dan nyaman dibaca lama (standar WCAG AAA).<br>' +
+    '• <b>Di atas 12:1</b>: terlalu kontras. Teks terasa <b>silau</b>, tepinya berpendar (halation), dan mata cepat lelah. Biasanya terjadi saat putih murni di atas hitam pekat. Solusinya, pilih putih agak abu-abu terang.<br>' +
+    '<b>Saran:</b> untuk isi poster pilih 7:1 sampai 12:1. Judul besar boleh sedikit di bawah itu.</div>';
+}
+/* v1.9.9: Hapus Objek AI (MI-GAN 512 generator, ONNX Runtime Web). Model diunduh saat pertama dipakai lalu di-cache. */
+const AI_INPAINT_URL = 'https://huggingface.co/FreeHugsForRobots/ps-inpaint-migan/resolve/main/migan-512-generator.onnx';
+const AI_INPAINT_CACHE = 'spm-ai-inpaint-v1';
+const AI_ORT_URL = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js';
+const AI_ORT_WASM = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/';
+let aiOrt = null, aiSession = null, aiSessionLoading = null, aiOrtLoading = null;
+let aiState = null;
+const aiV = { s: 1, ox: 0, oy: 0, paint: true };
+let aiRafId = 0;
+
+function aiSetStatus(t){ const e = document.getElementById('aiStatus'); if(e) e.innerText = t; const o = document.getElementById('aiOvStatus'); if(o) o.innerText = t; }
+function aiSetBar(p){
+    const v = Math.round(Math.max(0, Math.min(1, p)) * 100) + '%';
+    const b = document.getElementById('aiBar'); if(b) b.style.width = v;
+    const ob = document.getElementById('aiOvBar'); if(ob) ob.style.width = v;
+    const op = document.getElementById('aiOvPct'); if(op) op.innerText = v;
+}
+
+function aiLoadScript(){
+    if(window.ort) return Promise.resolve(window.ort);
+    if(aiOrtLoading) return aiOrtLoading;
+    aiOrtLoading = new Promise((res, rej) => {
+        const sc = document.createElement('script');
+        sc.src = AI_ORT_URL;
+        sc.onload = () => res(window.ort);
+        sc.onerror = () => { aiOrtLoading = null; rej(new Error('Gagal memuat mesin AI. Periksa koneksi internet.')); };
+        document.head.appendChild(sc);
+    });
+    return aiOrtLoading;
+}
+async function aiGetModelBuffer(onProg){
+    const cache = ('caches' in window) ? await caches.open(AI_INPAINT_CACHE) : null;
+    if(cache){
+        const hit = await cache.match(AI_INPAINT_URL);
+        if(hit) return await hit.arrayBuffer();
+    }
+    const resp = await fetch(AI_INPAINT_URL);
+    if(!resp.ok) throw new Error('Gagal mengunduh model AI (HTTP ' + resp.status + ').');
+    const total = parseInt(resp.headers.get('content-length') || '0', 10) || 29500000;
+    const reader = resp.body.getReader();
+    const chunks = []; let got = 0;
+    for(;;){
+        const { done, value } = await reader.read();
+        if(done) break;
+        chunks.push(value); got += value.length;
+        if(onProg) onProg(Math.min(1, got / total));
+    }
+    const buf = new Uint8Array(got);
+    let off = 0;
+    for(const c of chunks){ buf.set(c, off); off += c.length; }
+    if(cache){
+        try { await cache.put(AI_INPAINT_URL, new Response(buf.slice(0), { headers: { 'Content-Type': 'application/octet-stream' } })); } catch(e){}
+    }
+    return buf.buffer;
+}
+async function aiGetSession(onProg){
+    if(aiSession) return aiSession;
+    if(aiSessionLoading) return aiSessionLoading;
+    aiSessionLoading = (async () => {
+        const ort = await aiLoadScript();
+        ort.env.wasm.wasmPaths = AI_ORT_WASM;
+        ort.env.wasm.numThreads = 1;
+        const buf = await aiGetModelBuffer(onProg);
+        const providers = [];
+        if(navigator.gpu) providers.push('webgpu');
+        providers.push('wasm');
+        let sess = null;
+        for(const ep of providers){
+            try { sess = await ort.InferenceSession.create(buf, { executionProviders: [ep], graphOptimizationLevel: 'all' }); break; }
+            catch(e){ console.warn('Provider gagal:', ep, e); }
+        }
+        if(!sess) throw new Error('Browser ini tidak bisa menjalankan model AI.');
+        aiOrt = ort;
+        aiSession = sess;
+        return sess;
+    })();
+    try { return await aiSessionLoading; } finally { aiSessionLoading = null; }
+}
+async function aiRunModel(sess, pix, hole){
+    const N = 512 * 512;
+    const data = new Float32Array(4 * N);
+    for(let i = 0; i < N; i++){
+        const h = hole[i];
+        data[i] = h ? -0.5 : 0.5;
+        const k = i * 4;
+        for(let c = 0; c < 3; c++) data[N * (c + 1) + i] = h ? 0 : (pix[k + c] / 127.5 - 1);
+    }
+    const input = new aiOrt.Tensor('float32', data, [1, 4, 512, 512]);
+    const feeds = {};
+    feeds[sess.inputNames[0]] = input;
+    const res = await sess.run(feeds);
+    const od = res[sess.outputNames[0]].data;
+    let mn = Infinity, mx = -Infinity;
+    for(let i = 0; i < od.length; i += 97){ if(od[i] < mn) mn = od[i]; if(od[i] > mx) mx = od[i]; }
+    const zeroOne = mn >= -0.05 && mx <= 1.05;
+    const out = new Uint8Array(N * 3);
+    for(let c = 0; c < 3; c++) for(let i = 0; i < N; i++){
+        let v = od[c * N + i];
+        v = zeroOne ? v * 255 : (v + 1) * 127.5;
+        out[i * 3 + c] = v < 0 ? 0 : (v > 255 ? 255 : v);
+    }
+    return out;
+}
+function aiDilate(mask, W, H, r){
+    const out = new Uint8Array(mask.length);
+    for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){
+        if(!mask[y * W + x]) continue;
+        for(let dy = -r; dy <= r; dy++){
+            const yy = y + dy; if(yy < 0 || yy >= H) continue;
+            for(let dx = -r; dx <= r; dx++){
+                const xx = x + dx; if(xx < 0 || xx >= W) continue;
+                out[yy * W + xx] = 1;
+            }
+        }
+    }
+    return out;
+}
+function aiCropRect(mask, W, H){
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){
+        if(mask[y * W + x]){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+    }
+    if(x1 < 0) return null;
+    const pad = 24;
+    x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad);
+    x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
+    let side = Math.max(x1 - x0 + 1, y1 - y0 + 1, 64);
+    side = Math.min(side, W, H);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    let sx = Math.round(cx - side / 2), sy = Math.round(cy - side / 2);
+    sx = Math.max(0, Math.min(W - side, sx));
+    sy = Math.max(0, Math.min(H - side, sy));
+    return { sx: sx, sy: sy, side: side };
+}
+
+function openAiInpaint(){
+    const el = getActiveElement();
+    if(!el || el.type !== 'image' || !el.img || !el.img.width){ showToast('Pilih gambar dulu'); return; }
+    const ow = el.img.width, oh = el.img.height;
+    const k = Math.min(1, 1600 / Math.max(ow, oh));
+    const W = Math.max(2, Math.round(ow * k)), H = Math.max(2, Math.round(oh * k));
+    const work = document.createElement('canvas'); work.width = W; work.height = H;
+    work.getContext('2d').drawImage(el.img, 0, 0, W, H);
+    const ovl = document.createElement('canvas'); ovl.width = W; ovl.height = H;
+    aiState = { el: el, ow: ow, oh: oh, W: W, H: H, work: work, ovl: ovl, mask: new Uint8Array(W * H),
+        result: null, fillMask: null, undo: [], redo: [], mode: 'hand', painting: false, panning: false,
+        busy: false, view: 'orig', lastX: 0, lastY: 0 };
+    document.getElementById('aiInpaintModal').classList.add('active');
+    const cv = document.getElementById('aiCanvas');
+    cv.width = cv.clientWidth || 560; cv.height = cv.clientHeight || 380;
+    aiBindOnce();
+    aiBindStalk();
+    aiV.paint = true;
+    const _pb = document.getElementById('aiPillBrush'); if(_pb){ _pb.textContent = '✏️'; _pb.style.color = '#00ff88'; }
+    const _pk = document.getElementById('aiPill');
+    if(_pk){ _pk.style.left = '50%'; _pk.style.top = 'auto'; _pk.style.right = 'auto'; _pk.style.bottom = '20px'; _pk.style.transform = 'translateX(-50%)'; }
+    aiSetMode('brush');
+    aiSetBar(0);
+    document.getElementById('aiApplyBtn').disabled = true;
+    document.getElementById('aiViewBtn').disabled = true;
+    document.getElementById('aiViewBtn').innerText = '👁 Lihat hasil';
+    document.getElementById('aiRunBtn').disabled = false;
+    document.getElementById('aiBrush').value = 60;
+    document.getElementById('aiBrushVal').innerText = '60px';
+    aiSetStatus('Siap. Geser gagang ✋: lingkaran (keker) di depan jari melukis objek yang mau dihapus.');
+    aiFit();
+    setTimeout(aiUpdateReticle, 60);
+}
+function closeAiInpaint(){
+    if(aiState && aiState.busy) return;
+    document.getElementById('aiInpaintModal').classList.remove('active');
+    aiState = null;
+    aiUpdateReticle();
+}
+function aiSetMode(m){
+    if(!aiState) return;
+    aiState.mode = m;
+    const map = { brush: 'aiModeBrush', erase: 'aiModeErase' };
+    Object.keys(map).forEach(k => { const b = document.getElementById(map[k]); if(b) b.classList.toggle('active', k === m); });
+    const cv = document.getElementById('aiCanvas');
+    if(cv) cv.style.cursor = (m === 'hand' || !aiV.paint) ? 'grab' : 'crosshair';
+    aiUpdateReticle();
+}
+/* v2.0.1: kuas ON/OFF (OFF = jari di kanvas menggeser tampilan) */
+function aiTogglePaint(){
+    aiV.paint = !aiV.paint;
+    const b = document.getElementById('aiPillBrush');
+    if(b){ b.textContent = aiV.paint ? '✏️' : '🚫'; b.style.color = aiV.paint ? '#00ff88' : '#ff6b6b'; }
+    if(aiState) aiState.stalkLast = null;
+    const cv = document.getElementById('aiCanvas');
+    if(cv && aiState) cv.style.cursor = (aiState.mode === 'hand' || !aiV.paint) ? 'grab' : 'crosshair';
+    aiUpdateReticle();
+}
+/* keker (lingkaran kuas) berada di depan gagang, bukan di bawah jari */
+function aiReticleClient(){
+    const sk = document.getElementById('aiPill'), cv = document.getElementById('aiCanvas');
+    if(!aiState || !sk || !cv) return null;
+    const sr = sk.getBoundingClientRect(), cr = cv.getBoundingClientRect();
+    if(!cr.width || !cv.width) return null;
+    const r = Math.max(1, parseInt(document.getElementById('aiBrush').value) || 60) * (cr.width / cv.width) / 2;
+    const dist = Math.max(95, r + 45);
+    return { x: sr.left + sr.width / 2, y: sr.top + 28 - dist, r: r };
+}
+function aiUpdateReticle(){
+    const ret = document.getElementById('aiReticle'), body = document.getElementById('aiBody');
+    if(!ret || !body) return;
+    const st = aiState;
+    if(!st || st.busy){ ret.style.display = 'none'; return; }
+    const b = aiReticleClient();
+    if(!b){ ret.style.display = 'none'; return; }
+    const br = body.getBoundingClientRect(), d = Math.max(8, b.r * 2);
+    ret.style.width = d + 'px'; ret.style.height = d + 'px';
+    ret.style.left = (b.x - br.left) + 'px'; ret.style.top = (b.y - br.top) + 'px';
+    ret.style.display = 'block';
+    const live = !!(aiV.paint && (st.mode === 'brush' || st.mode === 'erase'));
+    ret.classList.toggle('off', !live);
+    ret.style.borderColor = live ? (st.mode === 'erase' ? '#ff6b6b' : '#00ff88') : '';
+}
+/* melukis di titik keker saat gagang digeser */
+function aiStalkPaint(){
+    const st = aiState; if(!st || st.busy) return;
+    if(!aiV.paint || (st.mode !== 'brush' && st.mode !== 'erase')){ st.stalkLast = null; return; }
+    const b = aiReticleClient(); if(!b) return;
+    const cv = document.getElementById('aiCanvas'), r = cv.getBoundingClientRect();
+    const px = (b.x - r.left) * (cv.width / r.width), py = (b.y - r.top) * (cv.height / r.height);
+    const wx = (px - aiV.ox) / aiV.s, wy = (py - aiV.oy) / aiV.s;
+    if(wx < 0 || wy < 0 || wx > st.W || wy > st.H){ st.stalkLast = null; return; }
+    const erase = st.mode === 'erase';
+    if(!st.stalkLast){
+        aiSnapshot();
+        aiPaintAt(wx, wy, erase);
+    } else {
+        const a = st.stalkLast;
+        const dist = Math.hypot(wx - a[0], wy - a[1]);
+        const step = Math.max(0.5, parseInt(document.getElementById('aiBrush').value) / (4 * aiV.s));
+        const n = Math.max(1, Math.ceil(dist / step));
+        for(let i = 1; i <= n; i++) aiPaintAt(a[0] + (wx - a[0]) * i / n, a[1] + (wy - a[1]) * i / n, erase);
+    }
+    st.stalkLast = [wx, wy];
+    aiScheduleRedraw();
+}
+let _aiStalkDrag = false, _aiStalkOff = { x: 0, y: 0 };
+function aiBindStalk(){
+    const stalk = document.getElementById('aiPill'), handle = document.getElementById('aiPillHand'), body = document.getElementById('aiBody');
+    if(!stalk || !handle || !body || stalk._bound) return;
+    stalk._bound = true;
+    handle.addEventListener('pointerdown', e => {
+        if(!aiState || aiState.busy) return;
+        _aiStalkDrag = true;
+        try { handle.setPointerCapture(e.pointerId); } catch(_){}
+        const rect = stalk.getBoundingClientRect(), pr = body.getBoundingClientRect();
+        _aiStalkOff = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        stalk.style.left = (rect.left - pr.left) + 'px';
+        stalk.style.top = (rect.top - pr.top) + 'px';
+        stalk.style.right = 'auto'; stalk.style.bottom = 'auto'; stalk.style.transform = 'none';
+        aiState.stalkLast = null;
+        e.preventDefault(); e.stopPropagation();
+    });
+    window.addEventListener('pointermove', e => {
+        if(!_aiStalkDrag) return;
+        const br = body.getBoundingClientRect();
+        const maxL = Math.max(0, br.width - stalk.offsetWidth), maxT = Math.max(0, br.height - stalk.offsetHeight);
+        stalk.style.left = Math.max(0, Math.min(maxL, e.clientX - br.left - _aiStalkOff.x)) + 'px';
+        stalk.style.top = Math.max(0, Math.min(maxT, e.clientY - br.top - _aiStalkOff.y)) + 'px';
+        aiUpdateReticle();
+        aiStalkPaint();
+    });
+    const end = () => { _aiStalkDrag = false; if(aiState) aiState.stalkLast = null; };
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    window.addEventListener('resize', () => { if(aiState) setTimeout(aiUpdateReticle, 120); });
+}
+function aiFit(){
+    const st = aiState; if(!st) return;
+    const cv = document.getElementById('aiCanvas');
+    const s = Math.min(cv.width / st.W, cv.height / st.H) * 0.96;
+    aiV.s = s;
+    aiV.ox = (cv.width - st.W * s) / 2;
+    aiV.oy = (cv.height - st.H * s) / 2;
+    aiRender();
+}
+/* v2.0.2: pusatkan KUAS (gagang + keker) ke tengah kanvas; pemusat gambar tetap di aiFit() */
+function aiCenterBrush(){
+    const st = aiState, pill = document.getElementById('aiPill'), body = document.getElementById('aiBody');
+    if(!st || st.busy || !pill || !body) return;
+    const br = body.getBoundingClientRect();
+    const r = Math.max(1, parseInt(document.getElementById('aiBrush').value) || 60) * (document.getElementById('aiCanvas').getBoundingClientRect().width / (document.getElementById('aiCanvas').width || 1)) / 2;
+    const dist = Math.max(95, r + 45);
+    const maxL = Math.max(0, br.width - pill.offsetWidth), maxT = Math.max(0, br.height - pill.offsetHeight);
+    const L = br.width / 2 - pill.offsetWidth / 2;
+    const T = br.height / 2 + dist - 28;
+    pill.style.left = Math.max(0, Math.min(maxL, L)) + 'px';
+    pill.style.top = Math.max(0, Math.min(maxT, T)) + 'px';
+    pill.style.right = 'auto'; pill.style.bottom = 'auto'; pill.style.transform = 'none';
+    st.stalkLast = null;
+    aiUpdateReticle();
+}
+function aiZoom(f){
+    const st = aiState; if(!st) return;
+    const cv = document.getElementById('aiCanvas');
+    const cx = cv.width / 2, cy = cv.height / 2;
+    const wx = (cx - aiV.ox) / aiV.s, wy = (cy - aiV.oy) / aiV.s;
+    const ns = Math.max(0.2, Math.min(14, aiV.s * f));
+    aiV.s = ns;
+    aiV.ox = cx - wx * ns;
+    aiV.oy = cy - wy * ns;
+    aiRender();
+}
+function aiRender(){
+    const st = aiState; if(!st) return;
+    const cv = document.getElementById('aiCanvas');
+    const x = cv.getContext('2d');
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    x.clearRect(0, 0, cv.width, cv.height);
+    x.setTransform(aiV.s, 0, 0, aiV.s, aiV.ox, aiV.oy);
+    x.imageSmoothingEnabled = true;
+    const src = (st.view === 'result' && st.result) ? st.result : st.work;
+    x.drawImage(src, 0, 0, st.W, st.H);
+    if(st.view !== 'result'){
+        /* v2.0.2: setelah ada hasil, bekas kuas merah lebih transparan agar mudah membandingkan before/after */
+        x.globalAlpha = st.result ? 0.55 : 1;
+        x.drawImage(st.ovl, 0, 0, st.W, st.H);
+        x.globalAlpha = 1;
+    }
+    x.setTransform(1, 0, 0, 1, 0, 0);
+}
+function aiUpdateOverlay(){
+    const st = aiState; if(!st) return;
+    const ox = st.ovl.getContext('2d');
+    const id = ox.createImageData(st.W, st.H);
+    const d = id.data;
+    for(let i = 0; i < st.mask.length; i++){
+        if(st.mask[i]){ d[i * 4] = 230; d[i * 4 + 1] = 40; d[i * 4 + 2] = 40; d[i * 4 + 3] = 130; }
+    }
+    ox.putImageData(id, 0, 0);
+}
+function aiScheduleRedraw(){
+    if(aiRafId) return;
+    aiRafId = requestAnimationFrame(() => { aiRafId = 0; aiUpdateOverlay(); aiRender(); });
+}
+function aiInvalidate(){
+    const st = aiState; if(!st) return;
+    st.result = null; st.fillMask = null; st.view = 'orig';
+    document.getElementById('aiApplyBtn').disabled = true;
+    document.getElementById('aiViewBtn').disabled = true;
+    document.getElementById('aiViewBtn').innerText = '👁 Lihat hasil';
+}
+function aiSnapshot(){
+    const st = aiState; if(!st) return;
+    st.undo.push(Uint8Array.from(st.mask));
+    if(st.undo.length > 30) st.undo.shift();
+    st.redo = [];
+}
+function aiUndo(){
+    const st = aiState; if(!st || st.busy || !st.undo.length) return;
+    st.redo.push(Uint8Array.from(st.mask));
+    st.mask = st.undo.pop();
+    aiInvalidate();
+    aiSetStatus('Undo.');
+    aiUpdateOverlay(); aiRender();
+}
+function aiRedo(){
+    const st = aiState; if(!st || st.busy || !st.redo.length) return;
+    st.undo.push(Uint8Array.from(st.mask));
+    st.mask = st.redo.pop();
+    aiInvalidate();
+    aiSetStatus('Redo.');
+    aiUpdateOverlay(); aiRender();
+}
+function aiClear(){
+    const st = aiState; if(!st || st.busy) return;
+    aiSnapshot();
+    st.mask.fill(0);
+    aiInvalidate();
+    aiSetStatus('Oles dibersihkan.');
+    aiUpdateOverlay(); aiRender();
+}
+function aiPaintAt(wx, wy, erase){
+    const st = aiState; if(!st) return;
+    const rad = Math.max(1, parseInt(document.getElementById('aiBrush').value) / (2 * aiV.s));
+    const W = st.W, H = st.H;
+    const x0 = Math.max(0, Math.floor(wx - rad)), x1 = Math.min(W - 1, Math.ceil(wx + rad));
+    const y0 = Math.max(0, Math.floor(wy - rad)), y1 = Math.min(H - 1, Math.ceil(wy + rad));
+    const r2 = rad * rad, v = erase ? 0 : 1;
+    for(let yy = y0; yy <= y1; yy++) for(let xx = x0; xx <= x1; xx++){
+        const dx = xx - wx, dy = yy - wy;
+        if(dx * dx + dy * dy <= r2) st.mask[yy * W + xx] = v;
+    }
+}
+function aiBindOnce(){
+    const cv = document.getElementById('aiCanvas');
+    if(!cv || cv._bound) return;
+    cv._bound = true;
+    const local = e => {
+        const r = cv.getBoundingClientRect();
+        return [(e.clientX - r.left) * (cv.width / r.width), (e.clientY - r.top) * (cv.height / r.height)];
+    };
+    const toWork = (px, py) => [(px - aiV.ox) / aiV.s, (py - aiV.oy) / aiV.s];
+    cv.addEventListener('pointerdown', e => {
+        const st = aiState; if(!st || st.busy) return;
+        cv.setPointerCapture(e.pointerId);
+        const [px, py] = local(e);
+        st.lastX = px; st.lastY = py;
+        st.painting = true;
+        if(st.mode === 'hand' || !aiV.paint){ st.panning = true; return; }
+        aiSnapshot();
+        const [wx, wy] = toWork(px, py);
+        aiPaintAt(wx, wy, st.mode === 'erase');
+        aiScheduleRedraw();
+    });
+    cv.addEventListener('pointermove', e => {
+        const st = aiState; if(!st || !st.painting) return;
+        const [px, py] = local(e);
+        if(st.panning){
+            aiV.ox += px - st.lastX; aiV.oy += py - st.lastY;
+            st.lastX = px; st.lastY = py;
+            aiRender();
+            return;
+        }
+        const [ax, ay] = toWork(st.lastX, st.lastY);
+        const [bx, by] = toWork(px, py);
+        const dist = Math.hypot(bx - ax, by - ay);
+        const step = Math.max(0.5, parseInt(document.getElementById('aiBrush').value) / (4 * aiV.s));
+        const n = Math.max(1, Math.ceil(dist / step));
+        for(let i = 1; i <= n; i++){
+            aiPaintAt(ax + (bx - ax) * i / n, ay + (by - ay) * i / n, st.mode === 'erase');
+        }
+        st.lastX = px; st.lastY = py;
+        aiScheduleRedraw();
+    });
+    const end = () => { const st = aiState; if(!st) return; st.painting = false; st.panning = false; };
+    cv.addEventListener('pointerup', end);
+    cv.addEventListener('pointercancel', end);
+}
+
+async function aiRun(){
+    const st = aiState; if(!st || st.busy) return;
+    if(!st.mask.some(v => v)){ showToast('Oles dulu objek yang mau dihapus'); return; }
+    st.busy = true;
+    aiUpdateReticle();
+    document.getElementById('aiRunBtn').disabled = true;
+    document.getElementById('aiApplyBtn').disabled = true;
+    const ov = document.getElementById('aiOv'); if(ov) ov.style.display = 'flex';
+    aiSetBar(0);
+    showToast('🧠 Memulai Hapus Objek AI...');
+    try{
+        aiSetStatus('Menyiapkan model AI...');
+        aiSetBar(0.02);
+        const sess = await aiGetSession(p => {
+            aiSetStatus('Mengunduh model AI... ' + Math.round(p * 100) + '% (hanya sekali, lalu disimpan di browser)');
+            aiSetBar(p * 0.8);
+        });
+        aiSetStatus('Memproses area objek...');
+        aiSetBar(0.85);
+        await new Promise(r => setTimeout(r, 10));
+        const W = st.W, H = st.H;
+        const fill = aiDilate(st.mask, W, H, 2);
+        const crop = aiCropRect(fill, W, H);
+        if(!crop) throw new Error('Area objek tidak ditemukan.');
+        const sx = crop.sx, sy = crop.sy, side = crop.side;
+        const c512 = document.createElement('canvas'); c512.width = 512; c512.height = 512;
+        const cx = c512.getContext('2d');
+        cx.imageSmoothingQuality = 'high';
+        cx.drawImage(st.work, sx, sy, side, side, 0, 0, 512, 512);
+        const pix = cx.getImageData(0, 0, 512, 512).data;
+        const hole = new Uint8Array(512 * 512);
+        for(let y = 0; y < 512; y++){
+            const wy = sy + Math.floor((y + 0.5) * side / 512);
+            for(let x = 0; x < 512; x++){
+                const wx = sx + Math.floor((x + 0.5) * side / 512);
+                hole[y * 512 + x] = fill[wy * W + wx];
+            }
+        }
+        const out = await aiRunModel(sess, pix, hole);
+        aiSetBar(0.95);
+        const o512 = document.createElement('canvas'); o512.width = 512; o512.height = 512;
+        const ox = o512.getContext('2d');
+        const oi = ox.createImageData(512, 512);
+        for(let i = 0; i < 512 * 512; i++){
+            oi.data[i * 4] = out[i * 3]; oi.data[i * 4 + 1] = out[i * 3 + 1]; oi.data[i * 4 + 2] = out[i * 3 + 2]; oi.data[i * 4 + 3] = 255;
+        }
+        ox.putImageData(oi, 0, 0);
+        const big = document.createElement('canvas'); big.width = side; big.height = side;
+        const bx = big.getContext('2d');
+        bx.imageSmoothingQuality = 'high';
+        bx.drawImage(o512, 0, 0, side, side);
+        const bd = bx.getImageData(0, 0, side, side).data;
+        const res = document.createElement('canvas'); res.width = W; res.height = H;
+        const rx = res.getContext('2d');
+        rx.drawImage(st.work, 0, 0);
+        const rimg = rx.getImageData(0, 0, W, H);
+        const rd = rimg.data;
+        for(let y = 0; y < side; y++){
+            const wy = sy + y; if(wy >= H) break;
+            for(let x = 0; x < side; x++){
+                const wx = sx + x; if(wx >= W) break;
+                const wi = wy * W + wx;
+                if(!fill[wi]) continue;
+                const bi = (y * side + x) * 4, ri = wi * 4;
+                rd[ri] = bd[bi]; rd[ri + 1] = bd[bi + 1]; rd[ri + 2] = bd[bi + 2]; rd[ri + 3] = 255;
+            }
+        }
+        rx.putImageData(rimg, 0, 0);
+        st.result = res;
+        st.fillMask = fill;
+        st.view = 'result';
+        aiSetBar(1);
+        document.getElementById('aiViewBtn').disabled = false;
+        document.getElementById('aiViewBtn').innerText = '👁 Lihat asli';
+        document.getElementById('aiApplyBtn').disabled = false;
+        aiSetStatus('Selesai. Ini hasilnya. Kalau sudah pas, tekan ✅ Terapkan. Kurang pas? Undo lalu coba lagi.');
+        showToast('✅ Hapus Objek AI selesai');
+        aiRender();
+    } catch(e){
+        console.error(e);
+        aiSetStatus('Gagal: ' + (e && e.message ? e.message : e));
+        showToast('⚠️ Hapus Objek AI gagal');
+    } finally {
+        const ov2 = document.getElementById('aiOv'); if(ov2) ov2.style.display = 'none';
+        if(aiState) aiState.busy = false;
+        aiUpdateReticle();
+        const rb = document.getElementById('aiRunBtn'); if(rb) rb.disabled = false;
+    }
+}
+let aiPanTimer = 0;
+function aiStartPan(dx, dy){
+    aiStopPan();
+    const step = () => { aiV.ox += dx * 12; aiV.oy += dy * 12; aiRender(); };
+    step();
+    aiPanTimer = setInterval(step, 30);
+}
+function aiStopPan(){ if(aiPanTimer){ clearInterval(aiPanTimer); aiPanTimer = 0; } }
+function aiToggleView(){
+    const st = aiState; if(!st || !st.result) return;
+    st.view = st.view === 'result' ? 'orig' : 'result';
+    document.getElementById('aiViewBtn').innerText = st.view === 'result' ? '👁 Lihat asli' : '👁 Lihat hasil';
+    aiRender();
+}
+function aiApply(){
+    const st = aiState; if(!st || !st.result || st.busy) return;
+    const c = document.createElement('canvas');
+    c.width = st.ow; c.height = st.oh;
+    const x = c.getContext('2d');
+    x.drawImage(st.el.img, 0, 0, st.ow, st.oh);
+    const layer = document.createElement('canvas');
+    layer.width = st.ow; layer.height = st.oh;
+    const lx = layer.getContext('2d');
+    lx.imageSmoothingQuality = 'high';
+    lx.drawImage(st.result, 0, 0, st.ow, st.oh);
+    const mc = document.createElement('canvas');
+    mc.width = st.W; mc.height = st.H;
+    const mx = mc.getContext('2d');
+    const mi = mx.createImageData(st.W, st.H);
+    for(let i = 0; i < st.fillMask.length; i++){
+        if(st.fillMask[i]) mi.data[i * 4 + 3] = 255;
+    }
+    mx.putImageData(mi, 0, 0);
+    lx.globalCompositeOperation = 'destination-in';
+    lx.drawImage(mc, 0, 0, st.ow, st.oh);
+    x.drawImage(layer, 0, 0);
+    st.el.src = c.toDataURL('image/png');
+    st.el.img = getImageFromCache(st.el.src);
+    requestRender();
+    pushHistoryState();
+    closeAiInpaint();
+    showToast('✅ Objek berhasil dihapus');
+}
+
+/* Tombol pilih warna disembunyikan saat ada modal/panel layar penuh terbuka */
+function cwSyncVisibility(){
+    const tgl = document.getElementById('cwToggleBtn');
+    const pnl = document.getElementById('cwPanel');
+    if(!tgl) return;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let covered = false;
+    const list = document.querySelectorAll('.feature-modal, .project-modal, #upFull, #bibPanel, #ssPanel, #ssInfo, #ssBmEdit, #lmInfoOverlay');
+    for(const el of list){
+        const cs = getComputedStyle(el);
+        if(cs.display === 'none' || cs.visibility === 'hidden') continue;
+        const r = el.getBoundingClientRect();
+        const area = Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+        if(area > vw * vh * 0.25){ covered = true; break; }
+    }
+    const tp = document.getElementById('toolPanel');
+    const pOpen = !!pnl && pnl.style.display !== 'none';
+    if(tp && tp.classList.contains('active') && !pOpen) covered = true;
+    const _pen = document.getElementById('penToolbar');
+    if(_pen && _pen.classList.contains('active')) covered = true; /* v2.0.2: tombol pilih warna hilang saat tool Pena aktif */
+    tgl.style.visibility = covered ? 'hidden' : '';
+    if(pnl) pnl.style.visibility = covered ? 'hidden' : '';
+}
+setInterval(cwSyncVisibility, 400);
+
+/* ========== v2.0.5: PREVIEW MENGAMBANG = MONITOR KEDUA ==========
+   Satu kanvas kecil dipakai ulang (disalin dari mainCanvas). Sentuhan di preview dipetakan ke koordinat kanvas asli lalu diteruskan
+   sebagai PointerEvent ke jalur event asli (artboard / handle seleksi / window), sehingga pilih, geser, resize, rotasi, snap, garis
+   sejajar & garis jarak memakai logika yang sama persis dengan kanvas asli. */
+var FPV = { el: null, cv: null, cx: null, x: 8, y: 60, w: 110, cssW: 110, cssH: 138, aw: 0, ah: 0, closed: false, on: false, raf: 0, drag: null, fwd: null };
+function fpvAspect(){ return (mainCanvas.height || 1) / (mainCanvas.width || 1); }
+function fpvMaxW(){ return Math.max(80, Math.min(window.innerWidth * 0.92, (window.innerHeight * 0.75) / fpvAspect())); }
+function fpvBtnCss(extra){ return 'position:absolute;width:28px;height:28px;border-radius:50%;border:1px solid #D4AF37;background:rgba(0,0,0,.72);color:#D4AF37;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none;z-index:3;' + extra; }
+function fpvEnsure(){
+    if(FPV.el) return;
+    const el = document.createElement('div');
+    el.id = 'floatPreview';
+    el.style.cssText = 'position:fixed;z-index:9990;display:none;box-sizing:content-box;border-radius:8px;background:#000;box-shadow:0 0 0 2px #D4AF37,0 6px 22px rgba(0,0,0,.75);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;';
+    const cv = document.createElement('canvas');
+    cv.style.cssText = 'display:block;width:100%;height:100%;pointer-events:none;';
+    const xb = document.createElement('button');
+    xb.type = 'button'; xb.setAttribute('aria-label', 'Tutup preview'); xb.textContent = '✕';
+    xb.style.cssText = fpvBtnCss('top:3px;right:3px;font-size:13px;line-height:1;');
+    const hand = document.createElement('div');
+    hand.setAttribute('aria-label', 'Geser preview'); hand.title = 'Geser preview'; hand.textContent = '✋';
+    hand.style.cssText = fpvBtnCss('left:3px;bottom:3px;font-size:15px;cursor:grab;border-radius:10px;');
+    const rs = document.createElement('div');
+    rs.setAttribute('aria-label', 'Ubah ukuran preview'); rs.textContent = '◢';
+    rs.style.cssText = fpvBtnCss('right:3px;bottom:3px;font-size:15px;cursor:nwse-resize;border-radius:10px;');
+    el.appendChild(cv); el.appendChild(xb); el.appendChild(hand); el.appendChild(rs);
+    document.body.appendChild(el);
+    FPV.el = el; FPV.cv = cv; FPV.cx = cv.getContext('2d');
+    FPV.xb = xb; FPV.hand = hand; FPV.rs = rs;
+
+    xb.addEventListener('pointerdown', e => e.stopPropagation());
+    xb.addEventListener('click', e => { e.stopPropagation(); FPV.closed = true; fpvSync(); });
+
+    /* tombol tangan (geser preview) & pegangan ukuran */
+    const bindBtnDrag = (btn, mode) => {
+        btn.addEventListener('pointerdown', e => {
+            try { btn.setPointerCapture(e.pointerId); } catch(_){}
+            FPV.drag = { mode: mode, sx: e.clientX, sy: e.clientY, ox: FPV.x, oy: FPV.y, ow: FPV.w, id: e.pointerId };
+            e.preventDefault(); e.stopPropagation();
+        });
+        btn.addEventListener('pointermove', e => {
+            const d = FPV.drag; if(!d || d.id !== e.pointerId) return;
+            e.stopPropagation();
+            const dx = e.clientX - d.sx, dy = e.clientY - d.sy;
+            if(d.mode === 'move'){ FPV.x = d.ox + dx; FPV.y = d.oy + dy; }
+            else { FPV.w = d.ow + (dx + dy / fpvAspect()) / 2; }
+            fpvLayout(); fpvDraw();
+        });
+        const end = e => { if(FPV.drag && FPV.drag.id === e.pointerId) FPV.drag = null; e.stopPropagation(); };
+        btn.addEventListener('pointerup', end);
+        btn.addEventListener('pointercancel', end);
+    };
+    bindBtnDrag(hand, 'move');
+    bindBtnDrag(rs, 'resize');
+
+    /* badan preview = monitor interaktif: teruskan ke kanvas asli */
+    el.addEventListener('pointerdown', e => {
+        if(e.target === xb || e.target === hand || e.target === rs) return;
+        if(FPV.fwd) return;
+        e.preventDefault(); e.stopPropagation();
+        try { el.setPointerCapture(e.pointerId); } catch(_){}
+        const pt = fpvRealPoint(e);
+        const loc = fpvLocal(e);
+        const hit = fpvPick(loc.x, loc.y);
+        const target = hit ? hit.el : artboard;
+        FPV.fwd = { id: e.pointerId, pt: pt };
+        window.__fpvKeep = true; window.__fpvKeepId = activeElementId;
+        try { fpvDispatch('pointerdown', target, e, pt); } finally { window.__fpvKeep = false; window.__fpvKeepId = null; }
+        try { el.setPointerCapture(e.pointerId); } catch(_){}   /* handle seleksi mengambil capture: kembalikan ke preview */
+        fpvRefresh(true);
+    });
+    el.addEventListener('pointermove', e => {
+        const f = FPV.fwd; if(!f || f.id !== e.pointerId) return;
+        e.stopPropagation();
+        const pt = fpvRealPoint(e); f.pt = pt;
+        fpvDispatch('pointermove', artboard, e, pt);
+    });
+    const endFwd = e => {
+        const f = FPV.fwd; if(!f || f.id !== e.pointerId) return;
+        e.stopPropagation();
+        const pt = fpvRealPoint(e);
+        FPV.fwd = null;
+        fpvDispatch('pointerup', artboard, e, pt);
+        fpvRefresh(true);
+    };
+    el.addEventListener('pointerup', endFwd);
+    el.addEventListener('pointercancel', endFwd);
+    window.addEventListener('resize', () => { if(FPV.on){ fpvLayout(); fpvDraw(); } });
+}
+function fpvLocal(e){
+    const cr = FPV.cv.getBoundingClientRect();
+    return { x: e.clientX - cr.left, y: e.clientY - cr.top };
+}
+function fpvRealPoint(e){
+    const cr = FPV.cv.getBoundingClientRect(), ar = artboard.getBoundingClientRect();
+    const fx = cr.width ? (e.clientX - cr.left) / cr.width : 0, fy = cr.height ? (e.clientY - cr.top) / cr.height : 0;
+    return { x: ar.left + fx * ar.width, y: ar.top + fy * ar.height };
+}
+function fpvDispatch(type, target, e, pt){
+    const up = (type === 'pointerup' || type === 'pointercancel');
+    const ev = new PointerEvent(type, {
+        bubbles: true, cancelable: true, composed: true, view: window,
+        pointerId: e.pointerId, pointerType: e.pointerType, isPrimary: e.isPrimary,
+        clientX: pt.x, clientY: pt.y, button: 0, buttons: up ? 0 : 1, pressure: up ? 0 : (e.pressure || 0.5)
+    });
+    target.dispatchEvent(ev);
+}
+/* ---- geometri seleksi di preview (satuan px CSS preview) ---- */
+function fpvSelRect(){
+    if(!selBox || !selBox.classList.contains('active')) return null;
+    const l = parseFloat(selBox.style.left), t = parseFloat(selBox.style.top), w = parseFloat(selBox.style.width), h = parseFloat(selBox.style.height);
+    if(isNaN(l) || isNaN(t) || isNaN(w) || isNaN(h)) return null;
+    const f = FPV.cssW / (mainCanvas.width * canvasScale);
+    return { l: l * f, t: t * f, w: w * f, h: h * f };
+}
+function fpvStalks(r){
+    const sz = 24, gap = 6, n = 3, tot = n * sz + (n - 1) * gap;
+    let cx = r.l + r.w / 2;
+    cx = Math.max(tot / 2 + 2, Math.min(FPV.cssW - tot / 2 - 2, cx));
+    let cy = r.t + r.h + 6 + sz / 2;
+    if(cy + sz / 2 > FPV.cssH - 2) cy = r.t - 6 - sz / 2;
+    cy = Math.max(sz / 2 + 2, Math.min(FPV.cssH - sz / 2 - 2, cy));
+    const ids = ['stalkDelete', 'stalkMove', 'stalkRotate'], ic = ['🗑️', '✥', '🔄'];
+    return ids.map((id, i) => ({ id: id, icon: ic[i], x: cx - tot / 2 + sz / 2 + i * (sz + gap), y: cy, r: sz / 2 }));
+}
+function fpvPick(x, y){
+    const r = fpvSelRect(); if(!r) return null;
+    const st = fpvStalks(r);
+    for(const s of st){
+        if(Math.hypot(x - s.x, y - s.y) <= s.r + 3){ const el = document.getElementById(s.id); if(el) return { el: el }; }
+    }
+    const corners = [['tl', r.l, r.t], ['tr', r.l + r.w, r.t], ['bl', r.l, r.t + r.h], ['br', r.l + r.w, r.t + r.h]];
+    for(const c of corners){
+        if(Math.hypot(x - c[1], y - c[2]) <= 14){ const el = document.querySelector('.sel-handle[data-handle="' + c[0] + '"]'); if(el) return { el: el }; }
+    }
+    const T = 9, inX = x > r.l && x < r.l + r.w, inY = y > r.t && y < r.t + r.h;
+    let edge = null;
+    if(inX && Math.abs(y - r.t) <= T) edge = 't';
+    else if(inX && Math.abs(y - (r.t + r.h)) <= T) edge = 'b';
+    else if(inY && Math.abs(x - r.l) <= T) edge = 'l';
+    else if(inY && Math.abs(x - (r.l + r.w)) <= T) edge = 'r';
+    if(edge){ const el = document.querySelector('.sel-handle-edge[data-handle="' + edge + '"]'); if(el) return { el: el }; }
+    return null;
+}
+function fpvLayout(){
+    if(!FPV.el) return;
+    const asp = fpvAspect();
+    FPV.w = Math.max(70, Math.min(fpvMaxW(), FPV.w));
+    const w = Math.round(FPV.w), h = Math.round(FPV.w * asp);
+    FPV.x = Math.max(0, Math.min(window.innerWidth - w, FPV.x));
+    FPV.y = Math.max(0, Math.min(window.innerHeight - h, FPV.y));
+    const st = FPV.el.style;
+    st.left = Math.round(FPV.x) + 'px'; st.top = Math.round(FPV.y) + 'px';
+    st.width = w + 'px'; st.height = h + 'px';
+    FPV.cssW = w; FPV.cssH = h;
+    FPV.aw = mainCanvas.width; FPV.ah = mainCanvas.height;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const bw = Math.max(1, Math.round(w * dpr)), bh = Math.max(1, Math.round(h * dpr));
+    if(FPV.cv.width !== bw || FPV.cv.height !== bh){ FPV.cv.width = bw; FPV.cv.height = bh; }
+}
+function fpvDrawGuides(c, w, h){
+    const g = document.getElementById('bleedGuides');
+    if(!g || !g.classList.contains('visible') || activeGuideMode === 'none') return;
+    const m = activeGuideMode, mg = (bleedSettings.margin || 5) / 100;
+    const showMargin = (m === 'margin' || m === 'all'), showCenter = (m === 'center' || m === 'all'), showGrid = (m === 'grid3x3' || m === 'all');
+    c.save();
+    c.lineWidth = 1; c.setLineDash([4, 3]);
+    const hl = (y, col) => { c.strokeStyle = col; c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); };
+    const vl = (x, col) => { c.strokeStyle = col; c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); };
+    if(showMargin){ const col = bleedSettings.color || '#D4AF37'; hl(h * mg, col); hl(h * (1 - mg), col); vl(w * mg, col); vl(w * (1 - mg), col); }
+    if(showCenter){ hl(h / 2, '#00e5ff'); vl(w / 2, '#00e5ff'); }
+    if(showGrid){ const col = 'rgba(212,175,55,.7)'; hl(h / 3, col); hl(h * 2 / 3, col); vl(w / 3, col); vl(w * 2 / 3, col); }
+    c.restore();
+}
+function fpvDrawSmart(c, f){
+    if(typeof _sgLines === 'undefined' || !_sgLines || !_sgLines.length) return;
+    const NEON = '#b026ff', tk = 3, pills = [];
+    c.save();
+    c.strokeStyle = NEON; c.lineWidth = 1.4; c.shadowColor = 'rgba(212,0,255,.85)'; c.shadowBlur = 5;
+    c.setLineDash([4, 3]); c.beginPath();
+    _sgLines.forEach(l => { if(!l.gapIndicator && !l.gapIndicatorX){ c.moveTo(l.x1 * f, l.y1 * f); c.lineTo(l.x2 * f, l.y2 * f); } });
+    c.stroke();
+    c.setLineDash([]); c.beginPath();
+    _sgLines.forEach(l => {
+        if(l.gapIndicator){
+            c.moveTo(l.x * f - tk, l.y1 * f); c.lineTo(l.x * f + tk, l.y1 * f);
+            c.moveTo(l.x * f, l.y1 * f); c.lineTo(l.x * f, l.y2 * f);
+            c.moveTo(l.x * f - tk, l.y2 * f); c.lineTo(l.x * f + tk, l.y2 * f);
+            pills.push([l.x * f, (l.y1 + l.y2) / 2 * f, Math.round(Math.abs(l.y2 - l.y1)) + 'px']);
+        } else if(l.gapIndicatorX){
+            c.moveTo(l.x1 * f, l.y * f - tk); c.lineTo(l.x1 * f, l.y * f + tk);
+            c.moveTo(l.x1 * f, l.y * f); c.lineTo(l.x2 * f, l.y * f);
+            c.moveTo(l.x2 * f, l.y * f - tk); c.lineTo(l.x2 * f, l.y * f + tk);
+            pills.push([(l.x1 + l.x2) / 2 * f, l.y * f, Math.round(Math.abs(l.x2 - l.x1)) + 'px']);
+        }
+    });
+    c.stroke();
+    c.shadowBlur = 0;
+    c.font = "bold 9px 'Plus Jakarta Sans', sans-serif"; c.textAlign = 'center'; c.textBaseline = 'middle';
+    pills.forEach(p => {
+        const pw = c.measureText(p[2]).width + 8, ph = 13;
+        c.fillStyle = 'rgba(20,0,40,.82)'; c.strokeStyle = NEON; c.lineWidth = 1;
+        c.beginPath(); (c.roundRect || c.rect).call(c, p[0] - pw / 2, p[1] - ph / 2, pw, ph, ph / 2); c.fill(); c.stroke();
+        c.fillStyle = '#fff'; c.fillText(p[2], p[0], p[1]);
+    });
+    c.restore();
+}
+function fpvDrawSel(c){
+    const r = fpvSelRect(); if(!r) return;
+    c.save();
+    c.setLineDash([4, 3]); c.strokeStyle = '#D4AF37'; c.lineWidth = 1; c.strokeRect(r.l + .5, r.t + .5, r.w, r.h);
+    c.setLineDash([]);
+    const sq = 7, pts = [[r.l, r.t], [r.l + r.w, r.t], [r.l, r.t + r.h], [r.l + r.w, r.t + r.h]];
+    c.fillStyle = '#fff'; c.strokeStyle = '#D4AF37'; c.lineWidth = 1.5;
+    pts.forEach(p => { c.beginPath(); c.rect(p[0] - sq / 2, p[1] - sq / 2, sq, sq); c.fill(); c.stroke(); });
+    c.fillStyle = '#D4AF37';
+    const mx = r.l + r.w / 2, my = r.t + r.h / 2;
+    [[mx - 6, r.t - 1.5, 12, 3], [mx - 6, r.t + r.h - 1.5, 12, 3], [r.l - 1.5, my - 6, 3, 12], [r.l + r.w - 1.5, my - 6, 3, 12]].forEach(b => c.fillRect(b[0], b[1], b[2], b[3]));
+    fpvStalks(r).forEach(s => {
+        c.beginPath(); c.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        c.fillStyle = '#1e1e1e'; c.fill();
+        c.strokeStyle = s.id === 'stalkDelete' ? '#ff6b6b' : '#D4AF37'; c.lineWidth = 1.5; c.stroke();
+        c.font = '12px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillStyle = s.id === 'stalkDelete' ? '#ff6b6b' : '#D4AF37';
+        c.fillText(s.icon, s.x, s.y + 1);
+    });
+    c.restore();
+}
+/* v2.0.6: kanvas antara (≈2x ukuran preview) dibuat sekali lalu dipakai ulang tiap frame */
+var FPV_MID = null, FPV_MIDX = null;
+function fpvDraw(){
+    if(!FPV.on || !FPV.cx) return;
+    if(FPV.aw !== mainCanvas.width || FPV.ah !== mainCanvas.height) fpvLayout();   /* rasio poster berubah: ikuti seketika */
+    const cv = FPV.cv, c = FPV.cx;
+    const dpr = cv.width / Math.max(1, FPV.cssW);
+    const tw = cv.width, th = cv.height;
+    let src = mainCanvas;
+    if(mainCanvas.width > tw * 2.5 || mainCanvas.height > th * 2.5){
+        const mw = Math.max(1, Math.round(tw * 2)), mh = Math.max(1, Math.round(th * 2));
+        if(!FPV_MID){ FPV_MID = document.createElement('canvas'); FPV_MIDX = FPV_MID.getContext('2d'); }
+        if(FPV_MID.width !== mw || FPV_MID.height !== mh){ FPV_MID.width = mw; FPV_MID.height = mh; }
+        try {
+            FPV_MIDX.imageSmoothingEnabled = true; FPV_MIDX.imageSmoothingQuality = 'medium';
+            FPV_MIDX.clearRect(0, 0, mw, mh);
+            FPV_MIDX.drawImage(mainCanvas, 0, 0, mw, mh);
+            src = FPV_MID;
+        } catch(_){ src = mainCanvas; }
+    }
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, tw, th);
+    c.imageSmoothingEnabled = true;
+    c.imageSmoothingQuality = 'high';
+    try { c.drawImage(src, 0, 0, tw, th); } catch(_){}
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fpvDrawGuides(c, FPV.cssW, FPV.cssH);
+    fpvDrawSmart(c, FPV.cssW / mainCanvas.width);
+    fpvDrawSel(c);
+    c.setTransform(1, 0, 0, 1, 0, 0);
+}
+function fpvRefresh(sync){
+    if(!FPV || !FPV.on) return;
+    if(sync === true){
+        if(FPV.raf){ cancelAnimationFrame(FPV.raf); FPV.raf = 0; }
+        fpvDraw();
+        return;
+    }
+    if(FPV.raf) return;
+    FPV.raf = requestAnimationFrame(() => { FPV.raf = 0; fpvDraw(); });
+}
+function fpvSync(){
+    const tp = document.getElementById('toolPanel');
+    const open = !!tp && tp.classList.contains('active');
+    /* v2.0.6: sekali dibuka, preview tetap ada walau panel tool ditutup (mis. ketuk kanvas hitam).
+       Hanya tombol ✕ atau tool layar penuh yang menyembunyikannya; dibuka lagi saat panel tool dibuka kembali. */
+    if(open && !FPV.lastOpen){ FPV.closed = false; FPV.armed = true; }
+    FPV.lastOpen = open;
+    let want = !!FPV.armed && !FPV.closed;
+    if(want){
+        /* tool layar penuh (modal) punya preview sendiri: preview mengambang disembunyikan sementara */
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const list = document.querySelectorAll('.feature-modal, .project-modal, #upFull, #bibPanel, #ssPanel, #ssInfo, #ssBmEdit, #lmInfoOverlay');
+        for(const m of list){
+            const cs = getComputedStyle(m);
+            if(cs.display === 'none' || cs.visibility === 'hidden') continue;
+            const r = m.getBoundingClientRect();
+            const area = Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+            if(area > vw * vh * 0.25){ want = false; break; }
+        }
+    }
+    if(want){
+        fpvEnsure();
+        if(!FPV.on){ FPV.on = true; FPV.el.style.display = 'block'; fpvLayout(); fpvDraw(); }
+        else if(FPV.aw !== mainCanvas.width || FPV.ah !== mainCanvas.height){ fpvLayout(); fpvDraw(); }
+    } else if(FPV.on){
+        /* sentuhan masih berjalan saat preview hilang: akhiri drag dengan rapi */
+        if(FPV.fwd){
+            const f = FPV.fwd; FPV.fwd = null;
+            try { fpvDispatch('pointerup', artboard, { pointerId: f.id, pointerType: 'touch', isPrimary: true, pressure: 0 }, f.pt); } catch(_){}
+        }
+        FPV.on = false; FPV.el.style.display = 'none';
+    }
+}
+(function fpvInit(){
+    const tp = document.getElementById('toolPanel');
+    if(tp && window.MutationObserver) new MutationObserver(fpvSync).observe(tp, { attributes: true, attributeFilter: ['class'] });
+    setInterval(fpvSync, 400);
+})();
+
+function cwScrollBy(d){
+    const b = document.getElementById('cwBody'); if(!b) return;
+    b.scrollBy({ top: d, behavior: 'smooth' });
+}
+function cwSetAlpha(v){
+    const a = Math.max(30, Math.min(100, parseInt(v))) / 100;
+    const p = document.getElementById('cwPanel');
+    const t = document.getElementById('cwToggleBtn');
+    if(p) p.style.setProperty('--cw-bg', 'rgba(16,16,16,' + a + ')');
+    if(t) t.style.setProperty('--cw-bg2', 'rgba(18,18,18,' + a + ')');
+}
+function cwToggle(){
+    const panel = document.getElementById('cwPanel'); if(!panel) return;
+    const open = panel.style.display === 'none';
+    panel.style.display = open ? 'flex' : 'none';
+    if(!open) return;
+    const cv = document.getElementById('cwWheel');
+    if(cv && !cv._bound){
+        cv._bound = true;
+        cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); cv._drag = true; cwWheelPointer(e, true); });
+        cv.addEventListener('pointermove', e => { if(cv._drag) cwWheelPointer(e, true); });
+        const end = e => { if(cv._drag){ cv._drag = false; cwAfterBaseChange(); } };
+        cv.addEventListener('pointerup', end);
+        cv.addEventListener('pointercancel', end);
+    }
+    const el = getActiveElement();
+    if(el && el.type === 'text'){
+        const rgb = cwParseColor(el.color || '');
+        if(rgb){
+            const hsv = cwRgbToHsv(rgb[0], rgb[1], rgb[2]);
+            CWHEEL.h = hsv.h; CWHEEL.s = hsv.s;
+            if(hsv.v > 0.02) CWHEEL.v = hsv.v;
+            const sl = document.getElementById('cwV'); if(sl) sl.value = Math.round(CWHEEL.v * 100);
+        }
+    }
+    const sel = document.getElementById('cwHarmony'); if(sel) sel.value = CWHEEL.harmony;
+    cwAfterBaseChange();
+}
+
 function openPanelTextColor(){
 const el=getActiveElement();
 if(!el)return;
@@ -12929,6 +14768,7 @@ ${t.gradType==='conical' ? `
 <input type="range" class="ctrl-slider" min="-500" max="500" value="${t.offsetY || 0}" oninput="updateTransparency('offsetY', this.value)">
 ` : ''}
 
+<button class="btn-sub-tool" onclick="cwToggle()" style="width:100%;flex-direction:row;justify-content:center;margin:0 0 12px;"><svg class="ic" aria-hidden="true"><use href="#ic-wheel"/></svg>&nbsp;Roda Warna &amp; Paket</button>
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Kepekatan Maks:</span><span class="ctrl-val" id="valTransAlpha">${t.alpha}%</span></div>
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('opTransSlider',-1,(v)=>updateTransparency('alpha',v))">-</button>
@@ -13287,12 +15127,16 @@ function updateRelativeSize(pct) {
 
 function openPanelDepthFocus() {
     const el = getActiveElement(); if(!el || el.type !== 'image') return;
-    if(!el.depthFocus) el.depthFocus = {active:false, mode:'radial', blurAmount:14, centerX:50, centerY:50, radius:35};
+    if(!el.depthFocus) el.depthFocus = {active:false, mode:'radial', blurAmount:14, centerX:50, centerY:50, radius:35, invert:false};
     const df = el.depthFocus;
     const html = `
     <div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:12px;font-weight:700;">Status Fokus DSLR</span>
         <button class="btn-sub-tool ${df.active?'active':''}" onclick="toggleDepthFocus()">${df.active?'Aktif':'Mati'}</button>
+    </div>
+    <div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+        <span style="font-size:12px;font-weight:700;">Invert <span style="font-weight:400;color:#aaa;font-size:10px;">(dalam blur, luar jelas)</span></span>
+        <button class="btn-sub-tool ${df.invert?'active':''}" onclick="toggleDepthFocusInvert()">${df.invert?'ON':'OFF'}</button>
     </div>
     <div class="ctrl-grid-btns" style="margin-top:12px;">
         <button class="btn-sub-tool ${df.mode==='radial'?'active':''}" onclick="updateDepthFocus('mode', 'radial')">⭕ Radial</button>
@@ -13318,6 +15162,12 @@ function toggleDepthFocus() {
     renderAll(); pushHistoryState(); openPanelDepthFocus();
 }
 
+function toggleDepthFocusInvert() {
+    const el = getActiveElement(); if(!el || !el.depthFocus) return;
+    el.depthFocus.invert = !el.depthFocus.invert;
+    renderAll(); pushHistoryState(); openPanelDepthFocus();
+}
+
 function updateDepthFocus(prop, val) {
     const el = getActiveElement(); if(!el) return;
     el.depthFocus[prop] = (prop === 'mode') ? val : parseInt(val);
@@ -13331,7 +15181,7 @@ function updateDepthFocus(prop, val) {
 
 function resetDepthFocus() {
     const el = getActiveElement(); if(!el) return;
-    el.depthFocus = {active:false, mode:'radial', blurAmount:14, centerX:50, centerY:50, radius:35};
+    el.depthFocus = {active:false, mode:'radial', blurAmount:14, centerX:50, centerY:50, radius:35, invert:false};
     renderAll(); pushHistoryState(); openPanelDepthFocus();
 }
 
@@ -18412,5 +20262,104 @@ window._emoText=function(el){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
 </script>
+<button id="cwToggleBtn" class="cw-toggle" onclick="cwToggle()" title="Pilih warna"><svg class="ic" aria-hidden="true"><use href="#ic-colorpick"/></svg></button>
+<div id="cwPanel" class="cw-panel" style="display:none;"><div class="cw-rail"><button class="cw-rb" onclick="cwScrollBy(-160)" aria-label="Gulir ke atas">▲</button><button class="cw-rb" onclick="cwScrollBy(160)" aria-label="Gulir ke bawah">▼</button></div><div class="cw-body" id="cwBody">
+<div class="cw-head"><span>Pilih Warna</span><div class="cw-headbtns"><button class="cw-info" onclick="cwInfo()" title="Panduan">i</button><button class="cw-x" onclick="cwToggle()" title="Tutup">×</button></div></div>
+<div class="cw-seg">
+<button id="cwModeManual" class="cw-segbtn on" onclick="cwSetMode('manual')">✋ Manual</button>
+<button id="cwModeAuto" class="cw-segbtn" onclick="cwSetMode('auto')">⚡ Otomatis</button>
+</div>
+<div id="cwManual">
+<div class="cw-wheelwrap"><canvas id="cwWheel" width="300" height="300"></canvas></div>
+<div class="cw-row"><span>Warna dasar: <b id="cwBaseHex">#D4AF37</b></span><button class="cw-mini" onclick="cwPickScreen()">💉 Pipet</button></div>
+<div class="cw-row"><span>Transparansi panel</span><input type="range" id="cwAlpha" min="30" max="100" value="82" oninput="cwSetAlpha(this.value)"></div>
+<div class="cw-row"><span>Kecerahan</span><input type="range" id="cwV" min="0" max="100" value="85" oninput="cwSetV(this.value)"></div>
+<div class="cw-row"><span>Harmoni</span><select id="cwHarmony" onchange="cwSetHarmony(this.value)">
+<option value="complementary">Komplementer</option>
+<option value="analogous">Analog</option>
+<option value="triadic">Triadik</option>
+<option value="split">Split-komplementer</option>
+<option value="tetradic">Tetradik</option>
+<option value="square">Persegi</option>
+<option value="mono">Monokrom</option>
+</select></div>
+<div class="cw-sec">Palet harmoni (klik untuk memakai)</div>
+<div id="cwSwatches" class="cw-list"></div>
+<div class="cw-row"><button class="cw-mini" onclick="cwSavePalette()">💾 Simpan palet</button><button class="cw-mini" onclick="cwCopyPalette()">📋 Salin HEX</button></div>
+<div class="cw-sec">Tint, Tone, Shade</div>
+<div id="cwShades"></div>
+<div class="cw-sec">Paket warna tersimpan</div>
+<div id="cwSaved" class="cw-list"></div>
+</div>
+<div id="cwAuto" style="display:none;"></div>
+<div id="cwStatus" class="cw-status">Pilih teks untuk cek kontras.</div>
+</div>
+</div>
+<div class="feature-modal" id="aiInpaintModal">
+<div class="fmodal-header">
+<div style="font-weight:800;color:#D4AF37;font-size:13px;">🩹 Hapus Objek (AI)</div>
+<button class="panel-close" onclick="closeAiInpaint()">✕</button>
+</div>
+<div class="fmodal-body" id="aiBody" style="position:relative;">
+<div id="aiCanvasWrapper" style="position:relative;width:100%;height:100%;overflow:hidden;">
+<canvas id="aiCanvas" style="width:100%;height:100%;display:block;touch-action:none;"></canvas>
+</div>
+<div id="aiZoomUi" style="position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:5px;z-index:105;">
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onclick="aiZoom(1.25)" aria-label="Perbesar">➕</button>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onclick="aiZoom(0.8)" aria-label="Perkecil">➖</button>
+<button class="btn-nav" style="width:34px;justify-content:center;" onclick="aiFit()" aria-label="Pusatkan">🎯</button>
+</div>
+<div id="aiPanUi" style="position:absolute;top:10px;left:10px;z-index:105;">
+<div style="display:grid;grid-template-columns:repeat(3,34px);gap:4px;">
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="aiStartPan(0,1)" onpointerup="aiStopPan()" onpointerleave="aiStopPan()" onpointercancel="aiStopPan()" aria-label="Geser ke atas">⬆️</button>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="aiStartPan(1,0)" onpointerup="aiStopPan()" onpointerleave="aiStopPan()" onpointercancel="aiStopPan()" aria-label="Geser ke kiri">⬅️</button>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="aiStartPan(-1,0)" onpointerup="aiStopPan()" onpointerleave="aiStopPan()" onpointercancel="aiStopPan()" aria-label="Geser ke kanan">➡️</button>
+<span></span>
+<button class="btn-nav" style="width:34px;justify-content:center;touch-action:none;" onpointerdown="aiStartPan(0,-1)" onpointerup="aiStopPan()" onpointerleave="aiStopPan()" onpointercancel="aiStopPan()" aria-label="Geser ke bawah">⬇️</button>
+<span></span>
+</div>
+</div>
+<div class="grab-reticle" id="aiReticle"></div>
+<div id="aiPill" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border:2px solid #D4AF37;border-radius:22px;background:rgba(20,20,20,.85);touch-action:none;">
+<span id="aiPillHand" title="Geser gagang" style="padding:5px;cursor:grab;font-size:18px;touch-action:none;">✋</span>
+<div style="width:20px;height:1px;background:#D4AF37;"></div>
+<span id="aiPillBrush" onclick="aiTogglePaint()" title="Kuas ON/OFF" style="padding:5px;color:#00ff88;cursor:pointer;font-size:16px;">✏️</span>
+</div>
+<div class="snap-ov" id="aiOv" style="display:none;">
+<div class="snap-card">
+<div class="snap-title"><span class="snap-spin"></span><span id="aiOvTitle">AI sedang menghapus objek…</span></div>
+<div class="snap-status" id="aiOvStatus">Menyiapkan…</div>
+<div class="snap-bar"><div class="snap-fill" id="aiOvBar"></div></div>
+<div class="snap-pct" id="aiOvPct">0%</div>
+<div class="snap-hint">Mohon tunggu sebentar, aplikasi tidak macet.</div>
+</div>
+</div>
+</div>
+<div class="fmodal-footer" id="aiFooter" style="flex-direction:column;height:auto;padding:10px 16px;gap:10px;">
+<div style="width:100%;display:flex;flex-direction:column;gap:8px;">
+<div id="aiStatus" style="font-size:11px;color:#D4AF37;line-height:1.4;">Siap. Geser gagang ✋: lingkaran (keker) di depan jari melukis objek yang mau dihapus.</div>
+<div style="height:6px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;"><div id="aiBar" style="height:100%;width:0%;background:#D4AF37;transition:width .15s;"></div></div>
+</div>
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%;">
+<button class="btn-sub-tool" id="aiModeBrush" onclick="aiSetMode('brush')" style="flex-direction:row;padding:6px 8px;">➕ Tandai</button>
+<button class="btn-sub-tool" id="aiModeErase" onclick="aiSetMode('erase')" style="flex-direction:row;padding:6px 8px;">➖ Hapus Tanda</button>
+<button class="btn-nav" onclick="aiUndo()" style="padding:6px 10px;" title="Undo">↩️</button>
+<button class="btn-nav" onclick="aiRedo()" style="padding:6px 10px;" title="Redo">↪️</button>
+<button class="btn-nav" onclick="aiCenterBrush()" style="padding:6px 10px;" title="Pusatkan kuas">📍 Pusat</button>
+<span style="font-size:11px;color:#aaa;">Kuas:</span>
+<input type="range" class="ctrl-slider" id="aiBrush" min="6" max="200" value="60" style="width:70px;" oninput="document.getElementById('aiBrushVal').innerText=this.value+'px';aiUpdateReticle()">
+<span id="aiBrushVal" style="font-size:11px;color:#D4AF37;font-weight:700;min-width:36px;">60px</span>
+<button class="btn-nav" onclick="aiClear()" style="margin-left:auto;font-size:10px;padding:6px 8px;">🗑️ Bersihkan</button>
+</div>
+<div style="display:flex;gap:8px;width:100%;align-items:center;">
+<button class="btn-sub-tool active" id="aiRunBtn" onclick="aiRun()" style="flex:1;flex-direction:row;justify-content:center;padding:8px;">🧠 Hapus Objek AI</button>
+<button class="btn-nav" id="aiViewBtn" onclick="aiToggleView()" disabled style="padding:8px 10px;">👁 Lihat hasil</button>
+</div>
+<button class="btn-download" id="aiApplyBtn" onclick="aiApply()" disabled style="width:100%;height:44px;border-radius:22px;justify-content:center;display:flex;align-items:center;font-size:14px;font-weight:800;">✅ Terapkan</button>
+</div>
+</div>
 </body>
 </html>
