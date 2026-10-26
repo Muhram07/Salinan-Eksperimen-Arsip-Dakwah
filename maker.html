@@ -1,13 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v2.3.1
+Studio Poster Maker Pro - Update v2.3.2
+
+v2.3.2:
+1. FONT OFFLINE STABIL: font dibuat sekali dan tidak pernah dihapus saat memuat ulang, sehingga pindah projek, mode pesawat, dan kembali online tidak lagi merusak judul dan teks.
+2. MASK TEKS IKUT FONT: teks yang memakai layer mask ikut digambar ulang saat font siap.
+3. LAG FONT OFFLINE DIKURANGI: font yang sudah dimuat tidak dimuat ulang, dan render ulang dilakukan sekali per kelompok font.
 
 v2.3.1:
-1. FONT OFFLINE TAMPIL: teks yang sempat digambar sebelum font selesai dimuat (memakai cadangan) tidak lagi tertahan di cache. Teks otomatis digambar ulang dengan font asli setelah font tersedia, baik saat offline maupun online.
-2. PERBARUI FONT LEBIH LENGKAP: tombol Perbarui Font juga mengunduh font bawaan (Google Fonts) ke penyimpanan perangkat, sehingga bisa dipakai saat mode pesawat.
-
-v2.3.0:
-1. OFFLINE LEBIH KUAT: font bawaan ikut disimpan saat online, dan font repo dimuat sebelum render pertama.
-2. TOMBOL UPDATE AMAN: saat offline, Update tidak menghapus cache dan tidak memuat ulang halaman.
+1. FONT OFFLINE TAMPIL: teks yang sempat digambar sebelum font selesai dimuat tidak lagi tertahan di cache.
+2. PERBARUI FONT LEBIH LENGKAP: juga mengunduh font bawaan (Google Fonts).
 -->
 
 
@@ -2030,7 +2031,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.3.1';
+const APP_VERSION = 'v2.3.2';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2698,7 +2699,7 @@ renderAll();
 pushHistoryState();
 
 window.__fontEpoch = 0;
-if (document.fonts && document.fonts.addEventListener) { document.fonts.addEventListener('loadingdone', () => { window.__fontEpoch = (window.__fontEpoch || 0) + 1; scheduleFullRerender(150); }); }
+if (document.fonts && document.fonts.addEventListener) { document.fonts.addEventListener('loadingdone', () => { _bumpFontEpoch(); scheduleFullRerender(150); }); }
 document.fonts.ready.then(() => {
     slides.forEach(s => {
         if(s.elements) {
@@ -3675,7 +3676,7 @@ function renderLayerMaskPatches(c, elements, skipEl){
             let patch;
             if(isMain){
                 const t = c.getTransform();
-                const key = getElHash(el) + '|' + el.x + '|' + el.y + '|' + el.rotation + '|' + mask._lmId + '|' + c.canvas.width + 'x' + c.canvas.height + '|' + t.a + ',' + t.d + ',' + t.e + ',' + t.f + '|' + (window.currentRenderScale||1);
+                const key = getElHash(el) + '|fe' + (window.__fontEpoch || 0) + '|' + el.x + '|' + el.y + '|' + el.rotation + '|' + mask._lmId + '|' + c.canvas.width + 'x' + c.canvas.height + '|' + t.a + ',' + t.d + ',' + t.e + ',' + t.f + '|' + (window.currentRenderScale||1);
                 const cache = el._lmCache;
                 if(cache && cache.key === key && cache.canvas){
                     patch = cache.canvas;
@@ -13142,23 +13143,40 @@ async function cacheGoogleFonts() {
         }
     }
 }
+/* v2.3.2: registri font tunggal. Setiap font dibuat sekali (FontFace + URL) dan TIDAK pernah dihapus atau dicabut.
+   Loader hanya MENAMBAH font yang belum ada, sehingga pindah projek, mode pesawat, dan kembali online tidak merusak render. */
+window.__fontReg = window.__fontReg || new Map();
+let _fontEpochT = 0;
+function _bumpFontEpoch() {
+    clearTimeout(_fontEpochT);
+    _fontEpochT = setTimeout(function () {
+        window.__fontEpoch = (window.__fontEpoch || 0) + 1;
+        try { renderAll(); } catch (e) { }
+    }, 120);
+}
+async function _regFont(regKey, family, blob, desc) {
+    const hit = window.__fontReg.get(regKey);
+    if (hit) return hit.ff;
+    const url = URL.createObjectURL(blob);
+    const ff = new FontFace(family, `url(${url})`, desc || {});
+    await ff.load();
+    document.fonts.add(ff);
+    window.__fontReg.set(regKey, { ff: ff, url: url });
+    _bumpFontEpoch();
+    return ff;
+}
 async function loadGoogleFontsOffline() {
     await waitDbReady();
     for (const r of _readGfontRecs()) {
-        if (!r.key || _gfLoadedKeys.has(r.key)) continue;
+        if (!r.key || window.__fontReg.has(r.key)) continue;
         try {
             const row = await getFontBlobFromDB(r.key);
             if (!row || !row.data) continue;
-            const url = URL.createObjectURL(row.data);
             const desc = { weight: r.weight };
             if (r.unicode) desc.unicodeRange = r.unicode;
-            const ff = new FontFace(r.family, `url(${url})`, desc);
-            await ff.load();
-            document.fonts.add(ff);
-            _gfLoadedKeys.add(r.key);
+            await _regFont(r.key, r.family, row.data, desc);
         } catch (e) { }
     }
-    window.__fontEpoch = (window.__fontEpoch || 0) + 1;
 }
 
 /* v2.2.0: manifest font repo untuk mode offline. Nama internal, label, dan urutan font TIDAK diubah setelah tercatat.
@@ -13183,29 +13201,24 @@ function mergeRepoManifest(newRecs) {
 async function loadRepoFontsOffline() {
     await waitDbReady();
     const man = _readFontManifest();
-    for (const f of repoFonts) { try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { } }
-    for (const u of repoObjectUrls) { try { URL.revokeObjectURL(u); } catch (e) { } }
-    const recs = [], urls = [];
+    const recs = [];
     for (const r of man) {
         try {
-            const row = await getFontBlobFromDB(r.key);
-            if (!row || !row.data) continue;
-            const url = URL.createObjectURL(row.data);
-            urls.push(url);
-            const ff = new FontFace(r.internal, `url(${url})`);
-            await ff.load();
-            document.fonts.add(ff);
-            recs.push({ name: r.internal, label: r.label, file: r.file, size: r.size, tag: r.tag, emote: r.emote, src: 'repo', _ff: ff, key: r.key });
-        } catch (e) { }
+            if (!window.__fontReg.has(r.internal)) {
+                const row = await getFontBlobFromDB(r.key);
+                if (!row || !row.data) continue;
+                await _regFont(r.internal, r.internal, row.data);
+            }
+            const hit = window.__fontReg.get(r.internal);
+            if (!hit) continue;
+            recs.push({ name: r.internal, label: r.label, file: r.file, size: r.size, tag: r.tag, emote: r.emote, src: 'repo', _ff: hit.ff, key: r.key });
+        } catch (e) { console.warn('Font repo gagal dimuat:', r.internal, e); }
     }
     repoFonts = recs;
-    repoObjectUrls = urls;
     if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO';
     try { migrateRepoFontNames(); } catch (e) { }
-    window.__fontEpoch = (window.__fontEpoch || 0) + 1;
     return repoFonts.length > 0;
 }
-
 async function scanFontRepo() {
     const cfg = getFontRepoCfg();
     if (!cfg) {
@@ -13305,8 +13318,8 @@ async function scanFontRepo() {
             if (r.safe && r.it.sha && r.it.path) deletable.push({ name: r.it.name, path: r.it.path, sha: r.it.sha, size: r.it.size });
         });
         /* tahap 3: muat font yang dipilih */
-        for (const f of repoFonts) { try { if (f._ff) document.fonts.delete(f._ff); } catch (e) { } }
-        for (const u of repoObjectUrls) { try { URL.revokeObjectURL(u); } catch (e) { } }
+        /* v2.3.2: font tidak dihapus (registri) */
+        
         const newRecs = [], newUrls = [];
         const usedNames = new Set();
         let idx = 0;
