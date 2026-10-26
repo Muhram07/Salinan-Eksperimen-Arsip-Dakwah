@@ -1,13 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v2.3.0
+Studio Poster Maker Pro - Update v2.3.1
+
+v2.3.1:
+1. FONT OFFLINE TAMPIL: teks yang sempat digambar sebelum font selesai dimuat (memakai cadangan) tidak lagi tertahan di cache. Teks otomatis digambar ulang dengan font asli setelah font tersedia, baik saat offline maupun online.
+2. PERBARUI FONT LEBIH LENGKAP: tombol Perbarui Font juga mengunduh font bawaan (Google Fonts) ke penyimpanan perangkat, sehingga bisa dipakai saat mode pesawat.
 
 v2.3.0:
-1. OFFLINE LEBIH KUAT: font bawaan (Google Fonts) ikut disimpan saat online, sehingga tetap tampil di mode pesawat. Font repo dimuat setelah penyimpanan siap, lalu teks digambar ulang otomatis.
-2. TOMBOL UPDATE AMAN: saat offline, Update tidak lagi menghapus cache dan tidak memuat ulang halaman. Update hanya dijalankan saat online dan server sudah terjangkau. Versi baru yang tertunda akan dipasang saat online lagi.
-
-v2.2.0:
-1. FONT REPO BISA OFFLINE: font repo diunduh sekali dan disimpan di perangkat. Saat dibuka tanpa internet, font langsung dimuat dari penyimpanan.
-2. PROYEK LAMA AMAN: nama, label, dan urutan font yang sudah tercatat tidak berubah. Font baru hanya ditambahkan di akhir.
+1. OFFLINE LEBIH KUAT: font bawaan ikut disimpan saat online, dan font repo dimuat sebelum render pertama.
+2. TOMBOL UPDATE AMAN: saat offline, Update tidak menghapus cache dan tidak memuat ulang halaman.
 -->
 
 
@@ -2030,7 +2030,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.3.0';
+const APP_VERSION = 'v2.3.1';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2697,7 +2697,8 @@ adjustArtboardSize();
 renderAll();
 pushHistoryState();
 
-if (document.fonts && document.fonts.addEventListener) { document.fonts.addEventListener('loadingdone', () => scheduleFullRerender(150)); }
+window.__fontEpoch = 0;
+if (document.fonts && document.fonts.addEventListener) { document.fonts.addEventListener('loadingdone', () => { window.__fontEpoch = (window.__fontEpoch || 0) + 1; scheduleFullRerender(150); }); }
 document.fonts.ready.then(() => {
     slides.forEach(s => {
         if(s.elements) {
@@ -3980,7 +3981,7 @@ if(el.shadow&&el.shadow.color&&el.shadow.color!=='transparent'){
     targetCtx.shadowOffsetY=Math.sin(rad)*dist;
 }
 
-const hash = getElHash(el);
+const hash = getElHash(el) + '|fe' + (window.__fontEpoch || 0);
 const rScale = window.currentRenderScale || 1;
 
 if (!forceRawRender && rScale === 1 && el._cachedHash === hash && el._cachedCanvas) {
@@ -13157,6 +13158,7 @@ async function loadGoogleFontsOffline() {
             _gfLoadedKeys.add(r.key);
         } catch (e) { }
     }
+    window.__fontEpoch = (window.__fontEpoch || 0) + 1;
 }
 
 /* v2.2.0: manifest font repo untuk mode offline. Nama internal, label, dan urutan font TIDAK diubah setelah tercatat.
@@ -13200,6 +13202,7 @@ async function loadRepoFontsOffline() {
     repoObjectUrls = urls;
     if (repoFonts.length) repoFonts[0].grp = '📦 FONT REPO';
     try { migrateRepoFontNames(); } catch (e) { }
+    window.__fontEpoch = (window.__fontEpoch || 0) + 1;
     return repoFonts.length > 0;
 }
 
@@ -13414,6 +13417,7 @@ async function cleanRepoDuplicates(auto) {
     if (document.getElementById('fontRepoStatusLine')) openPanelFontFamily();
 }
 async function scanFontRepoUI() {
+    try { await cacheGoogleFonts(); await loadGoogleFontsOffline(); } catch (e) { }
     const ok = await scanFontRepo();
     _updateRepoStatusLine();
     showToast(ok ? ('✅ Font siap dipakai offline: ' + repoFonts.length + ' font') : (fontRepoStatus || 'Gagal memindai repo'));
