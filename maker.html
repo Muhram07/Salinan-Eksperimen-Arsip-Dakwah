@@ -1,15 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v2.3.3
+Studio Poster Maker Pro - Update v2.3.4
+
+v2.3.4:
+1. HAPUS OBJEK AI JALAN OFFLINE: mesin AI (ort.min.js + wasm) dan model kini disimpan di Cache API yang sama dengan Hapus BG dan Tangkap Ajaib, lalu dimuat dari sana saat mode pesawat. Sebelumnya mesin diambil langsung dari internet dan model ikut terhapus saat tombol Update ditekan.
+2. TOMBOL UPDATE TIDAK MENGHAPUS MODEL: cache model Hapus Objek AI ikut dipertahankan. Model lama (jika ada) dipindahkan otomatis tanpa unduh ulang.
+3. PESAN OFFLINE JELAS: bila model belum pernah diunduh, muncul keterangan "Mode offline ... sambungkan internet sekali" (bukan "Failed to fetch"). Hanya jalur wasm yang dipakai agar stabil offline.
 
 v2.3.3:
 1. FONT OFFLINE LENGKAP: font judul dan teks bernama tanpa tanda kutip (Anton, Bebas Neue, Montserrat, Inter, Lora, Amiri, dll.) sebelumnya tidak ikut disimpan sehingga hancur di mode pesawat. Kini semua font aplikasi, font di link Google Fonts, dan font yang dipakai poster ikut disimpan, termasuk bobot tebal (800/900).
 2. BUKA PROJEK OFFLINE OTOMATIS TERRENDER: font yang dipakai projek dipasang lebih dulu sebelum digambar, teks layer mask ikut digambar ulang, dan thumbnail slide (termasuk Demo) digambar ulang setelah font siap.
 3. TIDAK LAG: font dimuat bertahap (yang dipakai poster dulu), pemindaian repo font tidak lagi menunggu penyimpanan font selesai.
-
-v2.3.2:
-1. FONT OFFLINE STABIL: font dibuat sekali dan tidak pernah dihapus saat memuat ulang, sehingga pindah projek, mode pesawat, dan kembali online tidak lagi merusak judul dan teks.
-2. MASK TEKS IKUT FONT: teks yang memakai layer mask ikut digambar ulang saat font siap.
-3. LAG FONT OFFLINE DIKURANGI: font yang sudah dimuat tidak dimuat ulang, dan render ulang dilakukan sekali per kelompok font.
 -->
 
 
@@ -2032,7 +2032,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.3.3';
+const APP_VERSION = 'v2.3.4';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2589,7 +2589,7 @@ async function syncAppVersion() {
     try {
         if('caches' in window) {
             const keys = await caches.keys();
-            for(let key of keys) { if(key !== 'maker-ai-bg-v1') await caches.delete(key); }
+            for(let key of keys) { if(key !== 'maker-ai-bg-v1' && key !== 'spm-ai-inpaint-v1') await caches.delete(key); }
         }
         if('serviceWorker' in navigator) {
             const regs = await navigator.serviceWorker.getRegistrations();
@@ -14248,7 +14248,8 @@ function cwHelpHtml(){
 }
 /* v1.9.9: Hapus Objek AI (MI-GAN 512 generator, ONNX Runtime Web). Model diunduh saat pertama dipakai lalu di-cache. */
 const AI_INPAINT_URL = 'https://huggingface.co/FreeHugsForRobots/ps-inpaint-migan/resolve/main/migan-512-generator.onnx';
-const AI_INPAINT_CACHE = 'spm-ai-inpaint-v1';
+const AI_INPAINT_CACHE = 'spm-ai-inpaint-v1'; /* cache lama: hanya dibaca untuk memindahkan model yang sudah terunduh */
+const AI_INPAINT_KEEP = 'maker-ai-bg-v1'; /* v2.3.4: cache yang TIDAK dihapus tombol Update (sama dengan AI Hapus BG & Tangkap Ajaib) */
 const AI_ORT_URL = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js';
 const AI_ORT_WASM = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/';
 let aiOrt = null, aiSession = null, aiSessionLoading = null, aiOrtLoading = null;
@@ -14264,54 +14265,107 @@ function aiSetBar(p){
     const op = document.getElementById('aiOvPct'); if(op) op.innerText = v;
 }
 
+/* v2.3.4: mesin (ort.min.js + wasm) dan model diunduh sekali lalu disimpan di Cache API, sehingga Hapus Objek AI jalan offline */
+async function aiOpenKeepCache(){
+    try { if('caches' in window) return await caches.open(AI_INPAINT_KEEP); } catch(e){}
+    return null;
+}
+async function aiCachedBuf(url, minBytes, onProg, label, fallbackTotal){
+    const cache = await aiOpenKeepCache();
+    if(cache){
+        try { const hit = await cache.match(url); if(hit) return await hit.arrayBuffer(); } catch(e){}
+    }
+    let resp;
+    try { resp = await fetch(url); }
+    catch(e){
+        throw new Error(navigator.onLine
+            ? ('Koneksi gagal saat mengunduh ' + label + '. Coba lagi.')
+            : ('Mode offline: ' + label + ' belum tersimpan. Sambungkan internet sekali untuk mengunduh, setelah itu bisa dipakai offline.'));
+    }
+    if(!resp.ok) throw new Error('Gagal mengunduh ' + label + ' (HTTP ' + resp.status + ').');
+    const total = parseInt(resp.headers.get('content-length') || '0', 10) || fallbackTotal || 0;
+    let buf;
+    if(resp.body && resp.body.getReader){
+        const reader = resp.body.getReader();
+        const chunks = []; let got = 0;
+        for(;;){
+            const { done, value } = await reader.read();
+            if(done) break;
+            chunks.push(value); got += value.length;
+            if(onProg && total) onProg(Math.min(1, got / total));
+        }
+        const u = new Uint8Array(got);
+        let off = 0;
+        for(const c of chunks){ u.set(c, off); off += c.length; }
+        chunks.length = 0;
+        buf = u.buffer;
+    } else {
+        buf = await resp.arrayBuffer();
+    }
+    if(buf.byteLength < minBytes) throw new Error(label + ' tidak valid.');
+    if(cache){
+        try { await cache.put(url, new Response(buf.slice(0), { headers: { 'Content-Type': 'application/octet-stream' } })); } catch(e){}
+    }
+    return buf;
+}
 function aiLoadScript(){
-    if(window.ort) return Promise.resolve(window.ort);
+    if(window.ort && (window.__wandAiOrtReady || window.__aiOrtReady)) return Promise.resolve(window.ort);
     if(aiOrtLoading) return aiOrtLoading;
-    aiOrtLoading = new Promise((res, rej) => {
-        const sc = document.createElement('script');
-        sc.src = AI_ORT_URL;
-        sc.onload = () => res(window.ort);
-        sc.onerror = () => { aiOrtLoading = null; rej(new Error('Gagal memuat mesin AI. Periksa koneksi internet.')); };
-        document.head.appendChild(sc);
-    });
+    aiOrtLoading = (async () => {
+        try {
+            const jsBuf = await aiCachedBuf(AI_ORT_URL, 100000, null, 'mesin AI');
+            const jsUrl = URL.createObjectURL(new Blob([jsBuf], { type: 'text/javascript' }));
+            await new Promise((ok, no) => {
+                const sc = document.createElement('script');
+                sc.src = jsUrl; sc.onload = ok;
+                sc.onerror = () => no(new Error('Gagal memuat mesin AI.'));
+                document.head.appendChild(sc);
+            });
+            const wBuf = await aiCachedBuf(AI_ORT_WASM + 'ort-wasm-simd.wasm', 100000, null, 'mesin AI (wasm)');
+            const wUrl = URL.createObjectURL(new Blob([wBuf], { type: 'application/wasm' }));
+            const o = window.ort;
+            if(!o) throw new Error('Mesin AI tidak tersedia.');
+            o.env.wasm.numThreads = 1;
+            o.env.wasm.proxy = false;
+            o.env.wasm.wasmPaths = {
+                'ort-wasm-simd.wasm': wUrl,
+                'ort-wasm.wasm': AI_ORT_WASM + 'ort-wasm.wasm',
+                'ort-wasm-threaded.wasm': AI_ORT_WASM + 'ort-wasm-threaded.wasm',
+                'ort-wasm-simd-threaded.wasm': AI_ORT_WASM + 'ort-wasm-simd-threaded.wasm'
+            };
+            window.__aiOrtReady = true;
+            return o;
+        } finally { aiOrtLoading = null; }
+    })();
     return aiOrtLoading;
 }
 async function aiGetModelBuffer(onProg){
-    const cache = ('caches' in window) ? await caches.open(AI_INPAINT_CACHE) : null;
-    if(cache){
-        const hit = await cache.match(AI_INPAINT_URL);
-        if(hit) return await hit.arrayBuffer();
+    const keep = await aiOpenKeepCache();
+    if(keep){
+        try { const hit = await keep.match(AI_INPAINT_URL); if(hit) return await hit.arrayBuffer(); } catch(e){}
     }
-    const resp = await fetch(AI_INPAINT_URL);
-    if(!resp.ok) throw new Error('Gagal mengunduh model AI (HTTP ' + resp.status + ').');
-    const total = parseInt(resp.headers.get('content-length') || '0', 10) || 29500000;
-    const reader = resp.body.getReader();
-    const chunks = []; let got = 0;
-    for(;;){
-        const { done, value } = await reader.read();
-        if(done) break;
-        chunks.push(value); got += value.length;
-        if(onProg) onProg(Math.min(1, got / total));
-    }
-    const buf = new Uint8Array(got);
-    let off = 0;
-    for(const c of chunks){ buf.set(c, off); off += c.length; }
-    if(cache){
-        try { await cache.put(AI_INPAINT_URL, new Response(buf.slice(0), { headers: { 'Content-Type': 'application/octet-stream' } })); } catch(e){}
-    }
-    return buf.buffer;
+    /* model yang dulu tersimpan di cache lama dipindahkan, tanpa unduh ulang */
+    try {
+        if('caches' in window && await caches.has(AI_INPAINT_CACHE)){
+            const old = await caches.open(AI_INPAINT_CACHE);
+            const h = await old.match(AI_INPAINT_URL);
+            if(h){
+                const b = await h.arrayBuffer();
+                if(keep){ try { await keep.put(AI_INPAINT_URL, new Response(b.slice(0), { headers: { 'Content-Type': 'application/octet-stream' } })); } catch(e){} }
+                return b;
+            }
+        }
+    } catch(e){}
+    return await aiCachedBuf(AI_INPAINT_URL, 1000000, onProg, 'model AI', 29500000);
 }
 async function aiGetSession(onProg){
     if(aiSession) return aiSession;
     if(aiSessionLoading) return aiSessionLoading;
     aiSessionLoading = (async () => {
         const ort = await aiLoadScript();
-        ort.env.wasm.wasmPaths = AI_ORT_WASM;
-        ort.env.wasm.numThreads = 1;
         const buf = await aiGetModelBuffer(onProg);
-        const providers = [];
-        if(navigator.gpu) providers.push('webgpu');
-        providers.push('wasm');
+        /* v2.3.4: hanya wasm (file wasm-nya tersimpan offline); WebGPU butuh file tambahan dari internet */
+        const providers = ['wasm'];
         let sess = null;
         for(const ep of providers){
             try { sess = await ort.InferenceSession.create(buf, { executionProviders: [ep], graphOptimizationLevel: 'all' }); break; }
