@@ -1,13 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v2.0.6
+Studio Poster Maker Pro - Update v2.0.8
 
-v2.0.6:
-1. PREVIEW MENGAMBANG TIDAK HILANG SENDIRI: setelah dibuka, preview tetap tampil walau panel tool tertutup (mis. ketuk area kanvas hitam). Hanya tombol ✕ atau tool layar penuh yang menyembunyikannya; muncul lagi saat panel tool dibuka kembali.
-2. PREVIEW LEBIH RESPONSIF: downscale dua tahap dengan kanvas antara yang dipakai ulang (tanpa alokasi per frame), sehingga hasil tetap tajam dan lebih ringan daripada satu langkah berat.
+v2.0.8:
+1. GARIS BANTU LEBIH LAMA: garis sejajar, garis jarak, dan notif px kini bertahan sekitar 2,5 detik setelah snap berakhir (atau setelah sentuhan/tombol posisi dilepas) sebelum hilang, tidak lagi hilang dalam sekejap.
+2. PIPET DI TOOL PENA: tombol 🧪 Pipet ditambahkan di toolbar pena untuk mengambil warna langsung dari poster, memakai loupe pipet yang sama dengan color picker.
 
-v2.0.5:
-1. TOOL PENA (Sensor Blur/Airbrush): lag saat digerakkan cepat dihilangkan. Filter blur per segmen diganti stempel lembut (sprite offscreen di-cache dan dipakai ulang, dibebaskan saat selesai), sehingga ringan dan mengikuti jari.
-2. PREVIEW MENGAMBANG = MONITOR KEDUA: ukuran/rasio langsung mengikuti poster saat rasio diganti (4:5, 1:1, 9:16, dst). Garis bantu ikut tampil. Preview bisa disentuh seperti kanvas asli (pilih elemen, geser, tombol sudut/tepi/hapus/pindah/rotasi, snap, garis sejajar & garis jarak) lewat jalur event kanvas asli. Penggeser posisi diganti tombol tangan ✋ di sudut kiri bawah.
+v2.0.7:
+1. TOOL POSISI (tombol dpad) KINI MAGNET: garis sejajar, garis jarak, dan magnet ke tepi/pusat/grid/semua berfungsi saat digeser lewat tombol, sama seperti geser jari di kanvas. Magnet hanya menarik searah gerakan, sehingga elemen yang sudah menempel tidak macet.
+2. MAGNET KE GARIS BANTU: drag dan tombol posisi kini menempel ke garis panduan aktif (Tepi, Pusat, Grid 3x3, Semua), termasuk untuk elemen dan teks. Logika snap dipusatkan dalam satu fungsi (smartSnapMove) agar drag dan tombol selalu konsisten.
 -->
 
 
@@ -1078,6 +1078,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <option value="eraser">Penghapus (Tipe-X)</option>
     </select>
     <button class="btn-sub-tool" style="width:30px;height:30px;padding:0;background:#D4AF37;" id="penColorBtn" onclick="openCustomColorPicker(document.getElementById('penColorHidden').value, 'updatePenColor')"></button>
+    <button type="button" class="btn-sub-tool" style="height:30px;padding:0 8px;font-size:11px;" title="Pipet: ambil warna dari poster" onclick="openHandledLoupe('updatePenColor')">🧪 Pipet</button>
     <button type="button" class="clr-mini" title="Salin kode warna" onclick="copyColorFromEl('penColorHidden')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
     <button type="button" class="clr-mini" title="Tempel kode warna" onclick="pasteColorTo('updatePenColor')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="2"/><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12h6M9 16h4"/></svg></button>
     <input type="hidden" id="penColorHidden" value="#D4AF37">
@@ -2027,7 +2028,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.0.6';
+const APP_VERSION = 'v2.0.8';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -5561,18 +5562,27 @@ if(typeof fpvRefresh === 'function') fpvRefresh();
 function hideSnapGuides(){
 snapGuideH.style.display='none';
 snapGuideV.style.display='none';
-drawSmartGuides([]);
+drawSmartGuides([], true);
 }
 
 var _sgLines = [], _sgRaf = 0; // var: aman dipanggil sebelum baris ini dieksekusi (hindari TDZ)
-function drawSmartGuides(lines) {
+/* v2.0.8: garis bantu bertahan SG_HOLD_MS setelah tidak ada snap lagi (atau setelah sentuhan/tombol dilepas) sebelum hilang.
+   immediate = true hanya untuk pembersihan langsung (mis. elemen dilepas seleksinya). */
+var SG_HOLD_MS = 2500, _sgHoldT = 0;
+function drawSmartGuides(lines, immediate) {
     if (!lines || lines.length === 0) {
+        if (!immediate && _sgLines.length) {
+            if (!_sgHoldT) _sgHoldT = setTimeout(() => { _sgHoldT = 0; drawSmartGuides([], true); }, SG_HOLD_MS);
+            return;
+        }
+        if (_sgHoldT) { clearTimeout(_sgHoldT); _sgHoldT = 0; }
         if (_sgRaf) { cancelAnimationFrame(_sgRaf); _sgRaf = 0; }
         _sgLines = [];
         sgCtx.clearRect(0, 0, smartGuideCanvas.width, smartGuideCanvas.height);
         if(typeof fpvRefresh === 'function') fpvRefresh();
         return;
     }
+    if (_sgHoldT) { clearTimeout(_sgHoldT); _sgHoldT = 0; }
     _sgLines = lines;
     if (!_sgRaf) _sgRaf = requestAnimationFrame(paintSmartGuides);
 }
@@ -5909,33 +5919,9 @@ const centerY = el.y + cyOffset;
 return(px>=centerX-halfW && px<=centerX+halfW && py>=centerY-halfH && py<=centerY+halfH);
 }
 
-function handleWindowPointerMove(e) {
-if(!dragMode) return;
-if(dragMode === 'move' && dragPointerId !== null && e.pointerId !== dragPointerId) return;
-if(e.pointerType === 'mouse' && e.buttons === 0) { handleWindowPointerUp(e); return; }
-const el = getActiveElement();
-if(!el || el.locked) return;
-if((dragMode === 'move' || dragMode === 'stalk-move') && !dragMoved) {
-    if(Math.hypot(e.clientX - startPointer.x, e.clientY - startPointer.y) < DRAG_DEAD_ZONE) return;
-    dragMoved = true;
-}
-const currentCanvasScale = canvasScale * userZoomScale;
-const deltaX = (e.clientX - startPointer.x) / currentCanvasScale;
-const deltaY = (e.clientY - startPointer.y) / currentCanvasScale;
-
-if(dragMode === 'move' || dragMode === 'stalk-move') {
-    let targetX = Math.round(startElementState.x + deltaX);
-    let targetY = Math.round(startElementState.y + deltaY);
-
-    let cxOffset = 0;
-    let cyOffset = 0;
-    if(el.type === 'image') {
-        const cropL=el.cropL||0; const cropR=el.cropR||0; const cropT=el.cropT||0; const cropB=el.cropB||0;
-        const baseW=el.width||300; const baseH=el.height||300;
-        cxOffset = ((cropL - cropR) / 200) * baseW;
-        cyOffset = ((cropT - cropB) / 200) * baseH;
-    }
-
+/* v2.0.7: logika snap satu sumber untuk drag kanvas dan tombol dpad (tool Posisi).
+   nudgeFrom = posisi sebelum gerak (null untuk drag). Mengembalikan posisi hasil snap + garis bantu. */
+function smartSnapMove(el, targetX, targetY, cxOffset, cyOffset, nudgeFrom){
     const snapThreshold = Math.max(15, 25 / userZoomScale);
     const W = mainCanvas.width;
     const H = mainCanvas.height;
@@ -6037,6 +6023,34 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
         }
     }
 
+    /* v2.0.7: magnet ke garis panduan (Tepi, Pusat, Grid, Semua) sesuai mode aktif */
+    if (activeGuideMode && activeGuideMode !== 'none') {
+        const gmg = (bleedSettings.margin || 5) / 100;
+        const gXs = [], gYs = [];
+        if (activeGuideMode === 'margin' || activeGuideMode === 'all') { gXs.push(W * gmg, W * (1 - gmg)); gYs.push(H * gmg, H * (1 - gmg)); }
+        if (activeGuideMode === 'center' || activeGuideMode === 'all') { gXs.push(W / 2); gYs.push(H / 2); }
+        if (activeGuideMode === 'grid3x3' || activeGuideMode === 'all') { gXs.push(W / 3, W * 2 / 3); gYs.push(H / 3, H * 2 / 3); }
+        for (let gx of gXs) {
+            for (let tx of tXEdges) {
+                const diff = Math.abs(tx.val - gx);
+                if (diff <= minDiffX) {
+                    if (diff < minDiffX) { minDiffX = diff; bestSnapX = gx + tx.offset - cxOffset; lineGroupX = {}; }
+                    if (!lineGroupX[gx]) lineGroupX[gx] = [];
+                    lineGroupX[gx].push({ t: 0, b: H });
+                }
+            }
+        }
+        for (let gy of gYs) {
+            for (let ty of tYEdges) {
+                const diff = Math.abs(ty.val - gy);
+                if (diff <= minDiffY) {
+                    if (diff < minDiffY) { minDiffY = diff; bestSnapY = gy + ty.offset - cyOffset; lineGroupY = {}; }
+                    if (!lineGroupY[gy]) lineGroupY[gy] = [];
+                    lineGroupY[gy].push({ l: 0, r: W });
+                }
+            }
+        }
+    }
     for (let xPos in lineGroupX) {
         let minT = activeBounds.t;
         let maxB = activeBounds.b;
@@ -6147,11 +6161,54 @@ if(dragMode === 'move' || dragMode === 'stalk-move') {
     if (isGapSnapY) smartLines.push(...gapLinesY);
     if (isGapSnapX) smartLines.push(...gapLinesX);
 
+    /* v2.0.7: tombol dpad: magnet hanya menarik ke posisi yang searah gerakan, agar elemen yang sudah menempel tidak macet */
+    if (nudgeFrom) {
+        if (bestSnapX !== null && !((bestSnapX - nudgeFrom.x) * (targetX - nudgeFrom.x) > 0)) {
+            bestSnapX = null;
+            smartLines = smartLines.filter(l => l.isY !== false && !l.gapIndicatorX);
+        }
+        if (bestSnapY !== null && !((bestSnapY - nudgeFrom.y) * (targetY - nudgeFrom.y) > 0)) {
+            bestSnapY = null;
+            smartLines = smartLines.filter(l => l.isY !== true && !l.gapIndicator);
+        }
+    }
     // pengaman: snap tidak boleh menggeser elemen lebih jauh dari ambang
     if (bestSnapX !== null && Math.abs(bestSnapX - targetX) <= snapThreshold + 0.5) targetX = bestSnapX;
     if (bestSnapY !== null && Math.abs(bestSnapY - targetY) <= snapThreshold + 0.5) targetY = bestSnapY;
 
-    drawSmartGuides(smartLines);
+    return { x: targetX, y: targetY, lines: smartLines };
+}
+
+function handleWindowPointerMove(e) {
+if(!dragMode) return;
+if(dragMode === 'move' && dragPointerId !== null && e.pointerId !== dragPointerId) return;
+if(e.pointerType === 'mouse' && e.buttons === 0) { handleWindowPointerUp(e); return; }
+const el = getActiveElement();
+if(!el || el.locked) return;
+if((dragMode === 'move' || dragMode === 'stalk-move') && !dragMoved) {
+    if(Math.hypot(e.clientX - startPointer.x, e.clientY - startPointer.y) < DRAG_DEAD_ZONE) return;
+    dragMoved = true;
+}
+const currentCanvasScale = canvasScale * userZoomScale;
+const deltaX = (e.clientX - startPointer.x) / currentCanvasScale;
+const deltaY = (e.clientY - startPointer.y) / currentCanvasScale;
+
+if(dragMode === 'move' || dragMode === 'stalk-move') {
+    let targetX = Math.round(startElementState.x + deltaX);
+    let targetY = Math.round(startElementState.y + deltaY);
+
+    let cxOffset = 0;
+    let cyOffset = 0;
+    if(el.type === 'image') {
+        const cropL=el.cropL||0; const cropR=el.cropR||0; const cropT=el.cropT||0; const cropB=el.cropB||0;
+        const baseW=el.width||300; const baseH=el.height||300;
+        cxOffset = ((cropL - cropR) / 200) * baseW;
+        cyOffset = ((cropT - cropB) / 200) * baseH;
+    }
+
+    const _snapRes = smartSnapMove(el, targetX, targetY, cxOffset, cyOffset, null);
+    targetX = _snapRes.x; targetY = _snapRes.y;
+    drawSmartGuides(_snapRes.lines);
 
     el.x = targetX;
     el.y = targetY;
@@ -6217,7 +6274,9 @@ requestRender();
 
 function handleWindowPointerUp(e){
 if(e && dragMode === 'move' && dragPointerId !== null && e.pointerId !== dragPointerId) return;
-hideSnapGuides();
+snapGuideH.style.display='none';
+snapGuideV.style.display='none';
+drawSmartGuides([]);   /* v2.0.8: lepas sentuhan -> garis bertahan 2,5 detik */
 if(dragMode){
 const wasMoveDrag=(dragMode==='move'||dragMode==='stalk-move');
 const hadRealMove=dragMoved;
@@ -8102,14 +8161,20 @@ dpadHoldInterval=setInterval(()=>executeNudge(dx,dy),45);
 function stopDpadHold(){
 clearTimeout(dpadHoldTimeout);
 clearInterval(dpadHoldInterval);
+drawSmartGuides([]);   /* v2.0.8: lepas tombol -> garis bertahan 2,5 detik */
 }
 
 function executeNudge(dx,dy){
 const el=getActiveElement();
 if(!el||el.locked)return;
-el.x+=dx*nudgeStep;
-el.y+=dy*nudgeStep;
-moveGroupPeersBy(el,dx*nudgeStep,dy*nudgeStep);
+const preX=el.x, preY=el.y;
+let cxOff=0, cyOff=0;
+if(el.type==='image'){ const bw=el.width||300, bh=el.height||300; cxOff=(((el.cropL||0)-(el.cropR||0))/200)*bw; cyOff=(((el.cropT||0)-(el.cropB||0))/200)*bh; }
+/* v2.0.7: tombol dpad ikut magnet & garis bantu seperti drag kanvas */
+const sn=smartSnapMove(el, preX+dx*nudgeStep, preY+dy*nudgeStep, cxOff, cyOff, {x:preX, y:preY});
+el.x=sn.x; el.y=sn.y;
+drawSmartGuides(sn.lines);
+moveGroupPeersBy(el,el.x-preX,el.y-preY);
 const lbl=document.getElementById('posCoordLabel');
 if(lbl)lbl.innerHTML=`X: ${Math.round(el.x)}<br>Y: ${Math.round(el.y)}`;
 renderAll();
