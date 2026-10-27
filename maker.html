@@ -1,15 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v2.3.4
+Studio Poster Maker Pro - Update v2.3.6
 
-v2.3.4:
-1. HAPUS OBJEK AI JALAN OFFLINE: mesin AI (ort.min.js + wasm) dan model kini disimpan di Cache API yang sama dengan Hapus BG dan Tangkap Ajaib, lalu dimuat dari sana saat mode pesawat. Sebelumnya mesin diambil langsung dari internet dan model ikut terhapus saat tombol Update ditekan.
-2. TOMBOL UPDATE TIDAK MENGHAPUS MODEL: cache model Hapus Objek AI ikut dipertahankan. Model lama (jika ada) dipindahkan otomatis tanpa unduh ulang.
-3. PESAN OFFLINE JELAS: bila model belum pernah diunduh, muncul keterangan "Mode offline ... sambungkan internet sekali" (bukan "Failed to fetch"). Hanya jalur wasm yang dipakai agar stabil offline.
+v2.3.6:
+1. TOOL POSISI TIDAK NYENDAT: pembaruan tombol menyala dan koordinat X/Y kini digabung maksimal sekali per frame dan hanya menyentuh tombol yang benar-benar berubah (sebelumnya dihitung dan dicari ulang di setiap renderAll). Fungsi menyala kuning, magnet, dan joystick tidak berubah.
+2. TOMBOL INFO DI SEMUA TOOL: tombol bulat "i" sejajar tombol tutup di kepala panel dan modal (Posisi, Ukuran, Bayangan, Blend, Upscale, Hapus BG, Tangkap Ajaib, Crop Jari, Perspektif, Envelope, Tabel, Pena, Cari Gambar, dll). Isinya: fungsi, langkah pakai, arti istilah dan satuan, contoh pemakaian, dengan bahasa awam. Satu layar info dipakai ulang tanpa menambah beban memori.
 
-v2.3.3:
-1. FONT OFFLINE LENGKAP: font judul dan teks bernama tanpa tanda kutip (Anton, Bebas Neue, Montserrat, Inter, Lora, Amiri, dll.) sebelumnya tidak ikut disimpan sehingga hancur di mode pesawat. Kini semua font aplikasi, font di link Google Fonts, dan font yang dipakai poster ikut disimpan, termasuk bobot tebal (800/900).
-2. BUKA PROJEK OFFLINE OTOMATIS TERRENDER: font yang dipakai projek dipasang lebih dulu sebelum digambar, teks layer mask ikut digambar ulang, dan thumbnail slide (termasuk Demo) digambar ulang setelah font siap.
-3. TIDAK LAG: font dimuat bertahap (yang dipakai poster dulu), pemindaian repo font tidak lagi menunggu penyimpanan font selesai.
+v2.3.5:
+1. POSISI PINTAR: tombol Tengah Horisontal, Tengah Vertikal, 🎯 Tengah, dan 8 tombol sudut/tepi menyala kuning otomatis bila elemen (atau grup) sudah berada di posisi itu (toleransi 1px). Menyala langsung saat digeser di kanvas, lewat joystick, atau tombol; koordinat X/Y ikut hidup.
+2. BLUR GERAK TIDAK LAG: seluruh jejak digabung sekali menjadi satu bitmap yang dipotong sebatas area jejak. Saat slider/rotasi diubah terus-menerus dipakai versi ringan lalu otomatis menajam; ekspor tetap resolusi penuh dan memori dilepas.
+3. BLUR GERAK MELENGKUNG: slider Lengkung baru (kiri = ke dalam, tengah = lurus, kanan = ke luar).
 -->
 
 
@@ -194,6 +193,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .panel-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:8px;}
 .panel-title{font-size:13px;font-weight:800;color:#D4AF37;}
 .panel-close{background:none;border:none;color:#888;font-size:18px;cursor:pointer;}
+/* v2.3.6: tombol info "i" sejajar tombol tutup (ukuran sama 30px, jarak sama, rata tengah) */
+.panel-header .panel-title{flex:1 1 auto;min-width:0;}
+.panel-hbtns{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:8px;}
+.panel-info{width:30px;height:30px;padding:0;margin:0;border-radius:50%;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;cursor:pointer;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.6);color:#D4AF37;font:italic 800 16px/1 Georgia,"Times New Roman",serif;-webkit-tap-highlight-color:transparent;}
+.panel-info:active{background:rgba(212,175,55,.3);}
+.panel-hbtns .panel-close{width:30px;height:30px;padding:0;margin:0;border-radius:50%;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.18);color:#aaa;font-size:15px;line-height:1;}
+.tool-info-ov{display:none;position:fixed;left:0;top:0;right:0;bottom:0;z-index:1000003;background:rgba(0,0,0,.95);flex-direction:column;}
+.tool-info-ov.on{display:flex;}
+.ti-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));border-bottom:1px solid rgba(212,175,55,.35);background:#141414;flex:0 0 auto;}
+.ti-title{font-size:14px;font-weight:800;color:#D4AF37;min-width:0;line-height:1.3;}
+.ti-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding:14px 16px calc(24px + env(safe-area-inset-bottom,0px));}
+.ti-sec{margin-bottom:16px;}
+.ti-h{font-size:12px;font-weight:800;color:#D4AF37;margin-bottom:6px;}
+.ti-p{font-size:12.5px;line-height:1.55;color:#ddd;margin:0;}
+.ti-ol{margin:0;padding-left:20px;font-size:12.5px;line-height:1.55;color:#ddd;}
+.ti-ol li,.ti-ul li{margin-bottom:5px;}
+.ti-ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.55;color:#ddd;}
+.ti-term{padding:7px 10px;margin-bottom:6px;border-radius:8px;background:rgba(255,255,255,.05);font-size:12px;line-height:1.5;color:#ccc;}
+.ti-term b{color:#fff;display:block;margin-bottom:1px;}
+.ti-note{padding:9px 11px;border-radius:8px;border:1px solid rgba(250,204,21,.4);background:rgba(250,204,21,.08);font-size:12px;line-height:1.5;color:#f5e08a;}
 .ctrl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .ctrl-label{font-size:11px;color:#bbb;font-weight:bold;min-width:70px;}
 .ctrl-slider{flex:1;accent-color:#D4AF37;cursor:pointer;}
@@ -668,6 +687,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 /* v1.8.3: garis tombol default emas; blend mode difference otomatis membalik warna di atas latar emas/mirip emas. Transparansi tidak diubah. */
 .btn-nav,.btn-sub-tool,.dpad-btn,.bib-ico,.btn-step,.btn-reset-tool,.btn-pos-cell,.up-full,.bib-chip,.tag-pill,.pg-chip,.tool-btn.home-btn{border-color:#D4AF37 !important;mix-blend-mode:difference;}
 .btn-nav:not(.active):not(:disabled),.btn-sub-tool:not(.active):not(:disabled),.dpad-btn,.bib-ico{border-width:1px;}
+/* v2.3.5: tombol Posisi menyala kuning bila elemen sudah berada di posisi itu */
+.btn-sub-tool.pos-on,.btn-pos-cell.pos-on{background:#D4AF37;color:#111;border-color:#D4AF37;}
 
 /* v1.8.4: joystick & zoom pratinjau Upscale HD */
 .up-joy{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px;flex-shrink:0;}
@@ -1042,15 +1063,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <nav class="bottom-toolbar-container" id="bottomToolbar"></nav>
 
 <div class="tool-panel" id="toolPanel">
-<div class="panel-header"><span class="panel-title" id="panelTitle">Pengaturan</span><button class="panel-close" onclick="closeToolPanel()">×</button></div>
+<div class="panel-header"><span class="panel-title" id="panelTitle">Pengaturan</span><span class="panel-hbtns"><button class="panel-info" id="panelInfoBtn" type="button" style="display:none;" onclick="openToolInfo(this.getAttribute('data-k'))" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeToolPanel()">×</button></span></div>
 <div id="panelContent"></div>
 </div>
+
+<div class="tool-info-ov" id="toolInfoOv" onclick="if(event.target===this)closeToolInfo()"><div class="ti-head"><div class="ti-title" id="toolInfoTitle"></div><button class="panel-close" type="button" onclick="closeToolInfo()" aria-label="Tutup info" style="width:30px;height:30px;padding:0;border-radius:50%;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.18);color:#aaa;font-size:15px;line-height:1;">✕</button></div><div class="ti-body" id="toolInfoBody"></div></div>
 
 <!-- Table Editor Modal -->
 <div class="feature-modal" id="tableEditorModal" style="z-index: 99999;">
     <div class="fmodal-header">
         <div style="font-weight:800;color:#D4AF37;font-size:13px;">✏️ Editor Data Tabel</div>
-        <button class="panel-close" onclick="closeTableEditor()">✕</button>
+        <span class="panel-hbtns"><button class="panel-info" type="button" onclick="openToolInfo('table')" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeTableEditor()">✕</button></span>
     </div>
     <div class="fmodal-body" id="tableModalBody" style="flex-direction:column; padding:16px; align-items:flex-start; justify-content:flex-start; overflow:hidden; width: 100%; touch-action: pan-x pan-y;">
         <div style="display:flex; gap:10px; margin-bottom:10px; width: 100%; flex-wrap: wrap; flex-shrink:0; align-items:center;">
@@ -1087,6 +1110,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     <button type="button" class="clr-mini" title="Tempel kode warna" onclick="pasteColorTo('updatePenColor')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="2"/><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12h6M9 16h4"/></svg></button>
     <input type="hidden" id="penColorHidden" value="#D4AF37">
     <input type="range" id="penSize" min="2" max="100" value="10" style="width:80px;accent-color:#D4AF37;" oninput="updatePenSettings()">
+    <button class="panel-info" type="button" onclick="openToolInfo('pen')" aria-label="Info Pena">i</button>
     <button class="btn-nav" onclick="clearPenCanvas()">🗑️ Bersihkan</button>
     <button class="btn-nav btn-download" onclick="finishPenDrawing()">✅ Selesai</button>
 </div>
@@ -1255,7 +1279,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="feature-modal" id="perspectiveModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">📐 Perspektif 3D (Tarik 4 Pin Bebas)</div>
-<button class="panel-close" onclick="closePerspectiveModal()">✕</button>
+<span class="panel-hbtns"><button class="panel-info" type="button" onclick="openToolInfo('persp')" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closePerspectiveModal()">✕</button></span>
 </div>
 <div class="fmodal-body" id="perspectiveBody">
 <canvas id="perspectiveCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 25px rgba(0,0,0,.9);border-radius:6px;"></canvas>
@@ -1274,7 +1298,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="feature-modal" id="envelopeModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">🌊 Envelope Distort (Lengkungan Bebas)</div>
-<button class="panel-close" onclick="closeEnvelopeModal()">✕</button>
+<span class="panel-hbtns"><button class="panel-info" type="button" onclick="openToolInfo('env')" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeEnvelopeModal()">✕</button></span>
 </div>
 <div class="fmodal-body" id="envelopeBody">
 <canvas id="envelopeCanvas" style="max-width:90%;max-height:85%;box-shadow:0 0 25px rgba(0,0,0,.9);border-radius:6px;"></canvas>
@@ -1297,7 +1321,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="feature-modal" id="freeCropModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">✂️ Crop Bebas Pakai Jari (Lasso)</div>
-<button class="panel-close" onclick="closeFreeCropModal()">✕</button>
+<span class="panel-hbtns"><button class="panel-info" type="button" onclick="openToolInfo('freecrop')" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeFreeCropModal()">✕</button></span>
 </div>
 <div class="fmodal-body" id="freeCropBody" style="position:relative; overflow:hidden;">
     <div id="freeCropCanvasWrapper" style="display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:fit-content;max-width:none;line-height:0;transform-origin:center center;transition:transform 0.1s;">
@@ -1346,7 +1370,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="feature-modal" id="magicGrabModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">✨ Tangkap Ajaib (Magic Grab Brush)</div>
-<button class="panel-close" onclick="closeMagicGrabModal()">✕</button>
+<span class="panel-hbtns"><button class="panel-info" type="button" onclick="openToolInfo('magicgrab')" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeMagicGrabModal()">✕</button></span>
 </div>
 <div class="fmodal-body" id="magicGrabBody" style="overflow:hidden; position:relative;">
     <div id="magicGrabCanvasWrapper" style="display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:fit-content;max-width:none;line-height:0;transform-origin:center center;transition:transform 0.1s;">
@@ -1417,7 +1441,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="feature-modal" id="layerMaskModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">🧶 Layer Mask (Teks Melilit Objek)</div>
-<button class="panel-close" onclick="closeLayerMaskModal()">✕</button>
+<span class="panel-hbtns"><button class="panel-info" type="button" onclick="openLmInfo()" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeLayerMaskModal()">✕</button></span>
 </div>
 <div class="fmodal-body" id="lmBody" style="overflow:hidden; position:relative;">
     <div id="lmCanvasWrapper" style="display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:fit-content;max-width:none;line-height:0;transform-origin:center center;transition:transform 0.1s;">
@@ -1532,7 +1556,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="feature-modal" id="magicWandModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">🪄 Hapus BG (Magic Wand)</div>
-<button class="panel-close" onclick="closeMagicWandModal()">✕</button>
+<span class="panel-hbtns"><button class="panel-info" type="button" onclick="openToolInfo('wand')" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeMagicWandModal()">✕</button></span>
 </div>
 <div class="fmodal-body" id="magicWandBody">
 <div id="magicWandCanvasWrapper"><canvas id="magicWandCanvas"></canvas></div>
@@ -1749,6 +1773,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
         <button class="bib-tab on" id="bibTabImg" onclick="bibSetTab('img')">🖼️ Gambar</button>
         <button class="bib-tab" id="bibTabWeb" onclick="bibSetTab('web')">🌐 Web</button>
         <button class="bib-tab" id="bibTabUrl" onclick="bibSetTab('url')">🔗 URL / Tempel</button>
+        <button class="bib-ico" type="button" onclick="openToolInfo('bib')" aria-label="Info Cari Gambar" style="font:italic 800 15px/1 Georgia,serif;color:#D4AF37;">i</button>
         <button class="bib-ico" id="bibSizeBtn" onclick="bibToggleSize()" aria-label="Besar / kecil">⬆️</button>
         <button class="bib-ico" onclick="closeImageBrowser()" aria-label="Tutup">✕</button>
     </div>
@@ -2032,7 +2057,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.3.4';
+const APP_VERSION = 'v2.3.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -3593,6 +3618,7 @@ if(s.elements) {
 }
 updateSelectionBox();
 if(typeof fpvRefresh === 'function') fpvRefresh(true);
+if(document.getElementById('posCoordLabel')) _posSyncPanel();
 }
 
 
@@ -6588,25 +6614,94 @@ function openPanelMirrorInfo(){
 /* v2.1.0: Blur Gerak. Efek jejak bergerak (peluru, bintang jatuh, panah) untuk gambar, teks, dan shape.
    Jejak digambar dari snapshot offscreen yang di-cache per elemen (WeakMap), tidak mengubah cache render asli. */
 var _msBusy = false;
-const _msSnaps = new WeakMap();
+const _msTrails = new WeakMap();
+let _msUpT = 0;
 const MOTION_PRESETS = {
     peluru:  { label: '🔫 Peluru Melesat', desc: 'Jejak tipis dan cepat', length: 140, strength: 70, steps: 10, pw: 1.4 },
     bintang: { label: '☄️ Bintang Jatuh', desc: 'Ekor panjang yang berpendar', length: 340, strength: 85, steps: 16, pw: 2.2 },
     panah:   { label: '🏹 Panah Melesat', desc: 'Kepala tajam, ekor memudar', length: 220, strength: 75, steps: 12, pw: 0.9 }
 };
 
-function getMotionSnap(el, fn, arg, R, sc){
-    const key = [getElHash(el), R, sc, el.rotation || 0, el.width, el.height, (el.img && el.img.complete) ? 1 : 0].join('|');
-    const rec = _msSnaps.get(el);
-    if(rec && rec.key === key) return rec.cv;
-    const cv = document.createElement('canvas');
-    cv.width = Math.max(1, Math.ceil(2 * R * sc));
-    cv.height = Math.max(1, Math.ceil(2 * R * sc));
-    const c = cv.getContext('2d');
-    c.setTransform(sc, 0, 0, sc, sc * (R - el.x), sc * (R - el.y));
+/* v2.3.5: jalur jejak. curve 0 = lurus; negatif/positif = busur ke dua sisi. Salinan jejak ikut berputar mengikuti busur. */
+function _msPath(L, ang, curve, N){
+    const cs = Math.cos(ang), sn = Math.sin(ang);
+    const th = (curve / 100) * (Math.PI * 2 / 3);
+    const out = new Array(N + 1);
+    for(let k = 0; k <= N; k++){
+        const t = k / N;
+        let a, b;
+        if(Math.abs(th) < 1e-3){ a = L * t; b = 0; }
+        else { const rho = L / th; a = rho * Math.sin(th * t); b = rho * (1 - Math.cos(th * t)); }
+        out[k] = [-cs * a - sn * b, -sn * a + cs * b, th * t * 0.6];
+    }
+    return out;
+}
+
+function _msRelease(el){
+    const rec = _msTrails.get(el);
+    if(rec && rec.cv){ rec.cv.width = 1; rec.cv.height = 1; }
+    _msTrails.delete(el);
+}
+
+/* v2.3.5: seluruh jejak digabung SEKALI menjadi satu bitmap yang dipotong sebatas area jejak (bukan 40-70 gambar penuh per frame).
+   Saat elemen digeser, bitmap ini hanya digambar satu kali, jadi tidak lag. Bitmap dibangun ulang hanya bila pengaturan/ukuran/rotasi berubah.
+   Saat slider/rotasi sedang diubah terus-menerus, bitmap dibuat versi ringan lalu otomatis dipertajam ±0,4 detik setelah berhenti. */
+function getMotionTrail(el, fn, arg, P){
+    const sc = P.sc;
+    const now = (window.performance && performance.now) ? performance.now() : Date.now();
+    const exporting = sc > 1;
+    const keyP = [getElHash(el), P.R, sc, el.rotation || 0, el.width, el.height, (el.img && el.img.complete) ? 1 : 0, P.N, P.pw, P.L, P.S, P.ang, P.curve].join('|');
+    const rec = exporting ? null : _msTrails.get(el);
+    if(rec && rec.keyP === keyP && (rec.tier === 1 || now - rec.t0 < 350)) return rec;
+    const fast = !!rec && !exporting && rec.keyP !== keyP;
+    const R = P.R;
+    const pts = _msPath(P.L, P.ang, P.curve, P.N);
+    let mnx = 0, mxx = 0, mny = 0, mxy = 0;
+    for(let k = 1; k <= P.N; k++){
+        const p = pts[k];
+        if(p[0] < mnx) mnx = p[0]; if(p[0] > mxx) mxx = p[0];
+        if(p[1] < mny) mny = p[1]; if(p[1] > mxy) mxy = p[1];
+    }
+    const wA = 2 * R + (mxx - mnx), hA = 2 * R + (mxy - mny);
+    const cx0 = R - mnx, cy0 = R - mny;
+    const maxSide = exporting ? 4096 : (fast ? 700 : 1800);
+    const maxArea = exporting ? 16e6 : (fast ? 0.5e6 : 3.2e6);
+    const pw0 = wA * sc, ph0 = hA * sc;
+    const q = Math.min(1, maxSide / Math.max(pw0, ph0), Math.sqrt(maxArea / (pw0 * ph0)));
+    const tq = sc * q;
+    const sw = Math.max(1, Math.ceil(2 * R * tq));
+    const snap = document.createElement('canvas');
+    snap.width = sw; snap.height = sw;
+    const c = snap.getContext('2d');
+    c.setTransform(tq, 0, 0, tq, tq * (R - el.x), tq * (R - el.y));
     fn(c, el, arg);
-    _msSnaps.set(el, { key: key, cv: cv });
-    return cv;
+    const cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.ceil(wA * tq));
+    cv.height = Math.max(1, Math.ceil(hA * tq));
+    const tc = cv.getContext('2d');
+    tc.imageSmoothingEnabled = true;
+    tc.imageSmoothingQuality = 'high';
+    for(let k = P.N; k >= 1; k--){
+        const t = k / P.N;
+        const a = Math.min(1, P.S * Math.pow(1 - t, P.pw) * (2 / P.N));
+        if(a <= 0.001) continue;
+        const p = pts[k];
+        tc.globalAlpha = a;
+        tc.setTransform(1, 0, 0, 1, (cx0 + p[0]) * tq, (cy0 + p[1]) * tq);
+        if(p[2]) tc.rotate(p[2]);
+        tc.drawImage(snap, -R * tq, -R * tq);
+    }
+    snap.width = 1; snap.height = 1;
+    const out = { keyP: keyP, cv: cv, cx0: cx0, cy0: cy0, tq: tq, t0: now, tier: fast ? 0 : 1, temp: exporting };
+    if(!exporting){
+        if(rec && rec.cv){ rec.cv.width = 1; rec.cv.height = 1; }
+        _msTrails.set(el, out);
+        if(fast){
+            clearTimeout(_msUpT);
+            _msUpT = setTimeout(function(){ try{ renderAll(); }catch(e){} }, 380);
+        }
+    }
+    return out;
 }
 
 function renderMotionStreak(targetCtx, el, fn, arg){
@@ -6617,22 +6712,18 @@ function renderMotionStreak(targetCtx, el, fn, arg){
     const L = Math.max(0, +ms.length || 0);
     const S = Math.max(0, Math.min(1, (+ms.strength || 0) / 100));
     const ang = (+ms.angle || 0) * Math.PI / 180;
+    const curve = Math.max(-100, Math.min(100, +ms.curve || 0));
     const R = Math.ceil(Math.hypot(el.width || 200, el.height || 200) / 2) + 40;
     const sc = window.currentRenderScale || 1;
     _msBusy = true;
     try {
         if(S > 0 && L > 0){
-            const snap = getMotionSnap(el, fn, arg, R, sc);
-            const cs = Math.cos(ang), sn = Math.sin(ang);
+            const rec = getMotionTrail(el, fn, arg, { R: R, sc: sc, N: N, pw: pw, L: L, S: S, ang: ang, curve: curve });
             targetCtx.save();
-            for(let k = N; k >= 1; k--){
-                const t = k / N;
-                const a = Math.min(1, S * Math.pow(1 - t, pw) * (2 / N));
-                if(a <= 0.001) continue;
-                targetCtx.globalAlpha = a;
-                targetCtx.drawImage(snap, el.x - R - cs * L * t, el.y - R - sn * L * t, 2 * R, 2 * R);
-            }
+            targetCtx.globalAlpha = 1;
+            targetCtx.drawImage(rec.cv, el.x - rec.cx0, el.y - rec.cy0, rec.cv.width / rec.tq, rec.cv.height / rec.tq);
             targetCtx.restore();
+            if(rec.temp){ rec.cv.width = 1; rec.cv.height = 1; }
         }
         fn(targetCtx, el, arg);
     } finally {
@@ -6646,7 +6737,8 @@ function setMotionPreset(key){
     if(!el || !p) return;
     const prevAng = el.motionStreak ? (el.motionStreak.angle || 0) : 0;
     const prevSm = el.motionStreak && el.motionStreak.smooth != null ? el.motionStreak.smooth : 40;
-    el.motionStreak = { on: true, preset: key, length: p.length, strength: p.strength, angle: prevAng, smooth: prevSm };
+    const prevCur = el.motionStreak ? (el.motionStreak.curve || 0) : 0;
+    el.motionStreak = { on: true, preset: key, length: p.length, strength: p.strength, angle: prevAng, smooth: prevSm, curve: prevCur };
     renderAll();
     pushHistoryState();
     openPanelMotionStreak();
@@ -6656,8 +6748,8 @@ function setMotionProp(prop, val){
     const el = getActiveElement();
     if(!el || !el.motionStreak) return;
     el.motionStreak[prop] = Number(val);
-    const lbl = { length: ['valMsLen', 'px'], strength: ['valMsStr', '%'], angle: ['valMsAng', '°'], smooth: ['valMsSmo', '%'] }[prop];
-    if(lbl){ const o = document.getElementById(lbl[0]); if(o) o.innerText = val + lbl[1]; }
+    const lbl = { length: ['valMsLen', 'px'], strength: ['valMsStr', '%'], angle: ['valMsAng', '°'], smooth: ['valMsSmo', '%'], curve: ['valMsCur', '%'] }[prop];
+    if(lbl){ const o = document.getElementById(lbl[0]); if(o) o.innerText = (prop === 'curve' && Number(val) === 0) ? 'Lurus' : (val + lbl[1]); }
     renderAll();
 }
 
@@ -6669,7 +6761,7 @@ function motionOff(){
     const el = getActiveElement();
     if(!el) return;
     el.motionStreak = null;
-    _msSnaps.delete(el);
+    _msRelease(el);
     renderAll();
     pushHistoryState();
     openPanelMotionStreak();
@@ -6694,6 +6786,9 @@ function openPanelMotionStreak(){
 <input type="range" class="ctrl-slider" min="0" max="100" value="${m.smooth != null ? m.smooth : 40}" oninput="setMotionProp('smooth',this.value)" onchange="commitMotion()">
 <div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Arah Gerak:</span><span class="ctrl-val" id="valMsAng">${m.angle || 0}°</span></div>
 <input type="range" class="ctrl-slider" min="0" max="359" value="${m.angle || 0}" oninput="setMotionProp('angle',this.value)" onchange="commitMotion()">
+<div class="ctrl-row" style="margin-top:10px;"><span class="ctrl-label">Lengkung:</span><span class="ctrl-val" id="valMsCur">${(m.curve || 0) === 0 ? 'Lurus' : (m.curve + '%')}</span></div>
+<input type="range" class="ctrl-slider" min="-100" max="100" value="${m.curve || 0}" oninput="setMotionProp('curve',this.value)" onchange="commitMotion()">
+<div style="font-size:10px;opacity:.65;margin-top:2px;">◀ melengkung ke dalam · tengah = lurus · melengkung ke luar ▶</div>
 <div class="ctrl-grid-btns" style="margin-top:12px;"><button class="btn-sub-tool" onclick="motionOff()">✖ Matikan Blur Gerak</button></div>` : '';
     const html = `<div class="ctrl-label" style="margin-bottom:8px;line-height:1.5;">Pilih bentuk jejak, lalu atur panjang, kekuatan, dan arah gerak.</div>
 <div class="ctrl-grid-btns">${presets}</div>${sliders}
@@ -6710,8 +6805,9 @@ function openPanelMotionInfo(){
 <b>Panjang Jejak:</b> seberapa jauh ekor ditarik dari elemen (px kanvas).<br>
 <b>Kekuatan:</b> seberapa pekat jejaknya. 0% berarti tidak terlihat.<br>
 <b>Kehalusan:</b> jumlah lapisan jejak. 0% terlihat berlapis-lapis (seperti tangga), 100% sangat halus seperti kabut. Nilai tinggi sedikit lebih berat, terutama pada gambar besar.<br>
-<b>Arah Gerak:</b> arah elemen melesat. 0° ke kanan, 90° ke bawah, 180° ke kiri, 270° ke atas. Ekor selalu berada di belakang arah ini.<br><br>
-<b>Tips:</b> pakai pada satu atau dua elemen saja. Jejak yang panjang pada gambar besar membuat tampilan sedikit lebih berat, jadi turunkan panjang bila terasa lambat. Untuk mematikan, tekan Matikan Blur Gerak.
+<b>Arah Gerak:</b> arah elemen melesat. 0° ke kanan, 90° ke bawah, 180° ke kiri, 270° ke atas. Ekor selalu berada di belakang arah ini.<br>
+<b>Lengkung:</b> membengkokkan ekor menjadi busur. Tengah (0) = lurus, geser ke kiri = melengkung ke satu sisi (ke dalam), geser ke kanan = melengkung ke sisi lain (ke luar). Salinan jejak ikut berputar halus mengikuti busur, seperti objek yang berputar melesat.<br><br>
+<b>Tips:</b> jejak digabung menjadi satu bitmap yang dipotong sebatas area jejak, jadi elemen bisa digeser dengan lancar. Saat slider digeser, tampilan sementara dibuat ringan lalu otomatis menajam setelah berhenti. Untuk mematikan, tekan Matikan Blur Gerak.
 </div>
 <div class="ctrl-grid-btns" style="margin-top:12px;"><button class="btn-sub-tool" onclick="openPanelMotionStreak()">⬅️ Kembali</button></div>`;
     openToolPanel('ℹ️ Info Blur Gerak', html);
@@ -7358,6 +7454,44 @@ function toggleUITransparency() {
     }
 }
 
+
+/* ========== v2.3.6: TOMBOL INFO DI SEMUA TOOL ==========
+   Satu layar info (#toolInfoOv) dipakai ulang oleh semua tool; isinya dibuat saat dibuka dan dibuang saat ditutup (tanpa memori tersisa).
+   Tombol "i" di kepala panel otomatis muncul sesuai judul panel (TOOL_INFO_RULES); modal besar memanggil openToolInfo('kunci') langsung. */
+const TOOL_INFO = {"guides":{"t":"Garis Bantu & Panduan","what":"Menampilkan garis penuntun di atas kanvas supaya Anda mudah menata letak teks dan gambar agar lurus, seimbang, dan tidak terlalu dekat ke pinggir. Garis ini hanya bantuan di layar, <b>tidak ikut tercetak atau terunduh</b> di poster.","steps":["Pilih salah satu jenis garis: Pusat, Tepi, Grid, atau Semua.","Geser teks atau gambar di kanvas dan jadikan garis sebagai patokan.","Atur Margin Tepi bila garis tepinya terasa terlalu dekat atau terlalu jauh.","Setelah selesai menata, tekan Matikan agar kanvas bersih."],"terms":[["Pusat","Garis silang di tengah kanvas. Dipakai untuk meletakkan judul tepat di tengah."],["Tepi","Bingkai batas aman. Isi poster sebaiknya tidak keluar dari bingkai ini supaya tidak terpotong saat dicetak."],["Grid","Garis kotak 3 x 3 (kanvas dibagi sembilan bagian sama besar). Dipakai untuk komposisi yang enak dipandang."],["Margin Tepi (%)","Jarak bingkai Tepi dari pinggir kanvas, dihitung dalam persen. Makin besar angkanya, makin jauh bingkai dari pinggir."],["Warna Garis Tepi","Warna garis bingkai. Pilih warna yang kontras dengan background poster supaya jelas terlihat."]],"ex":["Poster seminar: pakai Pusat untuk meluruskan judul di tengah.","Poster yang akan dicetak: aktifkan Tepi supaya teks penting tidak terpotong mesin cetak.","Desain postingan Instagram: pakai Grid, letakkan objek utama di titik pertemuan garis."],"note":""},"bg":{"t":"Background Poster","what":"Mengatur latar belakang (dasar) poster: bisa satu warna, gradasi warna, atau foto.","steps":["Pilih jenis latar: Solid, Gradien, atau Foto.","Solid: pilih satu warna lewat kotak warna.","Gradien: pilih tipe, atur sudut, lalu atur warna-warnanya. Tekan Tambah Warna untuk menambah warna di tengah.","Foto: tekan Unggah lalu pilih gambar dari galeri. Atur ukuran dan posisinya, lalu atur kegelapan dan blur bila perlu."],"terms":[["Solid","Latar satu warna polos."],["Gradien (Fountain Fill)","Perpaduan beberapa warna yang berubah halus. Linear = lurus, Radial = melingkar dari tengah, Conical = berputar seperti kipas, Square = kotak."],["Sudut","Arah gradasi dalam derajat. 0 sampai 360 derajat; ubah sampai arah warnanya sesuai."],["Posisi (%)","Letak sebuah warna pada garis gradasi. 0% di awal, 100% di ujung."],["Geser X / Y","Menggeser titik pusat gradasi atau foto ke kiri-kanan (X) dan atas-bawah (Y), satuan piksel."],["Skala (%)","Memperbesar atau memperkecil foto latar. 100% = ukuran awal."],["Kegelapan (%)","Menggelapkan foto latar supaya teks putih lebih mudah dibaca."],["Blur (px)","Mengaburkan foto latar. Latar kabur membuat teks di atasnya lebih menonjol."],["Kopi, Navy, Zamrud, Maroon","Paket warna siap pakai, tinggal tekan."]],"ex":["Poster religi: gradien Navy ke hitam, teks emas di atasnya.","Poster promosi: foto produk sebagai latar, Kegelapan 40% agar teks putih jelas.","Poster kutipan: latar Solid krem dengan teks cokelat tua."],"note":""},"mirror":{"t":"Duplikat Simetris","what":"Membuat salinan elemen (gambar, teks, atau bentuk) di sisi lain kanvas dengan jarak ke tepi yang sama seperti aslinya. Hasilnya rapi, simetris, dan seimbang tanpa perlu menghitung manual.","steps":["Pilih dulu elemen yang ingin digandakan di kanvas.","Buka tool Duplikat Simetris.","Tekan salah satu mode. Salinan langsung muncul.","Tekan lagi mode yang sudah bertanda centang untuk menghapus salinannya, atau tekan Hapus Semua Duplikat."],"terms":[["Cermin Horizontal","Salinan muncul di sisi kanan dan dibalik kiri-kanan, seperti bayangan di cermin."],["Cermin Vertikal","Salinan muncul di sisi bawah dan dibalik atas-bawah."],["Berlawanan Pojok","Salinan muncul di pojok seberang dan dibalik dua arah."],["Sejajar","Salinan muncul di sisi kanan tanpa dibalik, arahnya sama dengan aslinya."]],"ex":["Hiasan sudut kiri atas diberi Cermin Horizontal, otomatis muncul juga di sudut kanan atas.","Logo kembar di kiri dan kanan header spanduk.","Ornamen bunga atau lengkung di dua sisi undangan."],"note":"Tiap mode hanya bisa dibuat satu kali untuk satu elemen. Untuk panduan lebih rinci, tekan tombol Info di dalam tool ini."},"motion":{"t":"Blur Gerak","what":"Memberi jejak gerak seperti benda yang melesat cepat: peluru, bintang jatuh, atau panah. Bagian kepala tetap tajam, ekor di belakangnya memudar halus.","steps":["Pilih gambar, teks, atau bentuk di kanvas.","Pilih bentuk jejak: Peluru, Bintang Jatuh, atau Panah.","Atur Panjang Jejak dan Kekuatan sampai terlihat pas.","Atur Arah Gerak supaya ekor berada di belakang arah lesatnya.","Tekan Matikan Blur Gerak bila ingin menghapus efeknya."],"terms":[["Panjang Jejak","Seberapa jauh ekor ditarik ke belakang, dalam piksel."],["Kekuatan","Seberapa pekat jejaknya. 0% = tidak terlihat."],["Kehalusan","Jumlah lapisan jejak. 0% terlihat berlapis seperti tangga, 100% halus seperti kabut. Nilai tinggi sedikit lebih berat."],["Arah Gerak","Arah benda melesat dalam derajat. 0 = ke kanan, 90 = ke bawah, 180 = ke kiri, 270 = ke atas."],["Lengkung","Membengkokkan ekor menjadi busur. Tengah = lurus; geser kiri atau kanan untuk melengkung ke dua sisi."]],"ex":["Gambar roket dengan ekor panjang yang melesat ke atas.","Teks judul olahraga dengan efek kecepatan.","Ikon panah yang menunjuk ke arah tertentu pada infografis."],"note":""},"tablestyle":{"t":"Gaya Tabel","what":"Mengatur garis pada tabel: ketebalan dan warnanya.","steps":["Pilih tabel di kanvas.","Geser Tebal Garis atau tekan tombol - dan +.","Pilih warna garis lewat kotak warna."],"terms":[["Tebal Garis (px)","Ketebalan garis tabel dalam piksel. Makin besar angkanya, makin tebal garisnya."]],"ex":["Tabel jadwal acara dengan garis tipis emas.","Tabel harga dengan garis putih tebal di atas latar gelap."],"note":""},"boxformat":{"t":"Format Teks (Tabel dan Kotak Bagan)","what":"Mengatur tampilan teks di dalam semua kotak tabel atau kotak bagan: tebal, miring, perataan, ukuran huruf, dan jarak teks ke garis.","steps":["Pilih tabel atau kotak bagan.","Tekan Tebal atau Miring bila perlu. Pengaturan ini berlaku ke semua kotak.","Pilih perataan teks: Kiri, Tengah, Kanan, atau Padat Kotak.","Atur Ukuran Font dan Jarak Teks ke Garis."],"terms":[["Padat Kotak","Teks dirapikan rata kiri dan kanan memenuhi lebar kotak."],["Ukuran Font (px)","Besar huruf dalam piksel."],["Jarak Teks ke Garis (px)","Ruang kosong antara teks dan garis kotak. Makin besar, makin lega."]],"ex":["Tabel jadwal dengan teks tengah dan huruf tebal.","Bagan organisasi dengan nama di tengah kotak."],"note":"Untuk memformat satu kotak saja, buka Edit Data lalu pakai tombol B atau I pada kotak tersebut."},"conn":{"t":"Gaya Konektor (Garis Penghubung Bagan)","what":"Mengatur garis penghubung antar kotak pada bagan organisasi: tebal dan warnanya.","steps":["Pilih garis penghubung di bagan.","Atur Tebal Garis dengan slider atau tombol - dan +.","Pilih warna garis lewat kotak warna."],"terms":[["Konektor","Garis yang menyambung satu kotak ke kotak lain, misalnya dari atasan ke bawahan."]],"ex":["Bagan struktur organisasi sekolah dengan garis emas tebal.","Bagan alur kerja dengan garis putih tipis."],"note":""},"shapecolor":{"t":"Warna Bentuk dan Kotak","what":"Mengubah warna isi bentuk atau kotak bagan. Bila bentuk berisi tulisan, warna tulisannya juga bisa diatur di bagian bawah.","steps":["Pilih bentuk atau kotak di kanvas.","Pilih warna di bagian WARNA BENTUK atau WARNA KOTAK.","Bila ada tulisan di dalamnya, pilih warna di bagian WARNA TEKS.","Kode warna bisa disalin atau ditempel lewat tombol di samping kotak warna. Gunakan Pipet untuk mengambil warna dari poster."],"terms":[["Kode warna (#RRGGBB)","Alamat warna dalam angka dan huruf, misalnya #D4AF37 untuk emas. Dua bentuk dengan kode sama pasti berwarna sama."],["transparent","Tanpa warna. Hanya kontur atau tulisan yang terlihat."]],"ex":["Papan nama berwarna hijau tua dengan tulisan putih.","Lingkaran emas sebagai hiasan di belakang judul."],"note":""},"fade":{"t":"Gradien Fade Tepi","what":"Membuat bayangan warna yang memudar dari tepi poster ke arah dalam. Sangat berguna untuk menggelapkan tepi foto agar teks di atasnya mudah dibaca, atau untuk menyatukan foto dengan latar.","steps":["Tekan tool ini, lalu sebuah lapisan fade muncul di kanvas.","Pilih arah fade: Masuk Kiri, Kanan, Atas, Bawah, atau dua sisi sekaligus.","Atur Kedalaman supaya fade menjangkau sejauh yang diinginkan.","Pilih Warna Fade, biasanya sama dengan warna latar."],"terms":[["Arah Fade","Dari sisi mana warna masuk. Masuk Kiri berarti warna pekat di kiri dan menghilang ke kanan."],["Kedalaman (%)","Seberapa jauh fade menjorok ke dalam kanvas. 0% hampir tidak terlihat, 100% menutup sampai jauh."],["Kanan Kiri / Atas Bawah","Fade muncul di dua sisi yang berhadapan sekaligus."]],"ex":["Foto orang di bagian atas, fade Masuk Bawah warna hitam, lalu tulis judul putih di area gelap.","Foto yang menyatu mulus dengan latar polos."],"note":""},"textsize":{"t":"Ukuran dan Pembatas Teks","what":"Mengatur besar huruf dan lebar kotak tempat teks berada. Teks otomatis turun baris bila mencapai batas lebar kotak.","steps":["Pilih teks di kanvas.","Atur Ukuran Font untuk membesarkan atau mengecilkan huruf.","Atur Lebar Kotak untuk menentukan seberapa lebar teks sebelum turun baris.","Pakai tombol cepat Lebar 500, 750, 950, atau Penuh Kanvas bila ingin cepat."],"terms":[["Ukuran Font (px)","Besar huruf dalam piksel."],["Lebar Kotak (px)","Lebar area teks. Kanvas standar lebarnya sekitar 1080 px, jadi 1080 hampir satu kanvas penuh."],["Penuh Kanvas","Lebar kotak disamakan dengan lebar kanvas."]],"ex":["Judul besar 120 px dengan lebar 950 agar turun ke dua baris.","Paragraf isi 36 px dengan lebar 750."],"note":"Angka lebar kanvas bisa berbeda tergantung ukuran poster yang dipilih."},"textformat":{"t":"Format dan Perataan Teks","what":"Mengatur gaya huruf (tebal, miring, garis bawah), jenis huruf kapital, dan perataan paragraf.","steps":["Pilih teks di kanvas. Bila hanya ingin mengubah beberapa kata, blok dulu kata itu saat mengedit teks.","Tekan B (tebal), I (miring), atau U (garis bawah). Tekan Reset untuk menghapus gaya.","Pilih Mode Huruf Kapital bila perlu.","Pilih perataan teks."],"terms":[["AA KAPITAL","Semua huruf menjadi huruf besar."],["aa kecil","Semua huruf menjadi huruf kecil."],["Aa Kalimat","Hanya huruf pertama tiap kalimat yang besar."],["Aa Judul","Huruf pertama tiap kata menjadi besar."],["Padat Kotak","Paragraf rata kiri dan kanan sehingga tepinya rapi seperti koran."]],"ex":["Judul acara dengan AA KAPITAL dan tebal.","Paragraf undangan dengan perataan Tengah.","Artikel pendek dengan Padat Kotak."],"note":""},"highlight":{"t":"Pengaturan Stabilo","what":"Memberi blok warna di belakang teks seperti stabilo di buku. Cocok untuk menegaskan kata penting atau membuat teks terbaca di atas foto ramai.","steps":["Pilih teks (atau blok kata tertentu saat mengedit teks).","Pilih warna stabilo.","Atur Transparansi supaya warna tidak terlalu pekat.","Atur Sudut Tumpul dan Tebal Bantalan sesuai selera.","Tekan Reset Stabilo bila ingin kembali ke awal."],"terms":[["Transparansi (%)","Seberapa tembus pandang warna stabilo. Kecil = tipis, besar = pekat."],["Sudut Tumpul (px)","Kebulatan ujung blok. 0 = kotak tajam, besar = bulat seperti pil."],["Tebal Bantalan (px)","Ruang tambahan di sekeliling teks sehingga blok warna lebih lega."],["Level Blur","Mengaburkan tepi blok sehingga lembut seperti cahaya."]],"ex":["Satu kata penting di kutipan diberi stabilo kuning.","Judul putih di atas foto ramai diberi stabilo hitam transparan agar jelas."],"note":""},"textskin":{"t":"Skin Teks dan Tekstur","what":"Mengisi bagian dalam huruf dengan gambar atau tekstur, misalnya emas, marmer, api, atau batik. Huruf tampil seperti terbuat dari bahan itu.","steps":["Pilih teks. Gunakan huruf yang tebal agar tekstur terlihat.","Tekan Unggah dan pilih gambar tekstur.","Atur Skala, Geser X, dan Geser Y sampai bagian tekstur yang bagus berada di huruf.","Pilih Blend Mode bila ingin gaya campuran lain.","Atur Penyesuaian Warna Skin untuk mengubah kecerahan dan rona tekstur."],"terms":[["Skala (%)","Besar tekstur. 100% = ukuran asli."],["Geser X / Y (px)","Menggeser posisi tekstur di dalam huruf."],["Normal (Mask)","Tekstur memenuhi huruf apa adanya."],["Subtrack (Multiply)","Menggelapkan, tekstur bercampur dengan warna huruf."],["Screen","Mencerahkan, bagian gelap tekstur menghilang."],["Overlay","Kontras dramatis, terang makin terang dan gelap makin gelap."],["Negatif (Difference)","Warna dibalik sehingga tampil kontras unik."],["Rona (Hue)","Menggeser warna, misalnya dari emas ke biru."]],"ex":["Tulisan RAMADAN berisi tekstur emas.","Judul SALE berisi gambar api.","Nama toko berisi pola batik."],"note":""},"light":{"t":"Cahaya dan Warna","what":"Memperbaiki atau mengubah tampilan foto: terang gelapnya, tajam kontrasnya, pekat warnanya, dan nuansa warnanya.","steps":["Pilih gambar di kanvas.","Geser slider satu per satu sambil melihat hasilnya di poster.","Tekan Reset Penyesuaian bila ingin kembali ke foto asli."],"terms":[["Kecerahan (%)","100% = normal. Di bawah 100 lebih gelap, di atas 100 lebih terang."],["Kontras (%)","Selisih terang dan gelap. Naikkan agar foto yang pucat terlihat tegas."],["Saturasi (%)","Kepekatan warna. 0% = hitam putih, 100% = normal, di atas 100 lebih menyala."],["Rona / Hue (derajat)","Menggeser seluruh warna mengelilingi roda warna. 0 = warna asli."]],"ex":["Foto berwarna pucat diperbaiki dengan menaikkan Kontras dan Saturasi.","Foto dibuat hitam putih dengan Saturasi 0%.","Foto dibuat lebih gelap agar teks putih jelas."],"note":""},"hsl":{"t":"Warna HSL dan Cahaya Lanjutan","what":"Mengubah warna tertentu saja pada foto tanpa mengganggu warna lain, misalnya hanya merah yang dijadikan biru. Juga mengatur bagian terang, gelap, dan menengah foto secara terpisah.","steps":["Pilih gambar lalu aktifkan Status Warna HSL.","Pilih Channel Warna: Master (semua warna) atau salah satu warna tertentu.","Atur Hue, Saturation, dan Lightness untuk channel itu.","Atur Intensitas, Highlights, Shadows, dan Midtones bila perlu.","Tekan Reset HSL untuk mengembalikan."],"terms":[["HSL","Singkatan dari Hue (jenis warna), Saturation (kepekatan), dan Lightness (terang gelap)."],["Channel","Kelompok warna yang sedang diatur, misalnya hanya merah."],["Intensitas (%)","Kekuatan seluruh efek ini."],["Highlights","Bagian paling terang foto."],["Shadows","Bagian paling gelap foto."],["Midtones","Bagian menengah, bukan terang dan bukan gelap."]],"ex":["Baju merah pada foto diubah menjadi hijau tanpa mengubah warna kulit.","Langit dibuat lebih biru dengan menaikkan Saturation pada channel biru.","Bayangan foto dibuka agar detail gelap terlihat."],"note":""},"shadow":{"t":"Bayangan dan Efek 3D","what":"Memberi bayangan agar elemen terlihat timbul dari latar. Ada dua jenis: Bayangan Luar (di luar elemen) dan Dalam atau Inner (di dalam elemen, seperti terpahat).","steps":["Pilih elemen.","Pilih tab Bayangan Luar atau Dalam.","Pastikan tombol berstatus ON.","Atur Blur, Jarak, dan Sudut, lalu pilih warna bayangan.","Tombol Reset Default mengembalikan ke pengaturan awal."],"terms":[["Blur (px)","Kelembutan bayangan. Kecil = tegas, besar = lembut menyebar."],["Jarak (px)","Seberapa jauh bayangan dari elemen."],["Sudut / Arah (derajat)","Arah jatuhnya bayangan. 45 = ke kanan bawah."],["Transparansi / Alpha (%)","Pekat tidaknya bayangan."],["ON / OFF","Menyalakan atau mematikan bayangan tanpa kehilangan pengaturan."]],"ex":["Judul putih di atas foto diberi Bayangan Luar hitam agar menonjol.","Teks emas diberi Bayangan Dalam supaya terlihat timbul.","Stiker PNG diberi bayangan lembut agar seperti menempel di kertas."],"note":""},"position":{"t":"Posisi Presisi dan Sensitif","what":"Memindahkan elemen dengan sangat teliti memakai tombol, bukan jari. Cocok bila geseran jari terlalu kasar atau elemen perlu tepat di tengah dan di sudut.","steps":["Pilih elemen di kanvas.","Atur Langkah Sensitif: berapa piksel elemen bergeser setiap sekali tekan tombol panah.","Tekan panah joystick. Tahan untuk bergerak terus.","Untuk meratakan, tekan Tengah Horisontal, Tengah Vertikal, atau tombol 3 x 3 di bawah.","Tombol yang menyala kuning berarti elemen sudah berada di posisi itu."],"terms":[["Langkah Sensitif (px)","Jarak sekali geser. 1 px = sangat halus, 50 px = loncat jauh. Bawaan 10 px."],["X dan Y","Koordinat titik tengah elemen di kanvas. X dihitung dari kiri, Y dari atas."],["Tengah Horisontal","Elemen digeser ke tengah kiri-kanan, tinggi tidak berubah."],["Tengah Vertikal","Elemen digeser ke tengah atas-bawah, posisi kiri-kanan tidak berubah."],["Peratan Sudut","Sembilan tombol untuk menempel ke sudut, tepi, atau tengah. Ada jarak aman 70 px dari kiri-kanan dan 90 px dari atas-bawah."],["Garis bantu & magnet","Saat bergeser dekat tengah atau tepi, elemen otomatis menempel dan muncul garis bantu."]],"ex":["Judul diletakkan tepat di tengah dengan tombol 🎯.","Logo ditempel ke pojok kanan atas dengan ↗️.","Menggeser teks sedikit demi sedikit sampai sejajar sempurna dengan gambar."],"note":"Jika elemen berada dalam grup, seluruh grup ikut diratakan bersama."},"group":{"t":"Kelola Multi-Grup","what":"Menggabungkan beberapa elemen menjadi satu grup supaya digeser bersama-sama dan tetap menjaga jarak antar elemen.","steps":["Centang elemen yang ingin digabung. Tombol Pilih Semua, Invert, dan Kosongkan membantu memilih cepat.","Tekan Buat Grup Baru. Minimal dua elemen.","Untuk melepas, centang elemennya lalu tekan Keluarkan."],"terms":[["Grup 1, Grup 2 ...","Nama otomatis tiap grup, selalu berurutan."],["Invert","Membalik pilihan: yang tercentang menjadi kosong dan sebaliknya."]],"ex":["Logo dan nama toko digabung agar bisa digeser sebagai satu paket.","Foto dan tulisan keterangannya dikunci satu grup."],"note":""},"layers":{"t":"Daftar Lapisan","what":"Menampilkan semua elemen di poster, diurutkan dari paling depan di atas hingga paling belakang di bawah. Dipakai untuk mengatur siapa yang menutupi siapa.","steps":["Cari elemen di daftar.","Tekan panah naik untuk memajukan satu tingkat, panah turun untuk memundurkan satu tingkat.","Tekan tombol ke paling depan atau ke paling belakang untuk loncat langsung.","Tombol tempat sampah menghapus elemen."],"terms":[["Lapisan (Layer)","Seperti tumpukan kertas bening. Lapisan teratas menutupi lapisan di bawahnya."]],"ex":["Teks tertutup foto: majukan teks ke paling depan.","Foto menutupi semua isi: mundurkan ke paling belakang."],"note":""},"addshape":{"t":"Tambah Bentuk","what":"Menambahkan bentuk dasar ke poster, seperti kotak, lingkaran, bintang, hati, panah, dan banyak lagi.","steps":["Ketuk bentuk yang diinginkan. Bentuk langsung muncul di kanvas.","Geser dan ubah ukurannya.","Ubah warnanya lewat tool Warna bentuk."],"terms":[["Papan Nama","Bentuk kapsul panjang untuk tulisan."],["Balon Kata","Gelembung percakapan seperti komik."],["Label / Tag, Pita / Mark","Hiasan penanda untuk harga atau diskon."],["Garis","Garis lurus pemisah."]],"ex":["Kotak transparan di belakang teks agar mudah dibaca.","Lingkaran sebagai bingkai foto profil.","Panah penunjuk pada infografis."],"note":""},"multicopy":{"t":"Copy Massal Elemen","what":"Menyalin banyak elemen sekaligus, lalu ditempel di slide lain dengan tool Tempel.","steps":["Centang elemen yang ingin disalin.","Tekan Salin Terpilih.","Pindah ke slide tujuan lalu buka Tempel, dan tekan Tempel Sekarang."],"terms":[["Slide","Satu halaman poster. Satu projek bisa memiliki banyak slide."]],"ex":["Menyalin logo, nama, dan alamat ke semua slide agar seragam."],"note":""},"paste":{"t":"Tempel Elemen","what":"Menempelkan elemen yang tadi disalin ke slide yang Anda pilih.","steps":["Salin elemen dulu dengan tombol Salin atau Copy Massal.","Buka Tempel dan pilih slide tujuan.","Tekan Tempel Sekarang."],"terms":[],"ex":["Menempel logo yang sama ke 10 slide tanpa membuat ulang."],"note":""},"font":{"t":"Pilih Font","what":"Memilih jenis huruf untuk teks. Tersedia banyak font, termasuk huruf Arab dan font pribadi yang Anda unggah.","steps":["Pilih teks di kanvas.","Gulir daftar. Setiap baris menampilkan contoh tulisan dengan font itu.","Ketuk satu font untuk memakainya.","Tekan 📌 untuk menyimpan font favorit ke daftar paling atas."],"terms":[["Font Favorit","Font yang Anda pin. Selalu tampil di atas daftar."],["Tag (misalnya AA, Arab)","AA artinya font hanya berisi huruf kapital. Arab artinya cocok untuk tulisan Arab."],["Font Pribadi","Font yang Anda masukkan sendiri. Bisa dihapus dengan tombol tempat sampah."]],"ex":["Judul tegas: font tebal huruf kapital.","Undangan elegan: font tulis tangan.","Ayat atau doa: font Arab."],"note":""},"readability":{"t":"Cek Mudah Dibaca","what":"Mengecek apakah teks cukup jelas terbaca di atas background-nya. Aplikasi menghitung selisih terang antara teks dan latarnya.","steps":["Pilih teks.","Buka tool ini dan lihat status lulus atau tidak.","Lihat peta kotak: hijau aman, kuning pas-pasan, merah sulit dibaca.","Pilih saran warna, atau tambahkan stabilo atau bayangan, atau geser teks ke area yang lebih polos."],"terms":[["Kontras 4,5:1","Standar umum agar nyaman dibaca. Makin besar angka depannya, makin jelas."],["P10","Nilai kontras di area yang paling sulit (10% terburuk). Dipakai agar bagian yang buruk tidak terlewat."]],"ex":["Teks putih di atas foto langit terang: tool menyarankan warna lebih gelap.","Judul sulit dibaca: tambahkan stabilo hitam transparan."],"note":""},"textcolor":{"t":"Warna Teks","what":"Mengubah warna tulisan. Bisa untuk seluruh teks atau hanya kata yang diblok.","steps":["Pilih teks.","Pilih warna dari kotak warna, roda warna, atau pipet.","Untuk satu dua kata saja, blok kata itu saat mengedit teks lalu pilih warnanya."],"terms":[["Kode warna (#RRGGBB)","Alamat warna. Bisa disalin dan ditempel."],["Pipet","Mengambil warna langsung dari poster."]],"ex":["Judul emas dengan satu kata merah sebagai penekanan.","Mengambil warna dari logo untuk dipakai di teks agar serasi."],"note":""},"spacing":{"t":"Jarak Baris dan Huruf","what":"Mengatur kerapatan teks: jarak antar baris dan jarak antar huruf.","steps":["Pilih teks.","Atur Jarak Baris lewat slider atau tombol - dan +.","Atur Jarak Huruf sesuai selera."],"terms":[["Jarak Baris","Kelipatan dari besar huruf. 1.3 berarti jarak baris 1,3 kali besar huruf. Makin besar makin renggang."],["Jarak Huruf (px)","Jarak antar huruf dalam piksel. Nilai positif merenggangkan, nilai negatif merapatkan."]],"ex":["Judul kapital dengan Jarak Huruf besar agar terlihat mewah.","Paragraf panjang diberi Jarak Baris lebih besar agar lega."],"note":""},"curve":{"t":"Lengkung dan Kemiringan","what":"Melengkungkan dan memiringkan elemen. Lengkung membuat teks atau gambar mengikuti busur, Miring membuatnya condong seperti huruf italic.","steps":["Pilih elemen.","Geser Lengkung ke kanan atau kiri sampai bentuk busur sesuai.","Geser Miring bila ingin condong.","Tekan Reset untuk kembali lurus."],"terms":[["Lengkung (derajat)","Besar lengkungan. 0 = lurus. Angka makin besar makin melengkung, positif dan negatif membuat busur ke arah berlawanan."],["Miring (derajat)","Kemiringan condong ke samping. 0 = tegak."]],"ex":["Teks melengkung seperti logo lencana atau stempel.","Tulisan di atas gambar lingkaran.","Judul dengan kemiringan dinamis."],"note":""},"rotate":{"t":"Rotasi Elemen","what":"Memutar elemen dengan derajat tertentu.","steps":["Pilih elemen.","Geser slider Rotasi atau tekan - dan +."],"terms":[["Rotasi (derajat)","Besar putaran. 0 = tegak lurus, 90 = miring seperempat putaran, 180 = terbalik."]],"ex":["Stiker diputar sedikit agar terlihat santai.","Teks vertikal dengan rotasi 90."],"note":""},"flip":{"t":"Cermin Gambar","what":"Membalik gambar seperti bayangan di cermin.","steps":["Pilih gambar.","Tekan Cermin H untuk dibalik kiri-kanan.","Tekan Cermin V untuk dibalik atas-bawah."],"terms":[["Cermin H","Kiri menjadi kanan dan sebaliknya."],["Cermin V","Atas menjadi bawah dan sebaliknya."]],"ex":["Orang yang menghadap kiri dibalik menghadap kanan agar menatap teks.","Membuat bayangan lantai dengan Cermin V."],"note":"Tekan sekali untuk membalik dan sekali lagi untuk mengembalikan."},"opacity":{"t":"Transparansi Lanjutan","what":"Membuat elemen tembus pandang. Bisa rata, atau memudar bertahap (gradien) sehingga sebagian menghilang halus.","steps":["Pilih elemen.","Uniform: geser Kepekatan Maks untuk membuat seluruh elemen tipis atau pekat.","Fountain: pilih tipe (Linear, Radial, Conical, atau PNG Custom) lalu atur sudut dan posisi.","Tekan Invert untuk membalik bagian yang pekat dan yang hilang.","Tekan Reset Nilai Fountain bila hasilnya kacau."],"terms":[["Uniform","Transparansi sama rata di seluruh elemen."],["Fountain","Transparansi bertingkat. Satu sisi pekat, sisi lain menghilang."],["Linear / Radial / Conical","Pola pudar lurus, melingkar dari tengah, atau berputar."],["PNG Custom","Memakai bentuk gambar PNG Anda sendiri sebagai pola pudar."],["Kepekatan Maks (%)","Batas paling pekat. 100% penuh, 0% hilang."],["Skala (%)","Besar pola pudar."],["Invert","Membalik pola pudar."]],"ex":["Foto memudar halus ke latar di bagian bawah.","Foto berbentuk lingkaran lembut tanpa tepi tajam.","Teks watermark dibuat tipis 30%."],"note":""},"blur":{"t":"Efek Blur Foto","what":"Mengaburkan seluruh foto.","steps":["Pilih foto.","Geser Blur. 0 = tajam."],"terms":[["Blur (px)","Seberapa kabur. Angka kecil sedikit lembut, angka besar sangat kabur."]],"ex":["Foto latar dikaburkan agar teks di atasnya menonjol.","Efek kedalaman: foto belakang kabur, foto depan tajam."],"note":""},"border":{"t":"Garis Tepi dan Stiker Siluet","what":"Memberi garis di pinggir gambar. Pada gambar PNG transparan (hasil Hapus BG), garis mengikuti bentuk objek sehingga menjadi seperti stiker.","steps":["Pilih gambar.","Geser Garis Tepi untuk menambah ketebalan.","Pilih warna garis.","Atur Efek Neon atau Blur untuk cahaya menyala di tepi.","Atur Kelengkungan untuk membulatkan sudut foto kotak."],"terms":[["Garis Tepi (px)","Tebal garis."],["Efek Neon / Blur (px)","Cahaya halus di sekeliling garis."],["Kelengkungan (px)","Kebulatan sudut foto kotak."],["Stiker Siluet","Garis tepi mengikuti kontur objek PNG."]],"ex":["Foto orang tanpa latar diberi garis putih tebal menjadi stiker.","Foto profil dengan sudut bulat dan garis emas."],"note":""},"blend":{"t":"Blend Mode Efek Cahaya","what":"Mencampur gambar dengan latar di bawahnya dengan cara khusus. Dipakai untuk efek cahaya, api, bokeh, atau tekstur.","steps":["Pilih gambar efek, misalnya cahaya atau percikan api.","Tekan salah satu mode, lihat hasilnya.","Atur Kekuatan dan Blur Efek.","Tekan Reset Blend Mode untuk kembali Normal."],"terms":[["Screen","Bagian hitam hilang, bagian terang menyala. Cocok untuk api dan cahaya di latar hitam."],["Add","Lebih menyala dari Screen."],["Subtrack","Bagian putih hilang."],["Overlay","Kontras dramatis."],["Dodge","Efek neon yang menyilaukan."],["Soft Light","Cahaya lembut."],["Hard Light","Cahaya kuat dan tajam."],["Negatif","Warna dibalik."],["Normal","Standar, tanpa pencampuran."]],"ex":["Gambar api berlatar hitam diberi Screen agar hitamnya hilang.","Tekstur debu diberi Overlay agar poster tampak sinematik."],"note":""},"silhouette":{"t":"Warna Siluet Full PNG","what":"Mengubah seluruh gambar PNG menjadi satu warna rata, seperti bayangan hitam.","steps":["Pilih gambar PNG (sebaiknya tanpa latar).","Pilih warna siluet.","Tekan Reset Warna Siluet untuk kembali ke warna asli."],"terms":[["Siluet","Bentuk objek saja tanpa detail, diisi satu warna."]],"ex":["Foto pemain dibuat hitam sebagai siluet dramatis.","Logo diwarnai putih untuk latar gelap."],"note":""},"crop":{"t":"Crop Presisi","what":"Memotong bagian tepi gambar dengan angka presisi, dari kiri, kanan, atas, dan bawah.","steps":["Pilih gambar.","Atur Potong Kiri, Kanan, Atas, dan Bawah.","Tekan Reset Potongan untuk mengembalikan."],"terms":[["Potong (%)","Berapa persen tepi gambar yang dibuang. 10% di kiri berarti sepersepuluh bagian kiri dibuang."]],"ex":["Membuang sisa putih di pinggir foto.","Memotong foto grup supaya hanya satu wajah yang terlihat."],"note":""},"skinphoto":{"t":"Skin Foto Overlay","what":"Melapisi gambar atau bentuk dengan tekstur, seperti emas, marmer, atau pola.","steps":["Pilih gambar atau bentuk.","Tekan Unggah dan pilih tekstur.","Atur Skala, Geser X dan Y, serta Opasitas.","Pilih Blend Mode untuk gaya campuran.","Tekan Reset Skin bila tidak puas."],"terms":[["Opasitas (%)","Pekat tidaknya tekstur."],["Blend Mode","Cara tekstur bercampur dengan gambar. Normal menimpa, Multiply menggelapkan, Screen mencerahkan."],["Skala (%)","Besar tekstur."]],"ex":["Siluet logo diberi tekstur emas.","Bentuk lingkaran diberi tekstur marmer."],"note":""},"size":{"t":"Ukuran dan Dimensi","what":"Mengatur lebar dan tinggi elemen secara tepat, atau relatif terhadap lebar kanvas.","steps":["Pilih elemen.","Atur Lebar atau Tinggi dalam piksel.","Atau pakai Relatif Kanvas untuk ukuran dalam persen lebar kanvas.","Pakai tombol cepat 25%, 50%, 100%, 200%.","Kunci rasio agar tinggi ikut berubah menjaga proporsi."],"terms":[["px (piksel)","Satuan titik pada layar. Makin banyak piksel, makin besar elemen."],["Relatif Kanvas (%)","100% = selebar kanvas, 50% = setengah lebar kanvas."],["Rasio terkunci","Perbandingan lebar dan tinggi dijaga agar gambar tidak gepeng atau melar."]],"ex":["Logo dibuat 25% lebar kanvas.","Foto dibuat 100% agar penuh sampai pinggir."],"note":""},"dslr":{"t":"Fokus Lensa DSLR (Tilt-Shift)","what":"Membuat foto seperti difoto kamera profesional: satu area tajam, sekitarnya kabur.","steps":["Pilih foto lalu aktifkan Status Fokus DSLR.","Pilih bentuk fokus: Radial, Horizontal, atau Vertikal.","Atur Intensitas Blur dan Ukuran Area Fokus.","Geser X dan Y supaya area tajam berada di objek utama.","Aktifkan Invert untuk membalik: dalam kabur, luar tajam."],"terms":[["Radial","Area tajam berbentuk lingkaran."],["Horizontal","Area tajam berupa pita mendatar."],["Vertikal","Area tajam berupa pita tegak."],["Intensitas Blur (px)","Seberapa kabur area di luar fokus."],["Ukuran Area Fokus (%)","Seberapa luas bagian yang tetap tajam."],["Tilt-Shift","Teknik membuat pemandangan terlihat seperti miniatur."]],"ex":["Foto produk: produk tajam, latar kabur.","Foto kota yang terlihat seperti maket mini."],"note":""},"upscale":{"t":"Upscale HD","what":"Memperbesar dan menajamkan foto yang pecah atau buram. Ukuran kotak di kanvas tetap, yang naik adalah kualitas atau resolusi fotonya.","steps":["Pilih foto lalu buka tool ini.","Pilih preset cepat: Ringan, Sedang, atau Kuat.","Geser garis putih untuk membandingkan sebelum dan sesudah.","Atur Skala, Hapus Noise, Ketajaman, dan Detail Tepi bila perlu.","Tekan Terapkan Upscale HD. Bila tidak puas, tekan Undo lalu atur ulang."],"terms":[["Skala","Berapa kali foto diperbesar, misalnya 2x."],["Hapus Noise","Membuang bintik atau butiran pada foto."],["Ketajaman","Menegaskan garis dan detail. Terlalu tinggi membuat foto berbulu."],["Detail Tepi","Menegaskan pinggir objek."],["Resolusi","Jumlah titik pada foto. Makin banyak, makin halus saat dicetak besar."]],"ex":["Foto kiriman WhatsApp yang buram diperbaiki untuk spanduk.","Logo kecil diperbesar agar tidak pecah."],"note":"Menerapkan berulang kali akan menambah efek. Foto sangat buram: pilih Kuat. Foto sudah tajam tapi kecil: pilih Ringan."},"table":{"t":"Editor Data Tabel","what":"Mengisi dan mengubah isi tabel: menambah baris, kolom, menggabung sel, dan mengetik data.","steps":["Ketuk kotak untuk mengetik isinya.","Tekan Baris Bawah atau Kolom Kanan untuk menambah.","Hapus Baris atau Hapus Kolom untuk membuang yang tidak perlu.","Gabung sel: centang kotak pertama, lalu centang kotak terakhir, kemudian tekan Gabung Sel.","Tekan Selesai untuk menutup."],"terms":[["Baris","Deretan kotak mendatar."],["Kolom","Deretan kotak tegak."],["Sel","Satu kotak dalam tabel."],["Gabung Sel","Menyatukan beberapa kotak menjadi satu kotak besar."],["Pisah Sel","Memecah kotak gabungan kembali."]],"ex":["Jadwal acara: kolom jam, kegiatan, dan tempat.","Daftar harga: kolom nama menu dan harga."],"note":""},"persp":{"t":"Perspektif 3D","what":"Membuat gambar seolah miring ke belakang atau ke depan dengan menarik empat sudutnya secara bebas.","steps":["Pilih gambar lalu buka tool ini.","Tarik keempat pin sudut sesuai bentuk yang diinginkan.","Tekan Terapkan Perspektif.","Reset Asli atau Atur Ulang Pin bila ingin mengulang."],"terms":[["Pin","Titik bulat di sudut gambar yang bisa ditarik."],["Perspektif","Efek jarak: bagian jauh tampak lebih kecil."]],"ex":["Mockup: poster ditempel miring di dinding.","Teks seperti tergeletak di lantai."],"note":""},"env":{"t":"Envelope Distort","what":"Melengkungkan gambar secara bebas seperti kain yang ditarik atau dibengkokkan.","steps":["Pilih gambar lalu buka tool ini.","Tarik pin untuk membengkokkan gambar.","Tekan Terapkan Envelope bila sudah pas.","Reset Asli atau Atur Ulang Pin untuk mengulang."],"terms":[["Envelope","Kerangka pembentuk yang menarik gambar."]],"ex":["Teks seperti bendera berkibar.","Gambar dibuat melengkung mengikuti botol."],"note":""},"freecrop":{"t":"Crop Bebas Pakai Jari (Lasso)","what":"Memotong gambar mengikuti garis buatan Anda sendiri, tidak harus kotak.","steps":["Pilih foto lalu buka tool ini.","Geser gagang ✋ untuk menggambar garis memutari objek.","Rapatkan garis sampai kembali ke titik awal.","Pilih mode: Buang Luar (ambil bagian dalam garis) atau Buang Dalam (lubangi bagian dalam).","Tekan Terapkan Crop."],"terms":[["Ukuran Ujung","Besar keker lingkaran pada ujung jari."],["Lasso","Alat pemotong yang mengikuti garis bebas."],["Buang Luar","Bagian luar garis dibuang, dalam dipertahankan."],["Buang Dalam","Bagian dalam garis dilubangi."]],"ex":["Memotong foto orang dari latarnya.","Membuat lubang di foto agar teks di belakang terlihat."],"note":""},"magicgrab":{"t":"Tangkap Ajaib","what":"Mengambil objek dari foto dengan menggosok kuas di atasnya. Objek dipisahkan sebagai gambar baru.","steps":["Pilih foto lalu buka tool ini.","Geser gagang ✋ lalu gosok objek yang ingin diambil.","Aktifkan Snap ke Objek (AI) supaya tepi lebih pas.","Atur Toleransi dan Halus bila perlu.","Tekan Pisahkan Subjek."],"terms":[["Kuas (px)","Besar kuas."],["Toleransi","Seberapa jauh warna mirip masih dihitung bagian objek."],["Halus","Kehalusan tepi hasil."],["Pulihkan / Hapus","Pulihkan menambah area terpilih, Hapus mengurangi."],["Ambil Dalam / Ambil Luar","Menentukan apakah bagian dalam atau luar garis yang diambil."]],"ex":["Mengambil seekor kucing dari foto lalu ditempel ke poster lain.","Memisahkan produk dari latar berantakan."],"note":""},"wand":{"t":"Hapus BG","what":"Menghapus latar belakang foto sehingga hanya objek yang tersisa dan menjadi PNG transparan.","steps":["Pilih foto lalu buka tool ini.","Coba AI 1 (Cepat) atau AI 2 (Halus) untuk hasil otomatis.","Atau pakai Auto Dominan, Manual Garis, dan Global Warna.","Rapikan dengan kuas Pulihkan dan Hapus.","Tekan Terapkan."],"terms":[["AI 1 (Cepat)","Hasil cepat, cocok untuk objek sederhana."],["AI 2 (Halus)","Lebih teliti untuk rambut dan tepi rumit."],["Auto Dominan","Menghapus warna latar yang paling dominan."],["Global Warna","Menghapus semua area dengan warna mirip."],["Toleransi","Kemiripan warna yang ikut terhapus."],["Halus","Kehalusan tepi."]],"ex":["Foto produk tanpa latar untuk katalog.","Foto orang menjadi stiker."],"note":"Model AI diunduh sekali, setelah itu bisa dipakai tanpa internet."},"ai":{"t":"Hapus Objek AI","what":"Menghapus benda yang tidak diinginkan dari foto dan mengisi bekasnya secara otomatis.","steps":["Pilih foto lalu buka tool ini.","Tandai objek dengan kuas lewat gagang ✋.","Tekan Hapus Objek AI dan tunggu.","Tekan Lihat hasil untuk membandingkan, lalu Terapkan."],"terms":[["Tandai / Hapus Tanda","Menambah atau mengurangi area yang dihapus."],["Kuas (px)","Besar kuas."]],"ex":["Menghapus tiang listrik dari foto.","Membuang tulisan atau watermark kecil."],"note":""},"pen":{"t":"Pena Gambar","what":"Menggambar bebas di atas poster.","steps":["Pilih jenis pena.","Pilih warna dan atur ukuran.","Gambar di kanvas.","Tekan Selesai untuk menyimpan."],"terms":[["Gemerlap (Glow)","Garis bercahaya."],["Sensor Blur (Airbrush)","Garis kabur lembut."],["Spidol","Garis transparan seperti stabilo."],["Penghapus","Menghapus goresan."]],"ex":["Menandai bagian penting dengan lingkaran.","Menambah tanda tangan."],"note":""},"bib":{"t":"Cari Gambar","what":"Mencari gambar di internet lalu memasukkannya ke poster.","steps":["Tulis kata kunci lalu tekan Cari.","Ketuk gambar yang cocok, lalu tekan Ke Kanvas.","Atau pakai tab Web dan URL / Tempel untuk mengambil gambar dari alamat tertentu."],"terms":[["URL","Alamat gambar di internet."]],"ex":["Mencari gambar masjid untuk latar."],"note":"Pastikan gambar boleh dipakai."}};
+const TOOL_INFO_RULES = [["^Info ",null],["^Garis Bantu","guides"],["^Background","bg"],["Duplikat Simetris","mirror"],["^Blur Gerak","motion"],["^Gaya Tabel","tablestyle"],["^Format Teks","boxformat"],["^Gaya Konektor","conn"],["^Warna Kotak|^Warna Bentuk","shapecolor"],["^Gradien Fade","fade"],["Ukuran Teks","textsize"],["^Format & Perataan","textformat"],["Stabilo","highlight"],["^Skin Teks","textskin"],["^Cahaya & Warna","light"],["^Warna HSL","hsl"],["^Bayangan","shadow"],["^Posisi Presisi","position"],["^Kelola Multi-Grup","group"],["^Daftar Lapisan","layers"],["^Tambah Bentuk","addshape"],["^Copy Massal","multicopy"],["^Tempel Elemen","paste"],["^Pilih Font","font"],["^Cek Mudah Dibaca","readability"],["^Panduan Pilih Warna",null],["^Warna Teks","textcolor"],["^Jarak Baris","spacing"],["^Lengkung & Kemiringan","curve"],["^Rotasi Elemen","rotate"],["^Cermin Gambar","flip"],["Advanced Transparency","opacity"],["^Efek Blur Foto","blur"],["^Garis Tepi","border"],["^Blend Mode","blend"],["^Warna Siluet","silhouette"],["^Crop Presisi","crop"],["^Skin Foto","skinphoto"],["^Ukuran & Dimensi","size"],["Fokus Lensa DSLR","dslr"],["^Upscale","upscale"]];
+function _infoKeyForTitle(title){
+    const plain=String(title==null?'':title).replace(/^[^A-Za-z0-9]+/,'');
+    for(let i=0;i<TOOL_INFO_RULES.length;i++){
+        if(new RegExp(TOOL_INFO_RULES[i][0]).test(plain)) return TOOL_INFO_RULES[i][1];
+    }
+    return null;
+}
+function _setPanelInfoBtn(title){
+    const b=document.getElementById('panelInfoBtn'); if(!b) return;
+    const k=_infoKeyForTitle(title);
+    if(k && TOOL_INFO[k]){ b.setAttribute('data-k',k); b.style.display='inline-flex'; }
+    else { b.removeAttribute('data-k'); b.style.display='none'; }
+}
+function openToolInfo(key){
+    const d=TOOL_INFO[key]; if(!d) return;
+    const sec=(ic,h,body)=>'<div class="ti-sec"><div class="ti-h">'+ic+' '+h+'</div>'+body+'</div>';
+    let h='';
+    if(d.what) h+=sec('📌','Apa gunanya tool ini?','<p class="ti-p">'+d.what+'</p>');
+    if(d.steps&&d.steps.length) h+=sec('🪜','Cara memakainya, langkah demi langkah','<ol class="ti-ol">'+d.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol>');
+    if(d.terms&&d.terms.length) h+=sec('📖','Arti istilah dan satuan',d.terms.map(x=>'<div class="ti-term"><b>'+x[0]+'</b>'+x[1]+'</div>').join(''));
+    if(d.ex&&d.ex.length) h+=sec('💡','Contoh pemakaian','<ul class="ti-ul">'+d.ex.map(x=>'<li>'+x+'</li>').join('')+'</ul>');
+    if(d.note) h+='<div class="ti-sec"><div class="ti-note">⚠️ '+d.note+'</div></div>';
+    document.getElementById('toolInfoTitle').textContent='ℹ️ Info: '+d.t;
+    const body=document.getElementById('toolInfoBody');
+    body.innerHTML=h; body.scrollTop=0;
+    document.getElementById('toolInfoOv').classList.add('on');
+}
+function closeToolInfo(){
+    const o=document.getElementById('toolInfoOv'); if(o) o.classList.remove('on');
+    const b=document.getElementById('toolInfoBody'); if(b) b.innerHTML='';
+}
+
 const _PANEL_ICON_RULES = [
     [/Cahaya & Warna/, 'tone'], [/Warna Siluet/, 'silhouette'], [/HSL/, 'spectrum'], [/Skin Teks/, 'skintext'], [/Skin Foto/, 'skinphoto'],
     [/Stabilo/, 'highlighter'], [/Tambah Bentuk/, 'shapes'], [/Garis Tepi/, 'border'], [/Upscale/, 'upscale'], [/Pilih Font|Format/, 'font'],
@@ -7389,6 +7523,7 @@ function _setPanelTitle(title){
 }
 function openToolPanel(title,htmlContent){
 _setPanelTitle(title);
+_setPanelInfoBtn(title);
 document.getElementById('panelContent').innerHTML=htmlContent;
 const panel=document.getElementById('toolPanel');
 panel.classList.remove('upscale-panel');
@@ -8373,8 +8508,8 @@ const html=`
 
 <div style="font-size:11px;font-weight:700;color:#D4AF37;margin:12px 0 6px;">TATA LETAK & JOYSTICK:</div>
 <div class="ctrl-grid-btns" style="margin-bottom:12px;">
-<button class="btn-sub-tool" onclick="setAlignPosition('center-h')">↔️ Tengah Horisontal</button>
-<button class="btn-sub-tool" onclick="setAlignPosition('center-v')">↕️ Tengah Vertikal</button>
+<button class="btn-sub-tool" data-pos="center-h" onclick="setAlignPosition('center-h')">↔️ Tengah Horisontal</button>
+<button class="btn-sub-tool" data-pos="center-v" onclick="setAlignPosition('center-v')">↕️ Tengah Vertikal</button>
 </div>
 
 <div class="dpad-container">
@@ -8389,18 +8524,89 @@ const html=`
 
 <div style="font-size:11px;font-weight:700;color:#D4AF37;margin:12px 0 6px;">PERATAAN SUDUT:</div>
 <div class="pos-grid-3x3">
-<button class="btn-pos-cell" onclick="setAlignPosition('top-left')">↖️</button>
-<button class="btn-pos-cell" onclick="setAlignPosition('top')">⬆️</button>
-<button class="btn-pos-cell" onclick="setAlignPosition('top-right')">↗️</button>
-<button class="btn-pos-cell" onclick="setAlignPosition('left')">⬅️</button>
-<button class="btn-pos-cell active" onclick="setAlignPosition('center')">🎯</button>
-<button class="btn-pos-cell" onclick="setAlignPosition('right')">➡️</button>
-<button class="btn-pos-cell" onclick="setAlignPosition('bottom-left')">↙️</button>
-<button class="btn-pos-cell" onclick="setAlignPosition('bottom')">⬇️</button>
-<button class="btn-pos-cell" onclick="setAlignPosition('bottom-right')">↘️</button>
+<button class="btn-pos-cell" data-pos="top-left" onclick="setAlignPosition('top-left')">↖️</button>
+<button class="btn-pos-cell" data-pos="top" onclick="setAlignPosition('top')">⬆️</button>
+<button class="btn-pos-cell" data-pos="top-right" onclick="setAlignPosition('top-right')">↗️</button>
+<button class="btn-pos-cell" data-pos="left" onclick="setAlignPosition('left')">⬅️</button>
+<button class="btn-pos-cell" data-pos="center" onclick="setAlignPosition('center')">🎯</button>
+<button class="btn-pos-cell" data-pos="right" onclick="setAlignPosition('right')">➡️</button>
+<button class="btn-pos-cell" data-pos="bottom-left" onclick="setAlignPosition('bottom-left')">↙️</button>
+<button class="btn-pos-cell" data-pos="bottom" onclick="setAlignPosition('bottom')">⬇️</button>
+<button class="btn-pos-cell" data-pos="bottom-right" onclick="setAlignPosition('bottom-right')">↘️</button>
 </div>
 `;
 openToolPanel('🎯 Posisi Presisi & Sensitif',html);
+_posBtnCache=null;_posBtnLbl=null;
+_posSyncNow();
+}
+
+/* v2.3.5: tombol Posisi pintar. Tombol menyala kuning bila elemen (atau grup) SUDAH berada di posisi yang akan dihasilkan tombol itu
+   (toleransi 1px), dihitung dengan rumus yang sama dengan setAlignPosition, juga memeriksa kotak tampilan (termasuk potongan gambar). */
+function _posAlignFlags(el){
+    const W=mainCanvas.width,H=mainCanvas.height,pX=70,pY=90;
+    const sets=[];
+    const peers=getGroupPeers(el);
+    if(peers.length){
+        const members=[el,...peers];
+        let gl=Infinity,gr=-Infinity,gt=Infinity,gb=-Infinity;
+        members.forEach(m=>{const bd=getElementBounds(m);gl=Math.min(gl,bd.l);gr=Math.max(gr,bd.r);gt=Math.min(gt,bd.t);gb=Math.max(gb,bd.b);});
+        const gcx=(gl+gr)/2,gcy=(gt+gb)/2;
+        sets.push({
+            'top-left':[pX-gl,pY-gt],'top':[W/2-gcx,pY-gt],'top-right':[(W-pX)-gr,pY-gt],
+            'left':[pX-gl,H/2-gcy],'center':[W/2-gcx,H/2-gcy],'right':[(W-pX)-gr,H/2-gcy],
+            'bottom-left':[pX-gl,(H-pY)-gb],'bottom':[W/2-gcx,(H-pY)-gb],'bottom-right':[(W-pX)-gr,(H-pY)-gb],
+            'center-h':[W/2-gcx,null],'center-v':[null,H/2-gcy]
+        });
+    } else {
+        const mk=(cx,cy,w,h)=>{
+            const Lx=pX+w/2,Rx=W-pX-w/2,Ty=pY+h/2,By=H-pY-h/2;
+            return {
+                'top-left':[Lx-cx,Ty-cy],'top':[W/2-cx,Ty-cy],'top-right':[Rx-cx,Ty-cy],
+                'left':[Lx-cx,H/2-cy],'center':[W/2-cx,H/2-cy],'right':[Rx-cx,H/2-cy],
+                'bottom-left':[Lx-cx,By-cy],'bottom':[W/2-cx,By-cy],'bottom-right':[Rx-cx,By-cy],
+                'center-h':[W/2-cx,null],'center-v':[null,H/2-cy]
+            };
+        };
+        sets.push(mk(el.x,el.y,el._renderedW||el.width||300,el._renderedH||el._calculatedHeight||el.height||100));
+        const bd=getElementBounds(el);
+        if(Math.abs(bd.cx-el.x)>0.01||Math.abs(bd.cy-el.y)>0.01) sets.push(mk(bd.cx,bd.cy,bd.w,bd.h));
+    }
+    const out={};
+    sets.forEach(D=>{
+        for(const k in D){
+            const d=D[k];
+            if((d[0]==null||Math.abs(d[0])<=1)&&(d[1]==null||Math.abs(d[1])<=1)) out[k]=true;
+        }
+    });
+    return out;
+}
+/* v2.3.6: sinkron panel Posisi ringan. Dipanggil dari renderAll (bisa puluhan kali per detik saat drag), jadi:
+   (1) digabung maksimal SEKALI per frame lewat requestAnimationFrame, (2) daftar tombol di-cache (tanpa querySelectorAll tiap frame),
+   (3) classList hanya disentuh pada tombol yang statusnya benar-benar berubah, (4) teks X/Y hanya ditulis bila angkanya berubah. */
+let _posRaf=0, _posBtnCache=null, _posBtnLbl=null;
+function _posSyncPanel(){
+    if(_posRaf) return;
+    _posRaf=requestAnimationFrame(_posSyncNow);
+}
+function _posSyncNow(){
+    _posRaf=0;
+    const lbl=document.getElementById('posCoordLabel');
+    if(!lbl){ _posBtnCache=null; _posBtnLbl=null; return; }
+    const el=getActiveElement();
+    if(!el)return;
+    if(_posBtnLbl!==lbl || !_posBtnCache){
+        _posBtnLbl=lbl;
+        _posBtnCache=Array.prototype.map.call(document.querySelectorAll('[data-pos]'),b=>({b:b,k:b.getAttribute('data-pos'),on:b.classList.contains('pos-on')}));
+        lbl.removeAttribute('data-v');
+    }
+    let fl={};
+    try{ fl=_posAlignFlags(el); }catch(e){}
+    const t='X: '+Math.round(el.x)+'<br>Y: '+Math.round(el.y);
+    if(lbl.getAttribute('data-v')!==t){ lbl.setAttribute('data-v',t); lbl.innerHTML=t; }
+    for(let i=0;i<_posBtnCache.length;i++){
+        const c=_posBtnCache[i], on=!!fl[c.k];
+        if(c.on!==on){ c.on=on; c.b.classList.toggle('pos-on',on); }
+    }
 }
 
 function updateNudgeStep(v){
@@ -20992,7 +21198,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 <div class="feature-modal" id="aiInpaintModal">
 <div class="fmodal-header">
 <div style="font-weight:800;color:#D4AF37;font-size:13px;">🩹 Hapus Objek (AI)</div>
-<button class="panel-close" onclick="closeAiInpaint()">✕</button>
+<span class="panel-hbtns"><button class="panel-info" type="button" onclick="openToolInfo('ai')" aria-label="Info tool ini">i</button><button class="panel-close" onclick="closeAiInpaint()">✕</button></span>
 </div>
 <div class="fmodal-body" id="aiBody" style="position:relative;">
 <div id="aiCanvasWrapper" style="position:relative;width:100%;height:100%;overflow:hidden;">
