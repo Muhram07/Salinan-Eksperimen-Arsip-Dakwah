@@ -1,16 +1,20 @@
-/* Service Worker - Maker Pro v1.2.4
+/* Service Worker - Maker Pro v1.2.5
+   v1.2.5: demo.zip ikut disimpan untuk mode offline (demo.json lama tetap dicoba sebagai cadangan).
+   v1.2.4: halaman /maker jaringan dulu, berkas pendamping cache dulu.
+
    Struktur situs: halaman aplikasi di /maker, berkas pendamping di akar situs (/).
    Strategi:
    - Halaman /maker (navigasi): JARINGAN DULU, jika offline pakai salinan tersimpan
      (tidak lagi cache-first, jadi versi baru langsung terpakai saat online).
-   - Berkas satu asal (demo.json, ikon, dll) + font Google: tampilkan cache dulu, perbarui di latar belakang.
+   - Berkas satu asal (demo.zip, demo.json, ikon, dll) + font Google: tampilkan cache dulu, perbarui di latar belakang.
    - Permintaan lain (mis. cek lisensi api.github.com) TIDAK disentuh sama sekali. */
-const APP_VERSION = 'v1.2.4';
+const APP_VERSION = 'v1.2.5';
 const CACHE_NAME = 'maker-pro-' + APP_VERSION;
 const APP_PAGE = '/maker';
 const CORE_FILES = [
   APP_PAGE,
   '/postermaker.manifest.json',
+  '/demo.zip',
   '/demo.json',
   '/icon.png',
   '/pwa-icon-192.png',
@@ -30,7 +34,7 @@ async function cleanResponse(res) {
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // Satu berkas gagal (mis. demo.json belum ada) tidak boleh menggagalkan seluruh instalasi
+    // Satu berkas gagal (mis. demo.zip belum ada) tidak boleh menggagalkan seluruh instalasi
     await Promise.all(CORE_FILES.map(async (url) => {
       try {
         const res = await fetch(new Request(url, { cache: 'reload' }));
