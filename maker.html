@@ -1,13 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v2.4.3
+Studio Poster Maker Pro - Update v2.4.4
+
+v2.4.4:
+1. CAROUSEL POSTER DEMO: poster Demo kini berupa carousel otomatis. Semua berkas demo1.zip, demo2.zip, demo3.zip, dst. di folder /demo/ dibaca berurutan tanpa batas jumlah (berhenti di nomor pertama yang tidak ada). Tiap 2 detik poster bergeser halus ke kiri ke poster berikutnya, lalu kembali ke demo1 setelah yang terakhir. Di bawah poster ada penanda bernomor 1, 2, 3, ... bergaya emas abu yang ikut bergeser; nomor bisa diketuk untuk melompat. Poster dibaca hemat memori: hanya poster aktif dan tetangganya yang dibuka, sisanya tetap berupa Zip terkompres.
+2. KUNCI & GESER MANUAL: ketuk 2x pada poster untuk mengunci geser otomatis, ketuk 2x lagi untuk membuka. Kunci terbuka sendiri setelah 5 menit. Usap kiri/kanan untuk pindah poster secara manual (poster mengikuti jari); usapan manual otomatis membatalkan kunci. Tombol melayang kedua berisi petunjuk ini lengkap dengan tombol X untuk menutupnya.
+3. FOLDER demo/ & HAPUS JSON: berkas demo kini ada di folder demo/ pada repo (demo/demo1.zip, demo/demo2.zip, ...). Dukungan demo.json dan demo.zip lama di root dihapus karena sudah tidak dipakai.
 
 v2.4.3:
 1. EKSPOR & IMPOR PROJEK FORMAT ZIP: tombol Ekspor kini menghasilkan file .zip (Projek - Nama Projek.zip). Gambar di tiap lapisan disimpan sebagai file biner asli di dalam Zip (bukan teks base64 yang membengkak sekitar 33%), gambar kembar disimpan sekali saja, lalu data lain dipadatkan. Ukuran file jadi jauh lebih kecil, hemat kuota saat dikirim. Font pribadi projek ikut masuk ke Zip. Saat file Zip dimasukkan lewat Impor, projek dipulihkan persis sama seperti aslinya (setiap berkas dicek CRC, dan gambar dibandingkan ulang agar tidak berubah satu karakter pun). File lama .poster dan .json tetap bisa diimpor.
 2. DEMO JADI demo.zip: poster Demo kini dibaca dari /demo.zip (hasil Ekspor yang namanya diganti demo.zip). Bila demo.zip belum ada, otomatis memakai /demo.json lama agar Demo tidak hilang.
 
-v2.4.2:
-1. PEMERIKSAAN IKON: sisa ikon yang masih berupa emoji berwarna bawaan HP kini diganti ikon asli bergaris emas dan abu-abu putih. Mencakup: Panduan, mode offline, Duplikat Simetris, Blur Gerak (Peluru, Bintang Jatuh, Panah), Gerak Serentak, Pipet, Hapus Objek AI, Tips Aman, langkah Info Tool, pegangan ubah ukuran preview, dan tombol geser Upscale HD.
-2. HAPUS BANYAK PROJEK: tombol baru "Hapus Banyak" di menu Projek. Bisa mencentang projek satu per satu, Pilih Semua, Inversi, dan Kosongkan. Tiap projek punya tombol mata untuk melihat preview besar (bisa geser ke projek berikutnya dan centang dari sana). Ada konfirmasi berisi daftar nama sebelum dihapus. Projek yang sedang dibuka tidak bisa dicentang, jadi selalu tersisa minimal 1 projek.
 -->
 
 
@@ -390,6 +392,36 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
 }
+
+/* ===== v2.4.4: Carousel Poster Demo (emas & abu) ===== */
+.workspace-viewport.demo-pager-on{padding-bottom:40px;box-sizing:border-box;}
+.demo-pager{position:absolute;left:0;right:0;bottom:7px;margin:0 auto;width:max-content;max-width:94%;z-index:36;display:none;pointer-events:auto;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+.demo-pager.show{display:block;animation:dpRise .45s cubic-bezier(.22,.8,.26,1) both;}
+@keyframes dpRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.dp-pill{position:relative;display:flex;align-items:center;gap:6px;padding:4px 12px 7px;border-radius:999px;background:linear-gradient(180deg,rgba(38,34,26,.94),rgba(14,12,9,.95));border:1px solid rgba(212,175,55,.38);box-shadow:0 6px 18px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,235,170,.08);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:border-color .35s,box-shadow .35s;}
+.demo-pager.locked .dp-pill{border-color:rgba(243,215,122,.85);box-shadow:0 6px 18px rgba(0,0,0,.65),0 0 14px rgba(212,175,55,.35);}
+.dp-view{position:relative;width:150px;height:28px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24%,#000 76%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 24%,#000 76%,transparent 100%);}
+.dp-hl{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff1b8,#d4af37 55%,#a8821f);box-shadow:0 0 10px rgba(212,175,55,.55);}
+.dp-track{position:absolute;left:0;top:0;height:100%;display:flex;will-change:transform;transition:transform .5s cubic-bezier(.22,.8,.26,1);}
+.dp-n{position:relative;z-index:1;flex:0 0 30px;width:30px;height:28px;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Roboto',system-ui,sans-serif;color:#9a9486;opacity:.3;cursor:pointer;transition:color .4s,opacity .4s,transform .5s cubic-bezier(.22,.8,.26,1);}
+.dp-n.d1{opacity:.65;}
+.dp-n.d0{color:#1b1507;opacity:1;transform:scale(1.12);font-weight:800;}
+.dp-sp,.dp-lock{width:14px;height:14px;flex:0 0 14px;}
+.dp-lock{color:#f3d77a;opacity:0;transform:scale(.6);transition:opacity .35s,transform .35s;}
+.demo-pager.locked .dp-lock{opacity:1;transform:scale(1);}
+.dp-lock .ic{width:14px;height:14px;}
+.dp-prog{position:absolute;left:20px;right:20px;bottom:3px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(212,175,55,.15),#f3d77a);transform:scaleX(0);transform-origin:left center;}
+.dp-prog.run{animation:dpProg 2s linear forwards;}
+.demo-pager.locked .dp-prog{display:none;}
+@keyframes dpProg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.dp-stage{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;border-radius:6px;z-index:40;pointer-events:none;background:#181818;}
+.dp-page{position:absolute;left:0;top:0;width:100%;height:100%;display:block;will-change:transform,opacity;}
+.demo-tip{position:absolute;left:0;right:0;bottom:52px;margin:0 auto;width:min(90%,340px);box-sizing:border-box;z-index:37;display:none;padding:10px 38px 10px 12px;border-radius:14px;background:linear-gradient(160deg,rgba(42,37,28,.96),rgba(16,14,10,.97));border:1px solid rgba(212,175,55,.45);box-shadow:0 8px 24px rgba(0,0,0,.7);color:#cfcabd;font-size:11.5px;line-height:1.45;pointer-events:auto;animation:floatAnim 3.4s ease-in-out infinite;}
+.demo-tip.show{display:flex;gap:9px;align-items:flex-start;}
+.demo-tip .dt-ic{width:22px;height:22px;color:#f3d77a;margin-top:1px;}
+.demo-tip .dt-text b{display:block;color:#f3d77a;font-size:12px;margin-bottom:2px;}
+.demo-tip .dt-x{position:absolute;top:6px;right:6px;width:24px;height:24px;padding:0;border-radius:50%;border:1px solid rgba(212,175,55,.4);background:rgba(255,255,255,.05);color:#d4af37;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.demo-tip .dt-x .ic{width:12px;height:12px;}
 
 .hsl-channel-btn {
     width: 24px; height: 24px; border-radius: 4px; border: 2px solid transparent; cursor: pointer;
@@ -1096,6 +1128,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <div class="dz-pet" id="dzikirPet" role="button" aria-label="Dzikir"><div class="dz-pet-in"><div>سُبْحَانَ اللَّهِ وَبِحَمْدِهِ ،</div><div>سُبْحَانَ اللَّهِ الْعَظِيمِ</div></div></div>
 <div class="dz-pet" id="dzikirPet2" role="button" aria-label="Dzikir"><div class="dz-pet-in"><div>لاَ حَوْلَ وَلاَ قُوَّةَ</div><div>إِلاَّ بِاللَّهِ</div></div></div>
 <div class="dz-pet" id="dzikirPet3" role="button" aria-label="Dzikir"><div class="dz-pet-in"><div>سُبْحَانَ اللَّهِ وَبِحَمْدِهِ</div><div class="dz-n">100x</div></div></div>
+<div class="demo-pager" id="demoPager" aria-label="Carousel poster demo"><div class="dp-pill"><span class="dp-sp"></span><div class="dp-view"><i class="dp-hl"></i><div class="dp-track" id="dpTrack"></div></div><span class="dp-lock" id="dpLock"><svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg></span><i class="dp-prog" id="dpProg"></i></div></div>
+<div class="demo-tip" id="demoTip"><svg class="ic dt-ic" aria-hidden="true"><use href="#ic-hand"/></svg><div class="dt-text" id="dtText"></div><button type="button" class="dt-x" onclick="demoTipClose()" aria-label="Tutup petunjuk"><svg class="ic" aria-hidden="true"><use href="#ic-close"/></svg></button></div>
 <div class="artboard-container" id="artboard">
 <canvas id="mainCanvas"></canvas>
 <canvas id="drawingCanvasOverlay"></canvas>
@@ -2215,7 +2249,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.4.3';
+const APP_VERSION = 'v2.4.4';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2821,41 +2855,449 @@ if(!s||s.elements===undefined)return null;
 return s.elements.find(e=>e.id===activeElementId)||null;
 }
 
-async function loadDemoProject() {
-    /* v2.4.3: demo dibaca dari /demo.zip; bila belum ada, memakai /demo.json lama */
-    let projectData = null;
+/* ========== v2.4.4: CAROUSEL POSTER DEMO ==========
+   Berkas demo dibaca dari /demo/demo1.zip, demo2.zip, ... (berhenti di nomor pertama yang tidak ada).
+   slides[0] tetap menjadi "poster demo aktif", sehingga semua logika Demo lama tidak berubah. */
+const DEMO_DIR = '/demo/';
+const DEMO_MAX = 300;
+const DEMO_STEP_MS = 2000;
+const DEMO_GRACE_MS = 4000;
+const DEMO_LOCK_MAX_MS = 300000;
+const DEMO_ANIM_MS = 480;
+let _demoList = [], _demoIdx = 0, _demoInit = null, _demoProbing = false;
+let _demoBusy = false, _demoLocked = false, _demoTimer = 0, _demoTimerOn = false, _demoLockTimer = 0;
+let _demoTipClosed = false, _demoDrag = null, _demoBuiltN = -1, _demoPadOn = false, _demoNextDelay = DEMO_STEP_MS;
+const _demoLastTap = { t: 0, x: 0, y: 0 };
+
+async function _demoFetch(n) {
     try {
-        const resZ = await fetch('/demo.zip');
-        if(resZ.ok) {
-            const blobZ = await resZ.blob();
-            const head = new Uint8Array(await blobZ.slice(0, 4).arrayBuffer());
-            if(head[0] === 0x50 && head[1] === 0x4B) {
-                const r = await _pzReadProjectZip(blobZ, { onlyFirstSlide: true, skipFonts: true });
-                projectData = r.project;
-            }
-        }
-    } catch(e) {
-        console.warn("Failed to load demo.zip", e);
-    }
-    if(!projectData) {
-        try {
-            const res = await fetch('/demo.json');
-            if(res.ok) projectData = await res.json();
-        } catch(e) {
-            console.warn("Failed to load demo.json", e);
-        }
-    }
-    try {
-        if(projectData && projectData.slides && projectData.slides.length > 0) {
-            const demoSlide = deserializeSlides([projectData.slides[0]])[0];
-            demoSlide.isDemo = true;
-            return demoSlide;
-        }
-    } catch(e) {
-        console.warn("Failed to read demo project", e);
-    }
-    return null;
+        const res = await fetch(DEMO_DIR + 'demo' + n + '.zip');
+        if (!res.ok) return null;
+        const blob = await res.blob();
+        const h = new Uint8Array(await blob.slice(0, 4).arrayBuffer());
+        if (h[0] !== 0x50 || h[1] !== 0x4B) return null;
+        return blob;
+    } catch (e) { return null; }
 }
+function _demoMakeEntry(n, blob) { return { n: n, blob: blob, slide: null, pending: null, thumb: null, bad: false }; }
+
+async function _demoParse(entry) {
+    const r = await _pzReadProjectZip(entry.blob, { onlyFirstSlide: true, skipFonts: true });
+    const p = r.project;
+    if (!p || !p.slides || !p.slides.length) return null;
+    const s = deserializeSlides([p.slides[0]])[0];
+    s.isDemo = true;
+    if (entry.thumb) s._thumbData = entry.thumb;
+    return s;
+}
+async function _demoGetSlide(i) {
+    const e = _demoList[i];
+    if (!e) return null;
+    if (e.slide) return e.slide;
+    if (!e.pending) {
+        e.pending = _demoParse(e).then(function (s) { e.slide = s; e.pending = null; if (!s) e.bad = true; return s; })
+            .catch(function (err) { console.warn('Demo ' + e.n + ' gagal dibaca', err); e.pending = null; e.bad = true; return null; });
+    }
+    return e.pending;
+}
+/* hanya poster aktif + tetangga yang disimpan terbuka; sisanya kembali jadi Zip terkompres (hemat memori) */
+function _demoTrim() {
+    const n = _demoList.length;
+    if (!n) return;
+    const keep = new Set([_demoIdx, (_demoIdx + 1) % n, (_demoIdx - 1 + n) % n]);
+    _demoList.forEach(function (e, i) {
+        if (!keep.has(i) && e.slide && e.slide !== slides[0]) {
+            if (e.slide._thumbData) e.thumb = e.slide._thumbData;
+            e.slide = null;
+        }
+    });
+}
+/* cache render poster dibuang bila font berubah sejak terakhir tampil */
+function _demoPrep(s) {
+    const fe = window.__fontEpoch || 0;
+    if (s._demoFE === fe) return;
+    s._demoFE = fe;
+    (s.elements || []).forEach(function (el) {
+        el._cachedCanvas = null; el._cachedHash = null; lmInvalidate(el);
+        el._calculatedHeight = null; el._renderedW = null;
+    });
+}
+function _demoWaitImages(s, ms) {
+    return new Promise(function (res) {
+        const t0 = performance.now();
+        (function chk() {
+            const a = [];
+            if (s.background && s.background.img) a.push(s.background.img);
+            (s.elements || []).forEach(function (el) {
+                ['img', 'warpImg', 'textSkinImg', 'imageSkinImg'].forEach(function (k) { if (el[k]) a.push(el[k]); });
+            });
+            const pend = a.some(function (im) { return im && im.complete === false; });
+            if (!pend || performance.now() - t0 > ms) res(); else setTimeout(chk, 40);
+        })();
+    });
+}
+
+async function loadDemoProject() {
+    try {
+        if (!_demoInit) {
+            _demoInit = (async function () {
+                const b = await _demoFetch(1);
+                if (!b) return false;
+                _demoList.push(_demoMakeEntry(1, b));
+                _demoProbeRest();
+                return true;
+            })();
+        }
+        const ok = await _demoInit;
+        if (!ok) { _demoInit = null; return null; }
+        if (_demoIdx >= _demoList.length) _demoIdx = 0;
+        const s = await _demoGetSlide(_demoIdx);
+        if (s) _demoPrep(s);
+        return s;
+    } catch (e) {
+        console.warn('Failed to read demo project', e);
+        return null;
+    }
+}
+async function _demoProbeRest() {
+    if (_demoProbing) return;
+    _demoProbing = true;
+    try {
+        for (let n = _demoList.length + 1; n <= DEMO_MAX; n++) {
+            const b = await _demoFetch(n);
+            if (!b) break;
+            _demoList.push(_demoMakeEntry(n, b));
+            demoCarouselSync();
+        }
+    } finally { _demoProbing = false; }
+}
+
+/* ----- status ----- */
+function _demoActive() { return !!(slides && slides[0] && slides[0].isDemo && currentSlideIndex === 0); }
+function _demoPagerOn() { return _demoActive() && _demoList.length > 1; }
+function _demoNextIdx(dir) {
+    const n = _demoList.length;
+    let i = _demoIdx;
+    for (let k = 0; k < n; k++) {
+        i = ((i + dir) % n + n) % n;
+        if (!_demoList[i].bad) return i;
+    }
+    return _demoIdx;
+}
+
+/* ----- penanda bernomor ----- */
+function _demoBuildPager() {
+    const tr = document.getElementById('dpTrack');
+    const n = _demoList.length;
+    if (!tr || _demoBuiltN === n) return;
+    tr.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+        const d = document.createElement('div');
+        d.className = 'dp-n';
+        d.textContent = String(i + 1);
+        d.onclick = function () { _demoUserGo(i); };
+        tr.appendChild(d);
+    }
+    _demoBuiltN = n;
+}
+function _demoPagerUpdate() {
+    const tr = document.getElementById('dpTrack');
+    if (!tr) return;
+    tr.style.transform = 'translate3d(' + (60 - _demoIdx * 30) + 'px,0,0)';
+    for (let i = 0; i < tr.children.length; i++) {
+        const dd = Math.abs(i - _demoIdx);
+        tr.children[i].className = 'dp-n' + (dd === 0 ? ' d0' : (dd === 1 ? ' d1' : ''));
+    }
+}
+function _demoTipText() {
+    const t = document.getElementById('dtText');
+    if (!t) return;
+    t.innerHTML = _demoLocked
+        ? '<b>Poster terkunci</b>Ketuk 2× poster lagi untuk membuka kunci. Kunci terbuka sendiri dalam 5 menit.'
+        : '<b>Ingin melihat lebih lama?</b>Ketuk 2× poster untuk mengunci geser otomatis, ketuk 2× lagi untuk membuka. Usap kiri atau kanan untuk pindah poster manual.';
+}
+function demoTipClose() {
+    _demoTipClosed = true;
+    const tip = document.getElementById('demoTip');
+    if (tip) tip.classList.remove('show');
+}
+function demoCarouselSync() {
+    const vp = document.getElementById('workspaceViewport');
+    const pg = document.getElementById('demoPager');
+    const tip = document.getElementById('demoTip');
+    if (!vp || !pg || !slides || !slides.length) return;
+    const on = _demoPagerOn();
+    if (on) { _demoBuildPager(); _demoPagerUpdate(); _demoTipText(); }
+    pg.classList.toggle('show', on);
+    pg.classList.toggle('locked', on && _demoLocked);
+    if (tip) tip.classList.toggle('show', on && !_demoTipClosed);
+    if (on !== _demoPadOn) {
+        _demoPadOn = on;
+        vp.classList.toggle('demo-pager-on', on);
+        try { adjustArtboardSize(); renderAll(); } catch (e) { }
+    }
+    if (on) { if (!_demoTimerOn && !_demoBusy && !_demoDrag) _demoSchedule(); }
+    else _demoClearTimer();
+}
+
+/* ----- pewaktu geser otomatis ----- */
+function _demoClearTimer() {
+    clearTimeout(_demoTimer);
+    _demoTimerOn = false;
+    const prog = document.getElementById('dpProg');
+    if (prog) prog.classList.remove('run');
+}
+function _demoSchedule() {
+    _demoClearTimer();
+    if (!_demoPagerOn() || _demoLocked || document.hidden || _demoBusy || _demoDrag) return;
+    const delay = _demoNextDelay;
+    _demoNextDelay = DEMO_STEP_MS;
+    const prog = document.getElementById('dpProg');
+    if (prog) { void prog.offsetWidth; prog.style.animationDuration = delay + 'ms'; prog.classList.add('run'); }
+    _demoTimerOn = true;
+    _demoTimer = setTimeout(function () {
+        _demoTimerOn = false;
+        if (!_demoPagerOn() || _demoLocked || _demoBusy || _demoDrag) { _demoSchedule(); return; }
+        demoGo(_demoNextIdx(1), 1);
+    }, delay);
+}
+document.addEventListener('visibilitychange', function () {
+    if (document.hidden) _demoClearTimer();
+    else if (_demoPagerOn() && !_demoBusy && !_demoDrag) _demoSchedule();
+});
+
+/* ----- kunci ----- */
+function _demoSetLock(v, silent) {
+    v = !!v;
+    if (v === _demoLocked) return;
+    _demoLocked = v;
+    clearTimeout(_demoLockTimer);
+    if (v) {
+        _demoLockTimer = setTimeout(function () {
+            _demoSetLock(false, true);
+            showToast('🔓 Kunci dibuka otomatis, carousel berjalan lagi', 2500);
+        }, DEMO_LOCK_MAX_MS);
+    }
+    const pg = document.getElementById('demoPager');
+    if (pg) pg.classList.toggle('locked', v);
+    _demoTipText();
+    if (!silent) showToast(v ? '🔒 Poster dikunci. Ketuk 2× lagi untuk membuka' : '🔓 Kunci dibuka, geser otomatis berjalan', 2200);
+    _demoSchedule();
+}
+
+/* ----- transisi geser (dua gambar salinan dalam panggung berpotongan, kanvas asli tidak disentuh) ----- */
+function _demoCopyMain() {
+    const c = document.createElement('canvas');
+    c.width = mainCanvas.width; c.height = mainCanvas.height;
+    c.className = 'dp-page';
+    c.getContext('2d').drawImage(mainCanvas, 0, 0);
+    return c;
+}
+function _demoPos(tr, p, ms) {
+    const tf = ms ? ('transform ' + ms + 'ms cubic-bezier(.22,.8,.26,1), opacity ' + ms + 'ms linear') : 'none';
+    tr.pOld.style.transition = tf; tr.pNew.style.transition = tf;
+    tr.pOld.style.transform = 'translate3d(' + (-tr.dir * p * 100) + '%,0,0)';
+    tr.pOld.style.opacity = String(1 - p * 0.4);
+    tr.pNew.style.transform = 'translate3d(' + (tr.dir * (1 - p) * 100) + '%,0,0)';
+    tr.pNew.style.opacity = String(0.6 + 0.4 * p);
+}
+function _demoRun(tr, p, ms) {
+    void tr.stage.offsetWidth;
+    _demoPos(tr, p, ms);
+    return new Promise(function (r) { setTimeout(r, ms + 30); });
+}
+function _demoBegin(slide, newIdx, dir) {
+    const pOld = _demoCopyMain();
+    const prev = slides[0];
+    _demoPrep(slide);
+    slides[0] = slide;
+    renderAll();
+    const pNew = _demoCopyMain();
+    const stage = document.createElement('div');
+    stage.className = 'dp-stage';
+    stage.appendChild(pOld); stage.appendChild(pNew);
+    artboard.appendChild(stage);
+    const tr = { stage: stage, pOld: pOld, pNew: pNew, prev: prev, slide: slide, newIdx: newIdx, dir: dir };
+    _demoPos(tr, 0, 0);
+    return tr;
+}
+function _demoEnd(tr) {
+    if (tr.stage.parentNode) tr.stage.parentNode.removeChild(tr.stage);
+    tr.pOld.width = tr.pOld.height = 0;
+    tr.pNew.width = tr.pNew.height = 0;
+}
+async function _demoCommit(tr, fromP) {
+    _demoIdx = tr.newIdx;
+    _demoPagerUpdate();
+    await _demoRun(tr, 1, Math.round(DEMO_ANIM_MS * (1 - fromP)) + 120);
+    _demoEnd(tr);
+    requestRender();
+    _demoAfter();
+}
+async function _demoCancel(tr, fromP) {
+    await _demoRun(tr, 0, Math.round(DEMO_ANIM_MS * fromP) + 160);
+    slides[0] = tr.prev;
+    _demoPrep(tr.prev);
+    renderAll();
+    _demoEnd(tr);
+}
+function _demoUpdateThumb() {
+    const s = slides[0], e = _demoList[_demoIdx];
+    if (!s || !s.isDemo || !e) return;
+    if (!s._thumbData) { try { s._thumbData = generateSlideThumb(s); } catch (er) { } }
+    if (s._thumbData) {
+        e.thumb = s._thumbData;
+        const th = document.querySelector('#slideThumbList .slide-thumb');
+        if (th) {
+            th.style.backgroundImage = 'url(' + s._thumbData + ')';
+            th.style.backgroundSize = 'cover';
+            th.style.backgroundPosition = 'center';
+        }
+    }
+}
+function _demoAfter() {
+    _demoTrim();
+    setTimeout(function () {
+        _demoUpdateThumb();
+        const n = _demoList.length;
+        if (n > 1) _demoGetSlide((_demoIdx + 1) % n);
+    }, 150);
+}
+async function demoGo(target, dir) {
+    if (_demoBusy || !_demoPagerOn() || target === _demoIdx) return;
+    _demoBusy = true;
+    _demoClearTimer();
+    try {
+        const s = await _demoGetSlide(target);
+        if (!s) return;
+        await _demoWaitImages(s, 700);
+        if (!_demoPagerOn()) return;
+        const tr = _demoBegin(s, target, dir);
+        await _demoCommit(tr, 0);
+    } catch (err) {
+        console.warn('Carousel demo', err);
+    } finally {
+        _demoBusy = false;
+        _demoSchedule();
+    }
+}
+function _demoUserGo(i) {
+    if (_demoBusy || i === _demoIdx || !_demoPagerOn()) return;
+    _demoSetLock(false, true);
+    _demoNextDelay = DEMO_GRACE_MS;
+    demoGo(i, i > _demoIdx ? 1 : -1);
+}
+
+/* ----- geser manual (ikut jari) & ketuk 2x ----- */
+function _demoApplyDrag(d) {
+    if (!d.tr) return;
+    const W = artboard.getBoundingClientRect().width || 1;
+    d.p = Math.max(0, Math.min(1, (-d.tr.dir * d.dx) / W));
+    _demoPos(d.tr, d.p, 0);
+}
+function _demoDragStart(d) {
+    if (_demoBusy) { d.mode = 'v'; return; }
+    _demoBusy = true;
+    _demoClearTimer();
+    const n = _demoList.length;
+    d.dir = d.dx < 0 ? 1 : -1;
+    d.newIdx = ((_demoIdx + d.dir) % n + n) % n;
+    d.p = 0;
+    d.ready = (async function () {
+        const s = await _demoGetSlide(d.newIdx);
+        if (!s || d.aborted) return null;
+        await _demoWaitImages(s, 600);
+        if (d.aborted) return null;
+        d.tr = _demoBegin(s, d.newIdx, d.dir);
+        _demoApplyDrag(d);
+        return d.tr;
+    })();
+}
+async function _demoDragEnd(d, cancelled) {
+    if (!d.ready) { _demoBusy = false; _demoSchedule(); return; }
+    let tr = null;
+    try { tr = await d.ready; } catch (e) { tr = null; }
+    if (!tr) { _demoBusy = false; _demoSchedule(); return; }
+    const sm = d.samples;
+    let v = 0;
+    if (sm.length > 1) { const a = sm[0], b = sm[sm.length - 1]; v = (b.x - a.x) / Math.max(1, b.t - a.t); }
+    const flick = (-tr.dir * v) > 0.4 && d.p > 0.03;
+    const commit = !cancelled && (d.p > 0.22 || flick);
+    try {
+        if (commit) {
+            _demoSetLock(false, true);
+            _demoNextDelay = DEMO_GRACE_MS;
+            await _demoCommit(tr, d.p);
+        } else {
+            await _demoCancel(tr, d.p);
+        }
+    } catch (err) {
+        console.warn('Carousel demo', err);
+    } finally {
+        _demoBusy = false;
+        _demoSchedule();
+    }
+}
+function _demoAbortDrag() {
+    const d = _demoDrag;
+    if (!d) return;
+    _demoDrag = null;
+    d.aborted = true;
+    if (d.mode === 'h') _demoDragEnd(d, true);
+}
+function _demoTap(e, d) {
+    const now = performance.now();
+    if (now - d.t0 > 350 || Math.abs(d.dx) > 10) return;
+    const r = artboard.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) { _demoLastTap.t = 0; return; }
+    const L = _demoLastTap;
+    if (now - L.t < 340 && Math.hypot(e.clientX - L.x, e.clientY - L.y) < 32) {
+        L.t = 0;
+        _demoSetLock(!_demoLocked);
+    } else {
+        L.t = now; L.x = e.clientX; L.y = e.clientY;
+    }
+}
+(function () {
+    const vp = document.getElementById('workspaceViewport');
+    if (!vp) return;
+    const ptrs = new Set();
+    vp.addEventListener('pointerdown', function (e) {
+        if (!_demoPagerOn()) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (e.target.closest && e.target.closest('.vertical-toolbar,.dz-pet,#demoTip,#demoPager,button,input,select,textarea')) return;
+        ptrs.add(e.pointerId);
+        if (ptrs.size > 1) { _demoAbortDrag(); return; }
+        const t = performance.now();
+        _demoDrag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: t, dx: 0, p: 0, mode: '', tr: null, ready: null, aborted: false, samples: [{ x: e.clientX, t: t }] };
+        try { vp.setPointerCapture(e.pointerId); } catch (_) { }
+    });
+    vp.addEventListener('pointermove', function (e) {
+        const d = _demoDrag;
+        if (!d || e.pointerId !== d.id) return;
+        d.dx = e.clientX - d.x0;
+        const dy = e.clientY - d.y0;
+        d.samples.push({ x: e.clientX, t: performance.now() });
+        if (d.samples.length > 6) d.samples.shift();
+        if (!d.mode) {
+            if (Math.abs(d.dx) > 10 && Math.abs(d.dx) > Math.abs(dy) * 1.15) { d.mode = 'h'; _demoDragStart(d); }
+            else if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(d.dx)) d.mode = 'v';
+        }
+        if (d.mode === 'h') _demoApplyDrag(d);
+    });
+    function end(e) {
+        ptrs.delete(e.pointerId);
+        const d = _demoDrag;
+        if (!d || e.pointerId !== d.id) return;
+        _demoDrag = null;
+        try { vp.releasePointerCapture(e.pointerId); } catch (_) { }
+        if (d.mode === 'h') { _demoDragEnd(d, e.type === 'pointercancel'); return; }
+        if (!d.mode && e.type === 'pointerup') _demoTap(e, d);
+        _demoSchedule();
+    }
+    vp.addEventListener('pointerup', end);
+    vp.addEventListener('pointercancel', end);
+})();
 
 async function syncAppVersion() {
     if (!navigator.onLine) { showToast("📴 Update butuh internet. Aplikasi tetap bisa dipakai offline."); return; }
@@ -3376,7 +3818,7 @@ smartGuideCanvas.height=targetH;
 const vp=document.getElementById('workspaceViewport');
 const padding=24;
 const availW=vp.clientWidth-padding;
-const availH=vp.clientHeight-padding;
+const availH=vp.clientHeight-padding-(vp.classList.contains('demo-pager-on')?40:0);
 const scaleW=availW/targetW;
 const scaleH=availH/targetH;
 canvasScale=Math.min(scaleW,scaleH);
@@ -6211,6 +6653,7 @@ function handleArtboardPointerDown(e){
 if(appMode === 'drawing') return;
 if(e.target.closest('#stalkContainer')||e.target.closest('.sel-handle')||e.target.closest('.sel-handle-edge'))return;
 if(isPaintingGrab) return;
+if(_demoPagerOn()) return; /* v2.4.4: sentuhan di poster demo dipakai carousel (geser / ketuk 2x) */
 if(checkDemo()) return;
 
 const s=getCurrentSlide();
@@ -18237,6 +18680,7 @@ function updateDemoFloatingBtn() {
     } else {
         if(btn) btn.style.display = 'none';
     }
+    if(typeof demoCarouselSync === 'function') demoCarouselSync();
 }
 
 /* ===== UPSCALE HD (v1.2.6) ===== */
