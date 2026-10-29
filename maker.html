@@ -1,14 +1,16 @@
 <!--
-Studio Poster Maker Pro - Update v2.4.4
+Studio Poster Maker Pro - Update v2.4.5
+
+v2.4.5:
+1. DEMO TERSIMPAN DI INDEXEDDB: berkas demo/demoN.zip cukup diunduh sekali, lalu disimpan di IndexedDB browser. Berikutnya poster Demo dibaca dari sana: tidak mengunduh terus-menerus, tidak lag, dan tetap tampil saat sinyal buruk atau mode pesawat.
+2. CEK PEMBARUAN OTOMATIS: tiap aplikasi dibuka (dan saat internet kembali) browser mencocokkan demo dengan repo lewat permintaan HEAD yang sangat ringan. Zip yang sama tidak diunduh ulang; yang berubah atau baru diunduh sekali lagi; yang sudah tidak ada di repo otomatis dihapus dari IndexedDB agar tidak menumpuk. Saat sinyal buruk, isi IndexedDB dibiarkan apa adanya.
+3. GESER OTOMATIS LEBIH MULUS: poster berikutnya digambar lebih dulu saat idle sehingga saat bergeser hanya memindahkan gambar (tanpa render berat atau baca Zip). Efek blur kaca di penanda nomor dihilangkan agar ringan di HP.
+4. PENANDA NOMOR: dinaikkan agar tidak mepet bar bawah, dan cahaya emas di sekeliling bulatan nomor diberi ruang lebih luas supaya tidak terpotong.
 
 v2.4.4:
 1. CAROUSEL POSTER DEMO: poster Demo kini berupa carousel otomatis. Semua berkas demo1.zip, demo2.zip, demo3.zip, dst. di folder /demo/ dibaca berurutan tanpa batas jumlah (berhenti di nomor pertama yang tidak ada). Tiap 2 detik poster bergeser halus ke kiri ke poster berikutnya, lalu kembali ke demo1 setelah yang terakhir. Di bawah poster ada penanda bernomor 1, 2, 3, ... bergaya emas abu yang ikut bergeser; nomor bisa diketuk untuk melompat. Poster dibaca hemat memori: hanya poster aktif dan tetangganya yang dibuka, sisanya tetap berupa Zip terkompres.
 2. KUNCI & GESER MANUAL: ketuk 2x pada poster untuk mengunci geser otomatis, ketuk 2x lagi untuk membuka. Kunci terbuka sendiri setelah 5 menit. Usap kiri/kanan untuk pindah poster secara manual (poster mengikuti jari); usapan manual otomatis membatalkan kunci. Tombol melayang kedua berisi petunjuk ini lengkap dengan tombol X untuk menutupnya.
 3. FOLDER demo/ & HAPUS JSON: berkas demo kini ada di folder demo/ pada repo (demo/demo1.zip, demo/demo2.zip, ...). Dukungan demo.json dan demo.zip lama di root dihapus karena sudah tidak dipakai.
-
-v2.4.3:
-1. EKSPOR & IMPOR PROJEK FORMAT ZIP: tombol Ekspor kini menghasilkan file .zip (Projek - Nama Projek.zip). Gambar di tiap lapisan disimpan sebagai file biner asli di dalam Zip (bukan teks base64 yang membengkak sekitar 33%), gambar kembar disimpan sekali saja, lalu data lain dipadatkan. Ukuran file jadi jauh lebih kecil, hemat kuota saat dikirim. Font pribadi projek ikut masuk ke Zip. Saat file Zip dimasukkan lewat Impor, projek dipulihkan persis sama seperti aslinya (setiap berkas dicek CRC, dan gambar dibandingkan ulang agar tidak berubah satu karakter pun). File lama .poster dan .json tetap bisa diimpor.
-2. DEMO JADI demo.zip: poster Demo kini dibaca dari /demo.zip (hasil Ekspor yang namanya diganti demo.zip). Bila demo.zip belum ada, otomatis memakai /demo.json lama agar Demo tidak hilang.
 
 -->
 
@@ -393,17 +395,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
     50% { transform: translateY(-10px); }
 }
 
-/* ===== v2.4.4: Carousel Poster Demo (emas & abu) ===== */
-.workspace-viewport.demo-pager-on{padding-bottom:40px;box-sizing:border-box;}
-.demo-pager{position:absolute;left:0;right:0;bottom:7px;margin:0 auto;width:max-content;max-width:94%;z-index:36;display:none;pointer-events:auto;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+/* ===== v2.4.5: Carousel Poster Demo (emas & abu) ===== */
+.workspace-viewport.demo-pager-on{padding-bottom:88px;box-sizing:border-box;}
+.demo-pager{position:absolute;left:0;right:0;bottom:28px;margin:0 auto;width:max-content;max-width:94%;z-index:36;display:none;pointer-events:auto;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
 .demo-pager.show{display:block;animation:dpRise .45s cubic-bezier(.22,.8,.26,1) both;}
 @keyframes dpRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.dp-pill{position:relative;display:flex;align-items:center;gap:6px;padding:4px 12px 7px;border-radius:999px;background:linear-gradient(180deg,rgba(38,34,26,.94),rgba(14,12,9,.95));border:1px solid rgba(212,175,55,.38);box-shadow:0 6px 18px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,235,170,.08);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:border-color .35s,box-shadow .35s;}
+.dp-pill{position:relative;display:flex;align-items:center;gap:6px;padding:3px 12px 6px;border-radius:999px;background:#1a1712;border:1px solid rgba(212,175,55,.38);box-shadow:0 6px 18px rgba(0,0,0,.65);transition:border-color .35s,box-shadow .35s;}
 .demo-pager.locked .dp-pill{border-color:rgba(243,215,122,.85);box-shadow:0 6px 18px rgba(0,0,0,.65),0 0 14px rgba(212,175,55,.35);}
-.dp-view{position:relative;width:150px;height:28px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24%,#000 76%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 24%,#000 76%,transparent 100%);}
-.dp-hl{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff1b8,#d4af37 55%,#a8821f);box-shadow:0 0 10px rgba(212,175,55,.55);}
+.dp-view{position:relative;width:150px;height:44px;overflow:hidden;}
+.dp-view::before,.dp-view::after{content:'';position:absolute;top:0;bottom:0;width:36px;z-index:2;pointer-events:none;}
+.dp-view::before{left:0;background:linear-gradient(90deg,#1a1712,rgba(26,23,18,0));}
+.dp-view::after{right:0;background:linear-gradient(270deg,#1a1712,rgba(26,23,18,0));}
+.dp-hl{position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff1b8,#d4af37 55%,#a8821f);box-shadow:0 0 9px 1px rgba(212,175,55,.55);}
 .dp-track{position:absolute;left:0;top:0;height:100%;display:flex;will-change:transform;transition:transform .5s cubic-bezier(.22,.8,.26,1);}
-.dp-n{position:relative;z-index:1;flex:0 0 30px;width:30px;height:28px;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Roboto',system-ui,sans-serif;color:#9a9486;opacity:.3;cursor:pointer;transition:color .4s,opacity .4s,transform .5s cubic-bezier(.22,.8,.26,1);}
+.dp-n{position:relative;z-index:1;flex:0 0 30px;width:30px;height:44px;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Roboto',system-ui,sans-serif;color:#9a9486;opacity:.3;cursor:pointer;transition:color .4s,opacity .4s,transform .5s cubic-bezier(.22,.8,.26,1);}
 .dp-n.d1{opacity:.65;}
 .dp-n.d0{color:#1b1507;opacity:1;transform:scale(1.12);font-weight:800;}
 .dp-sp,.dp-lock{width:14px;height:14px;flex:0 0 14px;}
@@ -415,8 +420,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .demo-pager.locked .dp-prog{display:none;}
 @keyframes dpProg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .dp-stage{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;border-radius:6px;z-index:40;pointer-events:none;background:#181818;}
-.dp-page{position:absolute;left:0;top:0;width:100%;height:100%;display:block;will-change:transform,opacity;}
-.demo-tip{position:absolute;left:0;right:0;bottom:52px;margin:0 auto;width:min(90%,340px);box-sizing:border-box;z-index:37;display:none;padding:10px 38px 10px 12px;border-radius:14px;background:linear-gradient(160deg,rgba(42,37,28,.96),rgba(16,14,10,.97));border:1px solid rgba(212,175,55,.45);box-shadow:0 8px 24px rgba(0,0,0,.7);color:#cfcabd;font-size:11.5px;line-height:1.45;pointer-events:auto;animation:floatAnim 3.4s ease-in-out infinite;}
+.dp-page{position:absolute;left:0;top:0;width:100%;height:100%;display:block;will-change:transform,opacity;backface-visibility:hidden;}
+.demo-tip{position:absolute;left:0;right:0;bottom:92px;margin:0 auto;width:min(90%,340px);box-sizing:border-box;z-index:37;display:none;padding:10px 38px 10px 12px;border-radius:14px;background:linear-gradient(160deg,rgba(42,37,28,.96),rgba(16,14,10,.97));border:1px solid rgba(212,175,55,.45);box-shadow:0 8px 24px rgba(0,0,0,.7);color:#cfcabd;font-size:11.5px;line-height:1.45;pointer-events:auto;animation:floatAnim 3.4s ease-in-out infinite;}
 .demo-tip.show{display:flex;gap:9px;align-items:flex-start;}
 .demo-tip .dt-ic{width:22px;height:22px;color:#f3d77a;margin-top:1px;}
 .demo-tip .dt-text b{display:block;color:#f3d77a;font-size:12px;margin-bottom:2px;}
@@ -2249,7 +2254,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.4.4';
+const APP_VERSION = 'v2.4.5';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2855,39 +2860,159 @@ if(!s||s.elements===undefined)return null;
 return s.elements.find(e=>e.id===activeElementId)||null;
 }
 
-/* ========== v2.4.4: CAROUSEL POSTER DEMO ==========
-   Berkas demo dibaca dari /demo/demo1.zip, demo2.zip, ... (berhenti di nomor pertama yang tidak ada).
-   slides[0] tetap menjadi "poster demo aktif", sehingga semua logika Demo lama tidak berubah. */
+/* ========== v2.4.5: CAROUSEL POSTER DEMO (tersimpan di IndexedDB, bisa offline) ==========
+   Berkas demo: /demo/demo1.zip, demo2.zip, ... Unduhan pertama disimpan di IndexedDB browser (PosterDemoCacheV1).
+   Sesudahnya poster dibaca dari IndexedDB (tanpa unduh ulang, jalan di mode pesawat), lalu di latar belakang dicek
+   perbedaannya dengan repo (HEAD ringan): berkas yang berubah diunduh ulang, yang sudah tidak ada di repo dihapus dari IndexedDB.
+   slides[0] tetap menjadi "poster demo aktif" agar semua logika Demo lama tidak berubah. */
 const DEMO_DIR = '/demo/';
 const DEMO_MAX = 300;
 const DEMO_STEP_MS = 2000;
 const DEMO_GRACE_MS = 4000;
 const DEMO_LOCK_MAX_MS = 300000;
 const DEMO_ANIM_MS = 480;
-let _demoList = [], _demoIdx = 0, _demoInit = null, _demoProbing = false;
-let _demoBusy = false, _demoLocked = false, _demoTimer = 0, _demoTimerOn = false, _demoLockTimer = 0;
+const DEMO_DB = 'PosterDemoCacheV1';
+const DEMO_RECHECK_MS = 20 * 60 * 1000;
+let _demoList = [], _demoIdx = 0, _demoInit = null, _demoSyncing = false, _demoLastSync = 0;
+let _demoBusy = false, _demoLocked = false, _demoTimer = 0, _demoTimerOn = false, _demoLockTimer = 0, _demoPreT = 0, _demoPreOn = false;
 let _demoTipClosed = false, _demoDrag = null, _demoBuiltN = -1, _demoPadOn = false, _demoNextDelay = DEMO_STEP_MS;
+let _demoDbP = null;
 const _demoLastTap = { t: 0, x: 0, y: 0 };
 
-async function _demoFetch(n) {
-    try {
-        const res = await fetch(DEMO_DIR + 'demo' + n + '.zip');
-        if (!res.ok) return null;
-        const blob = await res.blob();
-        const h = new Uint8Array(await blob.slice(0, 4).arrayBuffer());
-        if (h[0] !== 0x50 || h[1] !== 0x4B) return null;
-        return blob;
-    } catch (e) { return null; }
+/* ----- IndexedDB (dua toko: meta kecil + berkas Zip; meta dibaca dulu, Zip dibaca saat dibutuhkan saja) ----- */
+function _demoDb() {
+    if (!_demoDbP) {
+        _demoDbP = new Promise(function (res) {
+            try {
+                const rq = indexedDB.open(DEMO_DB, 1);
+                rq.onupgradeneeded = function () {
+                    rq.result.createObjectStore('meta', { keyPath: 'n' });
+                    rq.result.createObjectStore('files', { keyPath: 'n' });
+                };
+                rq.onsuccess = function () { res(rq.result); };
+                rq.onerror = function () { res(null); };
+                rq.onblocked = function () { res(null); };
+            } catch (e) { res(null); }
+        });
+    }
+    return _demoDbP;
 }
-function _demoMakeEntry(n, blob) { return { n: n, blob: blob, slide: null, pending: null, thumb: null, bad: false }; }
+async function _demoDbMetaAll() {
+    const db = await _demoDb();
+    if (!db) return [];
+    return new Promise(function (res) {
+        try {
+            const rq = db.transaction('meta', 'readonly').objectStore('meta').getAll();
+            rq.onsuccess = function () { res((rq.result || []).sort(function (a, b) { return a.n - b.n; })); };
+            rq.onerror = function () { res([]); };
+        } catch (e) { res([]); }
+    });
+}
+async function _demoDbGetBuf(n) {
+    const db = await _demoDb();
+    if (!db) return null;
+    return new Promise(function (res) {
+        try {
+            const rq = db.transaction('files', 'readonly').objectStore('files').get(n);
+            rq.onsuccess = function () { res(rq.result ? rq.result.buf : null); };
+            rq.onerror = function () { res(null); };
+        } catch (e) { res(null); }
+    });
+}
+async function _demoDbPut(meta, buf) {
+    const db = await _demoDb();
+    if (!db) return false;
+    return new Promise(function (res) {
+        try {
+            const tx = db.transaction(['meta', 'files'], 'readwrite');
+            tx.objectStore('files').put({ n: meta.n, buf: buf });
+            tx.objectStore('meta').put(meta);
+            tx.oncomplete = function () { res(true); };
+            tx.onerror = tx.onabort = function () { res(false); };
+        } catch (e) { res(false); }
+    });
+}
+async function _demoDbDropFrom(n) {
+    const db = await _demoDb();
+    if (!db) return;
+    return new Promise(function (res) {
+        try {
+            const tx = db.transaction(['meta', 'files'], 'readwrite');
+            const rg = IDBKeyRange.lowerBound(n);
+            tx.objectStore('files').delete(rg);
+            tx.objectStore('meta').delete(rg);
+            tx.oncomplete = tx.onerror = tx.onabort = function () { res(); };
+        } catch (e) { res(); }
+    });
+}
 
-async function _demoParse(entry) {
-    const r = await _pzReadProjectZip(entry.blob, { onlyFirstSlide: true, skipFonts: true });
+/* ----- jaringan ----- */
+function _demoSigOf(res) {
+    const et = res.headers.get('etag') || '', lm = res.headers.get('last-modified') || '';
+    return (et || lm) ? (et + '|' + lm) : '';
+}
+async function _demoHead(n) {
+    let to = 0;
+    try {
+        const ctl = new AbortController();
+        to = setTimeout(function () { ctl.abort(); }, 8000);
+        const res = await fetch(DEMO_DIR + 'demo' + n + '.zip?chk=' + Date.now(), { method: 'HEAD', cache: 'no-store', signal: ctl.signal });
+        clearTimeout(to);
+        if (res.status === 404 || res.status === 410) return { state: 'missing' };
+        if (res.status === 405 || res.status === 501) return { state: 'ok', sig: '' };
+        if (!res.ok) return { state: 'error' };
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (ct.indexOf('text/html') >= 0) return { state: 'html' };
+        return { state: 'ok', sig: _demoSigOf(res) };
+    } catch (e) { clearTimeout(to); return { state: 'error' }; }
+}
+async function _demoNetFetch(n) {
+    let to = 0;
+    try {
+        const ctl = new AbortController();
+        to = setTimeout(function () { ctl.abort(); }, 45000);
+        const res = await fetch(DEMO_DIR + 'demo' + n + '.zip?dl=' + Date.now(), { cache: 'no-store', signal: ctl.signal });
+        if (res.status === 404 || res.status === 410) { clearTimeout(to); return null; }
+        if (!res.ok) { clearTimeout(to); return 'error'; }
+        const buf = await res.arrayBuffer();
+        clearTimeout(to);
+        const h = new Uint8Array(buf, 0, Math.min(4, buf.byteLength));
+        if (h[0] !== 0x50 || h[1] !== 0x4B) return null;
+        return { buf: buf, sig: _demoSigOf(res) };
+    } catch (e) { clearTimeout(to); return 'error'; }
+}
+async function _demoHash(buf) {
+    try {
+        if (!(window.crypto && crypto.subtle)) return 'size:' + buf.byteLength;
+        const d = new Uint8Array(await crypto.subtle.digest('SHA-1', buf));
+        let s = '';
+        for (let i = 0; i < d.length; i++) s += (d[i] < 16 ? '0' : '') + d[i].toString(16);
+        return s;
+    } catch (e) { return 'size:' + buf.byteLength; }
+}
+
+/* ----- daftar & entri ----- */
+function _demoMakeEntry(n, meta) {
+    return { n: n, sig: meta ? (meta.sig || '') : '', hash: meta ? (meta.hash || '') : '', blob: null, slide: null, pending: null,
+        thumb: null, bad: false, frame: null, framePending: null, v: 0 };
+}
+function _demoDropFrame(e) {
+    if (e.frame) { e.frame.width = e.frame.height = 0; e.frame = null; }
+}
+async function _demoBlob(e) {
+    if (e.blob) return e.blob;
+    const buf = await _demoDbGetBuf(e.n);
+    return buf ? new Blob([buf], { type: 'application/zip' }) : null;
+}
+async function _demoParse(e) {
+    const blob = await _demoBlob(e);
+    if (!blob) return null;
+    const r = await _pzReadProjectZip(blob, { onlyFirstSlide: true, skipFonts: true });
     const p = r.project;
     if (!p || !p.slides || !p.slides.length) return null;
     const s = deserializeSlides([p.slides[0]])[0];
     s.isDemo = true;
-    if (entry.thumb) s._thumbData = entry.thumb;
+    if (e.thumb) s._thumbData = e.thumb;
     return s;
 }
 async function _demoGetSlide(i) {
@@ -2895,24 +3020,35 @@ async function _demoGetSlide(i) {
     if (!e) return null;
     if (e.slide) return e.slide;
     if (!e.pending) {
-        e.pending = _demoParse(e).then(function (s) { e.slide = s; e.pending = null; if (!s) e.bad = true; return s; })
-            .catch(function (err) { console.warn('Demo ' + e.n + ' gagal dibaca', err); e.pending = null; e.bad = true; return null; });
+        const v = e.v;
+        const p = _demoParse(e).then(function (s) {
+            if (e.v !== v) return null;
+            e.slide = s; e.pending = null;
+            if (!s) e.bad = true;
+            return s;
+        }).catch(function (err) {
+            console.warn('Demo ' + e.n + ' gagal dibaca', err);
+            if (e.v === v) { e.pending = null; e.bad = true; }
+            return null;
+        });
+        e.pending = p;
     }
     return e.pending;
 }
-/* hanya poster aktif + tetangga yang disimpan terbuka; sisanya kembali jadi Zip terkompres (hemat memori) */
+/* hanya poster aktif + tetangga yang disimpan terbuka (slide & gambar jadi); sisanya dibuang dari memori */
 function _demoTrim() {
     const n = _demoList.length;
     if (!n) return;
     const keep = new Set([_demoIdx, (_demoIdx + 1) % n, (_demoIdx - 1 + n) % n]);
     _demoList.forEach(function (e, i) {
-        if (!keep.has(i) && e.slide && e.slide !== slides[0]) {
+        if (keep.has(i)) return;
+        _demoDropFrame(e);
+        if (e.slide && e.slide !== slides[0]) {
             if (e.slide._thumbData) e.thumb = e.slide._thumbData;
             e.slide = null;
         }
     });
 }
-/* cache render poster dibuang bila font berubah sejak terakhir tampil */
 function _demoPrep(s) {
     const fe = window.__fontEpoch || 0;
     if (s._demoFE === fe) return;
@@ -2936,20 +3072,198 @@ function _demoWaitImages(s, ms) {
         })();
     });
 }
+function _demoLoadFonts(s) {
+    if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    const seen = new Set(), jobs = [];
+    (s.elements || []).forEach(function (el) {
+        if (el.type !== 'text' || !el.fontFamily) return;
+        let fam;
+        try { fam = getCleanFont(el.fontFamily); } catch (e) { return; }
+        const st = new Set([(el.fontStyle || 'normal') + ' ' + (el.fontWeight || 'normal')]);
+        Object.values(el.wordStyles || {}).forEach(function (w) { st.add((w.fontStyle || el.fontStyle || 'normal') + ' ' + (w.fontWeight || el.fontWeight || 'normal')); });
+        st.forEach(function (v) {
+            const spec = v + ' 32px ' + fam;
+            if (seen.has(spec)) return;
+            seen.add(spec);
+            try { jobs.push(document.fonts.load(spec, el.text || undefined).catch(function () { })); } catch (e) { }
+        });
+    });
+    return Promise.race([Promise.all(jobs), new Promise(function (r) { setTimeout(r, 1500); })]);
+}
+function _demoIdle() {
+    return new Promise(function (r) {
+        if (window.requestIdleCallback) requestIdleCallback(function () { r(); }, { timeout: 300 });
+        else setTimeout(r, 30);
+    });
+}
+
+/* ----- bingkai siap-tampil (poster digambar lebih dulu saat idle, sehingga saat geser tidak ada proses berat) ----- */
+function _demoRenderFrame(s) {
+    const W = mainCanvas.width, H = mainCanvas.height;
+    const els = s.elements || [];
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H; c.className = 'dp-page';
+    if (els.some(function (e) { return e.type === 'connector'; })) {
+        const prev = slides[0];
+        slides[0] = s;
+        try { renderAll(); c.getContext('2d').drawImage(mainCanvas, 0, 0); }
+        finally { slides[0] = prev; renderAll(); }
+    } else {
+        const x = c.getContext('2d');
+        renderBackground(s.background, W, H, x);
+        els.forEach(function (el) {
+            if (el.type === 'text') renderTextElement(x, el);
+            else if (el.type === 'image') renderImageElement(x, el);
+            else if (el.type === 'shape') renderShapeElement(x, el);
+            else if (el.type === 'fade') renderFadeElement(x, el);
+            else if (el.type === 'table') renderTableElement(x, el);
+        });
+        renderLayerMaskPatches(x, els);
+    }
+    c._fe = window.__fontEpoch || 0;
+    return c;
+}
+function _demoThumbFromFrame(f) {
+    const c = document.createElement('canvas');
+    c.width = 108; c.height = Math.max(1, Math.round(108 * f.height / f.width));
+    c.getContext('2d').drawImage(f, 0, 0, c.width, c.height);
+    const u = c.toDataURL('image/jpeg', 0.5);
+    c.width = c.height = 0;
+    return u;
+}
+function _demoFrameOk(e) {
+    return !!(e.frame && e.frame.width === mainCanvas.width && e.frame.height === mainCanvas.height && e.frame._fe === (window.__fontEpoch || 0));
+}
+function _demoEnsureFrame(i) {
+    const e = _demoList[i];
+    if (!e || e.bad) return Promise.resolve(null);
+    if (_demoFrameOk(e)) return Promise.resolve(e.frame);
+    if (e.framePending) return e.framePending;
+    const v = e.v;
+    const p = (async function () {
+        const s = await _demoGetSlide(i);
+        if (!s) return null;
+        await _demoLoadFonts(s);
+        await _demoWaitImages(s, 1500);
+        await _demoIdle();
+        if (e.v !== v) return null;
+        _demoPrep(s);
+        _demoDropFrame(e);
+        const f = _demoRenderFrame(s);
+        e.frame = f;
+        try { e.thumb = _demoThumbFromFrame(f); s._thumbData = e.thumb; } catch (er) { }
+        return f;
+    })().catch(function (err) {
+        console.warn('Bingkai demo gagal', err);
+        e.bad = true;
+        return null;
+    }).then(function (f) { e.framePending = null; return f; });
+    e.framePending = p;
+    return p;
+}
+
+/* ----- sinkron dengan repo (HEAD ringan; unduh hanya yang baru/berubah; hapus yang sudah tidak ada) ----- */
+async function _demoSwapNow(i) {
+    try {
+        const s = await _demoGetSlide(i);
+        if (!s) return;
+        await _demoWaitImages(s, 1500);
+        _demoPrep(s);
+        slides[0] = s;
+        _demoIdx = i;
+        s._thumbData = null;
+        try { s._thumbData = generateSlideThumb(s); } catch (er) { }
+        if (currentSlideIndex === 0) renderAll();
+        _demoUpdateThumb();
+        demoCarouselSync();
+    } catch (e) { }
+}
+async function _demoDropFrom(n) {
+    const removed = _demoList.splice(n - 1);
+    removed.forEach(function (e) { e.v++; _demoDropFrame(e); e.slide = null; });
+    await _demoDbDropFrom(n);
+    if (!removed.length) return;
+    const len = _demoList.length;
+    if (len === 0) {
+        _demoInit = null; _demoIdx = 0;
+        if (slides && slides[0] && slides[0].isDemo) {
+            slides.shift();
+            currentSlideIndex = Math.max(0, currentSlideIndex - 1);
+            if (!slides.length) { slides = [createDefaultSlide()]; currentSlideIndex = 0; }
+            renderAll(); renderCarouselThumbs(); renderBottomToolbar(); updateDemoFloatingBtn();
+        }
+        return;
+    }
+    if (_demoIdx >= len) {
+        if (_demoActive() && !_demoBusy) {
+            if (len > 1) { _demoIdx = len - 1; demoGo(0, 1); }
+            else _demoSwapNow(0);
+        } else _demoIdx = 0;
+    }
+    demoCarouselSync();
+}
+async function _demoSaveEntry(n, got, hash) {
+    const meta = { n: n, sig: got.sig || '', hash: hash || '', size: got.buf.byteLength, ts: Date.now() };
+    const ok = await _demoDbPut(meta, got.buf);
+    let e = _demoList[n - 1];
+    const fresh = !e;
+    if (fresh) { e = _demoMakeEntry(n, meta); _demoList[n - 1] = e; }
+    e.v++;
+    e.sig = meta.sig; e.hash = meta.hash;
+    e.blob = ok ? null : new Blob([got.buf], { type: 'application/zip' });
+    e.pending = null; e.bad = false; e.thumb = null; e.slide = null;
+    _demoDropFrame(e);
+    if (fresh) demoCarouselSync();
+    else if (n - 1 === _demoIdx && _demoActive() && !_demoBusy) _demoSwapNow(n - 1);
+}
+async function _demoRevalidate() {
+    if (_demoSyncing || !navigator.onLine) return;
+    _demoSyncing = true;
+    _demoLastSync = Date.now();
+    try {
+        let verified = false;
+        for (let n = 1; n <= DEMO_MAX; n++) {
+            const st = await _demoHead(n);
+            if (st.state === 'error') return;                              /* sinyal buruk: cache dipertahankan apa adanya */
+            if (st.state === 'html') { if (verified) await _demoDropFrom(n); return; }   /* hanya dipercaya bila nomor sebelumnya benar-benar Zip */
+            if (st.state === 'missing') { await _demoDropFrom(n); return; }
+            verified = true;
+            const e = _demoList[n - 1];
+            if (e && st.sig && e.sig === st.sig) continue;                 /* sama dengan repo: tidak perlu unduh */
+            const got = await _demoNetFetch(n);
+            if (got === 'error') return;
+            if (!got) { await _demoDropFrom(n); return; }
+            let hash = '';
+            if (!got.sig) {
+                hash = await _demoHash(got.buf);
+                if (e && e.hash && e.hash === hash) continue;
+            }
+            await _demoSaveEntry(n, got, hash);
+            await _demoIdle();
+        }
+    } catch (err) {
+        console.warn('Sinkron demo', err);
+    } finally { _demoSyncing = false; }
+}
+window.addEventListener('online', function () { setTimeout(_demoRevalidate, 1200); });
 
 async function loadDemoProject() {
     try {
         if (!_demoInit) {
             _demoInit = (async function () {
-                const b = await _demoFetch(1);
-                if (!b) return false;
-                _demoList.push(_demoMakeEntry(1, b));
-                _demoProbeRest();
+                const metas = await _demoDbMetaAll();
+                let k = 0;
+                while (k < metas.length && metas[k].n === k + 1) { _demoList.push(_demoMakeEntry(k + 1, metas[k])); k++; }
+                if (_demoList.length) { setTimeout(_demoRevalidate, 1500); return true; }
+                const got = await _demoNetFetch(1);
+                if (!got || got === 'error') return false;
+                await _demoSaveEntry(1, got, got.sig ? '' : await _demoHash(got.buf));
+                setTimeout(_demoRevalidate, 800);
                 return true;
             })();
         }
         const ok = await _demoInit;
-        if (!ok) { _demoInit = null; return null; }
+        if (!ok || !_demoList.length) { _demoInit = null; return null; }
         if (_demoIdx >= _demoList.length) _demoIdx = 0;
         const s = await _demoGetSlide(_demoIdx);
         if (s) _demoPrep(s);
@@ -2958,18 +3272,6 @@ async function loadDemoProject() {
         console.warn('Failed to read demo project', e);
         return null;
     }
-}
-async function _demoProbeRest() {
-    if (_demoProbing) return;
-    _demoProbing = true;
-    try {
-        for (let n = _demoList.length + 1; n <= DEMO_MAX; n++) {
-            const b = await _demoFetch(n);
-            if (!b) break;
-            _demoList.push(_demoMakeEntry(n, b));
-            demoCarouselSync();
-        }
-    } finally { _demoProbing = false; }
 }
 
 /* ----- status ----- */
@@ -3036,8 +3338,10 @@ function demoCarouselSync() {
         vp.classList.toggle('demo-pager-on', on);
         try { adjustArtboardSize(); renderAll(); } catch (e) { }
     }
-    if (on) { if (!_demoTimerOn && !_demoBusy && !_demoDrag) _demoSchedule(); }
-    else _demoClearTimer();
+    if (on) {
+        if (!_demoTimerOn && !_demoBusy && !_demoDrag) _demoSchedule();
+        if (!_demoPreOn) { _demoPreOn = true; _demoAfter(600); }
+    } else { _demoClearTimer(); _demoPreOn = false; }
 }
 
 /* ----- pewaktu geser otomatis ----- */
@@ -3062,8 +3366,9 @@ function _demoSchedule() {
     }, delay);
 }
 document.addEventListener('visibilitychange', function () {
-    if (document.hidden) _demoClearTimer();
-    else if (_demoPagerOn() && !_demoBusy && !_demoDrag) _demoSchedule();
+    if (document.hidden) { _demoClearTimer(); return; }
+    if (_demoPagerOn() && !_demoBusy && !_demoDrag) _demoSchedule();
+    if (Date.now() - _demoLastSync > DEMO_RECHECK_MS) setTimeout(_demoRevalidate, 1500);
 });
 
 /* ----- kunci ----- */
@@ -3085,7 +3390,7 @@ function _demoSetLock(v, silent) {
     _demoSchedule();
 }
 
-/* ----- transisi geser (dua gambar salinan dalam panggung berpotongan, kanvas asli tidak disentuh) ----- */
+/* ----- transisi geser: hanya memindahkan dua gambar (transform/opacity, dikerjakan GPU), tanpa render berat ----- */
 function _demoCopyMain() {
     const c = document.createElement('canvas');
     c.width = mainCanvas.width; c.height = mainCanvas.height;
@@ -3106,39 +3411,42 @@ function _demoRun(tr, p, ms) {
     _demoPos(tr, p, ms);
     return new Promise(function (r) { setTimeout(r, ms + 30); });
 }
-function _demoBegin(slide, newIdx, dir) {
+function _demoBegin(newIdx, dir, frame) {
     const pOld = _demoCopyMain();
-    const prev = slides[0];
-    _demoPrep(slide);
-    slides[0] = slide;
-    renderAll();
-    const pNew = _demoCopyMain();
+    frame.className = 'dp-page';
     const stage = document.createElement('div');
     stage.className = 'dp-stage';
-    stage.appendChild(pOld); stage.appendChild(pNew);
+    stage.appendChild(pOld); stage.appendChild(frame);
     artboard.appendChild(stage);
-    const tr = { stage: stage, pOld: pOld, pNew: pNew, prev: prev, slide: slide, newIdx: newIdx, dir: dir };
+    const tr = { stage: stage, pOld: pOld, pNew: frame, slide: _demoList[newIdx].slide, newIdx: newIdx, dir: dir };
     _demoPos(tr, 0, 0);
     return tr;
 }
 function _demoEnd(tr) {
     if (tr.stage.parentNode) tr.stage.parentNode.removeChild(tr.stage);
     tr.pOld.width = tr.pOld.height = 0;
-    tr.pNew.width = tr.pNew.height = 0;
 }
 async function _demoCommit(tr, fromP) {
     _demoIdx = tr.newIdx;
     _demoPagerUpdate();
     await _demoRun(tr, 1, Math.round(DEMO_ANIM_MS * (1 - fromP)) + 120);
+    if (tr.slide) slides[0] = tr.slide;
+    if (currentSlideIndex === 0) {
+        if (tr.pNew.width === mainCanvas.width && tr.pNew.height === mainCanvas.height && tr.pNew.width > 0) {
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            ctx.drawImage(tr.pNew, 0, 0);
+            ctx.restore();
+            if (typeof fpvRefresh === 'function') { try { fpvRefresh(true); } catch (er) { } }
+        } else renderAll();
+    }
     _demoEnd(tr);
-    requestRender();
-    _demoAfter();
+    _demoAfter(350);
 }
 async function _demoCancel(tr, fromP) {
     await _demoRun(tr, 0, Math.round(DEMO_ANIM_MS * fromP) + 160);
-    slides[0] = tr.prev;
-    _demoPrep(tr.prev);
-    renderAll();
     _demoEnd(tr);
 }
 function _demoUpdateThumb() {
@@ -3155,24 +3463,29 @@ function _demoUpdateThumb() {
         }
     }
 }
-function _demoAfter() {
+/* setelah tiap geser: buang yang tidak perlu, lalu siapkan poster berikutnya & sebelumnya saat idle */
+function _demoAfter(delay) {
     _demoTrim();
-    setTimeout(function () {
-        _demoUpdateThumb();
-        const n = _demoList.length;
-        if (n > 1) _demoGetSlide((_demoIdx + 1) % n);
-    }, 150);
+    clearTimeout(_demoPreT);
+    _demoPreT = setTimeout(async function () {
+        try {
+            _demoUpdateThumb();
+            if (!_demoPagerOn()) return;
+            await _demoEnsureFrame(_demoNextIdx(1));
+            if (!_demoPagerOn()) return;
+            await _demoIdle();
+            await _demoEnsureFrame(_demoNextIdx(-1));
+        } catch (e) { }
+    }, delay || 350);
 }
 async function demoGo(target, dir) {
     if (_demoBusy || !_demoPagerOn() || target === _demoIdx) return;
     _demoBusy = true;
     _demoClearTimer();
     try {
-        const s = await _demoGetSlide(target);
-        if (!s) return;
-        await _demoWaitImages(s, 700);
-        if (!_demoPagerOn()) return;
-        const tr = _demoBegin(s, target, dir);
+        const f = await _demoEnsureFrame(target);
+        if (!f || !_demoPagerOn()) return;
+        const tr = _demoBegin(target, dir, f);
         await _demoCommit(tr, 0);
     } catch (err) {
         console.warn('Carousel demo', err);
@@ -3204,11 +3517,9 @@ function _demoDragStart(d) {
     d.newIdx = ((_demoIdx + d.dir) % n + n) % n;
     d.p = 0;
     d.ready = (async function () {
-        const s = await _demoGetSlide(d.newIdx);
-        if (!s || d.aborted) return null;
-        await _demoWaitImages(s, 600);
-        if (d.aborted) return null;
-        d.tr = _demoBegin(s, d.newIdx, d.dir);
+        const f = await _demoEnsureFrame(d.newIdx);
+        if (!f || d.aborted) return null;
+        d.tr = _demoBegin(d.newIdx, d.dir, f);
         _demoApplyDrag(d);
         return d.tr;
     })();
@@ -3818,7 +4129,7 @@ smartGuideCanvas.height=targetH;
 const vp=document.getElementById('workspaceViewport');
 const padding=24;
 const availW=vp.clientWidth-padding;
-const availH=vp.clientHeight-padding-(vp.classList.contains('demo-pager-on')?40:0);
+const availH=vp.clientHeight-padding-(vp.classList.contains('demo-pager-on')?88:0);
 const scaleW=availW/targetW;
 const scaleH=availH/targetH;
 canvasScale=Math.min(scaleW,scaleH);
