@@ -1,17 +1,16 @@
 <!--
-Studio Poster Maker Pro - Update v2.4.5
+Studio Poster Maker Pro - Update v2.4.6
+
+v2.4.6:
+1. PETUNJUK "Ingin melihat lebih lama?" kini berada di lapisan paling depan (di atas bar kiri & kanan) sehingga tombol X-nya bisa ditekan.
+2. NOTIF "Ini Poster Demo" kini punya tombol X untuk menutup, dinaikkan ke bagian atas poster (menutupi logo atas) agar tidak menutupi judul poster.
+3. JEDA TAMPIL DIAM poster Demo ditambah 0,5 detik (2 detik menjadi 2,5 detik) supaya elemen sempat dirender sebelum bergeser.
 
 v2.4.5:
 1. DEMO TERSIMPAN DI INDEXEDDB: berkas demo/demoN.zip cukup diunduh sekali, lalu disimpan di IndexedDB browser. Berikutnya poster Demo dibaca dari sana: tidak mengunduh terus-menerus, tidak lag, dan tetap tampil saat sinyal buruk atau mode pesawat.
 2. CEK PEMBARUAN OTOMATIS: tiap aplikasi dibuka (dan saat internet kembali) browser mencocokkan demo dengan repo lewat permintaan HEAD yang sangat ringan. Zip yang sama tidak diunduh ulang; yang berubah atau baru diunduh sekali lagi; yang sudah tidak ada di repo otomatis dihapus dari IndexedDB agar tidak menumpuk. Saat sinyal buruk, isi IndexedDB dibiarkan apa adanya.
 3. GESER OTOMATIS LEBIH MULUS: poster berikutnya digambar lebih dulu saat idle sehingga saat bergeser hanya memindahkan gambar (tanpa render berat atau baca Zip). Efek blur kaca di penanda nomor dihilangkan agar ringan di HP.
 4. PENANDA NOMOR: dinaikkan agar tidak mepet bar bawah, dan cahaya emas di sekeliling bulatan nomor diberi ruang lebih luas supaya tidak terpotong.
-
-v2.4.4:
-1. CAROUSEL POSTER DEMO: poster Demo kini berupa carousel otomatis. Semua berkas demo1.zip, demo2.zip, demo3.zip, dst. di folder /demo/ dibaca berurutan tanpa batas jumlah (berhenti di nomor pertama yang tidak ada). Tiap 2 detik poster bergeser halus ke kiri ke poster berikutnya, lalu kembali ke demo1 setelah yang terakhir. Di bawah poster ada penanda bernomor 1, 2, 3, ... bergaya emas abu yang ikut bergeser; nomor bisa diketuk untuk melompat. Poster dibaca hemat memori: hanya poster aktif dan tetangganya yang dibuka, sisanya tetap berupa Zip terkompres.
-2. KUNCI & GESER MANUAL: ketuk 2x pada poster untuk mengunci geser otomatis, ketuk 2x lagi untuk membuka. Kunci terbuka sendiri setelah 5 menit. Usap kiri/kanan untuk pindah poster secara manual (poster mengikuti jari); usapan manual otomatis membatalkan kunci. Tombol melayang kedua berisi petunjuk ini lengkap dengan tombol X untuk menutupnya.
-3. FOLDER demo/ & HAPUS JSON: berkas demo kini ada di folder demo/ pada repo (demo/demo1.zip, demo/demo2.zip, ...). Dukungan demo.json dan demo.zip lama di root dihapus karena sudah tidak dipakai.
-
 -->
 
 
@@ -416,16 +415,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .demo-pager.locked .dp-lock{opacity:1;transform:scale(1);}
 .dp-lock .ic{width:14px;height:14px;}
 .dp-prog{position:absolute;left:20px;right:20px;bottom:3px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(212,175,55,.15),#f3d77a);transform:scaleX(0);transform-origin:left center;}
-.dp-prog.run{animation:dpProg 2s linear forwards;}
+.dp-prog.run{animation:dpProg 2.5s linear forwards;}
 .demo-pager.locked .dp-prog{display:none;}
 @keyframes dpProg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .dp-stage{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;border-radius:6px;z-index:40;pointer-events:none;background:#181818;}
 .dp-page{position:absolute;left:0;top:0;width:100%;height:100%;display:block;will-change:transform,opacity;backface-visibility:hidden;}
-.demo-tip{position:absolute;left:0;right:0;bottom:92px;margin:0 auto;width:min(90%,340px);box-sizing:border-box;z-index:37;display:none;padding:10px 38px 10px 12px;border-radius:14px;background:linear-gradient(160deg,rgba(42,37,28,.96),rgba(16,14,10,.97));border:1px solid rgba(212,175,55,.45);box-shadow:0 8px 24px rgba(0,0,0,.7);color:#cfcabd;font-size:11.5px;line-height:1.45;pointer-events:auto;animation:floatAnim 3.4s ease-in-out infinite;}
+.demo-tip{position:absolute;left:0;right:0;bottom:92px;margin:0 auto;width:min(90%,340px);box-sizing:border-box;z-index:140;display:none;padding:10px 38px 10px 12px;border-radius:14px;background:linear-gradient(160deg,rgba(42,37,28,.96),rgba(16,14,10,.97));border:1px solid rgba(212,175,55,.45);box-shadow:0 8px 24px rgba(0,0,0,.7);color:#cfcabd;font-size:11.5px;line-height:1.45;pointer-events:auto;animation:floatAnim 3.4s ease-in-out infinite;}
 .demo-tip.show{display:flex;gap:9px;align-items:flex-start;}
 .demo-tip .dt-ic{width:22px;height:22px;color:#f3d77a;margin-top:1px;}
 .demo-tip .dt-text b{display:block;color:#f3d77a;font-size:12px;margin-bottom:2px;}
-.demo-tip .dt-x{position:absolute;top:6px;right:6px;width:24px;height:24px;padding:0;border-radius:50%;border:1px solid rgba(212,175,55,.4);background:rgba(255,255,255,.05);color:#d4af37;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.demo-tip .dt-x{z-index:1;touch-action:manipulation;position:absolute;top:6px;right:6px;width:24px;height:24px;padding:0;border-radius:50%;border:1px solid rgba(212,175,55,.4);background:rgba(255,255,255,.05);color:#d4af37;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .demo-tip .dt-x .ic{width:12px;height:12px;}
 
 .hsl-channel-btn {
@@ -2254,7 +2253,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.4.5';
+const APP_VERSION = 'v2.4.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2867,7 +2866,7 @@ return s.elements.find(e=>e.id===activeElementId)||null;
    slides[0] tetap menjadi "poster demo aktif" agar semua logika Demo lama tidak berubah. */
 const DEMO_DIR = '/demo/';
 const DEMO_MAX = 300;
-const DEMO_STEP_MS = 2000;
+const DEMO_STEP_MS = 2500;
 const DEMO_GRACE_MS = 4000;
 const DEMO_LOCK_MAX_MS = 300000;
 const DEMO_ANIM_MS = 480;
@@ -18976,18 +18975,48 @@ function setupPreviewDrag() {
     });
 }
 
+let _demoBannerClosed = false;
+function demoBannerClose() {
+    _demoBannerClosed = true;
+    const b = document.getElementById('demoFloatingBtn');
+    if (b) b.style.display = 'none';
+}
+function demoBannerPlace() {
+    const btn = document.getElementById('demoFloatingBtn');
+    if (!btn || btn.style.display === 'none') return;
+    const ab = document.getElementById('artboard');
+    const vp = document.getElementById('workspaceViewport');
+    if (!ab || !vp) return;
+    const r = ab.getBoundingClientRect(), v = vp.getBoundingClientRect();
+    const w = btn.offsetWidth || 220;
+    let left = r.left + (r.width - w) / 2;
+    left = Math.max(6, Math.min(window.innerWidth - w - 6, left));
+    let top = Math.max(v.top + 4, r.top - 2);
+    btn.style.left = Math.round(left) + 'px';
+    btn.style.top = Math.round(top) + 'px';
+}
+window.addEventListener('resize', function () { setTimeout(demoBannerPlace, 150); });
 function updateDemoFloatingBtn() {
     let btn = document.getElementById('demoFloatingBtn');
     const s = getCurrentSlide();
-    if(s && s.isDemo) {
+    if(s && s.isDemo && !_demoBannerClosed) {
         if(!btn) {
             btn = document.createElement('div');
             btn.id = 'demoFloatingBtn';
-            btn.style.cssText = 'position:fixed; top:120px; left:15px; background:linear-gradient(135deg, #ff007f, #7928ca); color:#fff; padding:10px 20px; border-radius:30px; font-size:14px; font-weight:bold; z-index:9999; box-shadow:0 4px 15px rgba(0,0,0,0.5); pointer-events:none; animation: floatAnim 3s ease-in-out infinite; text-align:center;';
+            btn.style.cssText = 'position:fixed; top:120px; left:15px; background:linear-gradient(135deg, #ff007f, #7928ca); color:#fff; padding:10px 38px 10px 20px; border-radius:30px; font-size:14px; font-weight:bold; z-index:9999; box-shadow:0 4px 15px rgba(0,0,0,0.5); pointer-events:auto; animation: floatAnim 3s ease-in-out infinite; text-align:center;';
             btn.innerHTML = '⚠️ Ini Poster Demo<br><span style="font-size:11px;font-weight:normal;">Edit Slide 1, 2, 3... untuk berkarya</span>';
+            const x = document.createElement('button');
+            x.type = 'button';
+            x.setAttribute('aria-label', 'Tutup notif demo');
+            x.style.cssText = 'position:absolute; top:50%; right:8px; margin-top:-13px; width:26px; height:26px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,.6); background:rgba(0,0,0,.25); color:#fff; font-size:13px; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation;';
+            x.textContent = '✕';
+            x.onclick = function (ev) { ev.stopPropagation(); demoBannerClose(); };
+            btn.appendChild(x);
             document.body.appendChild(btn);
         }
         btn.style.display = 'block';
+        demoBannerPlace();
+        setTimeout(demoBannerPlace, 200);
     } else {
         if(btn) btn.style.display = 'none';
     }
