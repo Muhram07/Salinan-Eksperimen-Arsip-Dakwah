@@ -1,14 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v2.4.2
+Studio Poster Maker Pro - Update v2.4.3
+
+v2.4.3:
+1. EKSPOR & IMPOR PROJEK FORMAT ZIP: tombol Ekspor kini menghasilkan file .zip (Projek - Nama Projek.zip). Gambar di tiap lapisan disimpan sebagai file biner asli di dalam Zip (bukan teks base64 yang membengkak sekitar 33%), gambar kembar disimpan sekali saja, lalu data lain dipadatkan. Ukuran file jadi jauh lebih kecil, hemat kuota saat dikirim. Font pribadi projek ikut masuk ke Zip. Saat file Zip dimasukkan lewat Impor, projek dipulihkan persis sama seperti aslinya (setiap berkas dicek CRC, dan gambar dibandingkan ulang agar tidak berubah satu karakter pun). File lama .poster dan .json tetap bisa diimpor.
+2. DEMO JADI demo.zip: poster Demo kini dibaca dari /demo.zip (hasil Ekspor yang namanya diganti demo.zip). Bila demo.zip belum ada, otomatis memakai /demo.json lama agar Demo tidak hilang.
 
 v2.4.2:
 1. PEMERIKSAAN IKON: sisa ikon yang masih berupa emoji berwarna bawaan HP kini diganti ikon asli bergaris emas dan abu-abu putih. Mencakup: Panduan, mode offline, Duplikat Simetris, Blur Gerak (Peluru, Bintang Jatuh, Panah), Gerak Serentak, Pipet, Hapus Objek AI, Tips Aman, langkah Info Tool, pegangan ubah ukuran preview, dan tombol geser Upscale HD.
 2. HAPUS BANYAK PROJEK: tombol baru "Hapus Banyak" di menu Projek. Bisa mencentang projek satu per satu, Pilih Semua, Inversi, dan Kosongkan. Tiap projek punya tombol mata untuk melihat preview besar (bisa geser ke projek berikutnya dan centang dari sana). Ada konfirmasi berisi daftar nama sebelum dihapus. Projek yang sedang dibuka tidak bisa dicentang, jadi selalu tersisa minimal 1 projek.
-
-v2.4.1:
-1. EKSPOR & DUPLIKAT PROJEK BISA DI-SCROLL: daftar projek di menu Ekspor dan Duplikat sebelumnya tidak bisa digulir karena area daftar menahan geseran jari (touch-action:none). Kini daftar bisa digulir sampai item paling bawah.
-2. NAMA FILE UNDUHAN OTOMATIS & JELAS: Projek - Nama Projek.poster, Font - Nama Font.ttf, Poster - Slide N - Rasio.png (atau .jpg), Gambar - Judul.ext, dan Bookmark - Situs Sunnah - tanggal.json. Karakter terlarang di nama file otomatis dibersihkan.
-3. IKON & TOOL LATAR: tool "Latar" kini bernama "Background" dengan ikon baru berupa ilustrasi bingkai, matahari, dan pegunungan bergaris emas dan abu-abu.
 -->
 
 
@@ -1205,7 +1204,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 <input type="file" id="fileTextSkinInput" accept="image/*" style="display:none;" onchange="handleTextSkinUpload(event)">
 <input type="file" id="fileImageSkinInput" accept="image/*" style="display:none;" onchange="handleImageSkinUpload(event)">
 <input type="file" id="fileBgInput" accept="image/*" style="display:none;" onchange="handleBgUpload(event)">
-<input type="file" id="fileProjectInput" accept=".poster,.json" multiple style="display:none;" onchange="handleProjectImport(event)">
+<input type="file" id="fileProjectInput" accept=".zip,.poster,.json,application/zip,application/x-zip-compressed" multiple style="display:none;" onchange="handleProjectImport(event)">
 <input type="file" id="fileFontInput" accept=".ttf,.otf,.woff,.woff2,.zip,application/zip,application/x-zip-compressed" multiple style="display:none;" onchange="handleFontUpload(event)">
 
 <div class="handled-loupe-container" id="handledLoupe">
@@ -1302,7 +1301,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <div class="feature-modal" id="projectExportModal">
     <div class="fmodal-header">
-        <div style="font-weight:800;color:#D4AF37;font-size:13px;" id="exportModalTitle">📤 Ekspor Projek (.poster)</div>
+        <div style="font-weight:800;color:#D4AF37;font-size:13px;" id="exportModalTitle">📤 Ekspor Projek (.zip)</div>
         <button class="panel-close" onclick="closeProjectExportModal()">✕</button>
     </div>
     <div class="fmodal-body" style="flex-direction:column; padding:16px; align-items:stretch; justify-content:flex-start; overflow-y:auto; overflow-x:hidden; min-height:0; flex:1 1 0; touch-action:pan-y; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;">
@@ -2216,7 +2215,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.4.2';
+const APP_VERSION = 'v2.4.3';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -2823,18 +2822,37 @@ return s.elements.find(e=>e.id===activeElementId)||null;
 }
 
 async function loadDemoProject() {
+    /* v2.4.3: demo dibaca dari /demo.zip; bila belum ada, memakai /demo.json lama */
+    let projectData = null;
     try {
-        const res = await fetch('/demo.json');
-        if(res.ok) {
-            const projectData = await res.json();
-            if(projectData && projectData.slides && projectData.slides.length > 0) {
-                const demoSlide = deserializeSlides([projectData.slides[0]])[0];
-                demoSlide.isDemo = true;
-                return demoSlide;
+        const resZ = await fetch('/demo.zip');
+        if(resZ.ok) {
+            const blobZ = await resZ.blob();
+            const head = new Uint8Array(await blobZ.slice(0, 4).arrayBuffer());
+            if(head[0] === 0x50 && head[1] === 0x4B) {
+                const r = await _pzReadProjectZip(blobZ, { onlyFirstSlide: true, skipFonts: true });
+                projectData = r.project;
             }
         }
     } catch(e) {
-        console.warn("Failed to load demo.json", e);
+        console.warn("Failed to load demo.zip", e);
+    }
+    if(!projectData) {
+        try {
+            const res = await fetch('/demo.json');
+            if(res.ok) projectData = await res.json();
+        } catch(e) {
+            console.warn("Failed to load demo.json", e);
+        }
+    }
+    try {
+        if(projectData && projectData.slides && projectData.slides.length > 0) {
+            const demoSlide = deserializeSlides([projectData.slides[0]])[0];
+            demoSlide.isDemo = true;
+            return demoSlide;
+        }
+    } catch(e) {
+        console.warn("Failed to read demo project", e);
     }
     return null;
 }
@@ -17180,7 +17198,7 @@ async function deleteProjectById(id){
 }
 
 function showProjectInfo() {
-    alert("INFO PENYIMPANAN PROJEK:\n\n1. Projek disimpan di memori browser (IndexedDB).\n2. Jika Anda menghapus Cache/Data Browser, projek akan HILANG.\n3. Gunakan fitur 'Ekspor' untuk mengunduh file mentah (.poster) ke penyimpanan HP Anda (Folder Download).\n4. File .poster ini bisa Anda bagikan ke teman atau di-Impor kembali jika browser terhapus.\n5. Font lokal yang Anda tambahkan akan ikut tersimpan di dalam file .poster tersebut.\n6. Buat folder khusus di HP Anda untuk mem-backup file .poster agar aman permanen.");
+    alert("INFO PENYIMPANAN PROJEK:\n\n1. Projek disimpan di memori browser (IndexedDB).\n2. Jika Anda menghapus Cache/Data Browser, projek akan HILANG.\n3. Gunakan fitur 'Ekspor' untuk mengunduh projek dalam bentuk file Zip (.zip) yang kecil ke penyimpanan HP Anda (Folder Download).\n4. File .zip ini bisa Anda bagikan ke teman atau di-Impor kembali jika browser terhapus. Isinya dipulihkan persis sama.\n5. Font lokal yang Anda tambahkan akan ikut tersimpan di dalam file .zip tersebut.\n6. Buat folder khusus di HP Anda untuk mem-backup file .zip agar aman permanen.");
 }
 
 async function openProjectExportModal() {
@@ -17196,7 +17214,7 @@ async function openProjectExportModal() {
         </label>
         `;
     });
-    document.getElementById('exportModalTitle').innerText = '📤 Ekspor Projek (.poster)';
+    document.getElementById('exportModalTitle').innerText = '📤 Ekspor Projek (.zip)';
     document.getElementById('btnExecuteExport').innerText = '📤 Ekspor Terpilih';
     document.getElementById('btnExecuteExport').onclick = executeProjectExport;
     document.getElementById('projectExportModal').classList.add('active');
@@ -17390,60 +17408,441 @@ async function executeProjectExport() {
     }
     showToast('⏳ Menyiapkan file ekspor...');
     
-    for(let cb of cbs) {
-        const p = await getProjectFromDB(cb.value);
-        if(p) {
-            const dataStr = JSON.stringify(p);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileSafeName('Projek - ' + p.name) + '.poster';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            await new Promise(r => setTimeout(r, 300));
+    const ids = Array.from(cbs).map(cb => cb.value);
+    let done = 0, failed = 0, lastInfo = '';
+    for(let n = 0; n < ids.length; n++) {
+        try {
+            const p = await getProjectFromDB(ids[n]);
+            if(p) {
+                showToast('⏳ Memadatkan projek ke Zip (' + (n + 1) + '/' + ids.length + ')...', 4000);
+                const fontBlobs = [];
+                const fl = Array.isArray(p.fonts) ? p.fonts : [];
+                for(const f of fl) {
+                    if(!f || !f.name || f.data) continue;
+                    try {
+                        const row = await getFontBlobFromDB(p.id + '::' + f.name);
+                        if(row && row.data) fontBlobs.push({ name: f.name, data: row.data });
+                    } catch(e) {}
+                }
+                const built = await _pzBuildProjectZip(p, fontBlobs);
+                const url = URL.createObjectURL(built.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileSafeName('Projek - ' + p.name) + '.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+                done++;
+                lastInfo = _pzFmtMB(built.origBytes) + ' → ' + _pzFmtMB(built.blob.size);
+                await new Promise(r => setTimeout(r, 400));
+            }
+        } catch(err) {
+            console.error(err);
+            failed++;
         }
     }
     closeProjectExportModal();
-    showToast('📤 Ekspor selesai!');
+    if(done > 0) showToast('📤 Ekspor Zip selesai! ' + (done === 1 ? '(' + lastInfo + ')' : '(' + done + ' file)') + (failed ? ' - ' + failed + ' gagal' : ''), 4500);
+    else showToast('⚠️ Ekspor gagal. Coba lagi.');
 }
 
-function handleProjectImport(e) {
-    const files = e.target.files;
-    if(!files || files.length === 0) return;
-    
-    showToast('⏳ Mengimpor projek...');
-    let importedCount = 0;
+/* ========== v2.4.3: ZIP projek (pembuat & pembaca Zip bawaan browser, tanpa library) ==========
+   Gambar/font di dalam projek disimpan sebagai berkas biner asli (lebih kecil 33% dari base64),
+   data kembar disimpan sekali, lalu dipulihkan persis sama saat impor (CRC dicek, base64 dibandingkan ulang). */
+const _PZ_REF = '__pzref__:';
+const _PZ_MIN_LEN = 512;
+let _pzCrcTab = null;
 
-    Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            try {
-                const importedData = JSON.parse(evt.target.result);
-                if(!importedData.id || !importedData.slides) throw new Error("Format tidak valid");
-                
-                importedData.id = 'proj_import_' + Date.now() + Math.floor(Math.random()*1000);
-                importedData.name = importedData.name + ' (Impor)';
-                importedData.updatedAt = Date.now();
-                
-                await saveProjectToDB(importedData);
-                importedCount++;
+function _pzCrc32(u8) {
+    if (!_pzCrcTab) {
+        _pzCrcTab = new Uint32Array(256);
+        for (let n = 0; n < 256; n++) {
+            let c = n;
+            for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+            _pzCrcTab[n] = c >>> 0;
+        }
+    }
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < u8.length; i++) c = _pzCrcTab[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function _pzFmtMB(n) {
+    return (n / 1048576).toFixed(1) + ' MB';
+}
+function _pzB64ToBytes(b64) {
+    const bin = atob(b64);
+    const n = bin.length;
+    const u = new Uint8Array(n);
+    for (let i = 0; i < n; i++) u[i] = bin.charCodeAt(i);
+    return u;
+}
+function _pzBytesToB64(u8) {
+    const parts = [];
+    for (let i = 0; i < u8.length; i += 0x6000) parts.push(String.fromCharCode.apply(null, u8.subarray(i, i + 0x6000)));
+    return btoa(parts.join(''));
+}
+async function _pzDeflate(u8) {
+    const st = new Blob([u8]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(st).arrayBuffer());
+}
+async function _pzInflate(u8) {
+    const st = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(st).arrayBuffer());
+}
+function _pzMimeInfo(m) {
+    m = String(m || '').toLowerCase();
+    const t = {
+        'image/png': ['png', 0], 'image/jpeg': ['jpg', 0], 'image/jpg': ['jpg', 0], 'image/webp': ['webp', 0],
+        'image/gif': ['gif', 0], 'image/avif': ['avif', 0], 'image/svg+xml': ['svg', 1], 'image/bmp': ['bmp', 1],
+        'font/woff2': ['woff2', 0], 'font/woff': ['woff', 0], 'application/font-woff': ['woff', 0],
+        'font/ttf': ['ttf', 1], 'font/otf': ['otf', 1]
+    };
+    const r = t[m];
+    return r ? { ext: r[0], comp: !!r[1] } : { ext: 'bin', comp: true };
+}
 
-                if(importedCount === files.length) {
-                    await loadProjectById(importedData.id);
-                    await renderProjectList();
-                    showToast(`📥 ${importedCount} Projek berhasil diimpor!`);
-                }
-            } catch(err) {
-                console.error(err);
-                showToast('⚠️ Gagal mengimpor file: ' + file.name);
+/* ---- penulis ZIP: berkas ditambah satu per satu agar memori hemat ---- */
+function _pzZipWriter() {
+    const enc = new TextEncoder();
+    const parts = [];
+    const cds = [];
+    let off = 0;
+    const d = new Date();
+    const dosT = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+    const dosD = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+    const canDeflate = typeof CompressionStream !== 'undefined';
+    return {
+        async add(name, raw, compress) {
+            const nameB = enc.encode(name);
+            const crc = _pzCrc32(raw);
+            let method = 0, body = raw;
+            if (compress && canDeflate && raw.length > 64) {
+                try {
+                    const z = await _pzDeflate(raw);
+                    if (z.length < raw.length) { method = 8; body = z; }
+                } catch (e) { }
             }
-        };
-        reader.readAsText(file);
-    });
-    e.target.value = '';
+            const lh = new Uint8Array(30 + nameB.length);
+            const dv = new DataView(lh.buffer);
+            dv.setUint32(0, 0x04034b50, true);
+            dv.setUint16(4, 20, true);
+            dv.setUint16(6, 0x0800, true);
+            dv.setUint16(8, method, true);
+            dv.setUint16(10, dosT, true);
+            dv.setUint16(12, dosD, true);
+            dv.setUint32(14, crc, true);
+            dv.setUint32(18, body.length, true);
+            dv.setUint32(22, raw.length, true);
+            dv.setUint16(26, nameB.length, true);
+            dv.setUint16(28, 0, true);
+            lh.set(nameB, 30);
+            parts.push(lh, body);
+            cds.push({ nameB: nameB, method: method, crc: crc, csize: body.length, usize: raw.length, off: off });
+            off += lh.length + body.length;
+            if (off > 0xFFFFF000 || cds.length > 65000) throw new Error('ZIP_TOO_BIG');
+        },
+        finish() {
+            let cdSize = 0;
+            const cdStart = off;
+            for (const c of cds) {
+                const cd = new Uint8Array(46 + c.nameB.length);
+                const dv = new DataView(cd.buffer);
+                dv.setUint32(0, 0x02014b50, true);
+                dv.setUint16(4, 20, true);
+                dv.setUint16(6, 20, true);
+                dv.setUint16(8, 0x0800, true);
+                dv.setUint16(10, c.method, true);
+                dv.setUint16(12, dosT, true);
+                dv.setUint16(14, dosD, true);
+                dv.setUint32(16, c.crc, true);
+                dv.setUint32(20, c.csize, true);
+                dv.setUint32(24, c.usize, true);
+                dv.setUint16(28, c.nameB.length, true);
+                dv.setUint16(30, 0, true);
+                dv.setUint16(32, 0, true);
+                dv.setUint16(34, 0, true);
+                dv.setUint16(36, 0, true);
+                dv.setUint32(38, 0, true);
+                dv.setUint32(42, c.off, true);
+                cd.set(c.nameB, 46);
+                parts.push(cd);
+                cdSize += cd.length;
+            }
+            const eo = new Uint8Array(22);
+            const ev = new DataView(eo.buffer);
+            ev.setUint32(0, 0x06054b50, true);
+            ev.setUint16(4, 0, true);
+            ev.setUint16(6, 0, true);
+            ev.setUint16(8, cds.length, true);
+            ev.setUint16(10, cds.length, true);
+            ev.setUint32(12, cdSize, true);
+            ev.setUint32(16, cdStart, true);
+            ev.setUint16(20, 0, true);
+            parts.push(eo);
+            return new Blob(parts, { type: 'application/zip' });
+        }
+    };
+}
+
+/* ---- pembaca ZIP: hanya membaca daftar isi lalu berkas yang dibutuhkan (tidak memuat seluruh Zip sekaligus) ---- */
+async function _pzZipRead(file) {
+    const size = file.size;
+    if (size < 22) throw new Error('BAD_ZIP');
+    const tailLen = Math.min(size, 65557);
+    const tail = new Uint8Array(await file.slice(size - tailLen, size).arrayBuffer());
+    const tdv = new DataView(tail.buffer);
+    let e = -1;
+    for (let i = tail.length - 22; i >= 0; i--) {
+        if (tdv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+    }
+    if (e < 0) throw new Error('BAD_ZIP');
+    const total = tdv.getUint16(e + 10, true);
+    const cdSize = tdv.getUint32(e + 12, true);
+    const cdOff = tdv.getUint32(e + 16, true);
+    if (total === 0xFFFF || cdOff === 0xFFFFFFFF) throw new Error('ZIP64');
+    const cd = new Uint8Array(await file.slice(cdOff, cdOff + cdSize).arrayBuffer());
+    const dv = new DataView(cd.buffer);
+    const dec = new TextDecoder('utf-8');
+    const map = new Map();
+    let p = 0;
+    for (let n = 0; n < total; n++) {
+        if (p + 46 > cd.length || dv.getUint32(p, true) !== 0x02014b50) break;
+        const flags = dv.getUint16(p + 8, true);
+        const method = dv.getUint16(p + 10, true);
+        const crc = dv.getUint32(p + 16, true);
+        const csize = dv.getUint32(p + 20, true);
+        const usize = dv.getUint32(p + 24, true);
+        const nl = dv.getUint16(p + 28, true);
+        const el = dv.getUint16(p + 30, true);
+        const cl = dv.getUint16(p + 32, true);
+        const off = dv.getUint32(p + 42, true);
+        const name = dec.decode(cd.subarray(p + 46, p + 46 + nl));
+        map.set(name, { flags: flags, method: method, crc: crc, csize: csize, usize: usize, off: off });
+        p += 46 + nl + el + cl;
+    }
+    return map;
+}
+async function _pzZipEntry(file, ent) {
+    if (ent.flags & 1) throw new Error('ENCRYPTED');
+    const lh = new DataView(await file.slice(ent.off, ent.off + 30).arrayBuffer());
+    if (lh.byteLength < 30 || lh.getUint32(0, true) !== 0x04034b50) throw new Error('BAD_ZIP');
+    const start = ent.off + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+    let raw = new Uint8Array(await file.slice(start, start + ent.csize).arrayBuffer());
+    if (ent.method === 8) {
+        if (typeof DecompressionStream === 'undefined') throw new Error('NO_DECOMPRESS');
+        raw = await _pzInflate(raw);
+    } else if (ent.method !== 0) {
+        throw new Error('BAD_METHOD');
+    }
+    if (raw.length !== ent.usize || _pzCrc32(raw) !== ent.crc) throw new Error('BAD_CRC');
+    return raw;
+}
+
+/* ---- ekstraksi: string data: besar diganti penanda, aslinya jadi berkas di Zip ---- */
+function _pzExtract(v, ctx) {
+    if (typeof v === 'string') {
+        if (v.startsWith(_PZ_REF)) return _PZ_REF + 'e:' + v;
+        if (v.length >= _PZ_MIN_LEN && v.startsWith('data:')) {
+            const comma = v.indexOf(',');
+            if (comma > 0 && comma < 200) {
+                let idx = ctx.map.get(v);
+                if (idx === undefined) {
+                    idx = ctx.list.length;
+                    ctx.list.push(v);
+                    ctx.map.set(v, idx);
+                }
+                ctx.orig += v.length;
+                return _PZ_REF + idx;
+            }
+        }
+        return v;
+    }
+    if (Array.isArray(v)) {
+        const a = new Array(v.length);
+        for (let i = 0; i < v.length; i++) a[i] = _pzExtract(v[i], ctx);
+        return a;
+    }
+    if (v && typeof v === 'object') {
+        const proto = Object.getPrototypeOf(v);
+        if (proto !== Object.prototype && proto !== null) return v;
+        const o = {};
+        for (const k in v) {
+            if (Object.prototype.hasOwnProperty.call(v, k)) o[k] = _pzExtract(v[k], ctx);
+        }
+        return o;
+    }
+    return v;
+}
+
+async function _pzBuildProjectZip(p, fontBlobs) {
+    const ctx = { map: new Map(), list: [], orig: 0 };
+    const root = {
+        app: 'StudioPosterMakerPro',
+        format: 'poster-zip',
+        v: 1,
+        appVersion: APP_VERSION,
+        project: _pzExtract(p, ctx),
+        fontBlobs: (fontBlobs || []).map(function (fb) { return { name: fb.name, data: _pzExtract(fb.data, ctx) }; }),
+        assets: []
+    };
+    const zw = _pzZipWriter();
+    const enc = new TextEncoder();
+    const dec = new TextDecoder('utf-8', { ignoreBOM: true });
+    for (let i = 0; i < ctx.list.length; i++) {
+        const str = ctx.list[i];
+        const comma = str.indexOf(',');
+        const head = str.slice(0, comma + 1);
+        const body = str.slice(comma + 1);
+        const mime = (/^data:([^;,]*)/.exec(head) || [])[1] || '';
+        let bytes = null, mode = '';
+        if (/;base64,$/i.test(head) && body.length % 4 === 0 && /^[A-Za-z0-9+\/]*={0,2}$/.test(body)) {
+            try {
+                const u = _pzB64ToBytes(body);
+                if (_pzBytesToB64(u) === body) { bytes = u; mode = 'b64'; }
+            } catch (e) { }
+        }
+        if (!mode) {
+            const tb = enc.encode(str);
+            if (dec.decode(tb) === str) { bytes = tb; mode = 'raw'; }
+        }
+        if (!mode) {
+            root.assets.push({ m: 'inline', s: str });
+        } else {
+            let ext = 'txt', comp = true;
+            if (mode === 'b64') { const mi = _pzMimeInfo(mime); ext = mi.ext; comp = mi.comp; }
+            const name = 'assets/' + String(i + 1).padStart(4, '0') + '.' + ext;
+            await zw.add(name, bytes, comp);
+            root.assets.push(mode === 'b64' ? { f: name, m: 'b64', h: head } : { f: name, m: 'raw' });
+        }
+        bytes = null;
+        ctx.list[i] = null;
+    }
+    const json = JSON.stringify(root);
+    await zw.add('project.json', enc.encode(json), true);
+    return { blob: zw.finish(), origBytes: ctx.orig + json.length };
+}
+
+/* ---- pemulihan ---- */
+function _pzCollectRefs(v, set) {
+    if (typeof v === 'string') {
+        if (v.startsWith(_PZ_REF) && !v.startsWith(_PZ_REF + 'e:')) set.add(parseInt(v.slice(_PZ_REF.length), 10));
+    } else if (Array.isArray(v)) {
+        for (let i = 0; i < v.length; i++) _pzCollectRefs(v[i], set);
+    } else if (v && typeof v === 'object') {
+        for (const k of Object.keys(v)) _pzCollectRefs(v[k], set);
+    }
+}
+function _pzApply(v, cache) {
+    if (typeof v === 'string') {
+        if (v.startsWith(_PZ_REF)) {
+            const rest = v.slice(_PZ_REF.length);
+            if (rest.startsWith('e:')) return rest.slice(2);
+            return cache.get(parseInt(rest, 10));
+        }
+        return v;
+    }
+    if (Array.isArray(v)) {
+        for (let i = 0; i < v.length; i++) v[i] = _pzApply(v[i], cache);
+        return v;
+    }
+    if (v && typeof v === 'object') {
+        for (const k of Object.keys(v)) v[k] = _pzApply(v[k], cache);
+        return v;
+    }
+    return v;
+}
+async function _pzLoadAsset(file, entries, root, idx) {
+    const a = root.assets && root.assets[idx];
+    if (!a) throw new Error('BAD_REF');
+    if (a.m === 'inline') return a.s;
+    const ent = entries.get(a.f);
+    if (!ent) throw new Error('BAD_REF');
+    const bytes = await _pzZipEntry(file, ent);
+    if (a.m === 'b64') return a.h + _pzBytesToB64(bytes);
+    return new TextDecoder('utf-8', { ignoreBOM: true }).decode(bytes);
+}
+async function _pzReadProjectZip(file, opt) {
+    opt = opt || {};
+    const entries = await _pzZipRead(file);
+    const pj = entries.get('project.json');
+    if (!pj) throw new Error('NOT_POSTER_ZIP');
+    const root = JSON.parse(new TextDecoder('utf-8').decode(await _pzZipEntry(file, pj)));
+    if (!root || root.format !== 'poster-zip' || !root.project) throw new Error('NOT_POSTER_ZIP');
+    if (opt.onlyFirstSlide && Array.isArray(root.project.slides)) root.project.slides = root.project.slides.slice(0, 1);
+    const fontBlobs = opt.skipFonts ? [] : (Array.isArray(root.fontBlobs) ? root.fontBlobs : []);
+    const refs = new Set();
+    _pzCollectRefs(root.project, refs);
+    _pzCollectRefs(fontBlobs, refs);
+    const cache = new Map();
+    for (const idx of refs) cache.set(idx, await _pzLoadAsset(file, entries, root, idx));
+    return { project: _pzApply(root.project, cache), fontBlobs: _pzApply(fontBlobs, cache) };
+}
+function _pzErrMsg(err) {
+    const m = (err && err.message) || '';
+    if (m === 'BAD_CRC') return 'isi Zip rusak (CRC tidak cocok)';
+    if (m === 'NO_DECOMPRESS') return 'browser belum mendukung Zip, perbarui browser';
+    if (m === 'NOT_POSTER_ZIP') return 'Zip ini bukan file projek Maker Pro';
+    if (m === 'BAD_ZIP' || m === 'BAD_METHOD' || m === 'ZIP64') return 'file Zip tidak dikenali';
+    if (m === 'ENCRYPTED') return 'Zip berpassword tidak didukung';
+    if (m === 'BAD_REF') return 'ada berkas gambar yang hilang di dalam Zip';
+    return '';
+}
+
+async function handleProjectImport(e) {
+    const inp = e.target;
+    const files = inp.files ? Array.from(inp.files) : [];
+    if (files.length === 0) return;
+
+    showToast('⏳ Mengimpor projek...');
+    let imported = 0, failed = 0, lastId = null;
+
+    try {
+        for (let n = 0; n < files.length; n++) {
+            const file = files[n];
+            try {
+                let data = null, fontBlobs = [];
+                const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+                if (head[0] === 0x50 && head[1] === 0x4B) {
+                    showToast('⏳ Membuka Zip (' + (n + 1) + '/' + files.length + ')...', 4000);
+                    const r = await _pzReadProjectZip(file);
+                    data = r.project;
+                    fontBlobs = r.fontBlobs || [];
+                } else {
+                    data = JSON.parse(await file.text());
+                }
+                if (!data || !data.id || !data.slides) throw new Error('Format tidak valid');
+
+                data.id = 'proj_import_' + Date.now() + Math.floor(Math.random() * 1000);
+                data.name = data.name + ' (Impor)';
+                data.updatedAt = Date.now();
+
+                await saveProjectToDB(data);
+                for (const fb of fontBlobs) {
+                    if (!fb || !fb.name || !fb.data) continue;
+                    try {
+                        await putFontBlobToDB({ key: data.id + '::' + fb.name, projId: data.id, name: fb.name, data: fb.data });
+                    } catch (er) { console.warn('Gagal simpan font impor', er); }
+                }
+                imported++;
+                lastId = data.id;
+            } catch (err) {
+                console.error(err);
+                failed++;
+                const why = _pzErrMsg(err);
+                showToast('⚠️ Gagal mengimpor file: ' + file.name + (why ? ' (' + why + ')' : ''), 4000);
+                await new Promise(r => setTimeout(r, 900));
+            }
+        }
+    } finally {
+        try { inp.value = ''; } catch (er) { }
+    }
+
+    if (lastId) {
+        await loadProjectById(lastId);
+        await renderProjectList();
+        showToast(`📥 ${imported} Projek berhasil diimpor!` + (failed ? ' (' + failed + ' file gagal)' : ''));
+    }
 }
 
 function openDownloadModal() {
