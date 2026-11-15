@@ -1,14 +1,13 @@
 <!--
-Studio Poster Maker Pro - Update v2.4.9
+Studio Poster Maker Pro - Update v2.5.1
 
-v2.4.9:
-1. BLOK TEKS TIDAK LAGI HILANG SAAT DIGULIR: penyebabnya maskot dzikir (dz-pet) tidak tahu bahwa panel seperti Materi/Notebook, Bookmark, atau pratinjau Bibliografi sedang terbuka (daftar modal yang dipantaunya cuma 3 popup miliknya sendiri), jadi ia terus "berjalan-jalan" bebas di layar dan bisa melintas tepat di atas teks yang sedang kamu blok, mencuri sebagian sentuhan saat jari menggulir sehingga seleksi OS batal. Sekarang maskot otomatis berhenti total & tidak bisa disentuh selama panel/materi apa pun sedang terbuka, jadi blok kalimat panjang tetap menetap sampai kamu lepas jari, untuk semua tempat yang menampilkan teks (materi, catatan, saat mengedit, dll).
-2. TOOL PILIH WARNA (Manual & Otomatis) + CEK MUDAH DIBACA KINI LEBIH PINTAR: sebelumnya kalau background terlalu campur sehingga tidak ada satu pun warna teks polos yang lulus kontras, aplikasi cuma menampilkan pesan umum "tambahkan stabilo/bayangan" tanpa kepastian warna apa. Sekarang di kondisi itu aplikasi MENGHITUNG sendiri kombinasi stabilo (warna + transparansi seminim mungkin) dan warna teks yang DIJAMIN lulus kontras secara matematis terhadap seluruh area di bawah teks, lalu bisa langsung diterapkan dengan satu ketukan — berlaku di tool Cek Mudah Dibaca maupun di bagian "Untuk TEKS" pada Pilih Warna Otomatis. Tombol panduan (i) di kedua tool disinkronkan agar menjelaskan cara baru ini.
+v2.5.1:
+1. URUTAN TOOL SERAGAM & BERKATEGORI: bilah tool bawah kini tersusun dalam kategori profesional dengan lencana ikon emas-abu di awal tiap kategori. Saat tidak ada yang dipilih (Beranda): Sisipkan, Bentuk, Kanvas, Lapisan, Salin & Tempel. Saat Teks / Foto / Bentuk / Fade / Tabel / Bagan dipilih: Posisi, Edit, Teks, Foto, Warna, Cahaya, Efek, Manipulasi, Lapisan, Salin & Hapus. Tool yang sama kini selalu berada di urutan & kategori yang sama di semua jenis elemen (misal Posisi selalu paling depan setelah Beranda).
+2. Ketuk lencana kategori untuk melompat ke kategori berikutnya. Fungsi tiap tombol tidak diubah, hanya urutan dan pengelompokan.
 
-v2.4.8:
-1. EDIT TEKS DEKAT TEPI KIRI/KANAN DIPERBAIKI: bar vertikal kiri & kanan (zoom, navigasi) ternyata selalu "melayang" di atas kanvas akibat konflik stacking-context (transform di artboard vs z-index di bar), jadi sentuhan untuk menaruh kursor di kata dekat tepi malah kena tombol bar itu (tanpa sengaja memicu pan/zoom) -> kanvas terlihat "lompat kembali" dan editor kehilangan fokus (keyboard tertutup). Kini saat mengetik langsung di kanvas, kedua bar otomatis memudar & tidak menangkap sentuhan, sehingga seluruh lebar teks bisa disentuh dan diedit dengan nyaman.
-2. KANVAS TIDAK LAGI RESET SAAT KEYBOARD MUNCUL/HILANG: sebelumnya setiap kali keyboard HP muncul/hilang di tengah proses mengetik, aplikasi menghitung ulang & menskalakan ulang kanvas (event resize bawaan browser), sehingga kotak edit yang sudah dibuka di posisi lama jadi tidak sinkron dan terasa "kembali sendiri". Sekarang perhitungan ulang itu ditunda selama sedang mengetik langsung, dan baru disinkronkan sekali secara rapi saat selesai mengetik.
-3. KOTAK EDIT TEKS KINI BISA DIGULIR (tidak lagi memanjang tanpa batas ke bawah): untuk teks panjang, tinggi kotak edit dibatasi secukupnya mengikuti ruang kanvas yang tersedia, dan isinya bisa digulir ke bawah sambil mengetik (kursor otomatis ikut terlihat), jadi tidak perlu lagi menggeser seluruh kanvas untuk mencapai baris paling bawah.
+v2.5.0:
+1. KOTAK WARNA & KODE WARNA KINI MENGIKUTI BLOK KATA: di panel Warna (dan Stabilo) saat mode "Blok Kata Terpilih" aktif, kotak warna dan kode hex otomatis berubah sesuai warna kata yang sedang diblok (per kata, per paragraf, Semua, Balik, Bergaya, Rentang), jadi warna dari satu blok bisa langsung disalin (tombol salin) lalu ditempel ke blok lain. Setelah memakai Pipet, memilih lingkaran warna, atau menempel kode, kotak & kode juga langsung ikut berubah. Lingkaran palet yang aktif ikut menyesuaikan.
+2. BLOK BERISI LEBIH DARI SATU WARNA: muncul catatan "Blok berisi N warna berbeda" lengkap dengan lingkaran semua warna yang ada di blok. Ketuk salah satu lingkaran untuk menampilkannya di kotak & kode (siap disalin / dipipet) tanpa mengubah poster; kotak & kode tetap di warna sebelumnya sampai kamu memilih salah satu. Menerapkan warna baru (pipet / palet / tempel) tetap berlaku ke seluruh kata terblok seperti biasa.
 -->
 
 
@@ -198,6 +197,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .ic-i{display:inline-block;vertical-align:-3px;margin-right:6px;width:16px;height:16px;}
 .tool-btn:hover,.tool-btn.active{background:rgba(212,175,55,.15);color:#D4AF37;}
 .tool-btn.home-btn{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;}
+/* v2.5.1: lencana kategori tool (garis emas-abu) */
+.tb-cat{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:54px;min-width:46px;padding:0 9px 0 11px;margin-left:4px;border-left:1px solid;border-image:linear-gradient(to bottom,rgba(212,175,55,0),rgba(212,175,55,.8),rgba(212,175,55,0)) 1;background:linear-gradient(90deg,rgba(212,175,55,.09),rgba(212,175,55,0));cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
+.tb-cat .ic{width:17px;height:17px;color:#a3a3a3;--ic-a:#D4AF37;}
+.tb-cat span{font-size:8px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#a99a6a;white-space:nowrap;line-height:1;}
+.tb-cat:active{background:rgba(212,175,55,.2);}
 .tool-panel{position:absolute;bottom:62px;left:0;right:0;max-height:380px;background:#181818;border-top:1px solid rgba(212,175,55,.3);border-radius:18px 18px 0 0;z-index:185;padding:14px 16px;box-shadow:0 -10px 30px rgba(0,0,0,.85);display:none;flex-direction:column;overflow-y:auto;gap:12px;animation:slideUpPanel .25s cubic-bezier(.16,1,.3,1);}
 .tool-panel.active{display:flex;}
 @keyframes slideUpPanel{from{transform:translateY(100%);}to{transform:translateY(0);}}
@@ -234,6 +238,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .color-palette-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0;}
 .color-circle{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex-shrink:0;cursor:pointer;}
 .color-circle.active{border-color:#D4AF37;transform:scale(1.2);}
+.wb-colornote{margin:6px 0 2px;padding:6px 8px;border:1px solid rgba(212,175,55,.45);border-radius:8px;background:rgba(212,175,55,.08);font-size:11px;color:#e8d9a0;line-height:1.4;}
+.wb-colornote.ok{border-color:rgba(255,255,255,.12);background:transparent;color:#9aa0a6;}
+.wb-cn-sw{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.wb-cn-c{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0;flex-shrink:0;color:#ff6b6b;font-size:10px;line-height:1;}
+.wb-cn-c.on{border-color:#D4AF37;transform:scale(1.15);}
 .stepper-row{display:flex;align-items:center;gap:8px;margin-top:4px;}
 .btn-step{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 .btn-step:hover{background:#D4AF37;color:#111;}
@@ -1112,6 +1121,20 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 <symbol id="ic-unite" viewBox="0 0 24 24"><circle cx='9' cy='12' r='5'/><circle class='ic-a' cx='15' cy='12' r='5'/></symbol>
 <symbol id="ic-resize" viewBox="0 0 24 24"><path class='ic-a' d='M20 8.5L8.5 20M20 14.5L14.5 20'/><path d='M20 20v0'/></symbol>
 <symbol id="ic-lifebuoy" viewBox="0 0 24 24"><circle cx='12' cy='12' r='9'/><circle cx='12' cy='12' r='3.6'/><path class='ic-a' d='M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9'/></symbol>
+<symbol id="ic-cat-insert" viewBox="0 0 24 24"><rect x='3.5' y='3.5' width='17' height='17' rx='4'/><path class='ic-a' d='M12 8v8M8 12h8'/></symbol>
+<symbol id="ic-cat-shape" viewBox="0 0 24 24"><circle cx='8.5' cy='8.5' r='4.5'/><rect class='ic-a' x='11' y='11' width='9' height='9' rx='1.6'/></symbol>
+<symbol id="ic-cat-move" viewBox="0 0 24 24"><path d='M12 3v18M3 12h18'/><path class='ic-a' d='M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3'/></symbol>
+<symbol id="ic-cat-edit" viewBox="0 0 24 24"><path d='M4 20l1-4.5L16.5 4a2 2 0 0 1 3 3L8 18.5z'/><path class='ic-a' d='M14.5 6l3.5 3.5'/></symbol>
+<symbol id="ic-cat-text" viewBox="0 0 24 24"><path d='M5 6V4.5h14V6M12 4.5V20'/><path class='ic-a' d='M9 20h6'/></symbol>
+<symbol id="ic-cat-photo" viewBox="0 0 24 24"><rect x='3.5' y='5' width='17' height='14' rx='2.5'/><circle class='ic-a' cx='9' cy='10' r='1.8'/><path d='M4 17l5-4.5 3.5 3 3-2.5 4.5 4'/></symbol>
+<symbol id="ic-cat-color" viewBox="0 0 24 24"><path d='M12 3.5s6 6.2 6 10.5a6 6 0 0 1-12 0C6 9.7 12 3.5 12 3.5z'/><path class='ic-a' d='M9 14.5a3 3 0 0 0 3 3'/></symbol>
+<symbol id="ic-cat-light" viewBox="0 0 24 24"><circle cx='12' cy='12' r='4'/><path class='ic-a' d='M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8'/></symbol>
+<symbol id="ic-cat-fx" viewBox="0 0 24 24"><path d='M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z'/><circle class='ic-af' cx='18.5' cy='18' r='1.6'/></symbol>
+<symbol id="ic-cat-manip" viewBox="0 0 24 24"><path d='M4 19C4 9 10 5 20 5'/><rect class='ic-a' x='2.5' y='17.5' width='3' height='3' rx='.6'/><rect class='ic-a' x='18.5' y='3.5' width='3' height='3' rx='.6'/></symbol>
+<symbol id="ic-cat-canvas" viewBox="0 0 24 24"><rect x='4' y='3.5' width='16' height='17' rx='2'/><path class='ic-a' d='M4 9h16M9 9v11.5'/></symbol>
+<symbol id="ic-cat-layers" viewBox="0 0 24 24"><path d='M12 4l8.5 4.2L12 12.4 3.5 8.2z'/><path class='ic-a' d='M3.5 12.2L12 16.4l8.5-4.2M3.5 16L12 20.2l8.5-4.2'/></symbol>
+<symbol id="ic-cat-copy" viewBox="0 0 24 24"><rect x='9' y='9' width='11' height='11' rx='2.2'/><path class='ic-a' d='M4 14V6.5A2.5 2.5 0 0 1 6.5 4H14'/></symbol>
+<symbol id="ic-cat-more" viewBox="0 0 24 24"><circle class='ic-af' cx='6' cy='12' r='1.6'/><circle class='ic-af' cx='12' cy='12' r='1.6'/><circle class='ic-af' cx='18' cy='12' r='1.6'/></symbol>
 </defs></svg>
 
 <header class="top-navbar">
@@ -2276,7 +2299,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.4.9';
+const APP_VERSION = 'v2.5.1';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -4113,18 +4136,19 @@ function getColorPickerHTML(currentValue, onChangeFuncName, allowTransparent = t
     let html = `
     <div class="ctrl-row" style="flex-wrap:wrap;row-gap:6px;">
         <span class="ctrl-label">Warna:</span>
-        <button class="btn-sub-tool" style="width:40px;height:30px;background:${currentValue};border:1px solid #fff;border-radius:4px;padding:0;" onclick="openCustomColorPicker('${currentValue}', '${onChangeFuncName}')"></button>
+        <button class="btn-sub-tool" id="wbSw_${onChangeFuncName}" style="width:40px;height:30px;background:${currentValue};border:1px solid #fff;border-radius:4px;padding:0;" onclick="openCustomColorPicker('${currentValue}', '${onChangeFuncName}')"></button>
         <input type="text" value="${currentValue}" onchange="${onChangeFuncName}(this.value)" id="hexInput_${onChangeFuncName}" style="width:75px; background:#222; color:#fff; border:1px solid #D4AF37; border-radius:4px; padding:4px; font-size:11px; text-transform:uppercase;">
         ${colorCopyPasteHTML("copyColorFromEl('hexInput_"+onChangeFuncName+"')", "pasteColorTo('"+onChangeFuncName+"')")}
         <button class="btn-sub-tool active" onclick="openHandledLoupe(${onChangeFuncName})" style="padding:4px 8px;">🧪 Pipet</button>
     </div>
+    <div id="wbColorNote_${onChangeFuncName}" class="wb-colornote" style="display:none"></div>
     <div class="color-palette-scroll" style="margin-top:8px;">
     `;
     if(allowTransparent) {
         html += `<div class="color-circle" style="background:#222;color:#ff6b6b;display:flex;align-items:center;justify-content:center;font-size:10px;" onclick="${onChangeFuncName}('transparent')">✕</div>`;
     }
     QUICK_COLORS.forEach(c => {
-        html += `<div class="color-circle ${currentValue===c?'active':''}" style="background:${c};" onclick="${onChangeFuncName}('${c}')"></div>`;
+        html += `<div class="color-circle ${currentValue===c?'active':''}" data-c="${c}" style="background:${c};" onclick="${onChangeFuncName}('${c}')"></div>`;
     });
     html += `</div>`;
     return html;
@@ -7600,10 +7624,73 @@ function _xslCommit(el,idx){
 }
 
 function _brandHtml(){return '<div class="brand-tail"><span class="bt-mark"><b>M</b></span><span class="bt-text"><span class="bt-name">Digital Dakwah Developer</span><span class="bt-copy">© 2026 Muhram Nur Surisma</span></span></div>';}
+/* v2.5.1: urutan & kategori tool seragam. Tombol asli tidak diubah, hanya disusun ulang berdasarkan fungsi onclick-nya. */
+const TB_HOME_GROUPS=[
+    {n:'Sisipkan',i:'ic-cat-insert',k:['addNewText','triggerImageUpload','openImageBrowser','openSunnahBrowser','openElementsDrive']},
+    {n:'Bentuk',i:'ic-cat-shape',k:['openPanelAddShape','openPenToolOverlay','openPanelFadeEdge','addNewTable','generateOrgChart']},
+    {n:'Kanvas',i:'ic-cat-canvas',k:['openPanelBackground','openPanelBleed']},
+    {n:'Lapisan',i:'ic-cat-layers',k:['openPanelLayers']},
+    {n:'Salin & Tempel',i:'ic-cat-copy',k:['openMultiCopyModal','openPasteModal']}
+];
+const TB_EL_GROUPS=[
+    {n:'Posisi',i:'ic-cat-move',k:['openPanelPosition','openPanelRelativeSizeAndPos','openPanelRotation','openPanelImageFlip']},
+    {n:'Edit',i:'ic-cat-edit',k:['openDirectCanvasTextEditor','resetTextWarp','openTableEditor','addOrgChild','addOrgSibling','toggleConnectorStyle','openPanelFadeEdge']},
+    {n:'Teks',i:'ic-cat-text',k:['openPanelFontFamily','openPanelTextSizeFull','openPanelSpacing','openPanelTextFormat','openPanelBoxTextFormat','openPanelReadability','openPanelHighlight']},
+    {n:'Foto',i:'ic-cat-photo',k:['openPanelCropImage','openFreeCropModal','openMagicGrabModal','openMagicWandModal','openAiInpaint','openPanelUpscale']},
+    {n:'Warna',i:'ic-cat-color',k:['openPanelTextColor','openPanelShapeColor','openPanelConnectorColor','openPanelTableStyle','openPanelPngColorOverlay','openPanelAdvancedColor']},
+    {n:'Cahaya',i:'ic-cat-light',k:['openPanelAdjustLight','openPanelOpacity','openPanelBlendMode']},
+    {n:'Efek',i:'ic-cat-fx',k:['openPanelAdvancedShadow','openPanelImageBlur','openPanelMotionStreak','openPanelDepthFocus','openPanelImageBorder','openPanelTextSkin','openPanelImageSkinOverlay']},
+    {n:'Manipulasi',i:'ic-cat-manip',k:['openLayerMaskModal','openPerspectiveModal','openEnvelopeModal','openPanelCurveAndSlant','openPanelImageCurve']},
+    {n:'Lapisan',i:'ic-cat-layers',k:['openPanelGroup','openPanelLayers','toggleElementLock']},
+    {n:'Salin & Hapus',i:'ic-cat-copy',k:['copyActiveElement','duplicateActiveElement','openPanelMirrorDup','deleteActiveElement']}
+];
+function _tbCatHtml(name,icon){
+    return '<div class="tb-cat" role="presentation" onclick="_tbJump(this)"><svg class="ic" aria-hidden="true"><use href="#'+icon+'"/></svg><span>'+name+'</span></div>';
+}
+function _tbJump(badge){
+    const bar=document.getElementById('bottomToolbar'); if(!bar) return;
+    const cats=Array.prototype.slice.call(bar.querySelectorAll('.tb-cat'));
+    const t=cats[cats.indexOf(badge)+1]||cats[0];
+    if(t) bar.scrollTo({left:Math.max(0,t.offsetLeft-6),behavior:'smooth'});
+}
+function _tbOrganize(bar,el){
+    const groups=el?TB_EL_GROUPS:TB_HOME_GROUPS;
+    const btns=Array.prototype.filter.call(bar.children,function(n){return n.classList&&n.classList.contains('tool-btn');});
+    if(!btns.length) return;
+    const home=[],pool=new Map(),rest=[];
+    btns.forEach(function(b){
+        if(b.classList.contains('home-btn')){ home.push(b); return; }
+        const m=/^\s*([A-Za-z_$][\w$]*)\s*\(/.exec(b.getAttribute('onclick')||'');
+        const key=m?m[1]:'';
+        if(key&&!pool.has(key)) pool.set(key,b); else rest.push(b);
+    });
+    const seq=[];
+    home.forEach(function(b){ seq.push(b); });
+    groups.forEach(function(g){
+        const ks=g.k.filter(function(k){return pool.has(k);});
+        if(!ks.length) return;
+        seq.push(_tbCatHtml(g.n,g.i));
+        ks.forEach(function(k){ seq.push(pool.get(k)); pool.delete(k); });
+    });
+    const left=[];
+    pool.forEach(function(b){ left.push(b); });
+    rest.forEach(function(b){ left.push(b); });
+    if(left.length){ seq.push(_tbCatHtml('Lainnya','ic-cat-more')); left.forEach(function(b){ seq.push(b); }); }
+    const scrollPos=bar.scrollLeft;
+    const frag=document.createDocumentFragment();
+    seq.forEach(function(x){
+        if(typeof x==='string'){ const t=document.createElement('template'); t.innerHTML=x; frag.appendChild(t.content); }
+        else frag.appendChild(x);
+    });
+    bar.textContent='';
+    bar.appendChild(frag);
+    bar.scrollLeft=scrollPos;
+}
 function renderBottomToolbar(){
     _renderBottomToolbarCore();
     const _bar=document.getElementById('bottomToolbar');
     const _s=getCurrentSlide();
+    try{ if(_bar && !(_s && _s.isDemo)) _tbOrganize(_bar,getActiveElement()); }catch(e){}
     if(_bar && !(_s && _s.isDemo)) _bar.insertAdjacentHTML('beforeend',_brandHtml());
 }
 function _renderBottomToolbarCore(){
@@ -9149,6 +9236,85 @@ debouncedPushHistory();
 
 let lastWordScrollPos = 0;
 let _wbElId = null, _wbRange = false, _wbAnchor = null;
+let _wbPicked = null, _wbMultiCtx = null;
+/* v2.5.0: normalisasi warna agar perbandingan antar kata akurat (hex/rgba -> hex huruf kecil) */
+function _wbNormC(c){
+    if (!c) return '';
+    const s = String(c).trim();
+    if (s.toLowerCase() === 'transparent') return 'transparent';
+    if (!/^(#|rgb|hsl)/i.test(s)) return s.toLowerCase();
+    try {
+        const o = parseColorToRGBAObj(s);
+        return rgbToHex(Math.round(o.r), Math.round(o.g), Math.round(o.b), o.a == null ? 1 : o.a).toLowerCase();
+    } catch (e) { return s.toLowerCase(); }
+}
+/* v2.5.0: warna efektif dari kata-kata yang sedang diblok (prop: 'color' atau 'highlightColor') */
+function wbColorState(el, prop){
+    const base = prop === 'color' ? (el.color || '#ffffff') : (el.highlightColor || 'transparent');
+    const res = { color: base, multi: false, colors: [], active: false, n: 0 };
+    if (!el || !formatWordOnlyMode) return res;
+    _wbSync(el, _wbTokens(el));
+    if (!selectedWordIndices.length) return res;
+    res.active = true; res.n = selectedWordIndices.length;
+    const seen = new Map();
+    selectedWordIndices.forEach(i => {
+        const ws = el.wordStyles && el.wordStyles[i];
+        const raw = (ws && ws[prop]) ? ws[prop] : base;
+        const k = _wbNormC(raw);
+        if (!seen.has(k)) seen.set(k, raw);
+    });
+    res.colors = Array.from(seen.values());
+    if (res.colors.length === 1) res.color = res.colors[0];
+    else if (res.colors.length > 1) res.multi = true;
+    return res;
+}
+/* v2.5.0: sinkronkan kotak warna, kode hex, palet aktif, dan catatan multi-warna dengan blok kata saat ini */
+function wbSyncColorUI(){
+    const el = getActiveElement();
+    if (!el || el.type !== 'text') return;
+    [['setTextColor', 'color'], ['setHighlightColor', 'highlightColor']].forEach(pair => {
+        const fn = pair[0], prop = pair[1];
+        const inp = document.getElementById('hexInput_' + fn);
+        if (!inp) return;
+        const st = wbColorState(el, prop);
+        let shown = st.color;
+        if (st.multi && _wbPicked && _wbPicked.prop === prop) shown = _wbPicked.color;
+        inp.value = shown;
+        const safe = String(shown).replace(/'/g, '');
+        const sw = document.getElementById('wbSw_' + fn);
+        if (sw) { sw.style.background = shown; sw.setAttribute('onclick', "openCustomColorPicker('" + safe + "', '" + fn + "')"); }
+        const sn = _wbNormC(shown);
+        document.querySelectorAll('#panelContent .color-circle[data-c]').forEach(c => c.classList.toggle('active', _wbNormC(c.dataset.c) === sn));
+        const note = document.getElementById('wbColorNote_' + fn);
+        if (!note) return;
+        if (st.multi) {
+            _wbMultiCtx = { prop: prop, colors: st.colors };
+            let sws = '';
+            st.colors.forEach((c, idx) => {
+                const on = _wbNormC(c) === sn ? ' on' : '';
+                const isT = _wbNormC(c) === 'transparent';
+                sws += '<button type="button" class="wb-cn-c' + on + '" title="' + _wbEsc(c) + '" style="background:' + (isT ? '#222' : _wbEsc(c)) + ';" onclick="wbPickBlockColor(' + idx + ')">' + (isT ? '\u2715' : '') + '</button>';
+            });
+            note.className = 'wb-colornote';
+            note.innerHTML = '<div>\u26a0 Blok berisi <b>' + st.colors.length + ' warna berbeda</b>. Ketuk satu warna untuk menampilkannya di kotak &amp; kode (siap disalin / dipipet). Kotak &amp; kode tetap di warna sebelumnya sampai kamu memilih.</div><div class="wb-cn-sw">' + sws + '</div>';
+            note.style.display = 'block';
+        } else if (st.active) {
+            _wbMultiCtx = null;
+            note.className = 'wb-colornote ok';
+            note.innerHTML = 'Kotak &amp; kode warna mengikuti ' + st.n + ' kata yang diblok.';
+            note.style.display = 'block';
+        } else {
+            _wbMultiCtx = null;
+            note.style.display = 'none';
+            note.innerHTML = '';
+        }
+    });
+}
+function wbPickBlockColor(idx){
+    if (!_wbMultiCtx || !_wbMultiCtx.colors[idx]) return;
+    _wbPicked = { prop: _wbMultiCtx.prop, color: _wbMultiCtx.colors[idx] };
+    wbSyncColorUI();
+}
 /* v2.4.7: penomoran kata WAJIB identik dengan getWrappedLines (baris kosong ikut memakai satu nomor) */
 function _wbTokens(el){
     const raw = String(el.text || '').replace(/\r\n?|\u2028|\u2029/g, '\n');
@@ -9242,6 +9408,7 @@ function wbRefresh(){
     w.innerHTML = _wbInner(el);
     const c2 = document.getElementById('wordSelectionContainer');
     if (c2) c2.scrollTop = lastWordScrollPos;
+    _wbPicked = null; wbSyncColorUI();
 }
 function wbBoxClick(e){
     const t = e.target.closest('[data-i],[data-p]');
@@ -9409,7 +9576,7 @@ ${formatWordOnlyMode ? `
 <div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk distabilo:</div>
 ${renderWordSelectionUI()}
 ` : ''}
-${getColorPickerHTML(el.highlightColor||'transparent', 'setHighlightColor')}
+${getColorPickerHTML(wbColorState(el,'highlightColor').color, 'setHighlightColor')}
 <div class="ctrl-row" style="margin-top:12px;"><span class="ctrl-label">Transparansi:</span><span class="ctrl-val" id="valHiAlpha">${curAlpha}%</span></div>
 <div class="stepper-row">
 <button class="btn-step" onclick="stepSliderVal('hiAlphaSlider',-1,updateHighlightAlpha)">-</button>
@@ -9436,7 +9603,7 @@ ${getColorPickerHTML(el.highlightColor||'transparent', 'setHighlightColor')}
 </div>
 <button class="btn-sub-tool" style="width:100%; margin-top:12px;" onclick="resetHighlight()">↺ Reset Stabilo</button>
 `;
-openToolPanel('🖍️ Pengaturan Lengkap Stabilo',html);
+_wbPicked=null;openToolPanel('🖍️ Pengaturan Lengkap Stabilo',html);wbSyncColorUI();
 }
 
 function updateHighlightAlpha(v){const el=getActiveElement();if(!el)return;el.highlightAlpha=parseInt(v)/100;document.getElementById('valHiAlpha').innerText=v+'%';renderAll();debouncedPushHistory();}
@@ -17033,9 +17200,9 @@ ${formatWordOnlyMode ? `
 <div style="font-size:10px;color:#888;margin-bottom:4px;">Pilih kata untuk diwarnai:</div>
 ${renderWordSelectionUI()}
 ` : ''}
-${getColorPickerHTML(el.color||'#ffffff', 'setTextColor', false)}
+${getColorPickerHTML(wbColorState(el,'color').color, 'setTextColor', false)}
 `;
-openToolPanel('Warna Teks',html);
+_wbPicked=null;openToolPanel('Warna Teks',html);wbSyncColorUI();
 }
 function setTextColor(color){
     const el=getActiveElement();if(!el)return;
