@@ -1,13 +1,14 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.5.1
+Arsip Dakwah Manhaj Salaf - Update v2.5.2
+
+v2.5.2:
+1. TOMBOL "AMALAN 12 BULAN": di sebelah tombol Semua (mode grid) kini ada kartu "Amalan 12 Bulan" dengan tanda panah ke bawah. Ketuk untuk membuka panel 12 kategori bulan Hijriah (kotaknya sama dengan kategori lain), ketuk lagi untuk menutup. Di mode ringkas, tombol yang sama diberi tanda panah di kanan dan 12 bulan keluar menyamping dari tombol itu, ketuk lagi untuk menutup. Animasi keluar & masuk perlahan, bulan muncul satu per satu seperti berjalan.
+2. 12 BULAN SELALU TAMPIL & BERURUTAN: Muharram (1) sampai Dzulhijjah (12) selalu tampil berurutan di situs publik walaupun masih 0 poster (tampil redup, otomatis aktif begitu ada poster). Nama bulan memakai penulisan tanpa tanda petik yang sama dengan sistem manifest sebelumnya, dan pencocokannya kebal terhadap variasi petik (Sya'ban, Dzulqa'dah, Rabi'ul, dst). Tambahan: penanda "Bulan ini" otomatis sesuai kalender Hijriah perangkat, hitungan terisi (misal 4/12), dan pesan "segera hadir" bila bulan yang dipilih masih kosong.
 
 v2.5.1:
 1. PENOMORAN VERSI DIMULAI & DISAMAKAN DENGAN MAKER PRO: halaman arsip kini memakai nomor versi yang sama dengan Maker (v2.5.1). Aturan urutan tetap sama: v2.5.1 menjadi v2.5.2, bukan v2.6.0.
 2. MONITOR VERSI: lencana "Versi" ditambahkan tepat di bawah garis emas pada bagian Muhram Nur Surisma - Digital Dakwah Developer, sinkron dengan konstanta APP_VERSION di dalam kode.
 3. PENAMAAN FILE: file halaman arsip di root repo kini bernama arsip.html (bukan index.html), dan cadangan versi memakai pola Arsip_v_2_5_1.html seperti Maker_v_2_5_1.html.
-
-v2.5.0:
-1. Kode dasar halaman arsip sebelum penomoran versi diterapkan (tanpa nomor versi). Seluruh fitur arsip, pencarian, kategori, mode Disimpan / PDF / Semua, dan pembuka Maker Pro tetap sama.
 -->
 
 <!DOCTYPE html>
@@ -316,6 +317,43 @@ v2.5.0:
         .kategori-scroll-compact .card-kategori .icon { font-size: 16px; }
         .kategori-scroll-compact .card-kategori .nama { color: #fff; font-size: 13px; font-weight: 600; text-transform: capitalize; }
         .kategori-scroll-compact .card-kategori .jumlah { color: #D4AF37; font-size: 11px; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 10px; }
+
+
+        /* --- v2.5.2: AMALAN 12 BULAN (toggle + panel animasi) --- */
+        .card-bulan-toggle{position:relative;}
+        .card-bulan-toggle .bulan-chev{display:flex;align-items:center;justify-content:center;height:14px;margin-top:-2px;transition:transform .7s cubic-bezier(.22,.61,.36,1);}
+        .card-bulan-toggle .bulan-chev svg{display:block;animation:chevNudge 2.2s ease-in-out infinite;}
+        .card-bulan-toggle.open .bulan-chev{transform:rotate(180deg);}
+        .card-bulan-toggle.open .bulan-chev svg{animation:none;}
+        .card-bulan-toggle.open,.card-bulan-toggle.has-active{background:rgba(212,175,55,0.15) !important;border-color:#D4AF37 !important;}
+        @keyframes chevNudge{0%,100%{transform:translateY(-1px);opacity:.7;}50%{transform:translateY(2px);opacity:1;}}
+        .bulan-panel{grid-column:1 / -1;display:grid;grid-template-rows:0fr;margin-top:-12px;opacity:0;visibility:hidden;transition:grid-template-rows .8s cubic-bezier(.22,.61,.36,1),margin-top .8s cubic-bezier(.22,.61,.36,1),opacity .55s ease,visibility 0s linear .8s;}
+        .bulan-panel.open{grid-template-rows:1fr;margin-top:0;opacity:1;visibility:visible;transition-delay:0s,0s,0s,0s;}
+        .bulan-panel-inner{overflow:hidden;min-height:0;}
+        .bulan-head{display:flex;align-items:center;gap:10px;padding:4px 2px 12px 2px;}
+        .bulan-head .bh-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(212,175,55,0),rgba(212,175,55,.55));}
+        .bulan-head .bh-line:last-child{background:linear-gradient(90deg,rgba(212,175,55,.55),rgba(212,175,55,0));}
+        .bulan-head .bh-title{color:#D4AF37;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;}
+        .bulan-head .bh-count{color:#8a8a8a;font-size:10px;font-weight:700;letter-spacing:.08em;white-space:nowrap;}
+        .bulan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;padding-bottom:6px;}
+        .bulan-item{display:flex;opacity:0;transform:translateX(-18px) scale(.97);transition:opacity .6s ease,transform .75s cubic-bezier(.22,.61,.36,1);transition-delay:calc((11 - var(--i,0)) * 25ms);}
+        .bulan-item .card-kategori{flex:1;min-width:0;position:relative;}
+        .bulan-panel.open .bulan-item,.bulan-chips-wrap.open .bulan-item{opacity:1;transform:none;transition-delay:calc(var(--i,0) * 80ms + 220ms);}
+        .card-kategori.is-empty{opacity:.6;border-style:dashed !important;}
+        .card-kategori.is-empty .jumlah{color:#8a7a45 !important;}
+        .card-kategori.is-now{box-shadow:0 0 0 1px rgba(212,175,55,.5),0 0 14px rgba(212,175,55,.18);}
+        .bulan-now{position:absolute;top:6px;right:8px;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#111;background:#D4AF37;padding:2px 6px;border-radius:8px;line-height:1.2;}
+        .kategori-scroll-compact .card-bulan-toggle-c .bulan-chev-c{display:inline-block;color:#D4AF37;font-size:18px;line-height:1;font-weight:700;margin-left:2px;transition:transform .7s cubic-bezier(.22,.61,.36,1);}
+        .kategori-scroll-compact .card-bulan-toggle-c.open .bulan-chev-c{transform:rotate(180deg);}
+        .kategori-scroll-compact .card-bulan-toggle-c.open,.kategori-scroll-compact .card-bulan-toggle-c.has-active{background:rgba(212,175,55,0.2);border-color:#D4AF37;}
+        .bulan-chips-wrap{display:grid;grid-template-columns:0fr;margin-left:-10px;opacity:0;visibility:hidden;transition:grid-template-columns .85s cubic-bezier(.22,.61,.36,1),margin-left .85s cubic-bezier(.22,.61,.36,1),opacity .55s ease,visibility 0s linear .85s;}
+        .bulan-chips-wrap.open{grid-template-columns:1fr;margin-left:0;opacity:1;visibility:visible;transition-delay:0s,0s,0s,0s;}
+        .bulan-chips-inner{overflow:hidden;min-width:0;}
+        .bulan-chips-row{display:flex;flex-wrap:nowrap;gap:10px;width:max-content;}
+        .kategori-scroll-compact .bulan-item .card-kategori.is-now::after{content:'';position:absolute;top:5px;right:7px;width:6px;height:6px;border-radius:50%;background:#D4AF37;box-shadow:0 0 6px rgba(212,175,55,.9);}
+        .kategori-scroll-compact .bulan-item .card-kategori{position:relative;}
+        .empty-kat-info{display:none;margin:0 0 18px 0;padding:16px 18px;text-align:center;color:#d8c98a;font-size:13px;line-height:1.6;border:1px dashed rgba(212,175,55,.45);border-radius:16px;background:rgba(212,175,55,.06);}
+        @media (prefers-reduced-motion:reduce){.bulan-panel,.bulan-chips-wrap,.bulan-item,.card-bulan-toggle .bulan-chev,.card-bulan-toggle-c .bulan-chev-c{transition-duration:.01s !important;transition-delay:0s !important;}.card-bulan-toggle .bulan-chev svg{animation:none;}}
 
         body.is-compact .kategori-grid-ori { display: none; }
         body.is-compact .kategori-scroll-compact { display: block; }
@@ -879,7 +917,7 @@ v2.5.0:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.1</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.2</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -957,7 +995,7 @@ v2.5.0:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.5.1';
+        const APP_VERSION = 'v2.5.2';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
         function startLiveClock() {
@@ -1062,6 +1100,86 @@ v2.5.0:
 
         let kategoriData = {};
         let kategoriAktif = null;
+        /* v2.5.2: daftar 12 bulan Hijriah (tanpa tanda petik, sama dengan penulisan resmi di manifest) */
+        const BULAN_LIST = ['Muharram (1)','Safar (2)','Rabiul Awwal (3)','Rabiul Akhir (4)','Jumadil Awwal (5)','Jumadil Akhir (6)','Rajab (7)','Syaban (8)','Ramadhan (9)','Syawwal (10)','Dzulqadah (11)','Dzulhijjah (12)'];
+        const BULAN_BASE = [['muharram'],['safar'],['rabiul awwal','rabiul awal'],['rabiul akhir'],['jumadil awwal','jumadil awal'],['jumadil akhir'],['rajab'],['syaban'],['ramadhan'],['syawwal','syawal'],['dzulqadah'],['dzulhijjah']];
+        let bulanOpen = false;
+        function bulanIndexOf(nama) {
+            const k = String(nama == null ? '' : nama).toLowerCase().replace(/['\u2019\u2018\u02bb`]/g, '').replace(/\s*\(\d+\)\s*$/, '').replace(/\s+/g, ' ').trim();
+            for (let i = 0; i < BULAN_BASE.length; i++) { if (BULAN_BASE[i].indexOf(k) !== -1) return i; }
+            return -1;
+        }
+        function escAttrBulan(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function bulanSekarang() {
+            try {
+                const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { month: 'numeric' }).formatToParts(new Date());
+                const m = parts.find(function(p) { return p.type === 'month'; });
+                const n = parseInt(m && m.value, 10);
+                return (n >= 1 && n <= 12) ? n - 1 : -1;
+            } catch (e) { return -1; }
+        }
+        function buildBulanData() {
+            const found = new Array(12).fill(null);
+            Object.keys(kategoriData).forEach(function(nama) {
+                const bi = bulanIndexOf(nama);
+                if (bi >= 0 && found[bi] === null) found[bi] = nama;
+            });
+            return BULAN_LIST.map(function(canon, i) {
+                const actual = found[i] !== null ? found[i] : canon;
+                return { i: i, nama: actual, jumlah: found[i] !== null ? kategoriData[found[i]] : 0 };
+            });
+        }
+        function bulanCardHtml(b, compact, now) {
+            const icon = emojiMapGlobal[b.nama.toLowerCase()] || emojiMapGlobal[b.nama] || '\uD83C\uDF19';
+            const cls = 'card-kategori' + (b.jumlah === 0 ? ' is-empty' : '') + (b.i === now ? ' is-now' : '');
+            const jml = compact ? String(b.jumlah) : (b.jumlah + ' Poster');
+            const badge = (!compact && b.i === now) ? '<span class="bulan-now">Bulan ini</span>' : '';
+            return '<div class="bulan-item" style="--i:' + b.i + '"><div class="' + cls + '" data-bulan-card="1" data-nama="' + escAttrBulan(b.nama) + '" onclick="filterKategori(this.dataset.nama, this)">' + badge + '<span class="icon">' + icon + '</span><span class="nama">' + escAttrBulan(b.nama) + '</span><span class="jumlah">' + jml + '</span></div></div>';
+        }
+        function toggleBulan(force) {
+            bulanOpen = (typeof force === 'boolean') ? force : !bulanOpen;
+            ['bulanPanel', 'bulanChipsWrap', 'bulanToggleOri', 'bulanToggleCompact'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('open', bulanOpen);
+            });
+            ['bulanToggleOri', 'bulanToggleCompact'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('aria-expanded', bulanOpen ? 'true' : 'false');
+            });
+            if (!bulanOpen) return;
+            if (isCompactView) {
+                setTimeout(function() { const t = document.getElementById('bulanToggleCompact'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' }); }, 60);
+            } else {
+                setTimeout(function() { const p = document.getElementById('bulanPanel'); if (p && p.scrollIntoView) p.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 900);
+            }
+        }
+        function syncBulanState() {
+            const on = kategoriAktif !== null && bulanIndexOf(kategoriAktif) >= 0;
+            ['bulanToggleOri', 'bulanToggleCompact'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('has-active', on);
+            });
+            document.querySelectorAll('[data-bulan-card]').forEach(function(c) {
+                c.classList.toggle('active', on && c.dataset.nama === kategoriAktif);
+            });
+        }
+        function updateEmptyKatInfo() {
+            const list = document.getElementById('post-list');
+            if (!list) return;
+            let box = document.getElementById('empty-kat-info');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'empty-kat-info';
+                box.className = 'empty-kat-info';
+                list.parentNode.insertBefore(box, list);
+            }
+            if (kategoriAktif !== null && !kategoriData[kategoriAktif]) {
+                box.textContent = 'Poster untuk kategori "' + kategoriAktif + '" belum tersedia. Segera hadir, insyaAllah.';
+                box.style.display = 'block';
+            } else {
+                box.style.display = 'none';
+            }
+        }
         let berandaModeAktif = 'all'; // 'all', 'pdf', 'fav'
         let semuaPosterCache = [];
         let isCompactView = false;
@@ -1181,6 +1299,7 @@ v2.5.0:
             kategoriAktif = null;
             document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.card-kategori-all').forEach(el => el.classList.add('active'));
+            syncBulanState();
             switchBerandaMode('all'); 
         }
 
@@ -1207,6 +1326,7 @@ v2.5.0:
                     p.style.display = 'none';
                 }
             });
+            updateEmptyKatInfo();
         }
 
         function downloadFile(url, nama) {
@@ -1387,7 +1507,42 @@ v2.5.0:
                     <span class="jumlah">${totalPoster}</span>
                 </div>`;
 
+            /* v2.5.2: Amalan 12 Bulan (toggle di sebelah Semua, panel 12 bulan selalu tampil berurutan) */
+            const bulanData = buildBulanData();
+            const bulanNow = bulanSekarang();
+            const bulanTotal = bulanData.reduce(function(s, b) { return s + b.jumlah; }, 0);
+            const bulanTerisi = bulanData.filter(function(b) { return b.jumlah > 0; }).length;
+            htmlKategoriOri += `
+                <div class="card-kategori card-bulan-toggle" id="bulanToggleOri" role="button" aria-expanded="${bulanOpen}" onclick="toggleBulan()">
+                    <span class="icon">\uD83C\uDF19</span>
+                    <span class="nama">Amalan 12 Bulan</span>
+                    <span class="jumlah">${bulanTotal} Poster</span>
+                    <span class="bulan-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D4AF37" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+                </div>
+                <div class="bulan-panel${bulanOpen ? ' open' : ''}" id="bulanPanel">
+                    <div class="bulan-panel-inner">
+                        <div class="bulan-head"><span class="bh-line"></span><span class="bh-title">\uD83C\uDF19 Amalan 12 Bulan Hijriah</span><span class="bh-count">${bulanTerisi}/12 terisi</span><span class="bh-line"></span></div>
+                        <div class="bulan-grid">${bulanData.map(function(b) { return bulanCardHtml(b, false, bulanNow); }).join('')}</div>
+                    </div>
+                </div>`;
+            htmlKategoriCompact += `
+                <div class="card-kategori card-bulan-toggle-c" id="bulanToggleCompact" role="button" aria-expanded="${bulanOpen}" onclick="toggleBulan()">
+                    <span class="icon">\uD83C\uDF19</span>
+                    <span class="nama">Amalan 12 Bulan</span>
+                    <span class="jumlah">${bulanTotal}</span>
+                    <span class="bulan-chev-c">&rsaquo;</span>
+                </div>
+                <div class="bulan-chips-wrap${bulanOpen ? ' open' : ''}" id="bulanChipsWrap">
+                    <div class="bulan-chips-inner"><div class="bulan-chips-row">${bulanData.map(function(b) { return bulanCardHtml(b, true, bulanNow); }).join('')}</div></div>
+                </div>`;
+            if (bulanOpen) {
+                /* render ulang saat panel sedang terbuka: tanda panah ikut posisi terbuka */
+                htmlKategoriOri = htmlKategoriOri.replace('card-bulan-toggle"', 'card-bulan-toggle open"');
+                htmlKategoriCompact = htmlKategoriCompact.replace('card-bulan-toggle-c"', 'card-bulan-toggle-c open"');
+            }
+
             for(let [nama, jumlah] of Object.entries(kategoriData)) {
+                if (bulanIndexOf(nama) >= 0) continue; /* bulan Hijriah tampil di panel Amalan 12 Bulan */
                 let icon = emojiMapGlobal[nama.toLowerCase()] || emojiMapGlobal[nama] || '📂';
                 htmlKategoriOri += `
                     <div class="card-kategori" onclick="filterKategori('${nama}', this)">
@@ -1406,6 +1561,7 @@ v2.5.0:
             }
             kategoriOri.innerHTML = htmlKategoriOri;
             kategoriCompact.innerHTML = htmlKategoriCompact;
+            syncBulanState();
             
             filterDisplayPosters();
 
@@ -1487,6 +1643,7 @@ v2.5.0:
             kategoriAktif = nama;
             document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
             if(element) element.classList.add('active');
+            syncBulanState();
 
             filterDisplayPosters();
             setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
