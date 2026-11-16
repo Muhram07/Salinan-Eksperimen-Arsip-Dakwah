@@ -311,7 +311,7 @@
             "@safari_dakwah",
             "@bummimadara",
             "@silentreminder",
-            "@thalibmuda",
+            "@hijrahepic",
             "@kajian.dakwah.sunnahh",
             "@mukmin_sunnah",
             "@abumalik_alfaruq",
@@ -356,7 +356,7 @@
         function getCollabList() {
             const saved = localStorage.getItem('dakwahCollabList');
             if (saved) {
-                try { return JSON.parse(saved); } catch(e){}
+                try { return JSON.parse(saved).map(u => u === '@thalibmuda' ? '@hijrahepic' : u); } catch(e){}
             }
             return DEFAULT_COLLABS;
         }
@@ -594,14 +594,20 @@
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
             }
 
+            /* Caption disimpan APA ADANYA seperti yang diketik (jumlah baris kosong dipertahankan).
+               Penanda <!--cap2--> di baris pertama memberi tahu situs publik agar menampilkan persis seperti ini. */
             function cleanMarkdownText(text) {
                 if (!text) return '';
-                return text
-                    .replace(/\r\n/g, '\n')
+                const lines = text
+                    .replace(/\r\n?/g, '\n')
+                    .replace(/[\u00a0\u2007\u202f\u3000]/g, ' ')
+                    .replace(/[\u200b\ufeff\u2060]/g, '')
                     .split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line.length > 0)
-                    .join('\n\n');
+                    .map(line => line.trim().replace(/^(\d+[.)])\s+(?=\S)/, '$1 '));
+                while (lines.length && lines[0] === '') lines.shift();
+                while (lines.length && lines[lines.length - 1] === '') lines.pop();
+                if (!lines.length) return '';
+                return '<!--cap2-->\n' + lines.join('\n');
             }
 
             function blobToBase64(blob) {
