@@ -1,13 +1,14 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.5.7
+Arsip Dakwah Manhaj Salaf - Update v2.5.8
+
+v2.5.8:
+1. CAPTION PERSIS SEPERTI DIKETIK: jumlah Enter di panel admin kini dipertahankan apa adanya (1x Enter = turun baris, 2x = 1 baris kosong, 4x = 3 baris kosong) di situs publik dan di hasil salin caption, jadi tidak perlu lagi menyisipkan titik sebagai pemisah paragraf. Caption lama (tanpa penanda) tetap tampil seperti sebelumnya.
+2. NOMOR "1." TIDAK HILANG LAGI: awal baris berupa angka + titik/kurung selalu ditampilkan sebagai teks biasa (bukan daftar markdown), spasi berlebih setelah nomor dirapikan otomatis, berlaku juga untuk caption lama.
+3. URUTAN KATEGORI: di bawah Amalan 12 Bulan kategori diurutkan Tauhid, Syirik, Sunnah, Bidah, Manhaj Salaf, Akidah, Hadits Shahih & Hasan, Hadits Dhaif & Maudhu, lalu kategori penting lainnya; kategori baru yang belum terdaftar ditaruh paling akhir sesuai abjad.
 
 v2.5.7:
 1. KALENDER HIJRIYAH REALTIME: di kartu jam menu samping, tepat di bawah tanggal Masehi, kini ada tanggal Hijriyah (misal 17 Jumadil Awal 1448 H). Sumbernya Aladhan API (metode HJCoSA / Majelis Kehakiman Tinggi Saudi, rujukan penetapan yang dipakai banyak aplikasi manhaj salaf), dipanggil sekali per hari lalu disimpan di perangkat. Bila offline atau API gagal, otomatis memakai perhitungan bawaan perangkat (Umm al-Qura) sehingga tanggal tetap tampil. Ada tombol koreksi -1 / +1 hari (tersimpan di perangkat) untuk jaga-jaga beda rukyat. Penanda "Bulan ini" pada panel Amalan 12 Bulan ikut sinkron dengan tanggal Hijriyah ini.
 2. TOMBOL KATEGORI 3D RINGAN: bayangan tiap tombol kategori diaktifkan lagi dengan efek timbul 3D (sorot cahaya atas, tebal tepi bawah, bayangan jatuh lembut) dan efek tertekan saat disentuh. Memakai box-shadow statis saja, dan blur kaca (backdrop-filter) pada tombol kategori dihapus, jadi lebih ringan di HP RAM kecil. Warna khas hitam-emas tetap.
-
-v2.5.6:
-1. LOADING GAMBAR CERDAS (gaya Instagram): gambar tidak lagi diunduh sekaligus. Hanya poster di sekitar posisi layar yang dimuat (beberapa poster di bawah dan di atas), poster yang sudah jauh dilepas dari memori (src dilepas, ruang tetap dijaga agar layar tidak lompat) lalu dimuat lagi otomatis saat didekati. Poster carousel hanya memuat slide yang sedang tampil dan slide di sebelahnya. Antrean unduhan dibatasi (maks 3 bersamaan, yang terdekat dengan layar didahulukan, yang sudah ditinggalkan scroll dibatalkan), muncul dengan fade halus di atas kotak placeholder yang proporsional. PDF dan file lain tetap hanya diunduh saat diketuk.
-2. ADAPTIF HP RINGAN: jendela muat otomatis diperkecil dan antrean dikurangi pada HP RAM kecil, mode hemat data, atau jaringan lambat; efek blur kartu dimatikan di HP RAM kecil agar scroll tetap mulus. Mode ringkas memakai jendela lebih lebar karena kartunya kecil.
 -->
 
 <!DOCTYPE html>
@@ -451,6 +452,7 @@ v2.5.6:
         .poster .sub-caption{ color:#D4AF37; font-size:15px; margin-bottom:15px; font-style:italic; text-align:center; line-height:1.5; }
         .poster-content-wrapper{ position:relative; color:#ddd; line-height:1.8; font-size:15px; overflow:hidden; transition:max-height 0.4s ease; text-align:center; }
         .poster-content-wrapper.collapsed{ max-height:250px; }
+        .cap2{ white-space:pre-wrap; overflow-wrap:break-word; word-break:normal; }
         .poster-content-wrapper.expanded{ max-height:2000px; }
         .read-more-btn{ display:inline-block; margin-top:10px; background:transparent; color:#D4AF37; border:none; font-weight:bold; cursor:pointer; font-size:14px; padding:5px 0; text-decoration:underline; }
         .read-more-btn:hover{ color:#fff; }
@@ -1047,7 +1049,7 @@ v2.5.6:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.7</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.8</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1233,7 +1235,7 @@ v2.5.6:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.5.7';
+        const APP_VERSION = 'v2.5.8';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
         function startLiveClock() {
@@ -1337,6 +1339,21 @@ v2.5.6:
         }
 
         let kategoriData = {};
+        /* v2.5.8: urutan kategori penting dulu (di bawah Amalan 12 Bulan) */
+        const KATEGORI_URUT = ['tauhid','syirik','sunnah','bidah','manhaj salaf','akidah','hadits shahih & hasan','hadits dhaif & maudhu','firqah-firqah','kitab','tafsir','fikih','sholat','puasa','doa','dzikir','adab','muamalah','rumah tangga','reminder'];
+        function kategoriKunci(nama) {
+            return String(nama == null ? '' : nama).toLowerCase().replace(/['\u2019\u2018\u02bb`]/g, '').replace(/hadist/g, 'hadits').replace(/\s+/g, ' ').trim();
+        }
+        function urutanKategori(nama) {
+            const i = KATEGORI_URUT.indexOf(kategoriKunci(nama));
+            return i >= 0 ? i : 999;
+        }
+        function kategoriTerurut() {
+            return Object.entries(kategoriData).sort(function(x, y) {
+                const d = urutanKategori(x[0]) - urutanKategori(y[0]);
+                return d !== 0 ? d : String(x[0]).localeCompare(String(y[0]), 'id');
+            });
+        }
         let kategoriAktif = null;
         /* v2.5.2: daftar 12 bulan Hijriah (tanpa tanda petik, sama dengan penulisan resmi di manifest) */
         const BULAN_LIST = ['Muharram (1)','Safar (2)','Rabiul Awwal (3)','Rabiul Akhir (4)','Jumadil Awwal (5)','Jumadil Akhir (6)','Rajab (7)','Syaban (8)','Ramadhan (9)','Syawwal (10)','Dzulqadah (11)','Dzulhijjah (12)'];
@@ -1614,6 +1631,46 @@ v2.5.6:
             });
         }
 
+        /* --- v2.5.8: CAPTION PERSIS SEPERTI DIKETIK + NOMOR TIDAK HILANG --- */
+        const CAP2_MARK = '<!--cap2-->';
+        function capEscHtml(t) {
+            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        function capNormLine(line) {
+            return String(line)
+                .replace(/[\u00a0\u2007\u202f\u3000]/g, ' ')
+                .replace(/[\u200b\ufeff\u2060]/g, '')
+                .replace(/^(\s*\d+[.)])\s+(?=\S)/, '$1 ');
+        }
+        function renderCaptionHtml(raw) {
+            raw = (raw === null || raw === undefined) ? '' : String(raw);
+            if (raw.indexOf(CAP2_MARK) === 0) {
+                const body = raw.slice(CAP2_MARK.length).replace(/\r\n?/g, '\n').replace(/^\n+/, '').replace(/\s+$/, '');
+                const html = body.split('\n').map(function(line) {
+                    line = capNormLine(line).trim();
+                    if (!line) return '';
+                    try {
+                        return (typeof marked.parseInline === 'function') ? marked.parseInline(line) : capEscHtml(line);
+                    } catch (e) { return capEscHtml(line); }
+                }).join('\n');
+                return '<div class="cap2">' + html + '</div>';
+            }
+            /* caption lama: perilaku sama seperti sebelumnya, hanya nomor di awal baris dijaga agar tidak jadi daftar markdown */
+            const fixed = raw.replace(/\r\n?/g, '\n').split('\n').map(function(line) {
+                return line.replace(/^(\s*)(\d+)([.)])(?:[ \t\u00a0\u2007\u202f\u3000]+|$)/, function(m, sp, n, d) { return sp + n + '\\' + d + ' '; });
+            }).join('\n');
+            return marked.parse(fixed);
+        }
+        function cleanCopyKeepBlank(text) {
+            if (!text) return '';
+            return text
+                .replace(/\r\n?/g, '\n')
+                .replace(/\u00a0/g, ' ')
+                .replace(/[ \t]+$/gm, '')
+                .replace(/^\n+/, '')
+                .replace(/\s+$/, '');
+        }
+
         function cleanCopyText(text) {
             if (!text) return '';
             return text
@@ -1631,9 +1688,10 @@ v2.5.6:
                 let sub = subElement ? (subElement.dataset.raw || subElement.innerText) : '';
                 
                 const contentWrapper = poster.querySelector('.poster-content-wrapper') || poster.querySelector('.m-content');
-                const isi = contentWrapper ? contentWrapper.innerText : '';
+                const cap2El = contentWrapper ? contentWrapper.querySelector('.cap2') : null;
+                const isi = contentWrapper ? (cap2El ? cap2El.textContent : contentWrapper.innerText) : '';
                 
-                const parts = [judul, sub, isi].map(cleanCopyText).filter(p => p.length > 0);
+                const parts = [judul, sub, isi].map(function(t, idx) { return (idx === 2 && cap2El) ? cleanCopyKeepBlank(t) : cleanCopyText(t); }).filter(p => p.length > 0);
                 const konten = parts.join('\n\n');
                 
                 navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
@@ -1671,7 +1729,7 @@ v2.5.6:
                     const k = p.kategori || "Umum";
                     if(!kategoriData[k]) kategoriData[k] = 0;
                     kategoriData[k]++;
-                    semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: k, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content : '') });
+                    semuaPosterCache.push({ id: p.path, judul: p.judul, subJudul: p.sub_judul, kategori: k, tags: p.tags, caption: p.sub_judul + " " + (typeof p.content === 'string' ? p.content.replace('<!--cap2-->', '') : '') });
                 });
 
                 setTargetProgress(45);
@@ -1695,7 +1753,7 @@ v2.5.6:
 
                     const posterId = p.path.replace(/\//g, '-');
                     const isSaved = favList.includes(posterId);
-                    const parsedContent = marked.parse(contentBody || "Konten belum tersedia.");
+                    const parsedContent = renderCaptionHtml(contentBody || "Konten belum tersedia.");
                     const imageList = (p.images || "1.jpg").split(',').map(s => s.trim());
 
                     let carouselHTML = '';
@@ -1820,7 +1878,7 @@ v2.5.6:
                 htmlKategoriCompact = htmlKategoriCompact.replace('card-bulan-toggle-c"', 'card-bulan-toggle-c open"');
             }
 
-            for(let [nama, jumlah] of Object.entries(kategoriData)) {
+            for(let [nama, jumlah] of kategoriTerurut()) {
                 if (bulanIndexOf(nama) >= 0) continue; /* bulan Hijriah tampil di panel Amalan 12 Bulan */
                 let icon = emojiMapGlobal[nama.toLowerCase()] || emojiMapGlobal[nama] || '📂';
                 htmlKategoriOri += `
@@ -1953,7 +2011,7 @@ v2.5.6:
             const pdfSrc = rawItem.pdf ? `${folder}/brosur.pdf` : null;
             const favList = getFavorit();
             const isSaved = favList.includes(posterId);
-            const parsedContent = marked.parse(rawItem.compiledContent || "Konten belum tersedia.");
+            const parsedContent = renderCaptionHtml(rawItem.compiledContent || "Konten belum tersedia.");
             const imageList = (rawItem.images || "1.jpg").split(',').map(s => s.trim());
 
             modalCarouselIndex = 0;
