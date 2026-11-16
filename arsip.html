@@ -1,14 +1,15 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.5.8
+Arsip Dakwah Manhaj Salaf - Update v2.5.9
+
+v2.5.9:
+1. CAPTION TIDAK RUSAK SAAT PENCARIAN CEPAT: penanda biru kata kunci kini hanya disisipkan ke teks yang terlihat (bukan ke kode HTML), sehingga tulisan seperti ass="cap2"> tidak muncul lagi; proses penanda lama yang tertunda dibatalkan tiap kali mengetik, dan tanda khusus di kata kunci aman.
+2. INFORMASI PENYIMPANAN DIRINCI: Poster Tunggal dan Poster Carousel dihitung terpisah (jumlah folder, jumlah gambar, ukuran), disusul PDF, Teks/Caption dan total; istilah repo/hosting tidak ditampilkan.
+3. STATUS KOTAK KATEGORI: tulisan "N Poster" diganti "N Folder" (Semua, Amalan 12 Bulan, tiap kategori dan bulan) karena satu folder bisa berisi poster tunggal atau carousel.
 
 v2.5.8:
 1. CAPTION PERSIS SEPERTI DIKETIK: jumlah Enter di panel admin kini dipertahankan apa adanya (1x Enter = turun baris, 2x = 1 baris kosong, 4x = 3 baris kosong) di situs publik dan di hasil salin caption, jadi tidak perlu lagi menyisipkan titik sebagai pemisah paragraf. Caption lama (tanpa penanda) tetap tampil seperti sebelumnya.
 2. NOMOR "1." TIDAK HILANG LAGI: awal baris berupa angka + titik/kurung selalu ditampilkan sebagai teks biasa (bukan daftar markdown), spasi berlebih setelah nomor dirapikan otomatis, berlaku juga untuk caption lama.
 3. URUTAN KATEGORI: di bawah Amalan 12 Bulan kategori diurutkan Tauhid, Syirik, Sunnah, Bidah, Manhaj Salaf, Akidah, Hadits Shahih & Hasan, Hadits Dhaif & Maudhu, lalu kategori penting lainnya; kategori baru yang belum terdaftar ditaruh paling akhir sesuai abjad.
-
-v2.5.7:
-1. KALENDER HIJRIYAH REALTIME: di kartu jam menu samping, tepat di bawah tanggal Masehi, kini ada tanggal Hijriyah (misal 17 Jumadil Awal 1448 H). Sumbernya Aladhan API (metode HJCoSA / Majelis Kehakiman Tinggi Saudi, rujukan penetapan yang dipakai banyak aplikasi manhaj salaf), dipanggil sekali per hari lalu disimpan di perangkat. Bila offline atau API gagal, otomatis memakai perhitungan bawaan perangkat (Umm al-Qura) sehingga tanggal tetap tampil. Ada tombol koreksi -1 / +1 hari (tersimpan di perangkat) untuk jaga-jaga beda rukyat. Penanda "Bulan ini" pada panel Amalan 12 Bulan ikut sinkron dengan tanggal Hijriyah ini.
-2. TOMBOL KATEGORI 3D RINGAN: bayangan tiap tombol kategori diaktifkan lagi dengan efek timbul 3D (sorot cahaya atas, tebal tepi bawah, bayangan jatuh lembut) dan efek tertekan saat disentuh. Memakai box-shadow statis saja, dan blur kaca (backdrop-filter) pada tombol kategori dihapus, jadi lebih ringan di HP RAM kecil. Warna khas hitam-emas tetap.
 -->
 
 <!DOCTYPE html>
@@ -506,6 +507,7 @@ v2.5.7:
         .stor-title{ text-align:center; color:#D4AF37; font-weight:bold; font-size:13.5px; letter-spacing:.4px; margin-bottom:8px; }
         .stor-row{ display:flex; justify-content:space-between; gap:10px; padding:7px 2px; border-bottom:1px dashed rgba(255,255,255,0.1); }
         .stor-row span:last-child{ color:#D4AF37; font-weight:bold; white-space:nowrap; }
+        .stor-row small{ display:block; font-size:11px; font-weight:400; color:#9a9a9a; margin-top:2px; }
         .stor-row.tot{ border-bottom:none; padding-top:9px; }
         .stor-row.tot span{ color:#fff; font-size:14px; }
         .stor-row.tot span:last-child{ color:#E8C65A; }
@@ -1049,7 +1051,7 @@ v2.5.7:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.8</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.9</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1235,7 +1237,7 @@ v2.5.7:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.5.8';
+        const APP_VERSION = 'v2.5.9';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
         function startLiveClock() {
@@ -1389,7 +1391,7 @@ v2.5.7:
             const icon = emojiMapGlobal[b.nama.toLowerCase()] || emojiMapGlobal[b.nama] || '\uD83C\uDF19';
             const haram = HARAM_IDX.indexOf(b.i) !== -1;
             const cls = 'card-kategori' + (b.jumlah === 0 ? ' is-empty' : '') + (b.i === now ? ' is-now' : '') + (haram ? ' is-haram' : '');
-            const jml = compact ? String(b.jumlah) : (b.jumlah + ' Poster');
+            const jml = compact ? String(b.jumlah) : (b.jumlah + ' Folder');
             const badge = (!compact && b.i === now) ? '<span class="bulan-now">Bulan ini</span>' : '';
             const warn = haram ? '<span class="hj-warn' + (compact ? ' hj-warn-inline' : '') + '" aria-hidden="true">\u26A0\uFE0F</span>' : '';
             const info = haram ? '<button type="button" class="hj-info" aria-label="Info bulan haram" title="Info bulan haram" onclick="event.stopPropagation();openHaramInfo(' + b.i + ')">i</button>' : '';
@@ -1710,7 +1712,7 @@ v2.5.7:
             let manifestData = { posters: [] };
 
             try {
-                // FIX: Menambahkan Cache Buster (?v=timestamp) ke fetch agar manifest.json selalu yang terbaru dari Cloudflare/GitHub.
+                // FIX: Menambahkan Cache Buster (?v=timestamp) ke fetch agar manifest.json selalu yang terbaru.
                 const cacheBuster = '?v=' + new Date().getTime();
                 let res = await fetch('manifest.json' + cacheBuster);
                 if(!res.ok) res = await fetch('/manifest.json' + cacheBuster);
@@ -1833,7 +1835,7 @@ v2.5.7:
                 <div class="card-kategori card-kategori-all active" onclick="resetSemua()">
                     <span class="icon">🪧</span>
                     <span class="nama">Semua</span>
-                    <span class="jumlah">${totalPoster} Poster</span>
+                    <span class="jumlah">${totalPoster} Folder</span>
                 </div>`;
 
             let htmlKategoriCompact = `
@@ -1852,7 +1854,7 @@ v2.5.7:
                 <div class="card-kategori card-bulan-toggle" id="bulanToggleOri" role="button" aria-expanded="${bulanOpen}" onclick="toggleBulan()">
                     <span class="icon">\uD83C\uDF19</span>
                     <span class="nama">Amalan 12 Bulan</span>
-                    <span class="jumlah">${bulanTotal} Poster</span>
+                    <span class="jumlah">${bulanTotal} Folder</span>
                     <span class="bulan-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D4AF37" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
                 </div>
                 <div class="bulan-panel${bulanOpen ? ' open' : ''}" id="bulanPanel">
@@ -1885,7 +1887,7 @@ v2.5.7:
                     <div class="card-kategori" onclick="filterKategori('${nama}', this)">
                         <span class="icon">${icon}</span>
                         <span class="nama">${nama}</span>
-                        <span class="jumlah">${jumlah} Poster</span>
+                        <span class="jumlah">${jumlah} Folder</span>
                     </div>
                 `;
                 htmlKategoriCompact += `
@@ -2076,10 +2078,12 @@ v2.5.7:
         const searchInput = document.getElementById('search');
         const resultBox = document.getElementById('search-result');
         let timeoutId;
+        let highlightTimer;
 
         searchInput.addEventListener('input', function() {
             if (isSelecting) { return; }
             clearTimeout(timeoutId); 
+            clearTimeout(highlightTimer);
             timeoutId = setTimeout(() => {
                 const key = this.value.trim().toLowerCase();
                 if (key === '') {
@@ -2115,7 +2119,8 @@ v2.5.7:
                     const text = poster.innerText.toLowerCase();
                     poster.style.display = text.includes(key) ? (isCompactView ? 'grid' : 'block') : 'none';
                 });
-                setTimeout(() => {
+                highlightTimer = setTimeout(() => {
+                    if (searchInput.value.trim().toLowerCase() !== key) return;
                     document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
                     highlightText(key);
                 }, 100);
@@ -2145,22 +2150,45 @@ v2.5.7:
 
         function highlightText(key) {
             document.querySelectorAll('.highlight').forEach(el => { el.outerHTML = el.innerText; });
+            if (!key) return;
+            const pola = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const posters = document.querySelectorAll('.poster');
             posters.forEach(poster => {
                 if (poster.style.display !== 'none') {
                     const judulEl = poster.querySelector('h3');
-                    if (judulEl) {
-                        const judulText = judulEl.innerHTML;
-                        const regex = new RegExp(`(${key})`, 'gi');
-                        judulEl.innerHTML = judulText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
-                    }
+                    if (judulEl) highlightTeksNode(judulEl, pola);
                     const contentWrapper = poster.querySelector('.poster-content-wrapper');
-                    if (contentWrapper) {
-                        const contentText = contentWrapper.innerHTML;
-                        const regex = new RegExp(`(${key})`, 'gi');
-                        contentWrapper.innerHTML = contentText.replace(regex, '<span class="highlight" style="background:#4A90E2;color:#fff;">$1</span>');
-                    }
+                    if (contentWrapper) highlightTeksNode(contentWrapper, pola);
                 }
+            });
+        }
+
+        /* v2.5.9: penanda kata kunci hanya pada simpul teks (tidak menyentuh tag/atribut HTML) */
+        function highlightTeksNode(root, pola) {
+            const uji = new RegExp(pola, 'i');
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+            const daftar = [];
+            let n;
+            while ((n = walker.nextNode())) {
+                if (n.nodeValue && uji.test(n.nodeValue)) daftar.push(n);
+            }
+            daftar.forEach(function(node) {
+                const teks = node.nodeValue;
+                const re = new RegExp(pola, 'gi');
+                const frag = document.createDocumentFragment();
+                let akhir = 0, m;
+                while ((m = re.exec(teks)) !== null) {
+                    if (m[0] === '') { re.lastIndex++; continue; }
+                    if (m.index > akhir) frag.appendChild(document.createTextNode(teks.slice(akhir, m.index)));
+                    const sp = document.createElement('span');
+                    sp.className = 'highlight';
+                    sp.style.cssText = 'background:#4A90E2;color:#fff;';
+                    sp.textContent = m[0];
+                    frag.appendChild(sp);
+                    akhir = m.index + m[0].length;
+                }
+                if (akhir < teks.length) frag.appendChild(document.createTextNode(teks.slice(akhir)));
+                if (node.parentNode) node.parentNode.replaceChild(frag, node);
             });
         }
 
@@ -2398,14 +2426,22 @@ v2.5.7:
         }
         function storRenderPanel(list) {
             const pn = document.getElementById('storPanel');
-            let img = 0, pdf = 0, md = 0, nPdf = 0, nImg = 0;
-            list.forEach(function(d) { img += d.imgTotal; pdf += d.pdf; md += d.md; nImg += d.imgs.length; if (d.hasPdf) nPdf++; });
-            const total = img + pdf + md;
+            let pdf = 0, md = 0, nPdf = 0;
+            let tFolder = 0, tImg = 0, tSize = 0;
+            let cFolder = 0, cImg = 0, cSize = 0;
+            list.forEach(function(d) {
+                pdf += d.pdf; md += d.md;
+                if (d.hasPdf) nPdf++;
+                if (d.imgs.length > 1) { cFolder++; cImg += d.imgs.length; cSize += d.imgTotal; }
+                else { tFolder++; tImg += d.imgs.length; tSize += d.imgTotal; }
+            });
+            const total = tSize + cSize + pdf + md;
             let h = '<div class="stor-title">Informasi Penyimpanan</div>';
-            h += '<div class="stor-row"><span>🖼️ Gambar Poster (' + nImg + ' file)</span><span>' + storFmt(img) + '</span></div>';
-            h += '<div class="stor-row"><span>📄 PDF (' + nPdf + ' file)</span><span>' + storFmt(pdf) + '</span></div>';
-            h += '<div class="stor-row"><span>📝 Teks / Caption (' + list.length + ' file)</span><span>' + storFmt(md) + '</span></div>';
-            h += '<div class="stor-row tot"><span>Total Keseluruhan</span><span>' + storFmt(total) + '</span></div>';
+            h += '<div class="stor-row"><span>🖼️ Poster Tunggal<small>' + tFolder + ' folder · ' + tImg + ' gambar</small></span><span>' + storFmt(tSize) + '</span></div>';
+            h += '<div class="stor-row"><span>🎠 Poster Carousel<small>' + cFolder + ' folder · ' + cImg + ' gambar</small></span><span>' + storFmt(cSize) + '</span></div>';
+            h += '<div class="stor-row"><span>📄 PDF<small>' + nPdf + ' file</small></span><span>' + storFmt(pdf) + '</span></div>';
+            h += '<div class="stor-row"><span>📝 Teks / Caption<small>' + list.length + ' file</small></span><span>' + storFmt(md) + '</span></div>';
+            h += '<div class="stor-row tot"><span>Total Keseluruhan<small>' + list.length + ' folder · ' + (tImg + cImg) + ' gambar</small></span><span>' + storFmt(total) + '</span></div>';
             h += '<div class="stor-note">Ukuran berupa perkiraan, selisih kecil mungkin terjadi.</div>';
             pn.innerHTML = h;
         }
