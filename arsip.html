@@ -1,15 +1,15 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.5.9
+Arsip Dakwah Manhaj Salaf - Update v2.6.1
 
-v2.5.9:
-1. CAPTION TIDAK RUSAK SAAT PENCARIAN CEPAT: penanda biru kata kunci kini hanya disisipkan ke teks yang terlihat (bukan ke kode HTML), sehingga tulisan seperti ass="cap2"> tidak muncul lagi; proses penanda lama yang tertunda dibatalkan tiap kali mengetik, dan tanda khusus di kata kunci aman.
-2. INFORMASI PENYIMPANAN DIRINCI: Poster Tunggal dan Poster Carousel dihitung terpisah (jumlah folder, jumlah gambar, ukuran), disusul PDF, Teks/Caption dan total; istilah repo/hosting tidak ditampilkan.
-3. STATUS KOTAK KATEGORI: tulisan "N Poster" diganti "N Folder" (Semua, Amalan 12 Bulan, tiap kategori dan bulan) karena satu folder bisa berisi poster tunggal atau carousel.
+v2.6.1:
+1. SEMUA EMOTE DIGANTI IKON SVG: seluruh emoji (menu, sidebar, tombol, kategori, poster, popup, badge ukuran, panel penyimpanan, Amalan 12 Bulan) kini memakai ikon garis tipis SVG inline selang-seling abu + emas seperti Poster Maker. Satu sprite <symbol> dipakai ulang lewat <use>, sehingga lebih ringan dan tajam di semua perangkat. Ikon kategori dipilih otomatis sesuai nama kategori (aqidah, fiqih, hadits, doa, keluarga, dll) dengan cadangan folder.
+2. Teks notifikasi (alert) tidak lagi memakai emoji, hanya teks biasa.
 
-v2.5.8:
-1. CAPTION PERSIS SEPERTI DIKETIK: jumlah Enter di panel admin kini dipertahankan apa adanya (1x Enter = turun baris, 2x = 1 baris kosong, 4x = 3 baris kosong) di situs publik dan di hasil salin caption, jadi tidak perlu lagi menyisipkan titik sebagai pemisah paragraf. Caption lama (tanpa penanda) tetap tampil seperti sebelumnya.
-2. NOMOR "1." TIDAK HILANG LAGI: awal baris berupa angka + titik/kurung selalu ditampilkan sebagai teks biasa (bukan daftar markdown), spasi berlebih setelah nomor dirapikan otomatis, berlaku juga untuk caption lama.
-3. URUTAN KATEGORI: di bawah Amalan 12 Bulan kategori diurutkan Tauhid, Syirik, Sunnah, Bidah, Manhaj Salaf, Akidah, Hadits Shahih & Hasan, Hadits Dhaif & Maudhu, lalu kategori penting lainnya; kategori baru yang belum terdaftar ditaruh paling akhir sesuai abjad.
+v2.6.0:
+1. MONITOR MB/KB LEBIH CEPAT: pengukuran ukuran file kini memakai antrean berprioritas (kartu yang sedang terlihat diukur paling dulu, panel penyimpanan kedua, pemindaian latar belakang terakhir), jalur unduh lebih banyak sekaligus, pengukuran ganda dihindari, jangkauan pra-ukur saat scroll diperluas, dan seluruh folder diukur diam-diam di latar belakang sehingga lencana hampir selalu langsung tampil, termasuk hasil pencarian. Cara ukur tidak diubah sehingga akurasi tetap sama.
+2. PROGRES PEMINDAIAN REAL-TIME: panel Informasi Penyimpanan menampilkan bar progres, persen, jumlah berkas terukur (misal 20/743) dan ukuran sementara yang naik langsung tiap berkas selesai.
+3. PDF MODE MULAI DARI SEMUA: saat PDF Mode ditekan, kategori otomatis kembali ke Semua sehingga seluruh PDF tampil dulu; setelah itu memilih kategori (misal Kitab) hanya menyaring PDF di kategori tersebut.
+
 -->
 
 <!DOCTYPE html>
@@ -512,6 +512,10 @@ v2.5.8:
         .stor-row.tot span{ color:#fff; font-size:14px; }
         .stor-row.tot span:last-child{ color:#E8C65A; }
         .stor-note{ margin-top:6px; text-align:center; font-size:10.5px; color:#8a8a8a; }
+        .stor-bar{ height:8px; border-radius:6px; background:rgba(255,255,255,0.1); overflow:hidden; margin:10px 0 7px; }
+        .stor-bar i{ display:block; height:100%; width:0; border-radius:6px; background:linear-gradient(90deg,#B8962E,#F0D060,#B8962E); background-size:200% 100%; animation:storShine 1.1s linear infinite; transition:width .2s ease; }
+        .stor-prog{ text-align:center; font-size:12.5px; font-weight:600; color:#E8C65A; }
+        @keyframes storShine{ from{ background-position:200% 0; } to{ background-position:-200% 0; } }
         .stor-b{ position:absolute; z-index:6; pointer-events:none; background:rgba(10,10,10,0.72); border:1px solid rgba(212,175,55,0.45); color:#E8C65A; font-size:10.5px; font-weight:600; letter-spacing:.2px; padding:2px 8px; border-radius:10px; line-height:1.35; white-space:nowrap; backdrop-filter:blur(4px); box-shadow:0 2px 6px rgba(0,0,0,0.45); }
         .stor-b-img{ top:10px; left:10px; }
         .stor-b-single{ top:28px; left:28px; }
@@ -927,9 +931,115 @@ v2.5.8:
         }
 
         .gate-btn-continue.active:hover { transform: scale(1.02); }
+
+        /* v2.6.1: ikon SVG garis tipis selang-seling abu + emas (gaya Poster Maker) */
+        .ic{width:1.15em;height:1.15em;display:inline-block;vertical-align:-.2em;flex-shrink:0;fill:none;stroke:var(--ic-g,#A9A9A9);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;overflow:visible;pointer-events:none;--ic-a:#D4AF37;}
+        .ic-a{stroke:var(--ic-a,#D4AF37);}
+        .ic-af{fill:var(--ic-a,#D4AF37);stroke:none;}
+        .ic-m{margin-right:.4em;}
+        .ic-ml{margin-left:.4em;}
+        .ic-lg{width:22px;height:22px;}
+        .btn-sosmed .ic-m,.btn-save .ic-m,.stor-inline-btn .ic-m,.btn-mode-segmented .ic-m,.gate-btn-continue .ic-m,.poster-badge-kat .ic-m,.m-badge .ic-m{margin-right:0;}
+        .btn-float-common .ic{width:24px;height:24px;vertical-align:0;}
+        .sidebar-time-card .cal-icon .ic{width:28px;height:28px;vertical-align:0;}
+        .sidebar-item .item-icon{display:flex;align-items:center;justify-content:center;}
+        .sidebar-item .item-icon .ic{width:20px;height:20px;vertical-align:0;}
+        .sidebar-item.active .item-icon .ic,.sidebar-item:hover .item-icon .ic{--ic-g:#CFCFCF;}
+        .sidebar-close-btn .ic,.modal-close-btn .ic{width:16px;height:16px;vertical-align:0;}
+        .kategori-grid-ori .card-kategori .icon{display:flex;align-items:center;justify-content:center;height:28px;}
+        .kategori-grid-ori .card-kategori .icon .ic{width:26px;height:26px;vertical-align:0;}
+        .kategori-scroll-compact .card-kategori .icon{display:inline-flex;align-items:center;}
+        .kategori-scroll-compact .card-kategori .icon .ic{width:18px;height:18px;vertical-align:0;}
+        .gate-icon-badge .ic{width:30px;height:30px;vertical-align:0;}
+        .gate-btn-follow .status-icon{display:inline-flex;align-items:center;gap:4px;}
+        .gate-btn-follow.clicked .ic{--ic-g:#81C784;--ic-a:#81C784;}
+        .carousel-btn,.m-carousel-btn{display:flex;align-items:center;justify-content:center;padding:0;}
+        .carousel-btn .ic,.m-carousel-btn .ic{width:18px;height:18px;vertical-align:0;}
+        #post-list.compact-view .carousel-btn .ic{width:12px;height:12px;}
+        .stor-b .ic{width:1.2em;height:1.2em;margin-right:.3em;vertical-align:-.22em;}
+        .stor-inline-btn .stor-chev{display:inline-flex;align-items:center;}
+        .stor-inline-btn .stor-chev .ic{width:14px;height:14px;vertical-align:0;}
+        .stor-row .ic{width:1.15em;height:1.15em;margin-right:.45em;}
+        .hj-warn .ic,.hj-head-warn .ic{--ic-g:#F5B84A;--ic-a:#F5B84A;}
+        .hj-warn .ic{width:1em;height:1em;vertical-align:0;}
+        .hj-head-warn .ic{width:30px;height:30px;vertical-align:0;}
+        .hj-ms-ic .ic{width:1.2em;height:1.2em;}
+        .bh-title .ic{width:1.2em;height:1.2em;margin-right:.45em;vertical-align:-.25em;}
+        .bulan-chev-c .ic{width:1em;height:1em;vertical-align:-.15em;}
+        .hijri-adj .hijri-src .ic{width:1.2em;height:1.2em;--ic-g:currentColor;--ic-a:currentColor;vertical-align:-.25em;}
+        .loading .ic{width:1.15em;height:1.15em;}
+        .read-more-btn .ic{text-decoration:none;}
+        .btn-sosmed:hover .ic,.btn-mode-segmented.active .ic,.btn-save:hover .ic,.btn-save.saved .ic,.poster .actions button .ic,.poster .sosial-actions button:hover .ic,.gate-btn-continue.active .ic,.carousel-btn:hover .ic,.m-carousel-btn:hover .ic,.modal-close-btn:hover .ic,.sidebar-close-btn:hover .ic,.modal-card .m-actions button:hover .ic,#post-list.compact-view .actions button:hover .ic{--ic-g:#111;--ic-a:#5c4506;}
+        .poster .actions button .ic{--ic-g:#2a2008;}
+        #post-list.compact-view .actions button .ic{--ic-g:#A9A9A9;--ic-a:#D4AF37;}
+        #post-list.compact-view .actions button:hover .ic{--ic-g:#111;--ic-a:#5c4506;}
     </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false"><defs>
+<symbol id="ic-menu" viewBox="0 0 24 24"><path d='M4 7h16'/><path class='ic-a' d='M4 12h11'/><path d='M4 17h16'/></symbol>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d='M3.5 11L12 4l8.5 7'/><path d='M6 9.5V20h12V9.5'/><path class='ic-a' d='M10 20v-5.5h4V20'/></symbol>
+<symbol id="ic-close" viewBox="0 0 24 24"><path d='M6 6l12 12'/><path class='ic-a' d='M18 6L6 18'/></symbol>
+<symbol id="ic-hourglass" viewBox="0 0 24 24"><path d='M6.5 3.5h11M6.5 20.5h11'/><path class='ic-a' d='M8 3.5c0 4.2 4 5.2 4 8.5s-4 4.3-4 8.5M16 3.5c0 4.2-4 5.2-4 8.5s4 4.3 4 8.5'/><path d='M10 18.2h4'/></symbol>
+<symbol id="ic-docs" viewBox="0 0 24 24"><rect x='7' y='3.5' width='12.5' height='16' rx='2'/><path class='ic-a' d='M4.5 7v12.5a2 2 0 0 0 2 2H16'/><path d='M10.5 8.5h6M10.5 12h6M10.5 15.5h3.5'/></symbol>
+<symbol id="ic-palette" viewBox="0 0 24 24"><path d='M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2-1 1.5-2.2-.5-1.3.4-2.3 1.8-2.3H18a2.5 2.5 0 0 0 2.5-2.5C20.5 7 16.8 3.5 12 3.5z'/><circle class='ic-af' cx='7.8' cy='11' r='1.2'/><circle class='ic-af' cx='11' cy='7.3' r='1.2'/><circle cx='15.4' cy='8.2' r='1.1'/></symbol>
+<symbol id="ic-bookmark" viewBox="0 0 24 24"><path d='M6.5 3.5h11v17L12 16.5l-5.5 4z'/><path class='ic-a' d='M9.5 8h5'/></symbol>
+<symbol id="ic-bmadd" viewBox="0 0 24 24"><path d='M6.5 3.5h11v17L12 16.5l-5.5 4z'/><path class='ic-a' d='M12 7.5v5M9.5 10h5'/></symbol>
+<symbol id="ic-bmcheck" viewBox="0 0 24 24"><path d='M6.5 3.5h11v17L12 16.5l-5.5 4z'/><path class='ic-a' d='M9.3 9.8l2 2 3.6-3.8'/></symbol>
+<symbol id="ic-pdf" viewBox="0 0 24 24"><path d='M6 3.5h8l4.5 4.5v12.5H6z'/><path class='ic-a' d='M14 3.5V8h4.5'/><path d='M9 13.5h6M9 17h4'/></symbol>
+<symbol id="ic-textsize" viewBox="0 0 24 24"><path d='M3.5 18L8.5 6l5 12M5.3 14h6.4'/><path class='ic-a' d='M15.5 18l2.8-6.8L21 18M16.4 16h3.8'/></symbol>
+<symbol id="ic-vcompact" viewBox="0 0 24 24"><rect x='3.5' y='3.5' width='7' height='7' rx='1.4'/><rect class='ic-a' x='13.5' y='3.5' width='7' height='7' rx='1.4'/><rect class='ic-a' x='3.5' y='13.5' width='7' height='7' rx='1.4'/><rect x='13.5' y='13.5' width='7' height='7' rx='1.4'/></symbol>
+<symbol id="ic-vcard" viewBox="0 0 24 24"><rect x='4.5' y='3.5' width='15' height='17' rx='2.4'/><path class='ic-a' d='M4.5 13.5h15'/><path d='M8 17h5'/><circle class='ic-af' cx='9' cy='8.5' r='1.3'/></symbol>
+<symbol id="ic-camera" viewBox="0 0 24 24"><rect x='3' y='7' width='18' height='13' rx='3'/><path class='ic-a' d='M8.5 7l1.3-2.5h4.4L15.5 7'/><circle class='ic-a' cx='12' cy='13.5' r='3.4'/></symbol>
+<symbol id="ic-sparkle" viewBox="0 0 24 24"><path class='ic-a' d='M11 4l1.9 5.6L18.5 11l-5.6 1.9L11 18.5l-1.9-5.6L3.5 11l5.6-1.4z'/><path d='M19 3.5v3.5M17.2 5.2h3.6M18 16.5v3M16.5 18h3'/></symbol>
+<symbol id="ic-arrow" viewBox="0 0 24 24"><path d='M4 12h14'/><path class='ic-a' d='M13 6.5l5.5 5.5-5.5 5.5'/></symbol>
+<symbol id="ic-grid" viewBox="0 0 24 24"><rect x='3.5' y='4' width='7.5' height='7.5' rx='1.5'/><rect class='ic-a' x='13' y='4' width='7.5' height='7.5' rx='1.5'/><rect class='ic-a' x='3.5' y='13.5' width='7.5' height='7' rx='1.5'/><rect x='13' y='13.5' width='7.5' height='7' rx='1.5'/></symbol>
+<symbol id="ic-disk" viewBox="0 0 24 24"><ellipse cx='12' cy='6' rx='7.5' ry='2.8'/><path d='M4.5 6v12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V6'/><path class='ic-a' d='M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8'/></symbol>
+<symbol id="ic-chevd" viewBox="0 0 24 24"><path class='ic-a' d='M6 9.5l6 6 6-6'/></symbol>
+<symbol id="ic-chevr" viewBox="0 0 24 24"><path class='ic-a' d='M9.5 5.5L16 12l-6.5 6.5'/></symbol>
+<symbol id="ic-chevl" viewBox="0 0 24 24"><path class='ic-a' d='M14.5 5.5L8 12l6.5 6.5'/></symbol>
+<symbol id="ic-link" viewBox="0 0 24 24"><path d='M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7L11.8 6.5'/><path class='ic-a' d='M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2'/></symbol>
+<symbol id="ic-lock" viewBox="0 0 24 24"><rect x='5' y='10.5' width='14' height='10' rx='2.2'/><path class='ic-a' d='M8 10.5V8a4 4 0 0 1 8 0v2.5'/><circle class='ic-af' cx='12' cy='15.5' r='1.2'/></symbol>
+<symbol id="ic-unlock" viewBox="0 0 24 24"><rect x='5' y='10.5' width='14' height='10' rx='2.2'/><path class='ic-a' d='M8 10.5V8a4 4 0 0 1 7.6-1.7'/><circle class='ic-af' cx='12' cy='15.5' r='1.2'/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path class='ic-a' d='M5 12.5l4.5 4.5L19 7'/></symbol>
+<symbol id="ic-clip" viewBox="0 0 24 24"><rect x='6' y='5' width='12' height='16' rx='2'/><path class='ic-a' d='M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1'/><path d='M9 11.5h6M9 15.5h4'/></symbol>
+<symbol id="ic-book" viewBox="0 0 24 24"><path d='M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z'/><path class='ic-a' d='M12 6.5v13'/></symbol>
+<symbol id="ic-bookc" viewBox="0 0 24 24"><path d='M6 4.5A1.5 1.5 0 0 1 7.5 3H18v15H7.5A1.5 1.5 0 0 0 6 19.5z'/><path class='ic-a' d='M6 19.5A1.5 1.5 0 0 0 7.5 21H18v-3'/><path d='M10 7h5'/></symbol>
+<symbol id="ic-quran" viewBox="0 0 24 24"><path d='M6 4.5A1.5 1.5 0 0 1 7.5 3H18v15H7.5A1.5 1.5 0 0 0 6 19.5z'/><path d='M6 19.5A1.5 1.5 0 0 0 7.5 21H18v-3'/><path class='ic-a' d='M13.8 6.6a3 3 0 1 0 0 5.4 2.5 2.5 0 0 1 0-5.4z'/></symbol>
+<symbol id="ic-image" viewBox="0 0 24 24"><rect x='3.5' y='5' width='17' height='14' rx='2.2'/><circle class='ic-af' cx='8.5' cy='9.7' r='1.4'/><path class='ic-a' d='M4 17l4.8-4.8 3.2 3.2 2.6-2.6 5.4 5.2'/></symbol>
+<symbol id="ic-send" viewBox="0 0 24 24"><path d='M20.5 3.5L3.5 10.5l6.5 2.5 2.5 6.5z'/><path class='ic-a' d='M20.5 3.5L10 13'/></symbol>
+<symbol id="ic-chat" viewBox="0 0 24 24"><path d='M4 5.5h16v11H12l-4.5 3.5v-3.5H4z'/><path class='ic-a' d='M8 10h8M8 13h5'/></symbol>
+<symbol id="ic-carousel" viewBox="0 0 24 24"><rect x='6.5' y='5' width='11' height='14' rx='2'/><path class='ic-a' d='M3.5 8v8M20.5 8v8'/><path d='M9.5 15l2-2.2 1.7 1.7 1.3-1.3 1.5 1.8'/></symbol>
+<symbol id="ic-note" viewBox="0 0 24 24"><rect x='5' y='3.5' width='14' height='17' rx='2'/><path class='ic-a' d='M8.5 8.5h7M8.5 12h7'/><path d='M8.5 15.5h4'/></symbol>
+<symbol id="ic-books" viewBox="0 0 24 24"><rect x='4' y='4' width='4.5' height='16' rx='1'/><rect class='ic-a' x='10' y='4' width='4.5' height='16' rx='1'/><path d='M16 7l3.6-.9 2.4 12.6-3.6.9z'/></symbol>
+<symbol id="ic-volume" viewBox="0 0 24 24"><path d='M4 9.5h3.5L12 5.5v13l-4.5-4H4z'/><path class='ic-a' d='M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11'/></symbol>
+<symbol id="ic-mute" viewBox="0 0 24 24"><path d='M4 9.5h3.5L12 5.5v13l-4.5-4H4z'/><path class='ic-a' d='M16 9.5l5 5M21 9.5l-5 5'/></symbol>
+<symbol id="ic-moon" viewBox="0 0 24 24"><path d='M19 14.5A8 8 0 0 1 9.5 5 8 8 0 1 0 19 14.5z'/><path class='ic-a' d='M17 3.8l.8 1.7 1.8.3-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.3z'/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx='12' cy='12' r='8.5'/><path class='ic-a' d='M12 7v5l3.2 2'/></symbol>
+<symbol id="ic-warn" viewBox="0 0 24 24"><path d='M12 3.8L21 19.5H3z'/><path class='ic-a' d='M12 10v4.3'/><circle class='ic-af' cx='12' cy='16.9' r='.9'/></symbol>
+<symbol id="ic-folder" viewBox="0 0 24 24"><path d='M3.5 7a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z'/><path class='ic-a' d='M3.5 11h17'/></symbol>
+<symbol id="ic-dot0" viewBox="0 0 24 24"><circle cx='12' cy='12' r='4.5'/></symbol>
+<symbol id="ic-dot1" viewBox="0 0 24 24"><circle class='ic-af' cx='12' cy='12' r='5'/></symbol>
+<symbol id="ic-mosque" viewBox="0 0 24 24"><path d='M6.5 20.5V14a5.5 5.5 0 0 1 11 0v6.5'/><path class='ic-a' d='M12 8.5V5.2M10.9 4.3a1.3 1.3 0 1 0 1.9 1.2'/><path class='ic-a' d='M2.8 20.5v-9l1.4-2.2 1.4 2.2v9M18.4 20.5v-9l1.4-2.2 1.4 2.2v9'/><path d='M2 20.5h20'/></symbol>
+<symbol id="ic-hadith" viewBox="0 0 24 24"><path d='M9 4.5h9.5V17a2.5 2.5 0 0 1-2.5 2.5H6.5A2.5 2.5 0 0 0 9 17z'/><path d='M9 4.5a2.2 2.2 0 1 0-2.2 2.2H9'/><path class='ic-a' d='M12 9h4.5M12 12.5h4.5'/></symbol>
+<symbol id="ic-kaaba" viewBox="0 0 24 24"><path d='M4 8.5L12 5l8 3.5v10L12 22l-8-3.5z'/><path class='ic-a' d='M4 11.5l8 3.5 8-3.5'/><path d='M12 15v7'/></symbol>
+<symbol id="ic-scales" viewBox="0 0 24 24"><path d='M12 4v16M7.5 20h9'/><path class='ic-a' d='M5 7.5h14'/><path d='M5 7.5L2.8 13a2.9 2.9 0 0 0 4.4 0zM19 7.5L16.8 13a2.9 2.9 0 0 0 4.4 0z'/></symbol>
+<symbol id="ic-heart" viewBox="0 0 24 24"><path d='M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z'/><path class='ic-a' d='M8 10.3a2 2 0 0 1 2-1.8'/></symbol>
+<symbol id="ic-hands" viewBox="0 0 24 24"><path d='M3.5 11c2.5 0 4.5 1 6 2.8 1 1.2 2.5 1.2 2.5 1.2s1.5 0 2.5-1.2c1.5-1.8 3.5-2.8 6-2.8-.3 4.7-3.8 8.5-8.5 8.5S3.8 15.7 3.5 11z'/><path class='ic-a' d='M12 4v5M8.8 5.8l1 3M15.2 5.8l-1 3'/></symbol>
+<symbol id="ic-beads" viewBox="0 0 24 24"><circle cx='12' cy='11' r='7' stroke-width='2.6' stroke-dasharray='0 3.67'/><circle class='ic-af' cx='12' cy='4' r='1.5'/><path class='ic-a' d='M12 18.5V22M10.6 22h2.8'/></symbol>
+<symbol id="ic-family" viewBox="0 0 24 24"><circle cx='8' cy='7.5' r='2.6'/><circle class='ic-a' cx='16.5' cy='8.5' r='2.1'/><path d='M3.5 19.5c0-3.5 2-5.5 4.5-5.5s4.5 2 4.5 5.5'/><path class='ic-a' d='M14 19.5c0-2.5 1-4.2 2.8-4.2s3.7 1.7 3.7 4.2'/></symbol>
+<symbol id="ic-woman" viewBox="0 0 24 24"><path d='M12 3.5c-3.3 0-5.5 2.6-5.5 6 0 2 .8 3.6 1.8 4.6-2.5.8-4 2.6-4 6.4h15.4c0-3.8-1.5-5.6-4-6.4 1-1 1.8-2.6 1.8-4.6 0-3.4-2.2-6-5.5-6z'/><path class='ic-a' d='M9 9.8c0-1.3 1.3-2.3 3-2.3s3 1 3 2.3-1.3 3-3 3-3-1.7-3-3z'/></symbol>
+<symbol id="ic-smile" viewBox="0 0 24 24"><circle cx='12' cy='12' r='8.5'/><path class='ic-a' d='M8.5 14c1 1.6 2.2 2.3 3.5 2.3s2.5-.7 3.5-2.3'/><circle class='ic-af' cx='9' cy='10' r='.9'/><circle class='ic-af' cx='15' cy='10' r='.9'/></symbol>
+<symbol id="ic-column" viewBox="0 0 24 24"><path d='M3.5 8.5L12 4l8.5 4.5z'/><path class='ic-a' d='M6 11v6.5M10 11v6.5M14 11v6.5M18 11v6.5'/><path d='M3.5 20.5h17'/></symbol>
+<symbol id="ic-compass" viewBox="0 0 24 24"><circle cx='12' cy='12' r='8.5'/><path class='ic-a' d='M15.8 8.2l-2 5.6-5.6 2 2-5.6z'/></symbol>
+<symbol id="ic-bulb" viewBox="0 0 24 24"><path d='M9 17.5h6M10 20.5h4'/><path class='ic-a' d='M12 3.5a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3.5z'/></symbol>
+<symbol id="ic-pulse" viewBox="0 0 24 24"><path d='M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z'/><path class='ic-a' d='M6 12.5h3l1.5-2.5 2 4.5 1.5-2h4'/></symbol>
+<symbol id="ic-coin" viewBox="0 0 24 24"><circle cx='12' cy='12' r='8.5'/><path class='ic-a' d='M14.5 9.3c-.6-.8-1.5-1.1-2.5-1.1-1.4 0-2.4.7-2.4 1.8 0 2.6 5 1.2 5 3.9 0 1.1-1.1 1.9-2.6 1.9-1.1 0-2-.4-2.6-1.2M12 6.5v1.7M12 15.8v1.7'/></symbol>
+<symbol id="ic-globe" viewBox="0 0 24 24"><circle cx='12' cy='12' r='8.5'/><path class='ic-a' d='M3.5 12h17M12 3.5c2.5 2.4 3.6 5.2 3.6 8.5s-1.1 6.1-3.6 8.5c-2.5-2.4-3.6-5.2-3.6-8.5S9.5 5.9 12 3.5z'/></symbol>
+<symbol id="ic-mic" viewBox="0 0 24 24"><rect x='9' y='3.5' width='6' height='11' rx='3'/><path class='ic-a' d='M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3'/></symbol>
+<symbol id="ic-shield" viewBox="0 0 24 24"><path d='M12 3.5l7.5 2.7v5.6c0 4.5-3.2 7.6-7.5 9-4.3-1.4-7.5-4.5-7.5-9V6.2z'/><path class='ic-a' d='M8.8 12l2.2 2.2 4.2-4.4'/></symbol>
+<symbol id="ic-sajadah" viewBox="0 0 24 24"><rect x='5' y='3.5' width='14' height='17' rx='1.5'/><path class='ic-a' d='M8.5 17v-5a3.5 3.5 0 0 1 7 0v5'/><path d='M8 3.5V2M16 3.5V2M8 20.5V22M16 20.5V22'/></symbol>
+</defs></svg>
     <!-- ELEMEN LOADING LOGO 3D "M" 4 TAHAP ANIMASI HASIL TRANSISI -->
     <div id="app-loader">
         <div class="loader-ring-wrapper">
@@ -953,17 +1063,17 @@ v2.5.8:
 
     <!-- TOMBOL MELAYANG ATAS (MENU KIRI & HOME KANAN) -->
     <button class="btn-float-common menu-top-btn" id="btnOpenMenu" onclick="openSidebar()" title="Buka Menu">
-        <span style="font-size:20px; line-height:1;">☰</span>
+        <svg class="ic ic-lg" aria-hidden="true"><use href="#ic-menu"/></svg>
     </button>
     <button class="btn-float-common home-top-btn" id="btnGoHome" onclick="scrollToTop()" title="Kembali ke Atas">
-        <span style="font-size:20px; line-height:1;">🏠</span>
+        <svg class="ic ic-lg" aria-hidden="true"><use href="#ic-home"/></svg>
     </button>
 
     <!-- SIDEBAR / MENU SAMPING ELEGAN GAYA HIJRAHAPP (EMAS-HITAM) -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
     <div class="sidebar-drawer" id="sidebarDrawer">
         <div class="sidebar-header">
-            <button class="sidebar-close-btn" onclick="closeSidebar()" title="Tutup Menu">✕</button>
+            <button class="sidebar-close-btn" onclick="closeSidebar()" title="Tutup Menu"><svg class="ic" aria-hidden="true"><use href="#ic-close"/></svg></button>
             
             <!-- KARTU JAM REALTIME & TANGGAL HP (100% SINKRON PERANGKAT PENGGUNA) -->
             <div class="sidebar-time-card">
@@ -975,10 +1085,10 @@ v2.5.8:
                         <button type="button" id="hijriMinus" onclick="hijriAdj(-1)" aria-label="Mundur 1 hari">&minus;</button>
                         <span id="hijriAdjLabel">Koreksi 0</span>
                         <button type="button" id="hijriPlus" onclick="hijriAdj(1)" aria-label="Maju 1 hari">+</button>
-                        <span class="hijri-src" id="hijriSrc" title="">&#9675;</span>
+                        <span class="hijri-src" id="hijriSrc" title=""><svg class="ic" aria-hidden="true"><use href="#ic-dot0"/></svg></span>
                     </div>
                 </div>
-                <div class="cal-icon">⏳</div>
+                <div class="cal-icon"><svg class="ic" aria-hidden="true"><use href="#ic-hourglass"/></svg></div>
             </div>
 
             <div class="sidebar-brand-title">ARSIP DAKWAH MANHAJ SALAF</div>
@@ -987,14 +1097,14 @@ v2.5.8:
         <div class="sidebar-nav">
             <!-- BARIS MENU 1: PDF / POSTER DAKWAH (HALAMAN UTAMA) -->
             <div class="sidebar-item active" onclick="pilihMenuSidebar('arsip')">
-                <span class="item-icon">📑</span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-docs"/></svg></span>
                 <span>PDF / Poster Dakwah</span>
                 <span class="item-badge">Aktif</span>
             </div>
 
             <!-- BARIS MENU 2: POSTER MAKER (TERHUBUNG KE MAKER.HTML) -->
             <div class="sidebar-item" onclick="pilihMenuSidebar('maker')">
-                <span class="item-icon">🎨</span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-palette"/></svg></span>
                 <span>Poster Maker</span>
                 <span class="item-badge" style="background:rgba(212,175,55,0.2);color:#D4AF37;border-color:rgba(212,175,55,0.4);">Studio</span>
             </div>
@@ -1004,15 +1114,15 @@ v2.5.8:
 
             <!-- Menu Tambahan Pendukung -->
             <div class="sidebar-item" onclick="closeSidebar(); switchBerandaMode('fav');">
-                <span class="item-icon">🔖</span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></span>
                 <span>Poster Tersimpan</span>
             </div>
             <div class="sidebar-item" onclick="closeSidebar(); switchBerandaMode('pdf');">
-                <span class="item-icon">📄</span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-pdf"/></svg></span>
                 <span>Brosur PDF Dakwah</span>
             </div>
             <div class="sidebar-item" onclick="closeSidebar(); toggleView();">
-                <span class="item-icon">🔠</span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-vcompact"/></svg></span>
                 <span>Ubah Tampilan Mode</span>
             </div>
 
@@ -1020,11 +1130,11 @@ v2.5.8:
             <div class="sidebar-section-label">Media Dakwah</div>
 
             <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" class="sidebar-item" onclick="closeSidebar()">
-                <span class="item-icon">📸</span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-camera"/></svg></span>
                 <span>@tauhidsunnah_id</span>
             </a>
             <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" class="sidebar-item" onclick="closeSidebar()">
-                <span class="item-icon">✨</span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-sparkle"/></svg></span>
                 <span>@an.nashiha_daily</span>
             </a>
         </div>
@@ -1039,8 +1149,8 @@ v2.5.8:
     <div class="follow-wrapper">
         <!-- 2 USERNAME AKUN DITARUH DI PALING ATAS -->
         <div class="sosmed-container">
-            <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" class="btn-sosmed anim-down">➡️ @tauhidsunnah_id</a>
-            <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" class="btn-sosmed anim-up">➡️ @an.nashiha_daily</a>
+            <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" class="btn-sosmed anim-down"><svg class="ic" aria-hidden="true"><use href="#ic-arrow"/></svg> @tauhidsunnah_id</a>
+            <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" class="btn-sosmed anim-up"><svg class="ic" aria-hidden="true"><use href="#ic-arrow"/></svg> @an.nashiha_daily</a>
         </div>
         <!-- TULISAN AJAKAN FOLLOW DI BAWAHNYA DENGAN TEKS MIRING & LEBIH RINGKAS -->
         <div class="follow-text">Mari follow akun dakwah kami diatas untuk konten manhaj salaf bermanfaat lainnya</div>
@@ -1051,33 +1161,33 @@ v2.5.8:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.9</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.1</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
     <div class="mode-switcher-container">
         <div class="mode-switcher-card">
             <button class="btn-mode-segmented" id="btnModeFav" onclick="switchBerandaMode('fav')">
-                🔖 Disimpan
+                <svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg> Disimpan
             </button>
             <button class="btn-mode-segmented" id="btnModePdf" onclick="switchBerandaMode('pdf')">
-                📄 PDF Mode
+                <svg class="ic" aria-hidden="true"><use href="#ic-pdf"/></svg> PDF Mode
             </button>
             <button class="btn-mode-segmented active" id="btnModeAll" onclick="switchBerandaMode('all')">
-                🪧 Semua
+                <svg class="ic" aria-hidden="true"><use href="#ic-grid"/></svg> Semua
             </button>
         </div>
     </div>
 
     <!-- v2.5.5: TOMBOL INFO PENYIMPANAN (di bawah mode switcher) -->
     <div class="stor-inline-wrap">
-        <button class="stor-inline-btn" id="storBtn" aria-expanded="false" onclick="toggleStorPanel()">💾 Penyimpanan <span class="stor-chev">▾</span></button>
+        <button class="stor-inline-btn" id="storBtn" aria-expanded="false" onclick="toggleStorPanel()"><svg class="ic" aria-hidden="true"><use href="#ic-disk"/></svg> Penyimpanan <span class="stor-chev"><svg class="ic" aria-hidden="true"><use href="#ic-chevd"/></svg></span></button>
         <div class="stor-panel" id="storPanel"></div>
     </div>
 
     <div class="header-container">
         <h1>Arsip Dakwah</h1>
-        <div class="sub-title">✨ Manhaj Salaf ✨</div>
+        <div class="sub-title"><svg class="ic ic-m" aria-hidden="true"><use href="#ic-sparkle"/></svg>Manhaj Salaf<svg class="ic ic-ml" aria-hidden="true"><use href="#ic-sparkle"/></svg></div>
     </div>
     <div class="search-wrapper">
         <input type="text" id="search" placeholder="Cari judul, kategori, tag, caption...">
@@ -1097,7 +1207,7 @@ v2.5.8:
     <!-- Modal Full View untuk Mode Padat -->
     <div class="modal-overlay" id="detailModal" onclick="checkCloseModal(event)">
         <div class="modal-card">
-            <button class="modal-close-btn" onclick="tutupModalDetail()">✕</button>
+            <button class="modal-close-btn" onclick="tutupModalDetail()"><svg class="ic" aria-hidden="true"><use href="#ic-close"/></svg></button>
             <div id="modalBody"></div>
         </div>
     </div>
@@ -1105,38 +1215,38 @@ v2.5.8:
     <!-- POPUP MODAL FOLLOW GATE (ELEGAN & MEWAH) -->
     <div class="modal-overlay" id="followGateModal">
         <div class="follow-gate-card">
-            <div class="gate-icon-badge">✨</div>
+            <div class="gate-icon-badge"><svg class="ic" aria-hidden="true"><use href="#ic-sparkle"/></svg></div>
             <div class="gate-title">Dukungan Dakwah</div>
             <p class="gate-msg">Untuk meneruskan, silahkan follow dulu 2 akun dakwah kami berikut:</p>
             
             <div class="gate-buttons">
                 <a href="https://www.instagram.com/tauhidsunnah_id" target="_blank" id="gateBtn1" class="gate-btn-follow" onclick="trackGateFollow(1)">
-                    <span>➡️ @tauhidsunnah_id</span>
-                    <span class="status-icon" id="gateCheck1">🔗</span>
+                    <span><svg class="ic ic-m" aria-hidden="true"><use href="#ic-arrow"/></svg>@tauhidsunnah_id</span>
+                    <span class="status-icon" id="gateCheck1"><svg class="ic" aria-hidden="true"><use href="#ic-link"/></svg></span>
                 </a>
                 <a href="https://www.instagram.com/an.nashiha_daily" target="_blank" id="gateBtn2" class="gate-btn-follow" onclick="trackGateFollow(2)">
-                    <span>➡️ @an.nashiha_daily</span>
-                    <span class="status-icon" id="gateCheck2">🔗</span>
+                    <span><svg class="ic ic-m" aria-hidden="true"><use href="#ic-arrow"/></svg>@an.nashiha_daily</span>
+                    <span class="status-icon" id="gateCheck2"><svg class="ic" aria-hidden="true"><use href="#ic-link"/></svg></span>
                 </a>
             </div>
 
             <p class="gate-quote">"Semoga semua kontennya bermanfaat buat ummat..."</p>
 
             <button id="gateContinueBtn" class="gate-btn-continue" disabled onclick="executePendingGateAction()">
-                🔒 Klik Kedua Akun Di Atas Untuk Lanjut
+                <svg class="ic ic-m" aria-hidden="true"><use href="#ic-lock"/></svg>Klik Kedua Akun Di Atas Untuk Lanjut
             </button>
         </div>
     </div>
 
-    <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()">🔠</button>
-    <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()">🔇</button>
+    <button class="btn-float-common view-float-btn" id="viewToggle" onclick="toggleView()"><svg class="ic" aria-hidden="true"><use href="#ic-vcompact"/></svg></button>
+    <button class="btn-float-common sound-float-btn silent" id="soundBtn" onclick="toggleSuara()"><svg class="ic" aria-hidden="true"><use href="#ic-mute"/></svg></button>
     <audio id="bgAudio" loop><source src="suara-ombak.mp3" type="audio/mpeg"></audio>
 
     <!-- v2.5.3: JENDELA INFO BULAN HARAM -->
     <div class="hj-overlay" id="hjOverlay" aria-hidden="true" onclick="closeHaramInfo()">
         <div class="hj-card" role="dialog" aria-modal="true" aria-labelledby="hjTitle" onclick="event.stopPropagation()">
             <div class="hj-head">
-                <span class="hj-head-warn" aria-hidden="true">&#9888;&#65039;</span>
+                <span class="hj-head-warn" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#ic-warn"/></svg></span>
                 <div class="hj-head-txt">
                     <div class="hj-title" id="hjTitle">Bulan Haram</div>
                     <div class="hj-sub">Al-Asyhurul Hurum &middot; empat bulan yang dimuliakan Allah</div>
@@ -1179,7 +1289,7 @@ v2.5.8:
                 </section>
 
                 <details class="hj-month" data-bulan="10" id="hj-m-10">
-                    <summary><span class="hj-ms-ic">&#128331;</span><span class="hj-ms-n">Dzulqadah (11)</span><span class="hj-grade g-shahih">Shahih</span></summary>
+                    <summary><span class="hj-ms-ic"><svg class="ic" aria-hidden="true"><use href="#ic-clock"/></svg></span><span class="hj-ms-n">Dzulqadah (11)</span><span class="hj-grade g-shahih">Shahih</span></summary>
                     <div class="hj-month-body">
                         <p class="hj-src">Dari Anas bin Malik radhiyallahu anhu:</p>
                         <p class="hj-q">&ldquo;Rasulullah shallallahu alaihi wa sallam berumrah empat kali, semuanya di bulan Dzulqadah, kecuali umrah yang bersama hajinya.&rdquo;</p>
@@ -1189,7 +1299,7 @@ v2.5.8:
                 </details>
 
                 <details class="hj-month" data-bulan="11" id="hj-m-11">
-                    <summary><span class="hj-ms-ic">&#128331;</span><span class="hj-ms-n">Dzulhijjah (12)</span><span class="hj-grade g-shahih">Shahih</span></summary>
+                    <summary><span class="hj-ms-ic"><svg class="ic" aria-hidden="true"><use href="#ic-clock"/></svg></span><span class="hj-ms-n">Dzulhijjah (12)</span><span class="hj-grade g-shahih">Shahih</span></summary>
                     <div class="hj-month-body">
                         <p class="hj-src">Dari Ibnu Abbas radhiyallahu anhuma, Nabi shallallahu alaihi wa sallam bersabda:</p>
                         <p class="hj-q">&ldquo;Tidak ada hari-hari yang amal shalih di dalamnya lebih dicintai Allah daripada hari-hari ini, yaitu sepuluh hari (pertama Dzulhijjah).&rdquo; Para sahabat bertanya, &ldquo;Wahai Rasulullah, tidak pula jihad di jalan Allah?&rdquo; Beliau menjawab, &ldquo;Tidak pula jihad di jalan Allah, kecuali seseorang yang keluar dengan jiwa dan hartanya lalu tidak kembali membawa sesuatu pun.&rdquo;</p>
@@ -1198,7 +1308,7 @@ v2.5.8:
                 </details>
 
                 <details class="hj-month" data-bulan="0" id="hj-m-0">
-                    <summary><span class="hj-ms-ic">&#127769;</span><span class="hj-ms-n">Muharram (1)</span><span class="hj-grade g-shahih">Shahih</span></summary>
+                    <summary><span class="hj-ms-ic"><svg class="ic" aria-hidden="true"><use href="#ic-moon"/></svg></span><span class="hj-ms-n">Muharram (1)</span><span class="hj-grade g-shahih">Shahih</span></summary>
                     <div class="hj-month-body">
                         <p class="hj-src">Dari Abu Hurairah radhiyallahu anhu, Rasulullah shallallahu alaihi wa sallam bersabda:</p>
                         <p class="hj-q">&ldquo;Puasa yang paling utama setelah Ramadhan adalah (puasa) di bulan Allah, Muharram. Dan shalat yang paling utama setelah shalat fardhu adalah shalat malam.&rdquo;</p>
@@ -1211,7 +1321,7 @@ v2.5.8:
                 </details>
 
                 <details class="hj-month" data-bulan="6" id="hj-m-6">
-                    <summary><span class="hj-ms-ic">&#127769;</span><span class="hj-ms-n">Rajab (7)</span><span class="hj-grade g-warn">Peringatan</span></summary>
+                    <summary><span class="hj-ms-ic"><svg class="ic" aria-hidden="true"><use href="#ic-moon"/></svg></span><span class="hj-ms-n">Rajab (7)</span><span class="hj-grade g-warn">Peringatan</span></summary>
                     <div class="hj-month-body">
                         <p class="hj-q">Rajab termasuk bulan haram berdasarkan hadits Abu Bakrah di atas (Rajab Mudhar). Itulah kemuliaannya yang sah, sehingga kita menjauhi kezaliman dan maksiat di dalamnya.</p>
                         <div class="hj-note"><b>Waspada hadits lemah dan palsu.</b> Al-Hafizh Ibnu Hajar Al-Asqalani dalam <i>Tabyin al-Ajab</i> menyatakan tidak ada hadits shahih yang layak dijadikan hujjah tentang keutamaan khusus bulan Rajab, puasanya, puasa pada hari tertentu, maupun shalat malam tertentu di dalamnya. Hadits-hadits yang beredar tentangnya berkisar antara dhaif dan maudhu (palsu).</div>
@@ -1237,7 +1347,7 @@ v2.5.8:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.5.9';
+        const APP_VERSION = 'v2.6.1';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
         function startLiveClock() {
@@ -1388,12 +1498,12 @@ v2.5.8:
             });
         }
         function bulanCardHtml(b, compact, now) {
-            const icon = emojiMapGlobal[b.nama.toLowerCase()] || emojiMapGlobal[b.nama] || '\uD83C\uDF19';
+            const icon = IC('moon');
             const haram = HARAM_IDX.indexOf(b.i) !== -1;
             const cls = 'card-kategori' + (b.jumlah === 0 ? ' is-empty' : '') + (b.i === now ? ' is-now' : '') + (haram ? ' is-haram' : '');
             const jml = compact ? String(b.jumlah) : (b.jumlah + ' Folder');
             const badge = (!compact && b.i === now) ? '<span class="bulan-now">Bulan ini</span>' : '';
-            const warn = haram ? '<span class="hj-warn' + (compact ? ' hj-warn-inline' : '') + '" aria-hidden="true">\u26A0\uFE0F</span>' : '';
+            const warn = haram ? '<span class="hj-warn' + (compact ? ' hj-warn-inline' : '') + '" aria-hidden="true">' + IC('warn') + '</span>' : '';
             const info = haram ? '<button type="button" class="hj-info" aria-label="Info bulan haram" title="Info bulan haram" onclick="event.stopPropagation();openHaramInfo(' + b.i + ')">i</button>' : '';
             const status = (haram && !compact) ? '<span class="hj-status">Bulan Haram</span>' : '';
             const nama = escAttrBulan(b.nama);
@@ -1481,6 +1591,56 @@ v2.5.8:
         let semuaPosterCache = [];
         let isCompactView = false;
         let isSelecting = false;
+
+        /* v2.6.1: pembuat ikon SVG (sprite di atas <body>) */
+        function IC(n, c) { return '<svg class="ic' + (c ? ' ' + c : '') + '" aria-hidden="true"><use href="#ic-' + n + '"/></svg>'; }
+        function IT(n, t) { return IC(n, t ? 'ic-m' : '') + t; }
+        const KAT_ICON_RULES = [
+            [/aqidah|akidah|tauhid|iman|syirik|asma/, 'kaaba'],
+            [/quran|qur.an|tafsir|tajwid|ayat|tahfiz|hafal/, 'quran'],
+            [/hadits|hadist|riwayat/, 'hadith'],
+            [/fiqih|fikih|fiqh|hukum|muamalah|syariat|syari.ah|halal|haram/, 'scales'],
+            [/doa|do.a|ruqyah|munajat/, 'hands'],
+            [/dzikir|zikir|wirid|tasbih/, 'beads'],
+            [/masjid|jamaah|jama.ah/, 'mosque'],
+            [/sholat|shalat|salat|ibadah|thaharah|wudhu/, 'sajadah'],
+            [/puasa|ramadhan|ramadan|bulan|hijriah|hijriyah/, 'moon'],
+            [/haji|umrah|kabah|ka.bah|makkah|mekah|madinah/, 'kaaba'],
+            [/zakat|sedekah|infak|infaq|harta|rizki|rezeki|ekonomi|riba/, 'coin'],
+            [/keluarga|rumah tangga|nikah|pernikahan|suami|istri|orang tua|parenting/, 'family'],
+            [/wanita|muslimah|akhwat|hijab|jilbab|ibu/, 'woman'],
+            [/anak|remaja|pemuda|pelajar|generasi|santri/, 'smile'],
+            [/sejarah|siroh|sirah|tarikh|kisah|ulama|biografi|sahabat|nabi|rasul/, 'column'],
+            [/bid.?ah|peringatan|bahaya|waspada|syubhat|hoax|fitnah|sesat|maksiat/, 'warn'],
+            [/manhaj|dakwah|salaf|sunnah|ahlus/, 'compass'],
+            [/akhlak|adab|etika|sabar|syukur|tazkiyah|hati|nasihat|taubat|ikhlas/, 'heart'],
+            [/kesehatan|medis|thibb|sehat/, 'pulse'],
+            [/kitab|buku|referensi|pdf|brosur/, 'books'],
+            [/kajian|ceramah|audio|video|podcast|khutbah|mimbar|tanya jawab/, 'mic'],
+            [/ilmu|belajar|motivasi|faedah|faidah|tips|fawaid|pelajaran|hikmah|renungan/, 'bulb'],
+            [/global|dunia|umat|ummat|berita|aktual/, 'globe'],
+            [/aman|perlindungan|benteng|keamanan/, 'shield']
+        ];
+        const KAT_EMOJI_MAP = {
+            '\uD83D\uDD4C':'mosque','\uD83D\uDCD6':'quran','\uD83D\uDCDA':'books','\uD83C\uDF19':'moon','\u262A':'moon','\uD83D\uDD4B':'kaaba',
+            '\uD83E\uDD32':'hands','\uD83D\uDCFF':'beads','\u2764':'heart','\uD83D\uDC9B':'heart','\uD83D\uDC96':'heart','\uD83D\uDC68':'family','\uD83D\uDC6A':'family',
+            '\uD83E\uDDD5':'woman','\uD83D\uDC76':'smile','\uD83D\uDCDC':'hadith','\u2696':'scales','\uD83E\uDDED':'compass','\uD83D\uDCA1':'bulb',
+            '\u26A0':'warn','\uD83D\uDCB0':'coin','\uD83C\uDF99':'mic','\uD83D\uDEE1':'shield','\uD83C\uDF0D':'globe','\uD83C\uDFDB':'column',
+            '\uD83D\uDCD5':'bookc','\uD83D\uDCC4':'pdf','\uD83D\uDCDD':'note'
+        };
+        function katIcon(nama, emojiRaw) {
+            const k = String(nama == null ? '' : nama).toLowerCase();
+            for (let i = 0; i < KAT_ICON_RULES.length; i++) {
+                if (KAT_ICON_RULES[i][0].test(k)) return IC(KAT_ICON_RULES[i][1]);
+            }
+            if (emojiRaw) {
+                const e = String(emojiRaw).replace(/[\uFE0F\u200D]/g, '');
+                const f = e.length ? e.slice(0, e.codePointAt(0) > 0xFFFF ? 2 : 1) : '';
+                if (KAT_EMOJI_MAP[f]) return IC(KAT_EMOJI_MAP[f]);
+            }
+            return IC('folder');
+        }
+
         let emojiMapGlobal = {};
         let rawManifestPosters = [];
 
@@ -1504,24 +1664,24 @@ v2.5.8:
                 const check1 = document.getElementById('gateCheck1');
                 const btn1 = document.getElementById('gateBtn1');
                 
-                check1.innerText = "⏳ Memeriksa...";
+                check1.innerHTML = IT('hourglass', 'Memeriksa...');
                 
                 setTimeout(() => {
                     gateFollowed1 = true;
                     btn1.classList.add('clicked');
-                    check1.innerText = "✓";
+                    check1.innerHTML = IC('check');
                     checkGateUnlockState();
                 }, 10000);
             } else if (accountNum === 2) {
                 const check2 = document.getElementById('gateCheck2');
                 const btn2 = document.getElementById('gateBtn2');
                 
-                check2.innerText = "⏳ Memeriksa...";
+                check2.innerHTML = IT('hourglass', 'Memeriksa...');
                 
                 setTimeout(() => {
                     gateFollowed2 = true;
                     btn2.classList.add('clicked');
-                    check2.innerText = "✓";
+                    check2.innerHTML = IC('check');
                     checkGateUnlockState();
                 }, 10000);
             }
@@ -1532,7 +1692,7 @@ v2.5.8:
                 const continueBtn = document.getElementById('gateContinueBtn');
                 continueBtn.disabled = false;
                 continueBtn.classList.add('active');
-                continueBtn.innerHTML = "🔓 Lanjutkan Ambil Konten";
+                continueBtn.innerHTML = IT('unlock', 'Lanjutkan Ambil Konten');
             }
         }
 
@@ -1555,10 +1715,10 @@ v2.5.8:
             let fav = getFavorit();
             if(fav.includes(id)) {
                 fav = fav.filter(f => f !== id);
-                if(btn) { btn.classList.remove('saved'); btn.innerHTML = '👆🏻 Belum Disimpan'; }
+                if(btn) { btn.classList.remove('saved'); btn.innerHTML = IT('bmadd', 'Belum Disimpan'); }
             } else {
                 fav.push(id);
-                if(btn) { btn.classList.add('saved'); btn.innerHTML = '🔖 Sudah Disimpan'; }
+                if(btn) { btn.classList.add('saved'); btn.innerHTML = IT('bmcheck', 'Sudah Disimpan'); }
             }
             localStorage.setItem('dakwahFavorit', JSON.stringify(fav));
             
@@ -1566,10 +1726,10 @@ v2.5.8:
             allBtns.forEach(b => {
                 if(fav.includes(id)) {
                     b.classList.add('saved');
-                    b.innerHTML = '🔖 Sudah Disimpan';
+                    b.innerHTML = IT('bmcheck', 'Sudah Disimpan');
                 } else {
                     b.classList.remove('saved');
-                    b.innerHTML = '👆🏻 Belum Disimpan';
+                    b.innerHTML = IT('bmadd', 'Belum Disimpan');
                 }
             });
 
@@ -1578,7 +1738,16 @@ v2.5.8:
 
         /* FUNGSI UTAMA SWITCH MODE BERANDA */
         function switchBerandaMode(mode) {
+            const masukPdf = (mode === 'pdf' && berandaModeAktif !== 'pdf');
             berandaModeAktif = mode;
+
+            /* v2.6.0: pertama kali masuk PDF Mode selalu mulai dari kategori Semua */
+            if (masukPdf && kategoriAktif !== null) {
+                kategoriAktif = null;
+                document.querySelectorAll('.card-kategori').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.card-kategori-all').forEach(el => el.classList.add('active'));
+                syncBulanState();
+            }
 
             document.getElementById('btnModeFav').classList.toggle('active', mode === 'fav');
             document.getElementById('btnModePdf').classList.toggle('active', mode === 'pdf');
@@ -1696,7 +1865,7 @@ v2.5.8:
                 const parts = [judul, sub, isi].map(function(t, idx) { return (idx === 2 && cap2El) ? cleanCopyKeepBlank(t) : cleanCopyText(t); }).filter(p => p.length > 0);
                 const konten = parts.join('\n\n');
                 
-                navigator.clipboard.writeText(konten).then(() => { alert("✅ Caption berhasil disalin!"); }).catch(() => { alert("❌ Gagal menyalin. Silakan salin secara manual."); });
+                navigator.clipboard.writeText(konten).then(() => { alert("Caption berhasil disalin!"); }).catch(() => { alert("Gagal menyalin. Silakan salin secara manual."); });
             });
         }
 
@@ -1705,7 +1874,7 @@ v2.5.8:
             const container = document.getElementById('post-list');
             const kategoriOri = document.getElementById('kategori-wrap-ori');
             const kategoriCompact = document.getElementById('kategori-wrap-compact');
-            container.innerHTML = '<div class="loading">📂 Memuat arsip...</div>';
+            container.innerHTML = '<div class="loading">' + IT('folder', 'Memuat arsip...') + '</div>';
             
             let htmlPoster = '';
             const favList = getFavorit();
@@ -1745,7 +1914,7 @@ v2.5.8:
                     const subJudul = p.sub_judul || "";
                     const kategori = p.kategori || "Umum";
                     
-                    const katEmoji = p.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori] || '📂';
+                    const katEmoji = katIcon(kategori, p.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori]);
                     const tagArray = p.tags ? p.tags.split(',').map(t => t.trim()) : [];
                     let pdfSrc = p.pdf ? `${folder}/brosur.pdf` : null;
                     const hasPdf = !!p.pdf;
@@ -1772,8 +1941,8 @@ v2.5.8:
                                     </div>
                                 `).join('')}
                             </div>
-                            <button class="carousel-btn prev" onclick="event.stopPropagation(); slideCarousel('${posterId}', -1)">❮</button>
-                            <button class="carousel-btn next" onclick="event.stopPropagation(); slideCarousel('${posterId}', 1)">❯</button>
+                            <button class="carousel-btn prev" onclick="event.stopPropagation(); slideCarousel('${posterId}', -1)">${IC('chevl')}</button>
+                            <button class="carousel-btn next" onclick="event.stopPropagation(); slideCarousel('${posterId}', 1)">${IC('chevr')}</button>
                         </div>
                         `;
                     }
@@ -1796,21 +1965,21 @@ v2.5.8:
                                 <h3>${judul}</h3>
                                 ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
                                 <div class="poster-content-wrapper collapsed" id="content-${posterId}">${parsedContent}</div>
-                                <button class="read-more-btn" id="btn-${posterId}" onclick="event.stopPropagation(); toggleReadMore('${posterId}')">📖 Baca Selengkapnya</button>
+                                <button class="read-more-btn" id="btn-${posterId}" onclick="event.stopPropagation(); toggleReadMore('${posterId}')">${IT('book', 'Baca Selengkapnya')}</button>
                                 
                                 <div class="actions">
-                                    <button class="btn-save btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '👆🏻 Belum Disimpan'}</button>
-                                    ${pdfSrc ? `<button onclick="event.stopPropagation(); downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
-                                    <button onclick="event.stopPropagation(); downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">🖼️ Gambar</button>
-                                    <button onclick="event.stopPropagation(); copyCaptionDariElemen(this)">📋 Caption</button>
+                                    <button class="btn-save btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleFavorit('${posterId}', this)">${isSaved ? IT('bmcheck', 'Sudah Disimpan') : IT('bmadd', 'Belum Disimpan')}</button>
+                                    ${pdfSrc ? `<button onclick="event.stopPropagation(); downloadFile('${pdfSrc}', '${judul}.pdf')">${IT('pdf', 'PDF')}</button>` : ''}
+                                    <button onclick="event.stopPropagation(); downloadMultiImage('${posterId}', '${folder}', '${p.images || "1.jpg"}')">${IT('image', 'Gambar')}</button>
+                                    <button onclick="event.stopPropagation(); copyCaptionDariElemen(this)">${IT('clip', 'Caption')}</button>
                                 </div>
                             </div>
                             
                             <hr class="divider">
                             
                             <div class="sosial-actions">
-                                <button onclick="event.stopPropagation(); sharePoster('${judul}', '${window.location.href}')"><span class="icon">✈️</span> Kirim ke Teman</button>
-                                <button onclick="event.stopPropagation(); dmInstagram()"><span class="icon">💬</span> DM</button>
+                                <button onclick="event.stopPropagation(); sharePoster('${judul}', '${window.location.href}')"><span class="icon">${IC('send')}</span> Kirim ke Teman</button>
+                                <button onclick="event.stopPropagation(); dmInstagram()"><span class="icon">${IC('chat')}</span> DM</button>
                             </div>
                             <hr class="divider">
                             ${tagArray.length > 0 ? `<div class="tags-wrapper"><span class="tags-label">Tagar :</span><div class="tag-container">${tagArray.map(t => `<span class="tag">${t}</span>`).join('')}</div></div>` : ''}
@@ -1833,14 +2002,14 @@ v2.5.8:
 
             let htmlKategoriOri = `
                 <div class="card-kategori card-kategori-all active" onclick="resetSemua()">
-                    <span class="icon">🪧</span>
+                    <span class="icon">${IC('grid')}</span>
                     <span class="nama">Semua</span>
                     <span class="jumlah">${totalPoster} Folder</span>
                 </div>`;
 
             let htmlKategoriCompact = `
                 <div class="card-kategori card-kategori-all active" onclick="resetSemua()">
-                    <span class="icon">🪧</span>
+                    <span class="icon">${IC('grid')}</span>
                     <span class="nama">Semua</span>
                     <span class="jumlah">${totalPoster}</span>
                 </div>`;
@@ -1852,24 +2021,24 @@ v2.5.8:
             const bulanTerisi = bulanData.filter(function(b) { return b.jumlah > 0; }).length;
             htmlKategoriOri += `
                 <div class="card-kategori card-bulan-toggle" id="bulanToggleOri" role="button" aria-expanded="${bulanOpen}" onclick="toggleBulan()">
-                    <span class="icon">\uD83C\uDF19</span>
+                    <span class="icon">${IC('moon')}</span>
                     <span class="nama">Amalan 12 Bulan</span>
                     <span class="jumlah">${bulanTotal} Folder</span>
                     <span class="bulan-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D4AF37" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
                 </div>
                 <div class="bulan-panel${bulanOpen ? ' open' : ''}" id="bulanPanel">
                     <div class="bulan-panel-inner">
-                        <div class="bulan-head"><span class="bh-line"></span><span class="bh-title">\uD83C\uDF19 Amalan 12 Bulan Hijriah</span><span class="bh-count">${bulanTerisi}/12 terisi</span><span class="bh-line"></span></div>
+                        <div class="bulan-head"><span class="bh-line"></span><span class="bh-title">${IC('moon')}Amalan 12 Bulan Hijriah</span><span class="bh-count">${bulanTerisi}/12 terisi</span><span class="bh-line"></span></div>
                         <div class="bulan-grid">${bulanData.map(function(b) { return bulanCardHtml(b, false, bulanNow); }).join('')}</div>
                         <div class="bulan-item bulan-end" style="--i:12"><span class="be-line"></span><span class="be-label">Akhir Amalan 12 Bulan</span><span class="be-line"></span></div>
                     </div>
                 </div>`;
             htmlKategoriCompact += `
                 <div class="card-kategori card-bulan-toggle-c" id="bulanToggleCompact" role="button" aria-expanded="${bulanOpen}" onclick="toggleBulan()">
-                    <span class="icon">\uD83C\uDF19</span>
+                    <span class="icon">${IC('moon')}</span>
                     <span class="nama">Amalan 12 Bulan</span>
                     <span class="jumlah">${bulanTotal}</span>
-                    <span class="bulan-chev-c">&rsaquo;</span>
+                    <span class="bulan-chev-c">${IC('chevr')}</span>
                 </div>
                 <div class="bulan-chips-wrap${bulanOpen ? ' open' : ''}" id="bulanChipsWrap">
                     <div class="bulan-chips-inner"><div class="bulan-chips-row">${bulanData.map(function(b) { return bulanCardHtml(b, true, bulanNow); }).join('')}<div class="bulan-item bulan-end-v" style="--i:12" title="Akhir Amalan 12 Bulan"><span class="bev-line"></span></div></div></div>
@@ -1882,7 +2051,7 @@ v2.5.8:
 
             for(let [nama, jumlah] of kategoriTerurut()) {
                 if (bulanIndexOf(nama) >= 0) continue; /* bulan Hijriah tampil di panel Amalan 12 Bulan */
-                let icon = emojiMapGlobal[nama.toLowerCase()] || emojiMapGlobal[nama] || '📂';
+                let icon = katIcon(nama, emojiMapGlobal[nama.toLowerCase()] || emojiMapGlobal[nama]);
                 htmlKategoriOri += `
                     <div class="card-kategori" onclick="filterKategori('${nama}', this)">
                         <span class="icon">${icon}</span>
@@ -1941,7 +2110,7 @@ v2.5.8:
                         const a = document.createElement('a'); a.href = `${folder}/${imageList[i]}`; a.download = `${id}-${i+1}.jpg`;
                         document.body.appendChild(a); a.click(); document.body.removeChild(a);
                     }
-                    alert(`✅ Semua ${imageList.length} gambar sedang didownload.`);
+                    alert(`Semua ${imageList.length} gambar sedang didownload.`);
                 } else {
                     const selected = choice.split(',').map(n => parseInt(n.trim()) - 1).filter(n => n >= 0 && n < imageList.length);
                     if (selected.length === 0) return alert("Tidak ada slide yang valid.");
@@ -1949,7 +2118,7 @@ v2.5.8:
                         const a = document.createElement('a'); a.href = `${folder}/${imageList[i]}`; a.download = `${id}-${i+1}.jpg`;
                         document.body.appendChild(a); a.click(); document.body.removeChild(a);
                     }
-                    alert(`✅ ${selected.length} gambar sedang didownload.`);
+                    alert(`${selected.length} gambar sedang didownload.`);
                 }
             });
         }
@@ -1959,10 +2128,10 @@ v2.5.8:
             const btn = document.getElementById(`btn-${id}`);
             if (content.classList.contains('collapsed')) {
                 content.classList.remove('collapsed'); content.classList.add('expanded');
-                btn.innerText = '📕 Tutup';
+                btn.innerHTML = IT('bookc', 'Tutup');
             } else {
                 content.classList.remove('expanded'); content.classList.add('collapsed');
-                btn.innerText = '📖 Baca Selengkapnya';
+                btn.innerHTML = IT('book', 'Baca Selengkapnya');
             }
         }
 
@@ -1971,10 +2140,10 @@ v2.5.8:
             const btn = document.getElementById('modalReadMoreBtn');
             if (content.classList.contains('collapsed')) {
                 content.classList.remove('collapsed'); content.classList.add('expanded');
-                btn.innerText = '📕 Tutup';
+                btn.innerHTML = IT('bookc', 'Tutup');
             } else {
                 content.classList.remove('expanded'); content.classList.add('collapsed');
-                btn.innerText = '📖 Baca Selengkapnya';
+                btn.innerHTML = IT('book', 'Baca Selengkapnya');
             }
         }
 
@@ -1992,7 +2161,7 @@ v2.5.8:
         function sharePoster(judul, url) {
             const textToCopy = `Cari "${judul}" di situs ini: ${url}`;
             if (navigator.share) { navigator.share({ title: judul, url: url }); } 
-            else { navigator.clipboard.writeText(textToCopy); alert("✅ Link poster berhasil disalin!"); }
+            else { navigator.clipboard.writeText(textToCopy); alert("Link poster berhasil disalin!"); }
         }
 
         function dmInstagram() { window.open('https://www.instagram.com/tauhidsunnah_id', '_blank'); }
@@ -2008,7 +2177,7 @@ v2.5.8:
             const judul = rawItem.judul || "Tanpa Judul";
             const subJudul = rawItem.sub_judul || "";
             const kategori = rawItem.kategori || "Umum";
-            const katEmoji = rawItem.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori] || '📂';
+            const katEmoji = katIcon(kategori, rawItem.kategori_emoji || emojiMapGlobal[kategori.toLowerCase()] || emojiMapGlobal[kategori]);
             const tagArray = rawItem.tags ? rawItem.tags.split(',').map(t => t.trim()) : [];
             const pdfSrc = rawItem.pdf ? `${folder}/brosur.pdf` : null;
             const favList = getFavorit();
@@ -2030,8 +2199,8 @@ v2.5.8:
                             </div>
                         `).join('')}
                     </div>
-                    <button class="m-carousel-btn prev" onclick="slideModalCarousel(-1, ${imageList.length})">❮</button>
-                    <button class="m-carousel-btn next" onclick="slideModalCarousel(1, ${imageList.length})">❯</button>
+                    <button class="m-carousel-btn prev" onclick="slideModalCarousel(-1, ${imageList.length})">${IC('chevl')}</button>
+                    <button class="m-carousel-btn next" onclick="slideModalCarousel(1, ${imageList.length})">${IC('chevr')}</button>
                     <div class="m-slide-number" id="modalSlideNum">1 / ${imageList.length}</div>
                 </div>
                 `;
@@ -2048,13 +2217,13 @@ v2.5.8:
                     <h3>${judul}</h3>
                     ${subJudul ? `<div class="sub-caption" data-raw="${plainSubJudul}">${parsedSubJudul}</div>` : ''}
                     <div class="m-content collapsed" id="modalContentBody">${parsedContent}</div>
-                    <button class="m-read-more-btn" id="modalReadMoreBtn" onclick="toggleModalReadMore()">📖 Baca Selengkapnya</button>
+                    <button class="m-read-more-btn" id="modalReadMoreBtn" onclick="toggleModalReadMore()">${IT('book', 'Baca Selengkapnya')}</button>
                     
                     <div class="m-actions">
-                        <button class="btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? '🔖 Sudah Disimpan' : '👆 Belum Disimpan'}</button>
-                        ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">📄 PDF</button>` : ''}
-                        <button onclick="downloadMultiImage('${posterId}', '${folder}', '${rawItem.images || "1.jpg"}')">🖼️ Gambar</button>
-                        <button onclick="copyCaptionDariElemen(this)">📋 Caption</button>
+                        <button class="btn-save-id-${posterId} ${isSaved ? 'saved' : ''}" onclick="toggleFavorit('${posterId}', this)">${isSaved ? IT('bmcheck', 'Sudah Disimpan') : IT('bmadd', 'Belum Disimpan')}</button>
+                        ${pdfSrc ? `<button onclick="downloadFile('${pdfSrc}', '${judul}.pdf')">${IT('pdf', 'PDF')}</button>` : ''}
+                        <button onclick="downloadMultiImage('${posterId}', '${folder}', '${rawItem.images || "1.jpg"}')">${IT('image', 'Gambar')}</button>
+                        <button onclick="copyCaptionDariElemen(this)">${IT('clip', 'Caption')}</button>
                     </div>
 
                     ${tagArray.length > 0 ? `<div class="m-tags">${tagArray.map(t => `<span class="m-tag">#${t}</span>`).join('')}</div>` : ''}
@@ -2102,10 +2271,10 @@ v2.5.8:
                 if (hasil.length > 0) {
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = hasil.map(item => {
-                        const katEmoji = emojiMapGlobal[item.kategori.toLowerCase()] || emojiMapGlobal[item.kategori] || '📂';
+                        const katEmoji = katIcon(item.kategori, emojiMapGlobal[item.kategori.toLowerCase()] || emojiMapGlobal[item.kategori]);
                         return `
                             <div class="search-item" onclick="pilihDariDropdown('${item.id}')">
-                                <span>📚 ${item.judul}</span>
+                                <span>${IT('books', '')}${item.judul}</span>
                                 <small>${katEmoji} ${item.kategori}</small>
                             </div>
                         `;
@@ -2201,12 +2370,12 @@ v2.5.8:
             if (isCompactView) { 
                 document.body.classList.add('is-compact');
                 list.classList.add('compact-view'); 
-                btn.innerHTML = '🅰️'; 
+                btn.innerHTML = IC('vcard'); 
                 btn.title = "Kembali ke Tampilan Utama";
             } else { 
                 document.body.classList.remove('is-compact');
                 list.classList.remove('compact-view'); 
-                btn.innerHTML = '🔠'; 
+                btn.innerHTML = IC('vcompact'); 
                 btn.title = "Ubah ke Tampilan Kompak"; 
             }
             filterDisplayPosters();
@@ -2217,8 +2386,8 @@ v2.5.8:
         let suaraMenyala = false;
         function toggleSuara() {
             suaraMenyala = !suaraMenyala;
-            if (suaraMenyala) { bgAudio.volume = 0.8; bgAudio.play(); soundBtn.innerHTML = '🔊'; soundBtn.classList.remove('silent'); soundBtn.classList.add('playing'); } 
-            else { bgAudio.pause(); soundBtn.innerHTML = '🔇'; soundBtn.classList.remove('playing'); soundBtn.classList.add('silent'); }
+            if (suaraMenyala) { bgAudio.volume = 0.8; bgAudio.play(); soundBtn.innerHTML = IC('volume'); soundBtn.classList.remove('silent'); soundBtn.classList.add('playing'); } 
+            else { bgAudio.pause(); soundBtn.innerHTML = IC('mute'); soundBtn.classList.remove('playing'); soundBtn.classList.add('silent'); }
         }
 
         /* --- v2.5.5: MONITOR PENYIMPANAN (info umum + lencana per file) --- */
@@ -2226,21 +2395,50 @@ v2.5.8:
         const storPosterCache = {};  /* posterId -> hasil ukur */
         let storSemuaData = null;
         let storSedangHitung = false;
-        const storQueue = [];
+        let storPrefetchJadwal = false;
+        let storPrefetchJalan = false;
         let storAktif = 0;
+        let storPanelCek = null;     /* pembaruan progres panel saat memindai */
+        let storRaf = 0;
 
-        function storRun(fn) {
-            return new Promise(function(resolve) {
-                storQueue.push(function() { return fn().then(resolve, function() { resolve(null); }); });
-                storPump();
-            });
+        /* v2.6.0: antrean 3 tingkat -> 0 = kartu terlihat (paling dulu), 1 = panel penyimpanan, 2 = latar belakang */
+        const storQueues = [[], [], []];
+        const storUrlItem = {};      /* url -> item antrean (hindari ukur ganda + bisa dinaikkan prioritasnya) */
+
+        function storMaxAktif() {
+            const c = navigator.connection || {};
+            if (c.saveData === true || /(^|-)2g$/.test(c.effectiveType || '')) return 4;
+            return 10;
         }
         function storPump() {
-            while (storAktif < 5 && storQueue.length) {
-                const job = storQueue.shift();
+            const maks = storMaxAktif();
+            while (storAktif < maks) {
+                let item = null;
+                for (let t = 0; t < 3 && !item; t++) item = storQueues[t].shift() || null;
+                if (!item) break;
+                item.mulai = true;
                 storAktif++;
-                job().then(function() { storAktif--; storPump(); });
+                item.fn().then(item.resolve, function() { item.resolve(null); }).then(function() { storAktif--; storPump(); });
             }
+        }
+        function storAntre(fn, prio) {
+            const item = { fn: fn, prio: prio, mulai: false };
+            item.promise = new Promise(function(resolve) { item.resolve = resolve; });
+            if (prio === 0) storQueues[0].unshift(item); else storQueues[prio].push(item);
+            storPump();
+            return item;
+        }
+        function storNaikkan(item, prio) {
+            if (!item || item.mulai || prio >= item.prio) return;
+            const q = storQueues[item.prio];
+            const i = q.indexOf(item);
+            if (i >= 0) q.splice(i, 1);
+            item.prio = prio;
+            if (prio === 0) storQueues[0].unshift(item); else storQueues[prio].push(item);
+        }
+        function storNotif() {
+            if (!storPanelCek || storRaf) return;
+            storRaf = requestAnimationFrame(function() { storRaf = 0; if (storPanelCek) storPanelCek(); });
         }
         function storFmt(b) {
             if (b === null || b === undefined) return '-';
@@ -2250,8 +2448,7 @@ v2.5.8:
             return (b / 1073741824).toFixed(2) + ' GB';
         }
         /* teks dibaca penuh agar ukuran = ukuran asli file (bukan ukuran terkompresi server) */
-        async function storUkurUrl(url, isText) {
-            if (url in storCache) return storCache[url];
+        async function storUkurLangsung(url, isText) {
             let size = null;
             try {
                 if (!isText) {
@@ -2268,30 +2465,62 @@ v2.5.8:
             } catch (e) {
                 try { const g2 = await fetch(url, { cache: 'no-store' }); if (g2.ok) size = (await g2.blob()).size; } catch (e2) {}
             }
-            storCache[url] = size;
             return size;
         }
-        async function storUkurPoster(id) {
+        function storUkurUrl(url, isText, prio) {
+            if (url in storCache) return Promise.resolve(storCache[url]);
+            prio = (prio === undefined) ? 1 : prio;
+            const ada = storUrlItem[url];
+            if (ada) { storNaikkan(ada, prio); return ada.promise; }
+            const item = storAntre(async function() {
+                const size = await storUkurLangsung(url, isText);
+                storCache[url] = size;
+                delete storUrlItem[url];
+                storNotif();
+                return size;
+            }, prio);
+            storUrlItem[url] = item;
+            return item.promise;
+        }
+        function storDaftarUrl(p) {
+            const folder = 'posters/' + p.path;
+            const names = (p.images || '1.jpg').split(',').map(function(x) { return x.trim(); }).filter(Boolean);
+            const out = names.map(function(n) { return { url: folder + '/' + n, text: false }; });
+            if (p.pdf) out.push({ url: folder + '/brosur.pdf', text: false });
+            out.push({ url: folder + '/poster.md', text: true });
+            return out;
+        }
+        async function storUkurPoster(id, prio) {
             if (storPosterCache[id]) return storPosterCache[id];
             const p = rawManifestPosters.find(function(x) { return x.path.replace(/\//g, '-') === id; });
             if (!p) return null;
             const folder = 'posters/' + p.path;
-            const names = (p.images || '1.jpg').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-            const imgs = await Promise.all(names.map(async function(n) {
-                return { name: n, size: await storRun(function() { return storUkurUrl(folder + '/' + n); }) };
-            }));
-            let pdf = null;
-            if (p.pdf) pdf = await storRun(function() { return storUkurUrl(folder + '/brosur.pdf'); });
-            let md = await storRun(function() { return storUkurUrl(folder + '/poster.md', true); });
+            const names = (p.images || '1.jpg').split(',').map(function(x) { return x.trim(); }).filter(Boolean);
+            const imgP = names.map(function(n) {
+                return storUkurUrl(folder + '/' + n, false, prio).then(function(size) { return { name: n, size: size }; });
+            });
+            const pdfP = p.pdf ? storUkurUrl(folder + '/brosur.pdf', false, prio) : Promise.resolve(null);
+            const mdP = storUkurUrl(folder + '/poster.md', true, prio);
+            const imgs = await Promise.all(imgP);
+            const pdf = await pdfP;
+            let md = await mdP;
             let mdEst = false;
             if (md === null) {
                 md = new TextEncoder().encode([p.judul, p.sub_judul, p.kategori, p.tags, p.content].join('\n')).length;
                 mdEst = true;
             }
-            const imgTotal = imgs.reduce(function(s, i) { return s + (i.size || 0); }, 0);
+            const imgTotal = imgs.reduce(function(sum, i) { return sum + (i.size || 0); }, 0);
             const data = { id: id, imgs: imgs, imgTotal: imgTotal, hasPdf: !!p.pdf, pdf: pdf || 0, md: md, mdEst: mdEst, total: imgTotal + (pdf || 0) + md };
             storPosterCache[id] = data;
             return data;
+        }
+        /* pra-ukur seluruh folder diam-diam (prioritas terendah) agar lencana & panel nyaris instan */
+        function storMulaiPrefetch() {
+            if (storPrefetchJalan) return;
+            storPrefetchJalan = true;
+            const c = navigator.connection || {};
+            if (c.saveData === true || /(^|-)2g$/.test(c.effectiveType || '')) return;
+            rawManifestPosters.forEach(function(p) { storUkurPoster(p.path.replace(/\//g, '-'), 2); });
         }
 
         /* --- Lencana kecil per file (gambar / slide, teks, PDF) --- */
@@ -2311,21 +2540,21 @@ v2.5.8:
                 slides.forEach(function(sl, i) {
                     const b = storBuatBadge('stor-b-img');
                     sl.appendChild(b);
-                    fills.push(function(d) { const im = d.imgs[i]; b.textContent = '🖼 ' + storFmt(im ? im.size : null); });
+                    fills.push(function(d) { const im = d.imgs[i]; b.innerHTML = IC('image') + storFmt(im ? im.size : null); });
                 });
             } else if (isModal) {
                 const box = root.querySelector('.m-carousel-container');
                 if (box) {
                     const b = storBuatBadge('stor-b-img');
                     box.appendChild(b);
-                    fills.push(function(d) { b.textContent = '🖼 ' + storFmt(d.imgs[0] ? d.imgs[0].size : null); });
+                    fills.push(function(d) { b.innerHTML = IC('image') + storFmt(d.imgs[0] ? d.imgs[0].size : null); });
                 }
             } else {
                 const img = root.querySelector(':scope > img');
                 if (img) {
                     const b = storBuatBadge('stor-b-img stor-b-single');
                     root.appendChild(b);
-                    fills.push(function(d) { b.textContent = '🖼 ' + storFmt(d.imgs[0] ? d.imgs[0].size : null); });
+                    fills.push(function(d) { b.innerHTML = IC('image') + storFmt(d.imgs[0] ? d.imgs[0].size : null); });
                 }
             }
 
@@ -2336,7 +2565,7 @@ v2.5.8:
                 const b = storBuatBadge('');
                 row.appendChild(b);
                 cap.parentNode.insertBefore(row, cap);
-                fills.push(function(d) { b.textContent = '📝 Teks ' + (d.mdEst ? '≈ ' : '') + storFmt(d.md); });
+                fills.push(function(d) { b.innerHTML = IT('note', 'Teks ') + (d.mdEst ? '≈ ' : '') + storFmt(d.md); });
             }
 
             const pdfBtn = root.querySelector(isModal ? '.m-actions button[onclick*="brosur.pdf"]' : '.actions button[onclick*="brosur.pdf"]');
@@ -2344,11 +2573,11 @@ v2.5.8:
                 pdfBtn.classList.add('stor-pdf-host');
                 const b = storBuatBadge('stor-b-pdf');
                 pdfBtn.appendChild(b);
-                fills.push(function(d) { b.textContent = '📄 ' + storFmt(d.pdf); });
+                fills.push(function(d) { b.innerHTML = IC('pdf') + storFmt(d.pdf); });
             }
 
             return function() {
-                storUkurPoster(id).then(function(d) { if (d) fills.forEach(function(f) { f(d); }); });
+                storUkurPoster(id, 0).then(function(d) { if (d) fills.forEach(function(f) { f(d); }); });
             };
         }
 
@@ -2358,9 +2587,13 @@ v2.5.8:
                 storObserver.unobserve(en.target);
                 if (en.target.__storRun) en.target.__storRun();
             });
-        }, { rootMargin: '300px' }) : null;
+        }, { rootMargin: '900px' }) : null;
 
         function storScanKartu() {
+            if (!storPrefetchJadwal && document.querySelector('#post-list .poster[data-id]')) {
+                storPrefetchJadwal = true;
+                setTimeout(storMulaiPrefetch, 1500);
+            }
             document.querySelectorAll('#post-list .poster[data-id]').forEach(function(card) {
                 if (card.__storDone) return;
                 card.__storDone = true;
@@ -2409,17 +2642,32 @@ v2.5.8:
             if (storSedangHitung) return;
             storSedangHitung = true;
             const pn = document.getElementById('storPanel');
-            const ids = rawManifestPosters.map(function(p) { return p.path.replace(/\//g, '-'); });
-            let selesai = 0;
-            pn.innerHTML = '<div class="stor-title">Informasi Penyimpanan</div><div class="stor-note" id="storProg">Menghitung 0/' + ids.length + '...</div>';
-            const hasil = await Promise.all(ids.map(function(id) {
-                return storUkurPoster(id).then(function(d) {
-                    selesai++;
-                    const el = document.getElementById('storProg');
-                    if (el) el.textContent = 'Menghitung ' + selesai + '/' + ids.length + '...';
-                    return d;
-                });
+            const daftar = rawManifestPosters.slice();
+            const urls = [];
+            daftar.forEach(function(p) { storDaftarUrl(p).forEach(function(u) { urls.push(u.url); }); });
+            const total = urls.length;
+            pn.innerHTML = '<div class="stor-title">Informasi Penyimpanan</div>' +
+                '<div class="stor-bar"><i id="storBarFill"></i></div>' +
+                '<div class="stor-prog" id="storProg">Memindai 0/' + total + ' berkas · 0%</div>' +
+                '<div class="stor-note" id="storLive">Terukur sementara: 0 B</div>';
+            storPanelCek = function() {
+                let selesai = 0, ukuran = 0;
+                for (let i = 0; i < total; i++) {
+                    if (urls[i] in storCache) { selesai++; ukuran += (storCache[urls[i]] || 0); }
+                }
+                const persen = total ? Math.floor(selesai * 100 / total) : 100;
+                const fill = document.getElementById('storBarFill');
+                const prog = document.getElementById('storProg');
+                const live = document.getElementById('storLive');
+                if (fill) fill.style.width = persen + '%';
+                if (prog) prog.textContent = 'Memindai ' + selesai + '/' + total + ' berkas · ' + persen + '%';
+                if (live) live.textContent = 'Terukur sementara: ' + storFmt(ukuran);
+            };
+            storPanelCek();
+            const hasil = await Promise.all(daftar.map(function(p) {
+                return storUkurPoster(p.path.replace(/\//g, '-'), 1);
             }));
+            storPanelCek = null;
             storSemuaData = hasil.filter(Boolean);
             storSedangHitung = false;
             storRenderPanel(storSemuaData);
@@ -2437,10 +2685,10 @@ v2.5.8:
             });
             const total = tSize + cSize + pdf + md;
             let h = '<div class="stor-title">Informasi Penyimpanan</div>';
-            h += '<div class="stor-row"><span>🖼️ Poster Tunggal<small>' + tFolder + ' folder · ' + tImg + ' gambar</small></span><span>' + storFmt(tSize) + '</span></div>';
-            h += '<div class="stor-row"><span>🎠 Poster Carousel<small>' + cFolder + ' folder · ' + cImg + ' gambar</small></span><span>' + storFmt(cSize) + '</span></div>';
-            h += '<div class="stor-row"><span>📄 PDF<small>' + nPdf + ' file</small></span><span>' + storFmt(pdf) + '</span></div>';
-            h += '<div class="stor-row"><span>📝 Teks / Caption<small>' + list.length + ' file</small></span><span>' + storFmt(md) + '</span></div>';
+            h += '<div class="stor-row"><span>' + IT('image', 'Poster Tunggal') + '<small>' + tFolder + ' folder · ' + tImg + ' gambar</small></span><span>' + storFmt(tSize) + '</span></div>';
+            h += '<div class="stor-row"><span>' + IT('carousel', 'Poster Carousel') + '<small>' + cFolder + ' folder · ' + cImg + ' gambar</small></span><span>' + storFmt(cSize) + '</span></div>';
+            h += '<div class="stor-row"><span>' + IT('pdf', 'PDF') + '<small>' + nPdf + ' file</small></span><span>' + storFmt(pdf) + '</span></div>';
+            h += '<div class="stor-row"><span>' + IT('note', 'Teks / Caption') + '<small>' + list.length + ' file</small></span><span>' + storFmt(md) + '</span></div>';
             h += '<div class="stor-row tot"><span>Total Keseluruhan<small>' + list.length + ' folder · ' + (tImg + cImg) + ' gambar</small></span><span>' + storFmt(total) + '</span></div>';
             h += '<div class="stor-note">Ukuran berupa perkiraan, selisih kecil mungkin terjadi.</div>';
             pn.innerHTML = h;
@@ -2693,7 +2941,7 @@ v2.5.8:
             if (sr) {
                 const online = hijriState.src === 'api' || hijriState.src === 'cache';
                 sr.className = 'hijri-src' + (online ? ' on' : '');
-                sr.textContent = online ? '\u25CF' : '\u25CB';
+                sr.innerHTML = IC(online ? 'dot1' : 'dot0');
                 sr.title = online ? 'Sumber: Aladhan API (HJCoSA)' : 'Sumber: perhitungan perangkat (Umm al-Qura)';
             }
         }
