@@ -1,14 +1,13 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.5.6
+Arsip Dakwah Manhaj Salaf - Update v2.5.7
+
+v2.5.7:
+1. KALENDER HIJRIYAH REALTIME: di kartu jam menu samping, tepat di bawah tanggal Masehi, kini ada tanggal Hijriyah (misal 17 Jumadil Awal 1448 H). Sumbernya Aladhan API (metode HJCoSA / Majelis Kehakiman Tinggi Saudi, rujukan penetapan yang dipakai banyak aplikasi manhaj salaf), dipanggil sekali per hari lalu disimpan di perangkat. Bila offline atau API gagal, otomatis memakai perhitungan bawaan perangkat (Umm al-Qura) sehingga tanggal tetap tampil. Ada tombol koreksi -1 / +1 hari (tersimpan di perangkat) untuk jaga-jaga beda rukyat. Penanda "Bulan ini" pada panel Amalan 12 Bulan ikut sinkron dengan tanggal Hijriyah ini.
+2. TOMBOL KATEGORI 3D RINGAN: bayangan tiap tombol kategori diaktifkan lagi dengan efek timbul 3D (sorot cahaya atas, tebal tepi bawah, bayangan jatuh lembut) dan efek tertekan saat disentuh. Memakai box-shadow statis saja, dan blur kaca (backdrop-filter) pada tombol kategori dihapus, jadi lebih ringan di HP RAM kecil. Warna khas hitam-emas tetap.
 
 v2.5.6:
 1. LOADING GAMBAR CERDAS (gaya Instagram): gambar tidak lagi diunduh sekaligus. Hanya poster di sekitar posisi layar yang dimuat (beberapa poster di bawah dan di atas), poster yang sudah jauh dilepas dari memori (src dilepas, ruang tetap dijaga agar layar tidak lompat) lalu dimuat lagi otomatis saat didekati. Poster carousel hanya memuat slide yang sedang tampil dan slide di sebelahnya. Antrean unduhan dibatasi (maks 3 bersamaan, yang terdekat dengan layar didahulukan, yang sudah ditinggalkan scroll dibatalkan), muncul dengan fade halus di atas kotak placeholder yang proporsional. PDF dan file lain tetap hanya diunduh saat diketuk.
 2. ADAPTIF HP RINGAN: jendela muat otomatis diperkecil dan antrean dikurangi pada HP RAM kecil, mode hemat data, atau jaringan lambat; efek blur kartu dimatikan di HP RAM kecil agar scroll tetap mulus. Mode ringkas memakai jendela lebih lebar karena kartunya kecil.
-
-v2.5.5:
-1. TOMBOL PENYIMPANAN DIPINDAH: tombol 💾 tidak lagi melayang di pojok, kini berada di tengah tepat di bawah tombol Disimpan / PDF Mode / Semua. Ketuk untuk membuka kartu informasi penyimpanan yang rapi dan center.
-2. TEKS INFO UMUM: kartu hanya menampilkan info umum untuk publik (total gambar, PDF, teks/caption, dan total keseluruhan) tanpa menyebut GitHub, repo, atau batas penyimpanan.
-3. MONITOR KECIL PER FILE: tombol total per kartu dihapus, diganti lencana kecil per file yang elegan: di sudut kiri atas tiap gambar (poster tunggal dan tiap slide carousel), di atas teks/caption (sejajar kanan dengan garis tipis), dan di sudut kanan atas tombol PDF. Berlaku di kartu maupun jendela detail mode ringkas. Ukuran diukur otomatis dari file asli saat kartu terlihat.
 -->
 
 <!DOCTYPE html>
@@ -530,6 +529,24 @@ v2.5.5:
         .poster > img.lz-img:not(.lz-ok){ aspect-ratio:4 / 5; }
         body.lz-lite .poster{ backdrop-filter:none; -webkit-backdrop-filter:none; }
 
+        /* --- v2.5.7: HIJRIYAH + TOMBOL KATEGORI 3D RINGAN --- */
+        .sidebar-time-card .live-hijri{ color:#D4AF37; font-size:12px; font-weight:700; margin-top:3px; letter-spacing:.2px; }
+        .hijri-adj{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-size:10px; color:#9a9a9a; }
+        .hijri-adj button{ width:20px; height:20px; border-radius:50%; border:1px solid rgba(212,175,55,0.5); background:rgba(212,175,55,0.08); color:#D4AF37; font-size:13px; line-height:1; cursor:pointer; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+        .hijri-adj button:disabled{ opacity:.35; cursor:default; }
+        .hijri-adj .hijri-src{ font-size:9px; color:#8a7a45; }
+        .hijri-adj .hijri-src.on{ color:#3fb97a; }
+
+        .kategori-grid-ori .card-kategori{ background-color:#1b1b1b; background-image:linear-gradient(165deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 38%, rgba(0,0,0,0.28) 100%); -webkit-backdrop-filter:none; backdrop-filter:none; border:1px solid rgba(255,255,255,0.08); border-top-color:rgba(255,255,255,0.18); border-bottom-color:rgba(0,0,0,0.65); box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -3px 5px rgba(0,0,0,0.4), 0 3px 0 rgba(0,0,0,0.6), 0 8px 12px -3px rgba(0,0,0,0.55); transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease; }
+        .kategori-grid-ori .card-kategori:hover, .kategori-grid-ori .card-kategori.active{ background-color:#262110; background-image:linear-gradient(165deg, rgba(212,175,55,0.30) 0%, rgba(212,175,55,0.07) 45%, rgba(0,0,0,0.25) 100%); border-color:#D4AF37; border-bottom-color:rgba(120,95,20,0.9); box-shadow:inset 0 1px 0 rgba(255,235,160,0.35), inset 0 -3px 5px rgba(0,0,0,0.35), 0 3px 0 rgba(70,55,10,0.9), 0 9px 14px -3px rgba(0,0,0,0.6), 0 0 12px rgba(212,175,55,0.2); }
+        .kategori-grid-ori .card-kategori:active{ transform:translateY(2px); box-shadow:inset 0 2px 5px rgba(0,0,0,0.5), 0 1px 0 rgba(0,0,0,0.6), 0 3px 5px -2px rgba(0,0,0,0.5); }
+        .kategori-grid-ori .card-kategori.is-now{ box-shadow:0 0 0 1px rgba(212,175,55,0.55), inset 0 1px 0 rgba(255,235,160,0.2), inset 0 -3px 5px rgba(0,0,0,0.4), 0 3px 0 rgba(0,0,0,0.6), 0 8px 12px -3px rgba(0,0,0,0.55), 0 0 14px rgba(212,175,55,0.18); }
+
+        .kategori-scroll-compact .card-kategori{ background-color:#1b1b1b; background-image:linear-gradient(170deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 45%, rgba(0,0,0,0.28) 100%); -webkit-backdrop-filter:none; backdrop-filter:none; border:1px solid rgba(255,255,255,0.08); border-top-color:rgba(255,255,255,0.18); border-bottom-color:rgba(0,0,0,0.65); box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4), 0 2px 0 rgba(0,0,0,0.6), 0 6px 9px -3px rgba(0,0,0,0.55); transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease; }
+        .kategori-scroll-compact .card-kategori:hover, .kategori-scroll-compact .card-kategori.active{ background-color:#262110; background-image:linear-gradient(170deg, rgba(212,175,55,0.30) 0%, rgba(212,175,55,0.07) 50%, rgba(0,0,0,0.25) 100%); border-color:#D4AF37; border-bottom-color:rgba(120,95,20,0.9); transform:translateY(-1px); box-shadow:inset 0 1px 0 rgba(255,235,160,0.35), inset 0 -2px 4px rgba(0,0,0,0.35), 0 2px 0 rgba(70,55,10,0.9), 0 7px 10px -3px rgba(0,0,0,0.6), 0 0 10px rgba(212,175,55,0.2); }
+        .kategori-scroll-compact .card-kategori:active{ transform:translateY(2px); box-shadow:inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 rgba(0,0,0,0), 0 2px 4px -2px rgba(0,0,0,0.5); }
+        .kategori-scroll-compact .card-kategori.is-now{ box-shadow:0 0 0 1px rgba(212,175,55,0.55), inset 0 1px 0 rgba(255,235,160,0.2), inset 0 -2px 4px rgba(0,0,0,0.4), 0 2px 0 rgba(0,0,0,0.6), 0 6px 9px -3px rgba(0,0,0,0.55), 0 0 12px rgba(212,175,55,0.18); }
+
         /* Posisi Tombol Melayang Atas (Menu Kiri & Home Kanan) */
         .menu-top-btn {
             top: 20px;
@@ -949,6 +966,13 @@ v2.5.5:
                 <div class="time-box">
                     <div class="live-clock" id="liveClockDisplay">00:00:00</div>
                     <div class="live-date" id="liveDateDisplay">Memuat tanggal...</div>
+                    <div class="live-hijri" id="liveHijriDisplay">Memuat Hijriyah...</div>
+                    <div class="hijri-adj" title="Koreksi tanggal Hijriyah (jika berbeda dengan rukyat setempat)">
+                        <button type="button" id="hijriMinus" onclick="hijriAdj(-1)" aria-label="Mundur 1 hari">&minus;</button>
+                        <span id="hijriAdjLabel">Koreksi 0</span>
+                        <button type="button" id="hijriPlus" onclick="hijriAdj(1)" aria-label="Maju 1 hari">+</button>
+                        <span class="hijri-src" id="hijriSrc" title="">&#9675;</span>
+                    </div>
                 </div>
                 <div class="cal-icon">⏳</div>
             </div>
@@ -1023,7 +1047,7 @@ v2.5.5:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.6</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.5.7</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1209,7 +1233,7 @@ v2.5.5:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.5.6';
+        const APP_VERSION = 'v2.5.7';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
         function startLiveClock() {
@@ -1325,6 +1349,7 @@ v2.5.5:
         }
         function escAttrBulan(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
         function bulanSekarang() {
+            if (typeof hijriState !== 'undefined' && hijriState.ok) return hijriState.month - 1;
             try {
                 const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { month: 'numeric' }).formatToParts(new Date());
                 const m = parts.find(function(p) { return p.type === 'month'; });
@@ -2509,6 +2534,121 @@ v2.5.5:
                 }).observe(lzList, { childList: true, subtree: true });
             }
         }
+
+        /* --- v2.5.7: KALENDER HIJRIYAH REALTIME (Aladhan API + cadangan Umm al-Qura + koreksi -1/+1) --- */
+        const HIJRI_BULAN = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 'Jumadil Akhir', 'Rajab', "Sya'ban", 'Ramadhan', 'Syawal', "Dzulqa'dah", 'Dzulhijjah'];
+        const hijriState = { ok: false, day: 0, month: 0, year: 0, key: '', src: '' };
+        let hijriSeq = 0;
+
+        function hijriGetAdj() {
+            try { const v = parseInt(localStorage.getItem('hijriAdjV1'), 10); return (v === -1 || v === 1) ? v : 0; } catch (e) { return 0; }
+        }
+        function hijriSetAdj(v) { try { localStorage.setItem('hijriAdjV1', String(v)); } catch (e) {} }
+        function hijriDate(adj) {
+            const d = new Date();
+            d.setHours(12, 0, 0, 0);
+            d.setDate(d.getDate() + adj);
+            return d;
+        }
+        function hijriKey(d) {
+            return String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear();
+        }
+        function hijriCacheGet(key) {
+            try { const c = JSON.parse(localStorage.getItem('hijriCacheV1') || '{}'); return c[key] || null; } catch (e) { return null; }
+        }
+        function hijriCachePut(key, val) {
+            try {
+                const c = JSON.parse(localStorage.getItem('hijriCacheV1') || '{}');
+                c[key] = val;
+                const ks = Object.keys(c);
+                if (ks.length > 8) delete c[ks[0]];
+                localStorage.setItem('hijriCacheV1', JSON.stringify(c));
+            } catch (e) {}
+        }
+        function hijriOffline(d) {
+            try {
+                const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(d);
+                const g = function(t) { const p = parts.find(function(x) { return x.type === t; }); return p ? parseInt(String(p.value).replace(/\D/g, ''), 10) : NaN; };
+                const r = { d: g('day'), m: g('month'), y: g('year') };
+                return (r.d >= 1 && r.d <= 30 && r.m >= 1 && r.m <= 12 && r.y > 1000) ? r : null;
+            } catch (e) { return null; }
+        }
+        async function hijriApi(key) {
+            const ctl = ('AbortController' in window) ? new AbortController() : null;
+            const t = setTimeout(function() { if (ctl) ctl.abort(); }, 7000);
+            try {
+                const res = await fetch('https://api.aladhan.com/v1/gToH/' + key + '?calendarMethod=HJCoSA', ctl ? { signal: ctl.signal } : {});
+                if (!res.ok) return null;
+                const j = await res.json();
+                const h = j && j.data && j.data.hijri;
+                if (!h) return null;
+                const r = { d: parseInt(h.day, 10), m: parseInt(h.month && h.month.number, 10), y: parseInt(h.year, 10) };
+                return (r.d >= 1 && r.d <= 30 && r.m >= 1 && r.m <= 12 && r.y > 1000) ? r : null;
+            } catch (e) { return null; } finally { clearTimeout(t); }
+        }
+        function hijriRender() {
+            const el = document.getElementById('liveHijriDisplay');
+            if (el && hijriState.ok) el.textContent = hijriState.day + ' ' + HIJRI_BULAN[hijriState.month - 1] + ' ' + hijriState.year + ' H';
+            const adj = hijriGetAdj();
+            const lb = document.getElementById('hijriAdjLabel');
+            if (lb) lb.textContent = 'Koreksi ' + (adj > 0 ? '+1' : (adj < 0 ? '\u22121' : '0'));
+            const mn = document.getElementById('hijriMinus'), pl = document.getElementById('hijriPlus');
+            if (mn) mn.disabled = adj <= -1;
+            if (pl) pl.disabled = adj >= 1;
+            const sr = document.getElementById('hijriSrc');
+            if (sr) {
+                const online = hijriState.src === 'api' || hijriState.src === 'cache';
+                sr.className = 'hijri-src' + (online ? ' on' : '');
+                sr.textContent = online ? '\u25CF' : '\u25CB';
+                sr.title = online ? 'Sumber: Aladhan API (HJCoSA)' : 'Sumber: perhitungan perangkat (Umm al-Qura)';
+            }
+        }
+        function hijriMarkBulanNow() {
+            if (!hijriState.ok) return;
+            const now = hijriState.month - 1;
+            document.querySelectorAll('[data-bulan-card]').forEach(function(c) {
+                const isNow = bulanIndexOf(c.dataset.nama) === now;
+                c.classList.toggle('is-now', isNow);
+                const old = c.querySelector('.bulan-now');
+                if (old) old.remove();
+                if (isNow && c.closest('.bulan-grid')) {
+                    const b = document.createElement('span');
+                    b.className = 'bulan-now';
+                    b.textContent = 'Bulan ini';
+                    c.appendChild(b);
+                }
+            });
+        }
+        function hijriApply(r, key, src) {
+            hijriState.ok = true;
+            hijriState.day = r.d; hijriState.month = r.m; hijriState.year = r.y;
+            hijriState.key = key; hijriState.src = src;
+            hijriRender();
+            hijriMarkBulanNow();
+        }
+        async function hijriResolve() {
+            const seq = ++hijriSeq;
+            const d = hijriDate(hijriGetAdj());
+            const key = hijriKey(d);
+            const cached = hijriCacheGet(key);
+            if (cached) { hijriApply(cached, key, 'cache'); return; }
+            const off = hijriOffline(d);
+            if (off) hijriApply(off, key, 'offline');
+            const api = await hijriApi(key);
+            if (seq !== hijriSeq) return;
+            if (api) { hijriCachePut(key, api); hijriApply(api, key, 'api'); }
+            else if (!off) { const el = document.getElementById('liveHijriDisplay'); if (el) el.textContent = 'Hijriyah tidak tersedia'; }
+        }
+        function hijriAdj(delta) {
+            const n = Math.max(-1, Math.min(1, hijriGetAdj() + delta));
+            hijriSetAdj(n);
+            hijriRender();
+            hijriResolve();
+        }
+        hijriRender();
+        hijriResolve();
+        setInterval(function() { if (hijriKey(hijriDate(hijriGetAdj())) !== hijriState.key) hijriResolve(); }, 30000);
+        document.addEventListener('visibilitychange', function() { if (!document.hidden && hijriKey(hijriDate(hijriGetAdj())) !== hijriState.key) hijriResolve(); });
 
         loadPosters();
     </script>
