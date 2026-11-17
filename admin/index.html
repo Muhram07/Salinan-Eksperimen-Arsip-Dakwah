@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  Arsip Dakwah - Admin Panel | v.1.0.1
+  Riwayat perbaikan (2 versi terbaru):
+  v.1.0.1 - Scan Poster AI (Gemini/Groq/OpenRouter/Grok/Kustom): isi otomatis judul, kategori, tag, caption, collaborator + lencana versi.
+  v.1.0.0 - Panel admin dasar: form poster, collaborator, upload & urut gambar, kirim ke GitHub via Worker, ZIP manual.
+-->
 <html lang="id">
 <head> 
     <meta charset="UTF-8">
@@ -194,6 +200,32 @@
             cursor: pointer;
             font-weight: bold;
         }
+
+        /* ===== v.1.0.1 : SCAN POSTER AI ===== */
+        .ai-card{background:linear-gradient(145deg,rgba(212,175,55,0.10),rgba(255,255,255,0.03));border:1px solid rgba(212,175,55,0.45);border-radius:18px;padding:15px;margin-bottom:20px;box-shadow:0 0 22px rgba(212,175,55,0.08);}
+        .ai-card h3{color:#D4AF37;text-align:center;font-size:17px;margin-bottom:4px;letter-spacing:.5px;}
+        .ai-card .ai-sub{font-size:12px;color:#aaa;text-align:center;margin-bottom:12px;line-height:1.5;}
+        .ai-card label{font-size:13px;color:#aaa;font-weight:bold;}
+        .ai-card details{background:rgba(255,255,255,0.05);border:1px solid #444;border-radius:14px;padding:10px 12px;margin-bottom:12px;}
+        .ai-card summary{cursor:pointer;color:#D4AF37;font-weight:bold;font-size:14px;outline:none;}
+        .ai-card details input,.ai-card details select,.ai-card details textarea{font-size:13px;margin-bottom:10px;padding:10px 14px;}
+        .ai-card details textarea{min-height:130px;}
+        .ai-card .ai-check{display:flex;align-items:center;gap:8px;font-size:13px;color:#ccc;font-weight:normal;margin-bottom:10px;cursor:pointer;line-height:1.4;}
+        .ai-card .ai-check input{width:auto;margin:0;padding:0;box-shadow:none;flex:0 0 auto;}
+        .ai-hint{font-size:12px;color:#999;margin:-4px 0 10px;line-height:1.5;word-break:break-word;}
+        .ai-hint a{color:#D4AF37;}
+        .ai-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+        .ai-row .btn-small-gold{padding:9px 12px;font-size:13px;}
+        .ai-card button:disabled{opacity:.5;cursor:not-allowed;animation:none;}
+        .ai-bar{height:6px;background:rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;margin:10px 0;display:none;}
+        .ai-bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,transparent,#D4AF37,transparent);animation:ai-slide 1.2s linear infinite;}
+        @keyframes ai-slide{0%{transform:translateX(-100%);}100%{transform:translateX(260%);}}
+        .ai-status{font-size:13px;color:#fff;line-height:1.6;margin-top:6px;word-break:break-word;white-space:pre-line;}
+        .ai-warn{margin-top:8px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,170,0,0.5);background:rgba(255,170,0,0.08);color:#ffcf66;font-size:13px;line-height:1.5;display:none;}
+        .ai-warn ul{margin:6px 0 0 18px;}
+        .ai-flash{animation:ai-flash 2.2s ease-out;}
+        @keyframes ai-flash{0%{box-shadow:0 0 0 2px #D4AF37,0 0 22px rgba(212,175,55,0.7);}100%{box-shadow:0 4px 15px rgba(0,0,0,0.3);}}
+        .app-ver{display:inline-block;margin-top:6px;padding:2px 10px;border:1px solid rgba(212,175,55,0.45);border-radius:20px;font-size:11px;color:#D4AF37;letter-spacing:.5px;background:rgba(212,175,55,0.08);}
     </style>
 </head>
 <body>
@@ -204,6 +236,7 @@
             <input type="password" id="pinInput" placeholder="PIN Admin" style="text-align:center;">
             <button class="btn-solid" id="loginBtn">Masuk</button>
             <p id="loginStatus" style="margin-top:10px;color:#ff5555;font-size:14px;font-weight:bold;"></p>
+            <div style="text-align:center;"><span class="app-ver"></span></div>
         </div>
     </div>
 
@@ -211,6 +244,7 @@
         <div class="admin-box">
             <h1>Dashboard ⚙️Admin⚙️</h1>
             <p>Selamat datang di panel kontrol Arsip Dakwah</p>
+            <div style="text-align:center;"><span class="app-ver"></span></div>
         </div>
         <div class="admin-box">
             <div class="admin-menu">
@@ -229,6 +263,55 @@
                 <input type="text" id="inpApiUrl" placeholder="https://api-dakwah.mnursurisma.workers.dev" style="font-size:13px;">
                 <label>🔑 API Secret Key</label>
                 <input type="text" id="inpApiKey" placeholder="kuncirahasia123" style="font-size:13px;">
+            </div>
+
+            <div class="ai-card" id="aiCard">
+                <h3>🤖 Scan Poster dengan AI</h3>
+                <div class="ai-sub">Pilih poster (tunggal atau carousel) → AI memecah judul, kategori, tag, caption &amp; collaborator → form di bawah terisi otomatis. Cek &amp; edit, lalu kirim seperti biasa.</div>
+
+                <details id="aiSettings">
+                    <summary>⚙️ Pengaturan AI</summary>
+                    <div style="margin-top:10px;">
+                        <label>Provider utama</label>
+                        <select id="aiProvider"></select>
+                        <div id="aiBaseRow" style="display:none;">
+                            <label>Base URL (OpenAI-compatible)</label>
+                            <input type="text" id="aiBase" placeholder="https://api.contoh.com/v1">
+                        </div>
+                        <label>API Key</label>
+                        <div class="ai-row" style="flex-wrap:nowrap;">
+                            <input type="password" id="aiKey" autocomplete="off" placeholder="Tempel API Key di sini" style="margin-bottom:0;">
+                            <button type="button" class="btn-small-gold" id="btnAiShowKey">👁</button>
+                        </div>
+                        <div id="aiKeyHint" class="ai-hint"></div>
+                        <label>Model (kosongkan = otomatis)</label>
+                        <input type="text" id="aiModel" list="aiModelList" autocomplete="off">
+                        <datalist id="aiModelList"></datalist>
+                        <div class="ai-row">
+                            <button type="button" class="btn-small-gold" id="btnAiModels">🔄 Ambil daftar model</button>
+                        </div>
+                        <label class="ai-check"><input type="checkbox" id="aiFallback"> Cadangan otomatis: jika gagal/limit, coba provider lain yang kuncinya sudah diisi</label>
+                        <label class="ai-check"><input type="checkbox" id="aiAuto"> Scan otomatis begitu poster dipilih</label>
+                        <label>Gaya caption (bisa diedit)</label>
+                        <textarea id="aiStyle"></textarea>
+                        <div class="ai-row">
+                            <button type="button" class="btn-small-gold" id="btnAiStyleReset">↺ Kembalikan gaya bawaan</button>
+                        </div>
+                    </div>
+                </details>
+
+                <label>Poster untuk dipindai</label>
+                <input type="file" id="aiFile" multiple accept="image/*">
+                <div id="aiFileInfo" class="ai-hint"></div>
+                <button type="button" class="btn-solid" id="btnAiScan" style="font-size:16px;padding:14px;">🔍 SCAN &amp; ISI OTOMATIS</button>
+                <div class="ai-row" style="margin-top:10px;">
+                    <button type="button" class="btn-small-gold" id="btnAiScanUpload">🖼️ Scan gambar di bagian Upload</button>
+                    <button type="button" class="btn-small-gold" id="btnAiUse" style="display:none;">📥 Pakai gambar scan untuk Upload</button>
+                    <button type="button" class="btn-small-gold" id="btnAiUndo" style="display:none;">↩️ Batalkan isi AI</button>
+                </div>
+                <div class="ai-bar" id="aiBar"><i></i></div>
+                <div class="ai-status" id="aiStatus"></div>
+                <div class="ai-warn" id="aiWarn"></div>
             </div>
 
             <label>Judul Poster</label>
@@ -296,6 +379,7 @@
     </div>
 
     <script>
+        const APP_VERSION = '1.0.1';
         const ALLOWED_PINS = ["301102", "291104", "666666"];
         
         const DEFAULT_COLLABS = [
@@ -892,6 +976,483 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     statusText.innerHTML = `❌ Error koneksi ke API. Detail: ${error.message}`;
                 }
             };
+
+            /* ===== v.1.0.1 : SCAN POSTER AI ===== */
+            const AI_PROVIDERS = {
+                gemini:     { label:'Google Gemini (gratis)', type:'gemini', base:'https://generativelanguage.googleapis.com/v1beta', models:['gemini-2.5-flash','gemini-3.5-flash','gemini-3.1-flash-lite','gemini-2.5-flash-lite'], maxImg:16, keyUrl:'https://aistudio.google.com/apikey' },
+                groq:       { label:'Groq (gratis)', type:'openai', base:'https://api.groq.com/openai/v1', models:['qwen/qwen3.6-27b','meta-llama/llama-4-maverick-17b-128e-instruct'], maxImg:5, keyUrl:'https://console.groq.com/keys' },
+                openrouter: { label:'OpenRouter (model :free)', type:'openai', base:'https://openrouter.ai/api/v1', models:['google/gemma-3-27b-it:free'], maxImg:8, keyUrl:'https://openrouter.ai/keys' },
+                xai:        { label:'Grok (xAI)', type:'openai', base:'https://api.x.ai/v1', models:['grok-4-fast','grok-4'], maxImg:10, keyUrl:'https://console.x.ai' },
+                custom:     { label:'Kustom (OpenAI-compatible)', type:'openai', base:'', models:[], maxImg:8, keyUrl:'' }
+            };
+
+            const AI_DEFAULT_STYLE = [
+                'Format caption:',
+                '- Baris pertama: judul poster.',
+                '- Jika poster berisi doa/dzikir/ayat/hadits: setelah judul tulis teks Arab persis seperti di poster (jangan menambah harakat bila tidak terlihat jelas), lalu transliterasi Latin, lalu terjemahan Indonesia, lalu sumber dalam tanda kurung, misalnya (HR. ...).',
+                '- Jika poster berupa daftar/artikel/nasihat: salin isi poster apa adanya dan rapi (pertahankan penomoran dan urutan slide), tanpa menambah pendapat sendiri.',
+                '- Pisahkan tiap bagian dengan satu baris kosong. Jangan pakai markdown (**, #), jangan pakai hashtag, jangan tulis username/collab.'
+            ].join('\n');
+
+            const AI_FIELDS = ['inpJudul','inpKategori','inpEmoji','inpTag','inpCaption','inpContent'];
+            let aiBusy = false;
+            let aiBackup = null;
+            let aiScanFiles = [];
+            let aiLastFiles = [];
+
+            function aiEl(id) { return document.getElementById(id); }
+            function aiSleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+            function aiErr(status, msg) { const e = new Error(msg); e.status = status; return e; }
+
+            function aiLoad() {
+                let c = {};
+                try { c = JSON.parse(localStorage.getItem('dakwahAiCfg') || '{}') || {}; } catch (e) {}
+                const cfg = Object.assign({ provider:'gemini', customBase:'', fallback:true, auto:true, style:'' }, c);
+                cfg.keys = Object.assign({}, c.keys);
+                cfg.models = Object.assign({}, c.models);
+                if (!AI_PROVIDERS[cfg.provider]) cfg.provider = 'gemini';
+                return cfg;
+            }
+            function aiSave(cfg) { try { localStorage.setItem('dakwahAiCfg', JSON.stringify(cfg)); } catch (e) {} }
+
+            function aiMsg(text) { aiEl('aiStatus').textContent = text || ''; }
+
+            function aiShowWarn(list, title) {
+                const box = aiEl('aiWarn');
+                box.innerHTML = '';
+                if (!list || !list.length) { box.style.display = 'none'; return; }
+                const b = document.createElement('b');
+                b.textContent = title;
+                box.appendChild(b);
+                const ul = document.createElement('ul');
+                list.forEach(w => { const li = document.createElement('li'); li.textContent = w; ul.appendChild(li); });
+                box.appendChild(ul);
+                box.style.display = 'block';
+            }
+
+            function aiToggleBusy(b) {
+                ['btnAiScan', 'btnAiScanUpload', 'btnAiModels'].forEach(id => { aiEl(id).disabled = b; });
+                aiEl('aiBar').style.display = b ? 'block' : 'none';
+            }
+
+            function aiRefreshUI() {
+                const c = aiLoad();
+                const p = AI_PROVIDERS[c.provider];
+                aiEl('aiProvider').value = c.provider;
+                aiEl('aiKey').value = c.keys[c.provider] || '';
+                aiEl('aiModel').value = c.models[c.provider] || '';
+                aiEl('aiModel').placeholder = p.models[0] || 'nama model';
+                aiEl('aiBaseRow').style.display = c.provider === 'custom' ? 'block' : 'none';
+                aiEl('aiBase').value = c.customBase || '';
+                aiEl('aiFallback').checked = !!c.fallback;
+                aiEl('aiAuto').checked = !!c.auto;
+                aiEl('aiStyle').value = c.style || AI_DEFAULT_STYLE;
+                const hint = aiEl('aiKeyHint');
+                hint.innerHTML = '';
+                if (p.keyUrl) {
+                    hint.appendChild(document.createTextNode('Kunci gratis/akun: '));
+                    const a = document.createElement('a');
+                    a.href = p.keyUrl; a.target = '_blank'; a.rel = 'noopener';
+                    a.textContent = p.keyUrl.replace('https://', '');
+                    hint.appendChild(a);
+                }
+            }
+
+            function aiChain(cfg) {
+                const order = [cfg.provider].concat(Object.keys(AI_PROVIDERS).filter(k => k !== cfg.provider));
+                return order.filter((k, i) => {
+                    if (i > 0 && !cfg.fallback) return false;
+                    if (!(cfg.keys[k] || '').trim()) return false;
+                    if (k === 'custom' && !(cfg.customBase || '').trim()) return false;
+                    return true;
+                });
+            }
+
+            function aiBuildSystem(cfg) {
+                let cats = Array.from(document.querySelectorAll('#kategori-list option')).map(o => o.value).filter(Boolean);
+                if (!cats.length) cats = ['Doa', 'Bidah', 'Tauhid', 'Sunnah', 'Akidah', 'Fikih', 'Dzikir', 'Adab', 'Tafsir', 'Reminder'];
+                const style = (cfg.style || '').trim() || AI_DEFAULT_STYLE;
+                return [
+                    'Kamu adalah asisten admin arsip dakwah. Tugasmu membaca poster (satu gambar, atau beberapa gambar berurutan = carousel = satu postingan) lalu memecah datanya.',
+                    'ATURAN:',
+                    '1. Baca SEMUA gambar secara berurutan sebagai satu postingan.',
+                    '2. Jangan mengarang. Salin isi sesuai poster dan jangan mengubah maknanya. Jangan menambah sumber, derajat hadits, atau nomor ayat yang tidak tertulis di poster; bila perlu diperiksa, tulis di "peringatan".',
+                    '3. "judul": ringkas, jelas, Title Case, maksimal 80 karakter, tanpa emoji, tanpa tanda kutip ganda.',
+                    '4. "kategori": pilih PERSIS salah satu dari daftar ini bila ada yang cocok: ' + cats.join(' | ') + '. Kategori bulan Hijriah (yang ada angka dalam kurung) hanya dipakai bila poster jelas membahas amalan bulan itu. Bila tidak ada yang cocok, buat kategori baru singkat (1-2 kata, Title Case).',
+                    '5. "emoji": satu emoji yang cocok untuk kategori.',
+                    '6. "tags": 5-10 tag huruf kecil, tanpa #, tanpa koma di dalam tag, relevan (campuran yang spesifik dan umum).',
+                    '7. "akun_terdeteksi": semua username/watermark akun media sosial yang terlihat di poster (misal "an nashiha daily"), tulis apa adanya; kosong bila tidak ada.',
+                    '8. "caption": ikuti gaya berikut.\n' + style,
+                    '9. "peringatan": daftar catatan singkat tentang bagian yang meragukan (tulisan buram, Arab kurang jelas, sumber tidak tertulis, dll). Kosong bila yakin.',
+                    'Balas HANYA dengan satu objek JSON valid (tanpa teks lain, tanpa ```), dengan kunci: judul, kategori, emoji, tags (array), akun_terdeteksi (array), caption, peringatan (array). Di dalam nilai string, tulis baris baru sebagai \\n.'
+                ].join('\n');
+            }
+
+            async function aiPrepImage(file, maxSide) {
+                const url = URL.createObjectURL(file);
+                try {
+                    const img = await new Promise((res, rej) => {
+                        const i = new Image();
+                        i.onload = () => res(i);
+                        i.onerror = () => rej(new Error('Gambar tidak bisa dibaca: ' + file.name));
+                        i.src = url;
+                    });
+                    const sc = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+                    const w = Math.max(1, Math.round(img.naturalWidth * sc));
+                    const h = Math.max(1, Math.round(img.naturalHeight * sc));
+                    const c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    const ctx = c.getContext('2d');
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const data = c.toDataURL('image/jpeg', 0.88).split(',')[1];
+                    c.width = 0; c.height = 0;
+                    img.src = '';
+                    return data;
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
+            }
+
+            async function aiFetch(url, opts) {
+                const ctl = new AbortController();
+                const t = setTimeout(() => ctl.abort(), 90000);
+                try {
+                    return await fetch(url, Object.assign({}, opts, { signal: ctl.signal }));
+                } catch (e) {
+                    throw aiErr(0, e.name === 'AbortError' ? 'Timeout 90 detik' : 'Gagal terhubung (jaringan/CORS)');
+                } finally {
+                    clearTimeout(t);
+                }
+            }
+
+            function aiHttpErr(status, txt) {
+                let m = '';
+                try {
+                    const j = JSON.parse(txt);
+                    m = (j.error && (j.error.message || (typeof j.error === 'string' ? j.error : ''))) || j.message || '';
+                } catch (e) {}
+                if (!m) m = String(txt || '').slice(0, 140);
+                return aiErr(status, 'HTTP ' + status + ': ' + String(m).slice(0, 160));
+            }
+
+            async function aiCallGemini(p, key, model, imgs, sys, userText) {
+                const parts = [{ text: userText }];
+                imgs.forEach(d => parts.push({ inline_data: { mime_type: 'image/jpeg', data: d } }));
+                const body = {
+                    systemInstruction: { parts: [{ text: sys }] },
+                    contents: [{ role: 'user', parts: parts }],
+                    generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
+                };
+                const r = await aiFetch(p.base + '/models/' + encodeURIComponent(model) + ':generateContent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+                    body: JSON.stringify(body)
+                });
+                const txt = await r.text();
+                if (!r.ok) throw aiHttpErr(r.status, txt);
+                let j = null;
+                try { j = JSON.parse(txt); } catch (e) {}
+                const cand = j && j.candidates && j.candidates[0];
+                const out = cand && cand.content && cand.content.parts
+                    ? cand.content.parts.filter(x => !x.thought).map(x => x.text || '').join('') : '';
+                if (!out) {
+                    const why = (j && j.promptFeedback && j.promptFeedback.blockReason) || (cand && cand.finishReason) || '';
+                    throw aiErr(0, 'Respons AI kosong' + (why ? ' (' + why + ')' : ''));
+                }
+                return out;
+            }
+
+            async function aiCallOpenAI(base, key, model, imgs, sys, userText, useJson) {
+                const content = [{ type: 'text', text: userText }];
+                imgs.forEach(d => content.push({ type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + d } }));
+                const body = {
+                    model: model,
+                    messages: [{ role: 'system', content: sys }, { role: 'user', content: content }],
+                    temperature: 0.2,
+                    max_tokens: 6000
+                };
+                if (useJson) body.response_format = { type: 'json_object' };
+                const r = await aiFetch(base.replace(/\/+$/, '') + '/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+                    body: JSON.stringify(body)
+                });
+                const txt = await r.text();
+                if (!r.ok) {
+                    if (useJson && r.status === 400) return aiCallOpenAI(base, key, model, imgs, sys, userText, false);
+                    throw aiHttpErr(r.status, txt);
+                }
+                let j = null;
+                try { j = JSON.parse(txt); } catch (e) {}
+                const out = j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : '';
+                if (!out) throw aiErr(0, 'Respons AI kosong');
+                return typeof out === 'string' ? out : JSON.stringify(out);
+            }
+
+            function aiParse(text) {
+                const t = String(text || '').replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```(?:json)?/gi, '').trim();
+                const a = t.indexOf('{');
+                const b = t.lastIndexOf('}');
+                if (a < 0 || b <= a) throw aiErr(0, 'Respons AI bukan JSON');
+                let o;
+                try { o = JSON.parse(t.slice(a, b + 1)); } catch (e) { throw aiErr(0, 'JSON dari AI tidak valid'); }
+                const arr = v => Array.isArray(v) ? v : (typeof v === 'string' && v.trim() ? v.split(/[,\n]/) : []);
+                const tags = arr(o.tags).map(x => String(x).replace(/^#/, '').replace(/[,"]/g, '').trim().toLowerCase()).filter(Boolean);
+                return {
+                    judul: String(o.judul || '').replace(/["“”]/g, "'").replace(/\s+/g, ' ').trim(),
+                    kategori: String(o.kategori || '').trim(),
+                    emoji: String(o.emoji || '').trim(),
+                    tags: Array.from(new Set(tags)).slice(0, 12),
+                    akun: arr(o.akun_terdeteksi).map(x => String(x).trim()).filter(Boolean),
+                    caption: String(o.caption || '').replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim(),
+                    warn: arr(o.peringatan).map(x => String(x).trim()).filter(Boolean)
+                };
+            }
+
+            function aiNorm(s) { return String(s).toLowerCase().replace(/^@/, '').replace(/[^a-z0-9]/g, ''); }
+
+            function aiMatchCollab(detected) {
+                const list = getCollabList();
+                const hit = [];
+                const miss = [];
+                detected.forEach(d => {
+                    const n = aiNorm(d);
+                    if (n.length < 3) return;
+                    const m = list.find(u => aiNorm(u) === n) ||
+                              list.find(u => { const x = aiNorm(u); return x.length >= 5 && n.includes(x); });
+                    if (m) {
+                        const u = m.startsWith('@') ? m : '@' + m;
+                        if (!hit.includes(u)) hit.push(u);
+                    } else if (!miss.includes(d)) {
+                        miss.push(d);
+                    }
+                });
+                return { hit: hit, miss: miss };
+            }
+
+            function aiSet(id, val) {
+                const el = aiEl(id);
+                el.value = val;
+                el.classList.remove('ai-flash');
+                void el.offsetWidth;
+                el.classList.add('ai-flash');
+                setTimeout(() => el.classList.remove('ai-flash'), 2400);
+            }
+
+            function aiApply(d) {
+                aiBackup = {};
+                AI_FIELDS.forEach(id => { aiBackup[id] = aiEl(id).value; });
+                if (d.judul) aiSet('inpJudul', d.judul);
+                if (d.kategori) {
+                    const kat = standardizeKategoriAdmin(d.kategori);
+                    aiSet('inpKategori', kat);
+                    if (!cachedKategoriEmojis[kat.toLowerCase()] && d.emoji) aiSet('inpEmoji', d.emoji);
+                }
+                if (d.tags.length) aiSet('inpTag', d.tags.join(', '));
+                if (d.caption) aiSet('inpContent', d.caption);
+                const cm = aiMatchCollab(d.akun);
+                if (cm.hit.length) {
+                    aiSet('inpCaption', 'Collab Dakwah Sunnah :\n' + cm.hit.slice(0, 6).join('\n'));
+                    renderCollabChips();
+                }
+                aiEl('btnAiUndo').style.display = 'inline-block';
+                return cm;
+            }
+
+            async function aiScan(files, fromUpload) {
+                if (aiBusy) return;
+                if (!files || !files.length) { aiMsg('❌ Pilih gambar poster dulu.'); return; }
+                const cfg = aiLoad();
+                const chain = aiChain(cfg);
+                if (!chain.length) {
+                    aiMsg('❌ API Key belum diisi. Buka ⚙️ Pengaturan AI lalu tempel kunci.');
+                    aiEl('aiSettings').open = true;
+                    return;
+                }
+                aiBusy = true;
+                aiToggleBusy(true);
+                aiShowWarn([], '');
+                aiLastFiles = files.slice();
+                aiEl('btnAiUse').style.display = 'none';
+                const t0 = Date.now();
+                let tick = null;
+                try {
+                    const cap = Math.max.apply(null, chain.map(k => AI_PROVIDERS[k].maxImg));
+                    const use = files.slice(0, cap);
+                    const b64 = [];
+                    for (let i = 0; i < use.length; i++) {
+                        aiMsg('🖼️ Menyiapkan gambar ' + (i + 1) + '/' + use.length + '...');
+                        b64.push(await aiPrepImage(use[i], 1600));
+                    }
+                    const sys = aiBuildSystem(cfg);
+                    const userText = 'Scan poster berikut (' + use.length + ' gambar berurutan) dan balas dalam JSON sesuai aturan.';
+                    const errs = [];
+                    let res = null;
+
+                    for (const k of chain) {
+                        if (res) break;
+                        const p = AI_PROVIDERS[k];
+                        const key = cfg.keys[k].trim();
+                        const base = k === 'custom' ? cfg.customBase.trim() : p.base;
+                        const imgs = b64.slice(0, p.maxImg);
+                        const models = Array.from(new Set([(cfg.models[k] || '').trim()].concat(p.models).filter(Boolean)));
+                        if (!models.length) { errs.push(p.label + ': isi nama model dulu'); continue; }
+                        let authFail = false;
+
+                        for (const m of models) {
+                            if (res || authFail) break;
+                            const label = p.label.split(' (')[0] + ' • ' + m;
+                            for (let attempt = 0; attempt < 2; attempt++) {
+                                const t1 = Date.now();
+                                clearInterval(tick);
+                                aiMsg('🤖 Memindai dengan ' + label + '... 0 dtk');
+                                tick = setInterval(() => aiMsg('🤖 Memindai dengan ' + label + '... ' + Math.round((Date.now() - t1) / 1000) + ' dtk'), 1000);
+                                try {
+                                    const raw = p.type === 'gemini'
+                                        ? await aiCallGemini({ base: base }, key, m, imgs, sys, userText)
+                                        : await aiCallOpenAI(base, key, m, imgs, sys, userText, true);
+                                    res = { data: aiParse(raw), prov: k, model: m, n: imgs.length, label: label };
+                                    break;
+                                } catch (e) {
+                                    clearInterval(tick);
+                                    const st = e.status || 0;
+                                    if ((st === 429 || st === 500 || st === 503) && attempt === 0) {
+                                        aiMsg('⏳ ' + label + ' sedang sibuk (' + st + '), mencoba lagi sebentar...');
+                                        await aiSleep(2500);
+                                        continue;
+                                    }
+                                    errs.push(label + ' → ' + e.message);
+                                    if (st === 401 || st === 403) authFail = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    clearInterval(tick);
+
+                    if (!res) {
+                        aiMsg('❌ Scan gagal di semua provider.');
+                        aiShowWarn(errs, 'Rincian error:');
+                        return;
+                    }
+
+                    const cm = aiApply(res.data);
+                    const detik = ((Date.now() - t0) / 1000).toFixed(1);
+                    let msg = '✅ Selesai (' + res.label + ', ' + detik + ' dtk). Form sudah terisi — cek & edit seperlunya.';
+                    if (res.prov !== cfg.provider) msg += '\nℹ️ Provider utama gagal, memakai cadangan.';
+                    if (cm.hit.length) msg += '\n🤝 Collab terdeteksi: ' + cm.hit.join(', ');
+                    aiMsg(msg);
+
+                    const warns = res.data.warn.slice();
+                    if (files.length > res.n) warns.push('Hanya ' + res.n + ' gambar pertama yang dipindai (batas provider). Cek slide sisanya manual.');
+                    if (cm.miss.length) warns.push('Akun di poster belum ada di Master List collaborator: ' + cm.miss.join(', '));
+                    if (!res.data.judul || !res.data.caption) warns.push('Judul atau caption kosong dari AI — coba scan ulang atau isi manual.');
+                    aiShowWarn(warns, '⚠️ Perlu dicek:');
+
+                    if (aiLastFiles.length && !fromUpload) aiEl('btnAiUse').style.display = 'inline-block';
+                } catch (e) {
+                    aiMsg('❌ ' + (e && e.message ? e.message : 'Terjadi kesalahan saat scan.'));
+                } finally {
+                    clearInterval(tick);
+                    aiBusy = false;
+                    aiToggleBusy(false);
+                }
+            }
+
+            async function aiFetchModels() {
+                if (aiBusy) return;
+                const cfg = aiLoad();
+                const p = AI_PROVIDERS[cfg.provider];
+                const key = (cfg.keys[cfg.provider] || '').trim();
+                const base = cfg.provider === 'custom' ? (cfg.customBase || '').trim() : p.base;
+                if (!key || !base) { aiMsg('❌ Isi API Key (dan Base URL untuk Kustom) dulu.'); return; }
+                aiBusy = true;
+                aiToggleBusy(true);
+                aiMsg('🔄 Mengambil daftar model...');
+                try {
+                    let ids = [];
+                    if (p.type === 'gemini') {
+                        const r = await aiFetch(base + '/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+                        const txt = await r.text();
+                        if (!r.ok) throw aiHttpErr(r.status, txt);
+                        const j = JSON.parse(txt);
+                        ids = (j.models || [])
+                            .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+                            .map(m => String(m.name || '').replace(/^models\//, ''))
+                            .filter(n => n.includes('gemini') && !/embedding|tts|image|audio|live|robotics/.test(n));
+                    } else {
+                        const r = await aiFetch(base.replace(/\/+$/, '') + '/models', { headers: { 'Authorization': 'Bearer ' + key } });
+                        const txt = await r.text();
+                        if (!r.ok) throw aiHttpErr(r.status, txt);
+                        const j = JSON.parse(txt);
+                        ids = (j.data || []).map(m => String(m.id || '')).filter(Boolean);
+                    }
+                    const dl = aiEl('aiModelList');
+                    dl.innerHTML = '';
+                    ids.sort().forEach(id => { const o = document.createElement('option'); o.value = id; dl.appendChild(o); });
+                    aiMsg(ids.length
+                        ? '✅ ' + ids.length + ' model ditemukan. Ketuk kolom Model untuk memilih (pilih yang mendukung gambar/vision).'
+                        : 'ℹ️ Tidak ada model yang dikembalikan.');
+                } catch (e) {
+                    aiMsg('❌ Gagal mengambil daftar model: ' + (e && e.message ? e.message : 'error'));
+                } finally {
+                    aiBusy = false;
+                    aiToggleBusy(false);
+                }
+            }
+
+            (function aiInit() {
+                const sel = aiEl('aiProvider');
+                Object.keys(AI_PROVIDERS).forEach(k => {
+                    const o = document.createElement('option');
+                    o.value = k; o.textContent = AI_PROVIDERS[k].label;
+                    sel.appendChild(o);
+                });
+                aiRefreshUI();
+
+                document.querySelectorAll('.app-ver').forEach(el => { el.textContent = 'v.' + APP_VERSION; });
+
+                sel.addEventListener('change', () => { const c = aiLoad(); c.provider = sel.value; aiSave(c); aiRefreshUI(); });
+                aiEl('aiKey').addEventListener('input', () => { const c = aiLoad(); c.keys[c.provider] = aiEl('aiKey').value.trim(); aiSave(c); });
+                aiEl('aiModel').addEventListener('input', () => { const c = aiLoad(); c.models[c.provider] = aiEl('aiModel').value.trim(); aiSave(c); });
+                aiEl('aiBase').addEventListener('input', () => { const c = aiLoad(); c.customBase = aiEl('aiBase').value.trim(); aiSave(c); });
+                aiEl('aiFallback').addEventListener('change', () => { const c = aiLoad(); c.fallback = aiEl('aiFallback').checked; aiSave(c); });
+                aiEl('aiAuto').addEventListener('change', () => { const c = aiLoad(); c.auto = aiEl('aiAuto').checked; aiSave(c); });
+                aiEl('aiStyle').addEventListener('input', () => { const c = aiLoad(); c.style = aiEl('aiStyle').value; aiSave(c); });
+                aiEl('btnAiStyleReset').addEventListener('click', () => { const c = aiLoad(); c.style = ''; aiSave(c); aiRefreshUI(); });
+                aiEl('btnAiShowKey').addEventListener('click', () => { const k = aiEl('aiKey'); k.type = k.type === 'password' ? 'text' : 'password'; });
+                aiEl('btnAiModels').addEventListener('click', aiFetchModels);
+
+                aiEl('aiFile').addEventListener('change', e => {
+                    aiScanFiles = Array.from(e.target.files || []);
+                    if (!aiScanFiles.length) { aiEl('aiFileInfo').textContent = ''; return; }
+                    aiEl('aiFileInfo').textContent = '🖼️ ' + aiScanFiles.length + ' gambar dipilih (urutan = urutan slide).';
+                    const c = aiLoad();
+                    if (c.auto && aiChain(c).length) aiScan(aiScanFiles);
+                    else if (!aiChain(c).length) aiMsg('ℹ️ Isi API Key di ⚙️ Pengaturan AI, lalu tekan Scan.');
+                });
+                aiEl('btnAiScan').addEventListener('click', () => { if (aiScanFiles.length) aiScan(aiScanFiles); else aiScan(selectedFiles.slice(), true); });
+                aiEl('btnAiScanUpload').addEventListener('click', () => aiScan(selectedFiles.slice(), true));
+                aiEl('btnAiUse').addEventListener('click', () => {
+                    if (!aiLastFiles.length) return;
+                    selectedFiles = aiLastFiles.slice();
+                    renderPreview();
+                    aiEl('btnAiUse').style.display = 'none';
+                    aiMsg('📥 ' + selectedFiles.length + ' gambar dipakai sebagai file upload. Atur urutannya di bagian Upload & Urutkan Gambar.');
+                    aiEl('previewContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                aiEl('btnAiUndo').addEventListener('click', () => {
+                    if (!aiBackup) return;
+                    AI_FIELDS.forEach(id => { aiEl(id).value = aiBackup[id]; });
+                    aiBackup = null;
+                    renderCollabChips();
+                    aiEl('btnAiUndo').style.display = 'none';
+                    aiShowWarn([], '');
+                    aiMsg('↩️ Isi form dikembalikan seperti sebelum scan.');
+                });
+            })();
         });
     </script>
 </body>
