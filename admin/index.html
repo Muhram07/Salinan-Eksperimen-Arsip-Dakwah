@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Arsip Dakwah - Admin Panel | v.1.0.1
+  Arsip Dakwah - Admin Panel | v.1.0.2
   Riwayat perbaikan (2 versi terbaru):
+  v.1.0.2 - Antrean Scan Otomatis (khusus Gemini): urutan slide manual, jeda & tunggu limit otomatis, simpan gambar di IndexedDB, lanjut otomatis setelah refresh/tab baru, daftar persetujuan, kirim semua yang aman.
   v.1.0.1 - Scan Poster AI (Gemini/Groq/OpenRouter/Grok/Kustom): isi otomatis judul, kategori, tag, caption, collaborator + lencana versi.
-  v.1.0.0 - Panel admin dasar: form poster, collaborator, upload & urut gambar, kirim ke GitHub via Worker, ZIP manual.
 -->
 <html lang="id">
 <head> 
@@ -226,6 +226,52 @@
         .ai-flash{animation:ai-flash 2.2s ease-out;}
         @keyframes ai-flash{0%{box-shadow:0 0 0 2px #D4AF37,0 0 22px rgba(212,175,55,0.7);}100%{box-shadow:0 4px 15px rgba(0,0,0,0.3);}}
         .app-ver{display:inline-block;margin-top:6px;padding:2px 10px;border:1px solid rgba(212,175,55,0.45);border-radius:20px;font-size:11px;color:#D4AF37;letter-spacing:.5px;background:rgba(212,175,55,0.08);}
+
+        /* ===== v.1.0.2 : ANTREAN SCAN OTOMATIS (GEMINI) ===== */
+        .q-card{background:linear-gradient(145deg,rgba(212,175,55,0.08),rgba(255,255,255,0.03));border:1px solid rgba(212,175,55,0.45);border-radius:18px;padding:15px;margin-bottom:20px;box-shadow:0 0 22px rgba(212,175,55,0.06);}
+        .q-card h3{color:#D4AF37;text-align:center;font-size:17px;margin-bottom:4px;letter-spacing:.5px;}
+        .q-card .q-sub{font-size:12px;color:#aaa;text-align:center;margin-bottom:12px;line-height:1.5;}
+        .q-card label{font-size:13px;color:#aaa;font-weight:bold;}
+        .q-card input[type="file"]{font-size:13px;margin-bottom:8px;}
+        .q-card select{font-size:13px;padding:8px 12px;margin-bottom:0;width:auto;}
+        .q-card button:disabled{opacity:.5;cursor:not-allowed;animation:none;}
+        .q-box{background:rgba(255,255,255,0.05);border:1px solid #444;border-radius:14px;padding:12px;margin-bottom:12px;}
+        .q-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
+        .q-row .btn-small-gold{padding:9px 12px;font-size:13px;}
+        .q-hint{font-size:12px;color:#999;line-height:1.5;word-break:break-word;margin-bottom:8px;}
+        .q-stage{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+        .q-stg{width:78px;text-align:center;font-size:11px;color:#bbb;}
+        .q-stg .q-img{width:78px;height:98px;border-radius:8px;border:1px solid #666;background:#111 center/cover no-repeat;}
+        .q-stg .q-ctl{display:flex;gap:2px;margin-top:3px;}
+        .q-stg .q-ctl button{flex:1;background:transparent;border:1px solid #D4AF37;color:#D4AF37;border-radius:6px;padding:2px 0;font-size:12px;cursor:pointer;}
+        .q-stg .q-ctl button:disabled{opacity:.3;border-color:#555;color:#555;cursor:not-allowed;}
+        .q-status{font-size:13px;color:#fff;line-height:1.6;word-break:break-word;white-space:pre-line;}
+        .q-notice{margin:8px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(212,175,55,0.5);background:rgba(212,175,55,0.08);color:#f0d77a;font-size:13px;line-height:1.5;display:none;}
+        .q-fatal{margin:8px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,85,85,0.6);background:rgba(255,85,85,0.08);color:#ff9a9a;font-size:13px;line-height:1.5;display:none;}
+        .q-count{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+        .q-count span{font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid #555;color:#ccc;background:rgba(255,255,255,0.05);}
+        .q-sec{margin-top:10px;}
+        .q-sec-h{width:100%;text-align:left;background:rgba(255,255,255,0.06);border:1px solid #555;color:#D4AF37;font-weight:bold;font-size:14px;padding:10px 12px;border-radius:12px;cursor:pointer;}
+        .q-item{display:flex;flex-wrap:wrap;gap:10px;background:rgba(255,255,255,0.04);border:1px solid #3a3a3a;border-radius:12px;padding:10px;margin-top:8px;}
+        .q-item .q-thumb{width:56px;height:72px;border-radius:8px;border:1px solid #555;background:#111 center/cover no-repeat;flex:0 0 auto;}
+        .q-item .q-info{flex:1;min-width:0;}
+        .q-item .q-title{font-size:14px;font-weight:bold;color:#fff;word-break:break-word;}
+        .q-item .q-meta{font-size:12px;color:#aaa;line-height:1.5;word-break:break-word;margin-top:2px;}
+        .q-item .q-w{font-size:12px;color:#ffcf66;line-height:1.45;margin-top:4px;word-break:break-word;}
+        .q-item .q-e{font-size:12px;color:#ff9a9a;line-height:1.45;margin-top:4px;word-break:break-word;}
+        .q-item .q-acts{width:100%;display:flex;flex-wrap:wrap;gap:6px;}
+        .q-item .q-acts button{background:rgba(212,175,55,0.12);border:1px solid #D4AF37;color:#D4AF37;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:bold;cursor:pointer;}
+        .q-item .q-acts button.q-danger{border-color:#a44;color:#f88;background:rgba(255,80,80,0.08);}
+        .q-more{margin-top:8px;width:100%;}
+        .q-editor{display:none;background:rgba(0,0,0,0.35);border:1px solid #D4AF37;border-radius:14px;padding:12px;margin:12px 0;}
+        .q-editor h4{color:#D4AF37;text-align:center;margin-bottom:8px;font-size:15px;}
+        .q-editor label{font-size:12px;color:#aaa;font-weight:bold;}
+        .q-editor input,.q-editor textarea{font-size:14px;padding:10px 12px;margin-bottom:10px;}
+        .q-editor textarea{min-height:90px;}
+        .q-editor .q-imgs{display:flex;flex-direction:column;gap:8px;align-items:center;margin-bottom:10px;}
+        .q-editor .q-imgs img{width:100%;max-width:420px;max-height:60vh;object-fit:contain;border-radius:10px;border:1px solid #555;background:#111;}
+        .q-banner{display:none;margin-bottom:20px;padding:12px 14px;border-radius:18px;border:1px solid rgba(212,175,55,0.5);background:rgba(212,175,55,0.08);color:#f0d77a;font-size:13px;line-height:1.5;text-align:center;}
+        .q-banner button{margin-top:8px;}
     </style>
 </head>
 <body>
@@ -252,6 +298,11 @@
                 <button class="btn-gold" onclick="showSection('add')">➕ Buat Poster Baru</button>
                 <button class="btn-gold" onclick="logout()">🚪 Logout</button>
             </div>
+        </div>
+
+        <div class="q-banner" id="qBanner">
+            <div id="qBannerText" style="white-space:pre-line;"></div>
+            <button type="button" class="btn-small-gold" id="qBannerOpen">📥 Buka antrean</button>
         </div>
 
         <div id="sectionAdd" class="admin-box" style="display:none;">
@@ -312,6 +363,51 @@
                 <div class="ai-bar" id="aiBar"><i></i></div>
                 <div class="ai-status" id="aiStatus"></div>
                 <div class="ai-warn" id="aiWarn"></div>
+            </div>
+
+            <div class="q-card" id="qCard">
+                <h3>📥 Antrean Scan Otomatis (Gemini)</h3>
+                <div class="q-sub">Tambah poster per postingan (urutan slide Anda tentukan sendiri) → diproses satu per satu di belakang layar dengan jeda. Hanya memakai Google Gemini, tanpa pindah AI. Hasil masuk daftar persetujuan untuk Anda cek sebelum dikirim ke GitHub.</div>
+
+                <div class="q-notice" id="qNotice"></div>
+                <div class="q-fatal" id="qFatal"></div>
+
+                <div class="q-box">
+                    <label>1) Pilih gambar satu postingan (poster tunggal atau carousel)</label>
+                    <input type="file" id="qFile" multiple accept="image/*">
+                    <div class="q-hint">Pilih lagi untuk menambah slide. Atur urutan dengan ▲ ▼ — urutan di sini = urutan slide 1.jpg, 2.jpg, ... Poster tunggal cukup 1 gambar.</div>
+                    <div class="q-stage" id="qStage"></div>
+                    <div class="q-row">
+                        <button type="button" class="btn-small-gold" id="qBtnFromUpload">🖼️ Ambil dari bagian Upload</button>
+                        <button type="button" class="btn-small-gold" id="qBtnClearStage" style="background:rgba(255,255,255,0.05);color:#aaa;border-color:#555;">🗑️ Kosongkan pilihan</button>
+                    </div>
+                    <button type="button" class="btn-solid" id="qBtnAdd" style="font-size:15px;padding:12px;">➕ TAMBAH KE ANTREAN</button>
+                </div>
+
+                <div class="q-box">
+                    <div class="q-row" style="margin-bottom:6px;">
+                        <label style="margin:0;">⏱️ Jeda antar poster</label>
+                        <select id="qDelay">
+                            <option value="5">5 detik</option>
+                            <option value="8">8 detik</option>
+                            <option value="15">15 detik</option>
+                            <option value="30">30 detik</option>
+                        </select>
+                    </div>
+                    <div class="q-status" id="qStatus"></div>
+                    <div class="q-count" id="qCount"></div>
+                    <div class="q-row">
+                        <button type="button" class="btn-small-gold" id="qBtnRun">▶️ Mulai antrean</button>
+                        <button type="button" class="btn-small-gold" id="qBtnRetryErr">🔁 Coba lagi yang gagal</button>
+                        <button type="button" class="btn-small-gold" id="qBtnSendAll">🚀 Kirim semua yang aman</button>
+                        <button type="button" class="btn-small-gold" id="qBtnClearSent" style="background:rgba(255,255,255,0.05);color:#aaa;border-color:#555;">🧹 Bersihkan terkirim</button>
+                    </div>
+                    <div class="q-hint">Biarkan halaman admin tetap terbuka (layar akan ditahan agar tidak mati). Jika Chrome tertutup/macet, buka lagi alamat panel yang sama — antrean lanjut otomatis tanpa memilih ulang file.</div>
+                    <div class="q-status" id="qMsg" style="color:#f0d77a;"></div>
+                </div>
+
+                <div class="q-editor" id="qEditor"></div>
+                <div id="qLists"></div>
             </div>
 
             <label>Judul Poster</label>
@@ -379,7 +475,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.1';
+        const APP_VERSION = '1.0.2';
         const ALLOWED_PINS = ["301102", "291104", "666666"];
         
         const DEFAULT_COLLABS = [
@@ -410,6 +506,7 @@
         ];
 
         function logout() {
+            if (window.qOnLogout) window.qOnLogout();
             localStorage.removeItem('adminLogin');
             document.getElementById('adminDashboard').style.display = 'none';
             document.getElementById('loginPage').style.display = 'block';
@@ -615,6 +712,7 @@
                     if(savedKey) apiKeyInput.value = savedKey;
                     
                     loadKategoriList();
+                    if (window.qOnLogin) window.qOnLogin();
                 } else {
                     loginStatus.innerText = '❌ PIN Salah!';
                     pinInput.value = '';
@@ -1452,6 +1550,885 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     aiShowWarn([], '');
                     aiMsg('↩️ Isi form dikembalikan seperti sebelum scan.');
                 });
+            })();
+
+            /* ===== v.1.0.2 : ANTREAN SCAN OTOMATIS (GEMINI) ===== */
+            (function queueInit() {
+                const DB_NAME = 'dakwahQueueDB';
+                const LS_PAUSE = 'dakwahQueuePaused';
+                const LS_DELAY = 'dakwahQueueDelay';
+                const LS_WAIT = 'dakwahQueueWait';
+                const LS_LOCK = 'dakwahQueueLock';
+                const TAB_ID = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+                const LOCK_STALE = 30000;
+                const MAX_IMG = AI_PROVIDERS.gemini.maxImg;
+                const MAX_ATTEMPTS = 4;
+                const BASE_TITLE = document.title;
+                const SECS = [
+                    { k: 'queue',  t: '⏳ Antrean scan',                         f: i => ['pending', 'processing', 'waiting'].indexOf(i.status) >= 0 },
+                    { k: 'review', t: '🔎 Perlu dicek (ada peringatan AI)',      f: i => i.status === 'review' },
+                    { k: 'ready',  t: '✅ Aman — siap kirim',                    f: i => i.status === 'ready' || i.status === 'sending' },
+                    { k: 'error',  t: '❌ Gagal',                                f: i => i.status === 'error' },
+                    { k: 'sent',   t: '📤 Terkirim ke GitHub',                   f: i => i.status === 'sent' }
+                ];
+
+                const Q = {
+                    db: null, dbErr: '', items: [], stage: [],
+                    running: false, paused: false, stop: false, sending: false,
+                    cur: null, curStart: 0, hb: null, wl: null,
+                    other: false, fatal: '', notice: '', limitHits: 0, hiddenDuring: false,
+                    open: { queue: true, review: true, ready: true, error: true, sent: false },
+                    limit: { queue: 25, review: 25, ready: 25, error: 25, sent: 25 },
+                    editId: null, editUrls: [], sig: '', renderT: null, doneMsg: ''
+                };
+
+                const $ = id => document.getElementById(id);
+                const sleep = ms => new Promise(r => setTimeout(r, ms));
+                const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                const logged = () => localStorage.getItem('adminLogin') === 'true';
+                const delaySec = () => { const v = parseInt(localStorage.getItem(LS_DELAY), 10); return v > 0 ? v : 8; };
+                const fmtMS = s => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); const r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; };
+                const fmtClock = t => { try { return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+                const qMsg = t => { $('qMsg').textContent = t || ''; };
+
+                /* ---------- IndexedDB ---------- */
+                function qOpen() {
+                    return new Promise((res, rej) => {
+                        if (!window.indexedDB) { rej(new Error('IndexedDB tidak tersedia di browser ini')); return; }
+                        let r;
+                        try { r = indexedDB.open(DB_NAME, 1); } catch (e) { rej(e); return; }
+                        r.onupgradeneeded = () => {
+                            const d = r.result;
+                            if (!d.objectStoreNames.contains('items')) d.createObjectStore('items', { keyPath: 'id' });
+                            if (!d.objectStoreNames.contains('blobs')) d.createObjectStore('blobs', { keyPath: 'id' });
+                        };
+                        r.onsuccess = () => res(r.result);
+                        r.onerror = () => rej(r.error || new Error('Gagal membuka penyimpanan'));
+                        r.onblocked = () => rej(new Error('Penyimpanan terblokir oleh tab lain'));
+                    });
+                }
+                function qTx(stores, mode, fn) {
+                    return new Promise((res, rej) => {
+                        let out;
+                        let tx;
+                        try { tx = Q.db.transaction(stores, mode); } catch (e) { rej(e); return; }
+                        tx.oncomplete = () => res(out instanceof IDBRequest ? out.result : out);
+                        tx.onerror = () => rej(tx.error || new Error('Transaksi gagal'));
+                        tx.onabort = () => rej(tx.error || new Error('Transaksi dibatalkan'));
+                        try { out = fn(tx); } catch (e) { try { tx.abort(); } catch (x) {} rej(e); }
+                    });
+                }
+                const qAll = () => qTx(['items'], 'readonly', tx => tx.objectStore('items').getAll());
+                const qExists = id => qTx(['items'], 'readonly', tx => tx.objectStore('items').getKey(id)).then(k => k !== undefined);
+                function qSave(it) { it.upd = Date.now(); return qTx(['items'], 'readwrite', tx => { tx.objectStore('items').put(it); }); }
+                function qLoadBlobs(id) {
+                    return qTx(['blobs'], 'readonly', tx => tx.objectStore('blobs').getAll(IDBKeyRange.bound(id + ':', id + ':\uffff')))
+                        .then(rows => rows.sort((a, b) => a.idx - b.idx).map(r => r.blob));
+                }
+                function qDropBlobs(id) {
+                    return qTx(['blobs'], 'readwrite', tx => { tx.objectStore('blobs').delete(IDBKeyRange.bound(id + ':', id + ':\uffff')); });
+                }
+                function qDelete(id) {
+                    return qTx(['items', 'blobs'], 'readwrite', tx => {
+                        tx.objectStore('blobs').delete(IDBKeyRange.bound(id + ':', id + ':\uffff'));
+                        tx.objectStore('items').delete(id);
+                    });
+                }
+                async function qReload() {
+                    if (!Q.db) return;
+                    try {
+                        const all = await qAll();
+                        all.sort((a, b) => a.createdAt - b.createdAt);
+                        Q.items = all;
+                    } catch (e) { /* abaikan, pakai data memori */ }
+                }
+                function qPersist() {
+                    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+                }
+
+                /* ---------- Kunci tab (hanya satu tab yang memproses) ---------- */
+                function lockRead() { try { return JSON.parse(localStorage.getItem(LS_LOCK) || 'null'); } catch (e) { return null; } }
+                function lockWrite() { try { localStorage.setItem(LS_LOCK, JSON.stringify({ tab: TAB_ID, ts: Date.now() })); } catch (e) {} }
+                function lockFresh(l) { return !!l && (Date.now() - l.ts) < LOCK_STALE; }
+                function lockMine() { const l = lockRead(); return !!l && l.tab === TAB_ID; }
+                function qHB() {
+                    if (Q.hb) return;
+                    Q.hb = setInterval(() => { if (lockMine()) lockWrite(); }, 4000);
+                }
+                async function qLock() {
+                    if (lockMine()) { lockWrite(); qHB(); return true; }
+                    if (lockFresh(lockRead())) return false;
+                    lockWrite();
+                    await sleep(300);
+                    if (!lockMine()) return false;
+                    qHB();
+                    return true;
+                }
+                function qUnlock() {
+                    if (Q.running || Q.sending) return;
+                    if (Q.hb) { clearInterval(Q.hb); Q.hb = null; }
+                    if (lockMine()) { try { localStorage.removeItem(LS_LOCK); } catch (e) {} }
+                }
+
+                /* ---------- Penahan layar ---------- */
+                async function qWake(on) {
+                    try {
+                        if (on) {
+                            if (!navigator.wakeLock || Q.wl) return;
+                            Q.wl = await navigator.wakeLock.request('screen');
+                            Q.wl.addEventListener('release', () => { Q.wl = null; });
+                        } else if (Q.wl) {
+                            const w = Q.wl; Q.wl = null; await w.release();
+                        }
+                    } catch (e) { Q.wl = null; }
+                }
+
+                /* ---------- Tunggu global (limit Gemini) ---------- */
+                function qWaitInfo() {
+                    try {
+                        const w = JSON.parse(localStorage.getItem(LS_WAIT) || 'null');
+                        if (w && w.until > Date.now()) return w;
+                    } catch (e) {}
+                    return null;
+                }
+                function qSetWait(sec, reason) {
+                    try { localStorage.setItem(LS_WAIT, JSON.stringify({ until: Date.now() + sec * 1000, reason: reason })); } catch (e) {}
+                }
+                async function qWait(ms) {
+                    const end = Date.now() + ms;
+                    while (Date.now() < end && !Q.paused && !Q.stop && lockMine()) {
+                        await sleep(Math.max(50, Math.min(1000, end - Date.now())));
+                        qTick();
+                    }
+                }
+
+                /* ---------- Hitung & status ---------- */
+                function qCount() {
+                    const c = { queue: 0, review: 0, ready: 0, error: 0, sent: 0, done: 0 };
+                    Q.items.forEach(i => {
+                        if (['pending', 'processing', 'waiting'].indexOf(i.status) >= 0) c.queue++;
+                        else if (i.status === 'review') c.review++;
+                        else if (i.status === 'ready' || i.status === 'sending') c.ready++;
+                        else if (i.status === 'error') c.error++;
+                        else if (i.status === 'sent') c.sent++;
+                    });
+                    c.done = c.review + c.ready + c.sent;
+                    return c;
+                }
+                const qHasWork = () => Q.items.some(i => ['pending', 'processing', 'waiting'].indexOf(i.status) >= 0);
+                const qNext = () => Q.items.find(i => ['pending', 'processing', 'waiting'].indexOf(i.status) >= 0);
+
+                function qStatusText() {
+                    if (Q.dbErr) return '❌ Penyimpanan browser tidak tersedia: ' + Q.dbErr + '\nAntrean tidak bisa dipakai di browser/mode ini.';
+                    const c = qCount();
+                    if (Q.paused) return '⏸ Antrean dijeda. ' + (c.queue ? c.queue + ' poster menunggu.' : '');
+                    if (Q.other) return '🔒 Antrean sedang diproses di tab/jendela lain. Tab ini hanya menampilkan; akan mengambil alih otomatis bila tab itu berhenti.';
+                    if (Q.running) {
+                        const w = qWaitInfo();
+                        if (w) return '⏳ ' + w.reason + ' — lanjut otomatis dalam ' + fmtMS((w.until - Date.now()) / 1000) + ' (±' + fmtClock(w.until) + ').';
+                        if (Q.cur) return '🤖 Memindai poster #' + Q.cur.no + ' (' + Q.cur.count + ' gambar)... ' + Math.round((Date.now() - Q.curStart) / 1000) + ' dtk';
+                        return '😴 Jeda antar poster (' + delaySec() + ' dtk)...';
+                    }
+                    if (c.queue) return '⏹ Antrean belum berjalan: ' + c.queue + ' poster menunggu. Tekan Mulai.';
+                    return c.done || c.error ? '✔️ Tidak ada poster yang menunggu scan.' : '📭 Antrean kosong. Tambahkan poster di atas.';
+                }
+
+                function qTitle() {
+                    const c = qCount();
+                    if (Q.running && c.queue) document.title = '⏳ ' + c.done + '/' + (c.done + c.queue) + ' · ' + BASE_TITLE;
+                    else document.title = BASE_TITLE;
+                }
+
+                function qTick() {
+                    const s = qStatusText();
+                    const a = $('qStatus'); if (a && a.textContent !== s) a.textContent = s;
+                    const b = $('qBannerText');
+                    if (b) { const t = qBannerLine(); if (b.textContent !== t) b.textContent = t; }
+                }
+
+                function qBannerLine() {
+                    const c = qCount();
+                    return '📥 Antrean AI: ' + c.done + ' selesai · ' + c.queue + ' belum' + (c.review ? ' · ' + c.review + ' perlu dicek' : '') + (c.error ? ' · ' + c.error + ' gagal' : '') + '\n' + qStatusText();
+                }
+
+                /* ---------- Render ---------- */
+                function qRender() {
+                    clearTimeout(Q.renderT);
+                    Q.renderT = setTimeout(qRenderNow, 80);
+                }
+
+                function qRenderNow() {
+                    const c = qCount();
+                    qTick();
+                    qTitle();
+                    const nt = $('qNotice');
+                    nt.textContent = Q.notice || Q.doneMsg || '';
+                    nt.style.display = (Q.notice || Q.doneMsg) ? 'block' : 'none';
+                    const ft = $('qFatal');
+                    ft.textContent = Q.fatal;
+                    ft.style.display = Q.fatal ? 'block' : 'none';
+
+                    $('qCount').innerHTML = '<span>⏳ ' + c.queue + ' menunggu</span><span>🔎 ' + c.review + ' perlu dicek</span><span>✅ ' + c.ready + ' aman</span><span>❌ ' + c.error + ' gagal</span><span>📤 ' + c.sent + ' terkirim</span>';
+                    $('qBtnRun').textContent = (Q.running && !Q.paused) ? '⏸ Jeda antrean' : '▶️ Mulai antrean';
+                    $('qBtnSendAll').disabled = Q.sending || !c.ready;
+                    $('qBtnRetryErr').disabled = !c.error;
+                    $('qBtnClearSent').disabled = !c.sent;
+                    $('qBtnAdd').disabled = !Q.db;
+                    $('qDelay').value = String(delaySec());
+
+                    const bn = $('qBanner');
+                    if (bn) bn.style.display = (Q.items.length && !Q.dbErr) ? 'block' : 'none';
+
+                    let html = '';
+                    SECS.forEach(sec => {
+                        let list = Q.items.filter(sec.f);
+                        if (!list.length) return;
+                        if (sec.k === 'sent') list = list.slice().sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0));
+                        const open = Q.open[sec.k];
+                        html += '<div class="q-sec"><button type="button" class="q-sec-h" data-act="toggle" data-sec="' + sec.k + '">' + (open ? '▾ ' : '▸ ') + sec.t + ' (' + list.length + ')</button>';
+                        if (open) {
+                            list.slice(0, Q.limit[sec.k]).forEach(it => { html += qItemHtml(it); });
+                            if (list.length > Q.limit[sec.k]) html += '<button type="button" class="btn-small-gold q-more" data-act="more" data-sec="' + sec.k + '">Tampilkan lebih banyak (' + (list.length - Q.limit[sec.k]) + ' lagi)</button>';
+                        }
+                        html += '</div>';
+                    });
+                    $('qLists').innerHTML = html;
+                }
+
+                function qStatusLabel(it) {
+                    switch (it.status) {
+                        case 'pending': return '⏳ Menunggu giliran';
+                        case 'processing': return '🤖 Sedang dipindai';
+                        case 'waiting': return '⏸ Menunggu' + (it.nextAt ? ' — lanjut ±' + fmtClock(it.nextAt) : '') + (it.err ? ' (' + it.err + ')' : '');
+                        case 'review': return '🔎 Perlu dicek';
+                        case 'ready': return '✅ Aman, siap kirim';
+                        case 'sending': return '📤 Sedang dikirim...';
+                        case 'error': return '❌ Gagal';
+                        case 'sent': return '📤 Terkirim' + (it.sentAt ? ' ' + fmtClock(it.sentAt) : '');
+                    }
+                    return it.status;
+                }
+
+                function qItemHtml(it) {
+                    const r = it.result;
+                    const title = r && r.judul ? r.judul : 'Poster tanpa judul';
+                    let h = '<div class="q-item" data-id="' + esc(it.id) + '">';
+                    h += '<div class="q-thumb"' + (it.thumb ? ' style="background-image:url(' + it.thumb + ')"' : '') + '></div>';
+                    h += '<div class="q-info"><div class="q-title">#' + it.no + ' · ' + esc(title) + '</div>';
+                    h += '<div class="q-meta">' + it.count + ' gambar · ' + esc(qStatusLabel(it)) + (r && r.kategori ? ' · ' + esc(r.kategori) : '') + '</div>';
+                    if (it.status === 'review' && r && r.warn && r.warn.length) {
+                        h += '<div class="q-w">⚠️ ' + r.warn.slice(0, 3).map(esc).join('<br>⚠️ ') + (r.warn.length > 3 ? '<br>… +' + (r.warn.length - 3) + ' lagi (buka Cek)' : '') + '</div>';
+                    }
+                    if ((it.status === 'error' || it.status === 'ready' || it.status === 'review') && it.err) h += '<div class="q-e">' + esc(it.err) + '</div>';
+                    h += '</div><div class="q-acts">';
+                    const id = esc(it.id);
+                    const b = (act, label, cls) => '<button type="button" data-act="' + act + '" data-id="' + id + '"' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</button>';
+                    if (it.status === 'review') h += b('edit', '✏️ Cek &amp; Setujui') + b('rescan', '🔁 Scan ulang') + b('del', '🗑️ Hapus', 'q-danger');
+                    else if (it.status === 'ready') h += b('send', '🚀 Kirim') + b('edit', '✏️ Edit') + b('rescan', '🔁 Scan ulang') + b('del', '🗑️ Hapus', 'q-danger');
+                    else if (it.status === 'error') h += b('rescan', '🔁 Coba lagi') + b('del', '🗑️ Hapus', 'q-danger');
+                    else if (it.status === 'sent') h += b('del', '🧹 Hapus catatan', 'q-danger');
+                    else if (it.status === 'pending' || it.status === 'waiting') h += b('del', '🗑️ Hapus', 'q-danger');
+                    else if (it.status === 'processing' && !(Q.running && Q.cur && Q.cur.id === it.id)) h += b('del', '🗑️ Hapus', 'q-danger');
+                    h += '</div></div>';
+                    return h;
+                }
+
+                /* ---------- Pilihan gambar (staging) ---------- */
+                function qThumb(file) {
+                    return new Promise(res => {
+                        const url = URL.createObjectURL(file);
+                        const img = new Image();
+                        img.onload = () => {
+                            try {
+                                const sc = 120 / Math.max(img.naturalWidth, img.naturalHeight);
+                                const w = Math.max(1, Math.round(img.naturalWidth * sc));
+                                const h = Math.max(1, Math.round(img.naturalHeight * sc));
+                                const c = document.createElement('canvas');
+                                c.width = w; c.height = h;
+                                c.getContext('2d').drawImage(img, 0, 0, w, h);
+                                const d = c.toDataURL('image/jpeg', 0.5);
+                                c.width = 0; c.height = 0;
+                                res(d);
+                            } catch (e) { res(''); }
+                            img.src = '';
+                            URL.revokeObjectURL(url);
+                        };
+                        img.onerror = () => { URL.revokeObjectURL(url); res(''); };
+                        img.src = url;
+                    });
+                }
+
+                function qRenderStage() {
+                    const box = $('qStage');
+                    box.innerHTML = '';
+                    Q.stage.forEach((s, i) => {
+                        const d = document.createElement('div');
+                        d.className = 'q-stg';
+                        d.innerHTML = '<div class="q-img"' + (s.thumb ? ' style="background-image:url(' + s.thumb + ')"' : '') + '></div><div>' + (i + 1) + '.jpg</div><div class="q-ctl"><button type="button" data-st="up" data-i="' + i + '"' + (i === 0 ? ' disabled' : '') + '>▲</button><button type="button" data-st="dn" data-i="' + i + '"' + (i === Q.stage.length - 1 ? ' disabled' : '') + '>▼</button><button type="button" data-st="rm" data-i="' + i + '">✕</button></div>';
+                        box.appendChild(d);
+                    });
+                    if (Q.stage.length > MAX_IMG) {
+                        const w = document.createElement('div');
+                        w.className = 'q-hint';
+                        w.style.width = '100%';
+                        w.textContent = '⚠️ Gemini hanya memindai ' + MAX_IMG + ' gambar pertama. Slide sisanya harus dicek manual.';
+                        box.appendChild(w);
+                    }
+                }
+
+                async function qAddFiles(files) {
+                    const imgs = files.filter(f => f && (!f.type || f.type.indexOf('image/') === 0));
+                    const entries = imgs.map(f => ({ file: f, thumb: '' }));
+                    Q.stage = Q.stage.concat(entries);
+                    qRenderStage();
+                    for (const e of entries) {
+                        e.thumb = await qThumb(e.file);
+                        qRenderStage();
+                    }
+                }
+
+                async function qAddToQueue() {
+                    if (!Q.db) { qMsg('❌ Penyimpanan browser tidak tersedia.'); return; }
+                    if (!Q.stage.length) { qMsg('❌ Pilih gambar poster dulu.'); return; }
+                    const stage = Q.stage.slice();
+                    const sig = stage.map(s => s.file.name + ':' + s.file.size).join('|');
+                    const dup = Q.items.find(i => i.sig === sig);
+                    if (dup && !confirm('File yang sama sudah ada di antrean/riwayat (#' + dup.no + '). Tambahkan lagi?')) return;
+                    $('qBtnAdd').disabled = true;
+                    qPersist();
+                    try {
+                        const rows = [];
+                        const id = 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                        for (let i = 0; i < stage.length; i++) {
+                            qMsg('💾 Menyimpan gambar ' + (i + 1) + '/' + stage.length + '...');
+                            const f = stage[i].file;
+                            const buf = await f.arrayBuffer();
+                            rows.push({ id: id + ':' + String(i).padStart(3, '0'), itemId: id, idx: i, name: f.name || '', blob: new Blob([buf], { type: f.type || 'image/jpeg' }) });
+                        }
+                        await qReload();
+                        const no = Q.items.reduce((m, x) => Math.max(m, x.no || 0), 0) + 1;
+                        const it = { id: id, no: no, createdAt: Date.now(), status: 'pending', count: stage.length, sig: sig, thumb: stage[0].thumb || '', attempts: 0, nextAt: 0, err: '', result: null, upd: Date.now() };
+                        await qTx(['items', 'blobs'], 'readwrite', tx => {
+                            const bs = tx.objectStore('blobs');
+                            rows.forEach(r => bs.put(r));
+                            tx.objectStore('items').put(it);
+                        });
+                        Q.items.push(it);
+                        Q.stage = [];
+                        qRenderStage();
+                        Q.doneMsg = '';
+                        qMsg('✅ Poster #' + no + ' (' + it.count + ' gambar) masuk antrean.' + (Q.paused ? ' Antrean sedang dijeda — tekan Mulai.' : ''));
+                        qRender();
+                        qKick();
+                    } catch (e) {
+                        qMsg('❌ Gagal menyimpan ke antrean: ' + (e && e.message ? e.message : 'penyimpanan penuh?'));
+                    } finally {
+                        $('qBtnAdd').disabled = !Q.db;
+                    }
+                }
+
+                /* ---------- Pemindaian satu poster (Gemini saja) ---------- */
+                async function qGemini(key, model, imgs, sys, userText) {
+                    const parts = [{ text: userText }];
+                    imgs.forEach(d => parts.push({ inline_data: { mime_type: 'image/jpeg', data: d } }));
+                    const body = {
+                        systemInstruction: { parts: [{ text: sys }] },
+                        contents: [{ role: 'user', parts: parts }],
+                        generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
+                    };
+                    const r = await aiFetch(AI_PROVIDERS.gemini.base + '/models/' + encodeURIComponent(model) + ':generateContent', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+                        body: JSON.stringify(body)
+                    });
+                    const txt = await r.text();
+                    if (!r.ok) { const e = aiHttpErr(r.status, txt); e.body = txt; throw e; }
+                    let j = null;
+                    try { j = JSON.parse(txt); } catch (e) {}
+                    const cand = j && j.candidates && j.candidates[0];
+                    const out = cand && cand.content && cand.content.parts
+                        ? cand.content.parts.filter(x => !x.thought).map(x => x.text || '').join('') : '';
+                    if (!out) {
+                        const why = (j && j.promptFeedback && j.promptFeedback.blockReason) || (cand && cand.finishReason) || '';
+                        throw aiErr(0, 'Respons AI kosong' + (why ? ' (' + why + ')' : ''));
+                    }
+                    return out;
+                }
+
+                async function qProcess(it) {
+                    const cfg = aiLoad();
+                    const key = (cfg.keys.gemini || '').trim();
+                    if (!key) throw aiErr(401, 'API Key Gemini belum diisi');
+                    const model = (cfg.models.gemini || '').trim() || AI_PROVIDERS.gemini.models[0];
+                    const files = await qLoadBlobs(it.id);
+                    if (!files.length) throw aiErr(-1, 'Gambar poster tidak ditemukan di penyimpanan browser.');
+                    const use = files.slice(0, MAX_IMG);
+                    const b64 = [];
+                    for (let i = 0; i < use.length; i++) b64.push(await aiPrepImage(use[i], 1600));
+                    const sys = aiBuildSystem(cfg);
+                    const userText = 'Scan poster berikut (' + use.length + ' gambar berurutan) dan balas dalam JSON sesuai aturan.';
+                    const raw = await qGemini(key, model, b64, sys, userText);
+                    const d = aiParse(raw);
+                    const cm = aiMatchCollab(d.akun);
+                    const warns = d.warn.slice();
+                    if (files.length > use.length) warns.push('Hanya ' + use.length + ' gambar pertama yang dipindai (batas Gemini). Cek slide sisanya manual.');
+                    if (cm.miss.length) warns.push('Akun di poster belum ada di Master List collaborator: ' + cm.miss.join(', '));
+                    if (!d.judul || !d.caption) warns.push('Judul atau caption kosong dari AI — isi manual atau scan ulang.');
+                    if (!d.kategori) warns.push('Kategori kosong dari AI — isi manual.');
+                    const kat = d.kategori ? standardizeKategoriAdmin(d.kategori) : '';
+                    return {
+                        judul: d.judul,
+                        kategori: kat,
+                        emoji: (!kat || cachedKategoriEmojis[kat.toLowerCase()]) ? '' : d.emoji,
+                        tags: d.tags.join(', '),
+                        collab: 'Collab Dakwah Sunnah :' + (cm.hit.length ? '\n' + cm.hit.slice(0, 6).join('\n') : ''),
+                        caption: d.caption,
+                        warn: warns,
+                        model: model,
+                        at: Date.now()
+                    };
+                }
+
+                async function qHandleErr(it, e) {
+                    const st = (e && e.status !== undefined) ? e.status : -1;
+                    const msg = (e && e.message) ? e.message : 'Kesalahan tidak dikenal';
+                    const body = (e && e.body) ? e.body : '';
+                    if (st === 401 || st === 403 || st === 404 || (st === 400 && /API key|API_KEY/i.test(msg + body))) {
+                        Q.fatal = '⛔ Antrean berhenti: ' + msg + '\nPeriksa API Key / nama model Gemini di ⚙️ Pengaturan AI (pilih provider Google Gemini), lalu tekan Mulai.';
+                        Q.paused = true;
+                        try { localStorage.setItem(LS_PAUSE, '1'); } catch (x) {}
+                        it.status = 'pending'; it.err = '';
+                    } else if (st === 429) {
+                        const m = body.match(/"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/);
+                        const retry = m ? Math.ceil(parseFloat(m[1])) : 0;
+                        const daily = /PerDay|per day|daily/i.test(body + msg);
+                        Q.limitHits = (Q.limitHits || 0) + 1;
+                        const n = Q.limitHits;
+                        let sec = retry ? retry + 5 : 65;
+                        if (daily || n >= 5) sec = Math.max(sec, 1800);
+                        else if (n >= 3) sec = Math.max(sec, 900);
+                        else if (n === 2) sec = Math.max(sec, 300);
+                        qSetWait(sec, daily ? 'Kuota harian Gemini habis' : 'Limit Gemini tercapai');
+                        it.status = 'waiting'; it.nextAt = Date.now() + sec * 1000; it.err = 'limit Gemini';
+                    } else if (st === 0 || st >= 500) {
+                        if (!(Q.hiddenDuring || document.hidden)) it.attempts = (it.attempts || 0) + 1;
+                        if (it.attempts >= MAX_ATTEMPTS) {
+                            it.status = 'error'; it.err = msg + ' (gagal ' + it.attempts + '×)';
+                        } else {
+                            const sec = Math.min(15 * Math.max(1, it.attempts), 90);
+                            qSetWait(sec, 'Gangguan sementara (' + msg + ')');
+                            it.status = 'waiting'; it.nextAt = Date.now() + sec * 1000; it.err = 'dicoba ulang';
+                        }
+                    } else {
+                        it.status = 'error'; it.err = msg;
+                    }
+                    if (await qExists(it.id)) await qSave(it);
+                }
+
+                async function qRunItem(it) {
+                    Q.cur = it; Q.curStart = Date.now(); Q.hiddenDuring = document.hidden;
+                    it.status = 'processing'; it.err = '';
+                    try {
+                        await qSave(it);
+                        qRender();
+                        const res = await qProcess(it);
+                        if (!(await qExists(it.id))) return;
+                        it.result = res;
+                        it.status = res.warn.length ? 'review' : 'ready';
+                        it.err = ''; it.nextAt = 0; it.attempts = 0;
+                        Q.limitHits = 0;
+                        await qSave(it);
+                    } catch (e) {
+                        try { await qHandleErr(it, e); } catch (x) {}
+                    } finally {
+                        Q.cur = null;
+                        qRender();
+                    }
+                }
+
+                async function qLoop() {
+                    if (Q.running || Q.paused || !Q.db || !logged()) return;
+                    const cfg = aiLoad();
+                    if (!(cfg.keys.gemini || '').trim()) {
+                        Q.fatal = 'API Key Gemini belum diisi. Buka ⚙️ Pengaturan AI, pilih provider Google Gemini, tempel kuncinya, lalu tekan Mulai.';
+                        qRender();
+                        return;
+                    }
+                    if (!(await qLock())) { Q.other = true; qRender(); return; }
+                    Q.other = false; Q.fatal = ''; Q.stop = false; Q.running = true; Q.doneMsg = '';
+                    qWake(true);
+                    let processed = 0;
+                    try {
+                        await qReload();
+                        qRender();
+                        while (!Q.paused && !Q.stop) {
+                            if (!lockMine()) { Q.other = true; break; }
+                            await qReload();
+                            const w = qWaitInfo();
+                            if (w) { await qWait(w.until - Date.now()); continue; }
+                            const it = qNext();
+                            if (!it) break;
+                            while (aiBusy && !Q.paused && !Q.stop) await sleep(1500);
+                            if (Q.paused || Q.stop) break;
+                            await qRunItem(it);
+                            processed++;
+                            if (Q.fatal || Q.paused || Q.stop) break;
+                            if (qNext()) await qWait(delaySec() * 1000);
+                        }
+                    } finally {
+                        Q.running = false; Q.cur = null;
+                        qWake(false);
+                        qUnlock();
+                        if (!Q.paused && !Q.other && !Q.fatal && !Q.stop && processed && !qHasWork()) {
+                            const c = qCount();
+                            Q.doneMsg = '🎉 Antrean selesai: ' + c.ready + ' aman siap kirim, ' + c.review + ' perlu dicek' + (c.error ? ', ' + c.error + ' gagal' : '') + '.';
+                        }
+                        qRender();
+                    }
+                }
+
+                function qKick() {
+                    if (Q.db && !Q.running && !Q.paused && !Q.fatal && logged() && qHasWork()) qLoop();
+                }
+
+                /* ---------- Pengiriman ke GitHub ---------- */
+                async function qBuildZip(it) {
+                    const files = await qLoadBlobs(it.id);
+                    if (!files.length) throw new Error('Gambar poster tidak ditemukan di penyimpanan.');
+                    const r = it.result || {};
+                    const judul = sanitizeForYAML((r.judul || '').trim());
+                    const kategori = sanitizeForYAML(standardizeKategoriAdmin((r.kategori || '').trim()));
+                    const emoji = sanitizeForYAML((r.emoji || '').trim());
+                    const tags = sanitizeForYAML((r.tags || '').trim());
+                    const collaborator = sanitizeForYAML((r.collab || '').trim());
+                    const content = (r.caption || '').trim();
+                    if (!judul || !(r.kategori || '').trim()) throw new Error('Judul/Kategori kosong. Buka Edit untuk melengkapi.');
+                    const slug = toSlug(judul);
+                    if (!it.zipName) {
+                        const n = Q.items.filter(x => x.id !== it.id && x.zipSlug === slug && x.zipName).length + 1;
+                        it.zipSlug = slug;
+                        it.zipName = slug + '-' + String(n).padStart(3, '0') + '.zip';
+                    }
+                    const zip = new JSZip();
+                    files.forEach((f, i) => zip.file((i + 1) + '.jpg', f));
+                    const finalContent = cleanMarkdownText(content);
+                    const finalCollaborator = formatCollaborator(collaborator);
+                    const imagesStr = Array.from({ length: files.length }, (_, i) => (i + 1) + '.jpg').join(', ');
+                    const finalEmoji = emoji || cachedKategoriEmojis[kategori.toLowerCase()] || '📂';
+                    const template = `---
+judul: "${judul}"
+sub_judul: "${finalCollaborator || 'Tulis collaborator di sini'}"
+kategori: "${kategori}"
+kategori_emoji: "${finalEmoji}"
+tags: "${tags || 'tag1, tag2'}"
+images: "${imagesStr}"
+tidakpakepdf: "brosur.pdf"
+---
+${finalContent || 'Tulis isi caption di sini...'}`;
+                    zip.file('poster.md', template);
+                    const blob = await zip.generateAsync({ type: 'blob' });
+                    if (blob.size > 100 * 1024 * 1024) throw new Error('Ukuran ZIP melebihi 100 MB.');
+                    return blob;
+                }
+
+                async function qPost(apiUrl, apiKey, base64, name) {
+                    const fd = new FormData();
+                    fd.append('content_base64', base64);
+                    fd.append('filename', name);
+                    const ctl = new AbortController();
+                    const t = setTimeout(() => ctl.abort(), 180000);
+                    try {
+                        const resp = await fetch(apiUrl, { method: 'POST', headers: { 'X-API-KEY': apiKey }, body: fd, signal: ctl.signal });
+                        const text = await resp.text();
+                        let result;
+                        try { result = JSON.parse(text); } catch (e) { result = { error: text.substring(0, 150) }; }
+                        if (resp.ok && result.success) return true;
+                        throw new Error(result.error || 'Unknown Error');
+                    } catch (e) {
+                        if (e && e.name === 'AbortError') throw new Error('Timeout 180 detik');
+                        throw e;
+                    } finally {
+                        clearTimeout(t);
+                    }
+                }
+
+                async function qSendOne(it, apiUrl, apiKey) {
+                    const blob = await qBuildZip(it);
+                    const b64 = await blobToBase64(blob);
+                    await qSave(it);
+                    await qPost(apiUrl, apiKey, b64, it.zipName);
+                    it.status = 'sent'; it.sentAt = Date.now(); it.err = '';
+                    await qDropBlobs(it.id);
+                    await qSave(it);
+                }
+
+                async function qSendList(list, ask) {
+                    if (Q.sending || !list.length) return;
+                    const apiUrl = $('inpApiUrl').value.trim();
+                    const apiKey = $('inpApiKey').value.trim();
+                    if (!apiUrl || !apiKey) { alert('❌ Harap isi API URL dan Secret Key di bagian konfigurasi!'); return; }
+                    if (typeof JSZip === 'undefined') { qMsg('❌ Library ZIP belum termuat. Periksa koneksi lalu muat ulang halaman.'); return; }
+                    if (ask && !confirm('Kirim ' + list.length + ' poster ke GitHub satu per satu (jeda 3 detik)?')) return;
+                    if (!(await qLock())) { qMsg('🔒 Tab lain sedang aktif memproses antrean. Lakukan pengiriman di tab itu.'); return; }
+                    Q.sending = true;
+                    qRender();
+                    let ok = 0;
+                    let fail = '';
+                    try {
+                        for (let i = 0; i < list.length; i++) {
+                            if (!lockMine()) { fail = 'Tab lain mengambil alih antrean.'; break; }
+                            const it = list[i];
+                            if (!(await qExists(it.id))) continue;
+                            it.status = 'sending'; it.err = '';
+                            await qSave(it);
+                            qRender();
+                            qMsg('📤 Mengirim #' + it.no + ' (' + (ok + 1) + '/' + list.length + ')...');
+                            try {
+                                await qSendOne(it, apiUrl, apiKey);
+                                ok++;
+                            } catch (e) {
+                                it.status = 'ready';
+                                it.err = 'Gagal kirim: ' + (e && e.message ? e.message : 'error');
+                                try { await qSave(it); } catch (x) {}
+                                fail = '#' + it.no + ' — ' + (e && e.message ? e.message : 'error');
+                                break;
+                            }
+                            qRender();
+                            if (i < list.length - 1) await sleep(3000);
+                        }
+                    } finally {
+                        Q.sending = false;
+                        qUnlock();
+                        qRender();
+                    }
+                    qMsg(fail ? '⚠️ Berhenti setelah ' + ok + ' terkirim. Gagal: ' + fail : '✅ ' + ok + ' poster terkirim ke GitHub. Bot akan memprosesnya otomatis.');
+                }
+
+                /* ---------- Editor persetujuan ---------- */
+                function qCloseEditor() {
+                    Q.editUrls.forEach(u => URL.revokeObjectURL(u));
+                    Q.editUrls = [];
+                    Q.editId = null;
+                    const ed = $('qEditor');
+                    ed.style.display = 'none';
+                    ed.innerHTML = '';
+                }
+
+                async function qOpenEditor(id) {
+                    const it = Q.items.find(x => x.id === id);
+                    if (!it || !it.result) return;
+                    qCloseEditor();
+                    Q.editId = id;
+                    const r = it.result;
+                    const ed = $('qEditor');
+                    ed.innerHTML = '<h4>✏️ Cek poster #' + it.no + '</h4><div class="q-imgs" id="qeImgs"><div class="q-hint">Memuat gambar...</div></div>' +
+                        (r.warn && r.warn.length ? '<div class="ai-warn" style="display:block;margin-bottom:10px;"><b>⚠️ Perlu dicek:</b><ul>' + r.warn.map(w => '<li>' + esc(w) + '</li>').join('') + '</ul></div>' : '') +
+                        '<label>Judul</label><input type="text" id="qeJudul" value="' + esc(r.judul) + '">' +
+                        '<label>Kategori</label><input type="text" id="qeKat" list="kategori-list" value="' + esc(r.kategori) + '">' +
+                        '<label>Emoji kategori (kosongkan = otomatis)</label><input type="text" id="qeEmoji" value="' + esc(r.emoji) + '">' +
+                        '<label>Tag (pisahkan koma)</label><input type="text" id="qeTag" value="' + esc(r.tags) + '">' +
+                        '<label>Collaborator</label><textarea id="qeCollab">' + esc(r.collab) + '</textarea>' +
+                        '<label>Isi caption</label><textarea id="qeCap" style="min-height:180px;">' + esc(r.caption) + '</textarea>' +
+                        '<div class="q-row"><button type="button" class="btn-solid" id="qeSave" style="width:auto;flex:1;">💾 Simpan &amp; Setujui</button><button type="button" class="btn-small-gold" id="qeClose">Tutup</button></div>';
+                    ed.style.display = 'block';
+                    ed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    $('qeClose').addEventListener('click', qCloseEditor);
+                    $('qeSave').addEventListener('click', async () => {
+                        const cur = Q.items.find(x => x.id === Q.editId);
+                        if (!cur) { qCloseEditor(); return; }
+                        const judul = $('qeJudul').value.replace(/["“”]/g, "'").replace(/\s+/g, ' ').trim();
+                        const kat = $('qeKat').value.trim();
+                        if (!judul || !kat) { qMsg('❌ Judul dan Kategori tidak boleh kosong.'); return; }
+                        let collab = $('qeCollab').value.replace(/\r\n?/g, '\n').trim();
+                        if (!collab) collab = 'Collab Dakwah Sunnah :';
+                        cur.result.judul = judul;
+                        cur.result.kategori = standardizeKategoriAdmin(kat);
+                        cur.result.emoji = $('qeEmoji').value.trim();
+                        cur.result.tags = $('qeTag').value.trim();
+                        cur.result.collab = collab;
+                        cur.result.caption = $('qeCap').value.replace(/\r\n?/g, '\n').trim();
+                        cur.result.warn = [];
+                        cur.status = 'ready'; cur.err = '';
+                        try { await qSave(cur); } catch (e) { qMsg('❌ Gagal menyimpan: ' + e.message); return; }
+                        qCloseEditor();
+                        qMsg('✅ Poster #' + cur.no + ' disetujui dan siap dikirim.');
+                        qRender();
+                    });
+                    try {
+                        const blobs = await qLoadBlobs(id);
+                        const box = $('qeImgs');
+                        if (Q.editId !== id || !box) return;
+                        box.innerHTML = '';
+                        blobs.forEach((b, i) => {
+                            const u = URL.createObjectURL(b);
+                            Q.editUrls.push(u);
+                            const im = document.createElement('img');
+                            im.src = u; im.alt = 'Slide ' + (i + 1);
+                            box.appendChild(im);
+                        });
+                        if (!blobs.length) box.innerHTML = '<div class="q-hint">Gambar tidak ditemukan.</div>';
+                    } catch (e) {
+                        const box = $('qeImgs');
+                        if (box) box.innerHTML = '<div class="q-hint">Gagal memuat gambar.</div>';
+                    }
+                }
+
+                /* ---------- Aksi tombol ---------- */
+                async function qRescan(it) {
+                    it.status = 'pending'; it.result = null; it.err = ''; it.attempts = 0; it.nextAt = 0;
+                    await qSave(it);
+                    if (Q.editId === it.id) qCloseEditor();
+                    qRender();
+                    if (Q.paused) qMsg('ℹ️ Poster #' + it.no + ' masuk antrean lagi. Antrean sedang dijeda — tekan Mulai.');
+                    else qKick();
+                }
+
+                function qOnListClick(e) {
+                    const btn = e.target.closest('button[data-act]');
+                    if (!btn) return;
+                    const act = btn.getAttribute('data-act');
+                    const sec = btn.getAttribute('data-sec');
+                    if (act === 'toggle') { Q.open[sec] = !Q.open[sec]; qRender(); return; }
+                    if (act === 'more') { Q.limit[sec] += 25; qRender(); return; }
+                    const id = btn.getAttribute('data-id');
+                    const it = Q.items.find(x => x.id === id);
+                    if (!it) return;
+                    if (act === 'edit') qOpenEditor(id);
+                    else if (act === 'send') qSendList([it], false);
+                    else if (act === 'rescan') qRescan(it);
+                    else if (act === 'del') {
+                        if (it.status !== 'sent' && !confirm('Hapus poster #' + it.no + ' dari antrean? Gambar tersimpan ikut terhapus.')) return;
+                        qDelete(id).then(() => {
+                            Q.items = Q.items.filter(x => x.id !== id);
+                            if (Q.editId === id) qCloseEditor();
+                            qRender();
+                        }).catch(err => qMsg('❌ Gagal menghapus: ' + (err && err.message ? err.message : 'error')));
+                    }
+                }
+
+                function qToggleRun() {
+                    if (Q.running && !Q.paused) {
+                        Q.paused = true;
+                        try { localStorage.setItem(LS_PAUSE, '1'); } catch (e) {}
+                        qMsg('⏸ Menjeda setelah poster yang sedang diproses selesai...');
+                    } else {
+                        Q.paused = false; Q.fatal = '';
+                        try { localStorage.removeItem(LS_PAUSE); } catch (e) {}
+                        qMsg('');
+                        if (!qHasWork()) qMsg('ℹ️ Tidak ada poster yang menunggu scan.');
+                        qLoop();
+                    }
+                    qRender();
+                }
+
+                /* ---------- Hook login/logout ---------- */
+                window.qOnLogin = function () { qKick(); };
+                window.qOnLogout = function () {
+                    Q.stop = true;
+                    qCloseEditor();
+                    if (!Q.running && !Q.sending) qUnlock();
+                };
+
+                /* ---------- Pasang event ---------- */
+                $('qFile').addEventListener('change', e => {
+                    const files = Array.from(e.target.files || []);
+                    e.target.value = '';
+                    if (files.length) qAddFiles(files);
+                });
+                $('qStage').addEventListener('click', e => {
+                    const b = e.target.closest('button[data-st]');
+                    if (!b) return;
+                    const i = parseInt(b.getAttribute('data-i'), 10);
+                    const k = b.getAttribute('data-st');
+                    if (k === 'up' && i > 0) { const t = Q.stage[i]; Q.stage[i] = Q.stage[i - 1]; Q.stage[i - 1] = t; }
+                    else if (k === 'dn' && i < Q.stage.length - 1) { const t = Q.stage[i]; Q.stage[i] = Q.stage[i + 1]; Q.stage[i + 1] = t; }
+                    else if (k === 'rm') Q.stage.splice(i, 1);
+                    qRenderStage();
+                });
+                $('qBtnFromUpload').addEventListener('click', () => {
+                    if (!selectedFiles.length) { qMsg('ℹ️ Bagian Upload & Urutkan Gambar masih kosong.'); return; }
+                    qAddFiles(selectedFiles.slice());
+                });
+                $('qBtnClearStage').addEventListener('click', () => { Q.stage = []; qRenderStage(); });
+                $('qBtnAdd').addEventListener('click', qAddToQueue);
+                $('qBtnRun').addEventListener('click', qToggleRun);
+                $('qDelay').addEventListener('change', () => { try { localStorage.setItem(LS_DELAY, $('qDelay').value); } catch (e) {} });
+                $('qLists').addEventListener('click', qOnListClick);
+                $('qBtnRetryErr').addEventListener('click', async () => {
+                    const errs = Q.items.filter(i => i.status === 'error');
+                    for (const it of errs) { it.status = 'pending'; it.err = ''; it.attempts = 0; it.nextAt = 0; await qSave(it); }
+                    qRender();
+                    if (errs.length) { qMsg('🔁 ' + errs.length + ' poster gagal dimasukkan ke antrean lagi.'); qKick(); }
+                });
+                $('qBtnSendAll').addEventListener('click', () => qSendList(Q.items.filter(i => i.status === 'ready'), true));
+                $('qBtnClearSent').addEventListener('click', async () => {
+                    const sent = Q.items.filter(i => i.status === 'sent');
+                    if (!sent.length) return;
+                    if (!confirm('Hapus ' + sent.length + ' catatan poster terkirim dari daftar?')) return;
+                    for (const it of sent) { try { await qDelete(it.id); } catch (e) {} }
+                    Q.items = Q.items.filter(i => i.status !== 'sent');
+                    qRender();
+                });
+                const goBtn = $('qBannerOpen');
+                if (goBtn) goBtn.addEventListener('click', () => {
+                    showSection('add');
+                    $('qCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) { Q.hiddenDuring = true; return; }
+                    if (Q.running || Q.sending) qWake(true);
+                    qReload().then(() => { qRender(); qKick(); });
+                });
+                window.addEventListener('pageshow', () => { qKick(); });
+                window.addEventListener('pagehide', () => { if (lockMine()) { try { localStorage.removeItem(LS_LOCK); } catch (e) {} } });
+                window.addEventListener('beforeunload', e => {
+                    if ((Q.running && qHasWork()) || Q.sending) { e.preventDefault(); e.returnValue = ''; return ''; }
+                });
+
+                /* ---------- Mulai ---------- */
+                (async function boot() {
+                    Q.paused = localStorage.getItem(LS_PAUSE) === '1';
+                    qRenderStage();
+                    try {
+                        Q.db = await qOpen();
+                        Q.db.onversionchange = () => { try { Q.db.close(); } catch (e) {} };
+                    } catch (e) {
+                        Q.dbErr = e && e.message ? e.message : 'error';
+                        qRender();
+                        return;
+                    }
+                    await qReload();
+                    const otherLive = lockFresh(lockRead()) && !lockMine();
+                    if (!otherLive) {
+                        for (const it of Q.items) {
+                            if (it.status === 'sending') {
+                                it.status = 'review';
+                                it.result = it.result || { judul: '', kategori: '', emoji: '', tags: '', collab: 'Collab Dakwah Sunnah :', caption: '', warn: [] };
+                                it.result.warn = (it.result.warn || []).concat(['Pengiriman sebelumnya terputus. Cek dulu di GitHub apakah poster ini sudah masuk sebelum mengirim ulang.']);
+                                try { await qSave(it); } catch (e) {}
+                            }
+                        }
+                    }
+                    const c = qCount();
+                    if (c.queue) Q.notice = '🔄 Antrean dilanjutkan: ' + c.done + ' selesai, ' + c.queue + ' belum.' + (c.error ? ' (' + c.error + ' gagal)' : '');
+                    qPersist();
+                    qRender();
+                    qKick();
+                    let n = 0;
+                    setInterval(async () => {
+                        n++;
+                        if (!Q.running && !Q.sending) {
+                            await qReload();
+                            const sg = Q.items.map(i => i.id + i.status + (i.upd || 0)).join('|');
+                            if (sg !== Q.sig) { Q.sig = sg; qRender(); }
+                            qKick();
+                        }
+                        if (Q.notice && n > 6 && Q.running) Q.notice = '';
+                        qTick();
+                    }, 5000);
+                    setInterval(qTick, 1000);
+                })();
             })();
         });
     </script>
