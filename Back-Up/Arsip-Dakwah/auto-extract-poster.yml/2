@@ -1,0 +1,68 @@
+name: Auto Extract Poster ZIP
+
+on:
+  push:
+    paths:
+      - '_uploads/*.zip'
+    branches:
+      - main
+
+# Satu proses pada satu waktu. Run yang menunggu cukup satu saja, karena
+# setiap run memproses SEMUA zip yang ada di _uploads (tidak ada yang terlewat).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  extract-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyYAML
+        run: python -m pip install --disable-pip-version-check pyyaml
+
+      # TANPA force-push: bila saat bot bekerja ada zip baru yang masuk,
+      # push ditolak lalu bot mengambil kondisi terbaru dan mengulang proses,
+      # sehingga tidak ada poster yang terhapus/hilang.
+      - name: Extract, commit and push (aman dari tabrakan)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5 6 7 8; do
+            echo "=== Putaran $attempt ==="
+            python .github/scripts/extract_zip.py
+            git add -A .
+            if git diff --cached --quiet; then
+              echo "Tidak ada perubahan untuk di-commit."
+            else
+              git commit -m "🤖 Auto-extract poster & Update Manifest"
+              if ! git push origin HEAD:main; then
+                echo "Push ditolak (ada commit baru masuk). Ambil kondisi terbaru lalu ulangi."
+                git fetch origin main
+                git reset --hard origin/main
+                sleep $((attempt * 2))
+                continue
+              fi
+            fi
+            git fetch origin main
+            git reset --hard origin/main
+            if ls _uploads/*.zip >/dev/null 2>&1; then
+              echo "Masih ada zip di _uploads, proses lagi."
+              continue
+            fi
+            break
+          done
