@@ -1,16 +1,15 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.6.5
+Arsip Dakwah Manhaj Salaf - Update v2.6.6
+
+v2.6.6:
+1. RIWAYAT KONTEN LEBIH CEPAT: riwayat unggahan tersimpan di perangkat dan langsung dipakai saat tombol ditekan (tanpa menunggu jaringan). Pemeriksaan GitHub berjalan di latar belakang, hanya mengunduh versi manifest yang baru, dengan 6 unduhan paralel, percobaan ulang otomatis, dan jeda 10 menit antar pemeriksaan agar hemat kuota.
+2. URUTAN TIDAK ACAK LAGI: waktu unggah kini disimpan lengkap (hanya untuk pengurutan, jam tidak ditampilkan). Poster yang diunggah dalam satu hari diurutkan dari yang paling baru, dengan arah urutan manifest (baru di akhir / baru di awal) dideteksi otomatis. Bagian "Lebih lama" ikut memakai arah yang sama. Jangkauan riwayat diperluas dari 12 ke 30 versi.
+3. Riwayat unggahan dimuat diam-diam di latar belakang setelah arsip terbuka, sehingga hasil siap saat dibutuhkan.
 
 v2.6.5:
-1. PERBAIKAN RIWAYAT TERBARU: manifest.json ternyata belum memuat tanggal unggah, sehingga urutan hanya mengikuti isi manifest (konten lama bisa muncul di atas). Kini tanggal unggah dibaca dari riwayat perubahan manifest.json di GitHub (kapan setiap poster pertama kali muncul), lalu disimpan di perangkat agar hemat kuota. Konten baru otomatis tampil paling atas dengan pembatas hari.
+1. PERBAIKAN RIWAYAT TERBARU: tanggal unggah dibaca dari riwayat perubahan manifest.json di GitHub (kapan setiap poster pertama kali muncul), lalu disimpan di perangkat agar hemat kuota. Konten baru otomatis tampil paling atas dengan pembatas hari.
 2. Tanggal eksplisit di manifest (kolom tanggal/date/dst.) tetap dipakai lebih dulu bila ada. Poster yang lebih tua dari riwayat yang terbaca dikelompokkan di bagian "Lebih lama".
 3. Banner menampilkan status pengambilan riwayat (memuat / berhasil / gagal beserta alasannya).
-
-v2.6.4:
-1. TOMBOL BARU "Riwayat Konten Terbaru" di sidebar > Akses Cepat. Ketika ditekan: kembali ke beranda publik (kategori Semua) dan seluruh poster tampil berurutan dari yang paling baru diunggah, supaya poster, caption, dan tagar bisa dicek dengan scroll tanpa mengetik di pencarian.
-2. Setiap hari upload diberi garis pembatas + judul hari dan tanggal (contoh: Rabu, 18 November 2026), tanpa jam demi privasi. Penanda "Hari ini" / "Kemarin" dan jumlah konten per hari ikut tampil.
-3. Tanggal dibaca dari manifest.json (kolom tanggal/date/created_at/uploaded_at dst.) atau dari pola tanggal pada nama folder. Jika belum ada tanggal sama sekali, urutan memakai data paling akhir di manifest sebagai yang terbaru.
-4. Menekan mode Disimpan / PDF Mode / Semua atau kartu Semua mengembalikan urutan biasa.
 
 -->
 
@@ -1211,7 +1210,7 @@ v2.6.4:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.5</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.6</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1397,7 +1396,7 @@ v2.6.4:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.6.5';
+        const APP_VERSION = 'v2.6.6';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* v2.6.2: animasi jam pasir mengikuti detik (0-59), terbalik tiap menit */
         let _hgPrev = -1;
@@ -1909,7 +1908,7 @@ v2.6.4:
             const m = /(20\d{2})[-_.]?(0[1-9]|1[0-2])[-_.]?(0[1-9]|[12]\d|3[01])(?!\d)/.exec(String(p.path || ''));
             if (m) return tglBuat(+m[1], +m[2], +m[3]);
             const h = riwayatGit.map[String(p.path || '')];
-            return h ? parseTanggalUpload(h) : null;
+            return (h && h.t) ? new Date(h.t) : null;
         }
         function kunciHari(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
         function labelHari(d) { return HARI_ID[d.getDay()] + ', ' + d.getDate() + ' ' + BULAN_MASEHI_ID[d.getMonth()] + ' ' + d.getFullYear(); }
@@ -1922,8 +1921,10 @@ v2.6.4:
         function susunUrutanTerbaru() {
             if (urutTerbaruCache && urutTerbaruCache.n === rawManifestPosters.length) return urutTerbaruCache;
             const items = rawManifestPosters.map(function(p, i) {
-                return { id: String(p.path).replace(/\//g, '-'), d: tanggalPoster(p), i: i };
+                const h = riwayatGit.map[String(p.path || '')];
+                return { id: String(p.path).replace(/\//g, '-'), d: tanggalPoster(p), i: i, s: (h && typeof h.s === 'number') ? h.s : null };
             });
+            const arah = riwayatGit.dir === -1 ? -1 : 1;
             const adaTanggal = items.some(function(x) { return x.d; });
             items.sort(function(a, b) {
                 if (adaTanggal) {
@@ -1934,9 +1935,10 @@ v2.6.4:
                         const kb = new Date(b.d.getFullYear(), b.d.getMonth(), b.d.getDate()).getTime();
                         if (ka !== kb) return kb - ka;
                         if (a.d.getTime() !== b.d.getTime()) return b.d.getTime() - a.d.getTime();
+                        if (a.s !== null && b.s !== null && a.s !== b.s) return b.s - a.s;
                     }
                 }
-                return b.i - a.i;
+                return arah === 1 ? (b.i - a.i) : (a.i - b.i);
             });
             urutTerbaruCache = { n: rawManifestPosters.length, items: items, adaTanggal: adaTanggal };
             return urutTerbaruCache;
@@ -2004,9 +2006,10 @@ v2.6.4:
         }
         /* v2.6.5: tanggal unggah dari riwayat perubahan manifest.json di GitHub (kapan tiap poster pertama kali muncul) */
         const RIWAYAT_REPO = 'Muhram07/Salinan-Eksperimen-Arsip-Dakwah';
-        const RIWAYAT_KEY = 'arsipRiwayatUnggahV1';
-        const RIWAYAT_MAKS_VERSI = 12;
-        const riwayatGit = { map: {}, status: 'idle', note: '' };
+        const RIWAYAT_KEY = 'arsipRiwayatUnggahV2';
+        const RIWAYAT_MAKS_VERSI = 30;
+        const RIWAYAT_JEDA_MS = 10 * 60 * 1000;
+        const riwayatGit = { map: {}, status: 'idle', note: '', dir: 1, sha: '', chk: 0, tugas: null };
 
         function teksBannerTerbaru() {
             const adaTgl = susunUrutanTerbaru().adaTanggal;
@@ -2034,54 +2037,108 @@ v2.6.4:
             const p2 = function(n) { return (n < 10 ? '0' : '') + n; };
             return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
         }
-        async function muatRiwayatGit() {
-            if (riwayatGit.status === 'loading') return false;
+        /* v2.6.6: cache riwayat dibaca instan dari perangkat */
+        function bacaCacheRiwayat() {
             let cache = null;
             try { cache = JSON.parse(localStorage.getItem(RIWAYAT_KEY) || 'null'); } catch (e) { cache = null; }
-            if (cache && cache.map && typeof cache.map === 'object') riwayatGit.map = Object.assign({}, cache.map);
-            riwayatGit.status = 'loading';
-            riwayatGit.note = '';
-            urutTerbaruCache = null;
-            perbaruiBannerTerbaru();
-            try {
-                const commits = await fetchJsonWaktu('https://api.github.com/repos/' + RIWAYAT_REPO + '/commits?path=manifest.json&per_page=30', 15000);
-                if (!Array.isArray(commits) || !commits.length) throw new Error('riwayat kosong');
-                if (cache && cache.sha === commits[0].sha) { riwayatGit.status = 'ok'; return true; }
-                let n = Math.min(commits.length, RIWAYAT_MAKS_VERSI);
-                if (cache && cache.sha) {
-                    const k = commits.findIndex(function(c) { return c.sha === cache.sha; });
-                    if (k >= 0) n = Math.min(k + 1, RIWAYAT_MAKS_VERSI);
-                }
-                if (n < 2) { riwayatGit.status = 'ok'; return true; }
-                const versi = commits.slice(0, n);
-                const setPath = new Array(n);
-                let idx = 0;
-                async function kerja() {
-                    while (idx < n) {
-                        const i = idx++;
-                        const j = await fetchJsonWaktu('https://raw.githubusercontent.com/' + RIWAYAT_REPO + '/' + versi[i].sha + '/manifest.json', 20000);
-                        const arr = (j && j.posters) ? j.posters : [];
-                        const s = new Set();
-                        arr.forEach(function(p) { if (p && p.path) s.add(String(p.path)); });
-                        setPath[i] = s;
-                    }
-                }
-                await Promise.all([kerja(), kerja(), kerja()]);
-                for (let i = n - 2; i >= 0; i--) {
-                    const tgl = hariLokalDariIso((versi[i].commit && versi[i].commit.committer && versi[i].commit.committer.date) || (versi[i].commit && versi[i].commit.author && versi[i].commit.author.date));
-                    if (!tgl) continue;
-                    setPath[i].forEach(function(pth) {
-                        if (!setPath[i + 1].has(pth) && !riwayatGit.map[pth]) riwayatGit.map[pth] = tgl;
-                    });
-                }
-                try { localStorage.setItem(RIWAYAT_KEY, JSON.stringify({ sha: commits[0].sha, map: riwayatGit.map, ts: Date.now() })); } catch (e) {}
-                riwayatGit.status = 'ok';
+            if (cache && cache.map && typeof cache.map === 'object') {
+                riwayatGit.map = Object.assign({}, cache.map);
+                riwayatGit.sha = cache.sha || '';
+                riwayatGit.chk = cache.chk || 0;
+                riwayatGit.dir = cache.dir === -1 ? -1 : 1;
                 return true;
-            } catch (e) {
-                riwayatGit.status = 'gagal';
-                riwayatGit.note = (e && e.name === 'AbortError') ? 'waktu habis' : String((e && e.message) || 'tidak diketahui').slice(0, 60);
-                return false;
             }
+            return false;
+        }
+        function simpanCacheRiwayat() {
+            try { localStorage.setItem(RIWAYAT_KEY, JSON.stringify({ sha: riwayatGit.sha, map: riwayatGit.map, dir: riwayatGit.dir, chk: riwayatGit.chk })); } catch (e) {}
+        }
+        async function ambilManifestVersi(sha) {
+            let err = null;
+            for (let t = 0; t < 2; t++) {
+                try { return await fetchJsonWaktu('https://raw.githubusercontent.com/' + RIWAYAT_REPO + '/' + sha + '/manifest.json', 20000); }
+                catch (e) { err = e; }
+            }
+            throw err;
+        }
+        /* mengembalikan true bila peta riwayat berubah */
+        async function muatRiwayatGit(paksa) {
+            if (riwayatGit.tugas) return riwayatGit.tugas;
+            riwayatGit.tugas = (async function() {
+                const sebelum = JSON.stringify(riwayatGit.map) + '|' + riwayatGit.dir;
+                if (riwayatGit.status === 'idle') bacaCacheRiwayat();
+                if (!paksa && riwayatGit.sha && (Date.now() - riwayatGit.chk) < RIWAYAT_JEDA_MS) { riwayatGit.status = 'ok'; return false; }
+                riwayatGit.status = 'loading';
+                riwayatGit.note = '';
+                perbaruiBannerTerbaru();
+                try {
+                    const commits = await fetchJsonWaktu('https://api.github.com/repos/' + RIWAYAT_REPO + '/commits?path=manifest.json&per_page=' + RIWAYAT_MAKS_VERSI, 15000);
+                    if (!Array.isArray(commits) || !commits.length) throw new Error('riwayat kosong');
+                    if (riwayatGit.sha && riwayatGit.sha === commits[0].sha) {
+                        riwayatGit.chk = Date.now(); simpanCacheRiwayat(); riwayatGit.status = 'ok'; return false;
+                    }
+                    let n = Math.min(commits.length, RIWAYAT_MAKS_VERSI);
+                    if (riwayatGit.sha) {
+                        const k = commits.findIndex(function(c) { return c.sha === riwayatGit.sha; });
+                        if (k >= 0) n = k + 1;
+                    }
+                    if (n < 2) { riwayatGit.sha = commits[0].sha; riwayatGit.chk = Date.now(); simpanCacheRiwayat(); riwayatGit.status = 'ok'; return false; }
+                    const versi = commits.slice(0, n);
+                    const urut = new Array(n);
+                    const setPath = new Array(n);
+                    let idx = 0;
+                    async function kerja() {
+                        while (idx < n) {
+                            const i = idx++;
+                            const j = await ambilManifestVersi(versi[i].sha);
+                            const arr = (j && j.posters) ? j.posters : [];
+                            const daftar = [];
+                            const s = new Set();
+                            arr.forEach(function(p) { if (p && p.path) { const k = String(p.path); daftar.push(k); s.add(k); } });
+                            urut[i] = daftar;
+                            setPath[i] = s;
+                        }
+                    }
+                    const pekerja = [];
+                    for (let w = 0; w < Math.min(6, n); w++) pekerja.push(kerja());
+                    await Promise.all(pekerja);
+                    const peta = Object.assign({}, riwayatGit.map);
+                    let dir = riwayatGit.dir;
+                    for (let i = n - 2; i >= 0; i--) {
+                        const cm = versi[i].commit || {};
+                        const iso = (cm.committer && cm.committer.date) || (cm.author && cm.author.date);
+                        const waktu = iso ? new Date(iso).getTime() : NaN;
+                        if (isNaN(waktu)) continue;
+                        const baru = [], lama = [];
+                        urut[i].forEach(function(pth, pos) { (setPath[i + 1].has(pth) ? lama : baru).push(pos); });
+                        if (baru.length && lama.length) {
+                            const rata = function(a) { return a.reduce(function(x, y) { return x + y; }, 0) / a.length; };
+                            dir = rata(baru) < rata(lama) ? -1 : 1;
+                        }
+                        urut[i].forEach(function(pth, pos) {
+                            if (setPath[i + 1].has(pth) || peta[pth]) return;
+                            peta[pth] = { t: waktu, s: dir === 1 ? pos : -pos };
+                        });
+                    }
+                    riwayatGit.map = peta;
+                    riwayatGit.dir = dir;
+                    riwayatGit.sha = commits[0].sha;
+                    riwayatGit.chk = Date.now();
+                    simpanCacheRiwayat();
+                    riwayatGit.status = 'ok';
+                    return (JSON.stringify(riwayatGit.map) + '|' + riwayatGit.dir) !== sebelum;
+                } catch (e) {
+                    riwayatGit.status = 'gagal';
+                    riwayatGit.note = (e && e.name === 'AbortError') ? 'waktu habis' : String((e && e.message) || 'tidak diketahui').slice(0, 60);
+                    return false;
+                }
+            })();
+            try { return await riwayatGit.tugas; } finally { riwayatGit.tugas = null; }
+        }
+        /* pemuatan diam-diam di latar belakang setelah arsip terbuka */
+        function prefetchRiwayat() {
+            const jalan = function() { muatRiwayatGit(false).then(function(berubah) { if (berubah) urutTerbaruCache = null; }).catch(function() {}); };
+            if ('requestIdleCallback' in window) requestIdleCallback(jalan, { timeout: 4000 }); else setTimeout(jalan, 1500);
         }
         async function tampilkanTerbaru() {
             closeSidebar();
@@ -2089,14 +2146,20 @@ v2.6.4:
             document.querySelectorAll('.card-kategori').forEach(function(el) { el.classList.remove('active'); });
             document.querySelectorAll('.card-kategori-all').forEach(function(el) { el.classList.add('active'); });
             syncBulanState();
+            if (riwayatGit.status === 'idle') bacaCacheRiwayat();
             urutTerbaru = true;
             urutTerbaruCache = null;
-            switchBerandaMode('all', true);
-            await muatRiwayatGit();
-            if (!urutTerbaru) return;
-            urutTerbaruCache = null;
             urutTerapkan = false;
-            filterDisplayPosters();
+            switchBerandaMode('all', true);
+            const berubah = await muatRiwayatGit(false);
+            if (!urutTerbaru) return;
+            if (berubah) {
+                urutTerbaruCache = null;
+                urutTerapkan = false;
+                filterDisplayPosters();
+            } else {
+                perbaruiBannerTerbaru();
+            }
         }
 
         /* FUNGSI SINKRONISASI FILTER */
@@ -2224,6 +2287,7 @@ v2.6.4:
 
             emojiMapGlobal = manifestData.kategori_emoji || {};
             rawManifestPosters = manifestData.posters || [];
+            setTimeout(prefetchRiwayat, 1500);
 
             if(rawManifestPosters.length > 0) {
                 const totalItems = rawManifestPosters.length;
