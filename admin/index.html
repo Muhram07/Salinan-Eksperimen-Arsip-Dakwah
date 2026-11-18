@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Arsip Dakwah - Admin Panel | v.1.0.2
+  Arsip Dakwah - Admin Panel | v.1.0.3
   Riwayat perbaikan (2 versi terbaru):
+  v.1.0.3 - Antrean anti-limit: rotasi otomatis model Gemini (daftar model diperbarui otomatis) + key cadangan + provider cadangan, tanpa menunggu saat satu model habis; scan gagal/timeout otomatis pindah model & dicoba ulang di belakang layar; tombol "Coba sekarang"; input dibagi jelas Cara 1 (Antrean Otomatis, paling atas) / Cara 2 (Scan AI satu poster) / Cara 3 (Manual).
   v.1.0.2 - Antrean Scan Otomatis (khusus Gemini): urutan slide manual, jeda & tunggu limit otomatis, simpan gambar di IndexedDB, lanjut otomatis setelah refresh/tab baru, daftar persetujuan, kirim semua yang aman.
-  v.1.0.1 - Scan Poster AI (Gemini/Groq/OpenRouter/Grok/Kustom): isi otomatis judul, kategori, tag, caption, collaborator + lencana versi.
 -->
 <html lang="id">
 <head> 
@@ -272,6 +272,18 @@
         .q-editor .q-imgs img{width:100%;max-width:420px;max-height:60vh;object-fit:contain;border-radius:10px;border:1px solid #555;background:#111;}
         .q-banner{display:none;margin-bottom:20px;padding:12px 14px;border-radius:18px;border:1px solid rgba(212,175,55,0.5);background:rgba(212,175,55,0.08);color:#f0d77a;font-size:13px;line-height:1.5;text-align:center;}
         .q-banner button{margin-top:8px;}
+
+        /* ===== v.1.0.3 : PEMBAGI CARA INPUT + ANTI-LIMIT ===== */
+        .cara-head{display:flex;align-items:center;gap:12px;margin:28px 0 14px;padding:12px 14px;border-radius:16px;border:1px solid rgba(212,175,55,0.6);background:linear-gradient(135deg,rgba(212,175,55,0.22),rgba(212,175,55,0.05));}
+        .cara-head.first{margin-top:6px;}
+        .cara-no{flex:0 0 auto;background:linear-gradient(135deg,#D4AF37,#E6B800);color:#111;font-weight:bold;font-size:13px;padding:7px 10px;border-radius:12px;letter-spacing:.5px;text-align:center;line-height:1.2;}
+        .cara-head b{display:block;color:#D4AF37;font-size:15px;line-height:1.3;}
+        .cara-head small{display:block;color:#bbb;font-size:12px;line-height:1.4;margin-top:2px;}
+        .q-set{background:rgba(255,255,255,0.04);border:1px solid #555;border-radius:14px;padding:10px 12px;margin-bottom:12px;}
+        .q-set summary{cursor:pointer;color:#D4AF37;font-weight:bold;font-size:14px;}
+        .q-set label{display:block;margin-top:10px;}
+        .q-set textarea{min-height:70px;font-size:13px;padding:10px 12px;margin:6px 0 8px;}
+        .q-pool{font-size:12px;color:#cfc28a;line-height:1.6;white-space:pre-line;word-break:break-word;margin-top:6px;}
     </style>
 </head>
 <body>
@@ -315,6 +327,69 @@
                 <label>🔑 API Secret Key</label>
                 <input type="text" id="inpApiKey" placeholder="kuncirahasia123" style="font-size:13px;">
             </div>
+
+            <div class="cara-head first"><span class="cara-no">CARA 1</span><div><b>Antrean Otomatis — disarankan</b><small>Banyak poster sekaligus · AI jalan di belakang layar · hasil masuk daftar persetujuan lalu kirim ke GitHub</small></div></div>
+
+            <div class="q-card" id="qCard">
+                <h3>📥 Antrean Scan Otomatis</h3>
+                <div class="q-sub">Tambah poster per postingan (urutan slide Anda tentukan sendiri) → diproses satu per satu di belakang layar dengan jeda. Jika satu model Gemini kena limit/gagal, antrean langsung pindah ke model lain (atau key cadangan) tanpa menunggu. Hasil masuk daftar persetujuan untuk Anda cek sebelum dikirim ke GitHub.</div>
+
+                <div class="q-notice" id="qNotice"></div>
+                <div class="q-fatal" id="qFatal"></div>
+
+                <div class="q-box">
+                    <label>Langkah 1 — Pilih gambar satu postingan (poster tunggal atau carousel)</label>
+                    <input type="file" id="qFile" multiple accept="image/*">
+                    <div class="q-hint">Pilih lagi untuk menambah slide. Atur urutan dengan ▲ ▼ — urutan di sini = urutan slide 1.jpg, 2.jpg, ... Poster tunggal cukup 1 gambar.</div>
+                    <div class="q-stage" id="qStage"></div>
+                    <div class="q-row">
+                        <button type="button" class="btn-small-gold" id="qBtnFromUpload">🖼️ Ambil dari bagian Upload</button>
+                        <button type="button" class="btn-small-gold" id="qBtnClearStage" style="background:rgba(255,255,255,0.05);color:#aaa;border-color:#555;">🗑️ Kosongkan pilihan</button>
+                    </div>
+                    <button type="button" class="btn-solid" id="qBtnAdd" style="font-size:15px;padding:12px;">➕ TAMBAH KE ANTREAN</button>
+                </div>
+
+                <div class="q-box">
+                    <div class="q-row" style="margin-bottom:6px;">
+                        <label style="margin:0;">⏱️ Jeda antar poster</label>
+                        <select id="qDelay">
+                            <option value="5">5 detik</option>
+                            <option value="8">8 detik</option>
+                            <option value="15">15 detik</option>
+                            <option value="30">30 detik</option>
+                        </select>
+                    </div>
+                    <div class="q-status" id="qStatus"></div>
+                    <div class="q-count" id="qCount"></div>
+                    <div class="q-row">
+                        <button type="button" class="btn-small-gold" id="qBtnRun">▶️ Mulai antrean</button>
+                        <button type="button" class="btn-small-gold" id="qBtnSkipWait">⚡ Coba sekarang (lewati tunggu)</button>
+                        <button type="button" class="btn-small-gold" id="qBtnRetryErr">🔁 Coba lagi yang gagal</button>
+                        <button type="button" class="btn-small-gold" id="qBtnSendAll">🚀 Kirim semua yang aman</button>
+                        <button type="button" class="btn-small-gold" id="qBtnClearSent" style="background:rgba(255,255,255,0.05);color:#aaa;border-color:#555;">🧹 Bersihkan terkirim</button>
+                    </div>
+                    <div class="q-hint">Biarkan halaman admin tetap terbuka (layar akan ditahan agar tidak mati). Jika Chrome tertutup/macet, buka lagi alamat panel yang sama — antrean lanjut otomatis tanpa memilih ulang file.</div>
+                    <div class="q-status" id="qMsg" style="color:#f0d77a;"></div>
+                </div>
+
+                <details class="q-set" id="qSettings">
+                    <summary>⚙️ Anti-limit &amp; cadangan kuota</summary>
+                    <label class="ai-check"><input type="checkbox" id="qRotate"> Rotasi model Gemini otomatis saat limit/gagal (disarankan)</label>
+                    <div class="q-hint">Tiap model Gemini punya kuota harian sendiri. Bila satu model habis, antrean langsung pindah ke model berikutnya — ini pengganti "obrolan baru" di aplikasi Gemini. Daftar model diambil otomatis dari Google (mengikuti versi terbaru), jadi kolom Model di ⚙️ Pengaturan AI sebaiknya dikosongkan.</div>
+                    <label>API Key Gemini cadangan (satu per baris, opsional)</label>
+                    <textarea id="qKeys" autocomplete="off" spellcheck="false" placeholder="AIza... (key dari project Google yang berbeda)"></textarea>
+                    <div class="q-hint">Kuota dihitung per PROJECT Google, bukan per key. Buat key cadangan di project BARU (aistudio.google.com/apikey → Create API key → project baru); dua key dari project yang sama tidak menambah kuota. Key utama tetap di ⚙️ Pengaturan AI. Provider lain (Groq/OpenRouter/dll) ikut jadi cadangan terakhir bila kuncinya diisi &amp; "Cadangan otomatis" dicentang.</div>
+                    <div class="q-row">
+                        <button type="button" class="btn-small-gold" id="qBtnModels">🔄 Perbarui daftar model</button>
+                    </div>
+                    <div class="q-pool" id="qPoolLine"></div>
+                </details>
+
+                <div class="q-editor" id="qEditor"></div>
+                <div id="qLists"></div>
+            </div>
+
+            <div class="cara-head"><span class="cara-no">CARA 2</span><div><b>Scan AI Satu Poster</b><small>Scan 1 postingan, hasilnya mengisi form Cara 3 di bawah → cek &amp; edit → kirim manual</small></div></div>
 
             <div class="ai-card" id="aiCard">
                 <h3>🤖 Scan Poster dengan AI</h3>
@@ -365,50 +440,7 @@
                 <div class="ai-warn" id="aiWarn"></div>
             </div>
 
-            <div class="q-card" id="qCard">
-                <h3>📥 Antrean Scan Otomatis (Gemini)</h3>
-                <div class="q-sub">Tambah poster per postingan (urutan slide Anda tentukan sendiri) → diproses satu per satu di belakang layar dengan jeda. Hanya memakai Google Gemini, tanpa pindah AI. Hasil masuk daftar persetujuan untuk Anda cek sebelum dikirim ke GitHub.</div>
-
-                <div class="q-notice" id="qNotice"></div>
-                <div class="q-fatal" id="qFatal"></div>
-
-                <div class="q-box">
-                    <label>1) Pilih gambar satu postingan (poster tunggal atau carousel)</label>
-                    <input type="file" id="qFile" multiple accept="image/*">
-                    <div class="q-hint">Pilih lagi untuk menambah slide. Atur urutan dengan ▲ ▼ — urutan di sini = urutan slide 1.jpg, 2.jpg, ... Poster tunggal cukup 1 gambar.</div>
-                    <div class="q-stage" id="qStage"></div>
-                    <div class="q-row">
-                        <button type="button" class="btn-small-gold" id="qBtnFromUpload">🖼️ Ambil dari bagian Upload</button>
-                        <button type="button" class="btn-small-gold" id="qBtnClearStage" style="background:rgba(255,255,255,0.05);color:#aaa;border-color:#555;">🗑️ Kosongkan pilihan</button>
-                    </div>
-                    <button type="button" class="btn-solid" id="qBtnAdd" style="font-size:15px;padding:12px;">➕ TAMBAH KE ANTREAN</button>
-                </div>
-
-                <div class="q-box">
-                    <div class="q-row" style="margin-bottom:6px;">
-                        <label style="margin:0;">⏱️ Jeda antar poster</label>
-                        <select id="qDelay">
-                            <option value="5">5 detik</option>
-                            <option value="8">8 detik</option>
-                            <option value="15">15 detik</option>
-                            <option value="30">30 detik</option>
-                        </select>
-                    </div>
-                    <div class="q-status" id="qStatus"></div>
-                    <div class="q-count" id="qCount"></div>
-                    <div class="q-row">
-                        <button type="button" class="btn-small-gold" id="qBtnRun">▶️ Mulai antrean</button>
-                        <button type="button" class="btn-small-gold" id="qBtnRetryErr">🔁 Coba lagi yang gagal</button>
-                        <button type="button" class="btn-small-gold" id="qBtnSendAll">🚀 Kirim semua yang aman</button>
-                        <button type="button" class="btn-small-gold" id="qBtnClearSent" style="background:rgba(255,255,255,0.05);color:#aaa;border-color:#555;">🧹 Bersihkan terkirim</button>
-                    </div>
-                    <div class="q-hint">Biarkan halaman admin tetap terbuka (layar akan ditahan agar tidak mati). Jika Chrome tertutup/macet, buka lagi alamat panel yang sama — antrean lanjut otomatis tanpa memilih ulang file.</div>
-                    <div class="q-status" id="qMsg" style="color:#f0d77a;"></div>
-                </div>
-
-                <div class="q-editor" id="qEditor"></div>
-                <div id="qLists"></div>
-            </div>
+            <div class="cara-head"><span class="cara-no">CARA 3</span><div><b>Input Manual / Hasil Cara 2</b><small>Isi sendiri judul, kategori, tag, caption &amp; gambar, lalu klik Kirim ke GitHub</small></div></div>
 
             <label>Judul Poster</label>
             <input type="text" id="inpJudul" placeholder="Masukkan judul poster">
@@ -475,7 +507,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.2';
+        const APP_VERSION = '1.0.3';
         const ALLOWED_PINS = ["301102", "291104", "666666"];
         
         const DEFAULT_COLLABS = [
@@ -1105,7 +1137,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
             function aiLoad() {
                 let c = {};
                 try { c = JSON.parse(localStorage.getItem('dakwahAiCfg') || '{}') || {}; } catch (e) {}
-                const cfg = Object.assign({ provider:'gemini', customBase:'', fallback:true, auto:true, style:'' }, c);
+                const cfg = Object.assign({ provider:'gemini', customBase:'', fallback:true, auto:true, style:'', rotate:true, gkeys:'' }, c);
                 cfg.keys = Object.assign({}, c.keys);
                 cfg.models = Object.assign({}, c.models);
                 if (!AI_PROVIDERS[cfg.provider]) cfg.provider = 'gemini';
@@ -1213,13 +1245,13 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 }
             }
 
-            async function aiFetch(url, opts) {
+            async function aiFetch(url, opts, ms) {
                 const ctl = new AbortController();
-                const t = setTimeout(() => ctl.abort(), 90000);
+                const t = setTimeout(() => ctl.abort(), ms || 90000);
                 try {
                     return await fetch(url, Object.assign({}, opts, { signal: ctl.signal }));
                 } catch (e) {
-                    throw aiErr(0, e.name === 'AbortError' ? 'Timeout 90 detik' : 'Gagal terhubung (jaringan/CORS)');
+                    throw aiErr(0, e.name === 'AbortError' ? 'Timeout ' + Math.round((ms || 90000) / 1000) + ' detik' : 'Gagal terhubung (jaringan/CORS)');
                 } finally {
                     clearTimeout(t);
                 }
@@ -1562,7 +1594,8 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const TAB_ID = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
                 const LOCK_STALE = 30000;
                 const MAX_IMG = AI_PROVIDERS.gemini.maxImg;
-                const MAX_ATTEMPTS = 4;
+                const MAX_ATTEMPTS = 2;
+                const MAX_ROUNDS = 3;
                 const BASE_TITLE = document.title;
                 const SECS = [
                     { k: 'queue',  t: '⏳ Antrean scan',                         f: i => ['pending', 'processing', 'waiting'].indexOf(i.status) >= 0 },
@@ -1587,7 +1620,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
                 const logged = () => localStorage.getItem('adminLogin') === 'true';
                 const delaySec = () => { const v = parseInt(localStorage.getItem(LS_DELAY), 10); return v > 0 ? v : 8; };
-                const fmtMS = s => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); const r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; };
+                const fmtMS = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); const r = s % 60; const mm = (m < 10 ? '0' : '') + m; const rr = (r < 10 ? '0' : '') + r; return h ? h + ':' + mm + ':' + rr : m + ':' + rr; };
                 const fmtClock = t => { try { return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
                 const qMsg = t => { $('qMsg').textContent = t || ''; };
 
@@ -1694,9 +1727,9 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 function qSetWait(sec, reason) {
                     try { localStorage.setItem(LS_WAIT, JSON.stringify({ until: Date.now() + sec * 1000, reason: reason })); } catch (e) {}
                 }
-                async function qWait(ms) {
+                async function qWait(ms, watch) {
                     const end = Date.now() + ms;
-                    while (Date.now() < end && !Q.paused && !Q.stop && lockMine()) {
+                    while (Date.now() < end && !Q.paused && !Q.stop && lockMine() && (!watch || qWaitInfo())) {
                         await sleep(Math.max(50, Math.min(1000, end - Date.now())));
                         qTick();
                     }
@@ -1715,8 +1748,19 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     c.done = c.review + c.ready + c.sent;
                     return c;
                 }
-                const qHasWork = () => Q.items.some(i => ['pending', 'processing', 'waiting'].indexOf(i.status) >= 0);
-                const qNext = () => Q.items.find(i => ['pending', 'processing', 'waiting'].indexOf(i.status) >= 0);
+                const qIsWork = i => ['pending', 'processing', 'waiting'].indexOf(i.status) >= 0;
+                const qHasWork = () => Q.items.some(qIsWork);
+                const qNext = () => {
+                    const now = Date.now();
+                    const ready = Q.items.filter(i => qIsWork(i) && !(i.nextAt > now));
+                    return ready.find(i => i.status !== 'waiting') || ready[0];
+                };
+                const qSoonest = () => {
+                    const now = Date.now();
+                    let m = Infinity;
+                    Q.items.forEach(i => { if (qIsWork(i) && i.nextAt > now) m = Math.min(m, i.nextAt - now); });
+                    return isFinite(m) ? m : 1000;
+                };
 
                 function qStatusText() {
                     if (Q.dbErr) return '❌ Penyimpanan browser tidak tersedia: ' + Q.dbErr + '\nAntrean tidak bisa dipakai di browser/mode ini.';
@@ -1726,7 +1770,8 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     if (Q.running) {
                         const w = qWaitInfo();
                         if (w) return '⏳ ' + w.reason + ' — lanjut otomatis dalam ' + fmtMS((w.until - Date.now()) / 1000) + ' (±' + fmtClock(w.until) + ').';
-                        if (Q.cur) return '🤖 Memindai poster #' + Q.cur.no + ' (' + Q.cur.count + ' gambar)... ' + Math.round((Date.now() - Q.curStart) / 1000) + ' dtk';
+                        if (Q.cur) return '🤖 Memindai poster #' + Q.cur.no + ' (' + Q.cur.count + ' gambar)' + (Q.curLabel ? ' · ' + Q.curLabel : '') + '... ' + Math.round((Date.now() - Q.curStart) / 1000) + ' dtk';
+                        if (qHasWork() && !qNext()) return '⏳ Poster yang gagal sementara akan dicoba ulang otomatis (±' + fmtClock(Date.now() + qSoonest()) + ').';
                         return '😴 Jeda antar poster (' + delaySec() + ' dtk)...';
                     }
                     if (c.queue) return '⏹ Antrean belum berjalan: ' + c.queue + ' poster menunggu. Tekan Mulai.';
@@ -1740,6 +1785,8 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 }
 
                 function qTick() {
+                    const pl = $('qPoolLine');
+                    if (pl && $('qSettings') && $('qSettings').open) { const t = qPoolLine(); if (pl.textContent !== t) pl.textContent = t; }
                     const s = qStatusText();
                     const a = $('qStatus'); if (a && a.textContent !== s) a.textContent = s;
                     const b = $('qBannerText');
@@ -1772,6 +1819,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     $('qBtnRun').textContent = (Q.running && !Q.paused) ? '⏸ Jeda antrean' : '▶️ Mulai antrean';
                     $('qBtnSendAll').disabled = Q.sending || !c.ready;
                     $('qBtnRetryErr').disabled = !c.error;
+                    $('qBtnSkipWait').disabled = !(qWaitInfo() || Object.keys(cdLoad()).length || Q.items.some(i => i.status === 'waiting'));
                     $('qBtnClearSent').disabled = !c.sent;
                     $('qBtnAdd').disabled = !Q.db;
                     $('qDelay').value = String(delaySec());
@@ -1927,51 +1975,294 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     }
                 }
 
-                /* ---------- Pemindaian satu poster (Gemini saja) ---------- */
-                async function qGemini(key, model, imgs, sys, userText) {
-                    const parts = [{ text: userText }];
-                    imgs.forEach(d => parts.push({ inline_data: { mime_type: 'image/jpeg', data: d } }));
-                    const body = {
-                        systemInstruction: { parts: [{ text: sys }] },
-                        contents: [{ role: 'user', parts: parts }],
-                        generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
-                    };
-                    const r = await aiFetch(AI_PROVIDERS.gemini.base + '/models/' + encodeURIComponent(model) + ':generateContent', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-                        body: JSON.stringify(body)
+                /* ---------- v.1.0.3 : Kolam kuota (model × key) + penghitung limit per kombinasi ---------- */
+                const LS_CD = 'dakwahQueueCooldown';
+                const LS_MODELS = 'dakwahQueueModels';
+                const QTIMEOUT = 120000;
+                const MAX_TRY = 3;
+                const FALLBACK_MODELS = ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemma-3-27b-it'];
+
+                function cdLoad() {
+                    let o = {};
+                    try { o = JSON.parse(localStorage.getItem(LS_CD) || '{}') || {}; } catch (e) { o = {}; }
+                    const now = Date.now();
+                    Object.keys(o).forEach(k => { if (!o[k] || !(o[k].until > now)) delete o[k]; });
+                    return o;
+                }
+                function cdSet(id, sec, kind) {
+                    const o = cdLoad();
+                    o[id] = { until: Date.now() + sec * 1000, kind: kind };
+                    try { localStorage.setItem(LS_CD, JSON.stringify(o)); } catch (e) {}
+                }
+                function cdClear() { try { localStorage.removeItem(LS_CD); localStorage.removeItem(LS_WAIT); } catch (e) {} }
+                function cdPurge(kinds) {
+                    const o = cdLoad();
+                    Object.keys(o).forEach(k => { if (kinds.indexOf(o[k].kind) >= 0) delete o[k]; });
+                    try { localStorage.setItem(LS_CD, JSON.stringify(o)); } catch (e) {}
+                }
+                function secToPacificMidnight() {
+                    try {
+                        const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date());
+                        let h = 0, m = 0, s = 0;
+                        parts.forEach(p => {
+                            if (p.type === 'hour') h = parseInt(p.value, 10) % 24;
+                            else if (p.type === 'minute') m = parseInt(p.value, 10);
+                            else if (p.type === 'second') s = parseInt(p.value, 10);
+                        });
+                        return Math.max(60, 86400 - (h * 3600 + m * 60 + s) + 30);
+                    } catch (e) { return 6 * 3600; }
+                }
+
+                const keyId = k => 'k' + String(k).slice(-6);
+                function geminiKeys(cfg) {
+                    const list = [(cfg.keys.gemini || '').trim()];
+                    String(cfg.gkeys || '').split(/[\s,;]+/).forEach(k => { k = k.trim(); if (k) list.push(k); });
+                    return Array.from(new Set(list.filter(Boolean)));
+                }
+                function qOthers(cfg) {
+                    if (!cfg.fallback) return [];
+                    return Object.keys(AI_PROVIDERS).filter(k => k !== 'gemini' && (cfg.keys[k] || '').trim() && (k !== 'custom' || (cfg.customBase || '').trim()));
+                }
+                const qHasAnyKey = cfg => geminiKeys(cfg).length > 0 || qOthers(cfg).length > 0;
+
+                function qRank(names) {
+                    const ver = n => { const m = n.match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
+                    const g = [[], [], [], []];
+                    names.forEach(n => {
+                        if (/^gemma/.test(n)) {
+                            if (/-it$/.test(n) && /(27b|26b|31b|12b)/.test(n)) g[3].push(n);
+                            return;
+                        }
+                        if (!/^gemini-/.test(n) || !/flash/.test(n)) return;
+                        if (/embedding|tts|image|audio|live|robotics|native|computer|latest|thinking|8b|-\d{3}$/.test(n)) return;
+                        if (/preview|exp/.test(n)) g[2].push(n);
+                        else if (/lite/.test(n)) g[1].push(n);
+                        else g[0].push(n);
                     });
-                    const txt = await r.text();
-                    if (!r.ok) { const e = aiHttpErr(r.status, txt); e.body = txt; throw e; }
-                    let j = null;
-                    try { j = JSON.parse(txt); } catch (e) {}
-                    const cand = j && j.candidates && j.candidates[0];
-                    const out = cand && cand.content && cand.content.parts
-                        ? cand.content.parts.filter(x => !x.thought).map(x => x.text || '').join('') : '';
-                    if (!out) {
-                        const why = (j && j.promptFeedback && j.promptFeedback.blockReason) || (cand && cand.finishReason) || '';
-                        throw aiErr(0, 'Respons AI kosong' + (why ? ' (' + why + ')' : ''));
+                    const srt = a => a.sort((x, y) => ver(y) - ver(x) || y.localeCompare(x));
+                    return srt(g[0]).slice(0, 2).concat(srt(g[1]).slice(0, 2), srt(g[2]).slice(0, 1), srt(g[3]).slice(0, 1));
+                }
+                function qCachedModels() {
+                    try {
+                        const c = JSON.parse(localStorage.getItem(LS_MODELS) || 'null');
+                        if (c && c.list && c.list.length) return c.list;
+                    } catch (e) {}
+                    return FALLBACK_MODELS.slice();
+                }
+                async function qDiscover(key, force) {
+                    let c = null;
+                    try { c = JSON.parse(localStorage.getItem(LS_MODELS) || 'null'); } catch (e) { c = null; }
+                    if (!force && c && c.list && c.list.length && (Date.now() - c.ts) < 12 * 3600 * 1000) return c.list;
+                    if (key) {
+                        try {
+                            const r = await aiFetch(AI_PROVIDERS.gemini.base + '/models?pageSize=200', { headers: { 'x-goog-api-key': key } }, 20000);
+                            const txt = await r.text();
+                            if (r.ok) {
+                                const j = JSON.parse(txt);
+                                const names = (j.models || [])
+                                    .filter(m => (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
+                                    .map(m => String(m.name || '').replace(/^models\//, ''));
+                                const list = qRank(names);
+                                if (list.length) {
+                                    try { localStorage.setItem(LS_MODELS, JSON.stringify({ ts: Date.now(), list: list })); } catch (e) {}
+                                    return list;
+                                }
+                            }
+                        } catch (e) { /* pakai cache / daftar bawaan */ }
                     }
-                    return out;
+                    return (c && c.list && c.list.length) ? c.list : FALLBACK_MODELS.slice();
+                }
+                async function qBuildPool(cfg) {
+                    const keys = geminiKeys(cfg);
+                    const pinned = (cfg.models.gemini || '').trim();
+                    let models;
+                    if (cfg.rotate === false) models = [pinned || AI_PROVIDERS.gemini.models[0]];
+                    else {
+                        models = keys.length ? await qDiscover(keys[0], false) : qCachedModels();
+                        if (pinned) models = [pinned].concat(models.filter(m => m !== pinned));
+                    }
+                    const pool = [];
+                    models.forEach(m => keys.forEach((k, i) => pool.push({ key: k, kid: keyId(k), ki: i + 1, model: m, id: keyId(k) + '|' + m })));
+                    Q.poolModels = models;
+                    return pool;
+                }
+                function qPick(pool) {
+                    const cd = cdLoad();
+                    return pool.find(p => !cd[p.id] && !cd[p.kid + '|*']) || null;
+                }
+                function qPoolStat(pool) {
+                    const cd = cdLoad();
+                    let min = Infinity, fatal = pool.length > 0, anyKey = false;
+                    pool.forEach(p => {
+                        const e = cd[p.kid + '|*'] || cd[p.id];
+                        if (!e) { fatal = false; return; }
+                        min = Math.min(min, e.until);
+                        if (e.kind === 'key') anyKey = true;
+                        if (e.kind !== 'key' && e.kind !== 'dead') fatal = false;
+                    });
+                    return {
+                        sec: isFinite(min) ? Math.max(10, Math.ceil((min - Date.now()) / 1000)) : 60,
+                        fatal: fatal,
+                        msg: anyKey ? 'API Key Gemini ditolak (tidak valid / tidak punya akses)' : 'Model Gemini tidak ditemukan / tidak didukung'
+                    };
+                }
+                function qPoolLine() {
+                    const cfg = aiLoad();
+                    const names = Q.poolModels || qCachedModels();
+                    const kids = geminiKeys(cfg).map(keyId);
+                    if (!names.length) return '';
+                    const cd = cdLoad();
+                    const now = Date.now();
+                    const parts = names.map(m => {
+                        let free = !kids.length, dead = kids.length > 0, soon = Infinity;
+                        kids.forEach(k => {
+                            const e = cd[k + '|*'] || cd[k + '|' + m];
+                            if (!e) { free = true; dead = false; return; }
+                            if (e.kind !== 'dead' && e.kind !== 'key') dead = false;
+                            soon = Math.min(soon, e.until);
+                        });
+                        return (free ? '✅ ' : (dead ? '🚫 ' : '⏳ ')) + m + ((!free && !dead && isFinite(soon)) ? ' (' + fmtMS((soon - now) / 1000) + ')' : '');
+                    });
+                    return '🧠 Model bergiliran: ' + parts.join(' · ') + '\n🔑 ' + kids.length + ' key Gemini' + (qOthers(cfg).length ? ' · cadangan provider lain: ' + qOthers(cfg).join(', ') : '');
+                }
+
+                /* ---------- Pemindaian satu poster ---------- */
+                async function qCall(c, imgs, sys, userText) {
+                    const isGemma = /^gemma/i.test(c.model);
+                    const parts = [{ text: isGemma ? (sys + '\n\n' + userText) : userText }];
+                    imgs.forEach(d => parts.push({ inline_data: { mime_type: 'image/jpeg', data: d } }));
+                    const gen = { temperature: 0.2 };
+                    if (!isGemma) gen.responseMimeType = 'application/json';
+                    if (/^gemini-2\.5-flash/.test(c.model)) gen.thinkingConfig = { thinkingBudget: 0 };
+                    else if (/^gemini-3/.test(c.model)) gen.thinkingConfig = { thinkingLevel: 'low' };
+                    for (let pass = 0; pass < 2; pass++) {
+                        const body = { contents: [{ role: 'user', parts: parts }], generationConfig: gen };
+                        if (!isGemma) body.systemInstruction = { parts: [{ text: sys }] };
+                        const r = await aiFetch(AI_PROVIDERS.gemini.base + '/models/' + encodeURIComponent(c.model) + ':generateContent', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': c.key },
+                            body: JSON.stringify(body)
+                        }, QTIMEOUT);
+                        const txt = await r.text();
+                        if (!r.ok) {
+                            if (pass === 0 && gen.thinkingConfig && r.status === 400 && /thinking/i.test(txt)) { delete gen.thinkingConfig; continue; }
+                            const e = aiHttpErr(r.status, txt); e.body = txt; throw e;
+                        }
+                        let j = null;
+                        try { j = JSON.parse(txt); } catch (e) {}
+                        const cand = j && j.candidates && j.candidates[0];
+                        const out = cand && cand.content && cand.content.parts
+                            ? cand.content.parts.filter(x => !x.thought).map(x => x.text || '').join('') : '';
+                        if (!out) {
+                            const why = (j && j.promptFeedback && j.promptFeedback.blockReason) || (cand && cand.finishReason) || '';
+                            throw aiErr(0, 'Respons AI kosong' + (why ? ' (' + why + ')' : ''));
+                        }
+                        return out;
+                    }
+                    throw aiErr(0, 'Respons AI kosong');
+                }
+
+                async function qCallOther(cfg, k, imgs, sys, userText) {
+                    const p = AI_PROVIDERS[k];
+                    const base = k === 'custom' ? cfg.customBase.trim() : p.base;
+                    const model = (cfg.models[k] || '').trim() || p.models[0];
+                    if (!model) throw aiErr(-1, p.label + ': nama model belum diisi');
+                    const use = imgs.slice(0, p.maxImg);
+                    const raw = await aiCallOpenAI(base, cfg.keys[k].trim(), model, use, sys, userText, true);
+                    return { raw: raw, model: model, n: use.length, label: p.label.split(' (')[0] + ' • ' + model };
                 }
 
                 async function qProcess(it) {
                     const cfg = aiLoad();
-                    const key = (cfg.keys.gemini || '').trim();
-                    if (!key) throw aiErr(401, 'API Key Gemini belum diisi');
-                    const model = (cfg.models.gemini || '').trim() || AI_PROVIDERS.gemini.models[0];
+                    if (!qHasAnyKey(cfg)) throw aiErr(401, 'API Key Gemini belum diisi');
                     const files = await qLoadBlobs(it.id);
                     if (!files.length) throw aiErr(-1, 'Gambar poster tidak ditemukan di penyimpanan browser.');
                     const use = files.slice(0, MAX_IMG);
-                    const b64 = [];
-                    for (let i = 0; i < use.length; i++) b64.push(await aiPrepImage(use[i], 1600));
+                    let side = 1600;
+                    const prep = async s => { const a = []; for (let i = 0; i < use.length; i++) a.push(await aiPrepImage(use[i], s)); return a; };
+                    let b64 = await prep(side);
                     const sys = aiBuildSystem(cfg);
                     const userText = 'Scan poster berikut (' + use.length + ' gambar berurutan) dan balas dalam JSON sesuai aturan.';
-                    const raw = await qGemini(key, model, b64, sys, userText);
-                    const d = aiParse(raw);
+                    let d = null, used = null, tries = 0, lastErr = null, usedN = use.length;
+
+                    for (let guard = 0; guard < 14 && !d; guard++) {
+                        const pool = await qBuildPool(cfg);
+                        const c = qPick(pool);
+                        if (!c) break;
+                        Q.curLabel = c.model + (geminiKeys(cfg).length > 1 ? ' · key ' + c.ki : '');
+                        qTick();
+                        try {
+                            d = aiParse(await qCall(c, b64, sys, userText));
+                            used = { label: c.model, model: c.model, gemma: /^gemma/i.test(c.model) };
+                        } catch (e) {
+                            lastErr = e; d = null;
+                            const st = (e && e.status !== undefined) ? e.status : -1;
+                            const body = (e && e.body) ? e.body : '';
+                            const all = ((e && e.message) ? e.message : '') + ' ' + body;
+                            if (st === 429) {
+                                const daily = /PerDay|per day|daily/i.test(all);
+                                const m = body.match(/"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/);
+                                let sec = m ? Math.ceil(parseFloat(m[1])) + 3 : 65;
+                                if (daily) sec = secToPacificMidnight();
+                                cdSet(c.id, sec, daily ? 'day' : 'rpm');
+                            } else if (st === 404 || (st === 400 && /not found|not supported|unsupported|does not support/i.test(all) && !/API key|API_KEY/i.test(all))) {
+                                cdSet(c.id, 24 * 3600, 'dead');
+                            } else if (st === 401 || st === 403 || (st === 400 && /API key|API_KEY/i.test(all))) {
+                                cdSet(c.kid + '|*', 6 * 3600, 'key');
+                            } else if (st === 0 || st >= 500) {
+                                tries++;
+                                const to = /Timeout/i.test(all);
+                                cdSet(c.id, to ? 150 : 45, 'temp');
+                                if (to && side > 1000) { side = 1100; b64 = await prep(side); }
+                                if (tries >= MAX_TRY) throw e;
+                            } else if (/^gemma/i.test(c.model)) {
+                                cdSet(c.id, 6 * 3600, 'dead');
+                            } else {
+                                throw e;
+                            }
+                        }
+                    }
+
+                    if (!d) {
+                        const pool = await qBuildPool(cfg);
+                        const stat = qPoolStat(pool);
+                        const others = qOthers(cfg);
+                        let othersWait = Infinity;
+                        for (const k of others) {
+                            const cdo = cdLoad()['x:' + k];
+                            if (cdo) { othersWait = Math.min(othersWait, cdo.until - Date.now()); continue; }
+                            Q.curLabel = AI_PROVIDERS[k].label.split(' (')[0] + ' (cadangan)';
+                            qTick();
+                            try {
+                                const o = await qCallOther(cfg, k, b64, sys, userText);
+                                d = aiParse(o.raw);
+                                used = { label: o.label, model: o.model, other: true };
+                                usedN = o.n;
+                                break;
+                            } catch (e) {
+                                const st = (e && e.status !== undefined) ? e.status : -1;
+                                const sec = (st === 401 || st === 403) ? 6 * 3600 : (st === 429 ? 300 : 120);
+                                cdSet('x:' + k, sec, 'x');
+                                othersWait = Math.min(othersWait, sec * 1000);
+                            }
+                        }
+                        if (!d) {
+                            if (stat.fatal) throw aiErr(401, stat.msg);
+                            let sec = stat.sec;
+                            if (isFinite(othersWait)) sec = Math.min(sec, Math.max(10, Math.ceil(othersWait / 1000)));
+                            const err = aiErr(429, 'Semua kuota habis');
+                            err.allLimit = true;
+                            err.waitSec = sec;
+                            err.reasonText = 'Semua kuota Gemini sedang habis (' + (Q.poolModels ? Q.poolModels.length : 0) + ' model × ' + geminiKeys(cfg).length + ' key)';
+                            throw err;
+                        }
+                    }
+
                     const cm = aiMatchCollab(d.akun);
                     const warns = d.warn.slice();
-                    if (files.length > use.length) warns.push('Hanya ' + use.length + ' gambar pertama yang dipindai (batas Gemini). Cek slide sisanya manual.');
+                    if (used.gemma) warns.push('Dipindai model cadangan ' + used.model + ' (kuota Gemini utama habis) — periksa teks Arab & caption dengan teliti.');
+                    if (used.other) warns.push('Dipindai provider cadangan ' + used.label + ' — periksa dengan teliti.');
+                    if (files.length > usedN) warns.push('Hanya ' + usedN + ' gambar pertama yang dipindai (batas model). Cek slide sisanya manual.');
                     if (cm.miss.length) warns.push('Akun di poster belum ada di Master List collaborator: ' + cm.miss.join(', '));
                     if (!d.judul || !d.caption) warns.push('Judul atau caption kosong dari AI — isi manual atau scan ulang.');
                     if (!d.kategori) warns.push('Kategori kosong dari AI — isi manual.');
@@ -1984,7 +2275,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                         collab: 'Collab Dakwah Sunnah :' + (cm.hit.length ? '\n' + cm.hit.slice(0, 6).join('\n') : ''),
                         caption: d.caption,
                         warn: warns,
-                        model: model,
+                        model: used.model,
                         at: Date.now()
                     };
                 }
@@ -1993,30 +2284,31 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     const st = (e && e.status !== undefined) ? e.status : -1;
                     const msg = (e && e.message) ? e.message : 'Kesalahan tidak dikenal';
                     const body = (e && e.body) ? e.body : '';
-                    if (st === 401 || st === 403 || st === 404 || (st === 400 && /API key|API_KEY/i.test(msg + body))) {
-                        Q.fatal = '⛔ Antrean berhenti: ' + msg + '\nPeriksa API Key / nama model Gemini di ⚙️ Pengaturan AI (pilih provider Google Gemini), lalu tekan Mulai.';
+                    if (e && e.allLimit) {
+                        Q.limitHits = (Q.limitHits || 0) + 1;
+                        const sec = Math.max(10, e.waitSec || 60);
+                        qSetWait(sec, e.reasonText || 'Kuota Gemini habis');
+                        it.status = 'waiting'; it.nextAt = Date.now() + sec * 1000; it.err = 'menunggu kuota';
+                    } else if (st === 401 || st === 403 || (st === 400 && /API key|API_KEY/i.test(msg + body))) {
+                        cdPurge(['key', 'dead']);
+                        Q.fatal = '⛔ Antrean berhenti: ' + msg + '\nPeriksa API Key Gemini di ⚙️ Pengaturan AI (atau key cadangan di ⚙️ Anti-limit), lalu tekan Mulai.';
                         Q.paused = true;
                         try { localStorage.setItem(LS_PAUSE, '1'); } catch (x) {}
                         it.status = 'pending'; it.err = '';
-                    } else if (st === 429) {
-                        const m = body.match(/"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/);
-                        const retry = m ? Math.ceil(parseFloat(m[1])) : 0;
-                        const daily = /PerDay|per day|daily/i.test(body + msg);
-                        Q.limitHits = (Q.limitHits || 0) + 1;
-                        const n = Q.limitHits;
-                        let sec = retry ? retry + 5 : 65;
-                        if (daily || n >= 5) sec = Math.max(sec, 1800);
-                        else if (n >= 3) sec = Math.max(sec, 900);
-                        else if (n === 2) sec = Math.max(sec, 300);
-                        qSetWait(sec, daily ? 'Kuota harian Gemini habis' : 'Limit Gemini tercapai');
-                        it.status = 'waiting'; it.nextAt = Date.now() + sec * 1000; it.err = 'limit Gemini';
                     } else if (st === 0 || st >= 500) {
                         if (!(Q.hiddenDuring || document.hidden)) it.attempts = (it.attempts || 0) + 1;
-                        if (it.attempts >= MAX_ATTEMPTS) {
-                            it.status = 'error'; it.err = msg + ' (gagal ' + it.attempts + '×)';
+                        if ((it.attempts || 0) >= MAX_ATTEMPTS) {
+                            it.rounds = (it.rounds || 0) + 1;
+                            if (it.rounds <= MAX_ROUNDS) {
+                                const sec = 150 * it.rounds;
+                                it.attempts = 0;
+                                it.status = 'waiting'; it.nextAt = Date.now() + sec * 1000;
+                                it.err = 'gagal sementara (' + msg + ') — dicoba ulang otomatis, putaran ' + it.rounds;
+                            } else {
+                                it.status = 'error'; it.err = msg + ' (sudah dicoba otomatis ' + MAX_ROUNDS + ' putaran)';
+                            }
                         } else {
-                            const sec = Math.min(15 * Math.max(1, it.attempts), 90);
-                            qSetWait(sec, 'Gangguan sementara (' + msg + ')');
+                            const sec = 20 * Math.max(1, it.attempts || 1);
                             it.status = 'waiting'; it.nextAt = Date.now() + sec * 1000; it.err = 'dicoba ulang';
                         }
                     } else {
@@ -2026,7 +2318,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 }
 
                 async function qRunItem(it) {
-                    Q.cur = it; Q.curStart = Date.now(); Q.hiddenDuring = document.hidden;
+                    Q.cur = it; Q.curStart = Date.now(); Q.hiddenDuring = document.hidden; Q.curLabel = '';
                     it.status = 'processing'; it.err = '';
                     try {
                         await qSave(it);
@@ -2035,13 +2327,13 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                         if (!(await qExists(it.id))) return;
                         it.result = res;
                         it.status = res.warn.length ? 'review' : 'ready';
-                        it.err = ''; it.nextAt = 0; it.attempts = 0;
+                        it.err = ''; it.nextAt = 0; it.attempts = 0; it.rounds = 0;
                         Q.limitHits = 0;
                         await qSave(it);
                     } catch (e) {
                         try { await qHandleErr(it, e); } catch (x) {}
                     } finally {
-                        Q.cur = null;
+                        Q.cur = null; Q.curLabel = '';
                         qRender();
                     }
                 }
@@ -2049,7 +2341,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 async function qLoop() {
                     if (Q.running || Q.paused || !Q.db || !logged()) return;
                     const cfg = aiLoad();
-                    if (!(cfg.keys.gemini || '').trim()) {
+                    if (!qHasAnyKey(cfg)) {
                         Q.fatal = 'API Key Gemini belum diisi. Buka ⚙️ Pengaturan AI, pilih provider Google Gemini, tempel kuncinya, lalu tekan Mulai.';
                         qRender();
                         return;
@@ -2065,9 +2357,10 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                             if (!lockMine()) { Q.other = true; break; }
                             await qReload();
                             const w = qWaitInfo();
-                            if (w) { await qWait(w.until - Date.now()); continue; }
+                            if (w) { await qWait(w.until - Date.now(), true); continue; }
+                            if (!qHasWork()) break;
                             const it = qNext();
-                            if (!it) break;
+                            if (!it) { await qWait(Math.min(qSoonest(), 20000)); continue; }
                             while (aiBusy && !Q.paused && !Q.stop) await sleep(1500);
                             if (Q.paused || Q.stop) break;
                             await qRunItem(it);
@@ -2275,7 +2568,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
 
                 /* ---------- Aksi tombol ---------- */
                 async function qRescan(it) {
-                    it.status = 'pending'; it.result = null; it.err = ''; it.attempts = 0; it.nextAt = 0;
+                    it.status = 'pending'; it.result = null; it.err = ''; it.attempts = 0; it.rounds = 0; it.nextAt = 0;
                     await qSave(it);
                     if (Q.editId === it.id) qCloseEditor();
                     qRender();
@@ -2356,7 +2649,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 $('qLists').addEventListener('click', qOnListClick);
                 $('qBtnRetryErr').addEventListener('click', async () => {
                     const errs = Q.items.filter(i => i.status === 'error');
-                    for (const it of errs) { it.status = 'pending'; it.err = ''; it.attempts = 0; it.nextAt = 0; await qSave(it); }
+                    for (const it of errs) { it.status = 'pending'; it.err = ''; it.attempts = 0; it.rounds = 0; it.nextAt = 0; await qSave(it); }
                     qRender();
                     if (errs.length) { qMsg('🔁 ' + errs.length + ' poster gagal dimasukkan ke antrean lagi.'); qKick(); }
                 });
@@ -2374,6 +2667,35 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     showSection('add');
                     $('qCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
+
+                (function initPoolUI() {
+                    const c0 = aiLoad();
+                    $('qRotate').checked = c0.rotate !== false;
+                    $('qKeys').value = c0.gkeys || '';
+                    $('qRotate').addEventListener('change', () => { const x = aiLoad(); x.rotate = $('qRotate').checked; aiSave(x); qTick(); });
+                    $('qKeys').addEventListener('input', () => { const x = aiLoad(); x.gkeys = $('qKeys').value; aiSave(x); qTick(); });
+                    $('qSettings').addEventListener('toggle', qTick);
+                    $('qBtnModels').addEventListener('click', async () => {
+                        const ks = geminiKeys(aiLoad());
+                        if (!ks.length) { qMsg('ℹ️ Isi API Key Gemini dulu di ⚙️ Pengaturan AI.'); return; }
+                        qMsg('🔄 Memperbarui daftar model Gemini...');
+                        const list = await qDiscover(ks[0], true);
+                        Q.poolModels = null;
+                        qMsg('✅ ' + list.length + ' model dipakai bergiliran: ' + list.join(', '));
+                        qTick();
+                    });
+                    $('qBtnSkipWait').addEventListener('click', async () => {
+                        cdClear();
+                        for (const it of Q.items) {
+                            if (it.status === 'waiting') { it.status = 'pending'; it.nextAt = 0; it.err = ''; try { await qSave(it); } catch (e) {} }
+                        }
+                        Q.limitHits = 0; Q.fatal = '';
+                        qMsg('⚡ Penghitung limit direset — mencoba lagi sekarang.');
+                        qRender();
+                        if (Q.paused) qMsg('ℹ️ Antrean sedang dijeda — tekan Mulai.');
+                        else qKick();
+                    });
+                })();
 
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden) { Q.hiddenDuring = true; return; }
