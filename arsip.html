@@ -1,16 +1,16 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.6.4
+Arsip Dakwah Manhaj Salaf - Update v2.6.5
+
+v2.6.5:
+1. PERBAIKAN RIWAYAT TERBARU: manifest.json ternyata belum memuat tanggal unggah, sehingga urutan hanya mengikuti isi manifest (konten lama bisa muncul di atas). Kini tanggal unggah dibaca dari riwayat perubahan manifest.json di GitHub (kapan setiap poster pertama kali muncul), lalu disimpan di perangkat agar hemat kuota. Konten baru otomatis tampil paling atas dengan pembatas hari.
+2. Tanggal eksplisit di manifest (kolom tanggal/date/dst.) tetap dipakai lebih dulu bila ada. Poster yang lebih tua dari riwayat yang terbaca dikelompokkan di bagian "Lebih lama".
+3. Banner menampilkan status pengambilan riwayat (memuat / berhasil / gagal beserta alasannya).
 
 v2.6.4:
 1. TOMBOL BARU "Riwayat Konten Terbaru" di sidebar > Akses Cepat. Ketika ditekan: kembali ke beranda publik (kategori Semua) dan seluruh poster tampil berurutan dari yang paling baru diunggah, supaya poster, caption, dan tagar bisa dicek dengan scroll tanpa mengetik di pencarian.
 2. Setiap hari upload diberi garis pembatas + judul hari dan tanggal (contoh: Rabu, 18 November 2026), tanpa jam demi privasi. Penanda "Hari ini" / "Kemarin" dan jumlah konten per hari ikut tampil.
 3. Tanggal dibaca dari manifest.json (kolom tanggal/date/created_at/uploaded_at dst.) atau dari pola tanggal pada nama folder. Jika belum ada tanggal sama sekali, urutan memakai data paling akhir di manifest sebagai yang terbaru.
 4. Menekan mode Disimpan / PDF Mode / Semua atau kartu Semua mengembalikan urutan biasa.
-
-v2.6.3:
-1. HIJRIYAH GANTI HARI SAAT MAGHRIB: tanggal Hijriyah maju otomatis ketika waktu Maghrib tiba (bukan tengah malam), sesuai hari Hijriyah yang dimulai dari terbenamnya matahari. Waktu Maghrib dihitung langsung di perangkat (rumus astronomi, +2 menit ihtiyath, jalan tanpa internet). Lokasi otomatis dari zona waktu; ketuk baris "Maghrib" di kartu jam untuk memakai GPS agar lebih presisi.
-2. Nama hari "Minggu" diganti "Ahad". Setelah Maghrib tampil penanda "Malam ..." (misal Malam Senin) di bawah tanggal Hijriyah.
-3. Ikon Tauhid: telunjuk ke atas, jari lain menggenggam, jempol terlipat. Ikon Manhaj Salaf: api. Ikon Doa: dua telapak tangan menengadah.
 
 -->
 
@@ -1211,7 +1211,7 @@ v2.6.3:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.4</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.5</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1397,7 +1397,7 @@ v2.6.3:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.6.4';
+        const APP_VERSION = 'v2.6.5';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* v2.6.2: animasi jam pasir mengikuti detik (0-59), terbalik tiap menit */
         let _hgPrev = -1;
@@ -1907,7 +1907,9 @@ v2.6.3:
                 }
             }
             const m = /(20\d{2})[-_.]?(0[1-9]|1[0-2])[-_.]?(0[1-9]|[12]\d|3[01])(?!\d)/.exec(String(p.path || ''));
-            return m ? tglBuat(+m[1], +m[2], +m[3]) : null;
+            if (m) return tglBuat(+m[1], +m[2], +m[3]);
+            const h = riwayatGit.map[String(p.path || '')];
+            return h ? parseTanggalUpload(h) : null;
         }
         function kunciHari(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
         function labelHari(d) { return HARI_ID[d.getDay()] + ', ' + d.getDate() + ' ' + BULAN_MASEHI_ID[d.getMonth()] + ' ' + d.getFullYear(); }
@@ -1960,9 +1962,7 @@ v2.6.3:
             const hasil = susunUrutanTerbaru();
             const banner = document.createElement('div');
             banner.className = 'terbaru-banner';
-            banner.innerHTML = '<span class="tb-ic">' + IC('clock') + '</span><span class="tb-txt"><b>Riwayat Konten Terbaru</b><small>' +
-                (hasil.adaTanggal ? 'Diurutkan dari yang paling baru diunggah. Scroll untuk mengecek poster dan caption.' : 'Tanggal unggah belum ada di manifest.json, jadi diurutkan dari data paling akhir.') +
-                '</small></span><button type="button" onclick="resetSemua()">Tutup</button>';
+            banner.innerHTML = '<span class="tb-ic">' + IC('clock') + '</span><span class="tb-txt"><b>Riwayat Konten Terbaru</b><small id="tbStatus">' + teksBannerTerbaru() + '</small></span><button type="button" onclick="resetSemua()">Tutup</button>';
             frag.appendChild(banner);
             let hariTerakhir = '#';
             hasil.items.forEach(function(x) {
@@ -1975,7 +1975,7 @@ v2.6.3:
                         const sep = document.createElement('div');
                         sep.className = 'day-sep';
                         const tg = x.d ? tagHari(x.d) : '';
-                        sep.innerHTML = '<span class="ds-line"></span><span class="ds-title">' + (x.d ? labelHari(x.d) : 'Tanpa tanggal') + '</span>' +
+                        sep.innerHTML = '<span class="ds-line"></span><span class="ds-title">' + (x.d ? labelHari(x.d) : 'Lebih lama') + '</span>' +
                             (tg ? '<span class="ds-tag">' + tg + '</span>' : '') + '<span class="ds-count"></span><span class="ds-line"></span>';
                         frag.appendChild(sep);
                     }
@@ -2002,14 +2002,101 @@ v2.6.3:
                 if (ct) ct.textContent = n + ' konten';
             });
         }
-        function tampilkanTerbaru() {
+        /* v2.6.5: tanggal unggah dari riwayat perubahan manifest.json di GitHub (kapan tiap poster pertama kali muncul) */
+        const RIWAYAT_REPO = 'Muhram07/Salinan-Eksperimen-Arsip-Dakwah';
+        const RIWAYAT_KEY = 'arsipRiwayatUnggahV1';
+        const RIWAYAT_MAKS_VERSI = 12;
+        const riwayatGit = { map: {}, status: 'idle', note: '' };
+
+        function teksBannerTerbaru() {
+            const adaTgl = susunUrutanTerbaru().adaTanggal;
+            if (riwayatGit.status === 'loading') return 'Mengambil riwayat unggahan dari GitHub...';
+            if (adaTgl) return 'Diurutkan dari yang paling baru diunggah. Poster yang lebih tua dari riwayat terbaca ada di bagian "Lebih lama".';
+            if (riwayatGit.status === 'gagal') return 'Riwayat unggahan belum bisa dibaca (' + riwayatGit.note + '). Urutan sementara memakai data paling akhir di manifest, bisa jadi bukan yang terbaru.';
+            return 'Belum ada catatan tanggal unggah. Urutan sementara memakai data paling akhir di manifest.';
+        }
+        function perbaruiBannerTerbaru() {
+            const el = document.getElementById('tbStatus');
+            if (el) el.textContent = teksBannerTerbaru();
+        }
+        async function fetchJsonWaktu(url, ms) {
+            const ctl = ('AbortController' in window) ? new AbortController() : null;
+            const t = setTimeout(function() { if (ctl) ctl.abort(); }, ms || 15000);
+            try {
+                const res = await fetch(url, ctl ? { signal: ctl.signal } : {});
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } finally { clearTimeout(t); }
+        }
+        function hariLokalDariIso(iso) {
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return null;
+            const p2 = function(n) { return (n < 10 ? '0' : '') + n; };
+            return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+        }
+        async function muatRiwayatGit() {
+            if (riwayatGit.status === 'loading') return false;
+            let cache = null;
+            try { cache = JSON.parse(localStorage.getItem(RIWAYAT_KEY) || 'null'); } catch (e) { cache = null; }
+            if (cache && cache.map && typeof cache.map === 'object') riwayatGit.map = Object.assign({}, cache.map);
+            riwayatGit.status = 'loading';
+            riwayatGit.note = '';
+            urutTerbaruCache = null;
+            perbaruiBannerTerbaru();
+            try {
+                const commits = await fetchJsonWaktu('https://api.github.com/repos/' + RIWAYAT_REPO + '/commits?path=manifest.json&per_page=30', 15000);
+                if (!Array.isArray(commits) || !commits.length) throw new Error('riwayat kosong');
+                if (cache && cache.sha === commits[0].sha) { riwayatGit.status = 'ok'; return true; }
+                let n = Math.min(commits.length, RIWAYAT_MAKS_VERSI);
+                if (cache && cache.sha) {
+                    const k = commits.findIndex(function(c) { return c.sha === cache.sha; });
+                    if (k >= 0) n = Math.min(k + 1, RIWAYAT_MAKS_VERSI);
+                }
+                if (n < 2) { riwayatGit.status = 'ok'; return true; }
+                const versi = commits.slice(0, n);
+                const setPath = new Array(n);
+                let idx = 0;
+                async function kerja() {
+                    while (idx < n) {
+                        const i = idx++;
+                        const j = await fetchJsonWaktu('https://raw.githubusercontent.com/' + RIWAYAT_REPO + '/' + versi[i].sha + '/manifest.json', 20000);
+                        const arr = (j && j.posters) ? j.posters : [];
+                        const s = new Set();
+                        arr.forEach(function(p) { if (p && p.path) s.add(String(p.path)); });
+                        setPath[i] = s;
+                    }
+                }
+                await Promise.all([kerja(), kerja(), kerja()]);
+                for (let i = n - 2; i >= 0; i--) {
+                    const tgl = hariLokalDariIso((versi[i].commit && versi[i].commit.committer && versi[i].commit.committer.date) || (versi[i].commit && versi[i].commit.author && versi[i].commit.author.date));
+                    if (!tgl) continue;
+                    setPath[i].forEach(function(pth) {
+                        if (!setPath[i + 1].has(pth) && !riwayatGit.map[pth]) riwayatGit.map[pth] = tgl;
+                    });
+                }
+                try { localStorage.setItem(RIWAYAT_KEY, JSON.stringify({ sha: commits[0].sha, map: riwayatGit.map, ts: Date.now() })); } catch (e) {}
+                riwayatGit.status = 'ok';
+                return true;
+            } catch (e) {
+                riwayatGit.status = 'gagal';
+                riwayatGit.note = (e && e.name === 'AbortError') ? 'waktu habis' : String((e && e.message) || 'tidak diketahui').slice(0, 60);
+                return false;
+            }
+        }
+        async function tampilkanTerbaru() {
             closeSidebar();
             kategoriAktif = null;
             document.querySelectorAll('.card-kategori').forEach(function(el) { el.classList.remove('active'); });
             document.querySelectorAll('.card-kategori-all').forEach(function(el) { el.classList.add('active'); });
             syncBulanState();
             urutTerbaru = true;
+            urutTerbaruCache = null;
             switchBerandaMode('all', true);
+            await muatRiwayatGit();
+            if (!urutTerbaru) return;
+            urutTerbaruCache = null;
+            urutTerapkan = false;
+            filterDisplayPosters();
         }
 
         /* FUNGSI SINKRONISASI FILTER */
