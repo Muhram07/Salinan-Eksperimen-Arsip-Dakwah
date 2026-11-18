@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Arsip Dakwah - Admin Panel | v.1.0.4
+  Arsip Dakwah - Admin Panel | v.1.0.5
   Riwayat perbaikan (2 versi terbaru):
-  v.1.0.4 - Cara 2 (Scan AI satu poster) kini memakai sistem rotasi model Gemini yang sama dengan Cara 1 (daftar model otomatis, key cadangan, provider cadangan, penghitung limit bersama). Prompt AI (Cara 1 & 2) ditambah: nama di "Source/Sumber" bukan collaborator, logo tanpa username tetap dipetakan ke username Master List, username tanpa logo = collaborator, dan aturan pemilihan kategori (paling sesuai; materi luas didahulukan dari yang sempit; rumah tangga, bulan Hijriah sebelum puasa).
-  v.1.0.3 - Antrean anti-limit: rotasi otomatis model Gemini (daftar model diperbarui otomatis) + key cadangan + provider cadangan, tanpa menunggu saat satu model habis; scan gagal/timeout otomatis pindah model & dicoba ulang di belakang layar; tombol "Coba sekarang"; input dibagi jelas Cara 1 / Cara 2 / Cara 3.
+  v.1.0.5 - Pengiriman banyak poster ke GitHub lebih tahan gagal: tiap poster dicoba ulang otomatis sampai 3 kali (jeda 6/15 detik) bila API sibuk atau bentrok commit, jeda antar poster dinaikkan 3 -> 5 detik agar tidak berebut commit, dan poster yang tetap gagal tidak lagi menghentikan seluruh antrean (dilewati, dilaporkan di akhir). Pasangan perbaikan: workflow auto-extract v2 (tanpa force-push) agar poster yang masuk saat bot bekerja tidak terhapus.
+  v.1.0.4 - Cara 2 (Scan AI satu poster) kini memakai sistem rotasi model Gemini yang sama dengan Cara 1 (daftar model otomatis, key cadangan, provider cadangan, penghitung limit bersama). Prompt AI (Cara 1 & 2) ditambah aturan sumber/collaborator dan pemilihan kategori.
 -->
 <html lang="id">
 <head> 
@@ -507,7 +507,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.4';
+        const APP_VERSION = '1.0.5';
         const ALLOWED_PINS = ["301102", "291104", "666666"];
         
         const DEFAULT_COLLABS = [
@@ -2530,12 +2530,13 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     const apiKey = $('inpApiKey').value.trim();
                     if (!apiUrl || !apiKey) { alert('❌ Harap isi API URL dan Secret Key di bagian konfigurasi!'); return; }
                     if (typeof JSZip === 'undefined') { qMsg('❌ Library ZIP belum termuat. Periksa koneksi lalu muat ulang halaman.'); return; }
-                    if (ask && !confirm('Kirim ' + list.length + ' poster ke GitHub satu per satu (jeda 3 detik)?')) return;
+                    if (ask && !confirm('Kirim ' + list.length + ' poster ke GitHub satu per satu (jeda 5 detik, otomatis coba ulang bila gagal)?')) return;
                     if (!(await qLock())) { qMsg('🔒 Tab lain sedang aktif memproses antrean. Lakukan pengiriman di tab itu.'); return; }
                     Q.sending = true;
                     qRender();
                     let ok = 0;
                     let fail = '';
+                    const gagal = [];
                     try {
                         for (let i = 0; i < list.length; i++) {
                             if (!lockMine()) { fail = 'Tab lain mengambil alih antrean.'; break; }
@@ -2545,25 +2546,38 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                             await qSave(it);
                             qRender();
                             qMsg('📤 Mengirim #' + it.no + ' (' + (ok + 1) + '/' + list.length + ')...');
-                            try {
-                                await qSendOne(it, apiUrl, apiKey);
+                            let terkirim = false, stop = false, lastErr = '';
+                            const jeda = [6000, 15000];
+                            for (let t = 0; t < 3 && !terkirim && !stop; t++) {
+                                try {
+                                    if (t > 0) { qMsg('🔁 Mencoba ulang #' + it.no + ' (percobaan ' + (t + 1) + '/3)...'); await sleep(jeda[t - 1]); }
+                                    await qSendOne(it, apiUrl, apiKey);
+                                    terkirim = true;
+                                } catch (e) {
+                                    lastErr = (e && e.message) ? e.message : 'error';
+                                    /* timeout: poster mungkin sudah masuk, jangan kirim ganda otomatis */
+                                    if (/^Timeout/.test(lastErr)) stop = true;
+                                }
+                            }
+                            if (terkirim) {
                                 ok++;
-                            } catch (e) {
+                            } else {
                                 it.status = 'ready';
-                                it.err = 'Gagal kirim: ' + (e && e.message ? e.message : 'error');
+                                it.err = 'Gagal kirim: ' + lastErr;
                                 try { await qSave(it); } catch (x) {}
-                                fail = '#' + it.no + ' — ' + (e && e.message ? e.message : 'error');
-                                break;
+                                gagal.push('#' + it.no + ' — ' + lastErr);
+                                if (stop) { fail = gagal.join('; '); break; }
                             }
                             qRender();
-                            if (i < list.length - 1) await sleep(3000);
+                            if (i < list.length - 1) await sleep(5000);
                         }
                     } finally {
                         Q.sending = false;
                         qUnlock();
                         qRender();
                     }
-                    qMsg(fail ? '⚠️ Berhenti setelah ' + ok + ' terkirim. Gagal: ' + fail : '✅ ' + ok + ' poster terkirim ke GitHub. Bot akan memprosesnya otomatis.');
+                    if (!fail && gagal.length) fail = gagal.join('; ');
+                    qMsg(fail ? '⚠️ ' + ok + ' terkirim. Gagal/dilewati: ' + fail : '✅ ' + ok + ' poster terkirim ke GitHub. Bot akan memprosesnya otomatis.');
                 }
 
                 /* ---------- Editor persetujuan ---------- */
