@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Arsip Dakwah - Admin Panel | v.1.0.3
+  Arsip Dakwah - Admin Panel | v.1.0.4
   Riwayat perbaikan (2 versi terbaru):
-  v.1.0.3 - Antrean anti-limit: rotasi otomatis model Gemini (daftar model diperbarui otomatis) + key cadangan + provider cadangan, tanpa menunggu saat satu model habis; scan gagal/timeout otomatis pindah model & dicoba ulang di belakang layar; tombol "Coba sekarang"; input dibagi jelas Cara 1 (Antrean Otomatis, paling atas) / Cara 2 (Scan AI satu poster) / Cara 3 (Manual).
-  v.1.0.2 - Antrean Scan Otomatis (khusus Gemini): urutan slide manual, jeda & tunggu limit otomatis, simpan gambar di IndexedDB, lanjut otomatis setelah refresh/tab baru, daftar persetujuan, kirim semua yang aman.
+  v.1.0.4 - Cara 2 (Scan AI satu poster) kini memakai sistem rotasi model Gemini yang sama dengan Cara 1 (daftar model otomatis, key cadangan, provider cadangan, penghitung limit bersama). Prompt AI (Cara 1 & 2) ditambah: nama di "Source/Sumber" bukan collaborator, logo tanpa username tetap dipetakan ke username Master List, username tanpa logo = collaborator, dan aturan pemilihan kategori (paling sesuai; materi luas didahulukan dari yang sempit; rumah tangga, bulan Hijriah sebelum puasa).
+  v.1.0.3 - Antrean anti-limit: rotasi otomatis model Gemini (daftar model diperbarui otomatis) + key cadangan + provider cadangan, tanpa menunggu saat satu model habis; scan gagal/timeout otomatis pindah model & dicoba ulang di belakang layar; tombol "Coba sekarang"; input dibagi jelas Cara 1 / Cara 2 / Cara 3.
 -->
 <html lang="id">
 <head> 
@@ -374,7 +374,7 @@
 
                 <details class="q-set" id="qSettings">
                     <summary>⚙️ Anti-limit &amp; cadangan kuota</summary>
-                    <label class="ai-check"><input type="checkbox" id="qRotate"> Rotasi model Gemini otomatis saat limit/gagal (disarankan)</label>
+                    <label class="ai-check"><input type="checkbox" id="qRotate"> Rotasi model Gemini otomatis saat limit/gagal (disarankan; berlaku juga untuk Cara 2)</label>
                     <div class="q-hint">Tiap model Gemini punya kuota harian sendiri. Bila satu model habis, antrean langsung pindah ke model berikutnya — ini pengganti "obrolan baru" di aplikasi Gemini. Daftar model diambil otomatis dari Google (mengikuti versi terbaru), jadi kolom Model di ⚙️ Pengaturan AI sebaiknya dikosongkan.</div>
                     <label>API Key Gemini cadangan (satu per baris, opsional)</label>
                     <textarea id="qKeys" autocomplete="off" spellcheck="false" placeholder="AIza... (key dari project Google yang berbeda)"></textarea>
@@ -389,7 +389,7 @@
                 <div id="qLists"></div>
             </div>
 
-            <div class="cara-head"><span class="cara-no">CARA 2</span><div><b>Scan AI Satu Poster</b><small>Scan 1 postingan, hasilnya mengisi form Cara 3 di bawah → cek &amp; edit → kirim manual</small></div></div>
+            <div class="cara-head"><span class="cara-no">CARA 2</span><div><b>Scan AI Satu Poster</b><small>Scan 1 postingan (rotasi model Gemini otomatis seperti Cara 1), hasilnya mengisi form Cara 3 di bawah → cek &amp; edit → kirim manual</small></div></div>
 
             <div class="ai-card" id="aiCard">
                 <h3>🤖 Scan Poster dengan AI</h3>
@@ -507,7 +507,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.3';
+        const APP_VERSION = '1.0.4';
         const ALLOWED_PINS = ["301102", "291104", "666666"];
         
         const DEFAULT_COLLABS = [
@@ -1208,12 +1208,22 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     '1. Baca SEMUA gambar secara berurutan sebagai satu postingan.',
                     '2. Jangan mengarang. Salin isi sesuai poster dan jangan mengubah maknanya. Jangan menambah sumber, derajat hadits, atau nomor ayat yang tidak tertulis di poster; bila perlu diperiksa, tulis di "peringatan".',
                     '3. "judul": ringkas, jelas, Title Case, maksimal 80 karakter, tanpa emoji, tanpa tanda kutip ganda.',
-                    '4. "kategori": pilih PERSIS salah satu dari daftar ini bila ada yang cocok: ' + cats.join(' | ') + '. Kategori bulan Hijriah (yang ada angka dalam kurung) hanya dipakai bila poster jelas membahas amalan bulan itu. Bila tidak ada yang cocok, buat kategori baru singkat (1-2 kata, Title Case).',
+                    '4. "kategori": pilih PERSIS salah satu dari daftar ini bila ada yang cocok: ' + cats.join(' | ') + '. Bila tidak ada yang cocok sama sekali, buat kategori baru singkat (1-2 kata, Title Case).',
+                    '   ATURAN MEMILIH KATEGORI (tujuannya: admin tidak perlu mengecek ulang, jadi pilih kategori yang PALING PALING PALING sesuai dengan topik utama poster):',
+                    '   a. Bila topik poster tentang pasangan, suami, istri, anak, atau kehidupan keluarga, pilih "Rumah Tangga", BUKAN "Adab", karena lebih tepat masuk Rumah Tangga.',
+                    '   b. Bila poster membahas amalan/keutamaan/peristiwa pada bulan Hijriah tertentu (yang ada angka dalam kurung, 12 bulan), pilih kategori bulan itu, WALAUPUN isinya tentang puasa. Utamakan kategori bulan lebih dulu; "Puasa" itu masih umum dan bukan kategori khusus, jadi dipakai hanya bila puasanya tidak terkait bulan tertentu.',
+                    '   c. Bila dalam satu poster ada beberapa topik sekaligus, atau ada topik luas dan sempit bersamaan, pilih kategori yang LEBIH LUAS yang mencakup semuanya. Contoh: poster membahas syirik, tauhid, dan akidah sekaligus, maka pilih "Akidah" (akidah lebih luas dari tauhid dan syirik); "Manhaj Salaf" lebih luas dari "Akidah"; dan seterusnya mengikuti pola luas mengalahkan sempit.',
+                    '   d. Jangan memilih kategori hanya karena ada satu kata kuncinya di poster; nilai topik utama poster secara keseluruhan, lalu pilih kategori yang paling pas.',
                     '5. "emoji": satu emoji yang cocok untuk kategori.',
                     '6. "tags": 5-10 tag huruf kecil, tanpa #, tanpa koma di dalam tag, relevan (campuran yang spesifik dan umum).',
-                    '7. "akun_terdeteksi": semua username/watermark akun media sosial yang terlihat di poster (misal "an nashiha daily"), tulis apa adanya; kosong bila tidak ada.',
+                    '7. "akun_terdeteksi": akun yang menjadi COLLABORATOR poster, yaitu akun yang memposting/memiliki poster ini, ditandai oleh logo, watermark, atau username akun yang tercetak di poster (biasanya di pojok, header, atau footer).',
+                    '   Daftar username Master List collaborator: ' + getCollabList().join(' ') + '.',
+                    '   a. Tulisan setelah "Source", "Sumber", "Source :", atau kutipan nama akun/orang/situs/kitab sebagai asal perkataan adalah bentuk penghormatan kepada penulis aslinya, BUKAN collaborator. Abaikan sepenuhnya: jangan dimasukkan ke akun_terdeteksi dan jangan dijadikan "peringatan" atau keraguan.',
+                    '   b. Bila yang terlihat hanya LOGO (tanpa tulisan username) dari akun yang ada di Master List, misalnya logo The Quran Path, logo Bedah Kitab, atau logo An Nashiha Daily, tetap tulis username Master List yang sesuai dengan yakin (misal "@thequran_path", "@bedahkitab_", "@an.nashiha_daily"), tulis PERSIS seperti di Master List, tanpa ragu dan tanpa peringatan.',
+                    '   c. Bila tidak ada logo tetapi ada username akun yang tercetak sebagai identitas/watermark poster, username itu adalah collaborator; tulis apa adanya.',
+                    '   d. Kosongkan bila tidak ada logo/username/watermark akun.',
                     '8. "caption": ikuti gaya berikut.\n' + style,
-                    '9. "peringatan": daftar catatan singkat tentang bagian yang meragukan (tulisan buram, Arab kurang jelas, sumber tidak tertulis, dll). Kosong bila yakin.',
+                    '9. "peringatan": daftar catatan singkat tentang bagian yang meragukan (tulisan buram, Arab kurang jelas, sumber tidak tertulis, dll). Kosong bila yakin. Jangan menulis peringatan tentang nama di "Source/Sumber" dan jangan meragukan pemilihan kategori.',
                     'Balas HANYA dengan satu objek JSON valid (tanpa teks lain, tanpa ```), dengan kunci: judul, kategori, emoji, tags (array), akun_terdeteksi (array), caption, peringatan (array). Di dalam nilai string, tulis baris baru sebagai \\n.'
                 ].join('\n');
             }
@@ -1409,6 +1419,48 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 const t0 = Date.now();
                 let tick = null;
                 try {
+                    /* v.1.0.4 : Gemini + rotasi aktif → pakai sistem model yang sama dengan Antrean Otomatis (Cara 1) */
+                    if (cfg.provider === 'gemini' && cfg.rotate !== false && typeof window.qScanFiles === 'function') {
+                        let curLbl = '';
+                        const showLbl = () => aiMsg('🤖 Memindai dengan ' + (curLbl || 'Gemini') + '... ' + Math.round((Date.now() - t0) / 1000) + ' dtk');
+                        aiMsg('🖼️ Menyiapkan gambar...');
+                        tick = setInterval(showLbl, 1000);
+                        let rr = null;
+                        try {
+                            rr = await window.qScanFiles(files, lbl => { curLbl = lbl; showLbl(); });
+                        } catch (e) {
+                            clearInterval(tick);
+                            if (e && e.allLimit) {
+                                const mnt = Math.max(1, Math.ceil((e.waitSec || 60) / 60));
+                                aiMsg('❌ ' + (e.reasonText || 'Semua kuota Gemini sedang habis') + '.\nCoba lagi sekitar ' + mnt + ' menit, atau tambah key cadangan di ⚙️ Anti-limit & cadangan kuota (Cara 1).');
+                            } else {
+                                aiMsg('❌ Scan gagal: ' + (e && e.message ? e.message : 'terjadi kesalahan'));
+                            }
+                            return;
+                        }
+                        clearInterval(tick);
+                        aiBackup = {};
+                        AI_FIELDS.forEach(id => { aiBackup[id] = aiEl(id).value; });
+                        if (rr.judul) aiSet('inpJudul', rr.judul);
+                        if (rr.kategori) {
+                            aiSet('inpKategori', rr.kategori);
+                            if (rr.emoji) aiSet('inpEmoji', rr.emoji);
+                        }
+                        if (rr.tags) aiSet('inpTag', rr.tags);
+                        if (rr.caption) aiSet('inpContent', rr.caption);
+                        const hitList = String(rr.collab || '').split('\n').map(x => x.trim()).filter(x => x.indexOf('@') === 0);
+                        if (hitList.length) {
+                            aiSet('inpCaption', rr.collab);
+                            renderCollabChips();
+                        }
+                        aiEl('btnAiUndo').style.display = 'inline-block';
+                        let msg2 = '✅ Selesai (' + rr.model + ', ' + ((Date.now() - t0) / 1000).toFixed(1) + ' dtk). Form sudah terisi — cek & edit seperlunya.';
+                        if (hitList.length) msg2 += '\n🤝 Collab terdeteksi: ' + hitList.join(', ');
+                        aiMsg(msg2);
+                        aiShowWarn(rr.warn || [], '⚠️ Perlu dicek:');
+                        if (aiLastFiles.length && !fromUpload) aiEl('btnAiUse').style.display = 'inline-block';
+                        return;
+                    }
                     const cap = Math.max.apply(null, chain.map(k => AI_PROVIDERS[k].maxImg));
                     const use = files.slice(0, cap);
                     const b64 = [];
@@ -2173,10 +2225,14 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                 }
 
                 async function qProcess(it) {
-                    const cfg = aiLoad();
-                    if (!qHasAnyKey(cfg)) throw aiErr(401, 'API Key Gemini belum diisi');
                     const files = await qLoadBlobs(it.id);
                     if (!files.length) throw aiErr(-1, 'Gambar poster tidak ditemukan di penyimpanan browser.');
+                    return qProcessFiles(files);
+                }
+
+                async function qProcessFiles(files) {
+                    const cfg = aiLoad();
+                    if (!qHasAnyKey(cfg)) throw aiErr(401, 'API Key Gemini belum diisi');
                     const use = files.slice(0, MAX_IMG);
                     let side = 1600;
                     const prep = async s => { const a = []; for (let i = 0; i < use.length; i++) a.push(await aiPrepImage(use[i], s)); return a; };
@@ -2190,6 +2246,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                         const c = qPick(pool);
                         if (!c) break;
                         Q.curLabel = c.model + (geminiKeys(cfg).length > 1 ? ' · key ' + c.ki : '');
+                        if (Q.scanCb) { try { Q.scanCb(Q.curLabel); } catch (x) {} }
                         qTick();
                         try {
                             d = aiParse(await qCall(c, b64, sys, userText));
@@ -2232,6 +2289,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                             const cdo = cdLoad()['x:' + k];
                             if (cdo) { othersWait = Math.min(othersWait, cdo.until - Date.now()); continue; }
                             Q.curLabel = AI_PROVIDERS[k].label.split(' (')[0] + ' (cadangan)';
+                            if (Q.scanCb) { try { Q.scanCb(Q.curLabel); } catch (x) {} }
                             qTick();
                             try {
                                 const o = await qCallOther(cfg, k, b64, sys, userText);
@@ -2279,6 +2337,17 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                         at: Date.now()
                     };
                 }
+
+                /* v.1.0.4 : dipakai Cara 2 (Scan AI satu poster) agar memakai rotasi model yang sama dengan antrean */
+                window.qScanFiles = async function (files, onLabel) {
+                    Q.scanCb = onLabel || null;
+                    try {
+                        return await qProcessFiles(files);
+                    } finally {
+                        Q.scanCb = null;
+                        Q.curLabel = '';
+                    }
+                };
 
                 async function qHandleErr(it, e) {
                     const st = (e && e.status !== undefined) ? e.status : -1;
