@@ -1,15 +1,14 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.6.6
+Arsip Dakwah Manhaj Salaf - Update v2.6.7
+
+v2.6.7:
+1. PEMBATAS WAKTU RINCI di Riwayat Konten Terbaru: di dalam satu hari, tiap kelompok poster yang diunggah berselang minimal 1 detik diberi pembatas berisi selisih waktu dari kelompok di atasnya (contoh: 3 mnt 12 dtk), tanpa menampilkan jam pasti. Kelompok paling atas tiap hari menampilkan umur unggahan (contoh: 5 mnt 3 dtk lalu) sehingga mudah mengenali poster yang baru saja diunggah.
+2. PEMBATAS TANGGAL LEBIH TEGAS DAN ELEGAN: pita emas dengan garis ganda, judul hari/tanggal besar, penanda Hari ini / Kemarin, dan jumlah konten. Pembatas waktu dibuat lebih halus agar jelas beda tingkatannya.
+3. Pembatas waktu ikut menyesuaikan saat poster disaring (kategori / mode), selisih dihitung ulang dari konten yang terlihat.
 
 v2.6.6:
-1. RIWAYAT KONTEN LEBIH CEPAT: riwayat unggahan tersimpan di perangkat dan langsung dipakai saat tombol ditekan (tanpa menunggu jaringan). Pemeriksaan GitHub berjalan di latar belakang, hanya mengunduh versi manifest yang baru, dengan 6 unduhan paralel, percobaan ulang otomatis, dan jeda 10 menit antar pemeriksaan agar hemat kuota.
-2. URUTAN TIDAK ACAK LAGI: waktu unggah kini disimpan lengkap (hanya untuk pengurutan, jam tidak ditampilkan). Poster yang diunggah dalam satu hari diurutkan dari yang paling baru, dengan arah urutan manifest (baru di akhir / baru di awal) dideteksi otomatis. Bagian "Lebih lama" ikut memakai arah yang sama. Jangkauan riwayat diperluas dari 12 ke 30 versi.
-3. Riwayat unggahan dimuat diam-diam di latar belakang setelah arsip terbuka, sehingga hasil siap saat dibutuhkan.
-
-v2.6.5:
-1. PERBAIKAN RIWAYAT TERBARU: tanggal unggah dibaca dari riwayat perubahan manifest.json di GitHub (kapan setiap poster pertama kali muncul), lalu disimpan di perangkat agar hemat kuota. Konten baru otomatis tampil paling atas dengan pembatas hari.
-2. Tanggal eksplisit di manifest (kolom tanggal/date/dst.) tetap dipakai lebih dulu bila ada. Poster yang lebih tua dari riwayat yang terbaca dikelompokkan di bagian "Lebih lama".
-3. Banner menampilkan status pengambilan riwayat (memuat / berhasil / gagal beserta alasannya).
+1. RIWAYAT KONTEN LEBIH CEPAT: riwayat unggahan tersimpan di perangkat dan langsung dipakai saat tombol ditekan; pemeriksaan GitHub berjalan di latar belakang, hanya mengunduh versi manifest baru, 6 unduhan paralel, jeda 10 menit antar pemeriksaan.
+2. URUTAN TIDAK ACAK: waktu unggah disimpan lengkap (hanya untuk pengurutan), arah urutan manifest dideteksi otomatis, jangkauan riwayat 30 versi.
 
 -->
 
@@ -439,12 +438,20 @@ v2.6.5:
         .terbaru-banner .tb-txt small{color:#9a9a9a;font-size:11px;line-height:1.35;}
         .terbaru-banner button{flex:0 0 auto;background:transparent;color:#D4AF37;border:1px solid rgba(212,175,55,.5);border-radius:999px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;}
         .terbaru-banner button:hover{background:#D4AF37;color:#111;}
-        .day-sep{grid-column:1 / -1;align-self:stretch;display:flex;align-items:center;gap:10px;padding:10px 2px 2px 2px;}
-        .day-sep .ds-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(212,175,55,0),rgba(212,175,55,.6));}
-        .day-sep .ds-line:last-child{background:linear-gradient(90deg,rgba(212,175,55,.6),rgba(212,175,55,0));}
-        .day-sep .ds-title{color:#D4AF37;font-size:12px;font-weight:800;letter-spacing:.06em;white-space:nowrap;}
-        .day-sep .ds-tag{color:#111;background:#D4AF37;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;white-space:nowrap;}
-        .day-sep .ds-count{color:#8a8a8a;font-size:10px;font-weight:700;letter-spacing:.06em;white-space:nowrap;}
+        .day-sep{grid-column:1 / -1;align-self:stretch;display:flex;align-items:center;gap:12px;margin:26px 0 6px 0;padding:12px 14px;border-top:2px solid #D4AF37;border-bottom:1px solid rgba(212,175,55,.35);border-radius:6px;background:linear-gradient(180deg,rgba(212,175,55,.16),rgba(212,175,55,.03));box-shadow:0 6px 18px rgba(0,0,0,.45);}
+        .day-sep:first-of-type{margin-top:8px;}
+        .day-sep .ds-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(212,175,55,0),rgba(212,175,55,.7));}
+        .day-sep .ds-line:last-child{background:linear-gradient(90deg,rgba(212,175,55,.7),rgba(212,175,55,0));}
+        .day-sep .ds-title{color:#F1D27A;font-size:15px;font-weight:800;letter-spacing:.07em;white-space:nowrap;text-shadow:0 1px 8px rgba(212,175,55,.35);}
+        .day-sep .ds-tag{color:#111;background:#D4AF37;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+        .day-sep .ds-count{color:#b8a56a;font-size:11px;font-weight:700;letter-spacing:.06em;white-space:nowrap;}
+        /* v2.6.7: pembatas waktu rinci di dalam satu hari */
+        .time-sep{grid-column:1 / -1;align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:0 6px;}
+        .time-sep .ts-line{flex:1;height:0;border-top:1px dashed rgba(212,175,55,.35);}
+        .time-sep .ts-chip{display:inline-flex;align-items:center;gap:6px;color:#cfcfcf;background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.35);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;}
+        .time-sep .ts-chip .ts-ic{color:#D4AF37;font-size:12px;line-height:1;}
+        .time-sep .ts-chip b{color:#F1D27A;font-weight:800;}
+        .time-sep.ts-awal .ts-chip{border-color:#D4AF37;background:rgba(212,175,55,.12);}
         #post-list{ display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center; transition: all 0.5s ease; }
         .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative; backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); }
         .poster:hover{border-color:#D4AF37;transform:scale(1.02);box-shadow:0 12px 40px rgba(212,175,55,0.05);}
@@ -1210,7 +1217,7 @@ v2.6.5:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.6</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.7</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1396,7 +1403,7 @@ v2.6.5:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.6.6';
+        const APP_VERSION = 'v2.6.7';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* v2.6.2: animasi jam pasir mengikuti detik (0-59), terbalik tiap menit */
         let _hgPrev = -1;
@@ -1898,7 +1905,7 @@ v2.6.5:
             const dt = new Date(s);
             return (!isNaN(dt.getTime()) && dt.getFullYear() >= 2000 && dt.getFullYear() <= 2100) ? dt : null;
         }
-        function tanggalPoster(p) {
+        function tanggalPosterEksplisit(p) {
             for (let i = 0; i < TGL_FIELDS.length; i++) {
                 if (Object.prototype.hasOwnProperty.call(p, TGL_FIELDS[i])) {
                     const d = parseTanggalUpload(p[TGL_FIELDS[i]]);
@@ -1907,8 +1914,31 @@ v2.6.5:
             }
             const m = /(20\d{2})[-_.]?(0[1-9]|1[0-2])[-_.]?(0[1-9]|[12]\d|3[01])(?!\d)/.exec(String(p.path || ''));
             if (m) return tglBuat(+m[1], +m[2], +m[3]);
+            return null;
+        }
+        function tanggalPoster(p) {
+            const ek = tanggalPosterEksplisit(p);
+            if (ek) return ek;
             const h = riwayatGit.map[String(p.path || '')];
             return (h && h.t) ? new Date(h.t) : null;
+        }
+        /* v2.6.7: waktu presisi (ms) hanya bila berasal dari riwayat GitHub, bukan tanggal eksplisit */
+        function waktuPresisi(p) {
+            if (tanggalPosterEksplisit(p)) return null;
+            const h = riwayatGit.map[String(p.path || '')];
+            return (h && h.t) ? h.t : null;
+        }
+        function formatDurasi(ms) {
+            let d = Math.max(0, Math.round(ms / 1000));
+            const hr = Math.floor(d / 86400); d -= hr * 86400;
+            const jm = Math.floor(d / 3600); d -= jm * 3600;
+            const mn = Math.floor(d / 60); const dt = d - mn * 60;
+            const b = [];
+            if (hr) b.push(hr + ' hari');
+            if (jm) b.push(jm + ' jam');
+            if (mn) b.push(mn + ' mnt');
+            if (dt || !b.length) b.push(dt + ' dtk');
+            return b.slice(0, 3).join(' ');
         }
         function kunciHari(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
         function labelHari(d) { return HARI_ID[d.getDay()] + ', ' + d.getDate() + ' ' + BULAN_MASEHI_ID[d.getMonth()] + ' ' + d.getFullYear(); }
@@ -1922,7 +1952,7 @@ v2.6.5:
             if (urutTerbaruCache && urutTerbaruCache.n === rawManifestPosters.length) return urutTerbaruCache;
             const items = rawManifestPosters.map(function(p, i) {
                 const h = riwayatGit.map[String(p.path || '')];
-                return { id: String(p.path).replace(/\//g, '-'), d: tanggalPoster(p), i: i, s: (h && typeof h.s === 'number') ? h.s : null };
+                return { id: String(p.path).replace(/\//g, '-'), d: tanggalPoster(p), i: i, s: (h && typeof h.s === 'number') ? h.s : null, pt: waktuPresisi(p) };
             });
             const arah = riwayatGit.dir === -1 ? -1 : 1;
             const adaTanggal = items.some(function(x) { return x.d; });
@@ -1950,7 +1980,7 @@ v2.6.5:
             let jumlahKartu = 0;
             list.querySelectorAll(':scope > .poster').forEach(function(c) { peta[c.getAttribute('data-id')] = c; jumlahKartu++; });
             if (jumlahKartu === 0) return;
-            list.querySelectorAll(':scope > .day-sep, :scope > .terbaru-banner').forEach(function(e) { e.remove(); });
+            list.querySelectorAll(':scope > .day-sep, :scope > .time-sep, :scope > .terbaru-banner').forEach(function(e) { e.remove(); });
             const frag = document.createDocumentFragment();
             if (!urutTerbaru) {
                 rawManifestPosters.forEach(function(p) {
@@ -1967,6 +1997,7 @@ v2.6.5:
             banner.innerHTML = '<span class="tb-ic">' + IC('clock') + '</span><span class="tb-txt"><b>Riwayat Konten Terbaru</b><small id="tbStatus">' + teksBannerTerbaru() + '</small></span><button type="button" onclick="resetSemua()">Tutup</button>';
             frag.appendChild(banner);
             let hariTerakhir = '#';
+            let ptTerakhir = null, kh0 = '';
             hasil.items.forEach(function(x) {
                 const c = peta[x.id];
                 if (!c) return;
@@ -1982,6 +2013,15 @@ v2.6.5:
                         frag.appendChild(sep);
                     }
                 }
+                if (x.pt !== null && (ptTerakhir === null || Math.abs(ptTerakhir - x.pt) >= 1000 || kh0 !== kunciHari(x.d))) {
+                    const ts = document.createElement('div');
+                    ts.className = 'time-sep';
+                    ts.setAttribute('data-t', String(x.pt));
+                    ts.setAttribute('data-hari', kunciHari(x.d));
+                    ts.innerHTML = '<span class=\"ts-line\"></span><span class=\"ts-chip\"><span class=\"ts-ic\">&#9201;</span><span class=\"ts-txt\"></span></span><span class=\"ts-line\"></span>';
+                    frag.appendChild(ts);
+                }
+                if (x.pt !== null) { ptTerakhir = x.pt; kh0 = kunciHari(x.d); } else { ptTerakhir = null; kh0 = ''; }
                 frag.appendChild(c);
             });
             list.appendChild(frag);
@@ -2003,6 +2043,34 @@ v2.6.5:
                 const ct = sep.querySelector('.ds-count');
                 if (ct) ct.textContent = n + ' konten';
             });
+            /* v2.6.7: pembatas waktu rinci - selisih dihitung dari kelompok terlihat di atasnya (hari yang sama) */
+            const sekarang = Date.now();
+            let tTerakhir = null, hariIni = '';
+            const anak = list.children;
+            for (let k = 0; k < anak.length; k++) {
+                const el = anak[k];
+                if (el.classList.contains('day-sep')) { tTerakhir = null; hariIni = ''; continue; }
+                if (!el.classList.contains('time-sep')) continue;
+                let n = 0;
+                let nx = el.nextElementSibling;
+                while (nx && !nx.classList.contains('time-sep') && !nx.classList.contains('day-sep')) {
+                    if (nx.classList.contains('poster') && nx.style.display !== 'none') n++;
+                    nx = nx.nextElementSibling;
+                }
+                if (n === 0) { el.style.display = 'none'; continue; }
+                const t = Number(el.getAttribute('data-t'));
+                const hr = el.getAttribute('data-hari');
+                const txt = el.querySelector('.ts-txt');
+                if (tTerakhir === null || hr !== hariIni) {
+                    el.classList.add('ts-awal');
+                    if (txt) txt.innerHTML = 'Terbaru &middot; <b>' + formatDurasi(sekarang - t) + '</b> lalu';
+                } else {
+                    el.classList.remove('ts-awal');
+                    if (txt) txt.innerHTML = 'Selisih <b>' + formatDurasi(tTerakhir - t) + '</b> sebelumnya';
+                }
+                el.style.display = 'flex';
+                tTerakhir = t; hariIni = hr;
+            }
         }
         /* v2.6.5: tanggal unggah dari riwayat perubahan manifest.json di GitHub (kapan tiap poster pertama kali muncul) */
         const RIWAYAT_REPO = 'Muhram07/Salinan-Eksperimen-Arsip-Dakwah';
