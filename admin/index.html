@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Arsip Dakwah - Admin Panel | v.1.0.5
+  Arsip Dakwah - Admin Panel | v.1.0.6
   Riwayat perbaikan (2 versi terbaru):
+  v.1.0.6 - Pemilih Poster Massal di ketiga cara: pilih 50-100 poster sekaligus, tampil sebagai gambar besar dalam satu kotak yang bisa digulir. Tekan lama poster = aktifkan centang bernomor, ketuk bulatan = pilih banyak (carousel), tombol Jadikan konten N menandai tunggal/carousel (status konten di pojok poster, urutan poster di bawahnya). Ada Tambah ke konten, Lepas dari konten, Hapus konten, Sisa = tunggal, Urut nama, ukuran Kecil/Sedang/Besar. Cara 1: semua konten masuk antrean sekaligus. Cara 2: scan per konten. Cara 3: pakai per konten untuk form, otomatis dibuang dari daftar setelah terkirim. Pratinjau hemat memori (dibuat saat terlihat, dilepas saat menjauh). Cara pilih file lama tetap tersedia.
   v.1.0.5 - Pengiriman banyak poster ke GitHub lebih tahan gagal: tiap poster dicoba ulang otomatis sampai 3 kali (jeda 6/15 detik) bila API sibuk atau bentrok commit, jeda antar poster dinaikkan 3 -> 5 detik agar tidak berebut commit, dan poster yang tetap gagal tidak lagi menghentikan seluruh antrean (dilewati, dilaporkan di akhir). Pasangan perbaikan: workflow auto-extract v2 (tanpa force-push) agar poster yang masuk saat bot bekerja tidak terhapus.
-  v.1.0.4 - Cara 2 (Scan AI satu poster) kini memakai sistem rotasi model Gemini yang sama dengan Cara 1 (daftar model otomatis, key cadangan, provider cadangan, penghitung limit bersama). Prompt AI (Cara 1 & 2) ditambah aturan sumber/collaborator dan pemilihan kategori.
 -->
 <html lang="id">
 <head> 
@@ -284,6 +284,55 @@
         .q-set label{display:block;margin-top:10px;}
         .q-set textarea{min-height:70px;font-size:13px;padding:10px 12px;margin:6px 0 8px;}
         .q-pool{font-size:12px;color:#cfc28a;line-height:1.6;white-space:pre-line;word-break:break-word;margin-top:6px;}
+
+        /* ===== v.1.0.6 : PEMILIH POSTER MASSAL (CARA 1, 2 & 3) ===== */
+        .bp{margin:6px 0 4px;}
+        .bp-how{font-size:12px;color:#d9cf9f;line-height:1.7;background:rgba(212,175,55,0.07);border:1px dashed rgba(212,175,55,0.45);border-radius:12px;padding:10px 12px;margin-bottom:10px;text-align:left;}
+        .bp-how b{color:#D4AF37;}
+        .bp .bp-file{font-size:13px;margin-bottom:8px;}
+        .bp-stats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px;}
+        .bp-stats span{font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid #555;color:#ccc;background:rgba(255,255,255,0.05);}
+        .bp-stats span.hot{border-color:#D4AF37;color:#111;background:#D4AF37;font-weight:bold;}
+        .bp-frame{height:70vh;height:min(76vh,780px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom;position:relative;background:#0c0c0c;border:1px solid rgba(212,175,55,0.55);border-radius:16px;padding:10px 8px;box-shadow:inset 0 0 24px rgba(0,0,0,0.6);}
+        .bp-frame.mode{border-color:#D4AF37;box-shadow:inset 0 0 0 2px rgba(212,175,55,0.35),inset 0 0 24px rgba(0,0,0,0.6);}
+        .bp-frame:empty{height:110px;display:flex;align-items:center;justify-content:center;}
+        .bp-frame:empty::before{content:'Belum ada poster — pilih file di atas';color:#777;font-size:13px;}
+        .bp-it{width:66%;max-width:560px;margin:0 auto 14px;position:relative;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
+        .bp-frame.l .bp-it{width:100%;max-width:none;}
+        .bp-frame.s{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;justify-content:center;}
+        .bp-frame.s .bp-it{width:calc(50% - 4px);margin:0 0 6px;}
+        .bp-pic{position:relative;border-radius:12px;overflow:hidden;border:2px solid #444;background:#111;aspect-ratio:4/5;}
+        .bp-pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;pointer-events:none;-webkit-user-drag:none;}
+        .bp-pic.ok img{display:block;}
+        .bp-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:12px;text-align:center;padding:6px;}
+        .bp-pic.ok .bp-ph{display:none;}
+        .bp-it.as .bp-pic{border-color:#D4AF37;}
+        .bp-it.as.c1 .bp-pic{border-color:#cfcfcf;}
+        .bp-it.sel .bp-pic{border-color:#fff;box-shadow:0 0 0 3px #D4AF37,0 0 20px rgba(212,175,55,0.65);}
+        .bp-chk{position:absolute;top:8px;left:8px;width:42px;height:42px;border-radius:50%;border:2.5px solid #D4AF37;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;color:#111;font-weight:800;font-size:14px;z-index:3;cursor:pointer;touch-action:manipulation;}
+        .bp-frame.mode .bp-chk{display:flex;}
+        .bp-it.sel .bp-chk{background:linear-gradient(135deg,#D4AF37,#E6B800);border-color:#fff;}
+        .bp-frame.s .bp-chk{width:36px;height:36px;font-size:12px;}
+        .bp-badge{position:absolute;top:8px;right:8px;font-size:11px;padding:3px 9px;border-radius:12px;background:rgba(0,0,0,0.6);color:#888;border:1px dashed #666;z-index:2;pointer-events:none;}
+        .bp-badge.on{background:linear-gradient(135deg,#D4AF37,#E6B800);color:#111;border:1px solid #fff;font-weight:bold;}
+        .bp-it.as.c1 .bp-badge.on{background:linear-gradient(135deg,#e6e6e6,#bdbdbd);}
+        .bp-idx{position:absolute;bottom:8px;left:8px;font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.65);color:#ddd;z-index:2;pointer-events:none;}
+        .bp-cap{font-size:12px;color:#bbb;margin-top:5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .bp-cap2{font-size:12px;color:#777;text-align:center;margin-top:1px;}
+        .bp-cap2.on{color:#D4AF37;font-weight:bold;}
+        .bp-ctl{margin-top:10px;}
+        .bp-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;}
+        .bp-row .btn-small-gold{flex:1 1 auto;padding:9px 10px;font-size:12.5px;text-align:center;}
+        .bp select{width:100%;font-size:13px;padding:10px 12px;margin-bottom:0;border-radius:12px;}
+        .bp-row select{flex:1 1 140px;width:auto;}
+        .bp-ok{font-size:15px;padding:13px;margin-top:2px;}
+        .bp-ok:disabled,.bp button:disabled{opacity:.45;cursor:not-allowed;animation:none;}
+        .bp-sizes{display:flex;gap:4px;align-items:center;font-size:12px;color:#aaa;flex:1 1 auto;justify-content:flex-end;}
+        .bp-sizes button.on{background:#D4AF37;color:#111;}
+        .bp-sizes .btn-small-gold{flex:0 0 auto;padding:8px 9px;}
+        .bp-msg{font-size:13px;color:#f0d77a;line-height:1.6;white-space:pre-line;word-break:break-word;margin-top:6px;}
+        .bp-xbox{margin-top:10px;padding:10px 12px;border:1px solid rgba(212,175,55,0.5);border-radius:14px;background:rgba(212,175,55,0.06);}
+        .bp-xt{color:#D4AF37;font-weight:bold;font-size:14px;margin-bottom:4px;text-align:center;}
     </style>
 </head>
 <body>
@@ -338,7 +387,14 @@
                 <div class="q-fatal" id="qFatal"></div>
 
                 <div class="q-box">
-                    <label>Langkah 1 — Pilih gambar satu postingan (poster tunggal atau carousel)</label>
+                    <label>Langkah 1 — Pilih banyak poster sekaligus (50–100), tandai tiap konten (tunggal / carousel)</label>
+                    <div id="qPicker"></div>
+                </div>
+
+                <details class="q-set" id="qOldPick">
+                    <summary>🗂️ Cara lama: satu postingan per langkah</summary>
+                <div class="q-box" style="margin-top:10px;">
+                    <label>Pilih gambar satu postingan (poster tunggal atau carousel)</label>
                     <input type="file" id="qFile" multiple accept="image/*">
                     <div class="q-hint">Pilih lagi untuk menambah slide. Atur urutan dengan ▲ ▼ — urutan di sini = urutan slide 1.jpg, 2.jpg, ... Poster tunggal cukup 1 gambar.</div>
                     <div class="q-stage" id="qStage"></div>
@@ -348,6 +404,7 @@
                     </div>
                     <button type="button" class="btn-solid" id="qBtnAdd" style="font-size:15px;padding:12px;">➕ TAMBAH KE ANTREAN</button>
                 </div>
+                </details>
 
                 <div class="q-box">
                     <div class="q-row" style="margin-bottom:6px;">
@@ -426,8 +483,12 @@
                     </div>
                 </details>
 
-                <label>Poster untuk dipindai</label>
-                <input type="file" id="aiFile" multiple accept="image/*">
+                <label>Poster untuk dipindai — pilih banyak, tandai konten, lalu scan satu per satu</label>
+                <div id="aiPicker"></div>
+                <details class="q-set" id="aiOldPick">
+                    <summary>🗂️ Cara lama: pilih satu postingan</summary>
+                    <input type="file" id="aiFile" multiple accept="image/*" style="margin-top:10px;">
+                </details>
                 <div id="aiFileInfo" class="ai-hint"></div>
                 <button type="button" class="btn-solid" id="btnAiScan" style="font-size:16px;padding:14px;">🔍 SCAN &amp; ISI OTOMATIS</button>
                 <div class="ai-row" style="margin-top:10px;">
@@ -475,6 +536,8 @@
             <div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;margin-bottom:15px;">
                 <label style="font-weight:bold;color:#D4AF37;">📸 Upload & Urutkan Gambar</label>
                 <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Pilih gambar. Nama file akan otomatis berubah menjadi <b>1.jpg, 2.jpg, 3.jpg</b>.</p>
+                <div id="mnPicker"></div>
+                <div class="q-hint" style="margin-top:10px;">Atau pilih langsung satu konten (cara lama):</div>
                 <input type="file" id="inpFileGambar" multiple accept="image/*" onchange="handleFileSelect(event)">
                 
                 <div id="previewContainer" class="preview-container"></div>
@@ -507,7 +570,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.5';
+        const APP_VERSION = '1.0.6';
         const ALLOWED_PINS = ["301102", "291104", "666666"];
         
         const DEFAULT_COLLABS = [
@@ -1099,6 +1162,7 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
 
                     if (response.ok && result.success) {
                         statusText.innerHTML = `✅ Berhasil! ZIP dikirim ke GitHub. Bot akan memprosesnya otomatis.`;
+                        if (window.bpAfterSend) { try { window.bpAfterSend(); } catch (e) {} }
                     } else {
                         statusText.innerHTML = `❌ Gagal mengirim ke API: ${result.error || 'Unknown Error'}`;
                     }
@@ -1106,6 +1170,447 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     statusText.innerHTML = `❌ Error koneksi ke API. Detail: ${error.message}`;
                 }
             };
+
+            /* ===== v.1.0.6 : PEMILIH POSTER MASSAL (dipakai Cara 1, 2 & 3) ===== */
+            const BP_ALL = [];
+            const BP_MAX_SIDE = 1280;
+            window.addEventListener('beforeunload', e => {
+                if (BP_ALL.some(p => p.hasWork())) { e.preventDefault(); e.returnValue = ''; return ''; }
+            });
+
+            function bpFillContents(sel, p) {
+                const cur = sel.value;
+                const c = p.getContents();
+                let h = '';
+                c.forEach((a, k) => { h += '<option value="' + k + '">Konten ' + (k + 1) + ' · ' + a.length + ' gambar' + (a.length > 1 ? ' (carousel)' : ' (tunggal)') + '</option>'; });
+                if (!c.length) h = '<option value="">(belum ada konten — tandai poster dulu)</option>';
+                sel.innerHTML = h;
+                if (cur !== '' && Number(cur) < c.length) sel.value = cur;
+            }
+
+            function bpCreate(host) {
+                const S = { items: [], by: {}, keys: {}, contents: [], sel: [], mode: false, map: {}, cbs: [], seq: 0, supp: 0 };
+                let size = 'm';
+                try { const sv = localStorage.getItem('dakwahBpSize'); if (sv === 's' || sv === 'm' || sv === 'l') size = sv; } catch (e) {}
+
+                host.classList.add('bp');
+                host.innerHTML =
+                    '<div class="bp-how"><b>💡 Cara pakai</b><br>' +
+                    '① <b>Tekan lama</b> satu poster → muncul bulatan ✓ di pojoknya.<br>' +
+                    '② <b>Ketuk bulatan</b> poster lain untuk memilih banyak (carousel). Tekan lama poster lain = pilih rentang.<br>' +
+                    '③ Tekan <b>Jadikan konten</b> di bawah kotak. ④ Ulangi sampai semua poster tertandai. Poster tunggal: cukup 1 centang.</div>' +
+                    '<input type="file" class="bp-file" multiple accept="image/*">' +
+                    '<div class="bp-stats"></div>' +
+                    '<div class="bp-frame m"></div>' +
+                    '<div class="bp-ctl">' +
+                        '<div class="bp-row"><select class="bp-tg"></select></div>' +
+                        '<button type="button" class="btn-solid bp-ok">✅ Jadikan konten 1</button>' +
+                        '<div class="bp-row">' +
+                            '<button type="button" class="btn-small-gold bp-cancel">❌ Batal pilih</button>' +
+                            '<button type="button" class="btn-small-gold bp-unas">↩️ Lepas dari konten</button>' +
+                            '<button type="button" class="btn-small-gold bp-next">⤵️ Ke yang belum</button>' +
+                        '</div>' +
+                        '<div class="bp-row">' +
+                            '<button type="button" class="btn-small-gold bp-single">⚡ Sisa = tunggal</button>' +
+                            '<button type="button" class="btn-small-gold bp-sort">🔤 Urut nama</button>' +
+                            '<span class="bp-sizes">🔎' +
+                                '<button type="button" class="btn-small-gold" data-sz="s">Kecil</button>' +
+                                '<button type="button" class="btn-small-gold" data-sz="m">Sedang</button>' +
+                                '<button type="button" class="btn-small-gold" data-sz="l">Besar</button>' +
+                            '</span>' +
+                        '</div>' +
+                        '<div class="bp-row">' +
+                            '<select class="bp-mg"></select>' +
+                            '<button type="button" class="btn-small-gold bp-view">📍 Lihat</button>' +
+                            '<button type="button" class="btn-small-gold bp-del" style="border-color:#a44;color:#f88;background:rgba(255,80,80,0.08);">🗑️ Hapus konten</button>' +
+                        '</div>' +
+                        '<div class="bp-row"><button type="button" class="btn-small-gold bp-clear" style="background:rgba(255,255,255,0.05);color:#aaa;border-color:#555;">🧹 Kosongkan semua poster</button></div>' +
+                    '</div>' +
+                    '<div class="bp-msg"></div>' +
+                    '<div class="bp-extra"></div>';
+
+                const q = c => host.querySelector(c);
+                const fileIn = q('.bp-file'), stats = q('.bp-stats'), frame = q('.bp-frame'), tg = q('.bp-tg'), ok = q('.bp-ok');
+                const mg = q('.bp-mg'), msg = q('.bp-msg'), extra = q('.bp-extra');
+                const bCancel = q('.bp-cancel'), bUnas = q('.bp-unas'), bNext = q('.bp-next'), bSingle = q('.bp-single');
+                const bSort = q('.bp-sort'), bView = q('.bp-view'), bDel = q('.bp-del'), bClear = q('.bp-clear');
+                const say = t => { msg.textContent = t || ''; };
+                const vib = () => { try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {} };
+                const idxOf = id => S.items.findIndex(x => x.id === id);
+
+                /* ---------- Pratinjau hemat memori: dibuat saat terlihat, dilepas saat menjauh ---------- */
+                const pq = [];
+                let act = 0;
+                function want(it) {
+                    if (it.url || it.queued) return;
+                    it.queued = true;
+                    pq.push(it);
+                    pump();
+                }
+                function pump() {
+                    while (act < 2 && pq.length) {
+                        const it = pq.shift();
+                        it.queued = false;
+                        if (!it.vis || !S.by[it.id] || it.url) continue;
+                        act++;
+                        mkPrev(it).then(() => { act--; pump(); }, () => { act--; pump(); });
+                    }
+                }
+                function rel(it) {
+                    it.vis = false;
+                    if (it.url) {
+                        it.img.removeAttribute('src');
+                        try { URL.revokeObjectURL(it.url); } catch (e) {}
+                        it.url = '';
+                        it.pic.classList.remove('ok');
+                    }
+                }
+                async function mkPrev(it) {
+                    try {
+                        let url = '', w = 0, h = 0, bmp = null;
+                        if (window.createImageBitmap) { try { bmp = await createImageBitmap(it.file); } catch (e) { bmp = null; } }
+                        if (bmp) {
+                            w = bmp.width; h = bmp.height;
+                            const sc = Math.min(1, BP_MAX_SIDE / Math.max(w, h));
+                            const cw = Math.max(1, Math.round(w * sc)), ch = Math.max(1, Math.round(h * sc));
+                            const c = document.createElement('canvas');
+                            c.width = cw; c.height = ch;
+                            const x = c.getContext('2d');
+                            x.fillStyle = '#fff';
+                            x.fillRect(0, 0, cw, ch);
+                            x.drawImage(bmp, 0, 0, cw, ch);
+                            try { bmp.close(); } catch (e) {}
+                            const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.86));
+                            c.width = 0; c.height = 0;
+                            if (blob) url = URL.createObjectURL(blob);
+                        }
+                        if (!url) url = URL.createObjectURL(it.file);
+                        if (!S.by[it.id] || !it.vis) { try { URL.revokeObjectURL(url); } catch (e) {} return; }
+                        it.url = url;
+                        if (w && h) { it.ar = w + ' / ' + h; it.pic.style.aspectRatio = it.ar; }
+                        it.img.onload = () => {
+                            if (!it.ar && it.img.naturalWidth) { it.ar = it.img.naturalWidth + ' / ' + it.img.naturalHeight; it.pic.style.aspectRatio = it.ar; }
+                            it.pic.classList.add('ok');
+                        };
+                        it.img.onerror = () => { it.ph.textContent = '⚠️ tidak bisa ditampilkan'; it.pic.classList.remove('ok'); };
+                        it.img.src = url;
+                    } catch (e) {
+                        it.ph.textContent = '⚠️ gagal memuat';
+                    }
+                }
+
+                let io = null;
+                if ('IntersectionObserver' in window) {
+                    io = new IntersectionObserver(entries => {
+                        entries.forEach(en => {
+                            const it = S.by[en.target.getAttribute('data-id')];
+                            if (!it) return;
+                            if (en.isIntersecting) { it.vis = true; want(it); }
+                            else rel(it);
+                        });
+                    }, { root: frame, rootMargin: '700px 0px' });
+                }
+
+                /* ---------- Simpul poster ---------- */
+                function mkNode(it) {
+                    const el = document.createElement('div');
+                    el.className = 'bp-it';
+                    el.setAttribute('data-id', it.id);
+                    el.innerHTML = '<div class="bp-pic" style="aspect-ratio:4/5"><img alt="" draggable="false"><div class="bp-ph">⏳ memuat…</div><div class="bp-chk" data-chk="1"></div><div class="bp-badge"></div><div class="bp-idx"></div></div><div class="bp-cap"></div><div class="bp-cap2"></div>';
+                    it.el = el;
+                    it.pic = el.querySelector('.bp-pic');
+                    it.img = el.querySelector('img');
+                    it.ph = el.querySelector('.bp-ph');
+                    it.chk = el.querySelector('.bp-chk');
+                    it.badge = el.querySelector('.bp-badge');
+                    it.idx = el.querySelector('.bp-idx');
+                    it.cap = el.querySelector('.bp-cap');
+                    it.cap2 = el.querySelector('.bp-cap2');
+                    frame.appendChild(el);
+                    if (io) io.observe(el);
+                    else { it.vis = true; want(it); }
+                }
+
+                function recalc() {
+                    S.map = {};
+                    S.contents.forEach((a, k) => a.forEach((id, s) => { S.map[id] = { k: k + 1, s: s + 1, n: a.length }; }));
+                }
+
+                function fillTargets() {
+                    const cur = tg.value;
+                    const n = S.contents.length;
+                    let h = '<option value="new">➕ Konten baru (#' + (n + 1) + ')</option>';
+                    S.contents.forEach((a, k) => { h += '<option value="' + (k + 1) + '">➕ Tambah ke konten ' + (k + 1) + ' (' + a.length + ' gambar)</option>'; });
+                    tg.innerHTML = h;
+                    if (Array.prototype.some.call(tg.options, o => o.value === cur)) tg.value = cur;
+                    else tg.value = 'new';
+                    const cm = mg.value;
+                    let m = '';
+                    S.contents.forEach((a, k) => { m += '<option value="' + k + '">Konten ' + (k + 1) + ' · ' + a.length + ' gambar</option>'; });
+                    if (!n) m = '<option value="">(belum ada konten)</option>';
+                    mg.innerHTML = m;
+                    if (cm !== '' && Number(cm) < n) mg.value = cm;
+                }
+
+                function refresh() {
+                    recalc();
+                    fillTargets();
+                    const total = S.items.length;
+                    let as = 0;
+                    S.items.forEach((it, i) => {
+                        const m = S.map[it.id];
+                        if (m) as++;
+                        const si = S.sel.indexOf(it.id);
+                        it.el.classList.toggle('sel', si >= 0);
+                        it.el.classList.toggle('as', !!m);
+                        it.el.classList.toggle('c1', !!m && (m.k % 2 === 0));
+                        it.chk.textContent = si >= 0 ? '✓' + (si + 1) : '';
+                        it.badge.textContent = m ? 'Konten ' + m.k : 'Belum';
+                        it.badge.className = 'bp-badge' + (m ? ' on' : '');
+                        it.idx.textContent = String(i + 1);
+                        it.cap.textContent = 'Poster ke-' + (i + 1) + ' dari ' + total + ' · ' + it.name;
+                        it.cap2.textContent = m ? '✅ Konten ' + m.k + ' · slide ' + m.s + '/' + m.n + (m.n > 1 ? ' (carousel)' : ' (tunggal)') : '⬜ Belum ditandai';
+                        it.cap2.className = 'bp-cap2' + (m ? ' on' : '');
+                    });
+                    const free = total - as;
+                    stats.innerHTML = '<span>📷 ' + total + ' poster</span><span>✅ ' + as + ' ditandai</span><span>⬜ ' + free + ' belum</span><span>📦 ' + S.contents.length + ' konten</span>' + (S.mode ? '<span class="hot">☑ ' + S.sel.length + ' dipilih</span>' : '');
+                    frame.className = 'bp-frame ' + size + (S.mode ? ' mode' : '');
+                    host.querySelectorAll('[data-sz]').forEach(b => b.classList.toggle('on', b.getAttribute('data-sz') === size));
+                    const m2 = S.sel.length;
+                    const v = tg.value;
+                    if (!m2) ok.textContent = '✅ Jadikan konten ' + (S.contents.length + 1) + ' — pilih poster dulu';
+                    else if (v === 'new') ok.textContent = '✅ Jadikan konten ' + (S.contents.length + 1) + ' (' + m2 + ' gambar)';
+                    else ok.textContent = '✅ Tambah ke konten ' + v + ' (+' + m2 + ')';
+                    ok.disabled = !m2;
+                    bCancel.disabled = !S.mode;
+                    bUnas.disabled = !S.sel.some(id => S.map[id]);
+                    bNext.disabled = !free;
+                    bSingle.disabled = !free;
+                    bSort.disabled = total < 2;
+                    bView.disabled = !S.contents.length;
+                    bDel.disabled = !S.contents.length;
+                    bClear.disabled = !total;
+                    S.cbs.forEach(cb => { try { cb(); } catch (e) {} });
+                }
+
+                /* ---------- Pilihan centang ---------- */
+                function toggle(id) {
+                    const i = S.sel.indexOf(id);
+                    if (i >= 0) S.sel.splice(i, 1); else S.sel.push(id);
+                    refresh();
+                }
+
+                function onLong(id) {
+                    vib();
+                    if (!S.mode) {
+                        S.mode = true;
+                        S.sel = [id];
+                        say('✓ Mode centang aktif. Ketuk bulatan poster lain untuk menambah, lalu tekan tombol Jadikan konten.');
+                    } else {
+                        const i = S.sel.indexOf(id);
+                        if (i >= 0) S.sel.splice(i, 1);
+                        else if (S.sel.length) {
+                            const a = idxOf(S.sel[S.sel.length - 1]), b = idxOf(id);
+                            const step = a < b ? 1 : -1;
+                            for (let j = a + step; j !== b + step; j += step) {
+                                const x = S.items[j].id;
+                                if (S.sel.indexOf(x) < 0) S.sel.push(x);
+                            }
+                        } else S.sel.push(id);
+                    }
+                    refresh();
+                }
+
+                let lp = null;
+                function lpCancel() { if (lp) { clearTimeout(lp.t); lp = null; } }
+                frame.addEventListener('pointerdown', e => {
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    const el = e.target.closest('.bp-it');
+                    if (!el) return;
+                    lpCancel();
+                    const id = el.getAttribute('data-id');
+                    lp = { x: e.clientX, y: e.clientY, t: setTimeout(() => { lp = null; S.supp = Date.now() + 600; onLong(id); }, 480) };
+                });
+                frame.addEventListener('pointermove', e => {
+                    if (lp && Math.abs(e.clientX - lp.x) + Math.abs(e.clientY - lp.y) > 12) lpCancel();
+                });
+                ['pointerup', 'pointercancel', 'pointerleave'].forEach(n => frame.addEventListener(n, lpCancel));
+                frame.addEventListener('scroll', lpCancel, { passive: true });
+                frame.addEventListener('contextmenu', e => e.preventDefault());
+                frame.addEventListener('click', e => {
+                    if (Date.now() < S.supp) return;
+                    const c = e.target.closest('[data-chk]');
+                    if (!c || !S.mode) return;
+                    const el = c.closest('.bp-it');
+                    if (el) toggle(el.getAttribute('data-id'));
+                });
+
+                /* ---------- Tandai konten ---------- */
+                function commit() {
+                    const ids = S.sel.slice();
+                    if (!ids.length) return;
+                    const v = tg.value;
+                    let moved = 0;
+                    ids.forEach(id => { if (S.map[id]) moved++; });
+                    let no = 0;
+                    if (v === 'new') {
+                        S.contents = S.contents.map(a => a.filter(id => ids.indexOf(id) < 0)).filter(a => a.length);
+                        S.contents.push(ids);
+                        no = S.contents.length;
+                    } else {
+                        const target = S.contents[parseInt(v, 10) - 1];
+                        if (!target) return;
+                        const add = ids.filter(id => target.indexOf(id) < 0);
+                        S.contents = S.contents.map(a => a === target ? a : a.filter(id => ids.indexOf(id) < 0));
+                        add.forEach(id => target.push(id));
+                        S.contents = S.contents.filter(a => a.length);
+                        no = S.contents.indexOf(target) + 1;
+                    }
+                    S.mode = false;
+                    S.sel = [];
+                    refresh();
+                    say('✅ Konten ' + no + ' = ' + S.contents[no - 1].length + ' gambar' + (S.contents[no - 1].length > 1 ? ' (carousel)' : ' (tunggal)') + '.' + (moved ? '\n↪️ ' + moved + ' poster dipindahkan dari konten lain.' : '') + '\nTekan lama poster berikutnya untuk lanjut.');
+                }
+
+                ok.addEventListener('click', commit);
+                tg.addEventListener('change', refresh);
+                bCancel.addEventListener('click', () => { S.mode = false; S.sel = []; say(''); refresh(); });
+                bUnas.addEventListener('click', () => {
+                    const ids = S.sel.filter(id => S.map[id]);
+                    if (!ids.length) return;
+                    S.contents = S.contents.map(a => a.filter(id => ids.indexOf(id) < 0)).filter(a => a.length);
+                    S.mode = false;
+                    S.sel = [];
+                    refresh();
+                    say('↩️ ' + ids.length + ' poster dilepas dari kontennya (kembali berstatus belum ditandai).');
+                });
+                function scrollToItem(it) { if (it && it.el) frame.scrollTop = Math.max(0, it.el.offsetTop - 6); }
+                bNext.addEventListener('click', () => {
+                    const it = S.items.find(x => !S.map[x.id]);
+                    if (!it) { say('🎉 Semua poster sudah ditandai.'); return; }
+                    scrollToItem(it);
+                });
+                bSingle.addEventListener('click', () => {
+                    const free = S.items.filter(x => !S.map[x.id]);
+                    if (!free.length) return;
+                    if (!confirm(free.length + ' poster yang belum ditandai akan dijadikan ' + free.length + ' konten tunggal (1 poster = 1 konten). Lanjutkan?')) return;
+                    free.forEach(x => S.contents.push([x.id]));
+                    S.mode = false;
+                    S.sel = [];
+                    refresh();
+                    say('⚡ ' + free.length + ' konten tunggal dibuat.');
+                });
+                bSort.addEventListener('click', () => {
+                    S.items.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+                    S.items.forEach(it => frame.appendChild(it.el));
+                    refresh();
+                    say('🔤 Poster diurutkan berdasarkan nama file.');
+                });
+                bView.addEventListener('click', () => {
+                    const k = parseInt(mg.value, 10);
+                    const a = S.contents[k];
+                    if (!a) return;
+                    scrollToItem(S.by[a[0]]);
+                });
+                bDel.addEventListener('click', () => {
+                    const k = parseInt(mg.value, 10);
+                    const a = S.contents[k];
+                    if (!a) return;
+                    if (!confirm('Hapus konten ' + (k + 1) + '? Posternya tetap ada di daftar, hanya statusnya kembali "belum ditandai".')) return;
+                    S.contents.splice(k, 1);
+                    refresh();
+                    say('🗑️ Konten ' + (k + 1) + ' dihapus. Nomor konten sesudahnya otomatis bergeser.');
+                });
+                host.querySelectorAll('[data-sz]').forEach(b => b.addEventListener('click', () => {
+                    size = b.getAttribute('data-sz');
+                    try { localStorage.setItem('dakwahBpSize', size); } catch (e) {}
+                    refresh();
+                }));
+                bClear.addEventListener('click', () => {
+                    if (!S.items.length) return;
+                    if (!confirm('Kosongkan semua ' + S.items.length + ' poster dan tanda konten dari daftar ini?')) return;
+                    clearAll();
+                    say('🧹 Daftar dikosongkan.');
+                });
+
+                /* ---------- Tambah / buang poster ---------- */
+                function addFiles(list) {
+                    const imgs = list.filter(f => f && ((f.type || '').indexOf('image/') === 0 || /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i.test(f.name || '')));
+                    let dup = 0, add = 0;
+                    imgs.forEach(f => {
+                        const key = (f.name || '') + '|' + f.size + '|' + (f.lastModified || 0);
+                        if (S.keys[key]) { dup++; return; }
+                        S.keys[key] = true;
+                        S.seq++;
+                        const it = { id: 'p' + S.seq, file: f, name: f.name || ('gambar-' + S.seq), key: key, url: '', ar: '', vis: false, queued: false };
+                        S.items.push(it);
+                        S.by[it.id] = it;
+                        mkNode(it);
+                        add++;
+                    });
+                    refresh();
+                    const skip = list.length - imgs.length;
+                    say(add ? '📷 ' + add + ' poster ditambahkan' + (dup ? ', ' + dup + ' duplikat dilewati' : '') + (skip ? ', ' + skip + ' bukan gambar dilewati' : '') + '. Tekan lama sebuah poster untuk mulai menandai.' : 'ℹ️ Tidak ada poster baru' + (dup ? ' (' + dup + ' duplikat dilewati)' : '') + '.');
+                }
+                fileIn.addEventListener('change', e => {
+                    const files = Array.from(e.target.files || []);
+                    e.target.value = '';
+                    if (files.length) addFiles(files);
+                });
+
+                function removeIds(ids) {
+                    const set = {};
+                    ids.forEach(id => { set[id] = true; });
+                    S.items.forEach(it => {
+                        if (!set[it.id]) return;
+                        if (io) io.unobserve(it.el);
+                        rel(it);
+                        it.el.remove();
+                        delete S.by[it.id];
+                        delete S.keys[it.key];
+                    });
+                    S.items = S.items.filter(it => !set[it.id]);
+                    S.contents = S.contents.map(a => a.filter(id => !set[id])).filter(a => a.length);
+                    S.sel = S.sel.filter(id => !set[id]);
+                    if (!S.sel.length) S.mode = false;
+                    refresh();
+                }
+                function removeFiles(files) {
+                    const ids = S.items.filter(it => files.indexOf(it.file) >= 0).map(it => it.id);
+                    if (ids.length) removeIds(ids);
+                }
+                function removeContents(idxList) {
+                    const ids = [];
+                    idxList.forEach(k => { (S.contents[k] || []).forEach(id => ids.push(id)); });
+                    if (ids.length) removeIds(ids);
+                }
+                function clearAll() {
+                    removeIds(S.items.map(it => it.id));
+                    S.contents = [];
+                    S.sel = [];
+                    S.mode = false;
+                    refresh();
+                }
+
+                const api = {
+                    el: host,
+                    extra: extra,
+                    say: say,
+                    addFiles: addFiles,
+                    getContents: () => S.contents.map(a => a.map(id => S.by[id].file)),
+                    getContentFiles: k => (S.contents[k] || []).map(id => S.by[id].file),
+                    count: () => S.items.length,
+                    freeCount: () => S.items.filter(x => !S.map[x.id]).length,
+                    removeFiles: removeFiles,
+                    removeContents: removeContents,
+                    onChange: cb => { S.cbs.push(cb); },
+                    hasWork: () => S.contents.length > 0,
+                    clear: clearAll
+                };
+                BP_ALL.push(api);
+                refresh();
+                return api;
+            }
 
             /* ===== v.1.0.1 : SCAN POSTER AI ===== */
             const AI_PROVIDERS = {
@@ -1634,6 +2139,98 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     aiShowWarn([], '');
                     aiMsg('↩️ Isi form dikembalikan seperti sebelum scan.');
                 });
+            })();
+
+            /* ===== v.1.0.6 : Pemilih poster massal — Cara 2 (scan per konten) ===== */
+            (function bpMountCara2() {
+                const host = aiEl('aiPicker');
+                if (!host) return;
+                const p = bpCreate(host);
+                p.extra.innerHTML =
+                    '<div class="bp-xbox"><div class="bp-xt">🔍 Scan per konten</div>' +
+                    '<div class="bp-row"><select class="bp-xs"></select></div>' +
+                    '<button type="button" class="btn-solid bp-xgo" style="font-size:15px;padding:12px;">🔍 SCAN KONTEN INI</button>' +
+                    '<div class="bp-row"><button type="button" class="btn-small-gold bp-xdone">✔ Selesai — buang konten ini dari daftar</button></div>' +
+                    '<div class="q-hint">Hasil scan mengisi form Cara 3 di bawah. Setelah dicek &amp; dikirim, buang konten ini lalu scan konten berikutnya.</div></div>';
+                const sel = p.extra.querySelector('.bp-xs');
+                const go = p.extra.querySelector('.bp-xgo');
+                const done = p.extra.querySelector('.bp-xdone');
+                const sync = () => { bpFillContents(sel, p); const none = !p.getContents().length; go.disabled = none; done.disabled = none; };
+                p.onChange(sync);
+                sync();
+                go.addEventListener('click', () => {
+                    const k = parseInt(sel.value, 10);
+                    if (isNaN(k)) { p.say('ℹ️ Tandai konten dulu (tekan lama poster → ketuk bulatan → Jadikan konten).'); return; }
+                    if (aiBusy) { p.say('⏳ Scan sebelumnya masih berjalan, tunggu sampai selesai.'); return; }
+                    const files = p.getContentFiles(k);
+                    if (!files.length) return;
+                    aiScanFiles = files.slice();
+                    aiEl('aiFileInfo').textContent = '🖼️ Konten ' + (k + 1) + ': ' + files.length + ' gambar dari pemilih massal (urutan = urutan slide).';
+                    p.say('🔍 Memindai konten ' + (k + 1) + ' (' + files.length + ' gambar)... lihat status di bawah.');
+                    aiScan(aiScanFiles);
+                });
+                done.addEventListener('click', () => {
+                    const k = parseInt(sel.value, 10);
+                    if (isNaN(k)) return;
+                    if (!confirm('Buang konten ' + (k + 1) + ' beserta gambarnya dari daftar ini?')) return;
+                    p.removeContents([k]);
+                    p.say('✔ Konten ' + (k + 1) + ' dibuang dari daftar.');
+                });
+            })();
+
+            /* ===== v.1.0.6 : Pemilih poster massal — Cara 3 (manual) ===== */
+            (function bpMountCara3() {
+                const host = document.getElementById('mnPicker');
+                if (!host) return;
+                const p = bpCreate(host);
+                let loaded = [];
+                p.extra.innerHTML =
+                    '<div class="bp-xbox"><div class="bp-xt">📥 Pakai untuk form di atas</div>' +
+                    '<div class="bp-row"><select class="bp-xs"></select></div>' +
+                    '<button type="button" class="btn-solid bp-xuse" style="font-size:15px;padding:12px;">📥 PAKAI KONTEN INI UNTUK FORM</button>' +
+                    '<div class="bp-row"><button type="button" class="btn-small-gold bp-xdone">✔ Selesai — buang konten ini dari daftar</button></div>' +
+                    '<div class="q-hint">Gambar konten masuk ke Upload &amp; Urutkan Gambar di bawah (urutan slide mengikuti urutan centang). Setelah <b>Kirim Poster ke GitHub (API)</b> berhasil, konten otomatis dibuang dari daftar.</div></div>';
+                const sel = p.extra.querySelector('.bp-xs');
+                const use = p.extra.querySelector('.bp-xuse');
+                const done = p.extra.querySelector('.bp-xdone');
+                const sync = () => { bpFillContents(sel, p); const none = !p.getContents().length; use.disabled = none; done.disabled = none; };
+                p.onChange(sync);
+                sync();
+                use.addEventListener('click', () => {
+                    const k = parseInt(sel.value, 10);
+                    if (isNaN(k)) { p.say('ℹ️ Tandai konten dulu (tekan lama poster → ketuk bulatan → Jadikan konten).'); return; }
+                    const files = p.getContentFiles(k);
+                    if (!files.length) return;
+                    selectedFiles = files.slice();
+                    loaded = files.slice();
+                    const fi = document.getElementById('inpFileGambar');
+                    if (fi) fi.value = '';
+                    renderPreview();
+                    p.say('📥 Konten ' + (k + 1) + ' (' + files.length + ' gambar) dimuat ke Upload & Urutkan Gambar. Isi judul, kategori & caption, lalu kirim.');
+                    const jd = document.getElementById('inpJudul');
+                    if (jd) jd.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                done.addEventListener('click', () => {
+                    const k = parseInt(sel.value, 10);
+                    if (isNaN(k)) return;
+                    if (!confirm('Buang konten ' + (k + 1) + ' beserta gambarnya dari daftar ini?')) return;
+                    p.removeContents([k]);
+                    p.say('✔ Konten ' + (k + 1) + ' dibuang dari daftar.');
+                });
+                /* dipanggil kirimKeGitHub() setelah API menjawab sukses */
+                window.bpAfterSend = function () {
+                    if (!loaded.length) return;
+                    const same = selectedFiles.length === loaded.length && selectedFiles.every((f, i) => f === loaded[i]);
+                    p.removeFiles(loaded);
+                    if (same) {
+                        selectedFiles = [];
+                        renderPreview();
+                        const fi = document.getElementById('inpFileGambar');
+                        if (fi) fi.value = '';
+                    }
+                    loaded = [];
+                    p.say('✅ Konten terkirim dan dikeluarkan dari daftar. Pilih konten berikutnya, lalu ganti judul & caption.');
+                };
             })();
 
             /* ===== v.1.0.2 : ANTREAN SCAN OTOMATIS (GEMINI) ===== */
@@ -2697,6 +3294,69 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     qRender();
                 }
 
+                /* ---------- v.1.0.6 : Pemilih poster massal → antrean ---------- */
+                async function qEnqueueFiles(files, noHint) {
+                    const sig = files.map(f => f.name + ':' + f.size).join('|');
+                    const id = 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                    const rows = [];
+                    for (let i = 0; i < files.length; i++) {
+                        const f = files[i];
+                        const buf = await f.arrayBuffer();
+                        rows.push({ id: id + ':' + String(i).padStart(3, '0'), itemId: id, idx: i, name: f.name || '', blob: new Blob([buf], { type: f.type || 'image/jpeg' }) });
+                    }
+                    const thumb = await qThumb(files[0]);
+                    const no = Math.max(noHint || 0, Q.items.reduce((m, x) => Math.max(m, x.no || 0), 0)) + 1;
+                    const it = { id: id, no: no, createdAt: Date.now(), status: 'pending', count: files.length, sig: sig, thumb: thumb || '', attempts: 0, nextAt: 0, err: '', result: null, upd: Date.now() };
+                    await qTx(['items', 'blobs'], 'readwrite', tx => {
+                        const bs = tx.objectStore('blobs');
+                        rows.forEach(r => bs.put(r));
+                        tx.objectStore('items').put(it);
+                    });
+                    Q.items.push(it);
+                    return it;
+                }
+
+                async function qAddBulk(p, btn) {
+                    if (!Q.db) { p.say('❌ Penyimpanan browser tidak tersedia.'); return; }
+                    const cons = p.getContents();
+                    if (!cons.length) { p.say('ℹ️ Belum ada konten. Tandai poster dulu lalu tekan Jadikan konten.'); return; }
+                    const free = p.freeCount();
+                    if (free && !confirm(free + ' poster belum ditandai jadi konten dan TIDAK ikut masuk antrean (tetap di daftar). Lanjut menambahkan ' + cons.length + ' konten?')) return;
+                    btn.disabled = true;
+                    qPersist();
+                    let ok = 0, last = 0, err = '';
+                    const doneFiles = [];
+                    try {
+                        await qReload();
+                        let dupMode = null;
+                        for (let k = 0; k < cons.length; k++) {
+                            const files = cons[k];
+                            const sig = files.map(f => f.name + ':' + f.size).join('|');
+                            const dup = Q.items.find(i => i.sig === sig);
+                            if (dup) {
+                                if (dupMode === null) dupMode = confirm('Ada konten yang file-nya sama dengan antrean/riwayat (konten ' + (k + 1) + ' sama dengan #' + dup.no + '). Tambahkan lagi yang sama?\nOK = tambahkan, Batal = lewati yang sama');
+                                if (!dupMode) continue;
+                            }
+                            p.say('💾 Menyimpan konten ' + (k + 1) + '/' + cons.length + ' ke antrean...');
+                            const it = await qEnqueueFiles(files, last);
+                            last = it.no;
+                            ok++;
+                            files.forEach(f => doneFiles.push(f));
+                        }
+                    } catch (e) {
+                        err = e && e.message ? e.message : 'penyimpanan penuh?';
+                    } finally {
+                        btn.disabled = false;
+                        if (doneFiles.length) p.removeFiles(doneFiles);
+                    }
+                    Q.doneMsg = '';
+                    const txt = (ok ? '✅ ' + ok + ' poster masuk antrean' + (Q.paused ? ' (antrean sedang dijeda — tekan Mulai)' : '') + '. Konten yang masuk dikeluarkan dari daftar ini.' : 'ℹ️ Tidak ada konten yang ditambahkan.') + (err ? '\n❌ Berhenti karena: ' + err : '');
+                    p.say(txt);
+                    qMsg(ok ? '✅ ' + ok + ' poster baru masuk antrean.' : '');
+                    qRender();
+                    qKick();
+                }
+
                 /* ---------- Hook login/logout ---------- */
                 window.qOnLogin = function () { qKick(); };
                 window.qOnLogout = function () {
@@ -2745,6 +3405,22 @@ ${finalContent || 'Tulis isi caption di sini...'}`;
                     Q.items = Q.items.filter(i => i.status !== 'sent');
                     qRender();
                 });
+                /* ---------- v.1.0.6 : pasang pemilih poster massal ---------- */
+                (function bpMountCara1() {
+                    const host = $('qPicker');
+                    if (!host) return;
+                    const p = bpCreate(host);
+                    p.extra.innerHTML = '<button type="button" class="btn-solid bp-qadd" style="font-size:15px;padding:12px;margin-top:10px;">➕ TAMBAH KONTEN KE ANTREAN</button><div class="q-hint" style="margin-top:6px;">Tiap konten masuk antrean sebagai satu poster (urutan slide mengikuti urutan centang). Konten yang sudah masuk dikeluarkan dari daftar ini; antrean lanjut diproses otomatis.</div>';
+                    const b = p.extra.querySelector('.bp-qadd');
+                    b.disabled = true;
+                    p.onChange(() => {
+                        const n = p.getContents().length;
+                        b.textContent = n ? '➕ TAMBAH ' + n + ' KONTEN KE ANTREAN' : '➕ TAMBAH KONTEN KE ANTREAN';
+                        b.disabled = !n || !Q.db;
+                    });
+                    b.addEventListener('click', () => qAddBulk(p, b));
+                })();
+
                 const goBtn = $('qBannerOpen');
                 if (goBtn) goBtn.addEventListener('click', () => {
                     showSection('add');
