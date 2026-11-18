@@ -1,14 +1,13 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.6.7
+Arsip Dakwah Manhaj Salaf - Update v2.6.8
+
+v2.6.8:
+1. PERBAIKAN TAMPILAN MEMBESAR / ZOOM di Riwayat Konten Terbaru: kolom daftar poster melebar melebihi layar karena teks pembatas hari tidak boleh turun baris (kolom grid 1fr ikut melebar). Kini kolom dikunci minmax(0,1fr) dan pembatas hari/waktu boleh turun baris serta mengecil di layar sempit, sehingga tampilan kembali normal seperti sedia kala.
+2. LAG DIKURANGI: selama mode Riwayat Terbaru, efek blur latar (backdrop-filter) pada kartu dan transisi layout daftar dinonaktifkan, perhitungan tanggal tiap poster tidak lagi diulang dua kali, dan gulir ke daftar tidak memakai animasi halus. Mode lain tidak berubah.
 
 v2.6.7:
-1. PEMBATAS WAKTU RINCI di Riwayat Konten Terbaru: di dalam satu hari, tiap kelompok poster yang diunggah berselang minimal 1 detik diberi pembatas berisi selisih waktu dari kelompok di atasnya (contoh: 3 mnt 12 dtk), tanpa menampilkan jam pasti. Kelompok paling atas tiap hari menampilkan umur unggahan (contoh: 5 mnt 3 dtk lalu) sehingga mudah mengenali poster yang baru saja diunggah.
-2. PEMBATAS TANGGAL LEBIH TEGAS DAN ELEGAN: pita emas dengan garis ganda, judul hari/tanggal besar, penanda Hari ini / Kemarin, dan jumlah konten. Pembatas waktu dibuat lebih halus agar jelas beda tingkatannya.
-3. Pembatas waktu ikut menyesuaikan saat poster disaring (kategori / mode), selisih dihitung ulang dari konten yang terlihat.
-
-v2.6.6:
-1. RIWAYAT KONTEN LEBIH CEPAT: riwayat unggahan tersimpan di perangkat dan langsung dipakai saat tombol ditekan; pemeriksaan GitHub berjalan di latar belakang, hanya mengunduh versi manifest baru, 6 unduhan paralel, jeda 10 menit antar pemeriksaan.
-2. URUTAN TIDAK ACAK: waktu unggah disimpan lengkap (hanya untuk pengurutan), arah urutan manifest dideteksi otomatis, jangkauan riwayat 30 versi.
+1. PEMBATAS WAKTU RINCI di Riwayat Konten Terbaru: selisih waktu antar kelompok unggahan (minimal 1 detik) dan umur unggahan kelompok teratas tiap hari, tanpa jam pasti.
+2. PEMBATAS TANGGAL LEBIH TEGAS DAN ELEGAN: pita emas, judul besar, penanda Hari ini / Kemarin, jumlah konten.
 
 -->
 
@@ -438,21 +437,26 @@ v2.6.6:
         .terbaru-banner .tb-txt small{color:#9a9a9a;font-size:11px;line-height:1.35;}
         .terbaru-banner button{flex:0 0 auto;background:transparent;color:#D4AF37;border:1px solid rgba(212,175,55,.5);border-radius:999px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;}
         .terbaru-banner button:hover{background:#D4AF37;color:#111;}
-        .day-sep{grid-column:1 / -1;align-self:stretch;display:flex;align-items:center;gap:12px;margin:26px 0 6px 0;padding:12px 14px;border-top:2px solid #D4AF37;border-bottom:1px solid rgba(212,175,55,.35);border-radius:6px;background:linear-gradient(180deg,rgba(212,175,55,.16),rgba(212,175,55,.03));box-shadow:0 6px 18px rgba(0,0,0,.45);}
+        .day-sep{grid-column:1 / -1;align-self:stretch;min-width:0;max-width:100%;flex-wrap:wrap;justify-content:center;display:flex;align-items:center;gap:8px 12px;margin:26px 0 6px 0;padding:12px 14px;border-top:2px solid #D4AF37;border-bottom:1px solid rgba(212,175,55,.35);border-radius:6px;background:linear-gradient(180deg,rgba(212,175,55,.16),rgba(212,175,55,.03));box-shadow:0 6px 18px rgba(0,0,0,.45);}
         .day-sep:first-of-type{margin-top:8px;}
         .day-sep .ds-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(212,175,55,0),rgba(212,175,55,.7));}
         .day-sep .ds-line:last-child{background:linear-gradient(90deg,rgba(212,175,55,.7),rgba(212,175,55,0));}
-        .day-sep .ds-title{color:#F1D27A;font-size:15px;font-weight:800;letter-spacing:.07em;white-space:nowrap;text-shadow:0 1px 8px rgba(212,175,55,.35);}
+        .day-sep .ds-title{color:#F1D27A;font-size:15px;font-weight:800;letter-spacing:.07em;white-space:normal;text-align:center;min-width:0;text-shadow:0 1px 8px rgba(212,175,55,.35);}
         .day-sep .ds-tag{color:#111;background:#D4AF37;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap;}
         .day-sep .ds-count{color:#b8a56a;font-size:11px;font-weight:700;letter-spacing:.06em;white-space:nowrap;}
         /* v2.6.7: pembatas waktu rinci di dalam satu hari */
-        .time-sep{grid-column:1 / -1;align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:0 6px;}
+        .time-sep{grid-column:1 / -1;align-self:stretch;min-width:0;max-width:100%;display:flex;align-items:center;gap:10px;margin:2px 0;padding:0 6px;}
         .time-sep .ts-line{flex:1;height:0;border-top:1px dashed rgba(212,175,55,.35);}
-        .time-sep .ts-chip{display:inline-flex;align-items:center;gap:6px;color:#cfcfcf;background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.35);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;}
+        .time-sep .ts-chip{display:inline-flex;align-items:center;gap:6px;color:#cfcfcf;background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.35);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:normal;text-align:center;max-width:100%;}
         .time-sep .ts-chip .ts-ic{color:#D4AF37;font-size:12px;line-height:1;}
         .time-sep .ts-chip b{color:#F1D27A;font-weight:800;}
+        .terbaru-banner{min-width:0;max-width:100%;}
+        @media (max-width:480px){.day-sep{padding:10px;}.day-sep .ds-title{font-size:13px;letter-spacing:.04em;}.day-sep .ds-line{display:none;}.day-sep .ds-count{font-size:10px;}}
+        /* v2.6.8: mode riwayat terbaru lebih ringan */
+        #post-list.mode-terbaru{transition:none;}
+        #post-list.mode-terbaru .poster{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(21,21,21,.85);}
         .time-sep.ts-awal .ts-chip{border-color:#D4AF37;background:rgba(212,175,55,.12);}
-        #post-list{ display:grid;grid-template-columns:1fr;gap:20px;align-items:start;justify-content:center; transition: all 0.5s ease; }
+        #post-list{ display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start;justify-content:center; transition: all 0.5s ease; }
         .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative; backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); }
         .poster:hover{border-color:#D4AF37;transform:scale(1.02);box-shadow:0 12px 40px rgba(212,175,55,0.05);}
         
@@ -498,8 +502,8 @@ v2.6.6:
         .btn-save.saved{ background:#D4AF37; color:#111; border-color:#D4AF37; }
         .loading{ text-align:center; color:#888; padding:20px; font-size:18px; }
         
-        @media(min-width:600px){ #post-list:not(.compact-view){grid-template-columns:repeat(2, 1fr);} }
-        @media(min-width:900px){ #post-list:not(.compact-view){grid-template-columns:repeat(3, 1fr);} }
+        @media(min-width:600px){ #post-list:not(.compact-view){grid-template-columns:repeat(2, minmax(0,1fr));} }
+        @media(min-width:900px){ #post-list:not(.compact-view){grid-template-columns:repeat(3, minmax(0,1fr));} }
 
         /* --- FLOATING BUTTONS (BAWAH & ATAS) --- */
         .btn-float-common{ 
@@ -1217,7 +1221,7 @@ v2.6.6:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.7</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.8</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1403,7 +1407,7 @@ v2.6.6:
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.6.7';
+        const APP_VERSION = 'v2.6.8';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* v2.6.2: animasi jam pasir mengikuti detik (0-59), terbalik tiap menit */
         let _hgPrev = -1;
@@ -1852,7 +1856,7 @@ v2.6.6:
             document.getElementById('search-result').style.display = 'none';
 
             filterDisplayPosters();
-            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+            setTimeout(() => { document.getElementById('post-list').scrollIntoView({ behavior: urutTerbaru ? 'auto' : 'smooth', block: 'start' }); }, 200);
         }
 
         function tampilkanFavorit() { switchBerandaMode('fav'); }
@@ -1952,7 +1956,9 @@ v2.6.6:
             if (urutTerbaruCache && urutTerbaruCache.n === rawManifestPosters.length) return urutTerbaruCache;
             const items = rawManifestPosters.map(function(p, i) {
                 const h = riwayatGit.map[String(p.path || '')];
-                return { id: String(p.path).replace(/\//g, '-'), d: tanggalPoster(p), i: i, s: (h && typeof h.s === 'number') ? h.s : null, pt: waktuPresisi(p) };
+                const ek = tanggalPosterEksplisit(p);
+                const adaH = !!(h && h.t);
+                return { id: String(p.path).replace(/\//g, '-'), d: ek || (adaH ? new Date(h.t) : null), i: i, s: (h && typeof h.s === 'number') ? h.s : null, pt: (!ek && adaH) ? h.t : null };
             });
             const arah = riwayatGit.dir === -1 ? -1 : 1;
             const adaTanggal = items.some(function(x) { return x.d; });
@@ -1980,6 +1986,7 @@ v2.6.6:
             let jumlahKartu = 0;
             list.querySelectorAll(':scope > .poster').forEach(function(c) { peta[c.getAttribute('data-id')] = c; jumlahKartu++; });
             if (jumlahKartu === 0) return;
+            list.classList.toggle('mode-terbaru', urutTerbaru);
             list.querySelectorAll(':scope > .day-sep, :scope > .time-sep, :scope > .terbaru-banner').forEach(function(e) { e.remove(); });
             const frag = document.createDocumentFragment();
             if (!urutTerbaru) {
