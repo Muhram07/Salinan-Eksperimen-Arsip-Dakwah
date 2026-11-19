@@ -1,16 +1,16 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.7.0
+Arsip Dakwah Manhaj Salaf - Update v2.7.1
+
+v2.7.1:
+1. PENANDA BACA: ikon pita diganti klip kertas (seperti emoji klip kertas) agar beda dari ikon Disimpan. Menekan klip di sudut poster kini meminta konfirmasi 2 kali (Batal / Lanjut, lalu Batal / Tandai di Sini, Pindah Tanda ke Sini, atau Lepas Penanda) disertai penjelasan bahwa penanda berbeda dengan fitur Disimpan dan hanya bisa menandai satu poster.
+2. INFO KATEGORI: tombol "i" di Amalan 12 Bulan dipindah ke kanan kotak, sama seperti kategori lain.
+3. FEED: saat pertama dibuka, urutan bawaan kini "Terbaru".
+4. PERFORMA: blur latar (backdrop-filter) di setiap kartu poster dihapus (tampilan sama, GPU lebih ringan), transisi kartu dipersempit ke properti yang berubah saja, format tanggal jam dihitung sekali per hari. Satu-satunya library (marked) memang dipakai, tidak ada library lain.
 
 v2.7.0:
 1. INFO KATEGORI: tombol "i" di pojok tiap kategori (Semua kategori utama + Amalan 12 Bulan) membuka jendela info lengkap: arti bahasa, pengertian menurut salaf, ruang lingkup, dalil dan kedudukan di sisi salaf, serta gambaran isi.
 2. PENANDA BACA: pita di pojok kanan atas tiap poster untuk menandai batas bacaan. Tombol "Penanda" (kiri, di bawah tombol kategori) dan menu samping "Lompat ke Penanda Baca" menggulir langsung ke poster yang ditandai pada feed apa pun. Ada garis batas di feed, lencana jumlah konten yang lebih baru dari penanda, dan penanda tersimpan di perangkat.
 3. FILTER FEED: tombol urutan feed (kanan Penanda) dengan pilihan Bawaan, Terbaru, Urutan Nomor (001, 002, 003 per kategori), dan Acak, plus bar status di atas feed yang menunjukkan feed, kategori, mode, dan jumlah konten aktif.
-
-v2.6.9:
-1. PRIVASI: label kelompok paling atas tiap hari kini hanya \"Terbaru\" tanpa jam/menit/detik umur unggahan, sehingga tidak terlihat kapan terakhir kali diunggah. Selisih waktu antar konten di bawahnya tetap tampil.
-2. IKON TAUHID DIPERBAIKI: kini seperti emoji jari telunjuk ke atas, dengan jempol terlipat di depan genggaman (tidak lagi mencuat ke samping).
-3. IKON DOA DIPERBAIKI: kini seperti emoji dua telapak tangan menengadah berdampingan membentuk mangkuk, jari-jari menghadap atas dan jempol di sisi dalam.
-
 -->
 
 <!DOCTYPE html>
@@ -458,8 +458,8 @@ v2.6.9:
         #post-list.mode-terbaru{transition:none;}
         #post-list.mode-terbaru .poster{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(21,21,21,.85);}
         .time-sep.ts-awal .ts-chip{border-color:#D4AF37;background:rgba(212,175,55,.12);}
-        #post-list{ display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start;justify-content:center; transition: all 0.5s ease; }
-        .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:0.3s;position:relative; backdrop-filter: blur(6px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); }
+        #post-list{ display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start;justify-content:center; transition: gap 0.5s ease, grid-template-columns 0.5s ease; }
+        .poster{ background:rgba(21, 21, 21, 0.4); border:1px solid rgba(255, 255, 255, 0.08); border-radius:24px;overflow:hidden;padding:20px;transition:border-color .3s,box-shadow .3s,transform .3s;position:relative; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); transform: scale(1); }
         .poster:hover{border-color:#D4AF37;transform:scale(1.02);box-shadow:0 12px 40px rgba(212,175,55,0.05);}
         
         .poster-header-info { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; margin-bottom: 18px; width: 100%; text-align: center; }
@@ -1023,7 +1023,6 @@ v2.6.9:
     
         /* ===== v2.7.0: INFO KATEGORI, FEED FILTER, PENANDA BACA ===== */
         .kategori-grid-ori .card-kategori{position:relative;}
-        .kategori-grid-ori .card-kategori .ki-btn.ki-left{right:auto;left:7px;}
         .kategori-scroll-compact .card-kategori .ki-btn{margin-left:4px;}
         .ki-lbl{color:#D4AF37;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
         .ki-ked{border-left-color:#f5b84a;}
@@ -1038,8 +1037,8 @@ v2.6.9:
         .ft-btn:active{transform:translateY(2px);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);}
         .ft-btn .ic{width:18px;height:18px;flex:0 0 18px;vertical-align:0;}
         .ft-lbl{overflow:hidden;text-overflow:ellipsis;min-width:0;}
-        .ft-ribbon{width:12px;height:16px;flex:0 0 12px;background:#8a7a45;clip-path:polygon(0 0,100% 0,100% 100%,50% 70%,0 100%);transition:background .2s;}
-        .ft-btn.on .ft-ribbon{background:#D4AF37;}
+        .ft-penanda .ic{--ic-g:#8a7a45;transition:stroke .2s;}
+        .ft-penanda.on .ic{--ic-g:#D4AF37;}
         .ft-badge{display:none;min-width:24px;height:18px;padding:0 6px;border-radius:9px;background:#D4AF37;color:#111;font-size:11px;font-weight:800;align-items:center;justify-content:center;}
         .ft-sortwrap{flex:1 1 0;min-width:0;position:relative;display:flex;}
         .ft-sortwrap .ft-btn{width:100%;}
@@ -1064,24 +1063,36 @@ v2.6.9:
 
         .kat-sep .ds-title{text-transform:capitalize;}
 
-        .pita-btn{position:absolute;top:0;right:16px;width:24px;height:32px;padding:0;border:0;cursor:pointer;z-index:5;background:linear-gradient(180deg,#8a7a45,#5e5226);clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);opacity:.85;transition:background .2s,height .2s,opacity .2s;-webkit-tap-highlight-color:transparent;}
-        .pita-btn::before{content:'';position:absolute;left:50%;top:8px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:rgba(0,0,0,.4);}
-        .pita-btn:hover{opacity:1;background:linear-gradient(180deg,#b79a3a,#7a6a2d);}
-        .pita-btn.on{height:40px;opacity:1;background:linear-gradient(180deg,#F1D27A,#D4AF37);}
-        .pita-btn.on::before{background:rgba(0,0,0,.55);}
-        #post-list.compact-view .pita-btn{width:18px;height:24px;right:10px;}
-        #post-list.compact-view .pita-btn.on{height:30px;}
-        #post-list.compact-view .pita-btn::before{top:6px;width:5px;height:5px;margin-left:-2.5px;}
-        .poster.is-penanda{border-color:rgba(212,175,55,.75);box-shadow:0 0 0 1px rgba(212,175,55,.35),0 8px 30px rgba(0,0,0,.5);}
+        .pita-btn{position:absolute;top:10px;right:12px;width:36px;height:36px;padding:0;border-radius:50%;border:1px solid rgba(212,175,55,.45);background:rgba(10,10,10,.72);cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;opacity:.92;transition:background .2s,border-color .2s,opacity .2s,transform .2s;-webkit-tap-highlight-color:transparent;}
+        .pita-btn .ic{width:20px;height:20px;vertical-align:0;--ic-g:#c9b570;transition:transform .25s;}
+        .pita-btn:hover{opacity:1;border-color:#D4AF37;background:rgba(40,34,12,.85);}
+        .pita-btn:active{transform:scale(.92);}
+        .pita-btn.on{opacity:1;border-color:#F1D27A;background:#D4AF37;}
+        .pita-btn.on .ic{--ic-g:#111;transform:rotate(-18deg);}
+        #post-list.compact-view .pita-btn{width:28px;height:28px;top:8px;right:8px;}
+        #post-list.compact-view .pita-btn .ic{width:16px;height:16px;}
+.poster.is-penanda{border-color:rgba(212,175,55,.75);box-shadow:0 0 0 1px rgba(212,175,55,.35),0 8px 30px rgba(0,0,0,.5);}
         @keyframes pnFlash{0%,100%{box-shadow:0 0 0 1px rgba(212,175,55,.35),0 8px 30px rgba(0,0,0,.5);}35%{box-shadow:0 0 0 3px #D4AF37,0 0 34px rgba(212,175,55,.55);}}
         .poster.pn-flash{animation:pnFlash 1.6s ease;}
 
         .penanda-line{grid-column:1 / -1;display:flex;align-items:center;gap:10px;margin:4px 0;min-width:0;max-width:100%;}
         .penanda-line .pl-ln{flex:1;height:0;border-top:2px dashed rgba(212,175,55,.65);}
         .penanda-line .pl-chip{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid #D4AF37;background:rgba(212,175,55,.12);color:#F1D27A;font-size:12px;font-weight:800;letter-spacing:.05em;text-align:center;min-width:0;}
-        .penanda-line .pl-rib{width:10px;height:14px;flex:0 0 10px;background:#D4AF37;clip-path:polygon(0 0,100% 0,100% 100%,50% 70%,0 100%);}
+        .penanda-line .pl-rib{width:15px;height:15px;flex:0 0 15px;vertical-align:0;--ic-g:#D4AF37;}
         @media (max-width:480px){.penanda-line .pl-ln{display:none;}.penanda-line{justify-content:center;}.ft-btn{padding:10px 8px;font-size:12.5px;gap:6px;}}
 
+        .pn-step{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;padding:4px 11px;border-radius:999px;border:1px solid rgba(212,175,55,.5);background:rgba(212,175,55,.1);color:#F1D27A;font-size:11px;font-weight:800;letter-spacing:.06em;}
+        .pn-judul{color:#fff;font-size:14.5px;font-weight:700;line-height:1.5;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);word-break:break-word;}
+        .pn-judul small{display:block;color:#9a9a9a;font-size:11px;font-weight:600;margin-bottom:3px;letter-spacing:.05em;}
+        .pn-warn{border-left:3px solid #f5b84a;background:rgba(245,184,74,.08);border-radius:0 12px 12px 0;padding:11px 13px;color:#e6e0c8;font-size:13px;line-height:1.65;}
+        .pn-warn b{color:#F1D27A;}
+        .pn-warn p+p{margin-top:8px;}
+        .pn-foot{display:flex;gap:10px;padding:12px 16px 16px;border-top:1px solid rgba(212,175,55,.18);flex-shrink:0;}
+        .pn-btn{flex:1 1 0;min-width:0;padding:12px 10px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:#1d1d1d;color:#e8e8e8;font-family:inherit;font-size:13.5px;font-weight:800;line-height:1.25;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .2s,border-color .2s,transform .15s;}
+        .pn-btn:active{transform:translateY(2px);}
+        .pn-btn.pn-ok{border-color:#D4AF37;background:linear-gradient(180deg,#F1D27A,#D4AF37);color:#111;}
+        .pn-btn.pn-danger{border-color:#e0705f;background:linear-gradient(180deg,#f08a79,#d4604d);color:#1a0a07;}
+        .pn-btn:hover{border-color:#D4AF37;}
         .feed-toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:30000;max-width:calc(100vw - 32px);padding:10px 18px;border-radius:999px;background:#1a1a1a;border:1px solid #D4AF37;color:#F1D27A;font-size:12.5px;font-weight:700;text-align:center;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;}
         .feed-toast.show{opacity:1;transform:translate(-50%,0);}
         @media (prefers-reduced-motion:reduce){.poster.pn-flash{animation:none;}.ft-menu,.feed-toast,.ft-chev{transition-duration:.01s !important;}}
@@ -1090,7 +1101,7 @@ v2.6.9:
 <body>
 <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false"><defs>
 <symbol id="ic-sort" viewBox="0 0 24 24"><path d='M4 7h16'/><path class='ic-a' d='M4 12h11'/><path d='M4 17h6'/></symbol>
-<symbol id="ic-flagpita" viewBox="0 0 24 24"><path d='M8 3.5h8v17l-4-3.4-4 3.4z'/><path class='ic-a' d='M8 8.5h8'/></symbol>
+<symbol id="ic-paperclip" viewBox="0 0 24 24"><path d='M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48'/></symbol>
 <symbol id="ic-menu" viewBox="0 0 24 24"><path d='M4 7h16'/><path class='ic-a' d='M4 12h11'/><path d='M4 17h16'/></symbol>
 <symbol id="ic-home" viewBox="0 0 24 24"><path d='M3.5 11L12 4l8.5 7'/><path d='M6 9.5V20h12V9.5'/><path class='ic-a' d='M10 20v-5.5h4V20'/></symbol>
 <symbol id="ic-close" viewBox="0 0 24 24"><path d='M6 6l12 12'/><path class='ic-a' d='M18 6L6 18'/></symbol>
@@ -1243,7 +1254,7 @@ v2.6.9:
 
             <!-- v2.7.0: lompat ke penanda baca -->
             <div class="sidebar-item" onclick="keePenanda();">
-                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-flagpita"/></svg></span>
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-paperclip"/></svg></span>
                 <span>Lompat ke Penanda Baca</span>
             </div>
 
@@ -1296,7 +1307,7 @@ v2.6.9:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.7.0</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.7.1</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1340,15 +1351,15 @@ v2.6.9:
     <!-- v2.7.0: PENANDA BACA + FILTER URUTAN FEED -->
     <div class="feed-toolbar" id="feedToolbar">
         <button type="button" class="ft-btn ft-penanda" id="btnPenanda" onclick="keePenanda()" title="Lompat ke penanda baca">
-            <span class="ft-ribbon" aria-hidden="true"></span><span class="ft-lbl">Penanda</span><b class="ft-badge" id="penandaBadge"></b>
+            <svg class="ic" aria-hidden="true"><use href="#ic-paperclip"/></svg><span class="ft-lbl">Penanda</span><b class="ft-badge" id="penandaBadge"></b>
         </button>
         <div class="ft-sortwrap">
             <button type="button" class="ft-btn ft-sort" id="btnFeedSort" aria-haspopup="true" aria-expanded="false" onclick="feedMenuToggle(event)">
-                <svg class="ic" aria-hidden="true"><use href="#ic-sort"/></svg><span class="ft-lbl" id="feedSortLabel">Bawaan</span><svg class="ic ft-chev" aria-hidden="true"><use href="#ic-chevd"/></svg>
+                <svg class="ic" aria-hidden="true"><use href="#ic-sort"/></svg><span class="ft-lbl" id="feedSortLabel">Terbaru</span><svg class="ic ft-chev" aria-hidden="true"><use href="#ic-chevd"/></svg>
             </button>
             <div class="ft-menu" id="feedMenu" role="menu" aria-label="Urutan feed">
-                <button type="button" class="ft-opt on" role="menuitemradio" data-feed="bawaan" onclick="feedSet('bawaan')"><svg class="ic" aria-hidden="true"><use href="#ic-grid"/></svg><span class="ft-ot"><b>Bawaan</b><small>Urutan arsip seperti biasa</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
-                <button type="button" class="ft-opt" role="menuitemradio" data-feed="terbaru" onclick="feedSet('terbaru')"><svg class="ic" aria-hidden="true"><use href="#ic-clock"/></svg><span class="ft-ot"><b>Konten Terbaru</b><small>Dari yang terakhir diunggah</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
+                <button type="button" class="ft-opt" role="menuitemradio" data-feed="bawaan" onclick="feedSet('bawaan')"><svg class="ic" aria-hidden="true"><use href="#ic-grid"/></svg><span class="ft-ot"><b>Bawaan</b><small>Urutan arsip seperti biasa</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
+                <button type="button" class="ft-opt on" role="menuitemradio" data-feed="terbaru" onclick="feedSet('terbaru')"><svg class="ic" aria-hidden="true"><use href="#ic-clock"/></svg><span class="ft-ot"><b>Konten Terbaru</b><small>Dari yang terakhir diunggah</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
                 <button type="button" class="ft-opt" role="menuitemradio" data-feed="nomor" onclick="feedSet('nomor')"><svg class="ic" aria-hidden="true"><use href="#ic-note"/></svg><span class="ft-ot"><b>Urutan Nomor</b><small>001, 002, 003 &hellip; di tiap kategori</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
                 <button type="button" class="ft-opt" role="menuitemradio" data-feed="acak" onclick="feedSet('acak')"><svg class="ic" aria-hidden="true"><use href="#ic-sparkle"/></svg><span class="ft-ot"><b>Acak</b><small>Urutan diacak, ketuk lagi untuk mengacak ulang</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
             </div>
@@ -1498,6 +1509,24 @@ v2.6.9:
         </div>
     </div>
 
+    <!-- v2.7.1: KONFIRMASI PENANDA BACA (2 LANGKAH) -->
+    <div class="hj-overlay" id="pnOverlay" aria-hidden="true" onclick="pnBatal()">
+        <div class="hj-card" role="dialog" aria-modal="true" aria-labelledby="pnTitle" onclick="event.stopPropagation()">
+            <div class="hj-head">
+                <span id="pnIcon" aria-hidden="true" style="display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:50%;border:1px solid rgba(212,175,55,.5);background:rgba(212,175,55,.08);"><svg class="ic" style="width:24px;height:24px;vertical-align:0;--ic-g:#D4AF37;" aria-hidden="true"><use href="#ic-paperclip"/></svg></span>
+                <div class="hj-head-txt">
+                    <div class="hj-title" id="pnTitle">Penanda Baca</div>
+                    <div class="hj-sub" id="pnSub">Konfirmasi</div>
+                </div>
+                <button type="button" class="hj-close" onclick="pnBatal()" aria-label="Tutup">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </div>
+            <div class="hj-body" id="pnBody"></div>
+            <div class="pn-foot" id="pnFoot"></div>
+        </div>
+    </div>
+
     <!-- v2.7.0: JENDELA INFO KATEGORI -->
     <div class="hj-overlay" id="kiOverlay" aria-hidden="true" onclick="tutupInfoKat()">
         <div class="hj-card" role="dialog" aria-modal="true" aria-labelledby="kiTitle" onclick="event.stopPropagation()">
@@ -1515,10 +1544,11 @@ v2.6.9:
         </div>
     </div>
 
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.7.0';
+        const APP_VERSION = 'v2.7.1';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* v2.6.2: animasi jam pasir mengikuti detik (0-59), terbalik tiap menit */
         let _hgPrev = -1;
@@ -1546,6 +1576,7 @@ v2.6.9:
             _hgPrev = s;
         }
         /* --- FUNGSI JAM & TANGGAL OTOMATIS IKUT MESIN HP REALTIME --- */
+        let _dateKeyCache = -1;
         function startLiveClock() {
             function updateClock() {
                 const now = new Date();
@@ -1560,9 +1591,12 @@ v2.6.9:
 
                 // Hari & Tanggal HP (Bahasa Indonesia)
                 const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-                const dateString = now.toLocaleDateString('id-ID', options);
-                const dateEl = document.getElementById('liveDateDisplay');
-                if (dateEl) dateEl.innerText = dateString.replace(/^Minggu/, 'Ahad');
+                const dayKey = now.getFullYear() * 400 + now.getMonth() * 32 + now.getDate();
+                if (dayKey !== _dateKeyCache) {
+                    _dateKeyCache = dayKey;
+                    const dateEl = document.getElementById('liveDateDisplay');
+                    if (dateEl) dateEl.innerText = now.toLocaleDateString('id-ID', options).replace(/^Minggu/, 'Ahad');
+                }
             }
             updateClock();
             setInterval(updateClock, 1000);
@@ -1788,7 +1822,8 @@ v2.6.9:
         let semuaPosterCache = [];
         let isCompactView = false;
         let isSelecting = false;
-        let urutTerbaru = false;      /* v2.6.4: mode riwayat konten terbaru aktif? */
+        let urutTerbaru = true;       /* v2.7.1: default saat pertama dibuka = Terbaru (v2.6.4: mode riwayat konten terbaru aktif?) */
+        let feedManual = false;       /* v2.7.1: true bila pengguna memilih urutan lain secara manual */
         let urutTerapkan = false;     /* v2.6.4: urutan DOM yang sedang terpasang (true = terbaru) */
         /* ===== v2.7.0: INFO LENGKAP TIAP KATEGORI (b = bahasa, s = menurut salaf, l = lingkup, kp/k = dalil & kedudukan, g = gambaran isi) ===== */
         const KAT_ALIAS = { 'shalat': 'sholat', 'salat': 'sholat', 'fiqih': 'fikih', 'aqidah': 'akidah', 'hadits shahih': 'hadits shahih & hasan', 'hadits dhaif': 'hadits dhaif & maudhu', 'hadits dhaif & maudhu\'': 'hadits dhaif & maudhu', 'firqah': 'firqah-firqah', 'amalan 12 bulan hijriah': 'amalan 12 bulan' };
@@ -2022,6 +2057,7 @@ v2.6.9:
             }
             const sama = (!urutTerbaru && feedUrut === mode);
             urutTerbaru = false;
+            feedManual = true;
             feedUrut = mode;
             if (mode === 'acak') { feedAcakSeq++; feedBuatAcak(); }
             else if (sama) { feedGulirKeAtas(); return; }
@@ -2110,6 +2146,73 @@ v2.6.9:
             penandaPasangGaris();
             penandaSegarkan();
         }
+        /* ---- v2.7.1: KONFIRMASI PENANDA (2 langkah) ---- */
+        let pnTarget = '', pnStep = 0;
+        function pnEsc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function pnKondisi(id) {
+            const lama = penandaId();
+            if (lama === id) return 'lepas';
+            if (lama && cardById(lama)) return 'pindah';
+            return 'baru';
+        }
+        function konfirmasiPenanda(id) {
+            pnTarget = id;
+            pnStep = 1;
+            pnRender();
+            const ov = document.getElementById('pnOverlay');
+            if (!ov) return;
+            ov.classList.add('open');
+            ov.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('hj-lock');
+        }
+        function pnRender() {
+            const id = pnTarget, k = pnKondisi(id);
+            const lamaId = penandaId();
+            const body = document.getElementById('pnBody'), foot = document.getElementById('pnFoot');
+            const ttl = document.getElementById('pnTitle'), sub = document.getElementById('pnSub');
+            if (!body || !foot) return;
+            const aksi = k === 'lepas' ? 'Lepas Penanda' : (k === 'pindah' ? 'Pindah Tanda ke Sini' : 'Tandai di Sini');
+            let h = '<span class="pn-step">Konfirmasi ' + pnStep + ' dari 2</span>';
+            h += '<div class="pn-judul"><small>Poster</small>' + pnEsc(judulById(id)) + '</div>';
+            if (pnStep === 1) {
+                ttl.textContent = k === 'lepas' ? 'Lepas Penanda Baca?' : (k === 'pindah' ? 'Pindahkan Penanda Baca?' : 'Pasang Penanda Baca?');
+                sub.textContent = 'Penanda klip kertas · bukan fitur Disimpan';
+                h += '<div class="pn-warn"><p><b>Penanda ini berbeda dengan fitur Disimpan.</b> Disimpan (ikon penanda buku) dipakai untuk menyimpan banyak konten sekaligus.</p>' +
+                     '<p>Penanda klip kertas hanya bisa menandai <b>satu poster saja</b> sebagai batas bacaan, tidak bisa lebih dari satu. Menandai poster lain akan memindahkan penanda ini.</p></div>';
+                if (k === 'pindah') h += '<div class="pn-warn"><p>Saat ini penanda ada di:<br><b>' + pnEsc(judulById(lamaId)) + '</b><br>Penanda tersebut akan dilepas dan dipindah ke poster ini.</p></div>';
+                if (k === 'lepas') h += '<div class="pn-warn"><p>Poster ini sedang menjadi penanda baca. Jika dilanjutkan, penanda akan dilepas dan tidak ada poster yang ditandai.</p></div>';
+                foot.innerHTML = '<button type="button" class="pn-btn" onclick="pnBatal()">Batal</button><button type="button" class="pn-btn pn-ok" id="pnNext" onclick="pnLanjut()">Lanjut</button>';
+            } else {
+                ttl.textContent = 'Yakin?';
+                sub.textContent = 'Langkah terakhir';
+                if (k === 'lepas') h += '<div class="pn-warn"><p>Penanda baca akan <b>dilepas</b> dari poster ini.</p></div>';
+                else if (k === 'pindah') h += '<div class="pn-warn"><p>Penanda akan <b>dipindah</b> dari "' + pnEsc(judulById(lamaId)) + '" ke poster ini. Hanya satu penanda yang aktif.</p></div>';
+                else h += '<div class="pn-warn"><p>Poster ini akan <b>ditandai</b> sebagai batas bacaan. Hanya satu penanda yang aktif pada satu waktu.</p></div>';
+                foot.innerHTML = '<button type="button" class="pn-btn" onclick="pnBatal()">Batal</button><button type="button" class="pn-btn ' + (k === 'lepas' ? 'pn-danger' : 'pn-ok') + '" id="pnNext" onclick="pnSetuju()">' + aksi + '</button>';
+            }
+            body.innerHTML = h;
+            body.scrollTop = 0;
+            setTimeout(function() { const n = document.getElementById('pnNext'); if (n) n.focus({ preventScroll: true }); }, 60);
+        }
+        function pnLanjut() { pnStep = 2; pnRender(); }
+        function pnTutup() {
+            const ov = document.getElementById('pnOverlay');
+            if (!ov || !ov.classList.contains('open')) return false;
+            ov.classList.remove('open');
+            ov.setAttribute('aria-hidden', 'true');
+            const ki = document.getElementById('kiOverlay'), hj = document.getElementById('hjOverlay');
+            if ((!ki || !ki.classList.contains('open')) && (!hj || !hj.classList.contains('open'))) document.body.classList.remove('hj-lock');
+            return true;
+        }
+        function pnBatal() { pnTutup(); pnTarget = ''; pnStep = 0; }
+        function pnSetuju() {
+            const id = pnTarget;
+            pnTutup();
+            pnTarget = ''; pnStep = 0;
+            if (id) setPenanda(id);
+        }
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') pnBatal(); });
+
         function penandaPasangGaris() {
             const list = document.getElementById('post-list');
             if (!list) return;
@@ -2122,7 +2225,7 @@ v2.6.9:
             const ln = document.createElement('div');
             ln.id = 'penandaLine';
             ln.className = 'penanda-line';
-            ln.innerHTML = '<span class="pl-ln"></span><span class="pl-chip"><span class="pl-rib"></span><span class="pl-t">Penanda Baca</span></span><span class="pl-ln"></span>';
+            ln.innerHTML = '<span class="pl-ln"></span><span class="pl-chip"><svg class="ic pl-rib" aria-hidden="true"><use href="#ic-paperclip"/></svg><span class="pl-t">Penanda Baca</span></span><span class="pl-ln"></span>';
             list.insertBefore(ln, card);
         }
         function penandaSegarkan() {
@@ -2137,7 +2240,7 @@ v2.6.9:
                 if (b && b.classList.contains('on') !== on) {
                     b.classList.toggle('on', on);
                     b.setAttribute('aria-pressed', on ? 'true' : 'false');
-                    b.title = on ? 'Hapus penanda baca' : 'Tandai sebagai penanda baca';
+                    b.title = on ? 'Lepas penanda baca (klip kertas)' : 'Tandai sebagai penanda baca (klip kertas)';
                 }
             });
             let ln = document.getElementById('penandaLine');
@@ -2151,7 +2254,7 @@ v2.6.9:
             const bt = document.getElementById('btnPenanda'), bd = document.getElementById('penandaBadge');
             if (bt) {
                 bt.classList.toggle('on', !!(idAktif && card));
-                bt.title = (idAktif && card) ? ('Lompat ke penanda: ' + judulById(idAktif)) : 'Belum ada penanda. Ketuk pita di pojok kanan atas poster untuk menandai.';
+                bt.title = (idAktif && card) ? ('Lompat ke penanda: ' + judulById(idAktif)) : 'Belum ada penanda. Ketuk ikon klip kertas di pojok kanan atas poster untuk menandai.';
             }
             if (bd) {
                 if (n > 0) { bd.textContent = '+' + n; bd.style.display = 'inline-flex'; bd.title = n + ' konten lebih baru dari penanda'; }
@@ -2163,7 +2266,7 @@ v2.6.9:
             const card = id ? cardById(id) : null;
             if (!id || !card) {
                 if (id && !card) { penandaMem = ''; penandaSimpan(); penandaSegarkan(); }
-                feedToast('Belum ada penanda. Ketuk pita di pojok kanan atas poster untuk menandai.');
+                feedToast('Belum ada penanda. Ketuk ikon klip kertas di pojok kanan atas poster untuk menandai.');
                 return;
             }
             closeSidebar();
@@ -2391,7 +2494,7 @@ v2.6.9:
         function switchBerandaMode(mode, tetapTerbaru) {
             const masukPdf = (mode === 'pdf' && berandaModeAktif !== 'pdf');
             berandaModeAktif = mode;
-            if (tetapTerbaru !== true) urutTerbaru = false;
+            if (tetapTerbaru !== true) urutTerbaru = !feedManual;
 
             /* v2.6.0: pertama kali masuk PDF Mode selalu mulai dari kategori Semua */
             if (masukPdf && kategoriAktif !== null) {
@@ -2766,7 +2869,7 @@ v2.6.9:
         }
         /* pemuatan diam-diam di latar belakang setelah arsip terbuka */
         function prefetchRiwayat() {
-            const jalan = function() { muatRiwayatGit(false).then(function(berubah) { if (berubah) { urutTerbaruCache = null; feedPerbarui(); } }).catch(function() {}); };
+            const jalan = function() { muatRiwayatGit(false).then(function(berubah) { if (berubah) { urutTerbaruCache = null; if (urutTerbaru) { urutTerapkan = false; filterDisplayPosters(); } else feedPerbarui(); } else if (urutTerbaru) perbaruiBannerTerbaru(); }).catch(function() {}); };
             if ('requestIdleCallback' in window) requestIdleCallback(jalan, { timeout: 4000 }); else setTimeout(jalan, 1500);
         }
         async function tampilkanTerbaru() {
@@ -2777,6 +2880,7 @@ v2.6.9:
             syncBulanState();
             if (riwayatGit.status === 'idle') bacaCacheRiwayat();
             urutTerbaru = true;
+            feedManual = false;
             urutTerbaruCache = null;
             urutTerapkan = false;
             switchBerandaMode('all', true);
@@ -2917,7 +3021,7 @@ v2.6.9:
 
             emojiMapGlobal = manifestData.kategori_emoji || {};
             rawManifestPosters = manifestData.posters || [];
-            setTimeout(prefetchRiwayat, 1500);
+            setTimeout(prefetchRiwayat, urutTerbaru ? 300 : 1500);
 
             if(rawManifestPosters.length > 0) {
                 const totalItems = rawManifestPosters.length;
@@ -2978,7 +3082,7 @@ v2.6.9:
 
                     htmlPoster += `
                         <div class="poster" data-id="${posterId}" data-kategori="${kategori}" data-has-pdf="${hasPdf}" onclick="handleCardClick(event, '${posterId}')">
-                            <button type="button" class="pita-btn" data-id="${posterId}" aria-pressed="false" aria-label="Penanda baca" title="Tandai sebagai penanda baca" onclick="event.stopPropagation(); setPenanda('${posterId}')"></button>
+                            <button type="button" class="pita-btn" data-id="${posterId}" aria-pressed="false" aria-label="Penanda baca (klip kertas)" title="Tandai sebagai penanda baca (klip kertas)" onclick="event.stopPropagation(); konfirmasiPenanda('${posterId}')"><svg class="ic" aria-hidden="true"><use href="#ic-paperclip"/></svg></button>
                             ${carouselHTML}
                             
                             <div class="poster-header-info">
@@ -3051,7 +3155,7 @@ v2.6.9:
                     <span class="icon">${IC('moon')}</span>
                     <span class="nama">Amalan 12 Bulan</span>
                     <span class="jumlah">${bulanTotal} Folder</span>
-                    ${katInfoBtn('Amalan 12 Bulan', 'ki-left')}
+                    ${katInfoBtn('Amalan 12 Bulan')}
                     <span class="bulan-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D4AF37" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
                 </div>
                 <div class="bulan-panel${bulanOpen ? ' open' : ''}" id="bulanPanel">
@@ -3102,6 +3206,7 @@ v2.6.9:
             kategoriCompact.innerHTML = htmlKategoriCompact;
             syncBulanState();
             
+            if (urutTerbaru && riwayatGit.status === 'idle') bacaCacheRiwayat();
             filterDisplayPosters();
 
             setTargetProgress(96);
