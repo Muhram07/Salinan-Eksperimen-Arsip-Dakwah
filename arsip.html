@@ -1,14 +1,15 @@
 <!--
-Arsip Dakwah Manhaj Salaf - Update v2.6.9
+Arsip Dakwah Manhaj Salaf - Update v2.7.0
+
+v2.7.0:
+1. INFO KATEGORI: tombol "i" di pojok tiap kategori (Semua kategori utama + Amalan 12 Bulan) membuka jendela info lengkap: arti bahasa, pengertian menurut salaf, ruang lingkup, dalil dan kedudukan di sisi salaf, serta gambaran isi.
+2. PENANDA BACA: pita di pojok kanan atas tiap poster untuk menandai batas bacaan. Tombol "Penanda" (kiri, di bawah tombol kategori) dan menu samping "Lompat ke Penanda Baca" menggulir langsung ke poster yang ditandai pada feed apa pun. Ada garis batas di feed, lencana jumlah konten yang lebih baru dari penanda, dan penanda tersimpan di perangkat.
+3. FILTER FEED: tombol urutan feed (kanan Penanda) dengan pilihan Bawaan, Terbaru, Urutan Nomor (001, 002, 003 per kategori), dan Acak, plus bar status di atas feed yang menunjukkan feed, kategori, mode, dan jumlah konten aktif.
 
 v2.6.9:
 1. PRIVASI: label kelompok paling atas tiap hari kini hanya \"Terbaru\" tanpa jam/menit/detik umur unggahan, sehingga tidak terlihat kapan terakhir kali diunggah. Selisih waktu antar konten di bawahnya tetap tampil.
 2. IKON TAUHID DIPERBAIKI: kini seperti emoji jari telunjuk ke atas, dengan jempol terlipat di depan genggaman (tidak lagi mencuat ke samping).
 3. IKON DOA DIPERBAIKI: kini seperti emoji dua telapak tangan menengadah berdampingan membentuk mangkuk, jari-jari menghadap atas dan jempol di sisi dalam.
-
-v2.6.8:
-1. PERBAIKAN TAMPILAN MEMBESAR / ZOOM di Riwayat Konten Terbaru: kolom daftar poster dikunci minmax(0,1fr) dan pembatas hari/waktu boleh turun baris serta mengecil di layar sempit.
-2. LAG DIKURANGI: selama mode Riwayat Terbaru, blur latar kartu dan transisi layout daftar dinonaktifkan, perhitungan tanggal tidak diulang, gulir tanpa animasi halus.
 
 -->
 
@@ -1019,10 +1020,77 @@ v2.6.8:
         .hg.hg-flip{animation:hgFlip .8s cubic-bezier(.45,0,.2,1);}
         @keyframes hgFlip{from{transform:rotate(180deg);}to{transform:rotate(360deg);}}
         @media (prefers-reduced-motion:reduce){.hg-stream{animation:none;}.hg.hg-flip{animation:none;}}
+    
+        /* ===== v2.7.0: INFO KATEGORI, FEED FILTER, PENANDA BACA ===== */
+        .kategori-grid-ori .card-kategori{position:relative;}
+        .kategori-grid-ori .card-kategori .ki-btn.ki-left{right:auto;left:7px;}
+        .kategori-scroll-compact .card-kategori .ki-btn{margin-left:4px;}
+        .ki-lbl{color:#D4AF37;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+        .ki-ked{border-left-color:#f5b84a;}
+        .ki-quote{font-style:italic;color:#f3e3a1;margin-bottom:2px !important;}
+        #kiIcon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:50%;border:1px solid rgba(212,175,55,.5);background:rgba(212,175,55,.08);}
+        #kiIcon .ic{width:24px;height:24px;vertical-align:0;--ic-g:#D4AF37;--ic-a:#F1D27A;}
+        #kiTitle{text-transform:capitalize;}
+
+        .feed-toolbar{display:flex;gap:10px;align-items:stretch;margin:2px 0 10px 0;position:relative;z-index:30;}
+        .ft-btn{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:14px;border:1px solid rgba(212,175,55,.4);background-color:#1b1b1b;background-image:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.25));color:#e8e8e8;font-family:inherit;font-size:13px;font-weight:700;line-height:1.2;cursor:pointer;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 3px 0 rgba(0,0,0,.55);transition:border-color .2s,background-color .2s,color .2s,transform .15s;-webkit-tap-highlight-color:transparent;}
+        .ft-btn:hover,.ft-btn.on,.ft-btn[aria-expanded="true"]{border-color:#D4AF37;background-color:#262110;color:#F1D27A;}
+        .ft-btn:active{transform:translateY(2px);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);}
+        .ft-btn .ic{width:18px;height:18px;flex:0 0 18px;vertical-align:0;}
+        .ft-lbl{overflow:hidden;text-overflow:ellipsis;min-width:0;}
+        .ft-ribbon{width:12px;height:16px;flex:0 0 12px;background:#8a7a45;clip-path:polygon(0 0,100% 0,100% 100%,50% 70%,0 100%);transition:background .2s;}
+        .ft-btn.on .ft-ribbon{background:#D4AF37;}
+        .ft-badge{display:none;min-width:24px;height:18px;padding:0 6px;border-radius:9px;background:#D4AF37;color:#111;font-size:11px;font-weight:800;align-items:center;justify-content:center;}
+        .ft-sortwrap{flex:1 1 0;min-width:0;position:relative;display:flex;}
+        .ft-sortwrap .ft-btn{width:100%;}
+        .ft-chev{transition:transform .25s;}
+        .ft-btn[aria-expanded="true"] .ft-chev{transform:rotate(180deg);}
+        .ft-menu{position:absolute;top:calc(100% + 8px);right:0;width:270px;max-width:calc(100vw - 40px);background:#141414;border:1px solid rgba(212,175,55,.45);border-radius:16px;box-shadow:0 18px 40px rgba(0,0,0,.7);padding:6px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s;}
+        .ft-menu.open{opacity:1;visibility:visible;transform:none;transition-delay:0s;}
+        .ft-opt{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:11px;border:0;background:transparent;color:#ddd;text-align:left;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;}
+        .ft-opt .ic{width:20px;height:20px;flex:0 0 20px;vertical-align:0;}
+        .ft-opt .ft-ot{flex:1;min-width:0;}
+        .ft-opt b{display:block;font-size:13px;color:#fff;}
+        .ft-opt small{display:block;font-size:11px;color:#8d8d8d;margin-top:2px;line-height:1.35;}
+        .ft-opt:hover,.ft-opt.on{background:rgba(212,175,55,.12);}
+        .ft-opt.on b{color:#F1D27A;}
+        .ft-opt .ft-tick{width:16px;height:16px;flex:0 0 16px;opacity:0;color:#D4AF37;}
+        .ft-opt.on .ft-tick{opacity:1;}
+
+        .feed-status{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin:0 0 16px 0;padding:9px 14px;border-radius:12px;border:1px solid rgba(212,175,55,.28);background:rgba(212,175,55,.06);font-size:12px;line-height:1.45;color:#a9a9a9;scroll-margin-top:12px;}
+        .feed-status b{color:#F1D27A;font-size:13px;letter-spacing:.03em;}
+        .feed-status .fs-sub{min-width:0;}
+        .fs-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#D4AF37;box-shadow:0 0 8px rgba(212,175,55,.8);}
+
+        .kat-sep .ds-title{text-transform:capitalize;}
+
+        .pita-btn{position:absolute;top:0;right:16px;width:24px;height:32px;padding:0;border:0;cursor:pointer;z-index:5;background:linear-gradient(180deg,#8a7a45,#5e5226);clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);opacity:.85;transition:background .2s,height .2s,opacity .2s;-webkit-tap-highlight-color:transparent;}
+        .pita-btn::before{content:'';position:absolute;left:50%;top:8px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:rgba(0,0,0,.4);}
+        .pita-btn:hover{opacity:1;background:linear-gradient(180deg,#b79a3a,#7a6a2d);}
+        .pita-btn.on{height:40px;opacity:1;background:linear-gradient(180deg,#F1D27A,#D4AF37);}
+        .pita-btn.on::before{background:rgba(0,0,0,.55);}
+        #post-list.compact-view .pita-btn{width:18px;height:24px;right:10px;}
+        #post-list.compact-view .pita-btn.on{height:30px;}
+        #post-list.compact-view .pita-btn::before{top:6px;width:5px;height:5px;margin-left:-2.5px;}
+        .poster.is-penanda{border-color:rgba(212,175,55,.75);box-shadow:0 0 0 1px rgba(212,175,55,.35),0 8px 30px rgba(0,0,0,.5);}
+        @keyframes pnFlash{0%,100%{box-shadow:0 0 0 1px rgba(212,175,55,.35),0 8px 30px rgba(0,0,0,.5);}35%{box-shadow:0 0 0 3px #D4AF37,0 0 34px rgba(212,175,55,.55);}}
+        .poster.pn-flash{animation:pnFlash 1.6s ease;}
+
+        .penanda-line{grid-column:1 / -1;display:flex;align-items:center;gap:10px;margin:4px 0;min-width:0;max-width:100%;}
+        .penanda-line .pl-ln{flex:1;height:0;border-top:2px dashed rgba(212,175,55,.65);}
+        .penanda-line .pl-chip{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid #D4AF37;background:rgba(212,175,55,.12);color:#F1D27A;font-size:12px;font-weight:800;letter-spacing:.05em;text-align:center;min-width:0;}
+        .penanda-line .pl-rib{width:10px;height:14px;flex:0 0 10px;background:#D4AF37;clip-path:polygon(0 0,100% 0,100% 100%,50% 70%,0 100%);}
+        @media (max-width:480px){.penanda-line .pl-ln{display:none;}.penanda-line{justify-content:center;}.ft-btn{padding:10px 8px;font-size:12.5px;gap:6px;}}
+
+        .feed-toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:30000;max-width:calc(100vw - 32px);padding:10px 18px;border-radius:999px;background:#1a1a1a;border:1px solid #D4AF37;color:#F1D27A;font-size:12.5px;font-weight:700;text-align:center;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;}
+        .feed-toast.show{opacity:1;transform:translate(-50%,0);}
+        @media (prefers-reduced-motion:reduce){.poster.pn-flash{animation:none;}.ft-menu,.feed-toast,.ft-chev{transition-duration:.01s !important;}}
     </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false"><defs>
+<symbol id="ic-sort" viewBox="0 0 24 24"><path d='M4 7h16'/><path class='ic-a' d='M4 12h11'/><path d='M4 17h6'/></symbol>
+<symbol id="ic-flagpita" viewBox="0 0 24 24"><path d='M8 3.5h8v17l-4-3.4-4 3.4z'/><path class='ic-a' d='M8 8.5h8'/></symbol>
 <symbol id="ic-menu" viewBox="0 0 24 24"><path d='M4 7h16'/><path class='ic-a' d='M4 12h11'/><path d='M4 17h16'/></symbol>
 <symbol id="ic-home" viewBox="0 0 24 24"><path d='M3.5 11L12 4l8.5 7'/><path d='M6 9.5V20h12V9.5'/><path class='ic-a' d='M10 20v-5.5h4V20'/></symbol>
 <symbol id="ic-close" viewBox="0 0 24 24"><path d='M6 6l12 12'/><path class='ic-a' d='M18 6L6 18'/></symbol>
@@ -1173,6 +1241,12 @@ v2.6.8:
                 <span>Riwayat Konten Terbaru</span>
             </div>
 
+            <!-- v2.7.0: lompat ke penanda baca -->
+            <div class="sidebar-item" onclick="keePenanda();">
+                <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-flagpita"/></svg></span>
+                <span>Lompat ke Penanda Baca</span>
+            </div>
+
             <!-- Menu Tambahan Pendukung -->
             <div class="sidebar-item" onclick="closeSidebar(); switchBerandaMode('fav');">
                 <span class="item-icon"><svg class="ic" aria-hidden="true"><use href="#ic-bookmark"/></svg></span>
@@ -1222,7 +1296,7 @@ v2.6.8:
         <span class="circuit-line right"></span>
         <div class="developer-title">Digital Dakwah Developer</div>
         <div class="brand-divider"></div>
-        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.6.9</span></div>
+        <div class="app-ver-badge" title="Versi Arsip Dakwah"><span class="avb-dot"></span><span class="avb-label">Versi</span><span class="avb-num" id="appVersionDisplay">v2.7.0</span></div>
     </div>
     
     <!-- SEGMENTED MODE SWITCHER SINGLE HEAD -->
@@ -1262,6 +1336,25 @@ v2.6.8:
     <div class="kategori-scroll-compact">
         <div id="kategori-wrap-compact" class="kategori-container"></div>
     </div>
+
+    <!-- v2.7.0: PENANDA BACA + FILTER URUTAN FEED -->
+    <div class="feed-toolbar" id="feedToolbar">
+        <button type="button" class="ft-btn ft-penanda" id="btnPenanda" onclick="keePenanda()" title="Lompat ke penanda baca">
+            <span class="ft-ribbon" aria-hidden="true"></span><span class="ft-lbl">Penanda</span><b class="ft-badge" id="penandaBadge"></b>
+        </button>
+        <div class="ft-sortwrap">
+            <button type="button" class="ft-btn ft-sort" id="btnFeedSort" aria-haspopup="true" aria-expanded="false" onclick="feedMenuToggle(event)">
+                <svg class="ic" aria-hidden="true"><use href="#ic-sort"/></svg><span class="ft-lbl" id="feedSortLabel">Bawaan</span><svg class="ic ft-chev" aria-hidden="true"><use href="#ic-chevd"/></svg>
+            </button>
+            <div class="ft-menu" id="feedMenu" role="menu" aria-label="Urutan feed">
+                <button type="button" class="ft-opt on" role="menuitemradio" data-feed="bawaan" onclick="feedSet('bawaan')"><svg class="ic" aria-hidden="true"><use href="#ic-grid"/></svg><span class="ft-ot"><b>Bawaan</b><small>Urutan arsip seperti biasa</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
+                <button type="button" class="ft-opt" role="menuitemradio" data-feed="terbaru" onclick="feedSet('terbaru')"><svg class="ic" aria-hidden="true"><use href="#ic-clock"/></svg><span class="ft-ot"><b>Konten Terbaru</b><small>Dari yang terakhir diunggah</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
+                <button type="button" class="ft-opt" role="menuitemradio" data-feed="nomor" onclick="feedSet('nomor')"><svg class="ic" aria-hidden="true"><use href="#ic-note"/></svg><span class="ft-ot"><b>Urutan Nomor</b><small>001, 002, 003 &hellip; di tiap kategori</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
+                <button type="button" class="ft-opt" role="menuitemradio" data-feed="acak" onclick="feedSet('acak')"><svg class="ic" aria-hidden="true"><use href="#ic-sparkle"/></svg><span class="ft-ot"><b>Acak</b><small>Urutan diacak, ketuk lagi untuk mengacak ulang</small></span><svg class="ic ft-tick" aria-hidden="true"><use href="#ic-check"/></svg></button>
+            </div>
+        </div>
+    </div>
+    <div class="feed-status" id="feedStatus" aria-live="polite"></div>
 
     <div id="post-list" class="loading">Memuat arsip...</div>
 
@@ -1405,10 +1498,27 @@ v2.6.8:
         </div>
     </div>
 
+    <!-- v2.7.0: JENDELA INFO KATEGORI -->
+    <div class="hj-overlay" id="kiOverlay" aria-hidden="true" onclick="tutupInfoKat()">
+        <div class="hj-card" role="dialog" aria-modal="true" aria-labelledby="kiTitle" onclick="event.stopPropagation()">
+            <div class="hj-head">
+                <span id="kiIcon" aria-hidden="true"></span>
+                <div class="hj-head-txt">
+                    <div class="hj-title" id="kiTitle">Kategori</div>
+                    <div class="hj-sub">Info Kategori &middot; Pemahaman Salafus Shalih</div>
+                </div>
+                <button type="button" class="hj-close" onclick="tutupInfoKat()" aria-label="Tutup">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </div>
+            <div class="hj-body" id="kiBody"></div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         /* v2.5.1: nomor versi arsip (disamakan dengan Maker Pro) */
-        const APP_VERSION = 'v2.6.9';
+        const APP_VERSION = 'v2.7.0';
         (function(){ const v = document.getElementById('appVersionDisplay'); if (v) v.textContent = APP_VERSION; })();
         /* v2.6.2: animasi jam pasir mengikuti detik (0-59), terbalik tiap menit */
         let _hgPrev = -1;
@@ -1680,6 +1790,448 @@ v2.6.8:
         let isSelecting = false;
         let urutTerbaru = false;      /* v2.6.4: mode riwayat konten terbaru aktif? */
         let urutTerapkan = false;     /* v2.6.4: urutan DOM yang sedang terpasang (true = terbaru) */
+        /* ===== v2.7.0: INFO LENGKAP TIAP KATEGORI (b = bahasa, s = menurut salaf, l = lingkup, kp/k = dalil & kedudukan, g = gambaran isi) ===== */
+        const KAT_ALIAS = { 'shalat': 'sholat', 'salat': 'sholat', 'fiqih': 'fikih', 'aqidah': 'akidah', 'hadits shahih': 'hadits shahih & hasan', 'hadits dhaif': 'hadits dhaif & maudhu', 'hadits dhaif & maudhu\'': 'hadits dhaif & maudhu', 'firqah': 'firqah-firqah', 'amalan 12 bulan hijriah': 'amalan 12 bulan' };
+        const KAT_INFO = {
+            'adab': {
+                b: "Secara bahasa, adab berarti kebiasaan yang baik, budi pekerti, akhlak, kesopanan, dan tata krama.",
+                s: "Dalam perspektif salafus shalih, adab adalah menerapkan segala sifat, perkataan, dan perbuatan yang terpuji (syar'i), baik lahir maupun batin, yang bersumber dari Al-Qur'an dan Sunnah. Adab mencakup tata cara seorang hamba berinteraksi dengan: Allah subhanahu wa ta'ala (rasa malu, takut, cinta, dan tunduk pada syariat-Nya); Rasulullah shallallahu 'alaihi wa sallam (mencintai beliau di atas segalanya, mengagungkan sunnahnya, dan mendahulukan sabdanya di atas pendapat siapa pun); serta sesama manusia (orang tua, guru/ulama, keluarga, tetangga, hingga masyarakat luas sesuai porsinya masing-masing).",
+                l: ["Adab kepada Allah dan Rasul-Nya: tunduk patuh, tidak mendahului ketetapan Allah dan Rasul-Nya, serta menjaga diri dari maksiat baik di tempat sepi maupun ramai.", "Adab dalam menuntut ilmu: tawadhu' (rendah hati) kepada guru, sabar dalam majelis ilmu, menjaga kehormatan buku/kitab, dan mengamalkan ilmu sebelum mengajarkannya.", "Adab dalam berinteraksi sosial: menjaga lisan (tidak ghibah, namimah, atau berkata kotor), memuliakan tamu, menyambung silaturahim, dan berbuat baik kepada tetangga.", "Adab sehari-hari: makan dan minum, berbicara, berpakaian, hingga masuk dan keluar rumah."],
+                kp: "Para ulama salaf menempatkan adab di atas ilmu, atau setidaknya memandang keduanya sebagai satu kesatuan yang tidak terpisahkan. Banyak dari mereka mempelajari adab bertahun-tahun sebelum mempelajari ilmu pokok (rujukan: Al-Adabul Mufrad karya Imam Al-Bukhari).",
+                k: [["Pelajarilah adab sebelum mempelajari ilmu.", "Imam Malik bin Anas rahimahullah, kepada seorang pemuda Quraisy"], ["Kami lebih membutuhkan adab (meskipun sedikit) daripada banyaknya ilmu.", "Ibnul Mubarak rahimahullah"]],
+                g: "Poster berisi adab kepada Allah dan Rasul-Nya, adab menuntut ilmu, adab bergaul, serta adab harian, disertai dalil dan nasihat para salaf."
+            },
+            'tauhid': {
+                b: "Tauhid berasal dari kata wahhada–yuwahhidu, artinya menjadikan sesuatu itu satu (mengesakan).",
+                s: "Menurut salaf, tauhid adalah mengesakan Allah subhanahu wa ta'ala dalam hal yang menjadi kekhususan-Nya: dalam perbuatan-Nya sebagai Rabb, dalam peribadahan kepada-Nya, serta dalam nama dan sifat-Nya. Inilah inti dakwah seluruh rasul dan syarat diterimanya amal.",
+                l: ["Tauhid Rububiyyah: meyakini Allah satu-satunya Pencipta, Pemberi rezeki, dan Pengatur alam semesta.", "Tauhid Uluhiyyah (ibadah): hanya Allah yang berhak disembah; doa, tawakal, nadzar, dan semua ibadah ditujukan kepada-Nya saja.", "Tauhid Asma' wa Shifat: menetapkan nama dan sifat Allah sebagaimana datang dalam Al-Qur'an dan Sunnah, tanpa tahrif, ta'thil, takyif, dan tamtsil.", "Makna dan konsekuensi kalimat Laa ilaaha illallaah."],
+                k: [["Aku tidak menciptakan jin dan manusia melainkan supaya mereka beribadah kepada-Ku.", "QS. Adz-Dzariyat: 56"], ["Hak Allah atas hamba adalah mereka beribadah kepada-Nya dan tidak menyekutukan-Nya dengan sesuatu apa pun.", "HR. Bukhari dan Muslim (hadits Mu'adz bin Jabal radhiyallahu 'anhu)"]],
+                g: "Poster tentang pengenalan tauhid, dalil-dalilnya, keutamaan orang yang bertauhid, dan cara menjaga tauhid."
+            },
+            'syirik': {
+                b: "Syirik secara bahasa berarti persekutuan, yaitu menjadikan sekutu bagi sesuatu.",
+                s: "Menurut salaf, syirik adalah menjadikan sekutu bagi Allah dalam rububiyyah, uluhiyyah, atau asma' wa shifat-Nya, misalnya berdoa, bernadzar, atau menyembelih untuk selain Allah. Syirik adalah dosa terbesar yang tidak diampuni jika pelakunya mati di atasnya tanpa bertaubat.",
+                l: ["Syirik akbar: mengeluarkan pelakunya dari Islam (menyembah kuburan atau wali, meminta kepada orang mati, sihir, dan sejenisnya).", "Syirik asghar: seperti riya' dan bersumpah dengan nama selain Allah.", "Jalan-jalan menuju syirik: ghuluw (berlebihan) kepada orang shalih, jimat, tathayyur, dan ramalan.", "Cara bertaubat dan membentengi diri darinya."],
+                k: [["Sesungguhnya syirik itu benar-benar kezhaliman yang besar.", "QS. Luqman: 13"], ["Sesungguhnya Allah tidak mengampuni dosa syirik, dan Dia mengampuni dosa selain itu bagi siapa yang Dia kehendaki.", "QS. An-Nisa': 48"], ["Yang paling aku khawatirkan menimpa kalian adalah syirik kecil, yaitu riya'.", "HR. Ahmad dari Mahmud bin Labid radhiyallahu 'anhu"]],
+                g: "Poster tentang macam-macam syirik, contohnya di tengah masyarakat, serta bahaya dan cara menghindarinya."
+            },
+            'sunnah': {
+                b: "Sunnah secara bahasa berarti jalan, cara, atau kebiasaan.",
+                s: "Menurut salaf, sunnah adalah jalan yang ditempuh Rasulullah shallallahu 'alaihi wa sallam dan para sahabatnya dalam akidah, ibadah, akhlak, dan seluruh sisi agama. Karena itu banyak ulama salaf menamai kitab akidah mereka dengan 'As-Sunnah'. Dalam istilah fikih, sunnah juga bermakna amalan yang dianjurkan dan berpahala bila dikerjakan.",
+                l: ["Sunnah dalam akidah, ibadah, muamalah, dan akhlak.", "Sunnah qauliyyah (ucapan), fi'liyyah (perbuatan), dan taqririyyah (persetujuan) Nabi.", "Sunnah harian: bangun tidur, berpakaian, makan, masuk masjid, dan lainnya.", "Menghidupkan sunnah yang mulai ditinggalkan dengan ilmu dan hikmah."],
+                k: [["Barangsiapa membenci sunnahku, maka ia bukan dari golonganku.", "HR. Bukhari dan Muslim"], ["Hendaklah kalian berpegang teguh pada sunnahku dan sunnah Khulafaur Rasyidin yang mendapat petunjuk. Gigitlah ia dengan gigi geraham.", "HR. Abu Dawud dan At-Tirmidzi (hadits Al-'Irbadh bin Sariyah radhiyallahu 'anhu)"]],
+                g: "Poster tentang sunnah-sunnah Nabi shallallahu 'alaihi wa sallam dan tata cara mengamalkannya, lengkap dengan dalil."
+            },
+            'bidah': {
+                b: "Bid'ah secara bahasa berarti sesuatu yang diciptakan tanpa contoh sebelumnya.",
+                s: "Menurut salaf, bid'ah adalah sesuatu yang diada-adakan dalam agama yang tidak ada dasarnya dari Al-Qur'an maupun Sunnah, dengan maksud mendekatkan diri kepada Allah. Karena menyangkut ibadah, ia tertolak walaupun pelakunya berniat baik.",
+                l: ["Bid'ah dalam akidah (misalnya mengingkari sifat Allah atau takdir) dan bid'ah dalam ibadah (menambah atau mengkhususkan waktu, jumlah, dan tata cara tanpa dalil).", "Kaidah: hukum asal ibadah adalah terlarang kecuali ada dalil yang memerintahkannya.", "Perbedaan bid'ah dalam agama dengan urusan dunia dan sarana (wasilah) yang mubah.", "Sikap ahlus sunnah: menjelaskan dengan ilmu dan adab, menasihati, dan tidak ghuluw."],
+                k: [["Barangsiapa mengada-adakan dalam urusan kami ini sesuatu yang bukan bagian darinya, maka ia tertolak.", "HR. Bukhari dan Muslim (hadits 'Aisyah radhiyallahu 'anha)"], ["Sesungguhnya setiap bid'ah adalah kesesatan.", "HR. Abu Dawud dan At-Tirmidzi (hadits Al-'Irbadh bin Sariyah)"], ["Ikutilah (tuntunan) dan jangan berbuat bid'ah, sungguh kalian telah dicukupi.", "Ibnu Mas'ud radhiyallahu 'anhu, diriwayatkan Ad-Darimi"]],
+                g: "Poster tentang pengertian bid'ah, contoh-contohnya, penjelasan syubhat, dan cara menyikapinya."
+            },
+            'manhaj salaf': {
+                b: "Manhaj berarti jalan yang terang; salaf berarti pendahulu.",
+                s: "Manhaj salaf adalah jalan beragama yang ditempuh generasi terbaik umat ini — para sahabat, tabi'in, dan tabi'ut tabi'in — dalam memahami dan mengamalkan Al-Qur'an dan Sunnah, mencakup akidah, ibadah, akhlak, dakwah, dan sikap terhadap penguasa maupun ahli bid'ah.",
+                l: ["Merujuk Al-Qur'an dan Sunnah dengan pemahaman para sahabat.", "Prinsip-prinsip: mendahulukan dalil di atas akal dan pendapat, memulai dakwah dengan tauhid, berdakwah di atas ilmu, dan bersatu di atas sunnah.", "Sikap terhadap ulama, penguasa, dan perbedaan pendapat.", "Kisah dan biografi ulama salaf."],
+                k: [["Sebaik-baik manusia adalah generasiku, kemudian yang sesudahnya, kemudian yang sesudahnya.", "HR. Bukhari dan Muslim"], ["Orang-orang terdahulu lagi yang pertama-tama (dari Muhajirin dan Anshar) dan orang-orang yang mengikuti mereka dengan baik, Allah ridha kepada mereka dan mereka pun ridha kepada-Nya.", "QS. At-Taubah: 100"], ["Hendaklah engkau mengikuti jejak para salaf, walaupun orang-orang menolakmu.", "Imam Al-Auza'i rahimahullah"]],
+                g: "Poster tentang pengenalan manhaj salaf, prinsip-prinsipnya, dan keteladanan ulama salaf."
+            },
+            'akidah': {
+                b: "Akidah berasal dari kata 'aqd, yaitu ikatan atau keyakinan yang teguh di dalam hati.",
+                s: "Menurut salaf, akidah adalah keimanan yang pasti kepada Allah, malaikat-Nya, kitab-kitab-Nya, rasul-rasul-Nya, hari akhir, dan takdir yang baik maupun buruk, berikut seluruh perkara gaib yang dikabarkan Al-Qur'an dan Sunnah, dipahami sebagaimana pemahaman para sahabat.",
+                l: ["Enam rukun iman dan rincian maknanya.", "Iman: keyakinan hati, ucapan lisan, dan amalan anggota badan; bertambah dengan ketaatan dan berkurang dengan maksiat.", "Perkara gaib: alam kubur, hari kiamat, surga dan neraka, serta syafaat.", "Hak para sahabat, ketaatan kepada pemimpin muslim, dan prinsip-prinsip ahlus sunnah wal jama'ah."],
+                k: [["Iman adalah engkau beriman kepada Allah, malaikat-Nya, kitab-kitab-Nya, rasul-rasul-Nya, hari akhir, dan beriman kepada takdir yang baik maupun yang buruk.", "HR. Muslim (hadits Jibril)"], ["Pokok sunnah menurut kami adalah berpegang pada apa yang dipegangi para sahabat Rasulullah shallallahu 'alaihi wa sallam dan meneladani mereka.", "Imam Ahmad bin Hanbal rahimahullah, dalam Ushulus Sunnah"]],
+                g: "Poster tentang rukun iman, prinsip akidah ahlus sunnah, dan penjelasan ringkas tentang pemahaman yang menyimpang."
+            },
+            'hadits shahih & hasan': {
+                b: "Shahih berarti sehat atau benar; hasan berarti baik.",
+                s: "Menurut ulama hadits, hadits shahih adalah hadits yang sanadnya bersambung, diriwayatkan perawi yang adil dan kuat hafalannya (dhabith) dari perawi yang semisal hingga akhir sanad, serta tidak syadz dan tidak berpenyakit ('illah). Hadits hasan serupa, hanya hafalan perawinya sedikit di bawahnya. Keduanya dapat dijadikan hujjah.",
+                l: ["Hadits dari Shahih Al-Bukhari dan Shahih Muslim, serta yang shahih atau hasan dari Sunan Abu Dawud, At-Tirmidzi, An-Nasa'i, Ibnu Majah, dan kitab lainnya.", "Hadits tentang akidah, ibadah, akhlak, dan adab yang sah dari Nabi shallallahu 'alaihi wa sallam.", "Penjelasan makna hadits menurut para ulama.", "Penyebutan derajat dan takhrij (rujukan) agar mudah ditelusuri."],
+                k: [["Sanad itu bagian dari agama. Seandainya tidak ada sanad, siapa pun akan berkata sekehendaknya.", "Abdullah bin Al-Mubarak rahimahullah, dalam Muqaddimah Shahih Muslim"], ["Semoga Allah memperindah (wajah) seseorang yang mendengar sesuatu dari kami lalu menyampaikannya sebagaimana ia dengar.", "HR. Abu Dawud dan At-Tirmidzi (hadits Zaid bin Tsabit radhiyallahu 'anhu)"]],
+                g: "Poster berisi hadits-hadits yang sah beserta sumber dan derajatnya."
+            },
+            'hadits dhaif & maudhu': {
+                b: "Dha'if berarti lemah; maudhu' berarti yang diletakkan (dipalsukan).",
+                s: "Hadits dha'if adalah hadits yang tidak memenuhi syarat hadits shahih atau hasan. Hadits maudhu' adalah kedustaan yang dinisbatkan kepada Nabi shallallahu 'alaihi wa sallam, dan haram meriwayatkannya kecuali untuk menjelaskan kepalsuannya. Para salaf sangat menjaga agama dengan meneliti sanad dan perawi.",
+                l: ["Sebab kelemahan: sanad terputus, perawi lemah hafalan, atau perawi tertuduh dusta.", "Hadits populer yang lemah atau palsu di tengah masyarakat, beserta penjelasannya.", "Perbedaan hadits dha'if (tingkat lemahnya berbeda-beda) dengan hadits maudhu' (palsu).", "Adab menyebarkan hadits: memeriksa derajatnya sebelum menyampaikan."],
+                k: [["Barangsiapa berdusta atas namaku dengan sengaja, hendaklah ia menempati tempat duduknya di neraka.", "HR. Bukhari dan Muslim"], ["Sesungguhnya ilmu ini adalah agama, maka perhatikanlah dari siapa kalian mengambil agama kalian.", "Muhammad bin Sirin rahimahullah, dalam Muqaddimah Shahih Muslim"]],
+                g: "Poster berisi peringatan tentang hadits lemah dan palsu yang beredar, beserta penjelasan derajatnya."
+            },
+            'firqah-firqah': {
+                b: "Firqah berarti kelompok atau golongan yang memisahkan diri.",
+                s: "Dalam istilah salaf, firqah adalah kelompok yang menyelisihi jalan Rasulullah shallallahu 'alaihi wa sallam dan para sahabatnya dalam pokok-pokok agama. Mengenalnya bertujuan agar umat waspada dan tetap berpegang pada kebenaran, bukan untuk mencela pribadi.",
+                l: ["Hadits tentang perpecahan umat dan ciri satu golongan yang selamat.", "Pengenalan kelompok seperti Khawarij, Syiah, Murji'ah, Qadariyah, Jahmiyah, Mu'tazilah, dan lainnya.", "Pokok-pokok penyimpangan tiap kelompok dan bantahan ilmiah yang ringkas.", "Sikap adil, ilmiah, dan penuh kasih sayang kepada kaum muslimin."],
+                k: [["Umatku akan terpecah menjadi tujuh puluh tiga golongan; semuanya di neraka kecuali satu, yaitu yang berada di atas apa yang aku dan para sahabatku berada di atasnya.", "HR. At-Tirmidzi (hadits 'Abdullah bin 'Amr radhiyallahu 'anhuma)"], ["Berpegang teguhlah kalian semuanya pada tali Allah dan janganlah bercerai-berai.", "QS. Ali 'Imran: 103"]],
+                g: "Poster tentang pengenalan kelompok-kelompok menyimpang dan cara menjaga diri dari pemikirannya."
+            },
+            'kitab': {
+                b: "Kitab secara bahasa berarti tulisan atau buku.",
+                s: "Dalam tradisi salaf, kitab adalah karya para ulama sebagai rujukan ilmu: hadits, akidah, tafsir, fikih, dan akhlak, yang disusun berlandaskan Al-Qur'an dan Sunnah. Ilmu dipelajari dengan guru dan bertahap, dari kitab yang ringkas sebelum kitab yang besar.",
+                l: ["Pengenalan kitab dan penulisnya: Kutubus Sittah, Riyadhush Shalihin, Al-Arba'in An-Nawawiyyah, dan lainnya.", "Kitab akidah: Kitab At-Tauhid, Al-Ushulus Tsalatsah, Al-'Aqidah Al-Wasithiyyah, Al-'Aqidah Ath-Thahawiyyah, dan lainnya.", "Faedah dan ringkasan isi kitab.", "Adab terhadap kitab dan urutan belajar kitab (tadarruj)."],
+                k: [["Barangsiapa menempuh suatu jalan untuk mencari ilmu, Allah memudahkan baginya jalan menuju surga.", "HR. Muslim (hadits Abu Hurairah radhiyallahu 'anhu)"]],
+                g: "Poster tentang pengenalan kitab-kitab rujukan ulama salaf, penulisnya, dan faedah isinya."
+            },
+            'tafsir': {
+                b: "Tafsir berarti menjelaskan dan menyingkap makna.",
+                s: "Menurut salaf, tafsir adalah penjelasan makna Al-Qur'an dengan cara yang benar. Urutan yang dijelaskan para ulama: menafsirkan Al-Qur'an dengan Al-Qur'an, kemudian dengan Sunnah, kemudian penjelasan para sahabat, lalu tabi'in, disertai kaidah bahasa Arab yang sahih. Menafsirkan dengan sekadar akal atau hawa nafsu terlarang.",
+                l: ["Tafsir ayat dari kitab ulama: Ibnu Katsir, Ath-Thabari, As-Sa'di, dan lainnya.", "Asbabun nuzul dan makna kosakata Al-Qur'an.", "Tadabbur ayat-ayat tauhid, hukum, kisah, dan nasihat.", "Adab terhadap Al-Qur'an dan kesalahan umum dalam menafsirkan."],
+                k: [["Sebaik-baik kalian adalah orang yang mempelajari Al-Qur'an dan mengajarkannya.", "HR. Bukhari (hadits 'Utsman bin 'Affan radhiyallahu 'anhu)"], ["Ini adalah kitab yang Kami turunkan kepadamu penuh berkah, agar mereka merenungkan ayat-ayatnya.", "QS. Shad: 29"]],
+                g: "Poster tentang tafsir ayat-ayat pilihan sesuai pemahaman para ulama salaf."
+            },
+            'fikih': {
+                b: "Fikih secara bahasa berarti paham.",
+                s: "Menurut salaf, fikih adalah pemahaman yang mendalam terhadap agama. Dalam istilah ulama belakangan, fikih adalah ilmu tentang hukum-hukum syariat yang bersifat amaliah, digali dari dalil-dalil yang terperinci. Ahlus sunnah mengikuti dalil, menghormati para imam, dan tidak ta'ashub (fanatik) kepada golongan.",
+                l: ["Thaharah, shalat, zakat, puasa, dan haji.", "Muamalah, nikah, warisan, dan hukum keseharian.", "Sumber hukum: Al-Qur'an, Sunnah, ijma', dan qiyas yang sahih.", "Adab perbedaan pendapat ulama dan cara mengambil pendapat yang terkuat berdasarkan dalil."],
+                k: [["Barangsiapa yang Allah kehendaki kebaikan baginya, Dia pahamkan ia dalam urusan agama.", "HR. Bukhari dan Muslim (hadits Mu'awiyah radhiyallahu 'anhu)"], ["Jika hadits itu shahih, maka itulah madzhabku.", "Imam Asy-Syafi'i rahimahullah (dinukil Imam An-Nawawi dan lainnya)"]],
+                g: "Poster tentang hukum-hukum praktis ibadah dan kehidupan sehari-hari beserta dalilnya."
+            },
+            'sholat': {
+                b: "Shalat secara bahasa berarti doa.",
+                s: "Menurut syariat, shalat adalah ibadah berupa ucapan dan gerakan tertentu, dibuka dengan takbir dan ditutup dengan salam. Ia tiang agama dan rukun Islam yang kedua, serta amalan pertama yang dihisab pada hari kiamat. Para salaf menjaganya dengan khusyuk, tepat waktu, dan berjamaah bagi laki-laki.",
+                l: ["Syarat, rukun, wajib, dan sunnah shalat serta pembatalnya.", "Tata cara shalat sesuai sunnah.", "Shalat berjamaah, shalat Jumat, shalat sunnah rawatib, tahajud, dhuha, dan lainnya.", "Shalat orang sakit dan musafir, serta dzikir setelah shalat."],
+                k: [["Shalatlah kalian sebagaimana kalian melihat aku shalat.", "HR. Bukhari (hadits Malik bin Al-Huwairits radhiyallahu 'anhu)"], ["Pokok urusan adalah Islam, tiangnya adalah shalat, dan puncaknya adalah jihad.", "HR. At-Tirmidzi dan Ibnu Majah (hadits Mu'adz bin Jabal radhiyallahu 'anhu)"], ["Tidak ada bagian dalam Islam bagi orang yang meninggalkan shalat.", "'Umar bin Al-Khaththab radhiyallahu 'anhu, diriwayatkan Malik dalam Al-Muwaththa'"]],
+                g: "Poster tentang tata cara, keutamaan, dan hukum-hukum shalat sesuai sunnah."
+            },
+            'puasa': {
+                b: "Puasa (shaum) secara bahasa berarti menahan diri.",
+                s: "Menurut syariat, puasa adalah beribadah kepada Allah dengan menahan diri dari makan, minum, dan pembatal lainnya sejak terbit fajar hingga terbenam matahari. Ia menjaga ketakwaan lahir dan batin, termasuk menahan lisan dari dusta dan perkataan kotor.",
+                l: ["Puasa Ramadhan: rukun, syarat, pembatal, keringanan, qadha dan fidyah.", "Puasa sunnah: Senin–Kamis, Ayyamul Bidh, 'Arafah, 'Asyura, enam hari Syawwal, dan puasa Daud.", "Adab puasa, sahur, berbuka, dan i'tikaf.", "Hari-hari yang dilarang berpuasa, seperti dua hari raya."],
+                k: [["Puasa adalah perisai.", "HR. Bukhari dan Muslim"], ["Setiap amalan anak Adam untuknya, kecuali puasa; ia untuk-Ku dan Aku sendiri yang akan membalasnya.", "HR. Bukhari dan Muslim (hadits qudsi)"]],
+                g: "Poster tentang hukum, keutamaan, dan adab puasa wajib maupun sunnah."
+            },
+            'doa': {
+                b: "Doa secara bahasa berarti seruan atau permohonan.",
+                s: "Menurut syariat, doa adalah ibadah berupa permohonan kebaikan dan perlindungan dari keburukan kepada Allah semata, disertai pujian, harap, takut, dan merendahkan diri. Meminta kepada selain Allah dalam perkara yang hanya Allah mampu adalah syirik.",
+                l: ["Doa-doa dari Al-Qur'an dan Sunnah, bukan rangkaian doa yang tidak ada dasarnya.", "Adab berdoa: ikhlas, memuji Allah, bershalawat, yakin, dan tidak tergesa-gesa.", "Waktu dan keadaan mustajab, serta penghalang terkabulnya doa.", "Doa harian: pagi dan petang, makan, safar, masuk dan keluar rumah, dan lainnya."],
+                k: [["Doa itu adalah ibadah.", "HR. Abu Dawud dan At-Tirmidzi (hadits An-Nu'man bin Basyir radhiyallahu 'anhuma)"], ["Berdoalah kepada-Ku, niscaya Aku kabulkan permohonan kalian.", "QS. Ghafir: 60"]],
+                g: "Poster berisi doa-doa shahih beserta waktu, adab, dan keutamaannya."
+            },
+            'dzikir': {
+                b: "Dzikir berarti mengingat dan menyebut.",
+                s: "Menurut syariat, dzikir adalah mengingat dan menyebut Allah dengan hati dan lisan: tasbih, tahmid, tahlil, takbir, istighfar, doa, dan bacaan Al-Qur'an, sebagaimana yang diajarkan Nabi shallallahu 'alaihi wa sallam. Dzikir bersifat tauqifi, sehingga lafal, jumlah, dan caranya mengikuti dalil.",
+                l: ["Dzikir pagi–petang, setelah shalat, sebelum tidur, dan di berbagai keadaan.", "Keutamaan kalimat thayyibah: tasbih, tahmid, tahlil, takbir, dan istighfar.", "Dzikir yang disyariatkan dan yang tidak ada tuntunannya (misalnya jumlah atau tata cara yang dikhususkan tanpa dalil).", "Dzikir sebagai penjaga hati."],
+                k: [["Perumpamaan orang yang berdzikir kepada Rabbnya dan orang yang tidak berdzikir adalah seperti orang hidup dan orang mati.", "HR. Bukhari (hadits Abu Musa Al-Asy'ari radhiyallahu 'anhu)"], ["Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram.", "QS. Ar-Ra'd: 28"]],
+                g: "Poster berisi dzikir-dzikir harian yang shahih beserta keutamaan dan tata caranya."
+            },
+            'muamalah': {
+                b: "Muamalah berasal dari kata 'amala, yang berarti interaksi dan saling berbuat.",
+                s: "Menurut ulama, muamalah adalah aturan syariat dalam hubungan antarmanusia, terutama harta dan transaksi: jual beli, sewa, utang-piutang, dan kerja sama. Hukum asalnya halal dan mubah kecuali ada dalil yang melarang; ditegakkan di atas kejujuran, keadilan, dan saling ridha.",
+                l: ["Jual beli yang halal dan yang haram (riba, gharar, penipuan, najasy).", "Utang-piutang, gadai, sewa-menyewa, dan syirkah.", "Zakat, sedekah, infak, dan wakaf.", "Etika berdagang, bekerja, dan bermasyarakat."],
+                k: [["Pedagang yang jujur lagi dapat dipercaya akan bersama para nabi, orang-orang shiddiq, dan para syuhada.", "HR. At-Tirmidzi (hadits Abu Sa'id Al-Khudri radhiyallahu 'anhu)"], ["Allah menghalalkan jual beli dan mengharamkan riba.", "QS. Al-Baqarah: 275"]],
+                g: "Poster tentang hukum jual beli, utang, harta, dan etika bermuamalah sesuai syariat."
+            },
+            'rumah tangga': {
+                b: "Rumah tangga adalah keluarga yang dibangun atas ikatan pernikahan.",
+                s: "Dalam pandangan salaf, rumah tangga adalah ibadah dan amanah: dibangun di atas tauhid dan sunnah, ditegakkan dengan hak dan kewajiban suami istri, serta pendidikan anak agar menjadi hamba Allah yang shalih.",
+                l: ["Memilih pasangan, khitbah, akad, mahar, dan walimah.", "Hak dan kewajiban suami istri, nafkah, dan pergaulan yang baik (mu'asyarah bil ma'ruf).", "Mendidik anak di atas akidah, adab, shalat, dan akhlak.", "Menyelesaikan konflik, menjaga aib keluarga, dan hubungan dengan mertua serta kerabat."],
+                k: [["Di antara tanda-tanda kekuasaan-Nya, Dia menciptakan pasangan untukmu agar kamu tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.", "QS. Ar-Rum: 21"], ["Sebaik-baik kalian adalah yang paling baik kepada keluarganya, dan aku adalah yang terbaik kepada keluargaku.", "HR. At-Tirmidzi dan Ibnu Majah"]],
+                g: "Poster tentang pernikahan, hak dan kewajiban suami istri, serta mendidik anak."
+            },
+            'reminder': {
+                b: "Reminder (tadzkirah) berarti pengingat dan nasihat.",
+                s: "Dalam manhaj salaf, nasihat dan peringatan adalah bagian pokok agama. Ia bertujuan melembutkan hati, mengingat akhirat, dan mengajak kembali kepada Allah, dengan dalil yang shahih, bahasa yang santun, dan tanpa berlebihan.",
+                l: ["Peringatan tentang kematian, kubur, hari kiamat, surga, dan neraka.", "Nasihat tentang syukur, sabar, tawakal, ikhlas, dan taubat.", "Nasihat dari ayat, hadits, dan atsar salaf.", "Kisah-kisah teladan yang membangkitkan semangat taat."],
+                k: [["Agama itu adalah nasihat.", "HR. Muslim (hadits Tamim Ad-Dari radhiyallahu 'anhu)"], ["Berilah peringatan, karena peringatan itu bermanfaat bagi orang-orang yang beriman.", "QS. Adz-Dzariyat: 55"]],
+                g: "Poster berisi pengingat dan nasihat singkat untuk menguatkan iman dan amal."
+            },
+            'amalan 12 bulan': {
+                b: "Amalan 12 bulan merujuk pada ibadah dan peristiwa penting sepanjang dua belas bulan Hijriah.",
+                s: "Kalender Hijriah adalah ketetapan Allah, dan empat di antara dua belas bulannya adalah bulan haram: Dzulqa'dah, Dzulhijjah, Muharram, dan Rajab. Menurut manhaj salaf, amalan khusus pada suatu bulan hanya diamalkan bila ada dalil yang sah, dan tidak boleh mengkhususkan ibadah tanpa dalil.",
+                l: ["Amalan bulan tertentu: puasa 'Asyura di Muharram, Ramadhan, puasa enam hari Syawwal, sepuluh hari pertama Dzulhijjah, 'Arafah, dan kurban.", "Amalan rutin: puasa Senin–Kamis dan Ayyamul Bidh (tanggal 13, 14, 15 tiap bulan Hijriah).", "Penjelasan amalan yang dalilnya lemah atau tidak ada.", "Keistimewaan dan hukum bulan-bulan haram."],
+                k: [["Sesungguhnya bilangan bulan menurut Allah adalah dua belas bulan, dalam ketetapan Allah di waktu Dia menciptakan langit dan bumi, di antaranya ada empat bulan haram.", "QS. At-Taubah: 36"], ["Puasa yang paling utama setelah Ramadhan adalah puasa di bulan Allah, Muharram.", "HR. Muslim (hadits Abu Hurairah radhiyallahu 'anhu)"]],
+                g: "Poster tentang amalan, puasa, dan peristiwa penting tiap bulan Hijriah beserta dalilnya."
+            }
+        };
+
+
+        /* ===== v2.7.0: FEED (filter urutan), PENANDA BACA, INFO KATEGORI ===== */
+        let feedUrut = 'bawaan';          /* 'bawaan' | 'nomor' | 'acak' (mode 'terbaru' memakai urutTerbaru) */
+        let feedKeyTerapkan = 'bawaan';   /* kunci urutan DOM yang sedang terpasang */
+        let feedAcakSeq = 0;
+        let feedAcakIds = null;
+        const PENANDA_KEY = 'arsipPenandaBacaV1';
+        let penandaMem = (function() {
+            try { const v = JSON.parse(localStorage.getItem(PENANDA_KEY) || 'null'); return (v && v.id) ? String(v.id) : ''; } catch (e) { return ''; }
+        })();
+        const FEED_LABEL = {
+            bawaan: { n: 'Feed Bawaan', s: 'urutan arsip seperti biasa', t: 'Bawaan' },
+            terbaru: { n: 'Feed Konten Terbaru', s: 'diurutkan dari yang terakhir diunggah', t: 'Terbaru' },
+            nomor: { n: 'Feed Urutan Nomor', s: '001, 002, 003 … di tiap kategori', t: 'Urutan Nomor' },
+            acak: { n: 'Feed Acak', s: 'urutan diacak', t: 'Acak' }
+        };
+        function feedMode() { return urutTerbaru ? 'terbaru' : feedUrut; }
+        function feedKey() { const m = feedMode(); return m === 'acak' ? 'acak' + feedAcakSeq : m; }
+        function feedIdPoster(p) { return String(p.path).replace(/\//g, '-'); }
+        function nomorPoster(p, i) {
+            const seg = String(p.path || '').split('/').pop();
+            const m = /(\d+)(?!.*\d)/.exec(seg);
+            return m ? parseInt(m[1], 10) : 1e9 + i;
+        }
+        function feedBuatAcak() {
+            const ids = rawManifestPosters.map(feedIdPoster);
+            for (let i = ids.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const t = ids[i]; ids[i] = ids[j]; ids[j] = t;
+            }
+            feedAcakIds = ids;
+        }
+        /* menyusun kartu ke fragment untuk mode non-terbaru (bawaan / nomor / acak) */
+        function feedSusunNonTerbaru(peta, frag) {
+            if (feedUrut === 'nomor') {
+                const arr = rawManifestPosters.map(function(p, i) { return { p: p, i: i, k: p.kategori || 'Umum', n: nomorPoster(p, i) }; });
+                arr.sort(function(a, b) {
+                    const d = urutanKategori(a.k) - urutanKategori(b.k);
+                    if (d !== 0) return d;
+                    const c = String(a.k).localeCompare(String(b.k), 'id');
+                    if (c !== 0) return c;
+                    return (a.n - b.n) || (a.i - b.i);
+                });
+                let kat = null;
+                arr.forEach(function(x) {
+                    const c = peta[feedIdPoster(x.p)];
+                    if (!c) return;
+                    if (x.k !== kat) {
+                        kat = x.k;
+                        const sep = document.createElement('div');
+                        sep.className = 'day-sep kat-sep';
+                        sep.innerHTML = '<span class="ds-line"></span><span class="ds-title"></span><span class="ds-count"></span><span class="ds-line"></span>';
+                        sep.querySelector('.ds-title').textContent = kat;
+                        frag.appendChild(sep);
+                    }
+                    frag.appendChild(c);
+                });
+                return;
+            }
+            if (feedUrut === 'acak') {
+                if (!feedAcakIds) feedBuatAcak();
+                feedAcakIds.forEach(function(id) { const c = peta[id]; if (c) { frag.appendChild(c); delete peta[id]; } });
+            }
+            rawManifestPosters.forEach(function(p) {
+                const id = feedIdPoster(p);
+                const c = peta[id];
+                if (c) { frag.appendChild(c); delete peta[id]; }
+            });
+        }
+        function feedSet(mode) {
+            feedMenuTutup();
+            if (!FEED_LABEL[mode]) return;
+            if (mode === 'terbaru') {
+                if (urutTerbaru) { feedGulirKeAtas(); return; }
+                tampilkanTerbaru();
+                return;
+            }
+            const sama = (!urutTerbaru && feedUrut === mode);
+            urutTerbaru = false;
+            feedUrut = mode;
+            if (mode === 'acak') { feedAcakSeq++; feedBuatAcak(); }
+            else if (sama) { feedGulirKeAtas(); return; }
+            filterDisplayPosters();
+            feedGulirKeAtas();
+        }
+        function feedGulirKeAtas() {
+            setTimeout(function() { const s = document.getElementById('feedStatus'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+        }
+        function feedMenuToggle(e) {
+            if (e) e.stopPropagation();
+            const m = document.getElementById('feedMenu'), b = document.getElementById('btnFeedSort');
+            if (!m || !b) return;
+            const buka = !m.classList.contains('open');
+            m.classList.toggle('open', buka);
+            b.setAttribute('aria-expanded', buka ? 'true' : 'false');
+        }
+        function feedMenuTutup() {
+            const m = document.getElementById('feedMenu'), b = document.getElementById('btnFeedSort');
+            if (m) m.classList.remove('open');
+            if (b) b.setAttribute('aria-expanded', 'false');
+        }
+        document.addEventListener('click', function(e) { if (!(e.target.closest && e.target.closest('.ft-sortwrap'))) feedMenuTutup(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { feedMenuTutup(); tutupInfoKat(); } });
+
+        let feedToastTimer = 0;
+        function feedToast(pesan) {
+            let t = document.getElementById('feedToast');
+            if (!t) { t = document.createElement('div'); t.id = 'feedToast'; t.className = 'feed-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+            t.textContent = pesan;
+            void t.offsetWidth;
+            t.classList.add('show');
+            clearTimeout(feedToastTimer);
+            feedToastTimer = setTimeout(function() { t.classList.remove('show'); }, 2400);
+        }
+
+        /* status di atas feed + label tombol urutan + penanda */
+        function feedPerbarui() {
+            const m = feedMode(), L = FEED_LABEL[m];
+            const st = document.getElementById('feedStatus');
+            if (st) {
+                let n = 0;
+                document.querySelectorAll('#post-list > .poster').forEach(function(p) { if (p.style.display !== 'none') n++; });
+                const modeTxt = berandaModeAktif === 'fav' ? 'Disimpan' : (berandaModeAktif === 'pdf' ? 'PDF Mode' : 'Semua');
+                const katTxt = kategoriAktif === null ? 'Semua kategori' : kategoriAktif;
+                st.innerHTML = '<span class="fs-dot"></span><b></b><span class="fs-sub"></span>';
+                st.querySelector('b').textContent = L.n;
+                st.querySelector('.fs-sub').textContent = L.s + ' · ' + katTxt + ' · ' + modeTxt + ' · ' + n + ' konten';
+                st.setAttribute('data-mode', m);
+            }
+            const lb = document.getElementById('feedSortLabel');
+            if (lb) lb.textContent = L.t;
+            document.querySelectorAll('#feedMenu [data-feed]').forEach(function(el) {
+                const on = el.getAttribute('data-feed') === m;
+                el.classList.toggle('on', on);
+                el.setAttribute('aria-checked', on ? 'true' : 'false');
+            });
+            penandaSegarkan();
+        }
+
+        /* ---- PENANDA BACA ---- */
+        function penandaId() { return penandaMem; }
+        function penandaSimpan() {
+            try { if (penandaMem) localStorage.setItem(PENANDA_KEY, JSON.stringify({ id: penandaMem, t: Date.now() })); else localStorage.removeItem(PENANDA_KEY); } catch (e) {}
+        }
+        function cardById(id) {
+            const cs = document.querySelectorAll('#post-list > .poster');
+            for (let i = 0; i < cs.length; i++) { if (cs[i].getAttribute('data-id') === id) return cs[i]; }
+            return null;
+        }
+        function judulById(id) {
+            for (let i = 0; i < rawManifestPosters.length; i++) { if (feedIdPoster(rawManifestPosters[i]) === id) return rawManifestPosters[i].judul || id; }
+            return id;
+        }
+        function penandaBaruCount() {
+            const id = penandaId();
+            if (!id) return -1;
+            const it = susunUrutanTerbaru().items;
+            for (let i = 0; i < it.length; i++) { if (it[i].id === id) return i; }
+            return -1;
+        }
+        function setPenanda(id) {
+            const lama = penandaMem;
+            if (lama === id) { penandaMem = ''; penandaSimpan(); feedToast('Penanda baca dihapus'); }
+            else { penandaMem = id; penandaSimpan(); feedToast((lama ? 'Penanda dipindah ke: ' : 'Penanda dipasang di: ') + judulById(id)); }
+            penandaPasangGaris();
+            penandaSegarkan();
+        }
+        function penandaPasangGaris() {
+            const list = document.getElementById('post-list');
+            if (!list) return;
+            const lama = document.getElementById('penandaLine');
+            if (lama) lama.remove();
+            const id = penandaId();
+            if (!id) return;
+            const card = cardById(id);
+            if (!card) return;
+            const ln = document.createElement('div');
+            ln.id = 'penandaLine';
+            ln.className = 'penanda-line';
+            ln.innerHTML = '<span class="pl-ln"></span><span class="pl-chip"><span class="pl-rib"></span><span class="pl-t">Penanda Baca</span></span><span class="pl-ln"></span>';
+            list.insertBefore(ln, card);
+        }
+        function penandaSegarkan() {
+            const id = penandaId();
+            const card = id ? cardById(id) : null;
+            if (id && !card && rawManifestPosters.length) { penandaMem = ''; penandaSimpan(); }
+            const idAktif = penandaId();
+            document.querySelectorAll('#post-list > .poster').forEach(function(c) {
+                const on = !!idAktif && c.getAttribute('data-id') === idAktif;
+                if (c.classList.contains('is-penanda') !== on) c.classList.toggle('is-penanda', on);
+                const b = c.querySelector('.pita-btn');
+                if (b && b.classList.contains('on') !== on) {
+                    b.classList.toggle('on', on);
+                    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+                    b.title = on ? 'Hapus penanda baca' : 'Tandai sebagai penanda baca';
+                }
+            });
+            let ln = document.getElementById('penandaLine');
+            if (idAktif && card && (!ln || ln.nextElementSibling !== card)) { penandaPasangGaris(); ln = document.getElementById('penandaLine'); }
+            const n = idAktif ? penandaBaruCount() : -1;
+            if (ln && card) {
+                ln.style.display = card.style.display === 'none' ? 'none' : 'flex';
+                const t = ln.querySelector('.pl-t');
+                if (t) t.textContent = (urutTerbaru && n > 0) ? ('Penanda Baca · ' + n + ' konten baru di atas') : 'Penanda Baca';
+            }
+            const bt = document.getElementById('btnPenanda'), bd = document.getElementById('penandaBadge');
+            if (bt) {
+                bt.classList.toggle('on', !!(idAktif && card));
+                bt.title = (idAktif && card) ? ('Lompat ke penanda: ' + judulById(idAktif)) : 'Belum ada penanda. Ketuk pita di pojok kanan atas poster untuk menandai.';
+            }
+            if (bd) {
+                if (n > 0) { bd.textContent = '+' + n; bd.style.display = 'inline-flex'; bd.title = n + ' konten lebih baru dari penanda'; }
+                else { bd.textContent = ''; bd.style.display = 'none'; }
+            }
+        }
+        function keePenanda() {
+            const id = penandaId();
+            const card = id ? cardById(id) : null;
+            if (!id || !card) {
+                if (id && !card) { penandaMem = ''; penandaSimpan(); penandaSegarkan(); }
+                feedToast('Belum ada penanda. Ketuk pita di pojok kanan atas poster untuk menandai.');
+                return;
+            }
+            closeSidebar();
+            feedMenuTutup();
+            let jeda = 60;
+            if (card.style.display === 'none') {
+                kategoriAktif = null;
+                document.querySelectorAll('.card-kategori').forEach(function(el) { el.classList.remove('active'); });
+                document.querySelectorAll('.card-kategori-all').forEach(function(el) { el.classList.add('active'); });
+                syncBulanState();
+                switchBerandaMode('all', urutTerbaru);
+                jeda = 320;
+            }
+            setTimeout(function() {
+                const ln = document.getElementById('penandaLine');
+                const tujuan = (ln && ln.style.display !== 'none') ? ln : card;
+                tujuan.scrollIntoView({ behavior: urutTerbaru ? 'auto' : 'smooth', block: 'start' });
+                card.classList.remove('pn-flash');
+                void card.offsetWidth;
+                card.classList.add('pn-flash');
+                setTimeout(function() { card.classList.remove('pn-flash'); }, 1800);
+            }, jeda);
+        }
+
+        /* ---- INFO KATEGORI ---- */
+        function katInfoKey(nama) {
+            let k = kategoriKunci(nama);
+            if (KAT_ALIAS[k]) k = KAT_ALIAS[k];
+            return KAT_INFO[k] ? k : '';
+        }
+        function katInfoBtn(nama, extra) {
+            if (!katInfoKey(nama)) return '';
+            const n = escAttrBulan(nama);
+            return '<button type="button" class="hj-info ki-btn' + (extra ? ' ' + extra : '') + '" data-kat="' + n + '" aria-label="Info kategori ' + n + '" title="Info kategori" onclick="event.stopPropagation();bukaInfoKat(this.dataset.kat)">i</button>';
+        }
+        function bukaInfoKat(nama) {
+            const k = katInfoKey(nama);
+            const ov = document.getElementById('kiOverlay');
+            if (!k || !ov) return;
+            const d = KAT_INFO[k];
+            const e = function(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+            document.getElementById('kiTitle').textContent = nama;
+            document.getElementById('kiIcon').innerHTML = (k === 'amalan 12 bulan') ? IC('moon') : katIcon(nama, emojiMapGlobal[String(nama).toLowerCase()] || emojiMapGlobal[nama]);
+            const jml = kategoriData[nama];
+            let h = '<div class="hj-intro"><div class="ki-lbl">Secara Bahasa</div>' + e(d.b) + '</div>';
+            h += '<section class="hj-cardx"><div class="hj-ct">Menurut Para Salaf</div><p class="hj-q">' + e(d.s) + '</p></section>';
+            h += '<section class="hj-cardx"><div class="hj-ct">Ruang Lingkup</div><ul class="hj-list">' + d.l.map(function(x) { return '<li>' + e(x) + '</li>'; }).join('') + '</ul></section>';
+            h += '<section class="hj-cardx ki-ked"><div class="hj-ct">Dalil &amp; Kedudukan di Sisi Salaf</div>' + (d.kp ? '<p class="hj-q">' + e(d.kp) + '</p>' : '') +
+                d.k.map(function(x) { return '<p class="hj-q ki-quote">“' + e(x[0]) + '”</p><p class="hj-src">' + e(x[1]) + '</p>'; }).join('') + '</section>';
+            h += '<section class="hj-cardx"><div class="hj-ct">Gambaran Isi Kategori</div><p class="hj-q">' + e(d.g) + (jml ? ' Saat ini tersedia ' + jml + ' folder di kategori ini.' : '') + '</p></section>';
+            h += '<div class="hj-foot">Ringkasan ini sebagai pengantar. Rujuklah kitab-kitab para ulama untuk pembahasan yang lebih rinci.</div>';
+            const body = document.getElementById('kiBody');
+            body.innerHTML = h;
+            body.scrollTop = 0;
+            ov.classList.add('open');
+            ov.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('hj-lock');
+            setTimeout(function() { const c = ov.querySelector('.hj-close'); if (c) c.focus({ preventScroll: true }); }, 80);
+        }
+        function tutupInfoKat() {
+            const ov = document.getElementById('kiOverlay');
+            if (!ov || !ov.classList.contains('open')) return;
+            ov.classList.remove('open');
+            ov.setAttribute('aria-hidden', 'true');
+            const hj = document.getElementById('hjOverlay');
+            if (!hj || !hj.classList.contains('open')) document.body.classList.remove('hj-lock');
+        }
+
 
         /* v2.6.1: pembuat ikon SVG (sprite di atas <body>) */
         function IC(n, c) { return '<svg class="ic' + (c ? ' ' + c : '') + '" aria-hidden="true"><use href="#ic-' + n + '"/></svg>'; }
@@ -1988,15 +2540,14 @@ v2.6.8:
             list.querySelectorAll(':scope > .poster').forEach(function(c) { peta[c.getAttribute('data-id')] = c; jumlahKartu++; });
             if (jumlahKartu === 0) return;
             list.classList.toggle('mode-terbaru', urutTerbaru);
-            list.querySelectorAll(':scope > .day-sep, :scope > .time-sep, :scope > .terbaru-banner').forEach(function(e) { e.remove(); });
+            list.querySelectorAll(':scope > .day-sep, :scope > .time-sep, :scope > .terbaru-banner, :scope > .penanda-line').forEach(function(e) { e.remove(); });
             const frag = document.createDocumentFragment();
             if (!urutTerbaru) {
-                rawManifestPosters.forEach(function(p) {
-                    const c = peta[String(p.path).replace(/\//g, '-')];
-                    if (c) frag.appendChild(c);
-                });
+                feedSusunNonTerbaru(peta, frag);
                 list.appendChild(frag);
                 urutTerapkan = false;
+                feedKeyTerapkan = feedKey();
+                penandaPasangGaris();
                 return;
             }
             const hasil = susunUrutanTerbaru();
@@ -2034,6 +2585,8 @@ v2.6.8:
             });
             list.appendChild(frag);
             urutTerapkan = true;
+            feedKeyTerapkan = 'terbaru';
+            penandaPasangGaris();
         }
         /* pembatas hari hanya tampil jika ada poster yang terlihat di bawahnya; jumlah konten dihitung ulang */
         function sinkronSeparatorHari() {
@@ -2213,7 +2766,7 @@ v2.6.8:
         }
         /* pemuatan diam-diam di latar belakang setelah arsip terbuka */
         function prefetchRiwayat() {
-            const jalan = function() { muatRiwayatGit(false).then(function(berubah) { if (berubah) urutTerbaruCache = null; }).catch(function() {}); };
+            const jalan = function() { muatRiwayatGit(false).then(function(berubah) { if (berubah) { urutTerbaruCache = null; feedPerbarui(); } }).catch(function() {}); };
             if ('requestIdleCallback' in window) requestIdleCallback(jalan, { timeout: 4000 }); else setTimeout(jalan, 1500);
         }
         async function tampilkanTerbaru() {
@@ -2240,7 +2793,7 @@ v2.6.8:
 
         /* FUNGSI SINKRONISASI FILTER */
         function filterDisplayPosters() {
-            if (urutTerbaru !== urutTerapkan) terapkanUrutanPoster();
+            if (urutTerbaru !== urutTerapkan || feedKeyTerapkan !== feedKey()) terapkanUrutanPoster();
             const fav = getFavorit();
             const posters = document.querySelectorAll('.poster');
 
@@ -2264,6 +2817,7 @@ v2.6.8:
             });
             sinkronSeparatorHari();
             updateEmptyKatInfo();
+            feedPerbarui();
         }
 
         function downloadFile(url, nama) {
@@ -2424,6 +2978,7 @@ v2.6.8:
 
                     htmlPoster += `
                         <div class="poster" data-id="${posterId}" data-kategori="${kategori}" data-has-pdf="${hasPdf}" onclick="handleCardClick(event, '${posterId}')">
+                            <button type="button" class="pita-btn" data-id="${posterId}" aria-pressed="false" aria-label="Penanda baca" title="Tandai sebagai penanda baca" onclick="event.stopPropagation(); setPenanda('${posterId}')"></button>
                             ${carouselHTML}
                             
                             <div class="poster-header-info">
@@ -2496,6 +3051,7 @@ v2.6.8:
                     <span class="icon">${IC('moon')}</span>
                     <span class="nama">Amalan 12 Bulan</span>
                     <span class="jumlah">${bulanTotal} Folder</span>
+                    ${katInfoBtn('Amalan 12 Bulan', 'ki-left')}
                     <span class="bulan-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D4AF37" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
                 </div>
                 <div class="bulan-panel${bulanOpen ? ' open' : ''}" id="bulanPanel">
@@ -2510,6 +3066,7 @@ v2.6.8:
                     <span class="icon">${IC('moon')}</span>
                     <span class="nama">Amalan 12 Bulan</span>
                     <span class="jumlah">${bulanTotal}</span>
+                    ${katInfoBtn('Amalan 12 Bulan')}
                     <span class="bulan-chev-c">${IC('chevr')}</span>
                 </div>
                 <div class="bulan-chips-wrap${bulanOpen ? ' open' : ''}" id="bulanChipsWrap">
@@ -2529,6 +3086,7 @@ v2.6.8:
                         <span class="icon">${icon}</span>
                         <span class="nama">${nama}</span>
                         <span class="jumlah">${jumlah} Folder</span>
+                        ${katInfoBtn(nama)}
                     </div>
                 `;
                 htmlKategoriCompact += `
@@ -2536,6 +3094,7 @@ v2.6.8:
                         <span class="icon">${icon}</span>
                         <span class="nama">${nama}</span>
                         <span class="jumlah">${jumlah}</span>
+                        ${katInfoBtn(nama)}
                     </div>
                 `;
             }
