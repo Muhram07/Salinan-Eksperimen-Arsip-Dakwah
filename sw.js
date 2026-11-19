@@ -1,6 +1,8 @@
-/* Service Worker - Maker Pro v1.2.5
+importScripts('/arsip-sw/sw-arsip.js');
+
+/* Service Worker - Maker Pro v1.2.6
+   v1.2.6: memuat pembersih cache UI lama milik /arsip (arsip-sw/sw-arsip.js); logika Maker Pro tidak diubah.
    v1.2.5: demo.zip ikut disimpan untuk mode offline (demo.json lama tetap dicoba sebagai cadangan).
-   v1.2.4: halaman /maker jaringan dulu, berkas pendamping cache dulu.
 
    Struktur situs: halaman aplikasi di /maker, berkas pendamping di akar situs (/).
    Strategi:
@@ -8,7 +10,7 @@
      (tidak lagi cache-first, jadi versi baru langsung terpakai saat online).
    - Berkas satu asal (demo.zip, demo.json, ikon, dll) + font Google: tampilkan cache dulu, perbarui di latar belakang.
    - Permintaan lain (mis. cek lisensi api.github.com) TIDAK disentuh sama sekali. */
-const APP_VERSION = 'v1.2.5';
+const APP_VERSION = 'v1.2.6';
 const CACHE_NAME = 'maker-pro-' + APP_VERSION;
 const APP_PAGE = '/maker';
 const CORE_FILES = [
