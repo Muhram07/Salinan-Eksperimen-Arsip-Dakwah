@@ -1,16 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v2.5.4
+Studio Poster Maker Pro - Update v2.6.2
 
-v2.5.4:
-1. AI DESAINER LEBIH PINTAR MEMAHAMI PERINTAH: "Mode cerdas" menganalisis maksud perintah singkat lebih dulu (maksud, judul, palet, font, tata letak, dekorasi, ilustrasi) lalu merancang layer berdasarkan brief itu. Mode Tiru Referensi kini membaca juga perangkat dekorasi (kuas, lingkaran, titik, stiker, ilustrasi).
-2. ASET PNG OTOMATIS: kuas di belakang judul, coretan garis bawah, lingkaran, percikan tinta, dan titik halftone dibuat lokal (transparan, gratis tanpa kuota). Ilustrasi dari model gambar otomatis dipotong latarnya jadi PNG transparan. Dekorasi/kartu/pil "menempel" pada teks nyata (bungkus, garis di bawah/atas) sehingga posisinya selalu pas.
-3. TATA LETAK LEBIH PRESISI: blok teks beserta kartunya tidak saling menimpa, isi yang terlalu padat otomatis diperkecil proporsional, dan hasil diperiksa lint otomatis (teks keluar area aman, menimpa, melewati tepi kartu, celah kosong, tidak tepat tengah).
-4. PENILAI AI + KOREKSI OTOMATIS: AI melihat hasil render, memberi nilai, lalu memperbaiki posisi/ukuran (0-3 putaran, atur di Opsi hasil) sebelum selesai.
-5. MONITOR PROSES DIPERBESAR: huruf lebih besar, bar kemajuan persen, tinggi lebih lega, menempel di bawah layar, tombol Besarkan dan Salin log.
+v2.6.2:
+1. AI DESAINER: dasar hasil kembali ke mesin v2.5.4 (prompt, tata letak, penilai AI) yang paling rapi, lalu semua fitur v2.6.x dipasang sebagai modul tambahan yang tidak mengubah jalur bawaan. Pengaturan v2.6.1 lama (hemat token, latar sinematik, agen) dikembalikan ke mati sekali saja saat pertama dibuka.
+2. FITUR DIMASUKKAN: monitor proses yang bisa disembunyikan, rotasi model cadangan + jeda aman, penyelamat JSON terpotong, perpustakaan logo (latar dihapus, warna siluet, letak bebas), perataan teks kiri/tengah/kanan/rata penuh + tombol "Rapikan lebar teks", tebal/warna kata kunci, latar sinematik (grain, bokeh, bara, air, debu, daun, cahaya), lebar kotak teks satu kolom, mesin tata letak presisi (opsional), agen penyempurna referensi (opsional).
+3. PENGAMAN: garis dekorasi yang memotong teks otomatis dibuang; hasil agen dibandingkan dengan rancangan awal (pemeriksaan otomatis + kemiripan) dan dikembalikan bila lebih buruk; pemeriksaan "rancangan terpotong" tidak lagi menolak poster sederhana.
 
-v2.5.3:
-1. TOOL BARU "AI DESAINER" (ikon garis emas-abu) di bilah tool Beranda, kategori "AI". Memakai API Gemini dengan API key yang dimasukkan manual (disimpan lokal di perangkat). Pengaturan: API key, model layout/vision, model gambar, tombol "Muat daftar model" dan "Tes koneksi".
-2. Tiga mode: Buat Baru, Tiru Referensi, Rombak Slide. Hasil berupa layer terpisah yang otomatis mengisi tool Lapisan, dengan mesin tata letak yang menjaga ruang tepi kosong dan mencegah teks saling menimpa.
+v2.6.1:
+1. ANTI TUMPANG TINDIH: setelah tiap putaran agen, teks yang saling menimpa otomatis dipisah dan blok di bawahnya bergeser; kertas diperpanjang bila isi melewati tepi bawahnya.
+2. UKURAN HURUF vs KERTAS: tabel agen memuat kotak kertas dan persentase lebar kertas yang terisi tiap teks (fill).
+
 -->
 
 
@@ -954,7 +953,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 /* v2.0.0: modal Hapus Objek AI memakai kelas Hapus BG */
 
-/* v2.5.4: AI Desainer (Gemini via API key manual) */
+/* v2.6.2: AI Desainer (Gemini via API key manual) */
 #adzModal{position:fixed;inset:0;z-index:9000000;display:none;flex-direction:column;background:#0b0b0b;color:#e5e7eb;font-family:inherit;}
 #adzModal.active{display:flex;}
 #adzModal *{box-sizing:border-box;}
@@ -993,20 +992,30 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 .adz-th b{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.75);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .adz-chk{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#d6d9df;line-height:1.45;margin-top:8px;}
 .adz-chk input{margin-top:2px;accent-color:#D4AF37;}
-.adz-logbox{display:none;position:sticky;bottom:0;z-index:5;background:#0a0907;border:1px solid rgba(212,175,55,.5);border-radius:14px;padding:10px 10px 8px;box-shadow:0 -10px 26px rgba(0,0,0,.65);}
-.adz-logbox.on{display:block;}
+.adz-body{overscroll-behavior:contain;min-height:0;}
+.adz-logbox{display:none;flex:0 0 auto;margin:0 12px 8px;background:#0a0907;border:1px solid rgba(212,175,55,.5);border-radius:14px;padding:10px 10px 8px;box-shadow:0 -6px 18px rgba(0,0,0,.5);}
+.adz-logbox.on:not(.hid){display:flex;flex-direction:column;}
 .adz-loghead{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:#FFE259;}
 .adz-loghead b{flex:1;font-weight:800;letter-spacing:.2px;}
 .adz-loghead span{font-weight:800;color:#D4AF37;font-size:13px;min-width:38px;text-align:right;}
 .adz-mini{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:#e5e7eb;border-radius:8px;padding:5px 9px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;}
 .adz-mini:active{transform:scale(.96);}
-.adz-prog{height:6px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:8px;}
+.adz-prog{height:6px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:8px;flex:0 0 auto;}
 .adz-prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FFE259,#D4AF37);transition:width .35s;}
-.adz-log{font-size:14px;line-height:1.65;color:#cfd3da;max-height:36vh;overflow-y:auto;white-space:pre-wrap;word-break:break-word;-webkit-overflow-scrolling:touch;}
-.adz-logbox.big .adz-log{max-height:66vh;font-size:15px;}
+.adz-log{flex:1 1 auto;min-height:0;font-size:14px;line-height:1.65;color:#cfd3da;max-height:30vh;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;white-space:pre-wrap;word-break:break-word;-webkit-overflow-scrolling:touch;}
+.adz-logbox.big .adz-log{max-height:52vh;font-size:15px;}
 .adz-log div{padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.07);}
 .adz-log div:last-child{border-bottom:0;}
 .adz-log .ok{color:#7ee2a8;}.adz-log .er{color:#ff8a8a;}.adz-log .wn{color:#FFE259;}
+/* v2.5.6: perpustakaan logo */
+.adz-logos{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.adz-lg{position:relative;width:66px;height:66px;border-radius:10px;border:2px solid rgba(255,255,255,.14);background:repeating-conic-gradient(#2a2822 0% 25%,#1c1b17 0% 50%) 50%/12px 12px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.adz-lg.on{border-color:#D4AF37;box-shadow:0 0 0 2px rgba(212,175,55,.3);}
+.adz-lg img{max-width:84%;max-height:84%;object-fit:contain;display:block;pointer-events:none;}
+.adz-lg i{position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.35);color:#1a1405;font-style:normal;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.adz-lg.on i{background:#D4AF37;border-color:#D4AF37;}
+.adz-lg b{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.75);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.adz-btn.cancel{border-color:#ff6b6b;color:#ffb3b3;background:rgba(255,107,107,.12);}
 .adz-foot{flex:0 0 auto;padding:10px 14px max(12px,env(safe-area-inset-bottom));background:#0f0e0a;border-top:1px solid rgba(212,175,55,.3);display:flex;gap:8px;}
 .adz-foot .adz-btn{flex:1;height:44px;border-radius:22px;font-size:13.5px;font-weight:800;}
 .adz-foot .adz-btn.cancel{flex:0 0 auto;padding:0 16px;}
@@ -2362,7 +2371,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.5.4';
+const APP_VERSION = 'v2.6.2';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -23945,7 +23954,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 </div>
 </div>
 <script>
-/* ===== v2.5.4: AI DESAINER (Gemini via API key manual) =====
+/* ===== v2.6.2: AI DESAINER (Gemini via API key manual) =====
    Modul mandiri: tidak mengubah fungsi lama. Memakai struktur elemen yang sama dengan addNewText/addNewShape/addNewFadeEdge/handleImageUpload. */
 (function(){
 'use strict';
@@ -23953,7 +23962,9 @@ const LS_KEY='ADZ_SETTINGS_V1';
 const API='https://generativelanguage.googleapis.com/v1beta/';
 const ADZ_FONTS=['Anton','Montserrat','Playfair Display','Cinzel','Bebas Neue','Poppins','Plus Jakarta Sans','Outfit','Oswald','Lora','Amiri','Aref Ruqaa','Cairo','Scheherazade New','Reem Kufi','Pacifico','Dancing Script','Great Vibes','Caveat','Permanent Marker','Abril Fatface','Lobster','Archivo Black','Righteous','Staatliches','Teko','Inter','Mali','Alfa Slab One','Metal Mania','Pirata One','Special Elite'];
 const ADZ_SHAPES=['rect','circle','triangle','star','polygon','pentagon','octagon','heart','arrow','cross','capsule','trapezoid','parallelogram','rhombus','crescent','shield','chat','tag','bookmark','line'];
-const ADZ_ARTS=['brush','splatter','ring','scribble','halftone'];
+const ADZ_ARTS=['brush','splatter','ring','scribble','halftone','grain','bokeh','embers','water','dust','leaves','glow'];
+const ATMO=['grain','bokeh','embers','water','dust','leaves','glow'];
+const BLENDS=['normal','multiply','screen','overlay','soft-light','lighten','darken'];
 const ADZ_STYLES=[
  ['Elegan emas gelap','dark elegant luxury poster, deep black/brown background, gold (#D4AF37) accents, serif display headings, generous whitespace'],
  ['Minimalis terang','clean minimalist light poster, off-white background, one accent color, lots of whitespace, modern sans-serif'],
@@ -23962,19 +23973,27 @@ const ADZ_STYLES=[
  ['Vintage kertas','vintage paper poster, warm beige/sepia tones, serif fonts, thin rules and frames'],
  ['Gradasi modern','modern vibrant gradient poster, glassy cards, rounded shapes, clean sans-serif']
 ];
-const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null};
+let ENG=false;
+const S={logos:[],mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null};
 let cfg=loadCfg();
-function loadCfg(){let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}return Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2},c);}
+function loadCfg(){
+ let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}
+ const o=Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,rotate:true,atmo:false,eco:false,agent:false,engine:false,logoPlace:'auto',logoSize:9,pace:true,pool:'',poolImg:'',textAlign:'auto'},c);
+ if(o.mig!==262){o.mig=262;o.eco=false;o.atmo=false;o.agent=false;o.engine=false;o.review=2;}
+ return o;
+}
 function saveCfg(){try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 const $=function(id){return document.getElementById(id);};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function delay(ms){return new Promise(function(r){setTimeout(r,ms);});}
-function log(msg,cls){const b=$('adzLogBox'),l=$('adzLog');if(!l||!b)return;b.classList.add('on');const d=document.createElement('div');if(cls)d.className=cls;d.textContent=msg;l.appendChild(d);l.scrollTop=l.scrollHeight;}
-function clearLog(){const b=$('adzLogBox'),l=$('adzLog');if(l)l.innerHTML='';if(b)b.classList.remove('on');setProg(0);}
+function log(msg,cls){const b=$('adzLogBox'),l=$('adzLog');if(!l||!b)return;b.classList.add('on');const bt=$('adzLogBtn');if(bt)bt.style.display='block';const d=document.createElement('div');if(cls)d.className=cls;d.textContent=msg;l.appendChild(d);l.scrollTop=l.scrollHeight;}
+function clearLog(){const b=$('adzLogBox'),l=$('adzLog');if(l)l.innerHTML='';if(b){b.classList.remove('on');b.classList.remove('hid');}const bt=$('adzLogBtn');if(bt){bt.style.display='none';bt.textContent='Sembunyikan Monitor';}setProg(0);}
 function setProg(p){const bar=$('adzProgBar');if(bar)bar.style.width=Math.max(0,Math.min(100,p))+'%';const t=$('adzPct');if(t)t.textContent=Math.round(Math.max(0,Math.min(100,p)))+'%';}
 function step(p,msg){setProg(p);log(msg);}
 window.adzLogSize=function(){const b=$('adzLogBox');b.classList.toggle('big');$('adzLogSizeBtn').textContent=b.classList.contains('big')?'Kecilkan':'Besarkan';setTimeout(function(){const l=$('adzLog');l.scrollTop=l.scrollHeight;},50);};
 window.adzLogCopy=function(){const t=Array.prototype.map.call($('adzLog').children,function(x){return x.textContent;}).join('\n');try{navigator.clipboard.writeText(t);showToast('Log disalin');}catch(e){showToast('Gagal menyalin log');}};
+window.adzLogHide=function(){const b=$('adzLogBox');if(b)b.classList.add('hid');const bt=$('adzLogBtn');if(bt)bt.textContent='Tampilkan Monitor';};
+window.adzLogToggle=function(){const b=$('adzLogBox');if(!b)return;const h=b.classList.toggle('hid');const bt=$('adzLogBtn');if(bt)bt.textContent=h?'Tampilkan Monitor':'Sembunyikan Monitor';if(!h){const l=$('adzLog');setTimeout(function(){l.scrollTop=l.scrollHeight;},30);}};
 
 /* ---------- UI ---------- */
 function build(){
@@ -23989,6 +24008,11 @@ function build(){
   '<label class="adz-lab">Model layout &amp; analisis (teks/vision)</label><input id="adzModelL" class="adz-in" list="adzListL" placeholder="gemini-2.5-flash"><datalist id="adzListL"></datalist>'+
   '<label class="adz-lab">Model gambar (opsional)</label><input id="adzModelI" class="adz-in" list="adzListI" placeholder="gemini-2.5-flash-image"><datalist id="adzListI"></datalist>'+
   '<div class="adz-row" style="margin-top:10px"><button class="adz-btn" style="flex:1" onclick="adzLoadModels()">Muat daftar model</button><button class="adz-btn" style="flex:1" onclick="adzTest()">Tes koneksi</button></div>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzRotate"><span>Rotasi model otomatis: bila model sibuk / kuota habis / tidak mendukung, AI pindah sendiri ke model cadangan yang tersedia.</span></label>'+
+  '<label class="adz-lab">Model cadangan layout &amp; analisis (urut prioritas, satu per baris)</label><textarea id="adzPoolL" class="adz-ta" style="min-height:70px" spellcheck="false" placeholder="gemini-2.5-flash&#10;gemini-2.5-flash-lite"></textarea>'+
+  '<label class="adz-lab">Model cadangan gambar (satu per baris)</label><textarea id="adzPoolI" class="adz-ta" style="min-height:48px" spellcheck="false" placeholder="gemini-2.5-flash-image"></textarea>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzPace"><span>Jeda aman antar permintaan dan antar peralihan model (menghindari peringatan terlalu cepat / server sibuk). Disarankan aktif.</span></label>'+
+  '<div class="adz-hint">Model utama di atas selalu dicoba pertama. "Muat daftar model" mengisi daftar cadangan otomatis bila masih kosong.</div>'+
  '</details>'+
  '<div class="adz-card"><div class="adz-tabs" id="adzTabs">'+
   '<button class="adz-tab on" data-m="new" onclick="adzMode(\'new\')">Buat Baru<br><span style="font-weight:600;font-size:10px">dari perintah</span></button>'+
@@ -24002,25 +24026,47 @@ function build(){
    '<input type="file" id="adzFileImg" accept="image/*" multiple style="display:none"><input type="file" id="adzFileDoc" accept=".json,.zip,.txt,.md,application/json,application/zip" multiple style="display:none">'+
    '<div class="adz-thumbs" id="adzThumbs"></div><div class="adz-hint">Maks. 4 gambar. Poster referensi dibaca gayanya (warna, font, tata letak, kuas, ornamen, ilustrasi), lalu dibuat ulang sebagai layer terpisah. JSON/ZIP dibaca sebagai konteks (teks &amp; gambar di dalamnya).</div></div>'+
  '</div>'+
+ '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Logo tersimpan (opsional)</div>'+
+  '<div class="adz-row"><button class="adz-btn" style="flex:1" onclick="adzLogoAdd()">+ Tambah logo</button><button class="adz-btn" onclick="adzLogoAll(true)">Pilih semua</button><button class="adz-btn" onclick="adzLogoAll(false)">Kosongkan</button></div>'+
+  '<input type="file" id="adzFileLogo" accept="image/*" multiple style="display:none">'+
+  '<div class="adz-logos" id="adzLogos"></div><div class="adz-hint" id="adzLogoHint"></div>'+
+  '<label class="adz-lab">Letak logo</label><div class="adz-chips" id="adzLogoPlace"></div>'+
+  '<label class="adz-lab">Tinggi logo: <span id="adzLogoSizeV">9</span>% lebar poster</label><input id="adzLogoSize" class="adz-range" type="range" min="4" max="22" step="1" value="9">'+
+ '</div>'+
  '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Opsi hasil</div>'+
   '<label class="adz-lab" style="margin-top:6px">Ruang tepi kosong: <span id="adzMarginV">7</span>%</label><input id="adzMargin" class="adz-range" type="range" min="4" max="12" step="1" value="7">'+
+  '<label class="adz-lab">Perataan &amp; lebar kotak teks</label><div class="adz-chips" id="adzAligns"></div>'+
+  '<div class="adz-hint">Otomatis = AI yang memilih. Pilihan lain memaksa semua kotak teks (judul, isi, catatan kaki) berbagi satu kolom dengan tepi kiri-kanan sejajar. Rata penuh = lebar kotak isi disamakan dengan lebar judul.</div>'+
+  '<button class="adz-btn" style="margin-top:8px;width:100%" onclick="adzTidy()">Rapikan lebar teks slide aktif (tanpa AI)</button>'+
   '<label class="adz-chk"><input type="checkbox" id="adzSmart"><span>Mode cerdas: AI menganalisis maksud perintah dulu (walau singkat), menyusun brief, lalu mendesain.</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzAssets"><span>Aset PNG otomatis: kuas di belakang judul, coretan, lingkaran, percikan, titik halftone. Dibuat lokal (gratis, tanpa kuota) dan ditempel mengikuti teks agar posisinya pas.</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzAtmo"><span>Latar sinematik (opsional): AI menambah tekstur kertas / gradasi halus dan efek blur (api, percikan air, tanah, daun melayang, bokeh) sesuai tema. Dibuat lokal, gratis. Matikan untuk poster bersih seperti referensi polos.</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzEco"><span>Hemat token (opsional): prompt dipadatkan dan jawaban AI diringkas. Bisa menurunkan kualitas tata letak; matikan untuk hasil terbaik.</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzAgent"><span>Agen penyempurna (opsional, perlu gambar referensi): AI membandingkan kanvas dengan referensi lalu mengedit layer sampai mirip (maks 5 putaran, lebih banyak token). Hasilnya dibandingkan dengan rancangan awal dan dikembalikan bila lebih buruk.</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzEngine"><span>Mesin tata letak presisi (opsional): padding ganda kartu, ritme jarak antar blok, batas ukuran huruf. Mati = mesin v2.5.4 yang stabil.</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Buat ilustrasi/latar dengan model gambar (ilustrasi otomatis dipotong jadi PNG transparan). Lebih lambat, bisa kena kuota/berbayar. Jika mati, hanya gradasi + bentuk + aset PNG lokal.</span></label>'+
   '<label class="adz-lab">Putaran koreksi otomatis: <span id="adzRevV">2</span> (AI menilai hasil lalu merapikan posisi; 0 = mati)</label><input id="adzRev" class="adz-range" type="range" min="0" max="3" step="1" value="2">'+
   '<label class="adz-chk"><input type="checkbox" id="adzReplace"><span>Ganti isi slide saat ini (bisa dibatalkan dengan Undo). Jika mati, hasil dibuat di slide baru.</span></label>'+
  '</div>'+
- '<div class="adz-logbox" id="adzLogBox"><div class="adz-loghead"><b>Monitor Proses AI</b><span id="adzPct">0%</span><button class="adz-mini" id="adzLogSizeBtn" onclick="adzLogSize()">Besarkan</button><button class="adz-mini" onclick="adzLogCopy()">Salin</button></div><div class="adz-prog"><i id="adzProgBar"></i></div><div class="adz-log" id="adzLog"></div></div>'+
  '</div>'+
- '<div class="adz-foot"><button class="adz-btn cancel" id="adzCancel" onclick="adzCancel()" style="display:none">Batal</button><button class="adz-btn gold" id="adzGo" onclick="adzGenerate()">Buat Desain</button></div>';
+ '<div class="adz-logbox" id="adzLogBox"><div class="adz-loghead"><b>Monitor Proses AI</b><span id="adzPct">0%</span><button class="adz-mini" id="adzLogSizeBtn" onclick="adzLogSize()">Besarkan</button><button class="adz-mini" onclick="adzLogCopy()">Salin</button><button class="adz-mini" onclick="adzLogHide()" aria-label="Tutup monitor">✕</button></div><div class="adz-prog"><i id="adzProgBar"></i></div><div class="adz-log" id="adzLog"></div></div>'+
+ '<div class="adz-foot"><button class="adz-btn cancel" id="adzCancel" onclick="adzCancel()" style="display:none">Batalkan</button><button class="adz-btn" id="adzLogBtn" onclick="adzLogToggle()" style="display:none;flex:0 0 auto;height:44px;border-radius:22px;padding:0 14px;font-size:12px">Sembunyikan Monitor</button><button class="adz-btn gold" id="adzGo" onclick="adzGenerate()">Buat Desain</button></div>';
  document.body.appendChild(m);
  const st=$('adzStyles');
  ADZ_STYLES.forEach(function(s,i){const b=document.createElement('button');b.className='adz-chip';b.textContent=s[0];b.onclick=function(){S.style=(S.style===i)?-1:i;paintChips();};st.appendChild(b);});
+ const al=$('adzAligns');
+ [['auto','Otomatis (AI)'],['left','Rata kiri'],['center','Rata tengah'],['right','Rata kanan'],['justify','Rata penuh']].forEach(function(a){const b=document.createElement('button');b.className='adz-chip';b.setAttribute('data-a',a[0]);b.textContent=a[1];b.onclick=function(){cfg.textAlign=a[0];saveCfg();paintAligns();};al.appendChild(b);});
  $('adzFileImg').addEventListener('change',function(e){addImages(e.target.files);e.target.value='';});
  $('adzFileDoc').addEventListener('change',function(e){addDocs(e.target.files);e.target.value='';});
  $('adzMargin').addEventListener('input',function(){$('adzMarginV').textContent=this.value;});
  $('adzRev').addEventListener('input',function(){$('adzRevV').textContent=this.value;});
+ $('adzFileLogo').addEventListener('change',function(e){addLogos(e.target.files);e.target.value='';});
+ $('adzLogoSize').addEventListener('input',function(){$('adzLogoSizeV').textContent=this.value;});
+ const lp=$('adzLogoPlace');
+ [['auto','Otomatis'],['bc','Bawah tengah'],['bl','Bawah kiri'],['br','Bawah kanan'],['tc','Atas tengah'],['tl','Atas kiri'],['tr','Atas kanan']].forEach(function(a){const b=document.createElement('button');b.className='adz-chip';b.setAttribute('data-p',a[0]);b.textContent=a[1];b.onclick=function(){cfg.logoPlace=a[0];saveCfg();paintLogoPlace();};lp.appendChild(b);});
 }
+function paintLogoPlace(){const lp=$('adzLogoPlace');if(!lp)return;Array.prototype.forEach.call(lp.children,function(b){b.classList.toggle('on',b.getAttribute('data-p')===(cfg.logoPlace||'auto'));});}
+function paintAligns(){Array.prototype.forEach.call($('adzAligns').children,function(b){b.classList.toggle('on',b.getAttribute('data-a')===(cfg.textAlign||'auto'));});}
 function paintChips(){Array.prototype.forEach.call($('adzStyles').children,function(b,i){b.classList.toggle('on',i===S.style);});}
 function paintThumbs(){
  const t=$('adzThumbs');t.innerHTML='';
@@ -24033,7 +24079,9 @@ window.openAiDesigner=function(){
  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
  $('adzApiCard').open=!cfg.key;
- paintChips();paintThumbs();adzMode(S.mode);
+ $('adzRotate').checked=cfg.rotate!==false;$('adzPace').checked=cfg.pace!==false;$('adzPoolL').value=cfg.pool||'';$('adzPoolI').value=cfg.poolImg||'';
+ $('adzAtmo').checked=cfg.atmo===true;$('adzEco').checked=cfg.eco===true;$('adzAgent').checked=cfg.agent===true;$('adzEngine').checked=cfg.engine===true;$('adzLogoSize').value=cfg.logoSize||9;$('adzLogoSizeV').textContent=cfg.logoSize||9;paintLogoPlace();loadLogos();
+ paintChips();paintAligns();paintThumbs();adzMode(S.mode);
  $('adzModal').classList.add('active');
 };
 window.adzClose=function(){if(S.busy&&!confirm('Proses masih berjalan. Batalkan dan tutup?'))return;adzCancel();readCfg();$('adzModal').classList.remove('active');};
@@ -24051,7 +24099,114 @@ window.adzMode=function(m){
 function readCfg(){
  cfg.key=$('adzKey').value.trim();cfg.layoutModel=$('adzModelL').value.trim()||'gemini-2.5-flash';cfg.imageModel=$('adzModelI').value.trim()||'gemini-2.5-flash-image';
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
- cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
+ cfg.rotate=$('adzRotate').checked;cfg.pace=$('adzPace').checked;cfg.pool=$('adzPoolL').value;cfg.poolImg=$('adzPoolI').value;cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));cfg.atmo=$('adzAtmo').checked;cfg.eco=$('adzEco').checked;cfg.agent=$('adzAgent').checked;cfg.engine=$('adzEngine').checked;cfg.logoSize=Math.max(4,Math.min(22,parseInt($('adzLogoSize').value)||9));saveCfg();
+}
+
+/* ---------- Perpustakaan logo (IndexedDB terpisah, tidak menyentuh DB proyek) ---------- */
+const LDB_NAME='StudioPosterLogos_v1',LDB_STORE='logos';
+let ldb=null;
+function ldbOpen(){
+ if(ldb)return Promise.resolve(ldb);
+ return new Promise(function(res,rej){
+  if(!window.indexedDB){rej(new Error('IndexedDB tidak tersedia'));return;}
+  const rq=indexedDB.open(LDB_NAME,1);
+  rq.onupgradeneeded=function(e){const d=e.target.result;if(!d.objectStoreNames.contains(LDB_STORE))d.createObjectStore(LDB_STORE,{keyPath:'id'});};
+  rq.onsuccess=function(e){ldb=e.target.result;res(ldb);};
+  rq.onerror=function(){rej(new Error('Gagal membuka penyimpanan logo'));};
+ });
+}
+function ldbTx(mode,fn){return ldbOpen().then(function(d){return new Promise(function(res,rej){const tx=d.transaction(LDB_STORE,mode);const r=fn(tx.objectStore(LDB_STORE));tx.oncomplete=function(){res(r&&r.result);};tx.onerror=function(){rej(new Error('Penyimpanan logo gagal'));};tx.onabort=tx.onerror;});});}
+async function loadLogos(){try{const all=await ldbTx('readonly',function(s){return s.getAll();});S.logos=(all||[]).sort(function(a,b){return a.t-b.t;});}catch(e){S.logos=[];}paintLogos();}
+async function logoShrink(src,maxDim){
+ const im=await loadImg(src);const iw=im.width||300,ih=im.height||300;const k=Math.min(1,maxDim/Math.max(iw,ih));
+ const c=document.createElement('canvas');c.width=Math.max(1,Math.round(iw*k));c.height=Math.max(1,Math.round(ih*k));
+ c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+ const r={url:c.toDataURL('image/png'),w:c.width,h:c.height};c.width=0;c.height=0;return r;
+}
+async function addLogos(files){
+ let n=0;
+ for(const f of Array.from(files||[])){
+  if(!/^image\//.test(f.type)&&!/\.(png|jpe?g|webp|svg|gif)$/i.test(f.name))continue;
+  try{
+   const r=await logoShrink(await readAsDataURL(f),560);
+   const rec={id:'lg_'+Date.now()+'_'+Math.floor(Math.random()*1e5),name:f.name.replace(/\.[^.]+$/,'').slice(0,24)||'Logo',url:r.url,w:r.w,h:r.h,sel:true,t:Date.now()+n};
+   await ldbTx('readwrite',function(st){return st.put(rec);});S.logos.push(rec);n++;
+  }catch(e){showToast('Logo gagal disimpan: '+f.name);}
+ }
+ paintLogos();if(n)showToast(n+' logo disimpan');
+}
+function paintLogos(){
+ const g=$('adzLogos');if(!g)return;g.innerHTML='';
+ S.logos.forEach(function(L){
+  const d=document.createElement('div');d.className='adz-lg'+(L.sel?' on':'');
+  const im=document.createElement('img');im.src=L.url;im.alt=L.name;d.appendChild(im);
+  const ck=document.createElement('i');ck.textContent=L.sel?'\u2713':'';d.appendChild(ck);
+  const x=document.createElement('b');x.textContent='\u00d7';
+  x.onclick=function(ev){ev.stopPropagation();if(!confirm('Hapus logo "'+L.name+'" dari penyimpanan?'))return;ldbTx('readwrite',function(st){return st.delete(L.id);}).then(function(){S.logos=S.logos.filter(function(q){return q!==L;});paintLogos();}).catch(function(){showToast('Gagal menghapus logo');});};
+  d.appendChild(x);
+  d.onclick=function(){L.sel=!L.sel;ldbTx('readwrite',function(st){return st.put(L);}).catch(function(){});paintLogos();};
+  g.appendChild(d);
+ });
+ const n=S.logos.filter(function(l){return l.sel;}).length,h=$('adzLogoHint');
+ if(h)h.textContent=S.logos.length?('Ketuk logo untuk memilih / membatalkan. Terpilih: '+n+' dari '+S.logos.length+'. Hanya logo terpilih yang dipasang di poster.'):'Belum ada logo. Tambahkan logo (PNG transparan paling bagus). Tersimpan di perangkat dan bisa dipakai lagi di poster lain.';
+}
+window.adzLogoAdd=function(){const f=$('adzFileLogo');if(f)f.click();};
+window.adzLogoAll=function(v){S.logos.forEach(function(L){L.sel=!!v;ldbTx('readwrite',function(st){return st.put(L);}).catch(function(){});});paintLogos();};
+function selLogos(){return (S.logos||[]).filter(function(l){return l.sel;});}
+function logoZone(){const p=cfg.logoPlace||'auto';if(p!=='auto')return p;const z=S.logoPlan&&S.logoPlan.zone;return /^[tb][lcr]$/.test(z||'')?z:'tc';}
+/* Hapus latar logo non-PNG (tepi halus), pangkas rapat, warnai siluet satu warna; hasil di-cache kecil */
+const LOGO_CACHE=new Map();
+async function logoPrep(g,tint){
+ const key=g.id+'|'+(tint||'');
+ if(LOGO_CACHE.has(key))return LOGO_CACHE.get(key);
+ let out={url:g.url,w:g.w,h:g.h};
+ try{
+  const im=await loadImg(g.url),w=im.width,h=im.height;
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0);
+  const id=x.getImageData(0,0,w,h),p=id.data,n=w*h;
+  let tr=0;for(let i=3;i<p.length;i+=4)if(p[i]<200)tr++;
+  let ok=true;
+  if(tr<n*0.02){
+   let br=0,bg=0,bb=0,k=0;const bp=[];
+   for(let i=0;i<w;i+=2){bp.push(i,(h-1)*w+i);}for(let j=0;j<h;j+=2){bp.push(j*w,j*w+w-1);}
+   bp.forEach(function(q){br+=p[q*4];bg+=p[q*4+1];bb+=p[q*4+2];k++;});br/=k;bg/=k;bb/=k;
+   let v=0;bp.forEach(function(q){v+=Math.sqrt(Math.pow(p[q*4]-br,2)+Math.pow(p[q*4+1]-bg,2)+Math.pow(p[q*4+2]-bb,2));});
+   if(v/k>40)ok=false;
+   else{
+    const LO=26,HI=105;
+    for(let i=0;i<n;i++){
+     const o=i*4,dd=Math.sqrt(Math.pow(p[o]-br,2)+Math.pow(p[o+1]-bg,2)+Math.pow(p[o+2]-bb,2));
+     let a=(dd-LO)/(HI-LO);a=a<=0?0:(a>=1?1:a*a*(3-2*a));
+     p[o+3]=Math.round(p[o+3]*a);
+    }
+   }
+  }
+  if(ok){
+   const tc=tint?rgbOf(tint).split(',').map(Number):null;
+   let x0=w,y0=h,x1=-1,y1=-1;
+   for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
+    const o=(yy*w+xx)*4;
+    if(p[o+3]>18){if(xx<x0)x0=xx;if(xx>x1)x1=xx;if(yy<y0)y0=yy;if(yy>y1)y1=yy;}
+    if(tc&&p[o+3]>0){p[o]=tc[0];p[o+1]=tc[1];p[o+2]=tc[2];}
+   }
+   if(x1>x0&&y1>y0){
+    x.putImageData(id,0,0);
+    const pd=2,cw=x1-x0+1+pd*2,ch=y1-y0+1+pd*2;
+    const c2=document.createElement('canvas');c2.width=cw;c2.height=ch;
+    c2.getContext('2d').drawImage(c,x0-pd,y0-pd,cw,ch,0,0,cw,ch);
+    out={url:c2.toDataURL('image/png'),w:cw,h:ch};
+   }
+  }
+ }catch(e){}
+ if(LOGO_CACHE.size>24)LOGO_CACHE.clear();
+ LOGO_CACHE.set(key,out);
+ return out;
+}
+function autoTint(L){
+ let best=null,bs=-1;
+ (L||[]).forEach(function(l){if(l&&l.kind==='text'&&l.color&&(+l.size||0)>bs){bs=+l.size||0;best=l.color;}});
+ return best?hex(best,null):null;
 }
 
 /* ---------- Berkas: gambar, JSON, ZIP ---------- */
@@ -24067,7 +24222,7 @@ async function shrink(src,maxDim,q){
 async function addImages(files){
  for(const f of Array.from(files||[])){
   if(S.refs.length>=4){showToast('Maks. 4 gambar referensi');break;}
-  try{S.refs.push({url:await shrink(await readAsDataURL(f),1280,0.85),name:f.name});}catch(e){showToast('Gambar gagal dibaca: '+f.name);}
+  try{S.refs.push({url:await shrink(await readAsDataURL(f),cfg.eco===true?1024:1280,0.85),name:f.name});}catch(e){showToast('Gambar gagal dibaca: '+f.name);}
  }
  paintThumbs();
 }
@@ -24103,7 +24258,7 @@ async function readZip(file){
   if(method===8)data=await inflateRaw(data);else if(method!==0)continue;
   if(isTxt){docs++;S.ctxTexts.push({name:name.split('/').pop(),text:trimJsonText(dec.decode(data))});}
   else{imgs++;const mime=/png$/i.test(name)?'image/png':(/webp$/i.test(name)?'image/webp':'image/jpeg');
-   const b=new Blob([data],{type:mime});S.refs.push({url:await shrink(await readAsDataURL(b),1280,0.85),name:name.split('/').pop()});}
+   const b=new Blob([data],{type:mime});S.refs.push({url:await shrink(await readAsDataURL(b),cfg.eco===true?1024:1280,0.85),name:name.split('/').pop()});}
  }
  if(!imgs&&!docs)showToast('ZIP tidak berisi JSON/gambar yang bisa dibaca');
 }
@@ -24111,37 +24266,152 @@ async function readZip(file){
 /* ---------- Gemini ---------- */
 function b64(url){const i=url.indexOf(',');return {mime:url.slice(5,url.indexOf(';')),data:url.slice(i+1)};}
 function imgPart(url){const b=b64(url);return {inline_data:{mime_type:b.mime,data:b.data}};}
-async function gem(model,parts,gen,system){
- if(!cfg.key)throw new Error('API key belum diisi (buka Pengaturan API & Model)');
- const body={contents:[{role:'user',parts:parts}],generationConfig:gen||{}};
+/* ---------- Jaringan: satu panggilan, jeda abortable, rotasi model ---------- */
+function mkErr(msg,status,kind,extra){const e=new Error(msg);e.status=status||0;e.kind=kind||'busy';if(extra)Object.assign(e,extra);return e;}
+function sleep(ms){
+ return new Promise(function(res,rej){
+  const sig=S.ctl&&S.ctl.signal;
+  if(sig&&sig.aborted){rej(new Error('Dibatalkan'));return;}
+  let t=null;const ab=function(){clearTimeout(t);rej(new Error('Dibatalkan'));};
+  t=setTimeout(function(){if(sig)sig.removeEventListener('abort',ab);res();},ms);
+  if(sig)sig.addEventListener('abort',ab,{once:true});
+ });
+}
+async function gem(model,parts,gen,system,timeoutMs){
+ if(!cfg.key)throw mkErr('API key belum diisi (buka Pengaturan API & Model)',0,'auth');
+ const gc=Object.assign({},gen||{});const tb=gc._tb;delete gc._tb;
+ if(tb!=null&&/gemini-2\.5-flash/i.test(model))gc.thinkingConfig={thinkingBudget:tb};
+ const body={contents:[{role:'user',parts:parts}],generationConfig:gc};
  if(system)body.systemInstruction={parts:[{text:system}]};
- for(let attempt=0;attempt<2;attempt++){
-  const tm=setTimeout(function(){if(S.ctl)S.ctl.abort();},170000);
-  let r;
-  try{r=await fetch(API+'models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body),signal:S.ctl?S.ctl.signal:undefined});}
-  catch(e){clearTimeout(tm);if(e.name==='AbortError')throw new Error('Dibatalkan / waktu habis');throw new Error('Jaringan gagal: '+e.message);}
-  clearTimeout(tm);
-  let j=null;try{j=await r.json();}catch(e){}
-  if(r.ok&&j)return j;
-  const msg=(j&&j.error&&j.error.message)||('HTTP '+r.status);
-  if((r.status===503||r.status===500)&&attempt===0){log('Server sibuk, mencoba lagi...','wn');await delay(2500);continue;}
-  if(r.status===400&&/API key/i.test(msg))throw new Error('API key tidak valid');
-  if(r.status===403)throw new Error('Akses ditolak (cek API key / izin model): '+msg);
-  if(r.status===404)throw new Error('Model "'+model+'" tidak ditemukan. Pilih lewat "Muat daftar model".');
-  if(r.status===429)throw new Error('Kuota habis / terlalu cepat (429). Tunggu sebentar atau ganti model.');
-  throw new Error(msg);
+ const c=new AbortController();let timedOut=false;
+ const sig=S.ctl&&S.ctl.signal;
+ if(sig&&sig.aborted)throw new Error('Dibatalkan');
+ const onAbort=function(){c.abort();};
+ if(sig)sig.addEventListener('abort',onAbort,{once:true});
+ const tm=setTimeout(function(){timedOut=true;c.abort();},timeoutMs||130000);
+ let r;
+ try{r=await fetch(API+'models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body),signal:c.signal});}
+ catch(e){
+  clearTimeout(tm);if(sig)sig.removeEventListener('abort',onAbort);
+  if(e.name==='AbortError'){if(timedOut)throw mkErr('Waktu habis (model lambat)',0,'busy');throw new Error('Dibatalkan');}
+  throw mkErr('Jaringan gagal: '+e.message,0,'busy');
  }
+ clearTimeout(tm);if(sig)sig.removeEventListener('abort',onAbort);
+ let j=null;try{j=await r.json();}catch(e){}
+ if(r.ok&&j)return j;
+ const msg=(j&&j.error&&j.error.message)||('HTTP '+r.status);
+ if(r.status===400&&/API key/i.test(msg))throw mkErr('API key tidak valid',400,'auth');
+ if(r.status===403)throw mkErr('Akses ditolak (cek API key / izin model): '+msg,403,'missing');
+ if(r.status===404)throw mkErr('Model "'+model+'" tidak ditemukan / tidak mendukung fitur ini',404,'missing');
+ if(r.status===429){const mm=/retry in ([\d.]+)s/i.exec(msg);throw mkErr('Kuota habis / terlalu cepat (429)',429,'quota',{retry:mm?Math.ceil(parseFloat(mm[1])):0});}
+ if(r.status>=500)throw mkErr('Server sibuk ('+r.status+')',r.status,'busy');
+ throw mkErr(msg,r.status,r.status===400?'missing':'busy');
+}
+/* Rotasi model (seperti panel admin): urut prioritas, lewati yang sedang istirahat/tidak cocok, jeda antar peralihan */
+const RT={cool:{},bad:{},last:0,good:{}};
+function poolOf(kind){
+ const primary=kind==='image'?cfg.imageModel:cfg.layoutModel;
+ const extra=String(kind==='image'?cfg.poolImg:cfg.pool).split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean);
+ const out=[primary];
+ if(cfg.rotate!==false)extra.forEach(function(x){if(out.indexOf(x)<0)out.push(x);});
+ return out.filter(Boolean);
+}
+async function pace(){
+ const gap=cfg.pace!==false?(1300+Math.random()*900):0;
+ const wait=RT.last+gap-Date.now();
+ if(wait>0)await sleep(wait);
+ RT.last=Date.now();
+}
+function cooldownFor(e){
+ if(e.kind==='quota')return Math.min(90,(e.retry||0)+3)*1000||60000;
+ if(e.kind==='bad')return 12000;
+ return 25000;
+}
+async function rotate(kind,fn,what){
+ const pool=poolOf(kind);let lastErr=null,tries=0;
+ for(let round=0;round<3;round++){
+  let progressed=false;
+  const now0=Date.now();
+  const order=pool.filter(function(mo){return !RT.bad[kind+':'+mo];});
+  if(!order.length){RT.bad={};throw lastErr||new Error('Tidak ada model yang bisa dipakai. Periksa nama model / API key.');}
+  /* model yang tidak istirahat diutamakan, sesuai urutan prioritas */
+  order.sort(function(a,b){const ca=(RT.cool[kind+':'+a]||0)>now0?1:0,cb=(RT.cool[kind+':'+b]||0)>now0?1:0;return ca-cb||(pool.indexOf(a)-pool.indexOf(b));});
+  for(const mo of order){
+   const key=kind+':'+mo;
+   const rest=(RT.cool[key]||0)-Date.now();
+   if(rest>0){
+    const w=Math.min(rest,45000);
+    log('Semua model sedang istirahat. Menunggu '+Math.ceil(w/1000)+' dtk lalu mencoba '+mo+' ...','wn');
+    await sleep(w+500);
+   }
+   try{
+    await pace();
+    if(tries>0)log('  mencoba model '+mo+' ...');
+    const res=await fn(mo);
+    RT.good[kind]=mo;progressed=true;
+    return {res:res,model:mo};
+   }catch(e){
+    if(/Dibatalkan/.test(e.message)||e.kind==='auth')throw e;
+    lastErr=e;tries++;
+    if(e.kind==='missing'){RT.bad[key]=1;log('  ⚠ '+mo+': '+e.message+' · dilewati untuk sesi ini','wn');}
+    else{RT.cool[key]=Date.now()+cooldownFor(e);log('  ⚠ '+mo+': '+e.message+' · diistirahatkan '+Math.round(cooldownFor(e)/1000)+' dtk','wn');}
+    const more=order.some(function(o){return o!==mo&&!RT.bad[kind+':'+o];});
+    if(more&&cfg.rotate!==false){const dl=cfg.pace!==false?(1800+Math.random()*1700):300;log('  pindah model dalam '+(dl/1000).toFixed(1)+' dtk ...');await sleep(dl);}
+   }
+  }
+  if(round<2&&cfg.rotate!==false){const dl=cfg.pace!==false?(5000+round*4000+Math.random()*2000):1500;log('Semua model gagal. Mengulang putaran '+(round+2)+'/3 setelah '+(dl/1000).toFixed(0)+' dtk ...','wn');await sleep(dl);}
+  else if(round<2){break;}
+ }
+ throw lastErr||new Error('Semua model gagal'+(what?(' ('+what+')'):''));
+}
+function copyLen(b){try{const c=(b&&b.copy)||{};return [c.headline,c.subheadline,Array.isArray(c.body)?c.body.join(' '):c.body,c.closing].filter(Boolean).join(' ').replace(/\s+/g,'').length;}catch(e){return 0;}}
+function checkDesign(sp){
+ const L=sp&&Array.isArray(sp.layers)?sp.layers.filter(function(l){return l&&typeof l==='object';}):[];
+ const T=L.filter(function(l){return l.kind==='text'&&String(l.text||'').trim();});
+ S.weakSpec=sp;
+ if(!L.length||!T.length)throw mkErr('Rancangan kosong (tanpa layer teks)',0,'bad');
+ if(T.some(function(l){return !isFinite(+l.size)||!(+l.size>0);}))throw mkErr('Rancangan tanpa ukuran huruf',0,'bad');
+ if(LAST_REPAIRED)throw mkErr('Rancangan terpotong (JSON tidak lengkap), mencoba ulang',0,'bad');
+ S.weakSpec=null;
+}
+async function gemJson(kind,parts,gen,system,tag,check){
+ const r=await rotate(kind,async function(mo){
+  const j=await gem(mo,parts,gen,system);
+  let sp;
+  try{sp=parseJson(textOf(j));}catch(e){throw mkErr(e.message,0,'bad');}
+  if(check)check(sp);
+  return sp;
+ },tag);
+ return {spec:r.res,model:r.model};
 }
 function partsOf(j){const c=j&&j.candidates&&j.candidates[0];if(!c){const br=j&&j.promptFeedback&&j.promptFeedback.blockReason;throw new Error(br?('Diblokir: '+br):'Respon AI kosong');}return (c.content&&c.content.parts)||[];}
 function textOf(j){return partsOf(j).map(function(p){return p.text||'';}).join('');}
+function repairJson(t){
+ let st=[],inS=false,esc=false,last=-1,ls=null;
+ for(let i=0;i<t.length;i++){const c=t[i];
+  if(inS){if(esc)esc=false;else if(c==='\\')esc=true;else if(c==='"')inS=false;continue;}
+  if(c==='"'){inS=true;continue;}
+  if(c==='{'||c==='[')st.push(c);
+  else if(c==='}'||c===']'){st.pop();if(st.length>=1){last=i;ls=st.slice();}}
+ }
+ if(last<0)return null;
+ let out=t.slice(0,last+1);
+ for(let k=ls.length-1;k>=0;k--)out+=(ls[k]==='{'?'}':']');
+ return out;
+}
+let LAST_REPAIRED=false;
 function parseJson(t){
+ LAST_REPAIRED=false;
  t=String(t||'').replace(/```json|```/gi,'').trim();
  try{return JSON.parse(t);}catch(e){}
  const a=t.indexOf('{'),b=t.lastIndexOf('}');
  if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1));}catch(e){}
   try{return JSON.parse(t.slice(a,b+1).replace(/,\s*([}\]])/g,'$1'));}catch(e){}}
+ const rp=repairJson(a>=0?t.slice(a):t);
+ if(rp){LAST_REPAIRED=true;try{const o=JSON.parse(rp);if(o&&typeof o==='object')return o;}catch(e){}}
  throw new Error('AI tidak mengembalikan JSON yang valid. Coba lagi atau sederhanakan perintah.');
 }
+function modelRank(n){const m=/gemini-(?:live-)?(\d+(?:\.\d+)?)/i.exec(n);const v=m?parseFloat(m[1]):0;return (/lite|nano|8b/i.test(n)?-3:0)+(/flash/i.test(n)?1:0)+v;}
 window.adzLoadModels=async function(){
  readCfg();if(!cfg.key){showToast('Isi API key dulu');return;}
  try{
@@ -24153,19 +24423,38 @@ window.adzLoadModels=async function(){
    if(/tts|embed|aqa|live|audio|robotics|computer-use/i.test(n))return;
    if(/image/i.test(n))I.push(n);else if(/gemini/i.test(n))L.push(n);
   });
+  L.sort(function(a,b){return modelRank(b)-modelRank(a);});
   $('adzListL').innerHTML=L.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
   $('adzListI').innerHTML=I.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
-  showToast('Model dimuat: '+L.length+' teks/vision, '+I.length+' gambar. Ketuk kolom model untuk memilih.');
+  RT.bad={};RT.cool={};
+  let filled='';
+  if(!$('adzPoolL').value.trim()){$('adzPoolL').value=L.filter(function(n){return n!==cfg.layoutModel&&/flash|pro/i.test(n)&&!/lite|nano|8b/i.test(n);}).slice(0,5).join('\n');filled=' Daftar cadangan layout diisi otomatis.';}
+  if(!$('adzPoolI').value.trim()){$('adzPoolI').value=I.filter(function(n){return n!==cfg.imageModel;}).slice(0,3).join('\n');}
+  readCfg();
+  showToast('Model dimuat: '+L.length+' teks/vision, '+I.length+' gambar.'+filled);
  }catch(e){showToast('Gagal memuat model: '+e.message);}
 };
 window.adzTest=async function(){
- readCfg();S.ctl=new AbortController();clearLog();log('Menguji '+cfg.layoutModel+' ...');
- try{const j=await gem(cfg.layoutModel,[{text:'Balas hanya dengan kata: OK'}],{maxOutputTokens:512});setProg(100);log('Terhubung. Balasan: '+textOf(j).trim().slice(0,40),'ok');}
- catch(e){log('Gagal: '+e.message,'er');}
+ readCfg();S.ctl=new AbortController();clearLog();RT.bad={};RT.cool={};log('Menguji koneksi (rotasi '+(cfg.rotate!==false?'aktif':'mati')+') ...');
+ try{
+  const r=await rotate('layout',async function(mo){log('  uji '+mo+' ...');const j=await gem(mo,[{text:'Balas hanya dengan kata: OK'}],{maxOutputTokens:512},null,40000);return textOf(j).trim().slice(0,40);},'tes');
+  setProg(100);log('Terhubung lewat '+r.model+'. Balasan: '+r.res,'ok');
+ }catch(e){log('Gagal: '+e.message,'er');}
 };
 
 /* ---------- Prompt ---------- */
 function canvasDims(){return {W:mainCanvas.width,H:mainCanvas.height};}
+function ratioName(W,H){const r=W/H,c=[['1:1',1],['3:4',.75],['4:5',.8],['2:3',.6667],['9:16',.5625],['16:9',1.7778],['4:3',1.3333],['3:2',1.5],['5:4',1.25],['5:7',.7143]];let b=null,bd=9;c.forEach(function(x){const dd=Math.abs(x[1]-r)/x[1];if(dd<bd){bd=dd;b=x[0];}});return bd<0.03?b:((Math.round(r*100)/100)+':1');}
+function canvasLabel(){const d=canvasDims();return ratioName(d.W,d.H)+' ('+d.W+'x'+d.H+' px, '+(d.W>d.H?'landscape':(d.W<d.H?'portrait':'square'))+')';}
+function alignRule(){
+ const a=cfg.textAlign||'auto';
+ if(a==='left')return 'ALIGNMENT (user setting): flush-left. Every text layer uses align "left" and shares exactly the same x and w (one column).\n';
+ if(a==='right')return 'ALIGNMENT (user setting): flush-right. Every text layer uses align "right" and shares exactly the same x and w (one column).\n';
+ if(a==='center')return 'ALIGNMENT (user setting): centered. Every text layer uses align "center" and shares exactly the same x and w (one centered column).\n';
+ if(a==='justify')return 'ALIGNMENT (user setting): justified body. The headline uses align "left"; body, closing and footnote use align "justify". EVERY text layer shares EXACTLY the same x and w as the headline block, so the left and right edges of the body box line up with the left and right edges of the headline box.\n';
+ return '';
+}
+function refMode(){return S.mode==='ref'||(S.mode==='new'&&S.refs.length>0);}
 function pc(v){return +(v*100).toFixed(1);}
 function slideSummary(){
  const s=getCurrentSlide(),d=canvasDims();
@@ -24182,32 +24471,54 @@ const COPY_RULES=
  'COPY RULES (da\'wah content): (a) Any wording, @usernames, hadith/verse/scholar text the user supplied is used VERBATIM. (b) NEVER invent Quran verses, hadith, scholar quotes, citations, numbers, sources or fiqh rulings. (c) Where the user gave only a theme or a message, you may write short original reminder copy in plain Indonesian (diksi singkat, kontras, bermakna dalam, bernada nasihat yang santun dan sedikit menyentil kelalaian, tanpa menghina, mengkafirkan atau menunjuk orang). Original copy is never put in quotation marks as if it were someone\'s saying and never attributed to anyone. (d) Keep the copy tight: kicker 2-6 words, headline max 7 words, body max about 45 words in total, closing line max 12 words. (e) Write in the language of the request (default Indonesian). (f) Do not depict people, faces or animals in any illustration; use objects, architecture, nature, calligraphy-free symbols or abstract shapes.\n';
 function briefSystem(d){
  return 'You are the creative director who interprets SHORT, informal client requests (usually Indonesian) for da\'wah / Islamic reminder posters and social cards. Understand the real intent even if the request is brief or loosely worded, then decide the copy, hierarchy, palette and decoration. Reply with ONE JSON object only.\n'+
- 'CANVAS: '+d.W+'x'+d.H+' px (aspect '+(d.W/d.H).toFixed(3)+').\n'+COPY_RULES+
- 'If reference image(s) are attached (labelled), analyse them deeply: palette (hex), font personality, how the headline is built (stacked lines, two colors, brush stroke behind a word...), card/pill shapes, decorative devices (brush strokes, stickers, rings, dots, rays, frames), illustration subject and where it sits, margins, vertical rhythm. Reproduce the DNA, not the exact text.\n'+
- 'SCHEMA: {"intent":"1-2 sentences: what the poster must achieve","audience":"","tone":"","archetype":"stack-center|editorial-left|card-focus|split-band|illustration-hero","copy":{"kicker":"","headline":"","headlineEmphasis":"the one word/phrase to highlight, or empty","subheadline":"","body":["short paragraph 1","optional paragraph 2"],"closing":"","footer":["@handle1","@handle2"]},"palette":{"bg":["#hex","#hex"],"accent":"#hex","accent2":"#hex","text":"#hex","muted":"#hex"},"fonts":{"display":"","body":"","accent":""},"decor":["each decorative device to build, e.g. brush stroke behind headline emphasis, scribble underline, ring around word, splatter corner, halftone dots"],"illustration":{"needed":true,"description":"English prompt for ONE flat-style object illustration without people/animals/text, or empty","placement":"where it sits (e.g. top-right, behind headline, bottom-center)"},"referenceDNA":"what to copy from the reference(s), or empty","zones":[{"role":"kicker|headline|subheadline|body|closing|footer|illustration","yPct":0,"hPct":0}]}';
+ 'CANVAS: '+d.W+'x'+d.H+' px (aspect '+(d.W/d.H).toFixed(3)+'). FORMAT: '+canvasLabel()+', detected automatically from the user\'s current template: design for exactly this format and ignore any ratio or size written in the request.\n'+COPY_RULES+
+ (cfg.agent===true&&refMode()?'If reference image(s) are attached (labelled), MEASURE them like a layout engineer, concisely but exactly: for every element estimate its box as % of the reference width/height (x,y,w,h); padding between text and card edges and between card and poster edge (as % of canvas width); font size from cap height (size = capHeight/0.72, as % of width); lineHeight; letterSpacing; gaps between headline, subheadline, paragraphs, footnote, handle pill and logos (% of canvas width); characters per line; card shadow strength; handle pill thickness; logo/username positions and sizes. Also read palette (hex), font personality, headline construction (stacked lines, colour per line), card/pill shapes and ornaments. Put the numbers in "measure" (no prose) and reproduce them faithfully; copy the DNA and proportions, not the text.\n':'If reference image(s) are attached (labelled), analyse them deeply: palette (hex), font personality, how the headline is built (stacked lines, two colors, brush stroke behind a word...), card/pill shapes, decorative devices (brush strokes, stickers, rings, dots, rays, frames), illustration subject and where it sits, margins, vertical rhythm. Reproduce the DNA, not the exact text.\n')+
+ 'SCHEMA: {"intent":"1-2 sentences: what the poster must achieve","audience":"","tone":"","archetype":"stack-center|editorial-left|card-focus|split-band|illustration-hero","copy":{"kicker":"","headline":"","headlineEmphasis":"the one word/phrase to highlight, or empty","subheadline":"","body":["short paragraph 1","optional paragraph 2"],"closing":"","footer":["@handle1","@handle2"]},"palette":{"bg":["#hex","#hex"],"accent":"#hex","accent2":"#hex","text":"#hex","muted":"#hex"},"fonts":{"display":"","body":"","accent":""},"decor":["each decorative device to build, e.g. brush stroke behind headline emphasis, scribble underline, ring around word, splatter corner, halftone dots"],"illustration":{"needed":true,"description":"English prompt for ONE flat-style object illustration without people/animals/text, or empty","placement":"where it sits (e.g. top-right, behind headline, bottom-center)"},"emphasis":["2-5 key phrases of the body to set in bold (the main points)"],'+(cfg.agent===true&&refMode()?'"measure":{"card":{"x":0,"y":0,"w":0,"h":0,"radius":0},"padX":0,"padY":0,"headline":{"x":0,"y":0,"w":0,"size":0,"lh":0,"ls":0},"body":{"size":0,"lh":0,"cpl":0},"gapsPct":{"headlineToBody":0,"paraToPara":0,"bodyToNote":0,"noteToHandle":0},"handle":{"x":0,"y":0,"w":0,"h":0},"logos":[{"x":0,"y":0,"h":0}]} (all numbers in percent of the reference),':'')+'"referenceDNA":"what to copy from the reference(s), or empty","zones":[{"role":"kicker|headline|subheadline|body|closing|footer|illustration","yPct":0,"hPct":0}]}';
 }
 function systemPrompt(m){
  const d=canvasDims(),mx=+(m/d.W*100).toFixed(1),my=+(m/d.H*100).toFixed(1),ratio=(d.W/d.H).toFixed(3);
  return 'You are a senior poster art director and layout engineer who outputs EDITABLE layer stacks with pixel-accurate positions. Reply with ONE JSON object only (no markdown, no commentary).\n'+
  'CANVAS: '+d.W+'x'+d.H+' px, aspect W/H = '+ratio+'. ALL geometry is in PERCENT: x = LEFT edge % of canvas width, y = TOP edge % of canvas height, w = width % of canvas width, h = height % of canvas height. For text layers h is ignored (height is automatic); y is the top of the text block. For centered text use x=(100-w)/2.\n'+
+ 'FORMAT: '+canvasLabel()+' is detected automatically from the user\'s current template. Design for exactly this canvas and ignore any ratio or size mentioned in the request.\n'+alignRule()+
  'SAFE AREA: keep every non-bleed layer inside x>='+mx+', x+w<='+(100-mx).toFixed(1)+', y>='+my+', y+h<='+(100-my).toFixed(1)+'. Text never touches edges or other text.\n'+
  'SCHEMA:\n{"title":"short name","background":{"type":"gradient|solid|image","gradType":"linear|radial","angle":0-360,"colors":["#hex","#hex"],"imagePrompt":"only when type is image","darken":0-0.7},\n"layers":[ ...ordered from BOTTOM to TOP... ]}\n'+
  'LAYER KINDS (every layer needs a unique, descriptive "name" such as "Judul", "Kartu isi", "Kuas judul"):\n'+
  '- {"kind":"shape","name":"...","shape":"'+ADZ_SHAPES.join('|')+'","x":,"y":,"w":,"h":,"color":"#hex","opacity":0-1,"radius":0-100 (rect only, px),"borderWidth":px,"borderColor":"#hex","rotation":deg,"bleed":false,"shadow":{"color":"#000000","blur":0-30,"distance":0-12,"opacity":0-1}|null,"attach":{...}|null}\n'+
  '- {"kind":"fade","name":"...","dir":"top|bottom|left|right|horizontal|vertical","depth":20-80,"color":"#hex"}  (soft gradient edge overlay, always full-bleed)\n'+
- '- {"kind":"text","name":"...","text":"...(use \\n for manual line breaks)","font":"one of: '+ADZ_FONTS.join(', ')+'","size":font size as % of canvas width (headline 7-14, subhead 3.6-5.5, body 2.6-3.8, small 2-2.6),"weight":"400|700|800|900","italic":false,"color":"#hex","align":"left|center|right|justify","x":,"y":,"w":,"lineHeight":1.05-1.8,"letterSpacing":px,"uppercase":false,"shadow":{...}|null,"highlight":"#hex|null","opacity":0-1}\n'+
- '- {"kind":"asset","name":"...","art":"'+ADZ_ARTS.join('|')+'","color":"#hex","opacity":0-1,"rotation":deg,"seed":int,"x":,"y":,"w":,"h":,"attach":{...}|null}  (PNG ornament drawn locally with transparency: brush = rough paint/brush stroke band, scribble = hand-drawn wavy underline, ring = hand-drawn circle/oval around a word, splatter = ink splash accent, halftone = fading dot pattern)\n'+
+ '- {"kind":"text","name":"...","text":"...(use \\n for manual line breaks)","font":"one of: '+ADZ_FONTS.join(', ')+'","size":font size as % of canvas width (headline 7-14, subhead 3.6-5.5, body 2.6-3.8, small 2-2.6),"weight":"400|700|800|900","italic":false,"color":"#hex","align":"left|center|right|justify","x":,"y":,"w":,"lineHeight":1.05-1.8,"letterSpacing":px,"uppercase":false,"shadow":{...}|null,"highlight":"#hex|null","opacity":0-1,"bold":["exact phrase copied from text"],"marks":[{"t":"exact phrase","color":"#hex","italic":false}]}\n'+
+ '- {"kind":"asset","name":"...","art":"'+artNames()+'","color":"#hex","opacity":0-1,"rotation":deg,"seed":int,"bleed":false,"blend":"normal|screen|multiply|overlay|soft-light","x":,"y":,"w":,"h":,"attach":{...}|null}  (PNG ornament drawn locally with transparency: brush = rough paint/brush stroke band, scribble = hand-drawn wavy underline, ring = hand-drawn circle/oval around a word, splatter = ink splash accent, halftone = fading dot pattern)\n'+
  '- {"kind":"image","name":"...","imagePrompt":"detailed English prompt of ONE flat-style object illustration, no text, no people/animals","cutout":true|false,"keyColor":"magenta|green","x":,"y":,"w":,"h":,"radius":0-50,"keepId":"id of an existing image layer (remix mode only)"}  (cutout:true = subject is generated on a flat key color and automatically turned into a transparent PNG sticker; use for illustrations/objects. cutout:false = rectangular photo/picture)\n'+
  'ATTACH (makes decoration hug the REAL rendered text, so positions are always exact): "attach":{"to":"layer name" or ["name1","name2"],"mode":"wrap|under|above","padX":% of canvas width (wrap),"padY":% of canvas height (wrap),"gap":% of canvas height (under/above),"wRatio":0.1-1.5 (under/above width relative to target text width),"h":% of canvas height (under/above thickness),"align":"center|left|right","z":"behind|front"}. When attach is present, x/y/w/h are ignored (give approximate values anyway). Use it for: cards/panels behind a text or a group of texts (wrap, padX 3-5, padY 1.5-3), pill/badge behind a handle or kicker (wrap, shape capsule or rect with radius), brush stroke behind a headline word (asset brush, wrap, padX 2-4, padY 0.5-1.2, rotation -1 to -3), underline lines/scribbles (under, gap 0.4-1), ring around a word (asset ring, wrap, padX 3, padY 1.5). NEVER guess coordinates for anything that belongs to a text: attach it.\n'+
  'TYPE FITTING MATH (do this before choosing y of the next block): average glyph width = 0.52 x size for normal fonts, 0.40 x size for condensed fonts (Anton, Bebas Neue, Oswald, Staatliches, Teko), 0.62 x size for wide bold display fonts. charsPerLine = w / (size x factor). lines = ceil(chars / charsPerLine). Block height as % of canvas height = lines x size x lineHeight x '+ratio+'. Next block y = previous y + previous height + gap (at least 2.5). The total must end above y='+(100-my).toFixed(1)+'; if it does not fit, reduce sizes (never overlap).\n'+
  'COMPOSITION: pick ONE archetype and keep one alignment axis (all centered OR all left at the same x). Hierarchy: headline dominant (at least 2.2x body size), max 3 text sizes + one small kicker/footer. Vertical rhythm: kicker near the top, headline block, subheadline, body (or card), closing, footer/handles at the bottom, with consistent gaps. Body line length 28-48 characters. Balance whitespace: no empty band taller than 15% of the canvas. Contrast: light text on dark areas and vice versa; if text sits on a busy area add a card or fade. Round numbers: card radius 16-40, handle pills use capsule.\n'+
+ 'EMPHASIS: in body, subheadline and closing texts mark the key points in bold: list 2-5 exact phrases copied letter for letter from that same text in "bold" (the core claim, the contrast such as bukan X melainkan Y, key terms); at most about 25% of the words, never a whole paragraph. You may use "marks" to color or italicize ONE key word in the headline. Every phrase must appear verbatim in the text.\n'+
  'ASSETS: add 2-5 decorative asset layers so the poster looks designed (for the da\'wah/modern style: brush stroke behind the key headline word, scribble underline under a keyword, ring around one word, splatter or halftone accent at a corner with low opacity 0.15-0.5). In reference mode recreate every decorative device seen in the reference using the closest kind. If an illustration is needed and image generation is ON, add ONE image layer with cutout:true (sticker-style), placed above the background and below the text unless overlap is intended; keep text readable.\n'+
- 'RULES: 1) Real layers like a designer: background, decor, optional illustration, headline, body, source/credit, footer/handle. 2) Use at most 3 fonts. Arabic text must use Amiri, Scheherazade New, Aref Ruqaa, Cairo or Reem Kufi with align center. 3) '+COPY_RULES+' 4) 8-20 layers total, at most '+(cfg.useImages?'2':'0')+' image layers'+(cfg.useImages?'':' (image generation is OFF: use only shapes, assets, fades and text; use keepId only in remix mode)')+(cfg.assets?'':'; asset layers are OFF: do not output kind asset')+'. 5) Full-canvas backgrounds/overlays set "bleed":true; everything else stays inside the safe area. 6) Follow the APPROVED CREATIVE BRIEF when given: its palette, fonts, copy, decor list and zones.';
+ 'RULES: 1) Real layers like a designer: background, decor, optional illustration, headline, body, source/credit, footer/handle. 2) Use at most 3 fonts. Arabic text must use Amiri, Scheherazade New, Aref Ruqaa, Cairo or Reem Kufi with align center. 3) '+COPY_RULES+' 4) 8-20 layers total, at most '+(cfg.useImages?'2':'0')+' image layers'+(cfg.useImages?'':' (image generation is OFF: use only shapes, assets, fades and text; use keepId only in remix mode)')+(cfg.assets?'':'; asset layers are OFF: do not output kind asset')+'. 5) Full-canvas backgrounds/overlays set "bleed":true; everything else stays inside the safe area. 6) Follow the APPROVED CREATIVE BRIEF when given: its palette, fonts, copy, decor list and zones.\n'+extraRules(d,m);
+}
+function artNames(){return ((cfg.atmo===true&&cfg.assets)?ADZ_ARTS:ADZ_ARTS.slice(0,5)).join('|');}
+function extraRules(d,m){
+ const px=(PADX(d)/d.W*100).toFixed(1),py=(PADY(d)/d.H*100).toFixed(1),mx=(m/d.W*100).toFixed(1);
+ let t='';
+ if(cfg.engine===true)t+='SPACING & PADDING (the engine enforces it, design for it). Two padding levels: (1) OUTER padding: no non-bleed layer closer than '+mx+'% to the poster edge. (2) INNER padding: text on a card/paper/panel keeps room from the card edges, SLIM left and right (about '+px+'% of canvas width) and GENEROUS top and bottom (about '+py+'% of canvas height, roughly 1.5x the side padding) so the block never feels cramped vertically. The card hugs the text column: choose column w from the amount of copy (slim copy of 20-30 characters per line = 52-68% of canvas width; medium = 68-80%; only long copy goes wider) and never leave wide empty strips left/right inside the card. Attach every card to its texts with {"mode":"wrap","padX":'+px+',"padY":'+py+'}. CARD DEPTH: give every card/paper a thick soft drop shadow {"color":"#000000","blur":30,"distance":10,"opacity":0.45} so it looks 3D and floats above the background. HANDLE PILL (@usernames): a SLIM capsule that hugs the text (height about 1.15 x text size, padY 0.3, padX 2.5-3), never a thick bar.\n'+
+ 'TYPOGRAPHY RHYTHM (clean editorial poster): headline lineHeight 1.0-1.1 (max 1.15), subheadline 1.1-1.2, BODY lineHeight 1.28-1.36 (max 1.38: tight, never airy), footnote 1.2-1.3; letterSpacing 0 for body, 0-1 for uppercase headline, never negative for body. Gaps between blocks as % of canvas width: kicker-headline 1.5, headline-body 4, paragraph-paragraph 2.5, body-footnote 2.2, last text-handle 4. Put every body paragraph in its OWN text layer (same x, same w, no blank lines inside a layer). Keep the text stack compact and vertically centred in the free area, not stretched edge to edge.\n';
+ if(cfg.atmo===true&&cfg.assets){
+  t+='CINEMATIC BACKGROUND (never leave the canvas flat; elegant, soft on the eye, not busy). Build depth in 3 tiers. (a) Base: a soft two-colour gradient of close hues in "background", plus ONE full-bleed asset art "grain" (paper/film texture, opacity 0.12-0.3, a tone slightly lighter or darker than the background) and optionally a fade layer as vignette (depth 25-40, dark colour). (b) Atmosphere: ONE or TWO asset arts chosen by theme, always soft and blurred: embers (fire sparks: warning, urgency, fitnah, hell, anger), water (droplets and splash: purity, mercy, tears, rain), dust (earth particles: grave, dunya, death, journey), leaves (floating blurred leaves: calm, nature, patience, sunnah), bokeh or glow (soft light: night, hope, elegance, knowledge). Atmosphere arts fill the canvas (x 0, y 0, w 100, h 100) or a 50-70% corner region, opacity 0.25-0.6, blend "screen" on dark backgrounds and "multiply"/"normal" on light ones, tinted to the palette (embers orange/gold, water pale blue, dust brown, leaves olive green). They sit BELOW every text and card, concentrated at edges and corners so the centre stays calm. (c) Content on top. Max 2 atmosphere arts + 1 grain, no hard clip-art, never cover text. Art names: grain, bokeh, embers, water, dust, leaves, glow (plus brush, splatter, ring, scribble, halftone).\n';
+ }
+ const lg=selLogos();
+ if(lg.length){const z=logoZone();const zn={bc:'bottom centre',bl:'bottom left',br:'bottom right',tc:'top centre',tl:'top left',tr:'top right'}[z]||'top centre';
+  const auto=(cfg.logoPlace||'auto')==='auto';
+  const bp=Math.round((Math.min(cfg.logoSize/100*d.W,d.H*0.1)+d.W*0.03+m)/d.H*100);
+  t+='LOGOS: the user selected '+lg.length+' logo(s) (height '+cfg.logoSize+'% of canvas width). Do NOT create logo layers: the ENGINE removes any non-transparent logo background with smooth edges, recolors each logo as ONE-colour silhouette and places it, reserving that band.'+(auto?' You decide with a top-level JSON key "logos":{"zone":"tl|tc|tr|bl|bc|br","layout":"row|split","tint":"#hex"}: zone = the band with the most free space relative to text density (usually the top; keep decoration light there); 1 logo: tc, tl or tr; 2+ logos: layout "split" (first logo top-left, last top-right) or "row" (side by side, centred), whichever looks better with the headline; ':' Position is fixed by the user at the '+zn+'. You decide with a top-level JSON key "logos":{"tint":"#hex"}: ')+'tint = ONE hex that fits the poster mood, taken from the dominant palette colour (about 30% of the composition) or the accent, with strong contrast against the background behind the logo (light tint on dark backgrounds, deep tint on light ones). The logo band takes about '+bp+'% of the canvas height at its edge (top or bottom): the card and all text must stay clear of that band, because logos sit on the background beside or above the card, never inside it.\n';}
+ if(cfg.engine===true)t+='LAYOUT DISCIPLINE: exactly ONE paper/card behind the text (no nested cards, double borders, header bands, empty strips or frames); NO horizontal divider lines or rules; no ornaments, brush strokes, rings or illustrations unless the reference shows them. Elegant means few elements, strong hierarchy, generous space, one accent colour.\n';
+ if(cfg.agent===true&&refMode())t+='REFERENCE FIDELITY (highest priority, above style hints and topic mood): copy the reference layout, not a new aesthetic. Same type family character (geometric/grotesque bold sans in the reference = use the closest of Poppins, Montserrat, Plus Jakarta Sans, Outfit; never switch to serif or vintage fonts unless the reference has them), same colours, same background (plain or lightly textured wall/paper; no particles or atmosphere unless visible), same single paper card with soft deep shadow, same alignment, same text proportions. Build the headline like the reference as 2-3 text layers with different sizes and the same x/w: lead lines (size S), ONE hero keyword (1.6-2.2 x S, weight 800-900), tail lines (about 0.85 x S), plus ONE accent-coloured word via marks; each headline line should span nearly the full column width. Body paragraphs centred or justified exactly like the reference with bold key phrases; small source/credit line under the body; handle pill or icon+label at the bottom. Keep the same vertical rhythm and margins as measured.\n';
+ if(cfg.engine===true)t+='HEADLINE LINES: break the headline so every line has a similar number of characters and fills the column evenly at the same size; only the hero keyword line is shorter and bigger; never leave one short word alone at the small size (merge it with its neighbours); consecutive headline layers touch (line gap about 1.0). CARD CONTENT: the card wrap target list must include EVERY text on the paper (headline layers, body, source line AND the handle); the handle pill sits INSIDE the card at the bottom as a thin capsule, never outside or below the card.\n';
+ if(cfg.eco===true)t+='OUTPUT: compact single-line JSON, omit optional fields you do not need (no nulls, no empty strings, no default values), layer names max 3 words.';
+ return t;
 }
 function qaSystem(m){
  const d=canvasDims(),ratio=(d.W/d.H).toFixed(3);
  return 'You are a meticulous poster QA art director. You get a screenshot of the rendered poster plus a table of its layers (percent geometry measured from the real render: x,y = top-left, w,h = size) and automatic lint warnings. Find real visual defects and propose minimal numeric fixes. Reply with ONE JSON object only.\n'+
- 'CHECK: text clipped or touching edges; text overlapping text; text crossing the edge of its card; card/pill/brush/ring that does not hug its text (it should be centered on it with even padding); decorative PNG covering text or floating in the wrong place; inconsistent alignment (centers/left edges); uneven vertical spacing; hierarchy too weak; low contrast; big empty areas or crowded areas; footer too close to body; element outside the safe margin ('+cfg.margin+'%).\n'+
+ (cfg.agent===true&&refMode()?'REFERENCE COMPARISON (top priority): you also get the REFERENCE image(s) and the target numbers measured from them. Compare the render with the reference element by element: paper size and position, headline size, line breaks and hero word, body size and column width, paragraph and line gaps, padding, handle pill thickness and position (inside the paper), logo size and position, colours, background. Score the similarity honestly (10 = nearly identical; below 8 whenever any element clearly differs) and fix the biggest differences first.\n':'')+'CHECK: text clipped or touching edges; text overlapping text; text crossing the edge of its card; card/pill/brush/ring that does not hug its text (it should be centered on it with even padding); decorative PNG covering text or floating in the wrong place; inconsistent alignment (centers/left edges); uneven vertical spacing; hierarchy too weak; low contrast; big empty areas or crowded areas; footer too close to body; element outside the safe margin ('+cfg.margin+'%).\n'+
  'SCHEMA: {"score":0-10,"verdict":"ok|fix","issues":["short Indonesian sentences, max 6"],"fixes":[{"i":layer index from the table,"x":,"y":,"w":,"h":,"size":font size % of canvas width,"color":"#hex","opacity":0-1,"align":"left|center|right|justify","lineHeight":,"rotation":deg,"attach":{...same as design schema}|null,"remove":false}]}\n'+
  'RULES: geometry is percent of the canvas (aspect W/H '+ratio+'); for text only x,y,w,size matter (height is automatic); never change wording; prefer fixing decoration via "attach" instead of coordinates; at most 8 fixes; omit unchanged fields; if the poster is already clean answer verdict "ok" with an empty fixes array and score >= 8.';
 }
@@ -24230,8 +24541,9 @@ async function imageParts(){
 }
 async function makeBrief(d){
  const parts=[{text:baseTask()+'\nProduce the creative brief JSON now.'}].concat(await imageParts());
- const j=await gem(cfg.layoutModel,parts,{responseMimeType:'application/json',temperature:0.6,maxOutputTokens:8192},briefSystem(d));
- return parseJson(textOf(j));
+ const r=await gemJson('layout',parts,{responseMimeType:'application/json',temperature:0.6,maxOutputTokens:cfg.eco===true?4096:8192,_tb:cfg.eco===true?0:null},briefSystem(d),'analisis');
+ log('  dianalisis oleh '+r.model);
+ return r.spec;
 }
 async function designParts(brief){
  let t=baseTask();
@@ -24245,13 +24557,16 @@ function nearestRatio(w,h){const r=w/h,c=[['1:1',1],['3:4',.75],['4:5',.8],['2:3
 async function genImage(full,w,h,refUrl){
  const parts=[{text:full+' Aspect ratio '+nearestRatio(w,h)+'.'}];
  if(refUrl){parts[0].text+=' The attached image is ONLY a rendering-style and color reference: do NOT reproduce its layout, text or composition.';parts.push(imgPart(refUrl));}
- let j;
- try{j=await gem(cfg.imageModel,parts,{responseModalities:['TEXT','IMAGE'],imageConfig:{aspectRatio:nearestRatio(w,h)}});}
- catch(e){if(/Dibatalkan|Kuota|API key|ditemukan/.test(e.message))throw e;j=await gem(cfg.imageModel,parts,{responseModalities:['TEXT','IMAGE']});}
- const p=partsOf(j).find(function(x){return x.inlineData||x.inline_data;});
- if(!p)throw new Error('Model tidak mengembalikan gambar (cek model gambar / kuota)');
- const id=p.inlineData||p.inline_data;
- return 'data:'+(id.mimeType||id.mime_type||'image/png')+';base64,'+id.data;
+ const r=await rotate('image',async function(mo){
+  let j;
+  try{j=await gem(mo,parts,{responseModalities:['TEXT','IMAGE'],imageConfig:{aspectRatio:nearestRatio(w,h)}},null,150000);}
+  catch(e){if(e.kind!=='missing')throw e;await pace();j=await gem(mo,parts,{responseModalities:['TEXT','IMAGE']},null,150000);}
+  let p;try{p=partsOf(j).find(function(x){return x.inlineData||x.inline_data;});}catch(e){throw mkErr(e.message,0,'bad');}
+  if(!p)throw mkErr('Model tidak mengembalikan gambar',0,'bad');
+  const id=p.inlineData||p.inline_data;
+  return 'data:'+(id.mimeType||id.mime_type||'image/png')+';base64,'+id.data;
+ },'gambar');
+ return r.res;
 }
 function plainPrompt(p){return 'Create an image. '+p+'. Absolutely no text, letters, numbers, logos or watermarks in the image.';}
 function cutoutPrompt(p,key){return 'Create a single isolated illustration: '+p+'. Subject centered, fully visible, not cropped, clean flat colors, generous empty margin around it. The background MUST be one perfectly flat uniform solid '+(key==='green'?'pure green (#00FF00)':'pure magenta (#FF00FF)')+' color: no gradient, no floor, no cast shadow, no texture, no border, no vignette. No text, letters, numbers, logos or watermarks.';}
@@ -24342,12 +24657,89 @@ function drawHalftone(x,w,h,R){
  const step=Math.max(10,Math.min(w,h)/14);
  for(let yy=step/2;yy<h;yy+=step){for(let xx=step/2;xx<w;xx+=step){const t=(xx/w)*0.7+(yy/h)*0.3,r=step*0.46*(1-t)*(0.75+R()*0.25);if(r>0.7){x.beginPath();x.arc(xx,yy,r,0,6.283);x.fill();}}}
 }
+/* v2.5.6: efek atmosfer lokal (lembut/blur, tanpa filter berat; gradien radial = blur alami) */
+function rgbOf(c){c=String(c||'#ffffff').replace('#','');if(c.length===3)c=c.split('').map(function(h){return h+h;}).join('');const n=parseInt(c.slice(0,6),16);const v=isNaN(n)?16777215:n;return ((v>>16)&255)+','+((v>>8)&255)+','+(v&255);}
+function softDot(x,px,py,r,rgb,a){const g=x.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,'rgba('+rgb+','+a+')');g.addColorStop(0.45,'rgba('+rgb+','+(a*0.55)+')');g.addColorStop(1,'rgba('+rgb+',0)');x.fillStyle=g;x.beginPath();x.arc(px,py,r,0,6.283);x.fill();}
+function drawGrain(x,w,h,R,col){
+ const id=x.createImageData(w,h),p=id.data,rgb=rgbOf(col),c3=rgb.split(',').map(Number);
+ for(let i=0;i<w*h;i++){const v=R(),o=i*4;p[o]=c3[0];p[o+1]=c3[1];p[o+2]=c3[2];p[o+3]=v<0.5?0:Math.round((v-0.5)*2*80);}
+ x.putImageData(id,0,0);
+ x.strokeStyle='rgba('+rgb+',0.10)';x.lineWidth=1;
+ for(let i=0;i<Math.round(w*h/9000);i++){const px=R()*w,py=R()*h,len=6+R()*26,a=R()*6.283;x.beginPath();x.moveTo(px,py);x.quadraticCurveTo(px+Math.cos(a)*len*0.5+(R()-0.5)*6,py+Math.sin(a)*len*0.5+(R()-0.5)*6,px+Math.cos(a)*len,py+Math.sin(a)*len);x.stroke();}
+ for(let i=0;i<10;i++)softDot(x,R()*w,R()*h,Math.min(w,h)*(0.15+R()*0.3),rgb,0.05+R()*0.06);
+}
+function drawBokeh(x,w,h,R,col){
+ const rgb=rgbOf(col),mn=Math.min(w,h),n=Math.round(14+mn/40);
+ for(let i=0;i<n;i++){const r=mn*(0.03+Math.pow(R(),2)*0.13),px=R()*w,py=R()*h,a=0.08+R()*0.22;
+  x.beginPath();x.arc(px,py,r,0,6.283);x.fillStyle='rgba('+rgb+','+a+')';x.fill();
+  x.lineWidth=Math.max(1,r*0.05);x.strokeStyle='rgba('+rgb+','+Math.min(0.5,a*1.6)+')';x.stroke();}
+ for(let i=0;i<8;i++)softDot(x,R()*w,R()*h,mn*(0.1+R()*0.2),rgb,0.12+R()*0.1);
+}
+function drawGlow(x,w,h,R,col){
+ const rgb=rgbOf(col),big=Math.max(w,h),cx=w*(0.2+R()*0.6),cy=h*(0.15+R()*0.5);
+ softDot(x,cx,cy,big*0.62,rgb,0.85);softDot(x,cx+(R()-0.5)*w*0.3,cy+(R()-0.5)*h*0.3,big*0.35,rgb,0.6);
+}
+function drawEmbers(x,w,h,R,col){
+ const rgb=rgbOf(col),mn=Math.min(w,h),n=Math.round(40+mn/12);
+ const g=x.createLinearGradient(0,h,0,h*0.55);g.addColorStop(0,'rgba('+rgb+',0.30)');g.addColorStop(1,'rgba('+rgb+',0)');x.fillStyle=g;x.fillRect(0,h*0.55,w,h*0.45);
+ x.lineCap='round';
+ for(let i=0;i<n;i++){
+  const near=R()<0.18,px=R()*w,py=h*(0.08+Math.pow(R(),0.8)*0.9);
+  const r=near?mn*(0.012+R()*0.03):mn*(0.0035+R()*0.008),a=near?0.35+R()*0.3:0.6+R()*0.4;
+  const ang=-1.2-R()*0.5,len=r*(near?3:6+R()*10);
+  x.strokeStyle='rgba('+rgb+','+(a*0.35)+')';x.lineWidth=Math.max(1,r*0.7);
+  x.beginPath();x.moveTo(px,py);x.lineTo(px-Math.cos(ang)*len,py-Math.sin(ang)*len);x.stroke();
+  softDot(x,px,py,r*(near?3.2:2.6),rgb,a);
+  if(!near){x.fillStyle='rgba(255,246,214,'+a+')';x.beginPath();x.arc(px,py,Math.max(0.8,r*0.45),0,6.283);x.fill();}
+ }
+}
+function drawWater(x,w,h,R,col){
+ const rgb=rgbOf(col),mn=Math.min(w,h),n=Math.round(30+mn/14);
+ for(let i=0;i<n;i++){
+  const r=mn*(0.004+Math.pow(R(),2.2)*0.03),px=R()*w,py=R()*h;
+  const gd=x.createRadialGradient(px-r*0.3,py-r*0.35,r*0.1,px,py,r);
+  gd.addColorStop(0,'rgba(255,255,255,0.85)');gd.addColorStop(0.35,'rgba('+rgb+',0.35)');gd.addColorStop(1,'rgba('+rgb+',0.12)');
+  x.fillStyle=gd;x.beginPath();x.ellipse(px,py,r,r*(1.1+R()*0.3),0,0,6.283);x.fill();
+  x.strokeStyle='rgba('+rgb+',0.45)';x.lineWidth=Math.max(0.8,r*0.12);x.stroke();
+ }
+ const cx=w*(0.25+R()*0.5),cy=h*(0.55+R()*0.3);x.lineCap='round';
+ for(let i=0;i<26;i++){const a=-Math.PI*(0.1+R()*0.8),len=mn*(0.08+R()*0.3),r=mn*(0.004+R()*0.012),ex=cx+Math.cos(a)*len,ey=cy+Math.sin(a)*len;
+  x.strokeStyle='rgba('+rgb+','+(0.2+R()*0.3)+')';x.lineWidth=Math.max(1,r*0.5);x.beginPath();x.moveTo(cx+Math.cos(a)*len*0.3,cy+Math.sin(a)*len*0.3);x.lineTo(ex,ey);x.stroke();
+  softDot(x,ex,ey,r*2.2,rgb,0.5);}
+ softDot(x,cx,cy,mn*0.18,rgb,0.18);
+}
+function drawDust(x,w,h,R,col){
+ const rgb=rgbOf(col),mn=Math.min(w,h),n=Math.round(90+mn/6);
+ for(let i=0;i<n;i++){
+  const clump=R()<0.25,r=mn*(clump?0.006+R()*0.014:0.0015+R()*0.004),px=R()*w,py=R()*h,a=0.25+R()*0.55,k=5+((R()*3)|0),rot=R()*6.283;
+  x.fillStyle='rgba('+rgb+','+a+')';x.beginPath();
+  for(let j=0;j<k;j++){const ang=rot+j/k*6.283,rr=r*(0.6+R()*0.6),qx=px+Math.cos(ang)*rr,qy=py+Math.sin(ang)*rr*0.8;if(j===0)x.moveTo(qx,qy);else x.lineTo(qx,qy);}
+  x.closePath();x.fill();
+  if(clump&&R()<0.5)softDot(x,px,py,r*3,rgb,0.12);
+ }
+ softDot(x,w*(R()<0.5?0.1:0.9),h*(0.6+R()*0.35),mn*0.45,rgb,0.18);
+}
+function leafPath(x,s){x.beginPath();x.moveTo(0,-s);x.bezierCurveTo(s*0.75,-s*0.5,s*0.7,s*0.45,0,s);x.bezierCurveTo(-s*0.7,s*0.45,-s*0.75,-s*0.5,0,-s);x.closePath();}
+function drawLeaves(x,w,h,R,col){
+ const rgb=rgbOf(col),mn=Math.min(w,h),n=Math.round(9+mn/110),canF=('filter' in x);
+ for(let i=0;i<n;i++){
+  const depth=R(),s=mn*(0.025+depth*depth*0.11),px=R()*w,py=R()*h,rot=R()*6.283,blur=depth>0.7?mn*0.014:(depth<0.3?mn*0.006:0);
+  x.save();if(canF&&blur>0.5)x.filter='blur('+blur.toFixed(1)+'px)';
+  x.translate(px,py);x.rotate(rot);
+  x.fillStyle='rgba('+rgb+','+(0.3+R()*0.5)+')';leafPath(x,s);x.fill();
+  x.strokeStyle='rgba(255,255,255,0.18)';x.lineWidth=Math.max(0.6,s*0.04);x.beginPath();x.moveTo(0,-s*0.9);x.lineTo(0,s*0.9);x.stroke();
+  x.restore();
+  if(!canF&&blur>0.5)softDot(x,px,py,s*1.4,rgb,0.12);
+ }
+}
 function artCanvas(kind,w,h,color,seed){
- const k=Math.min(1,1400/Math.max(w,h,1));
+ const cap=kind==='grain'?640:(ATMO.indexOf(kind)>=0?1000:1400);
+ const k=Math.min(1,cap/Math.max(w,h,1));
  const cw=Math.max(8,Math.round(w*k)),ch=Math.max(8,Math.round(h*k));
  const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');const R=rng(seed||7);
  x.fillStyle=color;x.strokeStyle=color;
- if(kind==='splatter')drawSplatter(x,cw,ch,R);else if(kind==='ring')drawRing(x,cw,ch,R);else if(kind==='scribble')drawScribble(x,cw,ch,R);else if(kind==='halftone')drawHalftone(x,cw,ch,R);else drawBrush(x,cw,ch,R);
+ if(kind==='grain')drawGrain(x,cw,ch,R,color);else if(kind==='bokeh')drawBokeh(x,cw,ch,R,color);else if(kind==='embers')drawEmbers(x,cw,ch,R,color);else if(kind==='water')drawWater(x,cw,ch,R,color);else if(kind==='dust')drawDust(x,cw,ch,R,color);else if(kind==='leaves')drawLeaves(x,cw,ch,R,color);else if(kind==='glow')drawGlow(x,cw,ch,R,color);
+ else if(kind==='splatter')drawSplatter(x,cw,ch,R);else if(kind==='ring')drawRing(x,cw,ch,R);else if(kind==='scribble')drawScribble(x,cw,ch,R);else if(kind==='halftone')drawHalftone(x,cw,ch,R);else drawBrush(x,cw,ch,R);
  return c;
 }
 
@@ -24375,17 +24767,68 @@ function normAttach(a){
  if(!a||typeof a!=='object'||a.to==null||a.to==='')return null;
  return {to:a.to,mode:/^(wrap|under|above)$/.test(a.mode)?a.mode:'wrap',padX:a.padX,padY:a.padY,gap:a.gap,wRatio:a.wRatio,h:a.h,align:/^(left|center|right)$/.test(a.align)?a.align:'center',z:a.z==='front'?'front':'behind'};
 }
+function wordTokens(text){
+ const out=[];let gi=0;
+ String(text).replace(/\r\n?|\u2028|\u2029/g,'\n').split('\n').forEach(function(par,pi){
+  if(!par){gi++;return;}
+  const ws=par.split(' ').filter(function(w){return w.length>0;});
+  if(!ws.length){gi++;return;}
+  ws.forEach(function(w){out.push({i:gi,w:w,p:pi});gi++;});
+ });
+ return out;
+}
+function normW(w){return String(w).toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');}
+/* penekanan kata/frasa: bold (tebal) dan marks (warna/miring) lewat wordStyles bawaan aplikasi */
+function applyMarks(el,L){
+ const bolds=Array.isArray(L.bold)?L.bold:[],marks=Array.isArray(L.marks)?L.marks:[];
+ if(!bolds.length&&!marks.length)return 0;
+ const toks=wordTokens(el.text),nt=toks.map(function(t){return normW(t.w);});
+ if(!el.wordStyles)el.wordStyles={};
+ const baseW=parseInt(el.fontWeight)||400,bw=baseW>=700?'900':'700',cap=Math.max(2,Math.round(toks.length*0.4));
+ let used=0,hit=0;
+ function find(ph){
+  const pw=String(ph).split(/\s+/).map(normW).filter(Boolean);if(!pw.length)return null;
+  for(let st=0;st+pw.length<=nt.length;st++){let ok=true;for(let k=0;k<pw.length;k++){if(nt[st+k]!==pw[k]){ok=false;break;}}if(ok)return [st,st+pw.length];}
+  return null;
+ }
+ function mark(ph,props,counts){
+  const r=find(ph);if(!r)return false;
+  if(counts&&used+(r[1]-r[0])>cap)return false;
+  for(let k=r[0];k<r[1];k++){const ix=toks[k].i;el.wordStyles[ix]=Object.assign(el.wordStyles[ix]||{},props);}
+  if(counts)used+=r[1]-r[0];hit++;return true;
+ }
+ bolds.slice(0,8).forEach(function(ph){if(typeof ph==='string')mark(ph,{fontWeight:bw},true);});
+ marks.slice(0,6).forEach(function(mk){
+  if(!mk||typeof mk.t!=='string')return;
+  const pr={};if(mk.color)pr.color=hex(mk.color,el.color);if(mk.italic)pr.fontStyle='italic';if(mk.bold)pr.fontWeight=bw;if(mk.highlight)pr.highlightColor=hex(mk.highlight,'transparent');
+  if(Object.keys(pr).length)mark(mk.t,pr,false);
+ });
+ return hit;
+}
+function lhFor(v,size,d){const disp=size>=d.W*0.065;v=+v;if(!isFinite(v)||v<=0)v=disp?1.05:1.32;return disp?clamp(v,0.92,1.15):clamp(v,1.05,size>=d.W*0.045?1.3:1.38);}
+function lsFor(L,size,d){const disp=size>=d.W*0.065;let v=clamp(L.letterSpacing||0,-5,30);if(disp)return Math.max(v,-2);if(L.uppercase)return Math.min(v,2.5);return clamp(v,-0.3,0.6);}
+function splitParas(l,d){
+ const size=clamp(l.size,1.6,20);
+ if(size>=6.5)return [l];
+ const parts=String(l.text||'').split(/\n\s*\n/).map(function(x){return x.trim();}).filter(Boolean);
+ if(parts.length<2)return [l];
+ return parts.map(function(p,k){return Object.assign({},l,{text:p,y:(+l.y||0)+k*0.01});});
+}
 function mkText(L,d){
- const size=clamp(L.size,1.6,20)/100*d.W;
+ const nch=String(L.text==null?'':L.text).replace(/\s+/g,' ').trim().length;
+ const floorPct=ENG?(nch>=70?3.5:(nch>=18?3.0:0)):0;
+ const size=Math.max(clamp(L.size,1.6,20),floorPct)/100*d.W;
  const el={id:newId(),type:'text',text:String(L.text==null?'':L.text),
   x:0,y:0,width:clamp(L.w,8,100)/100*d.W,fontFamily:adzFont(L.font),fontSize:Math.round(size),fontWeight:String(L.weight||'700'),fontStyle:L.italic?'italic':'normal',
   textDecoration:'none',textAlign:/^(left|center|right|justify)$/.test(L.align)?L.align:'center',textTransform:L.uppercase?'uppercase':'none',color:hex(L.color,'#FFFFFF'),
-  lineHeight:clamp(L.lineHeight||1.3,0.9,2.2),letterSpacing:clamp(L.letterSpacing||0,-5,30),highlightColor:L.highlight?hex(L.highlight,'transparent'):'transparent',highlightAlpha:0.35,
+  lineHeight:ENG?lhFor(L.lineHeight,size,d):clamp(L.lineHeight||1.3,0.9,2.2),letterSpacing:ENG?lsFor(L,size,d):clamp(L.letterSpacing||0,-5,30),highlightColor:L.highlight?hex(L.highlight,'transparent'):'transparent',highlightAlpha:0.35,
   opacity:clamp(L.opacity==null?1:L.opacity,0.05,1),rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},
   filters:{brightness:100,contrast:100,saturate:100,hue:0},
   shadow:shadowOf(L.shadow)||{color:'transparent',blur:0,angle:45,distance:0,alpha:0},transparency:Object.assign({},TRANSP),
-  _adz:{kind:'text',name:L.name||'Teks'}};
+  _adz:{kind:'text',name:L.name||'Teks',minFs:Math.round((floorPct?floorPct*0.92:1.8)/100*d.W)}};
  el._adz.leftPx=clamp(L.x,0,100)/100*d.W;el._adz.topPx=clamp(L.y,0,100)/100*d.H;
+ el._adz.baseLeft=el._adz.leftPx;el._adz.baseAlign=el.textAlign;
+ try{applyMarks(el,L);}catch(e){}
  return el;
 }
 function mkShape(L,d){
@@ -24427,13 +24870,28 @@ async function mkImage(L,d,res){
  }
  return el;
 }
-function mkAsset(L,d){
- const art=ADZ_ARTS.indexOf(L.art)>=0?L.art:'brush';
+function mkAsset(L0,d){
+ const art=ADZ_ARTS.indexOf(L0.art)>=0?L0.art:'brush';
+ const atmo=ATMO.indexOf(art)>=0;
+ const L=(atmo&&(L0.w==null||L0.h==null))?Object.assign({},L0,{x:0,y:0,w:100,h:100}):L0;
  const w=clamp(L.w,1,140)/100*d.W,h=clamp(L.h,0.3,140)/100*d.H;
  const x=clamp(L.x,-30,130)/100*d.W,y=clamp(L.y,-30,130)/100*d.H;
- const el=imageBase(getImageFromCache(TINY),TINY,x+w/2,y+h/2,w,h,clamp(L.rotation||0,-360,360),clamp(L.opacity==null?1:L.opacity,0,1));
- el._adz={kind:'asset',art:art,color:hex(L.color,'#D4AF37'),seed:Math.abs(parseInt(L.seed)||0)||(Math.floor(Math.random()*9000)+11),bleed:false,name:L.name||'Aset'};
+ const el=imageBase(getImageFromCache(TINY),TINY,x+w/2,y+h/2,w,h,clamp(L.rotation||0,-360,360),clamp(L.opacity==null?(atmo?0.35:1):L.opacity,0,1));
+ let bl=BLENDS.indexOf(L.blend)>=0?L.blend:null;
+ if(!bl){bl='normal';if(art==='grain')bl=BG_DARK?'screen':'multiply';else if(art==='embers'||art==='glow'||art==='bokeh'||art==='water')bl=BG_DARK?'screen':'normal';}
+ el.blendMode=bl;
+ el._adz={kind:'asset',art:art,color:hex(L.color,'#D4AF37'),seed:Math.abs(parseInt(L.seed)||0)||(Math.floor(Math.random()*9000)+11),bleed:atmo||!!L.bleed||(w>=d.W*0.96&&h>=d.H*0.9),name:L.name||'Aset'};
  return el;
+}
+let BG_DARK=true;
+function bgDark(B){B=B||{};const cols=(Array.isArray(B.colors)?B.colors:[]).map(function(c){return hex(c,null);}).filter(Boolean);if(!cols.length)return true;let t=0;cols.forEach(function(c){let h=c.replace('#','');if(h.length===3)h=h.split('').map(function(q){return q+q;}).join('');const n=parseInt(h.slice(0,6),16)||0;t+=(0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255))/255;});return t/cols.length<0.5;}
+function orderAtmo(els){
+ const at=els.filter(function(e){return e._adz&&e._adz.kind==='asset'&&ATMO.indexOf(e._adz.art)>=0&&!e._adz.attach;});
+ if(!at.length)return;
+ at.forEach(function(e){els.splice(els.indexOf(e),1);});
+ let ix=0;while(ix<els.length&&els[ix]._adz&&els[ix]._adz.bleed&&els[ix].type!=='text')ix++;
+ at.sort(function(a,b){return (a._adz.art==='grain'?1:0)-(b._adz.art==='grain'?1:0);});
+ els.splice.apply(els,[ix,0].concat(at));
 }
 function mkKeep(L,d,old){
  const w=clamp(L.w,2,100)/100*d.W,h=clamp(L.h,2,100)/100*d.H,x=clamp(L.x,-20,120)/100*d.W,y=clamp(L.y,-20,120)/100*d.H;
@@ -24456,15 +24914,20 @@ async function finalizeAssets(els){
 const mctx=document.createElement('canvas').getContext('2d');
 function textH(el){const h=el._calculatedHeight;return (h&&isFinite(h)&&h>0)?h:(el.fontSize*el.lineHeight*Math.max(1,String(el.text).split('\n').length));}
 function inkW(el){
- mctx.font=(el.fontStyle==='italic'?'italic ':'')+(el.fontWeight||'700')+' '+el.fontSize+'px '+el.fontFamily;
- let txt=String(el.text);if(el.textTransform==='uppercase')txt=txt.toUpperCase();
- const ls=el.letterSpacing||0;let mx=0;
- function wd(s){return mctx.measureText(s).width+ls*s.length;}
- txt.split('\n').forEach(function(par){
-  const words=par.split(' ').filter(Boolean);let cur='';
-  words.forEach(function(w){const t=cur?cur+' '+w:w;if(wd(t)>el.width&&cur){mx=Math.max(mx,wd(cur));cur=w;}else cur=t;});
-  if(cur)mx=Math.max(mx,wd(cur));
+ const ls=el.letterSpacing||0,ws=el.wordStyles||{},toks=wordTokens(el.text);
+ let mx=0,cur=0,lastP=-1,n=0;
+ mctx.font=(el.fontStyle||'normal')+' '+(el.fontWeight||'normal')+' '+el.fontSize+'px '+el.fontFamily;
+ const sp=mctx.measureText(' ').width+ls;
+ toks.forEach(function(t){
+  if(t.p!==lastP){mx=Math.max(mx,cur);cur=0;n=0;lastP=t.p;}
+  const st=ws[t.i]||{};
+  mctx.font=(st.fontStyle||el.fontStyle||'normal')+' '+(st.fontWeight||el.fontWeight||'normal')+' '+el.fontSize+'px '+el.fontFamily;
+  let w=t.w;const tt=st.textTransform||el.textTransform;if(tt==='uppercase')w=w.toUpperCase();
+  const wd=mctx.measureText(w).width+ls*w.length;
+  if(n>0&&cur+sp+wd>el.width){mx=Math.max(mx,cur);cur=wd;n=1;}
+  else{cur+=(n>0?sp:0)+wd;n++;}
  });
+ mx=Math.max(mx,cur);
  return Math.min(el.width,Math.max(mx,el.fontSize*0.6));
 }
 function boxOf(e){
@@ -24483,13 +24946,15 @@ function resolveTargets(to,els){
   if(!hit)hit=els.find(function(e){return e._adz&&e._adz.nm&&(e._adz.nm.indexOf(key)>=0||key.indexOf(e._adz.nm)>=0);});
   if(!hit&&/^#?\d+$/.test(key)){const ix=parseInt(key.replace('#',''));hit=els.find(function(e){return e._adz&&e._adz.idx===ix;});}
   if(hit&&out.indexOf(hit)<0)out.push(hit);
+  if(hit&&hit._adz&&hit._adz.nm){els.forEach(function(x){if(x._adz&&x._adz.pieceOf===hit._adz.nm&&out.indexOf(x)<0)out.push(x);});}
  });
  return out;
 }
 
 /* ---------- Mesin tata letak: ruang tepi, tumpukan teks, kartu, perataan, penempelan ---------- */
 function fontsToLoad(els){
- const set={};els.forEach(function(e){if(e.type==='text')set[e.fontFamily+'|'+e.fontWeight+'|'+e.fontStyle]=e;});
+ const set={};els.forEach(function(e){if(e.type!=='text')return;set[e.fontFamily+'|'+e.fontWeight+'|'+e.fontStyle]=e;
+  Object.keys(e.wordStyles||{}).forEach(function(k){const w=e.wordStyles[k]||{};const fw=w.fontWeight||e.fontWeight,fs=w.fontStyle||e.fontStyle;set[e.fontFamily+'|'+fw+'|'+fs]={fontFamily:e.fontFamily,fontWeight:fw,fontStyle:fs,text:e.text};});});
  return Promise.all(Object.keys(set).map(function(k){const e=set[k];const fam=String(e.fontFamily).split(',')[0].trim();
   return Promise.race([document.fonts.load((e.fontStyle==='italic'?'italic ':'')+e.fontWeight+' 40px '+fam,e.text.slice(0,20)||'A'),new Promise(function(r){setTimeout(r,2500);})]).catch(function(){});}));
 }
@@ -24511,7 +24976,7 @@ function arrange(slide,d,m){
   if(t.x>l&&t.x<r&&t.y>tp&&t.y<bt){const ar=c.width*c.height;if(ar<ba){ba=ar;best=c;}}});
   if(best)owner.set(t,best);});
  const orig=new Map();cards.forEach(function(c){orig.set(c,{l:c.x-c.width/2,r:c.x+c.width/2,t:c.y-c.height/2,b:c.y+c.height/2});});
- const limT=m,limB=d.H-m;
+ const LM=limits(d,m),limT=LM.t,limB=LM.b;
  function hov(a,b){return Math.min(a.x+a.width/2,b.x+b.width/2)-Math.max(a.x-a.width/2,b.x-b.width/2)>=Math.min(a.width,b.width)*0.12;}
  texts.forEach(function(t){const h=textH(t);if(t.y-h/2<limT)t.y=limT+h/2;if(t.y+h/2>limB)t.y=limB-h/2;});
  for(let pass=0;pass<4;pass++){
@@ -24537,7 +25002,7 @@ function fitStack(slide,d,m){
  for(let it=0;it<5;it++){
   const T=A.texts;if(!T.length)break;
   let top=1e9;T.forEach(function(t){top=Math.min(top,t.y-textH(t)/2);});
-  if(top>=m-0.5)break;
+  if(top>=limits(d,m).t-0.5)break;
   T.forEach(function(t){t.fontSize=Math.max(Math.round(d.W*0.018),Math.round(t.fontSize*0.92));t._calculatedHeight=null;t._cachedCanvas=null;t._cachedHash=null;});
   A=arrange(slide,d,m);
  }
@@ -24546,11 +25011,19 @@ function fitStack(slide,d,m){
 function snapAndClamp(slide,d,m,A){
  const cx=d.W/2;
  const byCard=new Map();A.owner.forEach(function(c,t){if(!byCard.has(c))byCard.set(c,[]);byCard.get(c).push(t);});
- const pad=Math.max(24,Math.round(m*0.45));
+ const pad=Math.max(24,Math.round(m*0.45)),padX=PADX(d),padY=PADY(d),padB=pad;
  byCard.forEach(function(ts,c){
   const o=A.orig.get(c);let l=1e9,r=-1e9,t0=1e9,b=-1e9;
   ts.forEach(function(t){l=Math.min(l,t.x-t.width/2);r=Math.max(r,t.x+t.width/2);t0=Math.min(t0,t.y-textH(t)/2);b=Math.max(b,t.y+textH(t)/2);});
-  let nl=Math.min(o.l,l-pad),nr=Math.max(o.r,r+pad);const nt=Math.min(o.t,t0-pad),nb=Math.max(o.b,b+pad);
+  let nl,nr,nt,nb;
+  if(!ENG){nl=Math.min(o.l,l-pad);nr=Math.max(o.r,r+pad);nt=Math.min(o.t,t0-pad);nb=Math.max(o.b,b+pad);}
+  else{
+   const band=(o.l<=d.W*0.02&&o.r>=d.W*0.98);
+   const px=band?padB:padX,py=band?padB:padY;
+   nl=Math.min(o.l,l-px);nr=Math.max(o.r,r+px);
+   nt=band?Math.min(o.t,t0-py):t0-py;nb=band?Math.max(o.b,b+py):b+py;
+   if(!band){nl=Math.max(m,nl);nr=Math.min(d.W-m,nr);}
+  }
   if(ts.every(function(t){return t.textAlign==='center';})&&Math.abs((nl+nr)/2-cx)<d.W*0.03){const hw=Math.max(cx-nl,nr-cx);nl=cx-hw;nr=cx+hw;}
   c.width=nr-nl;c.height=nb-nt;c.x=(nl+nr)/2;c.y=(nt+nb)/2;
  });
@@ -24585,7 +25058,9 @@ function applyAnchors(slide,d){
   const T=resolveTargets(A.to,els.filter(function(x){return x!==e;}));if(!T.length){e._adz.attach=null;return;}
   let l=1e9,t=1e9,r=-1e9,b=-1e9;
   T.forEach(function(q){const B=boxOf(q);l=Math.min(l,B.l);t=Math.min(t,B.t);r=Math.max(r,B.r);b=Math.max(b,B.b);});
-  const px=clamp(A.padX==null?2:A.padX,0,30)/100*d.W,py=clamp(A.padY==null?1.2:A.padY,0,30)/100*d.H;
+  let px=clamp(A.padX==null?2:A.padX,0,30)/100*d.W,py=clamp(A.padY==null?1.2:A.padY,0,30)/100*d.H;
+  const cardLike=ENG&&(A.mode==='wrap'&&e.type==='shape'&&e.shapeType!=='line'&&T.some(function(q){return q.type==='text'&&!isMini(q,d);}));
+  if(cardLike){px=Math.max(px,PADX(d));py=Math.max(py,PADY(d));}
   let nl,nr,nt,nb;
   if(A.mode==='wrap'){nl=l-px;nr=r+px;nt=t-py;nb=b+py;}
   else{
@@ -24597,7 +25072,13 @@ function applyAnchors(slide,d){
    nl=cxm-bw/2;nr=cxm+bw/2;
    if(A.mode==='under'){nt=b+gap;nb=nt+bh;}else{nb=t-gap;nt=nb-bh;}
   }
-  nl=Math.max(edge,nl);nr=Math.min(d.W-edge,nr);nt=Math.max(edge*0.5,nt);nb=Math.min(d.H-edge*0.5,nb);
+  if(cardLike)cardShadow(e,d);
+  else if(ENG&&A.mode==='wrap'&&e.type==='shape'&&(e.shapeType==='capsule'||e.shapeType==='rect')){
+   const tx=T.filter(function(q){return q.type==='text';});
+   if(tx.length===1&&isMini(tx[0],d)){const pxp=Math.min(px,d.W*0.035);nl=l-pxp;nr=r+pxp;const ph=tx[0].fontSize*1.12+2*d.W*0.0055,cyy=(t+b)/2;nt=cyy-ph/2;nb=cyy+ph/2;}
+  }
+  const eL=cardLike?Math.max(edge,CUR_M):edge,eT=cardLike?Math.max(edge*0.5,CUR_M):edge*0.5;
+  nl=Math.max(eL,nl);nr=Math.min(d.W-eL,nr);nt=Math.max(eT,nt);nb=Math.min(d.H-eT,nb);
   e.width=Math.max(4,nr-nl);e.height=Math.max(2,nb-nt);e.x=(nl+nr)/2;e.y=(nt+nb)/2;
  });
  /* urutan lapisan: tepat di bawah (atau di atas) teks yang ditempeli */
@@ -24651,7 +25132,7 @@ function resolveBlocks(slide,d,m,A){
    if(need>0.5){shift(G[i],need);moved=true;}}}
   if(!moved)break;
  }
- const limB=d.H-m*0.85,limT=m*0.85;
+ const LM2=limits(d,m),limB=LM2.b+m*0.15,limT=LM2.t-m*0.15;
  let bottom=-1e9,top=1e9;G.forEach(function(g){bottom=Math.max(bottom,g.box.b);top=Math.min(top,g.box.t);});
  let over=bottom-limB;
  if(over>1){
@@ -24661,26 +25142,270 @@ function resolveBlocks(slide,d,m,A){
  return {overflow:Math.max(0,over)};
 }
 function snapshot(els){const M=new Map();els.forEach(function(e){M.set(e,{x:e.x,y:e.y,w:e.width,h:e.height,fs:e.fontSize});});return M;}
-function restore(M,k,d){M.forEach(function(b,e){
+function isMini(t,d){
+ const a=t._adz||{};const nch=String(t.text).replace(/\s+/g,' ').trim().length;
+ const hnd=/@[\w.]{3,}/.test(String(t.text));
+ return (nch<=32||(hnd&&nch<=60))&&t.fontSize<=d.W*0.045&&(hnd||(a.baseAlign||t.textAlign)==='center');
+}
+/* Satu kolom teks: semua kotak (judul, isi, catatan kaki) berbagi tepi kiri-kanan yang sama; rata penuh = lebar isi mengikuti lebar judul */
+function alignColumnFor(cand,d,m,mode){
+ if(!cand.length||mode==='auto')return 0;
+ const maxFs=Math.max.apply(null,cand.map(function(t){return t.fontSize;}));
+ const disp=cand.filter(function(t){return t.fontSize>=maxFs*0.7;});
+ let cl=1e9,cr=-1e9;
+ disp.forEach(function(t){
+  const a=t._adz,iw=inkW(t),al=a.baseAlign;let l;
+  if(al==='left'||al==='justify')l=a.baseLeft;else if(al==='right')l=a.baseLeft+t.width-iw;else l=a.baseLeft+t.width/2-iw/2;
+  cl=Math.min(cl,l);cr=Math.max(cr,l+iw);
+ });
+ const sw=d.W-2*m;
+ if(!(cr-cl>=sw*(mode==='justify'?0.9:0.55))){cl=m;cr=d.W-m;}
+ cl=Math.max(m,cl);cr=Math.min(d.W-m,cr);
+ let colW=cr-cl;
+ if(mode==='center'){const cx=d.W/2;colW=Math.min(colW,2*(cx-m));cl=cx-colW/2;}
+ cand.forEach(function(t){
+  const a=t._adz,dispish=t.fontSize>=maxFs*0.7;
+  t.width=colW+2;a.leftPx=cl-1;
+  t.textAlign=(mode==='justify')?(dispish?'left':'justify'):mode;
+ });
+ if(mode==='justify'){
+  cand.forEach(function(t){
+   if(t.fontSize<maxFs*0.7)return;
+   const iw=inkW(t);
+   if(iw>0&&(iw<colW*0.93||CUR_KD<1)){const k=Math.max(0.72,Math.min(1.22,colW*0.97*CUR_KD/iw));t.fontSize=Math.round(t.fontSize*k);t._calculatedHeight=null;t._renderedW=null;t._cachedCanvas=null;t._cachedHash=null;}
+  });
+ }
+ return cand.length;
+}
+function alignColumn(target,d,m){
+ const mode=cfg.textAlign||'auto';if(mode==='auto')return;
+ const els=target.elements,T=els.filter(function(e){return e.type==='text';}),excl=new Set();
+ els.forEach(function(e){
+  const a=e._adz&&e._adz.attach;if(!a||e.type==='text'||a.mode!=='wrap')return;
+  if(e.type!=='shape')return;
+  resolveTargets(a.to,els.filter(function(x){return x!==e;})).forEach(function(t){if(t.type==='text'&&String(t.text).length<=40&&t.fontSize<=d.W*0.045)excl.add(t);});
+ });
+ alignColumnFor(T.filter(function(t){return !excl.has(t)&&!isMini(t,d);}),d,m,mode);
+}
+function restore(M,kd,kb,d){M.forEach(function(b,e){
+ e.x=b.x;e.y=b.y;e.width=b.w;
+ if(e.type==='text'){
+  const disp=b.fs>=d.W*0.055;
+  const mn=disp?Math.round(b.fs*0.7):((e._adz&&e._adz.minFs)||Math.round(d.W*0.018));
+  e.fontSize=Math.max(Math.min(mn,b.fs),Math.round(b.fs*(disp?kd:kb)));
+  e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;
+ }
+ else e.height=b.h;
+ if(e._adz&&e._adz.kind==='shape'&&e.shapeType==='line')e._adz.baseH=b.h;
+});}
+/* v2.5.6: padding ganda, ritme jarak teks, ruang logo */
+let PAD_OVR=null,GAP_OVR=null,CUR_KD=1;
+function PADX(d){return Math.round(d.W*(PAD_OVR?clamp(PAD_OVR.x,1.5,9):3.2)/100);}
+function PADY(d){return Math.round(d.W*(PAD_OVR?clamp(PAD_OVR.y,1.5,9):4.8)/100);}
+function gapOf(k,def){return (GAP_OVR&&GAP_OVR[k]>0)?clamp(GAP_OVR[k],0.5,9)/100:def;}
+/* bayangan kertas 3D tebal + kapsul username tipis */
+function cardShadow(e,d){
+ const sh=e.shadow||{},on=sh.color&&sh.color!=='transparent'&&sh.distance>0;
+ e.shadow={color:'#000000',blur:Math.max(on?sh.blur:0,Math.round(d.W*0.04)),angle:90,distance:Math.max(on?sh.distance:0,Math.round(d.W*0.016)),alpha:Math.max(on?(sh.alpha||0):0,0.42)};
+}
+let CUR_M=0,CARD_PADV=0,LOGO_RES={top:0,bottom:0};
+function limits(d,m){return {t:m+CARD_PADV+LOGO_RES.top,b:d.H-m-CARD_PADV-LOGO_RES.bottom};}
+/* Kotak/kertas: teks dimasukkan ke kolom dalam (padding kiri-kanan lebih lega); tanpa kotak hanya padding tepi poster */
+function insetCards(target,d,m){
+ CARD_PADV=0;
+ const els=target.elements,T=els.filter(function(e){return e.type==='text';});
+ if(!T.length)return;
+ const padX=PADX(d),sw=d.W-2*m;
+ function clampText(t,l,r){
+  const a=t._adz;if(!a)return;
+  const w=Math.max(d.W*0.28,r-l);
+  if(t.width>w)t.width=w;
+  if(a.leftPx<l)a.leftPx=l;
+  if(a.leftPx+t.width>r)a.leftPx=Math.max(l,r-t.width);
+ }
+ let attachedBody=false;
+ els.forEach(function(e){
+  if(e.type!=='shape'||e.shapeType==='line'||(e._adz&&e._adz.bleed))return;
+  const at=e._adz&&e._adz.attach;
+  if(at){
+   if(at.mode!=='wrap')return;
+   const tg=resolveTargets(at.to,els.filter(function(x){return x!==e;})).filter(function(x){return x.type==='text'&&!isMini(x,d);});
+   if(tg.length){attachedBody=true;CARD_PADV=PADY(d);}
+   return;
+  }
+  if(e.width<sw*0.5)return;
+  const l0=e.x-e.width/2,r0=e.x+e.width/2,t0=e.y-e.height/2,b0=e.y+e.height/2;
+  if(l0<=d.W*0.02&&r0>=d.W*0.98)return;
+  const own=T.filter(function(t){const a=t._adz;if(!a||isMini(t,d))return false;const cx=a.leftPx+t.width/2;return cx>l0&&cx<r0&&a.topPx>=t0-4&&a.topPx<b0;});
+  if(!own.length)return;
+  let L=Math.max(m,l0),R=Math.min(d.W-m,r0);
+  if(R-L>=sw*0.6){L=m;R=d.W-m;}
+  e.x=(L+R)/2;e.width=R-L;cardShadow(e,d);
+  {let nt=t0,nb=b0;if(LOGO_RES.top>0&&nt<m+LOGO_RES.top)nt=m+LOGO_RES.top;if(LOGO_RES.bottom>0&&nb>d.H-m-LOGO_RES.bottom)nb=d.H-m-LOGO_RES.bottom;if(nb-nt>=d.H*0.3){e.height=nb-nt;e.y=(nt+nb)/2;}}
+  own.forEach(function(t){clampText(t,L+padX,R-padX);});
+  CARD_PADV=PADY(d);
+ });
+ if(attachedBody){
+  const L=m+padX,R=d.W-m-padX;
+  T.forEach(function(t){if(!isMini(t,d))clampText(t,L,R);});
+ }
+}
+function isHead(t,d){const w=t.fontWeight==='bold'?700:(+t.fontWeight||400);return w>=700&&t.fontSize>=d.W*0.04&&!isMini(t,d);}
+function targetGap(a,b,d){
+ const W=d.W,fa=a.fontSize,fb=b.fontSize;
+ if(isHead(a,d)&&isHead(b,d))return W*0.012;
+ if(fa<=W*0.038&&isMini(a,d)&&fb>=W*0.06)return W*0.016;
+ if(fa>=W*0.065)return fb>=W*0.065?W*0.012:W*gapOf('headlineToBody',0.042);
+ if(isMini(b,d))return W*gapOf('noteToHandle',0.04)+(CARD_PADV>0?PADY(d)*0.5:0);
+ if(fb<fa*0.88&&fb<=W*0.04)return W*gapOf('bodyToNote',0.022);
+ return W*gapOf('paraToPara',0.026);
+}
+/* Rapikan jarak antar blok (judul, paragraf, catatan, handle) dan pusatkan tumpukan secara vertikal */
+function flowSpacing(target,d,m,A){
+ const els=target.elements,T=els.filter(function(e){return e.type==='text';});
+ if(T.length<2)return;
+ if(els.some(function(e){return e.type==='image'&&e._adz&&e._adz.kind==='image'&&!e._adz.bleed;}))return;
+ function hx(a,b){const P=boxOf(a),Q=boxOf(b);return Math.min(P.r,Q.r)-Math.max(P.l,Q.l)>Math.min(P.r-P.l,Q.r-Q.l)*0.12;}
+ for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++)if(!hx(T[i],T[j]))return;
+ const rec=T.map(function(t){return {t:t,y0:t.y};});
+ const srt=T.slice().sort(function(a,b){return boxOf(a).t-boxOf(b).t;});
+ let acc=0,prevB=0;
+ srt.forEach(function(t,i){
+  const B=boxOf(t);
+  if(i>0){const g=targetGap(srt[i-1],t,d),cur=(B.t-acc)-prevB,nd=Math.max(g*0.85,Math.min(g*1.25,cur));acc+=cur-nd;}
+  t.y-=acc;prevB=boxOf(t).b;
+ });
+ const LM=limits(d,m);let top=1e9,bot=-1e9;
+ T.forEach(function(t){const B=boxOf(t);top=Math.min(top,B.t);bot=Math.max(bot,B.b);});
+ const avail=LM.b-LM.t,hh=bot-top;
+ if(hh<avail*0.95){const dy=(LM.t+(avail-hh)/2)-top;T.forEach(function(t){t.y+=dy;});}
+ const owners=Array.from(A.owner.values());
+ els.forEach(function(e){
+  if(e.type==='text'||e.type==='fade'||owners.indexOf(e)>=0)return;
+  const a=e._adz||{};if(a.bleed||a.attach||a.kind==='logo')return;
+  let best=null,bd=1e18;rec.forEach(function(r){const dd=Math.abs(r.y0-e.y);if(dd<bd){bd=dd;best=r;}});
+  if(best)e.y+=best.t.y-best.y0;
+ });
+}
+/* Logo: dipasang mesin (tanpa token) di zona yang sudah dicadangkan */
+async function mkLogos(d,m){
+ const out=[],pl=S.logoPlan||{},tint=pl.tint&&/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(pl.tint)?pl.tint:null;
+ for(const g of selLogos()){
+  try{const pg=await logoPrep(g,tint);const img=getImageFromCache(pg.url);await waitImg(img);const h=Math.min(cfg.logoSize/100*d.W,d.H*0.1);out.push({g:pg,img:img,h:h,w:h*(pg.w/pg.h)});}catch(e){}
+ }
+ if(out.length){
+  const gap=Math.round(d.W*0.03),avail=d.W-2*m;let tot=gap*(out.length-1);out.forEach(function(q){tot+=q.w;});
+  if(tot>avail){const k=Math.max(0.2,(avail-gap*(out.length-1))/(tot-gap*(out.length-1)));out.forEach(function(q){q.w*=k;q.h*=k;});}
+ }
+ return out;
+}
+function placeLogos(target,d,m,logos){
+ const z=logoZone(),top=z.charAt(0)==='t',al=z.charAt(1),gap=Math.round(d.W*0.03);
+ let total=gap*(logos.length-1);logos.forEach(function(q){total+=q.w;});
+ const rowH=Math.max.apply(null,logos.map(function(q){return q.h;}));
+ let x=al==='l'?m:(al==='r'?d.W-m-total:(d.W-total)/2);
+ const cy=top?(m+rowH/2):(d.H-m-rowH/2);
+ const split=logos.length>=2&&(cfg.logoPlace||'auto')==='auto'&&S.logoPlan&&S.logoPlan.layout==='split';
+ let xs=null;
+ if(split){
+  let inner=0;logos.forEach(function(q){inner+=q.w;});
+  const free=Math.max(0,d.W-2*m-inner),sp=free/(logos.length-1);
+  xs=[];let cx=m;logos.forEach(function(q){xs.push(cx);cx+=q.w+sp;});
+ }
+ logos.forEach(function(q,k){
+  const lx=xs?xs[k]:x;
+  const e=imageBase(q.img,q.g.url,lx+q.w/2,cy,q.w,q.h,0,1);
+  e._adz={kind:'logo',bleed:false,name:'Logo '+(k+1),nm:'logo '+(k+1),idx:900+k};
+  target.elements.push(e);x+=q.w+gap;
+ });
+}
+function dropCrossingLines(target,d){
+ const els=target.elements,T=els.filter(function(t){return t.type==='text';});
+ for(let i=els.length-1;i>=0;i--){
+  const e=els[i];if(e.type!=='shape'||e.shapeType!=='line'||(e._adz&&e._adz.bleed))continue;
+  const hit=T.some(function(t){const B=boxOf(t),h=B.b-B.t;return e.y>B.t+h*0.15&&e.y<B.b-h*0.15&&e.x+e.width/2>B.l&&e.x-e.width/2<B.r;});
+  if(hit)els.splice(i,1);
+ }
+}
+function restoreLegacy(M,k,d){M.forEach(function(b,e){
  e.x=b.x;e.y=b.y;e.width=b.w;
  if(e.type==='text'){e.fontSize=Math.max(Math.round(d.W*0.018),Math.round(b.fs*k));e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;}
  else e.height=b.h;
  if(e._adz&&e._adz.kind==='shape'&&e.shapeType==='line')e._adz.baseH=b.h;
 });}
 function layoutAll(target,d,m){
- const base=snapshot(target.elements);let k=1,res={k:1,overflow:0};
- for(let it=0;it<8;it++){
-  restore(base,k,d);
+ CUR_M=m;CARD_PADV=0;
+ const base=snapshot(target.elements);
+ if(!ENG){
+  /* mesin v2.5.4 (stabil) */
+  let k=1,res={k:1,kd:1,kb:1,overflow:0};
+  for(let it=0;it<8;it++){
+   restoreLegacy(base,k,d);
+   CUR_KD=k;
+   alignColumn(target,d,m);
+   const A=fitStack(target,d,m);
+   snapAndClamp(target,d,m,A);
+   applyAnchors(target,d);
+   const r=resolveBlocks(target,d,m,A);
+   res={k:k,kd:k,kb:k,overflow:r.overflow};
+   if(r.overflow<=1)break;
+   k*=Math.max(0.84,Math.min(0.95,1-(r.overflow/d.H)*1.1));
+  }
+  return res;
+ }
+ /* mesin presisi (opsional) */
+ let kd=1,kb=1,res={k:1,kd:1,kb:1,overflow:0};
+ for(let it=0;it<18;it++){
+  restore(base,kd,kb,d);
+  CUR_KD=kd;
+  alignColumn(target,d,m);
+  insetCards(target,d,m);
   const A=fitStack(target,d,m);
+  flowSpacing(target,d,m,A);
   snapAndClamp(target,d,m,A);
   applyAnchors(target,d);
   const r=resolveBlocks(target,d,m,A);
-  res={k:k,overflow:r.overflow};
+  res={k:kd,kd:kd,kb:kb,overflow:r.overflow};
   if(r.overflow<=1)break;
-  k*=Math.max(0.84,Math.min(0.95,1-(r.overflow/d.H)*1.1));
+  if(kd>0.72)kd*=0.94;else kb*=0.95;
  }
  return res;
 }
+window.adzTidy=async function(){
+ if(S.busy)return;readCfg();
+ const mode=cfg.textAlign||'auto';
+ if(mode==='auto'){showToast('Pilih dulu: rata kiri, tengah, kanan, atau rata penuh');return;}
+ if(checkDemo())return;
+ const s=getCurrentSlide();if(!s)return;
+ const d=canvasDims(),m=Math.round(d.W*cfg.margin/100);
+ const T=s.elements.filter(function(e){return e.type==='text'&&!e.locked;});
+ if(!T.length){showToast('Slide ini belum punya teks');return;}
+ try{
+  renderAll();
+  const tops=new Map();
+  T.forEach(function(e){tops.set(e,e.y-textH(e)/2);e._adz={kind:'text',baseLeft:e.x-e.width/2,leftPx:e.x-e.width/2,baseAlign:e.textAlign||'center'};});
+  const n=alignColumnFor(T.filter(function(e){return !isMini(e,d);}),d,m,mode);
+  T.forEach(function(e){e.x=e._adz.leftPx+e.width/2;e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;});
+  await fontsToLoad(T);renderAll();
+  T.forEach(function(e){e.y=tops.get(e)+textH(e)/2;});
+  const gap=Math.max(14,Math.round(d.H*0.014));
+  for(let pass=0;pass<4;pass++){
+   const srt=T.slice().sort(function(a,b){return (a.y-textH(a)/2)-(b.y-textH(b)/2);});let moved=false;
+   for(let i=1;i<srt.length;i++){for(let j=0;j<i;j++){
+    const A=boxOf(srt[j]),B=boxOf(srt[i]);
+    if(Math.min(A.r,B.r)-Math.max(A.l,B.l)<Math.min(A.r-A.l,B.r-B.l)*0.12)continue;
+    const need=(A.b+gap)-B.t;if(need>0.5){srt[i].y+=need;moved=true;}}}
+   if(!moved)break;
+  }
+  let bottom=-1e9,top=1e9;T.forEach(function(e){const b=boxOf(e);bottom=Math.max(bottom,b.b);top=Math.min(top,b.t);});
+  const over=bottom-(d.H-m*0.85);
+  if(over>1){const up=Math.min(over,Math.max(0,top-m*0.85));if(up>0)T.forEach(function(e){e.y-=up;});}
+  renderAll();try{renderCarouselThumbs();}catch(e){}
+  pushHistoryState();
+  showToast('Lebar teks dirapikan: '+n+' kotak');
+ }catch(e){showToast('Gagal merapikan: '+e.message);}
+ finally{T.forEach(function(e){delete e._adz;});}
+};
 
 /* ---------- Lint otomatis + tabel layer untuk penilai ---------- */
 function lint(slide,d,m){
@@ -24735,8 +25460,8 @@ async function compose(target,L,d,m,keepSrc){
  for(let i=0;i<L.length;i++){
   const l=L[i];if(!l||typeof l!=='object'||l._skip)continue;
   try{
-   let e=null;
-   if(l.kind==='text'){if(String(l.text||'').trim())e=mkText(l,d);}
+   let e=null,extra=null;
+   if(l.kind==='text'){if(String(l.text||'').trim()){const ps=ENG?splitParas(l,d):[l];e=mkText(ps[0],d);if(ps.length>1)extra=ps.slice(1);}}
    else if(l.kind==='shape')e=mkShape(l,d);
    else if(l.kind==='fade')e=mkFade(l,d);
    else if(l.kind==='asset'){if(cfg.assets)e=mkAsset(l,d);}
@@ -24749,22 +25474,31 @@ async function compose(target,L,d,m,keepSrc){
    e._adz.attach=(l.kind==='text'||l.kind==='fade'||l.kind==='image')?null:normAttach(l.attach);
    if(e._adz.attach&&e._adz.attach.to!=null&&(e._adz.attach.mode==='under'||e._adz.attach.mode==='above')&&e.type==='shape'&&e.shapeType==='line')e._adz.baseH=e.height;
    els.push(e);
+   if(extra)extra.forEach(function(pl,k){const pe=mkText(pl,d);pe._adz.idx=i;pe._adz.nm=uniqueNm((l.name||'Teks')+' '+(k+2),used);pe._adz.pieceOf=e._adz.nm;pe._adz.attach=null;els.push(pe);});
   }catch(err){log('  layer dilewati ('+(l.name||l.kind)+'): '+err.message,'wn');}
  }
  if(!els.length)throw new Error('Tidak ada layer yang dapat dibuat');
+ orderAtmo(els);
+ if(selLogos().length){S.logoPlan=S.logoPlan||{};if(!(S.logoPlan.tint&&/^#/.test(S.logoPlan.tint)))S.logoPlan.tint=autoTint(L);}
+ const logos=await mkLogos(d,m);
+ const lz=logoZone(),lband=logos.length?Math.round(Math.max.apply(null,logos.map(function(q){return q.h;}))+d.W*0.03+(ENG?0:d.W*0.04)):0;
+ LOGO_RES={top:lz.charAt(0)==='t'?lband:0,bottom:lz.charAt(0)==='b'?lband:0};
  target.elements=els;
  deselectElement();
  await fontsToLoad(els);
- const res=layoutAll(target,d,m);
+ let res;
+ try{res=layoutAll(target,d,m);}finally{LOGO_RES={top:0,bottom:0};CARD_PADV=0;}
+ dropCrossingLines(target,d);
+ if(logos.length)placeLogos(target,d,m,logos);
  await finalizeAssets(els);
  renderAll();
  return res;
 }
 async function snapshotUrl(){
  renderAll();await delay(220);renderAll();
- return await shrink(mainCanvas.toDataURL('image/jpeg',0.88),1280,0.88);
+ const eco=cfg.eco===true;return await shrink(mainCanvas.toDataURL('image/jpeg',eco?0.8:0.88),eco?960:1280,eco?0.8:0.88);
 }
-window.adzCancel=function(){if(S.ctl){try{S.ctl.abort();}catch(e){}}};
+window.adzCancel=function(){if(S.ctl&&S.busy){try{S.ctl.abort();}catch(e){}log('Membatalkan proses ...','wn');}};
 function setBusy(b){S.busy=b;$('adzGo').disabled=b;$('adzGo').textContent=b?'Sedang membuat...':'Buat Desain';$('adzCancel').style.display=b?'block':'none';}
 function briefLog(b){
  try{
@@ -24775,6 +25509,179 @@ function briefLog(b){
   if(Array.isArray(b.decor)&&b.decor.length)log('Dekorasi: '+b.decor.slice(0,5).join('; ').slice(0,260));
   if(b.illustration&&b.illustration.needed&&b.illustration.description)log('Ilustrasi: '+String(b.illustration.description).slice(0,160));
  }catch(e){}
+}
+
+/* ===== v2.6.0: AGEN PENYEMPURNA (lihat kanvas + referensi, edit layer langsung) ===== */
+let AG_N=0;
+function agBox(e,d){const h=e.type==='text'?textH(e):(e.height||0);return {l:e.x-e.width/2,t:e.y-h/2,w:e.width,h:h};}
+function agPaper(slide,d){
+ let best=null,ba=0;
+ slide.elements.forEach(function(e){if(e.type!=='shape'||e.shapeType==='line'||(e._adz&&e._adz.bleed))return;const a=e.width*e.height;if(e.width>=d.W*0.4&&e.height>=d.H*0.3&&a>ba){ba=a;best=e;}});
+ return best;
+}
+function agOverlaps(slide,d){
+ const T=slide.elements.filter(function(e){return e.type==='text';}),out=[];
+ for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++){
+  const a=agBox(T[i],d),b=agBox(T[j],d);
+  const ho=Math.min(a.l+a.w,b.l+b.w)-Math.max(a.l,b.l),vo=Math.min(a.t+a.h,b.t+b.h)-Math.max(a.t,b.t);
+  if(ho>Math.min(a.w,b.w)*0.3&&vo>Math.min(a.h,b.h)*0.12)out.push([T[i],T[j]]);
+ }
+ return out;
+}
+function agDeoverlap(slide,d){
+ let moved=0;
+ for(let pass=0;pass<8;pass++){
+  const T=slide.elements.filter(function(e){return e.type==='text';}).sort(function(a,b){return agBox(a,d).t-agBox(b,d).t;});
+  let did=false;
+  for(let i=1;i<T.length&&!did;i++)for(let j=0;j<i&&!did;j++){
+   const p=agBox(T[j],d),t=agBox(T[i],d);
+   const ho=Math.min(p.l+p.w,t.l+t.w)-Math.max(p.l,t.l);
+   if(ho<=Math.min(p.w,t.w)*0.3)continue;
+   const gap=Math.min(T[i].fontSize,T[j].fontSize)*0.12,need=p.t+p.h+gap-t.t;
+   if(need>1&&t.t<p.t+p.h-Math.min(p.h,t.h)*0.12){
+    const t0=t.t-1;
+    slide.elements.forEach(function(e){if(e.type==='fade'||(e._adz&&e._adz.bleed))return;const bb=agBox(e,d);if(bb.t>=t0&&!(e.type==='shape'&&bb.h>d.H*0.4))e.y+=need;});
+    moved++;did=true;
+   }
+  }
+  if(!did)break;
+ }
+ if(moved){
+  const card=agPaper(slide,d);
+  if(card){
+   let mb=0;slide.elements.forEach(function(e){if(e.type==='text'||(e.type==='shape'&&e!==card&&e.height<d.H*0.2&&!(e._adz&&e._adz.bleed))){const bb=agBox(e,d);if(bb.l>=card.x-card.width/2-2&&bb.l+bb.w<=card.x+card.width/2+2)mb=Math.max(mb,bb.t+bb.h);}});
+   const cb=card.y+card.height/2,want=mb+d.W*0.045,cap=d.H-d.W*0.02;
+   if(want>cb){const nb=Math.min(want,cap),nt=card.y-card.height/2;card.height=nb-nt;card.y=(nt+nb)/2;card._cachedCanvas=null;card._cachedHash=null;}
+  }
+ }
+ renderAll();
+ return moved;
+}
+function agTable(slide,d){
+ const paper=agPaper(slide,d),pw=paper?paper.width:d.W,ov=agOverlaps(slide,d);
+ return slide.elements.map(function(e,i){
+  e._agid=e._agid||('E'+(++AG_N));
+  const a=e._adz||{},b=agBox(e,d);
+  const o={id:e._agid,t:a.kind==='logo'?'logo':(e.type==='shape'?'shape':e.type),n:String(a.nm||a.name||'').slice(0,24),x:pc(b.l/d.W),y:pc(b.t/d.H),w:pc(b.w/d.W),h:pc(b.h/d.H),z:i};
+  if(e.type==='text'){o.text=String(e.text||'').replace(/\n/g,' / ').slice(0,70);o.size=pc(e.fontSize/d.W);o.font=String(e.fontFamily||'').split(',')[0].replace(/['"]/g,'');o.wt=e.fontWeight;o.col=e.color;o.al=e.textAlign;o.lh=+(+e.lineHeight||0).toFixed(2);if(e.letterSpacing)o.ls=e.letterSpacing;try{o.fill=pc(inkW(e)/pw);}catch(x){}if(e.opacity!=null&&e.opacity<1)o.op=e.opacity;}
+  else if(e.type==='shape'){o.shape=e.shapeType;o.col=e.color;if(e.cornerRadius)o.rad=Math.round(e.cornerRadius);if(e.opacity!=null&&e.opacity<1)o.op=e.opacity;const sh=e.shadow;if(sh&&sh.color&&sh.color!=='transparent'&&sh.distance>0)o.sh={blur:Math.round(sh.blur),dist:Math.round(sh.distance),a:+(sh.alpha||0).toFixed(2)};}
+  if(e===paper)o.paper=true;
+  const hit=ov.filter(function(p){return p[0]===e||p[1]===e;}).map(function(p){return (p[0]===e?p[1]:p[0])._agid;});
+  if(hit.length)o.ov=hit;
+  return o;
+ });
+}
+function agSnap(slide){return {arr:slide.elements.slice(),st:slide.elements.map(function(e){const c={};Object.keys(e).forEach(function(k){if(k.charAt(0)==='_'&&k!=='_adz'&&k!=='_agid')return;if(k==='_adz'||typeof e[k]!=='function')c[k]=e[k];});return [e,c];})};}
+function agRestore(slide,sn){slide.elements=sn.arr.slice();sn.st.forEach(function(p){const e=p[0];Object.keys(p[1]).forEach(function(k){e[k]=p[1][k];});e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;});renderAll();}
+function agProps(e,o,d){
+ const W=d.W;
+ if(o.opacity!=null)e.opacity=clamp(o.opacity,0.05,1);
+ if(e.type==='text'){
+  if(o.size!=null)e.fontSize=Math.round(clamp(o.size,1.4,28)/100*W);
+  if(o.color)e.color=hex(o.color,e.color);
+  if(/^(left|center|right|justify)$/.test(o.align))e.textAlign=o.align;
+  if(o.lineHeight!=null)e.lineHeight=clamp(o.lineHeight,0.85,1.8);
+  if(o.letterSpacing!=null)e.letterSpacing=clamp(o.letterSpacing,-5,30);
+  if(o.weight!=null){const w=Math.round(clamp(o.weight,100,900)/100)*100;e.fontWeight=String(w);}
+  if(o.italic!=null)e.fontStyle=o.italic?'italic':'normal';
+  if(o.font)e.fontFamily=adzFont(o.font);
+  if(o.uppercase!=null)e.textTransform=o.uppercase?'uppercase':'none';
+  if(o.w!=null)e.width=clamp(o.w,5,100)/100*W;
+  if(Array.isArray(o.bold)||Array.isArray(o.marks)){e.wordStyles={};try{applyMarks(e,{bold:o.bold,marks:o.marks});}catch(x){}}
+ }else{
+  if(e.type==='shape'){
+   if(o.color)e.color=hex(o.color,e.color);
+   if(o.radius!=null)e.cornerRadius=clamp(o.radius,0,300);
+   if(o.borderWidth!=null)e.borderWidth=clamp(o.borderWidth,0,40);
+   if(o.borderColor)e.borderColor=hex(o.borderColor,'#ffffff');
+   if(o.rotation!=null)e.rotation=clamp(o.rotation,-360,360);
+   if(o.shadow===null)e.shadow={color:'transparent',blur:0,angle:45,distance:0,alpha:0};
+   else if(o.shadow&&typeof o.shadow==='object'){const sh=shadowOf(o.shadow);if(sh){sh.angle=90;sh.blur=clamp(o.shadow.blur,0,120);sh.distance=clamp(o.shadow.distance,0,60);e.shadow=sh;}}
+  }
+  const asp=(e.type==='image'&&e.width>0&&e.height>0)?e.height/e.width:0;
+  if(o.w!=null)e.width=clamp(o.w,1,140)/100*W;
+  if(o.h!=null)e.height=clamp(o.h,0.3,140)/100*d.H;
+  if(asp){if(o.h!=null&&o.w==null)e.width=e.height/asp;else if(o.w!=null)e.height=e.width*asp;}
+ }
+ e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;
+}
+async function agApply(slide,ops,d){
+ const touched=[];let n=0;
+ ops.forEach(function(o){
+  if(!o||typeof o!=='object')return;
+  try{
+   const find=function(id){return slide.elements.find(function(e){return e._agid===id;});};
+   if(o.op==='set'){const e=find(o.id);if(!e)return;agProps(e,o,d);touched.push([e,o]);n++;}
+   else if(o.op==='shift'){(Array.isArray(o.ids)?o.ids:[]).forEach(function(id){const e=find(id);if(!e)return;e.x+=clamp(o.dx||0,-100,100)/100*d.W;e.y+=clamp(o.dy||0,-100,100)/100*d.H;});n++;}
+   else if(o.op==='order'){const e=find(o.id);if(!e)return;const ix=slide.elements.indexOf(e);slide.elements.splice(ix,1);if(o.to==='back')slide.elements.unshift(e);else slide.elements.push(e);n++;}
+   else if(o.op==='delete'){const e=find(o.id);if(!e||e.type==='text')return;slide.elements.splice(slide.elements.indexOf(e),1);n++;}
+   else if(o.op==='add'&&o.kind==='shape'){
+    const e=mkShape({shape:o.shape,x:o.x,y:o.y,w:o.w,h:o.h,color:o.color,opacity:o.opacity,radius:o.radius,shadow:o.shadow,name:o.name||'Bentuk'},d);
+    e._agid='E'+(++AG_N);e._adz={kind:'shape',bleed:false,name:o.name||'Bentuk'};
+    if(o.shadow&&typeof o.shadow==='object'){const sh=shadowOf(o.shadow);if(sh){sh.angle=90;sh.blur=clamp(o.shadow.blur,0,120);sh.distance=clamp(o.shadow.distance,0,60);e.shadow=sh;}}
+    const bh=o.behind&&find(o.behind);
+    if(bh)slide.elements.splice(slide.elements.indexOf(bh),0,e);else slide.elements.push(e);n++;
+   }
+  }catch(err){}
+ });
+ try{await fontsToLoad(slide.elements);}catch(e){}
+ renderAll();await delay(80);renderAll();
+ /* posisi memakai tinggi teks yang sudah terukur */
+ touched.forEach(function(t){
+  const e=t[0],o=t[1];if(o.x==null&&o.y==null)return;
+  const b=agBox(e,d);
+  const l=o.x!=null?clamp(o.x,-30,130)/100*d.W:b.l,tp=o.y!=null?clamp(o.y,-30,130)/100*d.H:b.t;
+  e.x=l+e.width/2;e.y=tp+b.h/2;
+ });
+ slide.elements.forEach(function(e){e._cachedCanvas=null;e._cachedHash=null;});
+ renderAll();
+ if(agDeoverlap(slide,d))await delay(60);
+ return n;
+}
+function agentSystem(d,left){
+ return 'You are a senior poster designer who edits a LIVE canvas through tools. You receive [CURRENT RENDER], the [REFERENCE] image(s) and an ELEMENT TABLE of the live canvas. Canvas '+d.W+'x'+d.H+' px (aspect '+(d.W/d.H).toFixed(3)+'). Table and tool geometry are PERCENT: x,y = TOP-LEFT corner of the element box (% of canvas width / height), w,h = size; text height is automatic (h in the table is measured, never send h for text); "size" = font size as % of canvas width; z = layer order (low = behind).\n'+
+ 'GOAL: make the render match the reference as exactly as possible, like a professional editor with zero visible flaws: paper size and position, margins, text column left/right inside the paper, headline line breaks and sizes (hero word), body size and line count, line spacing, paragraph gaps, padding, source line, handle pill (thin, INSIDE the paper), logo size and position (on the background, outside the paper), background tone, colours, shadow.\n'+
+ 'METHOD: (1) measure the reference like pixels (margins, column edges, block heights, gaps, sizes); (2) compute the same quantities for the render from the table; (3) send exact numeric corrections. Fix big structure first (paper box, text column), then type sizes and line breaks (change w to change wrapping), then gaps (set y of blocks or shift groups), then details (pill, logos, shadow, colours). When you change a text width or size, recompute y of every block below it so the gaps match the reference.\n'+
+ 'TOOLS (ops, max 24 per round, applied in order): {"op":"set","id":"E1","x":,"y":,"w":,"h":,"size":,"color":"#hex","opacity":0-1,"align":"left|center|right|justify","lineHeight":,"letterSpacing":px,"weight":100-900,"italic":bool,"font":"name","uppercase":bool,"radius":px,"shadow":{"color":"#000000","blur":0-120,"distance":0-60,"opacity":0-1}|null,"borderWidth":px,"borderColor":"#hex","rotation":deg,"bold":["exact phrase"],"marks":[{"t":"exact phrase","color":"#hex"}]} (send only the fields to change; for logos/images send h OR w, aspect is kept) | {"op":"shift","ids":["E1","E2"],"dx":%,"dy":%} | {"op":"order","id":"E1","to":"front|back"} | {"op":"delete","id":"E5"} (decor shapes/images only, never text) | {"op":"add","kind":"shape","shape":"rect|capsule|line|circle","x":,"y":,"w":,"h":,"color":"#hex","opacity":,"radius":,"shadow":{...}|null,"name":"","behind":"E1"|null}.\n'+
+ 'RULES: never change the wording; keep all text inside the paper with the same padding proportions as the reference; text never overlaps text; keep everything inside the canvas; fonts only from: '+ADZ_FONTS.join(', ')+'; SIZE CHECK: compare fill of each headline line and the body size with the reference (headline lines usually span 85-100% of the paper inner width, body about 3.8-4.4% of canvas width); if text looks small and the paper empty, enlarge type and/or narrow the paper margins; no two texts may overlap (ov must be empty); remove decoration that the reference does not have (dividers, borders, ornaments, strips). '+left+' round(s) left including this one'+(S.agNote?(' . NOTE: '+S.agNote):'')+'.\n'+
+ 'OUTPUT: ONE compact JSON {"similarity":0-10 (strict: 9 or more only when nearly identical),"diffs":["max 5 short Indonesian sentences naming the biggest differences"],"ops":[...],"done":false}. Set done:true with empty ops only when similarity >= 9.';
+}
+function agQuality(target,d,m){let n=0;try{n=lint(target,d,m).length+3*agOverlaps(target,d).length;}catch(e){}return n;}
+async function agentRefine(target,d,m,brief){
+ const R=5;let prev=null;S.agNote='';
+ const pre=agSnap(target),q0=agQuality(target,d,m),sim0={v:null};
+ for(let r=1;r<=R+1;r++){
+  if(S.ctl.signal.aborted)throw new Error('Dibatalkan');
+  step(Math.min(96,66+r*5),'Agen penyempurna: putaran '+r+'/'+R+' (membandingkan dengan referensi) ...');
+  if(r===1)agDeoverlap(target,d);
+  const shot=await snapshotUrl();
+  let t='ELEMENT TABLE (live canvas; paper:true marks the paper/card; fill = % of the paper width used by the widest line of that text; ov = ids of elements it overlaps, fix those FIRST):\n'+JSON.stringify(agTable(target,d))+'\n';
+  if(brief&&brief.measure)t+='\nTARGET MEASURE FROM THE REFERENCE (percent, approximate): '+JSON.stringify(brief.measure).slice(0,1500)+'\n';
+  t+='\nCompare [CURRENT RENDER] with the reference and return the JSON.';
+  const parts=[{text:t},{text:'[CURRENT RENDER]'},imgPart(shot)];
+  S.refs.slice(0,2).forEach(function(rf,i){parts.push({text:'[REFERENCE '+(i+1)+']'});parts.push(imgPart(rf.url));});
+  let q;
+  try{q=(await gemJson('layout',parts,{responseMimeType:'application/json',temperature:0.25,maxOutputTokens:cfg.eco===true?4096:8192,_tb:cfg.eco===true?0:null},agentSystem(d,R-r+1),'agen')).spec;}
+  catch(e){if(/Dibatalkan|API key/.test(e.message))throw e;log('Agen dilewati: '+e.message,'wn');break;}
+  const sim=clamp(q&&q.similarity==null?6:(q&&q.similarity),0,10);
+  log('Kemiripan dengan referensi: '+sim+'/10',sim>=9?'ok':'wn');
+  (Array.isArray(q.diffs)?q.diffs:[]).slice(0,5).forEach(function(x){log('  · '+String(x).slice(0,200),'wn');});
+  if(prev&&sim<prev.sim-0.5){agRestore(target,prev.snap);log('  perubahan terakhir lebih buruk, dikembalikan.','wn');S.agNote='your previous edits made it WORSE and were undone; use smaller, more careful corrections';prev=null;if(r>R)break;continue;}
+  S.agNote='';
+  if(q.done||sim>=9||r>R)break;
+  const ops=Array.isArray(q.ops)?q.ops.slice(0,24):[];
+  if(!ops.length){log('  agen tidak punya perubahan lagi.');break;}
+  prev={sim:sim,snap:agSnap(target)};
+  const n=await agApply(target,ops,d);
+  log('  '+n+' perubahan diterapkan');
+  if(!n)break;
+ }
+ S.agNote='';
+ renderAll();
+ await delay(120);renderAll();
+ const q1=agQuality(target,d,m);
+ if(q1>q0+1){agRestore(target,pre);log('  hasil agen punya lebih banyak catatan ('+q1+' vs '+q0+') daripada rancangan awal, dikembalikan ke rancangan awal.','wn');}
+ else log('  pemeriksaan akhir agen: '+q1+' catatan (awal '+q0+')','ok');
 }
 window.adzGenerate=async function(){
  if(S.busy)return;
@@ -24787,21 +25694,38 @@ window.adzGenerate=async function(){
  let newEls=[],undoTarget=null,keptTarget=null;
  try{
   const d=canvasDims(),m=Math.round(d.W*cfg.margin/100);
-  log('Mulai · '+cfg.layoutModel+(cfg.useImages?(' + '+cfg.imageModel):'')+' · kanvas '+d.W+'×'+d.H);
+  ENG=cfg.engine===true;
+  log('Mulai · '+cfg.layoutModel+(cfg.useImages?(' + '+cfg.imageModel):'')+(cfg.rotate!==false?' · rotasi model aktif':'')+(ENG?' · mesin presisi':' · mesin stabil v2.5.4'));
+  log('Ukuran poster terdeteksi otomatis dari template: '+canvasLabel());
+  if(selLogos().length)log('Logo terpilih: '+selLogos().length+' (letak '+((cfg.logoPlace||'auto')==='auto'?'otomatis oleh AI':logoZone())+', latar dihapus & warna siluet otomatis, dipasang mesin)');
+  if((cfg.textAlign||'auto')!=='auto')log('Perataan teks: '+({left:'rata kiri',center:'rata tengah',right:'rata kanan',justify:'rata penuh (lebar isi = lebar judul)'}[cfg.textAlign]));
   setTimeout(function(){const b=$('adzLogBox');if(b&&b.scrollIntoView)b.scrollIntoView({block:'end',behavior:'smooth'});},120);
 
   /* 1) brief / analisis maksud */
-  let brief=null;
+  let brief=null;PAD_OVR=null;GAP_OVR=null;S.logoPlan=null;S.weakSpec=null;
   if(cfg.smart){
    step(4,'1/5 Menganalisis maksud perintah ...');
    try{brief=await makeBrief(d);log('Brief siap.','ok');briefLog(brief);}
-   catch(e){if(/Dibatalkan|Kuota|API key|ditemukan|Akses/.test(e.message))throw e;log('Analisis dilewati: '+e.message,'wn');}
+   catch(e){if(/Dibatalkan|API key/.test(e.message))throw e;log('Analisis dilewati: '+e.message,'wn');}
   }else log('1/5 Analisis dilewati (mode cerdas mati).');
 
+  try{
+   const ms=brief&&brief.measure;
+   if(ENG&&refMode()&&ms&&typeof ms==='object'){
+    if(+ms.padX>0&&+ms.padY>0){PAD_OVR={x:+ms.padX,y:+ms.padY};log('  padding diukur dari referensi: kiri-kanan '+(+ms.padX).toFixed(1)+'%, atas-bawah '+(+ms.padY).toFixed(1)+'%');}
+    if(ms.gapsPct&&typeof ms.gapsPct==='object')GAP_OVR=ms.gapsPct;
+   }
+  }catch(e){}
+
   /* 2) rancangan layer */
-  step(18,'2/5 Merancang layer dengan '+cfg.layoutModel+' ...');
-  const j=await gem(cfg.layoutModel,await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
-  const spec=parseJson(textOf(j));
+  step(18,'2/5 Merancang layer ...');
+  S.curBrief=brief;S.weakSpec=null;
+  let dr;
+  try{dr=await gemJson('layout',await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:cfg.eco===true?12288:16384,_tb:cfg.eco===true?768:null},systemPrompt(m),'rancangan',checkDesign);}
+  catch(e){if(S.weakSpec&&/terpotong|ukuran huruf|kosong/.test(e.message)){log('  rancangan belum sempurna, dipakai apa adanya: '+e.message,'wn');dr={spec:S.weakSpec,model:'-'};}else throw e;}
+  const spec=dr.spec;log('  dirancang oleh '+dr.model);
+  S.logoPlan=(spec&&spec.logos&&typeof spec.logos==='object')?spec.logos:null;
+  if(selLogos().length&&S.logoPlan)log('  logo: zona '+logoZone()+(S.logoPlan.layout?(' · '+S.logoPlan.layout):'')+(S.logoPlan.tint?(' · warna siluet '+S.logoPlan.tint):''));
   const L=(Array.isArray(spec.layers)?spec.layers.slice(0,28):[]).filter(function(l){return l&&typeof l==='object';});
   if(!L.length)throw new Error('AI tidak menghasilkan layer. Coba perintah yang lebih jelas.');
   const nAsset=L.filter(function(l){return l.kind==='asset';}).length;
@@ -24828,6 +25752,7 @@ window.adzGenerate=async function(){
    }catch(e){if(/Dibatalkan/.test(e.message))throw e;imgFail++;log('  gambar dilewati: '+e.message,'wn');}
   }
 
+  if(S.ctl.signal.aborted)throw new Error('Dibatalkan');
   /* 4) susun layer + tata letak */
   step(62,'4/5 Menyusun layer, menempelkan dekorasi ke teks, merapikan posisi ...');
   const s=getCurrentSlide();
@@ -24837,7 +25762,7 @@ window.adzGenerate=async function(){
   const target=(cfg.replace&&!s.isDemo)?s:{background:null,elements:[]};
   const bgBackup=target.background,elBackup=target.elements,prevIndex=currentSlideIndex;
   undoTarget=(target===s)?function(){s.background=bgBackup;s.elements=elBackup;}:function(){const ix=slides.indexOf(target);if(ix>=0){slides.splice(ix,1);currentSlideIndex=Math.max(0,Math.min(prevIndex,slides.length-1));}};
-  target.background=buildBackground(spec.background,d,bgSrc);
+  target.background=buildBackground(spec.background,d,bgSrc);BG_DARK=bgDark(spec.background);
   if(target!==s){slides.push(target);currentSlideIndex=slides.length-1;}
   keptTarget=target;
   let lay=await compose(target,L,d,m,keepSrc);
@@ -24849,17 +25774,27 @@ window.adzGenerate=async function(){
   issues.slice(0,6).forEach(function(t){log('  · '+t,'wn');});
 
   /* 5) AI menilai hasil lalu merapikan (putaran koreksi) */
-  const rounds=cfg.review;
+  let agentRan=false;
+  if(cfg.agent===true&&refMode()&&S.refs.length){
+   step(70,'5/5 Agen penyempurna: membandingkan kanvas dengan referensi ...');
+   try{await agentRefine(target,d,m,brief);agentRan=true;newEls=target.elements;}
+   catch(e){if(/Dibatalkan/.test(e.message))throw e;log('Agen gagal: '+e.message,'wn');}
+  }
+  let rounds=agentRan?0:cfg.review;
+  if(cfg.eco===true&&rounds>0&&!issues.length&&!refMode()){log('Penilaian AI dilewati (hemat token): pemeriksaan otomatis bersih.','ok');rounds=0;}
   for(let r=1;r<=rounds;r++){
    if(S.ctl.signal.aborted)throw new Error('Dibatalkan');
    step(72+(r-1)*(18/Math.max(1,rounds)),'5/5 Penilaian AI putaran '+r+'/'+rounds+' ...');
    let q;
    try{
     const shot=await snapshotUrl();
-    const t='LAYER TABLE (measured from the render):\n'+JSON.stringify(layerTable(target,d))+'\n\nAUTOMATIC LINT WARNINGS:\n'+(issues.length?issues.join('\n'):'none')+'\n\nUSER REQUEST (for context): '+(($('adzPrompt').value||'').trim().slice(0,600)||'-')+'\n\nThe screenshot is the current render. Judge it and return the JSON.';
-    const jq=await gem(cfg.layoutModel,[{text:t},{text:'[RENDERED POSTER]'},imgPart(shot)],{responseMimeType:'application/json',temperature:0.3,maxOutputTokens:8192},qaSystem(m));
-    q=parseJson(textOf(jq));
-   }catch(e){if(/Dibatalkan|Kuota|API key|ditemukan|Akses/.test(e.message))throw e;log('Penilaian dilewati: '+e.message,'wn');break;}
+    const useRef=cfg.agent===true&&refMode();
+    const t='LAYER TABLE (measured from the render):\n'+JSON.stringify(layerTable(target,d))+'\n\nAUTOMATIC LINT WARNINGS:\n'+(issues.length?issues.join('\n'):'none')+'\n\nUSER REQUEST (for context): '+(($('adzPrompt').value||'').trim().slice(0,600)||'-')+(useRef&&brief&&brief.measure?'\n\nTARGET MEASURE FROM THE REFERENCE: '+JSON.stringify(brief.measure).slice(0,1800):'')+'\n\nThe screenshot is the current render. Judge it and return the JSON.';
+    const qparts=[{text:t},{text:'[RENDERED POSTER]'},imgPart(shot)];
+    if(useRef)S.refs.slice(0,2).forEach(function(r2,i2){qparts.push({text:'[REFERENCE '+(i2+1)+']'});qparts.push(imgPart(r2.url));});
+    const jq=await gemJson('layout',qparts,{responseMimeType:'application/json',temperature:0.3,maxOutputTokens:cfg.eco===true?3072:8192,_tb:cfg.eco===true?0:null},qaSystem(m),'penilaian');
+    q=jq.spec;
+   }catch(e){if(/Dibatalkan|API key/.test(e.message))throw e;log('Penilaian dilewati: '+e.message,'wn');break;}
    const score=clamp(q.score==null?7:q.score,0,10);
    log('Nilai desain: '+score+'/10'+(q.verdict==='ok'?' · baik':''),score>=8?'ok':'wn');
    (Array.isArray(q.issues)?q.issues:[]).slice(0,6).forEach(function(t){log('  · '+String(t).slice(0,200),'wn');});
@@ -24875,7 +25810,7 @@ window.adzGenerate=async function(){
   }
 
   /* selesai */
-  newEls.forEach(function(e){delete e._adz;e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;});
+  newEls.forEach(function(e){delete e._adz;delete e._agid;e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;});
   newEls=[];
   try{preloadSlideFonts();}catch(e){}
   renderBottomToolbar();renderCarouselThumbs();
@@ -24888,7 +25823,7 @@ window.adzGenerate=async function(){
   showToast('Desain AI selesai: '+cnt+' layer');
   setTimeout(function(){if(!S.busy&&$('adzModal').classList.contains('active')){$('adzModal').classList.remove('active');}},1600);
  }catch(e){
-  log('Gagal: '+e.message,'er');
+  if(/Dibatalkan/.test(e.message))log('Proses dibatalkan.','wn');else log('Gagal: '+e.message,'er');
   if(undoTarget){try{undoTarget();}catch(x){}}
   else if(newEls.length){newEls.forEach(function(x){if(x){delete x._adz;x._calculatedHeight=null;x._renderedW=null;x._cachedCanvas=null;x._cachedHash=null;}});try{pushHistoryState();}catch(x){}}
   try{renderBottomToolbar();renderCarouselThumbs();renderAll();}catch(x){}
