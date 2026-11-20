@@ -1,15 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v2.6.3
+Studio Poster Maker Pro - Update v2.6.4
 
-v2.6.3: (basis proses editing AI Desainer = v2.5.4, hasil paling bagus; v2.5.5 - v2.6.2 tidak dipakai)
-1. TOMBOL X AI DESAINER: saat AI sedang bekerja, X menyembunyikan panel tanpa membatalkan proses sehingga kanvas yang bergerak sendiri bisa dilihat. Muncul kapsul kecil (persen + status) yang bisa digeser; ketuk kapsul untuk kembali ke panel dan log, tombol di kapsul untuk membatalkan. Kanvas dikunci sementara agar tidak merusak proses.
-2. PERINTAH TERSIMPAN: isi kolom perintah, mode, dan gaya disimpan otomatis ke IndexedDB sendiri (cadangan localStorage), tidak hilang walau versi Maker diperbarui.
-3. BUG SCROLL LOG: scroll monitor log tidak lagi menggulir halaman/form di belakangnya (monitor dipisah dari area gulir form, batas gulir dikunci, sentuhan tidak bocor). Log tidak menarik ke bawah bila sedang dibaca ke atas.
-4. JSON AI TERPOTONG diselamatkan sebagian (sebelumnya langsung gagal).
+v2.6.4:
+1. KOLOM USERNAME di tool AI Desainer: bisa lebih dari satu, pembatas "//" atau "•", default @tauhidsunnah_id // @an.nashiha_daily, tersimpan di IndexedDB. Username dipasang otomatis satu baris di bawah poster, tidak perlu ditulis di kolom perintah.
+2. KUOTA AI LEBIH TAHAN: menunggu otomatis lalu mengulang saat kena batas per menit/server sibuk; pindah ke MODEL CADANGAN (kuota terpisah) bila model utama habis; titik pemulihan (tombol "Lanjutkan (hemat token)" memakai ulang brief, rancangan, dan gambar yang sudah jadi); kegagalan di tahap penilaian tidak lagi membuang hasil desain.
+3. ANIMASI HANTU: saat panel di-X, kursor emas bergerak alami (melengkung, sedikit bergetar) menyentuh tiap layer lalu layer muncul satu per satu; koreksi AI diperagakan dengan menggeser layer; saat menunggu AI kursor melayang pelan dengan keterangan tahap.
 
-v2.5.4:
-1. AI DESAINER LEBIH PINTAR MEMAHAMI PERINTAH: "Mode cerdas" menganalisis maksud perintah singkat lebih dulu, lalu merancang layer berdasarkan brief itu. Mode Tiru Referensi membaca juga perangkat dekorasi.
-2. ASET PNG OTOMATIS, TATA LETAK LEBIH PRESISI, PENILAI AI + KOREKSI OTOMATIS, MONITOR PROSES DIPERBESAR.
+v2.6.3:
+1. TOMBOL X AI DESAINER menyembunyikan panel tanpa membatalkan proses (kapsul geser + kanvas dikunci sementara).
+2. PERINTAH TERSIMPAN di IndexedDB; bug scroll monitor log diperbaiki; JSON AI terpotong diselamatkan sebagian. Basis proses editing = v2.5.4.
 -->
 
 
@@ -953,7 +952,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 /* v2.0.0: modal Hapus Objek AI memakai kelas Hapus BG */
 
-/* v2.6.3: AI Desainer (Gemini via API key manual) */
+/* v2.6.4: AI Desainer (Gemini via API key manual) */
 #adzModal{position:fixed;inset:0;z-index:9000000;display:none;flex-direction:column;background:#0b0b0b;color:#e5e7eb;font-family:inherit;}
 #adzModal.active{display:flex;}
 #adzModal *{box-sizing:border-box;}
@@ -1021,6 +1020,15 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 #adzChip .cx{width:42px;border:0;border-left:1px solid rgba(212,175,55,.4);background:rgba(255,107,107,.12);color:#ffb3b3;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;}
 #adzChip.ok .cm{color:#7ee2a8;}#adzChip.er .cm{color:#ff8a8a;}
 #adzChip.ok .cx,#adzChip.er .cx{background:rgba(255,255,255,.06);color:#e5e7eb;}
+/* v2.6.4: kursor hantu */
+#adzGhost{position:fixed;left:0;top:0;width:0;height:0;z-index:8999400;display:none;pointer-events:none;}
+#adzGhost.on{display:block;}
+#adzGhost .gc{position:fixed;left:0;top:0;width:30px;height:30px;margin:-4px 0 0 -4px;will-change:transform;filter:drop-shadow(0 3px 5px rgba(0,0,0,.65));}
+#adzGhost .gl{position:fixed;left:0;top:0;white-space:nowrap;max-width:64vw;overflow:hidden;text-overflow:ellipsis;padding:3px 9px;border-radius:10px;background:rgba(10,9,7,.9);border:1px solid rgba(212,175,55,.7);color:#FFE259;font-size:11px;font-weight:700;line-height:1.35;will-change:transform;}
+#adzGhost .gb{position:fixed;left:0;top:0;border:2px dashed #FFE259;border-radius:4px;box-shadow:0 0 0 1px rgba(0,0,0,.45),0 0 14px rgba(212,175,55,.5);opacity:0;transition:opacity .15s;}
+#adzGhost .gr{position:fixed;left:0;top:0;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:2px solid #FFE259;opacity:0;}
+#adzGhost .gr.go{animation:adzRip .5s ease-out;}
+@keyframes adzRip{0%{opacity:.95;transform:scale(.4);}100%{opacity:0;transform:scale(3.6);}}
 .adz-range{width:100%;accent-color:#D4AF37;}
 </style>
 </head>
@@ -2373,7 +2381,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.6.3';
+const APP_VERSION = 'v2.6.4';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -23956,7 +23964,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 </div>
 </div>
 <script>
-/* ===== v2.6.3: AI DESAINER (Gemini via API key manual) =====
+/* ===== v2.6.4: AI DESAINER (Gemini via API key manual) =====
    Modul mandiri: tidak mengubah fungsi lama. Memakai struktur elemen yang sama dengan addNewText/addNewShape/addNewFadeEdge/handleImageUpload. */
 (function(){
 'use strict';
@@ -23973,9 +23981,9 @@ const ADZ_STYLES=[
  ['Vintage kertas','vintage paper poster, warm beige/sepia tones, serif fonts, thin rules and frames'],
  ['Gradasi modern','modern vibrant gradient poster, glassy cards, rounded shapes, clean sans-serif']
 ];
-const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false};
+const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:''};
 let cfg=loadCfg();
-function loadCfg(){let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}return Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2},c);}
+function loadCfg(){let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}return Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,fallbackModel:'gemini-2.5-flash-lite',ghost:true},c);}
 function saveCfg(){try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 const $=function(id){return document.getElementById(id);};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -23983,7 +23991,7 @@ function delay(ms){return new Promise(function(r){setTimeout(r,ms);});}
 function log(msg,cls){const b=$('adzLogBox'),l=$('adzLog');if(!l||!b)return;b.classList.add('on');const d=document.createElement('div');if(cls)d.className=cls;d.textContent=msg;const nb=(l.scrollHeight-l.scrollTop-l.clientHeight)<70;l.appendChild(d);if(nb)l.scrollTop=l.scrollHeight;}
 function clearLog(){const b=$('adzLogBox'),l=$('adzLog');if(l)l.innerHTML='';if(b)b.classList.remove('on');setProg(0);}
 function setProg(p){const bar=$('adzProgBar');if(bar)bar.style.width=Math.max(0,Math.min(100,p))+'%';const t=$('adzPct');if(t)t.textContent=Math.round(Math.max(0,Math.min(100,p)))+'%';S.pct=Math.round(Math.max(0,Math.min(100,p)));chipSync();}
-function step(p,msg){setProg(p);log(msg);}
+function step(p,msg){setProg(p);log(msg);S.stepTxt=msg;}
 window.adzLogSize=function(){const b=$('adzLogBox');b.classList.toggle('big');$('adzLogSizeBtn').textContent=b.classList.contains('big')?'Kecilkan':'Besarkan';setTimeout(function(){const l=$('adzLog');l.scrollTop=l.scrollHeight;},50);};
 window.adzLogCopy=function(){const t=Array.prototype.map.call($('adzLog').children,function(x){return x.textContent;}).join('\n');try{navigator.clipboard.writeText(t);showToast('Log disalin');}catch(e){showToast('Gagal menyalin log');}};
 
@@ -23999,6 +24007,8 @@ function build(){
   '<div class="adz-hint">Key disimpan hanya di perangkat ini (localStorage) dan dikirim langsung ke Google, tidak lewat server kami. Ambil gratis di aistudio.google.com/apikey</div>'+
   '<label class="adz-lab">Model layout &amp; analisis (teks/vision)</label><input id="adzModelL" class="adz-in" list="adzListL" placeholder="gemini-2.5-flash"><datalist id="adzListL"></datalist>'+
   '<label class="adz-lab">Model gambar (opsional)</label><input id="adzModelI" class="adz-in" list="adzListI" placeholder="gemini-2.5-flash-image"><datalist id="adzListI"></datalist>'+
+  '<label class="adz-lab">Model cadangan (dipakai bila model utama kehabisan kuota / sibuk)</label><input id="adzModelF" class="adz-in" list="adzListL" placeholder="gemini-2.5-flash-lite (kosongkan = mati)">'+
+  '<div class="adz-hint">Kuota Gemini dihitung per model, jadi model cadangan punya jatah terpisah. Isi yang sama pun tidak masalah, hanya tidak berguna.</div>'+
   '<div class="adz-row" style="margin-top:10px"><button class="adz-btn" style="flex:1" onclick="adzLoadModels()">Muat daftar model</button><button class="adz-btn" style="flex:1" onclick="adzTest()">Tes koneksi</button></div>'+
  '</details>'+
  '<div class="adz-card"><div class="adz-tabs" id="adzTabs">'+
@@ -24007,6 +24017,10 @@ function build(){
   '<button class="adz-tab" data-m="remix" onclick="adzMode(\'remix\')">Rombak Slide<br><span style="font-weight:600;font-size:10px">desain ulang</span></button></div>'+
   '<div class="adz-hint" id="adzModeHint"></div>'+
   '<label class="adz-lab">Perintah / isi poster</label><textarea id="adzPrompt" class="adz-ta" placeholder="Contoh singkat: Poster dakwah 4:5 tema &quot;Amal yang menemani di kubur&quot;, akun @tauhidsunnah_id di bawah, nuansa hitam-emas. (Singkat pun tidak apa-apa, AI akan menganalisis maksudnya.)"></textarea>'+
+  '<label class="adz-lab">Username di bawah poster</label><input id="adzUsers" class="adz-in" autocomplete="off" spellcheck="false" placeholder="@tauhidsunnah_id, @an.nashiha_daily">'+
+  '<div class="adz-chips" style="margin-top:6px" id="adzSepChips"></div>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzUserOn"><span>Pasang username otomatis satu baris di bawah poster (tidak perlu ditulis di perintah). Pisahkan beberapa username dengan koma.</span></label>'+
+  '<div class="adz-hint" id="adzUserPrev"></div>'+
   '<label class="adz-lab">Gaya desain (opsional)</label><div class="adz-chips" id="adzStyles"></div>'+
   '<div id="adzRefBox"><label class="adz-lab">Gambar referensi / berkas proyek</label>'+
    '<div class="adz-row"><button class="adz-btn" style="flex:1" onclick="adzPick(\'img\')">+ Gambar referensi</button><button class="adz-btn" style="flex:1" onclick="adzPick(\'file\')">+ JSON / ZIP</button></div>'+
@@ -24019,18 +24033,26 @@ function build(){
   '<label class="adz-chk"><input type="checkbox" id="adzAssets"><span>Aset PNG otomatis: kuas di belakang judul, coretan, lingkaran, percikan, titik halftone. Dibuat lokal (gratis, tanpa kuota) dan ditempel mengikuti teks agar posisinya pas.</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Buat ilustrasi/latar dengan model gambar (ilustrasi otomatis dipotong jadi PNG transparan). Lebih lambat, bisa kena kuota/berbayar. Jika mati, hanya gradasi + bentuk + aset PNG lokal.</span></label>'+
   '<label class="adz-lab">Putaran koreksi otomatis: <span id="adzRevV">2</span> (AI menilai hasil lalu merapikan posisi; 0 = mati)</label><input id="adzRev" class="adz-range" type="range" min="0" max="3" step="1" value="2">'+
+  '<label class="adz-chk"><input type="checkbox" id="adzGhost"><span>Animasi hantu: saat panel di-X, kursor emas bergerak alami dan layer muncul satu per satu (hanya tampilan, tidak menambah pemakaian AI).</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzReplace"><span>Ganti isi slide saat ini (bisa dibatalkan dengan Undo). Jika mati, hasil dibuat di slide baru.</span></label>'+
  '</div>'+
  '</div>'+
  '<div class="adz-logbox" id="adzLogBox"><div class="adz-loghead"><b>Monitor Proses AI</b><span id="adzPct">0%</span><button class="adz-mini" id="adzLogSizeBtn" onclick="adzLogSize()">Besarkan</button><button class="adz-mini" onclick="adzLogCopy()">Salin</button></div><div class="adz-prog"><i id="adzProgBar"></i></div><div class="adz-log" id="adzLog"></div></div>'+
- '<div class="adz-foot"><button class="adz-btn cancel" id="adzCancel" onclick="adzCancel()" style="display:none">Batal</button><button class="adz-btn gold" id="adzGo" onclick="adzGenerate()">Buat Desain</button></div>';
+ '<div class="adz-foot"><button class="adz-btn cancel" id="adzCancel" onclick="adzCancel()" style="display:none">Batal</button><button class="adz-btn" id="adzFresh" onclick="adzFresh()" style="display:none;flex:0 0 auto;height:44px;border-radius:22px;padding:0 14px;font-size:12px">Ulang awal</button><button class="adz-btn gold" id="adzGo" onclick="adzGenerate()">Buat Desain</button></div>';
  document.body.appendChild(m);
  buildChip();
  guardScroll(m.querySelector('.adz-body'));guardScroll($('adzLog'));
  m.addEventListener('touchmove',function(e){if(e.defaultPrevented)return;const t=e.target;if(t&&t.closest&&(t.closest('.adz-body')||t.closest('.adz-log')))return;if(e.cancelable)e.preventDefault();},{passive:false});
  m.addEventListener('pointerdown',function(e){e.stopPropagation();});
  m.addEventListener('pointermove',function(e){e.stopPropagation();});
- $('adzPrompt').addEventListener('input',function(){promptSave();});
+ $('adzPrompt').addEventListener('input',function(){promptSave();updGo();});
+ $('adzUsers').value='@tauhidsunnah_id, @an.nashiha_daily';$('adzUserOn').checked=true;
+ $('adzUsers').addEventListener('input',function(){S.uTouched=true;userPrev();promptSave();updGo();});
+ $('adzUserOn').addEventListener('change',function(){S.uTouched=true;userPrev();promptSave();updGo();});
+ const sp=$('adzSepChips');
+ [['//','Garis miring  //'],['•','Titik  •']].forEach(function(a){const b=document.createElement('button');b.className='adz-chip';b.setAttribute('data-s',a[0]);b.textContent=a[1];b.onclick=function(){S.sep=a[0];S.uTouched=true;paintSep();userPrev();promptSave();updGo();};sp.appendChild(b);});
+ paintSep();userPrev();
+ $('adzGhost').addEventListener('change',function(){cfg.ghost=this.checked;saveCfg();});
  const st=$('adzStyles');
  ADZ_STYLES.forEach(function(s,i){const b=document.createElement('button');b.className='adz-chip';b.textContent=s[0];b.onclick=function(){S.style=(S.style===i)?-1:i;paintChips();promptSave();};st.appendChild(b);});
  $('adzFileImg').addEventListener('change',function(e){addImages(e.target.files);e.target.value='';});
@@ -24049,6 +24071,7 @@ window.openAiDesigner=function(){
  $('adzKey').value=cfg.key;$('adzModelL').value=cfg.layoutModel;$('adzModelI').value=cfg.imageModel;
  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
+ $('adzModelF').value=cfg.fallbackModel==null?'':cfg.fallbackModel;$('adzGhost').checked=cfg.ghost!==false;
  $('adzApiCard').open=!cfg.key;
  paintChips();paintThumbs();adzMode(S.mode);
  $('adzModal').classList.add('active');
@@ -24059,16 +24082,17 @@ window.openAiDesigner=function(){
 window.adzClose=function(){
  /* v2.6.3: saat AI bekerja, X hanya menyembunyikan panel (proses tetap jalan) agar kanvas terlihat */
  if(S.busy){adzMinimize();return;}
- readCfg();promptSave(true);$('adzModal').classList.remove('active');chipHide();shieldSet(false);S.min=false;
+ readCfg();promptSave(true);$('adzModal').classList.remove('active');chipHide();shieldSet(false);S.min=false;gStop();
 };
 window.adzMinimize=function(){
  readCfg();promptSave(true);
  $('adzModal').classList.remove('active');S.min=true;
  chipShow();shieldSet(S.busy);
  try{renderAll();}catch(e){}
+ if(S.busy)gStart();
 };
 window.adzRestore=function(){
- S.min=false;chipHide();shieldSet(false);
+ S.min=false;chipHide();shieldSet(false);gStop();
  $('adzModal').classList.add('active');
  const lg=$('adzLog');if(lg)setTimeout(function(){lg.scrollTop=lg.scrollHeight;},40);
 };
@@ -24148,7 +24172,7 @@ function promptSave(now){
  clearTimeout(pTimer);
  const f=function(){
   const el=$('adzPrompt');if(!el||!S.pLoaded)return;
-  const v={text:el.value,mode:S.mode,style:S.style,t:Date.now()};
+  const v={text:el.value,mode:S.mode,style:S.style,users:($('adzUsers')||{}).value||'',sep:S.sep,on:!!($('adzUserOn')&&$('adzUserOn').checked),t:Date.now()};
   try{localStorage.setItem(LS_PROMPT,JSON.stringify(v));}catch(e){}
   pdbPut('prompt',v).catch(function(){});
  };
@@ -24163,6 +24187,13 @@ function promptLoad(){
   if(el&&!el.value&&typeof v.text==='string')el.value=v.text;
   if(v.style!=null&&v.style>=-1&&v.style<ADZ_STYLES.length){S.style=v.style;paintChips();}
   if(v.mode==='new'||v.mode==='ref'||v.mode==='remix')adzMode(v.mode);
+  if(!S.uTouched){
+   if(typeof v.users==='string'&&$('adzUsers'))$('adzUsers').value=v.users;
+   if(v.sep==='//'||v.sep==='•')S.sep=v.sep;
+   if(typeof v.on==='boolean'&&$('adzUserOn'))$('adzUserOn').checked=v.on;
+   paintSep();userPrev();
+  }
+  updGo();
  };
  pdbGet('prompt').then(function(v){
   if(v){apply(v);return;}
@@ -24188,6 +24219,7 @@ window.adzMode=function(m){
 };
 function readCfg(){
  cfg.key=$('adzKey').value.trim();cfg.layoutModel=$('adzModelL').value.trim()||'gemini-2.5-flash';cfg.imageModel=$('adzModelI').value.trim()||'gemini-2.5-flash-image';
+ cfg.fallbackModel=($('adzModelF').value||'').trim();cfg.ghost=$('adzGhost').checked;
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
  cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
 }
@@ -24249,24 +24281,60 @@ async function readZip(file){
 /* ---------- Gemini ---------- */
 function b64(url){const i=url.indexOf(',');return {mime:url.slice(5,url.indexOf(';')),data:url.slice(i+1)};}
 function imgPart(url){const b=b64(url);return {inline_data:{mime_type:b.mime,data:b.data}};}
+function parseRetry(j,msg){
+ let s=null;
+ try{((j&&j.error&&j.error.details)||[]).forEach(function(x){if(x&&x.retryDelay){const m=/([\d.]+)s/.exec(String(x.retryDelay));if(m)s=parseFloat(m[1]);}});}catch(e){}
+ if(s==null){const m=/retry in ([\d.]+)\s*s/i.exec(msg||'');if(m)s=parseFloat(m[1]);}
+ return s;
+}
+function isDaily(j,msg){let t=String(msg||'');try{t+=JSON.stringify((j&&j.error&&j.error.details)||'');}catch(e){}return /PerDay|per day|daily/i.test(t);}
+async function waitOn(ms,why){
+ log(why+' ('+Math.round(ms/1000)+' dtk) ...','wn');
+ const t0=Date.now();
+ while(Date.now()-t0<ms){
+  if(S.ctl&&S.ctl.signal.aborted)throw new Error('Dibatalkan / waktu habis');
+  S.stepTxt=why+' '+Math.ceil((ms-(Date.now()-t0))/1000)+' dtk';
+  await delay(500);
+ }
+}
 async function gem(model,parts,gen,system){
  if(!cfg.key)throw new Error('API key belum diisi (buka Pengaturan API & Model)');
  const body={contents:[{role:'user',parts:parts}],generationConfig:gen||{}};
  if(system)body.systemInstruction={parts:[{text:system}]};
- for(let attempt=0;attempt<2;attempt++){
-  const tm=setTimeout(function(){if(S.ctl)S.ctl.abort();},170000);
-  let r;
-  try{r=await fetch(API+'models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body),signal:S.ctl?S.ctl.signal:undefined});}
-  catch(e){clearTimeout(tm);if(e.name==='AbortError')throw new Error('Dibatalkan / waktu habis');throw new Error('Jaringan gagal: '+e.message);}
-  clearTimeout(tm);
-  let j=null;try{j=await r.json();}catch(e){}
-  if(r.ok&&j)return j;
-  const msg=(j&&j.error&&j.error.message)||('HTTP '+r.status);
-  if((r.status===503||r.status===500)&&attempt===0){log('Server sibuk, mencoba lagi...','wn');await delay(2500);continue;}
-  if(r.status===400&&/API key/i.test(msg))throw new Error('API key tidak valid');
-  if(r.status===403)throw new Error('Akses ditolak (cek API key / izin model): '+msg);
-  if(r.status===404)throw new Error('Model "'+model+'" tidak ditemukan. Pilih lewat "Muat daftar model".');
-  if(r.status===429)throw new Error('Kuota habis / terlalu cepat (429). Tunggu sebentar atau ganti model.');
+ const isLayout=(model===cfg.layoutModel);
+ let tries=0,rl=0;
+ for(;;){
+  const sig=S.ctl&&S.ctl.signal;
+  if(sig&&sig.aborted)throw new Error('Dibatalkan / waktu habis');
+  const mdl=(isLayout&&S.fb&&cfg.fallbackModel)?cfg.fallbackModel:model;
+  const gap=1400-(Date.now()-(S.lastCall||0));if(gap>0)await delay(gap);
+  const c=new AbortController();let timedOut=false;
+  const onAb=function(){c.abort();};if(sig)sig.addEventListener('abort',onAb,{once:true});
+  const tm=setTimeout(function(){timedOut=true;c.abort();},150000);
+  let r=null,j=null,netErr=null;
+  try{r=await fetch(API+'models/'+encodeURIComponent(mdl)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify(body),signal:c.signal});try{j=await r.json();}catch(e){}}
+  catch(e){netErr=e;}
+  clearTimeout(tm);if(sig)sig.removeEventListener('abort',onAb);S.lastCall=Date.now();
+  if(sig&&sig.aborted)throw new Error('Dibatalkan / waktu habis');
+  if(r&&r.ok&&j)return j;
+  const st=r?r.status:0;
+  const msg=(j&&j.error&&j.error.message)||(netErr?(timedOut?'Waktu tunggu habis':netErr.message):('HTTP '+st));
+  if(st===400&&/API key/i.test(msg))throw new Error('API key tidak valid');
+  if(st===403)throw new Error('Akses ditolak (cek API key / izin model): '+msg);
+  if(st===404)throw new Error('Model "'+mdl+'" tidak ditemukan. Pilih lewat "Muat daftar model".');
+  const busy=(st===500||st===503||st===504||!!netErr);
+  if(busy&&tries<2){tries++;await waitOn(3000*tries+1000,(netErr?'Jaringan/waktu habis':'Server sibuk')+', mencoba lagi');continue;}
+  if(st===429||busy){
+   const daily=isDaily(j,msg),ra=parseRetry(j,msg);
+   if(st===429&&!daily&&ra!=null&&ra<=80&&rl<3){rl++;await waitOn(Math.ceil(ra*1000)+1500,'Batas per menit tercapai, menunggu');continue;}
+   if(st===429&&!daily&&ra==null&&rl<2){rl++;await waitOn(25000,'Batas kecepatan tercapai, menunggu');continue;}
+   if(isLayout&&cfg.fallbackModel&&cfg.fallbackModel!==model&&!S.fb){
+    S.fb=true;tries=0;rl=0;
+    log('Model utama ('+model+') tidak bisa dipakai sekarang. Pindah ke model cadangan: '+cfg.fallbackModel+'. Brief dan rancangan yang sudah jadi dikirim ulang apa adanya agar topiknya tetap nyambung.','wn');
+    continue;
+   }
+   if(st===429)throw new Error('Kuota habis / terlalu cepat (429). '+(daily?'Kuota harian model ini habis: coba lagi besok atau isi model cadangan.':'Tunggu sebentar lalu tekan Lanjutkan.'));
+  }
   throw new Error(msg);
  }
 }
@@ -24314,7 +24382,7 @@ window.adzLoadModels=async function(){
  }catch(e){showToast('Gagal memuat model: '+e.message);}
 };
 window.adzTest=async function(){
- readCfg();S.ctl=new AbortController();clearLog();log('Menguji '+cfg.layoutModel+' ...');
+ readCfg();S.ctl=new AbortController();S.fb=false;clearLog();log('Menguji '+cfg.layoutModel+' ...');
  try{const j=await gem(cfg.layoutModel,[{text:'Balas hanya dengan kata: OK'}],{maxOutputTokens:512});setProg(100);log('Terhubung. Balasan: '+textOf(j).trim().slice(0,40),'ok');}
  catch(e){log('Gagal: '+e.message,'er');}
 };
@@ -24366,6 +24434,47 @@ function qaSystem(m){
  'SCHEMA: {"score":0-10,"verdict":"ok|fix","issues":["short Indonesian sentences, max 6"],"fixes":[{"i":layer index from the table,"x":,"y":,"w":,"h":,"size":font size % of canvas width,"color":"#hex","opacity":0-1,"align":"left|center|right|justify","lineHeight":,"rotation":deg,"attach":{...same as design schema}|null,"remove":false}]}\n'+
  'RULES: geometry is percent of the canvas (aspect W/H '+ratio+'); for text only x,y,w,size matter (height is automatic); never change wording; prefer fixing decoration via "attach" instead of coordinates; at most 8 fixes; omit unchanged fields; if the poster is already clean answer verdict "ok" with an empty fixes array and score >= 8.';
 }
+function footerLine(){
+ const on=$('adzUserOn');if(!on||!on.checked)return '';
+ const raw=($('adzUsers').value||'');
+ const m=raw.match(/@?[A-Za-z0-9._]{2,}/g)||[];
+ const seen={},list=[];
+ m.forEach(function(u){const h=(u.charAt(0)==='@'?u:('@'+u));const k=h.toLowerCase();if(!seen[k]){seen[k]=1;list.push(h);}});
+ return list.join(' '+S.sep+' ');
+}
+function userPrev(){const p=$('adzUserPrev');if(!p)return;const f=footerLine();p.textContent=f?('Tampil di poster: '+f):'Username otomatis mati: AI memakai username dari perintah Anda (bila ada).';}
+function paintSep(){const sp=$('adzSepChips');if(!sp)return;Array.prototype.forEach.call(sp.children,function(b){b.classList.toggle('on',b.getAttribute('data-s')===S.sep);});}
+function isHandleOnly(t){t=String(t||'').trim();return t.length>0&&t.length<=120&&/@[A-Za-z0-9._]{2,}/.test(t)&&t.replace(/@[A-Za-z0-9._]+/g,'').replace(/[\s\/|•·,\-–—]+/g,'')==='';}
+function enforceFooter(L,d){
+ const ft=footerLine();if(!ft)return;
+ const mx=cfg.margin,avail=100-2*mx;
+ const cand=L.filter(function(l){return l&&l.kind==='text'&&!l._skip&&isHandleOnly(l.text);});
+ let main=cand.filter(function(l){return /user|akun|handle|footer|sosmed|medsos/i.test(l.name||'');})[0]||cand[cand.length-1]||null;
+ cand.forEach(function(l){if(l!==main)l._skip=true;});
+ let sz=clamp(main&&main.size?main.size:2.6,2,3);
+ if(ft.length*sz*0.56>avail)sz=Math.max(1.4,avail/(ft.length*0.56));
+ if(main){
+  main.text=ft;main.size=sz;main._footer=true;main.x=mx;main.w=avail;
+  if(!/^(left|right)$/.test(main.align))main.align='center';
+ }else{
+  const T=L.filter(function(l){return l&&l.kind==='text'&&!l._skip;});
+  const ref=T[T.length-1]||{};
+  const my=mx*d.W/d.H;
+  L.push({kind:'text',name:'Username',text:ft,font:ref.font||'Montserrat',size:sz,weight:'700',align:'center',color:ref.color||'#E5E7EB',opacity:0.92,x:mx,w:avail,y:+(100-my-sz*d.W/d.H*1.7).toFixed(1),_footer:true});
+ }
+}
+function fitFooter(els,d,m){
+ els.forEach(function(e){
+  if(!(e.type==='text'&&e._adz&&e._adz.footer))return;
+  e.width=Math.min(d.W-2*m,Math.max(e.width,d.W*0.9));
+  e._calculatedHeight=null;e._renderedW=null;
+  mctx.font=(e.fontStyle==='italic'?'italic ':'')+(e.fontWeight||'700')+' '+e.fontSize+'px '+e.fontFamily;
+  let txt=String(e.text);if(e.textTransform==='uppercase')txt=txt.toUpperCase();
+  const w=mctx.measureText(txt).width+(e.letterSpacing||0)*txt.length;
+  const av=Math.min(e.width,d.W-2*m)*0.98;
+  if(w>av)e.fontSize=Math.max(Math.round(d.W*0.012),Math.floor(e.fontSize*av/w));
+ });
+}
 function baseTask(){
  const prompt=($('adzPrompt').value||'').trim();
  const styleTxt=S.style>=0?('STYLE DIRECTION: '+ADZ_STYLES[S.style][1]+'\n'):'';
@@ -24374,6 +24483,8 @@ function baseTask(){
  else if(S.mode==='ref')t='TASK: The attached image(s) labelled REFERENCE are STYLE REFERENCES. Recreate their visual language (palette, typography mood, composition, ornaments, brush strokes, spacing, illustration role) for a NEW poster with the content below. Do not copy their text or logos; use the user content. Decompose into separate layers.\n';
  else t='TASK: Redesign the CURRENT slide (the image labelled CURRENT SLIDE is its screenshot). Keep the existing text content (same wording) unless the user asks to change it; improve layout, hierarchy, spacing, colors and decoration. Current layers (percent geometry):\n'+JSON.stringify(slideSummary())+'\n';
  t+=styleTxt+'USER REQUEST (may be short or informal, infer the real intent):\n'+(prompt||(S.mode==='remix'?'Rapikan dan percantik desain ini.':'Buat poster yang bagus.'))+'\n';
+ const ftl=footerLine();
+ if(ftl)t+='\nFIXED FOOTER (set by the app, overrides anything in the request): the poster footer is ONE single-line text layer, centered inside the bottom safe area, with this EXACT text: "'+ftl+'". Name that layer "Username". Do not write any other @handles anywhere else and never split it over two lines.\n';
  if(S.ctxTexts.length){t+='\nATTACHED PROJECT FILES (context, may be a poster project JSON; reuse its texts/colors/fonts as relevant):\n';S.ctxTexts.forEach(function(c){t+='--- '+c.name+' ---\n'+c.text+'\n';});}
  return t;
 }
@@ -24539,7 +24650,7 @@ function mkText(L,d){
   opacity:clamp(L.opacity==null?1:L.opacity,0.05,1),rotation:0,curveAngle:0,locked:false,groupId:null,wordStyles:{},
   filters:{brightness:100,contrast:100,saturate:100,hue:0},
   shadow:shadowOf(L.shadow)||{color:'transparent',blur:0,angle:45,distance:0,alpha:0},transparency:Object.assign({},TRANSP),
-  _adz:{kind:'text',name:L.name||'Teks'}};
+  _adz:{kind:'text',name:L.name||'Teks',footer:!!L._footer}};
  el._adz.leftPx=clamp(L.x,0,100)/100*d.W;el._adz.topPx=clamp(L.y,0,100)/100*d.H;
  return el;
 }
@@ -24885,7 +24996,7 @@ function applyFixes(L,fixes){
 
 /* ---------- Eksekusi ---------- */
 function uniqueNm(base,used){let n=String(base||'layer').trim().toLowerCase()||'layer',k=n,c=2;while(used[k]){k=n+' '+c;c++;}used[k]=1;return k;}
-async function compose(target,L,d,m,keepSrc){
+async function compose(target,L,d,m,keepSrc,noRender){
  const els=[],used={};
  for(let i=0;i<L.length;i++){
   const l=L[i];if(!l||typeof l!=='object'||l._skip)continue;
@@ -24910,9 +25021,10 @@ async function compose(target,L,d,m,keepSrc){
  target.elements=els;
  deselectElement();
  await fontsToLoad(els);
+ fitFooter(els,d,m);
  const res=layoutAll(target,d,m);
  await finalizeAssets(els);
- renderAll();
+ if(!noRender)renderAll();
  return res;
 }
 async function snapshotUrl(){
@@ -24920,7 +25032,167 @@ async function snapshotUrl(){
  return await shrink(mainCanvas.toDataURL('image/jpeg',0.88),1280,0.88);
 }
 window.adzCancel=function(){if(S.ctl){try{S.ctl.abort();}catch(e){}}};
-function setBusy(b){S.busy=b;if(b){S.done='';S.pct=0;}$('adzX').title=b?'Sembunyikan panel (proses AI tetap berjalan)':'Tutup';if(S.min)shieldSet(b);chipSync();$('adzGo').disabled=b;$('adzGo').textContent=b?'Sedang membuat...':'Buat Desain';$('adzCancel').style.display=b?'block':'none';}
+
+/* ---------- v2.6.4: kursor hantu (hanya tampilan, memakai DOM ringan; kanvas digambar ulang lewat renderAll yang sudah ada) ---------- */
+const G={el:null,cur:null,lab:null,box:null,rip:null,x:0,y:0,mode:'',tok:0,init:false};
+function gBuild(){
+ if(G.el)return;
+ const e=document.createElement('div');e.id='adzGhost';
+ e.innerHTML='<div class="gb"></div><div class="gr"></div><div class="gc"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M4 2.5l1 18.2 4.6-4.3 3.3 6.4 3-1.5-3.2-6.3 6.3-.5z" fill="#FFE259" stroke="#1a1405" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div class="gl"></div>';
+ document.body.appendChild(e);G.el=e;
+ G.box=e.querySelector('.gb');G.rip=e.querySelector('.gr');G.cur=e.querySelector('.gc');G.lab=e.querySelector('.gl');
+}
+function gWatching(){return !!(S.busy&&S.min&&cfg.ghost!==false&&!document.hidden);}
+function gPlace(x,y){
+ G.x=x;G.y=y;G.cur.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+ const lw=G.lab.offsetWidth||80;
+ const lx=Math.max(4,Math.min(window.innerWidth-lw-6,x+24)),ly=Math.max(4,Math.min(window.innerHeight-26,y+26));
+ G.lab.style.transform='translate('+lx.toFixed(1)+'px,'+ly.toFixed(1)+'px)';
+}
+function gSay(t){if(!G.lab)return;G.lab.textContent=String(t||'').slice(0,60);gPlace(G.x,G.y);}
+function gWait(ms){return new Promise(function(res){if(!gWatching()||ms<=0){res();return;}setTimeout(res,ms);});}
+function c2s(x,y){const r=mainCanvas.getBoundingClientRect();return {x:r.left+x*r.width/mainCanvas.width,y:r.top+y*r.height/mainCanvas.height};}
+function clampScr(p){return {x:Math.max(8,Math.min(window.innerWidth-8,p.x)),y:Math.max(8,Math.min(window.innerHeight-8,p.y))};}
+function tween(ms,fn){
+ return new Promise(function(res){
+  if(!gWatching()||ms<=0){fn(1);res();return;}
+  const t0=performance.now();
+  (function f(now){
+   if(!gWatching()){fn(1);res();return;}
+   const k=Math.min(1,(now-t0)/ms);fn(k);
+   if(k<1)requestAnimationFrame(f);else res();
+  })(t0);
+ });
+}
+function gMove(tx,ty,ms){
+ const q=clampScr({x:tx,y:ty});tx=q.x;ty=q.y;
+ return new Promise(function(res){
+  const x0=G.x,y0=G.y,dx=tx-x0,dy=ty-y0,dist=Math.hypot(dx,dy);
+  if(!gWatching()||dist<1.5){gPlace(tx,ty);res();return;}
+  const dur=ms||Math.max(380,Math.min(1100,260+dist*1.1));
+  const nx=-dy/dist,ny=dx/dist,bow=(Math.random()<0.5?-1:1)*Math.min(70,dist*0.16);
+  const cx=(x0+tx)/2+nx*bow,cy=(y0+ty)/2+ny*bow,t0=performance.now();
+  (function f(now){
+   if(!gWatching()){gPlace(tx,ty);res();return;}
+   const k=Math.min(1,(now-t0)/dur),e=k<0.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+   const a=(1-e)*(1-e),b=2*(1-e)*e,c=e*e;
+   const tr=(1-Math.abs(2*e-1))*1.2;
+   gPlace(a*x0+b*cx+c*tx+Math.sin(now/37)*tr,a*y0+b*cy+c*ty+Math.cos(now/43)*tr);
+   if(k<1)requestAnimationFrame(f);else{gPlace(tx,ty);res();}
+  })(t0);
+ });
+}
+function gClick(){const r=G.rip;r.style.left=(G.x+4)+'px';r.style.top=(G.y+3)+'px';r.classList.remove('go');void r.offsetWidth;r.classList.add('go');}
+function gFrame(b){
+ const p1=c2s(b.l,b.t),p2=c2s(b.r,b.b),s=G.box.style;
+ s.left=Math.min(p1.x,p2.x)+'px';s.top=Math.min(p1.y,p2.y)+'px';s.width=Math.abs(p2.x-p1.x)+'px';s.height=Math.abs(p2.y-p1.y)+'px';s.opacity='1';
+}
+function gFrameHide(){if(G.box)G.box.style.opacity='0';}
+function idleLabel(){return String(S.stepTxt||'AI bekerja').replace(/^\d\/\d\s*/,'').replace(/\s*\.{3}$/,'').slice(0,46);}
+async function gIdle(tok){
+ while(G.tok===tok){
+  if(gWatching()&&G.mode===''){
+   const r=mainCanvas.getBoundingClientRect();
+   gSay(idleLabel());
+   await gMove(r.left+r.width*(0.2+Math.random()*0.6),r.top+r.height*(0.18+Math.random()*0.62),1500+Math.random()*900);
+   await gWait(500+Math.random()*800);
+   if(G.mode==='')await new Promise(function(r2){setTimeout(r2,10);});
+  }else await new Promise(function(r2){setTimeout(r2,350);});
+ }
+}
+function gStart(){
+ if(cfg.ghost===false)return;
+ gBuild();G.el.classList.add('on');
+ if(!G.init){G.init=true;const c=$('adzChip');const rc=c?c.getBoundingClientRect():null;gPlace(rc?rc.left:window.innerWidth-60,rc?rc.bottom:120);}
+ G.mode='';G.tok++;gIdle(G.tok);
+}
+function gStop(){G.tok++;G.mode='';if(G.el)G.el.classList.remove('on');gFrameHide();G.init=false;}
+function labelFor(e){
+ const a=e._adz||{},nm=a.nm||a.name||'';
+ if(e.type==='text')return 'Menulis: '+String(e.text||'').replace(/\s+/g,' ').slice(0,26);
+ if(e.type==='fade')return 'Gradasi tepi';
+ if(e.type==='image')return 'Gambar: '+nm;
+ if(a.art)return 'Aset: '+(nm||a.art);
+ return 'Bentuk: '+nm;
+}
+/* layer muncul satu per satu: kursor menyentuh layer, bingkai putus-putus, lalu layer meluncur halus dan memudar masuk */
+async function ghostReveal(target,d){
+ const full=target.elements.slice();
+ if(!gWatching()||!full.length){renderAll();return;}
+ G.mode='reveal';
+ const n=full.length,per=Math.min(1,26000/(n*1000));
+ const orig=full.map(function(e){return {e:e,op:e.opacity===undefined?1:e.opacity,x:e.x,y:e.y};});
+ target.elements=[];renderAll();
+ try{
+  const r=mainCanvas.getBoundingClientRect();
+  gSay('Latar & kanvas');
+  await gMove(r.left+r.width*0.5,r.top+r.height*0.45,Math.max(300,700*per));gClick();await gWait(260*per);
+  for(let i=0;i<n;i++){
+   const e=full[i];
+   if(!gWatching()){for(let j=i;j<n;j++)target.elements.push(full[j]);break;}
+   const b=boxOf(e),bleed=!!(e._adz&&e._adz.bleed);
+   const p=c2s(bleed?d.W*0.5:(b.l+b.r)/2,bleed?d.H*0.5:(b.t+b.b)/2);
+   gSay(labelFor(e));
+   await gMove(p.x+(Math.random()-0.5)*10,p.y+(Math.random()-0.5)*10);
+   gFrame(bleed?{l:0,t:0,r:d.W,b:d.H}:b);gClick();await gWait(170*per);
+   const o=orig[i],off=bleed?0:d.H*0.022;
+   e.opacity=0;e.y=o.y-off;target.elements.push(e);renderAll();
+   await tween(Math.max(160,340*per),function(k){const q=1-Math.pow(1-k,3);e.opacity=o.op*q;e.y=o.y-off*(1-q);renderAll();});
+   e.opacity=o.op;e.y=o.y;renderAll();
+   await gWait((e.type==='text'?240+Math.min(480,String(e.text||'').length*5):120)*per);
+   gFrameHide();
+  }
+ }finally{
+  orig.forEach(function(o){o.e.opacity=o.op;o.e.x=o.x;o.e.y=o.y;});
+  target.elements=full;G.mode='';gFrameHide();renderAll();
+ }
+}
+function geoSnap(els){const m={};(els||[]).forEach(function(e){const a=e._adz;if(a&&a.idx!=null)m[a.idx]={x:e.x,y:e.y};});return m;}
+/* koreksi AI: layer yang bergeser diperagakan dengan menyeretnya dari posisi lama ke posisi baru */
+async function ghostMorph(target,old,d){
+ const els=target.elements;
+ if(!gWatching()||!old){renderAll();return;}
+ const mv=[];
+ els.forEach(function(e){const a=e._adz;if(!a||a.idx==null)return;const o=old[a.idx];if(o&&Math.abs(o.x-e.x)+Math.abs(o.y-e.y)>2)mv.push({e:e,fx:e.x,fy:e.y,ox:o.x,oy:o.y});});
+ if(!mv.length){renderAll();return;}
+ mv.sort(function(a,b){return a.oy-b.oy;});
+ const act=mv.slice(0,8);
+ act.forEach(function(m){m.e.x=m.ox;m.e.y=m.oy;});
+ renderAll();G.mode='morph';
+ try{
+  for(const m of act){
+   if(!gWatching())break;
+   const e=m.e,dx=m.fx-m.ox,dy=m.fy-m.oy;
+   const b0=boxOf(e),cx=(b0.l+b0.r)/2,cy=(b0.t+b0.b)/2;
+   const p0=c2s(cx,cy),p1=c2s(cx+dx,cy+dy);
+   gSay('Geser: '+String((e._adz&&(e._adz.nm||e._adz.name))||e.type).slice(0,24));
+   await gMove(p0.x,p0.y);gFrame(b0);gClick();await gWait(140);
+   await tween(560,function(k){
+    const q=k<0.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+    e.x=m.ox+dx*q;e.y=m.oy+dy*q;
+    const tr=(1-Math.abs(2*q-1))*1.2;
+    gPlace(p0.x+(p1.x-p0.x)*q+Math.sin(performance.now()/37)*tr,p0.y+(p1.y-p0.y)*q+Math.cos(performance.now()/43)*tr);
+    gFrame(boxOf(e));renderAll();
+   });
+   e.x=m.fx;e.y=m.fy;renderAll();gFrameHide();await gWait(110);
+  }
+ }finally{
+  act.forEach(function(m){m.e.x=m.fx;m.e.y=m.fy;});
+  G.mode='';gFrameHide();renderAll();
+ }
+}
+/* ---------- titik pemulihan: lanjut tanpa mengulang tahap yang sudah jadi ---------- */
+function ckSig(){
+ return JSON.stringify([S.mode,S.style,($('adzPrompt').value||'').trim(),footerLine(),S.refs.map(function(r){return r.url.length;}),S.ctxTexts.map(function(c){return c.text.length;}),cfg.layoutModel,cfg.useImages,cfg.margin,cfg.smart,cfg.assets]);
+}
+function updGo(){
+ const go=$('adzGo'),fr=$('adzFresh');if(!go||S.busy)return;
+ let ok=false;try{ok=!!(S.ck&&S.ck.failed&&S.ck.sig===ckSig());}catch(e){}
+ go.textContent=ok?'Lanjutkan (hemat token)':'Buat Desain';
+ if(fr)fr.style.display=ok?'block':'none';
+}
+window.adzFresh=function(){S.ck=null;updGo();adzGenerate();};
+function setBusy(b){S.busy=b;if(b){S.done='';S.pct=0;}$('adzX').title=b?'Sembunyikan panel (proses AI tetap berjalan)':'Tutup';if(S.min)shieldSet(b);chipSync();$('adzGo').disabled=b;$('adzGo').textContent=b?'Sedang membuat...':'Buat Desain';$('adzCancel').style.display=b?'block':'none';if(b&&$('adzFresh'))$('adzFresh').style.display='none';if(b){if(S.min)gStart();}else{updGo();setTimeout(function(){if(!S.busy)gStop();},900);}}
 function briefLog(b){
  try{
   if(b.intent)log('Maksud: '+String(b.intent).slice(0,260));
@@ -24938,7 +25210,11 @@ window.adzGenerate=async function(){
  if(checkDemo())return;
  if(S.mode==='ref'&&!S.refs.length){showToast('Tambahkan minimal 1 gambar referensi');return;}
  if(!($('adzPrompt').value||'').trim()&&S.mode!=='remix'&&!S.refs.length&&!S.ctxTexts.length){showToast('Tulis perintah dulu');return;}
- S.ctl=new AbortController();setBusy(true);
+ S.ctl=new AbortController();S.fb=false;
+ const sig=ckSig();
+ const ckOld=(S.ck&&S.ck.failed&&S.ck.sig===sig)?S.ck:null;
+ S.ck={sig:sig,brief:ckOld?ckOld.brief:null,spec:ckOld?ckOld.spec:null,failed:false};
+ setBusy(true);
  let newEls=[],undoTarget=null,keptTarget=null;
  try{
   const d=canvasDims(),m=Math.round(d.W*cfg.margin/100);
@@ -24946,19 +25222,27 @@ window.adzGenerate=async function(){
 
   /* 1) brief / analisis maksud */
   let brief=null;
-  if(cfg.smart){
+  if(ckOld)log('Melanjutkan dari titik terakhir: tahap yang sudah jadi dipakai ulang (hemat token).','ok');
+  if(cfg.smart&&S.ck.brief){brief=S.ck.brief;step(4,'1/5 Memakai brief yang sudah jadi.');briefLog(brief);}
+  else if(cfg.smart){
    step(4,'1/5 Menganalisis maksud perintah ...');
-   try{brief=await makeBrief(d);log('Brief siap.','ok');briefLog(brief);}
+   try{brief=await makeBrief(d);S.ck.brief=brief;log('Brief siap.','ok');briefLog(brief);}
    catch(e){if(/Dibatalkan|Kuota|API key|ditemukan|Akses/.test(e.message))throw e;log('Analisis dilewati: '+e.message,'wn');}
   }else log('1/5 Analisis dilewati (mode cerdas mati).');
 
   /* 2) rancangan layer */
-  step(18,'2/5 Merancang layer dengan '+cfg.layoutModel+' ...');
-  const j=await gem(cfg.layoutModel,await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
-  const spec=parseJson(textOf(j));
-  if(LAST_REPAIRED)log('Jawaban AI terpotong; bagian yang utuh diselamatkan. Jika desain kurang lengkap, coba lagi atau ganti model.','wn');
+  let spec;
+  if(S.ck.spec){spec=S.ck.spec;step(18,'2/5 Memakai rancangan layer yang sudah jadi.');}
+  else{
+   step(18,'2/5 Merancang layer dengan '+cfg.layoutModel+' ...');
+   const j=await gem(cfg.layoutModel,await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
+   spec=parseJson(textOf(j));
+   if(LAST_REPAIRED)log('Jawaban AI terpotong; bagian yang utuh diselamatkan. Jika desain kurang lengkap, coba lagi atau ganti model.','wn');
+   S.ck.spec=spec;
+  }
   const L=(Array.isArray(spec.layers)?spec.layers.slice(0,28):[]).filter(function(l){return l&&typeof l==='object';});
   if(!L.length)throw new Error('AI tidak menghasilkan layer. Coba perintah yang lebih jelas.');
+  enforceFooter(L,d);
   const nAsset=L.filter(function(l){return l.kind==='asset';}).length;
   step(38,'Rancangan diterima: '+L.length+' layer'+(spec.title?(' · "'+spec.title+'"'):'')+(cfg.assets?(' · '+nAsset+' aset PNG'):''));
   if(S.mode==='ref'&&brief&&brief.illustration&&brief.illustration.needed&&!cfg.useImages)log('Referensi punya ilustrasi. Aktifkan "Buat ilustrasi dengan model gambar" agar ilustrasi mirip ikut dibuat sebagai PNG.','wn');
@@ -24966,8 +25250,8 @@ window.adzGenerate=async function(){
   /* 3) gambar AI (opsional): ilustrasi jadi PNG transparan */
   const wantImg=!!cfg.useImages;let imgDone=0,imgFail=0;
   const jobs=[];
-  if(wantImg&&spec.background&&spec.background.type==='image'&&spec.background.imagePrompt)jobs.push({bg:true,prompt:spec.background.imagePrompt,w:d.W,h:d.H});
-  if(wantImg)L.forEach(function(l){if(l.kind==='image'&&!l.keepId&&l.imagePrompt&&jobs.length<3)jobs.push({layer:l,prompt:l.imagePrompt,w:clamp(l.w,5,100)/100*d.W,h:clamp(l.h,5,100)/100*d.H});});
+  if(wantImg&&spec.background&&spec.background.type==='image'&&spec.background.imagePrompt&&!spec._bgSrc)jobs.push({bg:true,prompt:spec.background.imagePrompt,w:d.W,h:d.H});
+  if(wantImg)L.forEach(function(l){if(l.kind==='image'&&!l.keepId&&!l._res&&l.imagePrompt&&jobs.length<3)jobs.push({layer:l,prompt:l.imagePrompt,w:clamp(l.w,5,100)/100*d.W,h:clamp(l.h,5,100)/100*d.H});});
   if(jobs.length)step(42,'3/5 Membuat '+jobs.length+' gambar dengan '+cfg.imageModel+' ...');else step(42,'3/5 Tanpa gambar AI (aset PNG lokal tetap dibuat).');
   const refForImg=(S.mode==='ref'&&S.refs[0])?S.refs[0].url:null;
   for(const job of jobs){
@@ -24975,7 +25259,7 @@ window.adzGenerate=async function(){
    try{
     const cut=!job.bg&&job.layer.cutout!==false&&(job.layer.cutout===true||/\b(icon|object|illustration|sticker|clock|book|lantern|crescent|mosque|hourglass)\b/i.test(job.prompt));
     const raw=await genImage(cut?cutoutPrompt(job.prompt,job.layer.keyColor):plainPrompt(job.prompt),job.w,job.h,refForImg);
-    if(job.bg)job.src=raw;
+    if(job.bg){job.src=raw;spec._bgSrc=raw;}
     else if(cut){const k=await keyOut(raw,1400);if(k)job.layer._res={url:k.url,w:k.w,h:k.h,cut:true};else{log('  latar gambar tidak bisa dipotong, dipakai sebagai gambar persegi','wn');job.layer._res={url:raw,cut:false};}}
     else job.layer._res={url:raw,cut:false};
     imgDone++;log('  gambar '+imgDone+' selesai'+(job.bg?' (latar)':(job.layer._res&&job.layer._res.cut?' (PNG transparan)':'')),'ok');
@@ -24987,7 +25271,7 @@ window.adzGenerate=async function(){
   step(62,'4/5 Menyusun layer, menempelkan dekorasi ke teks, merapikan posisi ...');
   const s=getCurrentSlide();
   const bgJob=jobs.find(function(x){return x.bg&&x.src;});
-  let bgSrc=null;if(bgJob)bgSrc=await coverCrop(bgJob.src,d.W,d.H,1600);
+  let bgSrc=null;if(bgJob)bgSrc=await coverCrop(bgJob.src,d.W,d.H,1600);else if(spec._bgSrc)bgSrc=await coverCrop(spec._bgSrc,d.W,d.H,1600);
   const keepSrc=s.elements.filter(function(e){return e.type==='image';});
   const target=(cfg.replace&&!s.isDemo)?s:{background:null,elements:[]};
   const bgBackup=target.background,elBackup=target.elements,prevIndex=currentSlideIndex;
@@ -24995,9 +25279,10 @@ window.adzGenerate=async function(){
   target.background=buildBackground(spec.background,d,bgSrc);
   if(target!==s){slides.push(target);currentSlideIndex=slides.length-1;}
   keptTarget=target;
-  let lay=await compose(target,L,d,m,keepSrc);
+  let lay=await compose(target,L,d,m,keepSrc,true);
   undoTarget=null;
   newEls=target.elements;
+  await ghostReveal(target,d);
   if(lay.overflow>1)log('  isi terlalu padat, ukuran teks diperkecil '+Math.round((1-lay.k)*100)+'%','wn');
   let issues=lint(target,d,m);
   log(issues.length?('Pemeriksaan otomatis: '+issues.length+' catatan'):'Pemeriksaan otomatis: bersih','ok');
@@ -25006,7 +25291,7 @@ window.adzGenerate=async function(){
   /* 5) AI menilai hasil lalu merapikan (putaran koreksi) */
   const rounds=cfg.review;
   for(let r=1;r<=rounds;r++){
-   if(S.ctl.signal.aborted)throw new Error('Dibatalkan');
+   if(S.ctl.signal.aborted){log('Dibatalkan: hasil sementara tetap disimpan.','wn');break;}
    step(72+(r-1)*(18/Math.max(1,rounds)),'5/5 Penilaian AI putaran '+r+'/'+rounds+' ...');
    let q;
    try{
@@ -25014,7 +25299,7 @@ window.adzGenerate=async function(){
     const t='LAYER TABLE (measured from the render):\n'+JSON.stringify(layerTable(target,d))+'\n\nAUTOMATIC LINT WARNINGS:\n'+(issues.length?issues.join('\n'):'none')+'\n\nUSER REQUEST (for context): '+(($('adzPrompt').value||'').trim().slice(0,600)||'-')+'\n\nThe screenshot is the current render. Judge it and return the JSON.';
     const jq=await gem(cfg.layoutModel,[{text:t},{text:'[RENDERED POSTER]'},imgPart(shot)],{responseMimeType:'application/json',temperature:0.3,maxOutputTokens:8192},qaSystem(m));
     q=parseJson(textOf(jq));
-   }catch(e){if(/Dibatalkan|Kuota|API key|ditemukan|Akses/.test(e.message))throw e;log('Penilaian dilewati: '+e.message,'wn');break;}
+   }catch(e){log('Penilaian AI dilewati: '+e.message+' · desain yang sudah jadi tetap disimpan.','wn');break;}
    const score=clamp(q.score==null?7:q.score,0,10);
    log('Nilai desain: '+score+'/10'+(q.verdict==='ok'?' · baik':''),score>=8?'ok':'wn');
    (Array.isArray(q.issues)?q.issues:[]).slice(0,6).forEach(function(t){log('  · '+String(t).slice(0,200),'wn');});
@@ -25023,8 +25308,10 @@ window.adzGenerate=async function(){
    const n=applyFixes(L,fixes);
    if(!n){log('Koreksi tidak bisa diterapkan.','wn');break;}
    log('Menerapkan '+n+' koreksi ...');
-   lay=await compose(target,L,d,m,keepSrc);
+   const oldGeo=geoSnap(target.elements);
+   lay=await compose(target,L,d,m,keepSrc,true);
    newEls=target.elements;
+   await ghostMorph(target,oldGeo,d);
    issues=lint(target,d,m);
    log(issues.length?('Setelah koreksi: '+issues.length+' catatan'):'Setelah koreksi: bersih','ok');
   }
@@ -25038,13 +25325,16 @@ window.adzGenerate=async function(){
   setTimeout(function(){try{renderAll();renderCarouselThumbs();}catch(e){}},400);
   pushHistoryState();
   const cnt=target.elements.length;
-  setProg(100);S.done='ok';
+  setProg(100);S.ck=null;
+  if(S.ctl.signal.aborted){S.done='er';log('Proses dibatalkan; hasil sementara tersimpan ('+cnt+' layer). Bisa di-Undo.','wn');}
+  else{S.done='ok';
   log('Selesai: '+cnt+' layer dibuat'+(imgFail?(' ('+imgFail+' gambar gagal dilewati)'):'')+'. Buka tool Lapisan untuk melihat tiap layer.','ok');
-  showToast('Desain AI selesai: '+cnt+' layer');
+  showToast('Desain AI selesai: '+cnt+' layer');}
   setTimeout(function(){if(!S.busy&&$('adzModal').classList.contains('active')){$('adzModal').classList.remove('active');}},1600);
  }catch(e){
-  S.done='er';
+  S.done='er';if(S.ck)S.ck.failed=true;
   log('Gagal: '+e.message,'er');
+  if(S.ck&&(S.ck.brief||S.ck.spec))log('Tahap yang sudah jadi disimpan. Tekan "Lanjutkan (hemat token)" untuk meneruskan tanpa mengulang dari awal.','wn');
   if(undoTarget){try{undoTarget();}catch(x){}}
   else if(newEls.length){newEls.forEach(function(x){if(x){delete x._adz;x._calculatedHeight=null;x._renderedW=null;x._cachedCanvas=null;x._cachedHash=null;}});try{pushHistoryState();}catch(x){}}
   try{renderBottomToolbar();renderCarouselThumbs();renderAll();}catch(x){}
