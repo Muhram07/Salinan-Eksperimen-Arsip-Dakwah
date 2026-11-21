@@ -1,14 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v2.6.5
+Studio Poster Maker Pro - Update v2.6.6
+
+v2.6.6:
+1. MODE DESAINER PRO: AI kini merancang 24-44 layer (latar bertingkat, cahaya, pola, bingkai, ornamen, lencana, watermark tipografi, teks berefek) dengan gaya 3D atau 2D yang konsisten. Bisa dimatikan lewat opsi bila ingin poster sederhana.
+2. 18 ASET PNG LOKAL BARU (gratis, tanpa kuota): glow, rays, bokeh, sparkle, grain, star8, lattice, frame, divider, corner, wave, burst, rings, orb 3D, ribbon, gradbar logam, stripes, wordmark. Mendukung blend mode.
+3. EFEK TEKS: gradasi emas/logam, outline, glow, bayangan dalam, ketebalan 3D (extrude), kata beraksen warna.
+4. GAMBAR AI DIMATIKAN secara bawaan (hasil Gemini kurang memukau); Gemini dipakai untuk teks, tata letak, dan penilaian.
 
 v2.6.5:
-1. MODE PANTANG MENYERAH: tidak perlu menekan "Lanjutkan" lagi. Saat limit/server sibuk/jaringan putus, proses menunggu dengan jeda acak (tidak seperti bot) lalu mencoba lagi sendiri sampai berhasil; kegagalan lain diulang otomatis memakai titik pemulihan.
-2. DAFTAR MODEL OTOMATIS: semua model Gemini yang benar-benar ada di akun dibaca langsung dari Google lalu dipakai bergantian (tiap model punya kuota sendiri). Model yang limit diistirahatkan, model yang tidak ada (404) dilewati, model utama dipakai lagi begitu pulih. Menggantikan model cadangan bawaan lama yang salah (gemini-2.5-flash-lite, tidak ada di akun).
-3. Bila semua model habis kuota harian, proses berhenti rapi dengan penjelasan, hasil tahap yang sudah jadi tetap tersimpan.
-
-v2.6.4:
-1. KOLOM USERNAME di tool AI Desainer (tersimpan di IndexedDB, satu baris di bawah poster).
-2. TITIK PEMULIHAN "Lanjutkan (hemat token)", penilaian AI tidak lagi membuang hasil. ANIMASI HANTU: kursor emas bergerak alami saat panel di-X.
+1. MODE PANTANG MENYERAH: menunggu dengan jeda acak lalu mencoba lagi sendiri saat limit/server sibuk.
+2. DAFTAR MODEL OTOMATIS dibaca dari akun dan dipakai bergantian; model 404 dilewati.
 -->
 
 
@@ -952,7 +953,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 /* v2.0.0: modal Hapus Objek AI memakai kelas Hapus BG */
 
-/* v2.6.5: AI Desainer (Gemini via API key manual) */
+/* v2.6.6: AI Desainer (Gemini via API key manual) */
 #adzModal{position:fixed;inset:0;z-index:9000000;display:none;flex-direction:column;background:#0b0b0b;color:#e5e7eb;font-family:inherit;}
 #adzModal.active{display:flex;}
 #adzModal *{box-sizing:border-box;}
@@ -2381,7 +2382,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.6.5';
+const APP_VERSION = 'v2.6.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -23964,7 +23965,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 </div>
 </div>
 <script>
-/* ===== v2.6.5: AI DESAINER (Gemini via API key manual) =====
+/* ===== v2.6.6: AI DESAINER (Gemini via API key manual) =====
    Modul mandiri: tidak mengubah fungsi lama. Memakai struktur elemen yang sama dengan addNewText/addNewShape/addNewFadeEdge/handleImageUpload. */
 (function(){
 'use strict';
@@ -23972,7 +23973,8 @@ const LS_KEY='ADZ_SETTINGS_V1';
 const API='https://generativelanguage.googleapis.com/v1beta/';
 const ADZ_FONTS=['Anton','Montserrat','Playfair Display','Cinzel','Bebas Neue','Poppins','Plus Jakarta Sans','Outfit','Oswald','Lora','Amiri','Aref Ruqaa','Cairo','Scheherazade New','Reem Kufi','Pacifico','Dancing Script','Great Vibes','Caveat','Permanent Marker','Abril Fatface','Lobster','Archivo Black','Righteous','Staatliches','Teko','Inter','Mali','Alfa Slab One','Metal Mania','Pirata One','Special Elite'];
 const ADZ_SHAPES=['rect','circle','triangle','star','polygon','pentagon','octagon','heart','arrow','cross','capsule','trapezoid','parallelogram','rhombus','crescent','shield','chat','tag','bookmark','line'];
-const ADZ_ARTS=['brush','splatter','ring','scribble','halftone'];
+const ADZ_ARTS=['brush','splatter','ring','scribble','halftone','glow','rays','bokeh','sparkle','grain','star8','lattice','frame','divider','corner','wave','burst','rings','orb','ribbon','gradbar','stripes','wordmark'];
+const ADZ_BLENDS=['normal','screen','overlay','soft-light','multiply','lighten','hard-light','color-dodge'];
 const ADZ_STYLES=[
  ['Elegan emas gelap','dark elegant luxury poster, deep black/brown background, gold (#D4AF37) accents, serif display headings, generous whitespace'],
  ['Minimalis terang','clean minimalist light poster, off-white background, one accent color, lots of whitespace, modern sans-serif'],
@@ -23983,8 +23985,9 @@ const ADZ_STYLES=[
 ];
 const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:'',cool:{},dead:{},daily:{},allModels:null,poolT:0,curM:{txt:'',img:''},lastModel:'',autoCancel:false};
 let cfg=loadCfg();
+if(!cfg._v266){cfg.useImages=false;cfg.assets=true;cfg.rich=true;cfg._v266=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 if(cfg.fallbackModel==='gemini-2.5-flash-lite'){cfg.fallbackModel='';try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
-function loadCfg(){let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}return Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,fallbackModel:'',ghost:true},c);}
+function loadCfg(){let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}return Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,fallbackModel:'',ghost:true,rich:true},c);}
 function saveCfg(){try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 const $=function(id){return document.getElementById(id);};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -24031,8 +24034,9 @@ function build(){
  '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Opsi hasil</div>'+
   '<label class="adz-lab" style="margin-top:6px">Ruang tepi kosong: <span id="adzMarginV">7</span>%</label><input id="adzMargin" class="adz-range" type="range" min="4" max="12" step="1" value="7">'+
   '<label class="adz-chk"><input type="checkbox" id="adzSmart"><span>Mode cerdas: AI menganalisis maksud perintah dulu (walau singkat), menyusun brief, lalu mendesain.</span></label>'+
-  '<label class="adz-chk"><input type="checkbox" id="adzAssets"><span>Aset PNG otomatis: kuas di belakang judul, coretan, lingkaran, percikan, titik halftone. Dibuat lokal (gratis, tanpa kuota) dan ditempel mengikuti teks agar posisinya pas.</span></label>'+
-  '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Buat ilustrasi/latar dengan model gambar (ilustrasi otomatis dipotong jadi PNG transparan). Lebih lambat, bisa kena kuota/berbayar. Jika mati, hanya gradasi + bentuk + aset PNG lokal.</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzRich"><span>Mode desainer pro: poster rumit 24-44 layer (cahaya, pola, bingkai, ornamen, lencana, watermark tipografi, teks berefek emas/outline/3D). Matikan untuk poster sederhana.</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzAssets"><span>Aset PNG otomatis: kuas, coretan, lingkaran, percikan, halftone, glow, sinar, bokeh, kilau, grain, pola bintang, bingkai, sudut ornamen, pemisah, gelombang, lencana, bola 3D, pita, plat emas, watermark. Dibuat lokal (gratis, tanpa kuota).</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Gambar AI (tidak disarankan: hasil Gemini kurang memukau, lambat, boros kuota). Biarkan mati: desain memakai gradasi, bentuk, teks berefek, dan aset PNG lokal.</span></label>'+
   '<label class="adz-lab">Putaran koreksi otomatis: <span id="adzRevV">2</span> (AI menilai hasil lalu merapikan posisi; 0 = mati)</label><input id="adzRev" class="adz-range" type="range" min="0" max="3" step="1" value="2">'+
   '<label class="adz-chk"><input type="checkbox" id="adzGhost"><span>Animasi hantu: saat panel di-X, kursor emas bergerak alami dan layer muncul satu per satu (hanya tampilan, tidak menambah pemakaian AI).</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzReplace"><span>Ganti isi slide saat ini (bisa dibatalkan dengan Undo). Jika mati, hasil dibuat di slide baru.</span></label>'+
@@ -24071,7 +24075,7 @@ window.openAiDesigner=function(){
  build();cfg=loadCfg();
  $('adzKey').value=cfg.key;$('adzModelL').value=cfg.layoutModel;$('adzModelI').value=cfg.imageModel;
  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
- $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
+ $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRich').checked=cfg.rich!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
  $('adzModelF').value=cfg.fallbackModel==null?'':cfg.fallbackModel;$('adzGhost').checked=cfg.ghost!==false;
  $('adzApiCard').open=!cfg.key;
  paintChips();paintThumbs();adzMode(S.mode);
@@ -24222,7 +24226,7 @@ function readCfg(){
  cfg.key=$('adzKey').value.trim();cfg.layoutModel=$('adzModelL').value.trim()||'gemini-2.5-flash';cfg.imageModel=$('adzModelI').value.trim()||'gemini-2.5-flash-image';
  cfg.fallbackModel=($('adzModelF').value||'').trim();cfg.ghost=$('adzGhost').checked;
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
- cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
+ cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.rich=$('adzRich').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
 }
 
 /* ---------- Berkas: gambar, JSON, ZIP ---------- */
@@ -24459,7 +24463,7 @@ function briefSystem(d){
  return 'You are the creative director who interprets SHORT, informal client requests (usually Indonesian) for da\'wah / Islamic reminder posters and social cards. Understand the real intent even if the request is brief or loosely worded, then decide the copy, hierarchy, palette and decoration. Reply with ONE JSON object only.\n'+
  'CANVAS: '+d.W+'x'+d.H+' px (aspect '+(d.W/d.H).toFixed(3)+').\n'+COPY_RULES+
  'If reference image(s) are attached (labelled), analyse them deeply: palette (hex), font personality, how the headline is built (stacked lines, two colors, brush stroke behind a word...), card/pill shapes, decorative devices (brush strokes, stickers, rings, dots, rays, frames), illustration subject and where it sits, margins, vertical rhythm. Reproduce the DNA, not the exact text.\n'+
- 'SCHEMA: {"intent":"1-2 sentences: what the poster must achieve","audience":"","tone":"","archetype":"stack-center|editorial-left|card-focus|split-band|illustration-hero","copy":{"kicker":"","headline":"","headlineEmphasis":"the one word/phrase to highlight, or empty","subheadline":"","body":["short paragraph 1","optional paragraph 2"],"closing":"","footer":["@handle1","@handle2"]},"palette":{"bg":["#hex","#hex"],"accent":"#hex","accent2":"#hex","text":"#hex","muted":"#hex"},"fonts":{"display":"","body":"","accent":""},"decor":["each decorative device to build, e.g. brush stroke behind headline emphasis, scribble underline, ring around word, splatter corner, halftone dots"],"illustration":{"needed":true,"description":"English prompt for ONE flat-style object illustration without people/animals/text, or empty","placement":"where it sits (e.g. top-right, behind headline, bottom-center)"},"referenceDNA":"what to copy from the reference(s), or empty","zones":[{"role":"kicker|headline|subheadline|body|closing|footer|illustration","yPct":0,"hPct":0}]}';
+ 'SCHEMA: {"intent":"1-2 sentences: what the poster must achieve","audience":"","tone":"","archetype":"stack-center|editorial-left|card-focus|split-band|illustration-hero","look":"3d-lit|refined-2d","effects":"which text effects and light/ornament devices to use (gold gradient, extrude, glow, frame, corners, rays, bokeh, star pattern, wordmark watermark, ribbon, orb)","copy":{"kicker":"","headline":"","headlineEmphasis":"the one word/phrase to highlight, or empty","subheadline":"","body":["short paragraph 1","optional paragraph 2"],"closing":"","footer":["@handle1","@handle2"]},"palette":{"bg":["#hex","#hex"],"accent":"#hex","accent2":"#hex","text":"#hex","muted":"#hex"},"fonts":{"display":"","body":"","accent":""},"decor":["each decorative device to build, e.g. brush stroke behind headline emphasis, gold gradient headline, glow behind title, light rays, bokeh, star8 pattern, ornamental frame and corners, divider, ribbon or burst badge, wordmark watermark, sparkles"],"illustration":{"needed":true,"description":"English prompt for ONE flat-style object illustration without people/animals/text, or empty","placement":"where it sits (e.g. top-right, behind headline, bottom-center)"},"referenceDNA":"what to copy from the reference(s), or empty","zones":[{"role":"kicker|headline|subheadline|body|closing|footer|illustration","yPct":0,"hPct":0}]}';
 }
 function systemPrompt(m){
  const d=canvasDims(),mx=+(m/d.W*100).toFixed(1),my=+(m/d.H*100).toFixed(1),ratio=(d.W/d.H).toFixed(3);
@@ -24468,16 +24472,22 @@ function systemPrompt(m){
  'SAFE AREA: keep every non-bleed layer inside x>='+mx+', x+w<='+(100-mx).toFixed(1)+', y>='+my+', y+h<='+(100-my).toFixed(1)+'. Text never touches edges or other text.\n'+
  'SCHEMA:\n{"title":"short name","background":{"type":"gradient|solid|image","gradType":"linear|radial","angle":0-360,"colors":["#hex","#hex"],"imagePrompt":"only when type is image","darken":0-0.7},\n"layers":[ ...ordered from BOTTOM to TOP... ]}\n'+
  'LAYER KINDS (every layer needs a unique, descriptive "name" such as "Judul", "Kartu isi", "Kuas judul"):\n'+
- '- {"kind":"shape","name":"...","shape":"'+ADZ_SHAPES.join('|')+'","x":,"y":,"w":,"h":,"color":"#hex","opacity":0-1,"radius":0-100 (rect only, px),"borderWidth":px,"borderColor":"#hex","rotation":deg,"bleed":false,"shadow":{"color":"#000000","blur":0-30,"distance":0-12,"opacity":0-1}|null,"attach":{...}|null}\n'+
+ '- {"kind":"shape","name":"...","shape":"'+ADZ_SHAPES.join('|')+'","blend":"normal|screen|overlay|soft-light","x":,"y":,"w":,"h":,"color":"#hex","opacity":0-1,"radius":0-100 (rect only, px),"borderWidth":px,"borderColor":"#hex","rotation":deg,"bleed":false,"shadow":{"color":"#000000","blur":0-30,"distance":0-12,"opacity":0-1}|null,"attach":{...}|null}\n'+
  '- {"kind":"fade","name":"...","dir":"top|bottom|left|right|horizontal|vertical","depth":20-80,"color":"#hex"}  (soft gradient edge overlay, always full-bleed)\n'+
- '- {"kind":"text","name":"...","text":"...(use \\n for manual line breaks)","font":"one of: '+ADZ_FONTS.join(', ')+'","size":font size as % of canvas width (headline 7-14, subhead 3.6-5.5, body 2.6-3.8, small 2-2.6),"weight":"400|700|800|900","italic":false,"color":"#hex","align":"left|center|right|justify","x":,"y":,"w":,"lineHeight":1.05-1.8,"letterSpacing":px,"uppercase":false,"shadow":{...}|null,"highlight":"#hex|null","opacity":0-1}\n'+
- '- {"kind":"asset","name":"...","art":"'+ADZ_ARTS.join('|')+'","color":"#hex","opacity":0-1,"rotation":deg,"seed":int,"x":,"y":,"w":,"h":,"attach":{...}|null}  (PNG ornament drawn locally with transparency: brush = rough paint/brush stroke band, scribble = hand-drawn wavy underline, ring = hand-drawn circle/oval around a word, splatter = ink splash accent, halftone = fading dot pattern)\n'+
+ '- {"kind":"text","name":"...","text":"...(use \\n for manual line breaks)","font":"one of: '+ADZ_FONTS.join(', ')+'","size":font size as % of canvas width (headline 7-14, subhead 3.6-5.5, body 2.6-3.8, small 2-2.6),"weight":"400|700|800|900","italic":false,"color":"#hex","align":"left|center|right|justify","x":,"y":,"w":,"lineHeight":1.05-1.8,"letterSpacing":px,"uppercase":false,"shadow":{...}|null,"highlight":"#hex|null","opacity":0-1,"stroke":{"color":"#hex","width":2-8}|null,"gradient":{"colors":["#top","#middle","#bottom"]}|null (vertical metal/gold fill, 2-3 colors),"glow":{"color":"#hex","blur":8-30,"opacity":0.3-1}|null,"innerShadow":{"color":"#hex","blur":2-10,"distance":1-6,"opacity":0.3-0.9}|null,"extrude":{"color":"#hex","depth":6-18,"angle":45-90}|null (fake 3D thickness for a big headline only),"accent":{"words":["word"],"color":"#hex","weight":"900"}|null (recolors specific words)}\n'+
+ '- {"kind":"asset","name":"...","art":"'+ADZ_ARTS.join('|')+'","color":"#hex","color2":"#hex|null","opacity":0-1,"rotation":deg,"seed":int,"blend":"normal|screen|overlay|soft-light|multiply|lighten","bleed":false,"x":,"y":,"w":,"h":,"attach":{...}|null}  (PNG decoration drawn locally with transparency. brush = rough paint band, scribble = wavy underline, ring = hand-drawn circle, splatter = ink splash, halftone = fading dots, glow = soft radial light (blend screen), rays = sunburst beams from the center (blend screen), bokeh = soft light discs, sparkle = 4-point stars, grain = film noise (color #ffffff, blend overlay), star8 = Islamic 8-point star pattern, lattice = fine diamond grid, frame = ornamental double-line frame with notched corners, divider = line-diamond-line separator (wide and short, h 1.5-3), corner = corner flourish drawn for the TOP-LEFT (use rotation 90/180/270 at other corners, bleed true), wave = flowing line swooshes, burst = starburst badge, rings = concentric ripples, orb = glossy 3D sphere (color body, color2 rim light), ribbon = banner with folded tails (place a text above it), gradbar = metallic or gradient pill/plate (color to color2, metallic when color2 is null), stripes = diagonal stripes, wordmark = giant watermark word (also give "text","font","weight","style":"outline|fill","uppercase":true))\n'+
  '- {"kind":"image","name":"...","imagePrompt":"detailed English prompt of ONE flat-style object illustration, no text, no people/animals","cutout":true|false,"keyColor":"magenta|green","x":,"y":,"w":,"h":,"radius":0-50,"keepId":"id of an existing image layer (remix mode only)"}  (cutout:true = subject is generated on a flat key color and automatically turned into a transparent PNG sticker; use for illustrations/objects. cutout:false = rectangular photo/picture)\n'+
  'ATTACH (makes decoration hug the REAL rendered text, so positions are always exact): "attach":{"to":"layer name" or ["name1","name2"],"mode":"wrap|under|above","padX":% of canvas width (wrap),"padY":% of canvas height (wrap),"gap":% of canvas height (under/above),"wRatio":0.1-1.5 (under/above width relative to target text width),"h":% of canvas height (under/above thickness),"align":"center|left|right","z":"behind|front"}. When attach is present, x/y/w/h are ignored (give approximate values anyway). Use it for: cards/panels behind a text or a group of texts (wrap, padX 3-5, padY 1.5-3), pill/badge behind a handle or kicker (wrap, shape capsule or rect with radius), brush stroke behind a headline word (asset brush, wrap, padX 2-4, padY 0.5-1.2, rotation -1 to -3), underline lines/scribbles (under, gap 0.4-1), ring around a word (asset ring, wrap, padX 3, padY 1.5). NEVER guess coordinates for anything that belongs to a text: attach it.\n'+
  'TYPE FITTING MATH (do this before choosing y of the next block): average glyph width = 0.52 x size for normal fonts, 0.40 x size for condensed fonts (Anton, Bebas Neue, Oswald, Staatliches, Teko), 0.62 x size for wide bold display fonts. charsPerLine = w / (size x factor). lines = ceil(chars / charsPerLine). Block height as % of canvas height = lines x size x lineHeight x '+ratio+'. Next block y = previous y + previous height + gap (at least 2.5). The total must end above y='+(100-my).toFixed(1)+'; if it does not fit, reduce sizes (never overlap).\n'+
  'COMPOSITION: pick ONE archetype and keep one alignment axis (all centered OR all left at the same x). Hierarchy: headline dominant (at least 2.2x body size), max 3 text sizes + one small kicker/footer. Vertical rhythm: kicker near the top, headline block, subheadline, body (or card), closing, footer/handles at the bottom, with consistent gaps. Body line length 28-48 characters. Balance whitespace: no empty band taller than 15% of the canvas. Contrast: light text on dark areas and vice versa; if text sits on a busy area add a card or fade. Round numbers: card radius 16-40, handle pills use capsule.\n'+
- 'ASSETS: add 2-5 decorative asset layers so the poster looks designed (for the da\'wah/modern style: brush stroke behind the key headline word, scribble underline under a keyword, ring around one word, splatter or halftone accent at a corner with low opacity 0.15-0.5). In reference mode recreate every decorative device seen in the reference using the closest kind. If an illustration is needed and image generation is ON, add ONE image layer with cutout:true (sticker-style), placed above the background and below the text unless overlap is intended; keep text readable.\n'+
- 'RULES: 1) Real layers like a designer: background, decor, optional illustration, headline, body, source/credit, footer/handle. 2) Use at most 3 fonts. Arabic text must use Amiri, Scheherazade New, Aref Ruqaa, Cairo or Reem Kufi with align center. 3) '+COPY_RULES+' 4) 8-20 layers total, at most '+(cfg.useImages?'2':'0')+' image layers'+(cfg.useImages?'':' (image generation is OFF: use only shapes, assets, fades and text; use keepId only in remix mode)')+(cfg.assets?'':'; asset layers are OFF: do not output kind asset')+'. 5) Full-canvas backgrounds/overlays set "bleed":true; everything else stays inside the safe area. 6) Follow the APPROVED CREATIVE BRIEF when given: its palette, fonts, copy, decor list and zones.';
+ (cfg.rich?
+ 'PRO TYPOGRAPHER MODE: build the poster like a top-tier typography designer, 24-44 layers, elegant and eye-catching. Pick ONE look and keep it consistent: (A) 3D-LIT = extruded glossy headline, glow behind it, orbs or ribbon, soft shadows, light rays or bokeh; (B) REFINED 2D = editorial lock-up, gold/metal gradient type, outlines, ornamental frames, patterns, wordmark watermark. Follow brief.look when given. Match the tone: sacred/luxury = gold on deep navy, emerald or black; modern/bold = high contrast with ONE hot accent.\n'+
+ 'LAYER RECIPE (bottom to top): 1) background gradient (radial, 3 colors, dark edges). 2) atmosphere: asset glow (blend screen, bleed true, opacity 0.35-0.7, accent color) behind the headline; asset rays or bokeh (bleed true, blend screen, opacity 0.15-0.4); fade vignettes top and bottom. 3) texture: asset star8 or lattice (bleed true, opacity 0.05-0.14, accent color) and asset grain (bleed true, color #ffffff, blend overlay, opacity 0.25-0.45). 4) structure: asset frame inside the safe area (opacity 0.6-0.9) plus 2-4 asset corner at the corners (rotation 0/90/180/270, bleed true), or gradbar lines; a glass card for the body (shape rect radius 24-40, white or black at opacity 0.06-0.18, borderWidth 1-2, accent borderColor); asset ribbon or burst behind a kicker or key stat; asset divider between headline group and body (h 1.5-3). 5) optional giant asset wordmark (outline, opacity 0.06-0.14, bleed true) behind the headline. 6) type: kicker (small, uppercase, letterSpacing 6-12, accent), headline in 2-4 stacked lines with size contrast and effects, subheadline, body, closing, footer. 7) accents on top: 2-4 small sparkle assets (bleed true, blend screen) near the headline, never over body text.\n'+
+ 'TYPE CRAFT: display font only for kicker/headline, a readable font for body; headline leading 0.95-1.1; uppercase display letterSpacing 1-4; max 3 fonts; contrast at least 4.5:1. Effects budget: at most 2 text layers with extrude (never body text), at most 4 text layers with gradient/stroke/glow/innerShadow; gradient colors go top to bottom (gold: #FFF1B8, #E8B923, #9A6A00); stroke width 2-6; use accent OR gradient on one layer, not both. Every effect must stay readable.\n'+
+ 'SPACING RULES: decorative layers sit BEHIND text and must not hide it; any non-text shape that overlaps text but is not a real card must set bleed true (otherwise it is treated as a card and resized). A real card is a shape without bleed whose area contains the text center. Keep frames and corners clear of text (inset at least 4 percent).\n'
+ :'ASSETS: add 2-5 decorative asset layers so the poster looks designed (for the da\'wah/modern style: brush stroke behind the key headline word, scribble underline under a keyword, ring around one word, splatter or halftone accent at a corner with low opacity 0.15-0.5). ')
+ +'In reference mode recreate every decorative device seen in the reference using the closest kind. If an illustration is needed and image generation is ON, add ONE image layer with cutout:true (sticker-style), placed above the background and below the text unless overlap is intended; keep text readable.\n'+
+ 'RULES: 1) Real layers like a designer: background, decor, optional illustration, headline, body, source/credit, footer/handle. 2) Use at most 3 fonts. Arabic text must use Amiri, Scheherazade New, Aref Ruqaa, Cairo or Reem Kufi with align center. 3) '+COPY_RULES+' 4) '+(cfg.rich?'24-44':'8-20')+' layers total, at most '+(cfg.useImages?'2':'0')+' image layers'+(cfg.useImages?'':' (image generation is OFF: use only shapes, assets, fades and text; use keepId only in remix mode)')+(cfg.assets?'':'; asset layers are OFF: do not output kind asset')+'. 5) Full-canvas backgrounds/overlays set "bleed":true; everything else stays inside the safe area. 6) Follow the APPROVED CREATIVE BRIEF when given: its palette, fonts, copy, decor list and zones.';
 }
 function qaSystem(m){
  const d=canvasDims(),ratio=(d.W/d.H).toFixed(3);
@@ -24496,7 +24506,7 @@ function footerLine(){
 }
 function userPrev(){const p=$('adzUserPrev');if(!p)return;const f=footerLine();p.textContent=f?('Tampil di poster: '+f):'Username otomatis mati: AI memakai username dari perintah Anda (bila ada).';}
 function paintSep(){const sp=$('adzSepChips');if(!sp)return;Array.prototype.forEach.call(sp.children,function(b){b.classList.toggle('on',b.getAttribute('data-s')===S.sep);});}
-function isHandleOnly(t){t=String(t||'').trim();return t.length>0&&t.length<=120&&/@[A-Za-z0-9._]{2,}/.test(t)&&t.replace(/@[A-Za-z0-9._]+/g,'').replace(/[\s\/|•·,\-–—]+/g,'')==='';}
+function isHandleOnly(t){t=String(t||'').trim();return t.length>0&&t.length<=120&&/@[A-Za-z0-9._]+/.test(t)&&t.replace(/@[A-Za-z0-9._]+/g,'').replace(/[\s\/|•·,\-–—]+/g,'')==='';}
 function enforceFooter(L,d){
  const ft=footerLine();if(!ft)return;
  const mx=cfg.margin,avail=100-2*mx;
@@ -24660,12 +24670,203 @@ function drawHalftone(x,w,h,R){
  const step=Math.max(10,Math.min(w,h)/14);
  for(let yy=step/2;yy<h;yy+=step){for(let xx=step/2;xx<w;xx+=step){const t=(xx/w)*0.7+(yy/h)*0.3,r=step*0.46*(1-t)*(0.75+R()*0.25);if(r>0.7){x.beginPath();x.arc(xx,yy,r,0,6.283);x.fill();}}}
 }
-function artCanvas(kind,w,h,color,seed){
- const k=Math.min(1,1400/Math.max(w,h,1));
+/* ---------- v2.6.6: pustaka aset PNG lokal (digambar di kanvas, transparan) ---------- */
+function _rgb(c){c=String(c||'#ffffff').replace('#','');if(c.length===3)c=c.split('').map(function(h){return h+h;}).join('');const n=parseInt(c.slice(0,6),16)||0;return [(n>>16)&255,(n>>8)&255,n&255];}
+function rgba(c,a){const v=_rgb(c);return 'rgba('+v[0]+','+v[1]+','+v[2]+','+Math.max(0,Math.min(1,a)).toFixed(3)+')';}
+function mixc(a,b,t){const x=_rgb(a),y=_rgb(b);const h=function(i){return Math.max(0,Math.min(255,Math.round(x[i]+(y[i]-x[i])*t))).toString(16).padStart(2,'0');};return '#'+h(0)+h(1)+h(2);}
+function shade(c,t){return t>=0?mixc(c,'#ffffff',t):mixc(c,'#000000',-t);}
+function drawGlow(x,cw,ch,R,c1){
+ const m=Math.max(cw,ch);x.save();x.setTransform(cw/m,0,0,ch/m,0,0);
+ const g=x.createRadialGradient(m/2,m/2,0,m/2,m/2,m/2);
+ g.addColorStop(0,rgba(c1,1));g.addColorStop(0.22,rgba(c1,0.62));g.addColorStop(0.55,rgba(c1,0.2));g.addColorStop(1,rgba(c1,0));
+ x.fillStyle=g;x.fillRect(0,0,m,m);x.restore();
+}
+function drawRays(x,cw,ch,R,c1){
+ const cx=cw/2,cy=ch/2,rad=Math.hypot(cw,ch)/2,n=14+Math.floor(R()*10),off=R()*Math.PI;
+ x.save();x.translate(cx,cy);
+ for(let i=0;i<n;i++){
+  const a0=off+i*2*Math.PI/n,a1=a0+Math.PI/n*(0.5+R()*0.35);
+  x.beginPath();x.moveTo(0,0);x.lineTo(Math.cos(a0)*rad,Math.sin(a0)*rad);x.lineTo(Math.cos(a1)*rad,Math.sin(a1)*rad);x.closePath();
+  x.fillStyle=rgba(c1,0.5+R()*0.45);x.fill();
+ }
+ x.restore();
+ x.globalCompositeOperation='destination-in';
+ const g=x.createRadialGradient(cx,cy,0,cx,cy,rad);
+ g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(0.5,'rgba(0,0,0,0.4)');g.addColorStop(1,'rgba(0,0,0,0)');
+ x.fillStyle=g;x.fillRect(0,0,cw,ch);x.globalCompositeOperation='source-over';
+}
+function drawBokeh(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),n=22+Math.floor(R()*22);
+ for(let i=0;i<n;i++){
+  const r=mn*(0.012+R()*R()*0.075),px=R()*cw,py=R()*ch,col=mixc(c1,c2||'#ffffff',R()*0.65),a=0.07+R()*0.28;
+  x.beginPath();x.arc(px,py,r,0,Math.PI*2);x.fillStyle=rgba(col,a*0.55);x.fill();
+  x.lineWidth=Math.max(1,r*0.08);x.strokeStyle=rgba(col,Math.min(1,a*1.3));x.stroke();
+ }
+}
+function drawSparkle(x,cw,ch,R,c1){
+ const mn=Math.min(cw,ch),n=8+Math.floor(R()*9);
+ for(let i=0;i<n;i++){
+  const r=mn*(0.014+R()*R()*0.06),cx=r*1.5+R()*(cw-r*3),cy=r*1.5+R()*(ch-r*3),k=0.14;
+  x.save();x.shadowColor=rgba(c1,0.9);x.shadowBlur=r*1.3;x.fillStyle=rgba(c1,0.75+R()*0.25);
+  x.beginPath();x.moveTo(cx,cy-r);x.quadraticCurveTo(cx+r*k,cy-r*k,cx+r,cy);x.quadraticCurveTo(cx+r*k,cy+r*k,cx,cy+r);x.quadraticCurveTo(cx-r*k,cy+r*k,cx-r,cy);x.quadraticCurveTo(cx-r*k,cy-r*k,cx,cy-r);x.closePath();x.fill();x.restore();
+  if(R()<0.6){x.beginPath();x.arc(cx+(R()-0.5)*r*4,cy+(R()-0.5)*r*4,Math.max(1,r*0.12),0,Math.PI*2);x.fillStyle=rgba(c1,0.8);x.fill();}
+ }
+}
+function drawGrain(x,cw,ch,R,c1){
+ const id=x.createImageData(cw,ch),v=_rgb(c1),d=id.data;
+ for(let i=0;i<d.length;i+=4){if(R()<0.55){d[i]=v[0];d[i+1]=v[1];d[i+2]=v[2];d[i+3]=Math.floor(R()*120);}}
+ x.putImageData(id,0,0);
+}
+function drawStar8(x,cw,ch,R,c1){
+ const S=Math.min(cw,ch)/(4+Math.floor(R()*2)),lw=Math.max(1,S*0.022);
+ x.strokeStyle=c1;x.lineWidth=lw;x.lineJoin='round';
+ function sq(cx,cy,s,rot){x.save();x.translate(cx,cy);x.rotate(rot);x.strokeRect(-s/2,-s/2,s,s);x.restore();}
+ for(let cy=S/2;cy<ch+S;cy+=S)for(let cx=S/2;cx<cw+S;cx+=S){
+  sq(cx,cy,S*0.6,0);sq(cx,cy,S*0.6,Math.PI/4);
+  x.beginPath();x.moveTo(cx-S/2,cy);x.lineTo(cx,cy-S/2);x.lineTo(cx+S/2,cy);x.lineTo(cx,cy+S/2);x.closePath();x.stroke();
+  x.beginPath();x.arc(cx,cy,S*0.07,0,Math.PI*2);x.stroke();
+ }
+}
+function drawLattice(x,cw,ch,R,c1){
+ const S=Math.min(cw,ch)/(7+Math.floor(R()*4));x.strokeStyle=c1;x.lineWidth=Math.max(1,S*0.018);
+ for(let k=-Math.ceil(ch/S);k<=Math.ceil(cw/S);k++){
+  x.beginPath();x.moveTo(k*S,0);x.lineTo(k*S+ch,ch);x.stroke();
+  x.beginPath();x.moveTo(k*S+ch,0);x.lineTo(k*S,ch);x.stroke();
+ }
+}
+function _notchRect(x,l,t,r,b,n){
+ x.beginPath();x.moveTo(l+n,t);x.lineTo(r-n,t);x.arc(r,t,n,Math.PI,Math.PI/2,true);x.lineTo(r,b-n);x.arc(r,b,n,-Math.PI/2,Math.PI,true);
+ x.lineTo(l+n,b);x.arc(l,b,n,0,-Math.PI/2,true);x.lineTo(l,t+n);x.arc(l,t,n,Math.PI/2,0,true);x.closePath();
+}
+function drawFrame(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),t=Math.max(2,mn*0.0055),m0=t*2,gap=mn*0.022,n=mn*0.05,in2=c2||c1;
+ x.lineJoin='round';
+ x.strokeStyle=c1;x.lineWidth=t*1.7;_notchRect(x,m0,m0,cw-m0,ch-m0,n);x.stroke();
+ x.strokeStyle=in2;x.lineWidth=t*0.7;_notchRect(x,m0+gap,m0+gap,cw-m0-gap,ch-m0-gap,n*0.6);x.stroke();
+ x.fillStyle=c1;
+ const dm=t*3.4;
+ [[cw/2,m0],[cw/2,ch-m0],[m0,ch/2],[cw-m0,ch/2]].forEach(function(p){x.save();x.translate(p[0],p[1]);x.rotate(Math.PI/4);x.fillRect(-dm/2,-dm/2,dm,dm);x.restore();});
+}
+function drawDivider(x,cw,ch,R,c1,c2){
+ const cy=ch/2,dm=ch*0.36,gap=dm*2.1,lw=Math.max(1,ch*0.06),hc=c2||c1;
+ [[0,cw/2-gap,1],[cw,cw/2+gap,-1]].forEach(function(s){
+  const g=x.createLinearGradient(s[0],0,s[1],0);g.addColorStop(0,rgba(c1,0));g.addColorStop(1,rgba(c1,1));
+  x.strokeStyle=g;x.lineWidth=lw;x.beginPath();x.moveTo(s[0],cy);x.lineTo(s[1],cy);x.stroke();
+ });
+ function dia(cx,s,col){x.save();x.translate(cx,cy);x.rotate(Math.PI/4);x.fillStyle=col;x.fillRect(-s/2,-s/2,s,s);x.restore();}
+ dia(cw/2,dm,hc);dia(cw/2-gap*0.62,dm*0.45,c1);dia(cw/2+gap*0.62,dm*0.45,c1);
+ x.fillStyle=c1;[-1,1].forEach(function(sg){x.beginPath();x.arc(cw/2+sg*gap*0.88,cy,Math.max(1.2,lw*1.2),0,Math.PI*2);x.fill();});
+}
+function drawCorner(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),t=Math.max(2,mn*0.012),m0=mn*0.05,g=t*3.6,in2=c2||c1;
+ function ln(x0,y0,x1,y1,col,w){const gr=x.createLinearGradient(x0,y0,x1,y1);gr.addColorStop(0,rgba(col,1));gr.addColorStop(0.7,rgba(col,0.7));gr.addColorStop(1,rgba(col,0));x.strokeStyle=gr;x.lineWidth=w;x.lineCap='round';x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke();}
+ ln(m0,m0,cw*0.96,m0,c1,t);ln(m0,m0,m0,ch*0.96,c1,t);
+ ln(m0+g,m0+g,cw*0.62,m0+g,in2,t*0.55);ln(m0+g,m0+g,m0+g,ch*0.62,in2,t*0.55);
+ x.strokeStyle=c1;x.lineWidth=t*0.8;x.beginPath();x.arc(m0+g*2.6,m0+g*2.6,g*1.5,Math.PI,Math.PI*1.5);x.stroke();
+ x.fillStyle=c1;x.beginPath();x.arc(m0,m0,t*1.9,0,Math.PI*2);x.fill();
+ x.save();x.translate(m0+g*2.6,m0+g*2.6);x.rotate(Math.PI/4);x.fillRect(-t*1.1,-t*1.1,t*2.2,t*2.2);x.restore();
+}
+function drawWave(x,cw,ch,R,c1){
+ const n=5,mn=Math.min(cw,ch);
+ for(let i=0;i<n;i++){
+  const A=ch*(0.06+R()*0.1),f=0.8+R()*1.3,ph=R()*6.28,cy=ch/2+(i-(n-1)/2)*ch*0.1;
+  const g=x.createLinearGradient(0,0,cw,0);g.addColorStop(0,rgba(c1,0));g.addColorStop(0.25,rgba(c1,0.85));g.addColorStop(0.75,rgba(c1,0.85));g.addColorStop(1,rgba(c1,0));
+  x.strokeStyle=g;x.lineWidth=Math.max(1.2,mn*0.005*(1+(i%3)*0.7));x.lineCap='round';x.beginPath();
+  for(let k=0;k<=80;k++){const t=k/80,px=t*cw,py=cy+A*Math.sin(t*Math.PI*2*f+ph);if(k===0)x.moveTo(px,py);else x.lineTo(px,py);}
+  x.stroke();
+ }
+}
+function drawBurst(x,cw,ch,R,c1,c2){
+ const n=16+Math.floor(R()*8);
+ x.save();x.translate(cw/2,ch/2);x.scale(cw,ch);
+ x.beginPath();
+ for(let i=0;i<n*2;i++){const a=i*Math.PI/n,r=(i%2?0.37:0.48)*(0.97+R()*0.06);const px=Math.cos(a)*r,py=Math.sin(a)*r;if(i===0)x.moveTo(px,py);else x.lineTo(px,py);}
+ x.closePath();x.fillStyle=c1;x.fill();
+ x.lineJoin='round';x.lineWidth=0.012;x.strokeStyle=c2||shade(c1,-0.4);x.stroke();
+ x.beginPath();x.arc(0,0,0.31,0,Math.PI*2);x.lineWidth=0.008;x.strokeStyle=rgba(c2||'#ffffff',0.7);x.stroke();
+ x.restore();
+}
+function drawRings(x,cw,ch,R,c1){
+ const m=Math.max(cw,ch),n=8;x.save();x.setTransform(cw/m,0,0,ch/m,0,0);
+ for(let i=0;i<n;i++){x.beginPath();x.arc(m/2,m/2,(i+1)/n*m*0.5,0,Math.PI*2);x.strokeStyle=rgba(c1,(1-i/n)*0.85);x.lineWidth=Math.max(1.2,m*0.004);x.stroke();}
+ x.restore();
+}
+function drawOrb(x,cw,ch,R,c1,c2){
+ const d=Math.min(cw,ch),r=d*0.42,cx=cw/2,cy=ch/2-d*0.05,rim=c2||shade(c1,0.5);
+ x.save();x.translate(cx,cy+r*1.12);x.scale(1,0.17);
+ const sg=x.createRadialGradient(0,0,0,0,0,r*1.1);sg.addColorStop(0,'rgba(0,0,0,0.5)');sg.addColorStop(1,'rgba(0,0,0,0)');
+ x.fillStyle=sg;x.beginPath();x.arc(0,0,r*1.1,0,Math.PI*2);x.fill();x.restore();
+ const g=x.createRadialGradient(cx-r*0.35,cy-r*0.4,r*0.05,cx,cy,r*1.05);
+ g.addColorStop(0,shade(c1,0.7));g.addColorStop(0.25,shade(c1,0.22));g.addColorStop(0.6,c1);g.addColorStop(0.9,shade(c1,-0.45));g.addColorStop(1,shade(c1,-0.7));
+ x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.fillStyle=g;x.fill();
+ x.save();x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.clip();
+ const rg=x.createRadialGradient(cx+r*0.3,cy+r*0.6,r*0.05,cx+r*0.3,cy+r*0.6,r*0.95);rg.addColorStop(0,rgba(rim,0.6));rg.addColorStop(1,rgba(rim,0));
+ x.fillStyle=rg;x.fillRect(cx-r,cy-r,r*2,r*2);x.restore();
+ x.save();x.translate(cx-r*0.3,cy-r*0.46);x.rotate(-0.6);x.scale(1,0.55);
+ const hg=x.createRadialGradient(0,0,0,0,0,r*0.36);hg.addColorStop(0,'rgba(255,255,255,0.92)');hg.addColorStop(1,'rgba(255,255,255,0)');
+ x.fillStyle=hg;x.beginPath();x.arc(0,0,r*0.36,0,Math.PI*2);x.fill();x.restore();
+}
+function drawRibbon(x,cw,ch,R,c1,c2){
+ const bl=cw*0.1,br=cw*0.9,top=ch*0.1,bot=ch*0.76,fy=ch*0.14,f=ch*0.15,dark=shade(c1,-0.38),deep=shade(c1,-0.62);
+ function tail(left){
+  const o=left?0:cw,i=left?bl+f:br-f,s=left?1:-1;
+  x.beginPath();x.moveTo(o,top+fy);x.lineTo(i,top+fy);x.lineTo(i,bot+fy);x.lineTo(o,bot+fy);x.lineTo(o+s*cw*0.05,(top+bot)/2+fy);x.closePath();x.fillStyle=dark;x.fill();
+  x.beginPath();x.moveTo(left?bl:br,bot);x.lineTo(left?bl+f:br-f,bot);x.lineTo(left?bl+f:br-f,bot+fy);x.closePath();x.fillStyle=deep;x.fill();
+ }
+ tail(true);tail(false);
+ const g=x.createLinearGradient(0,top,0,bot);g.addColorStop(0,shade(c1,0.2));g.addColorStop(0.5,c1);g.addColorStop(1,shade(c1,-0.16));
+ x.fillStyle=g;x.fillRect(bl,top,br-bl,bot-top);
+ x.fillStyle='rgba(255,255,255,0.22)';x.fillRect(bl,top,br-bl,(bot-top)*0.08);
+ x.setLineDash([ch*0.05,ch*0.04]);x.strokeStyle=rgba(c2||'#ffffff',0.6);x.lineWidth=Math.max(1,ch*0.012);
+ x.strokeRect(bl+ch*0.045,top+ch*0.045,br-bl-ch*0.09,bot-top-ch*0.09);x.setLineDash([]);
+}
+function drawGradbar(x,cw,ch,R,c1,c2){
+ const rad=ch<cw*0.4?ch/2:Math.min(cw,ch)*0.12;
+ function rr(){x.beginPath();x.moveTo(rad,0);x.lineTo(cw-rad,0);x.arcTo(cw,0,cw,rad,rad);x.lineTo(cw,ch-rad);x.arcTo(cw,ch,cw-rad,ch,rad);x.lineTo(rad,ch);x.arcTo(0,ch,0,ch-rad,rad);x.lineTo(0,rad);x.arcTo(0,0,rad,0,rad);x.closePath();}
+ let g;
+ if(c2){g=x.createLinearGradient(0,0,cw,0);g.addColorStop(0,c1);g.addColorStop(1,c2);}
+ else{g=x.createLinearGradient(0,0,0,ch);g.addColorStop(0,shade(c1,0.5));g.addColorStop(0.48,c1);g.addColorStop(0.52,shade(c1,-0.28));g.addColorStop(1,shade(c1,0.25));}
+ rr();x.fillStyle=g;x.fill();
+ x.save();rr();x.clip();x.fillStyle='rgba(255,255,255,0.2)';x.fillRect(0,0,cw,ch*0.45);x.restore();
+ rr();x.strokeStyle=rgba(shade(c1,0.6),0.45);x.lineWidth=Math.max(1,ch*0.04);x.stroke();
+}
+function drawStripes(x,cw,ch,R,c1){
+ const S=Math.min(cw,ch)/(8+Math.floor(R()*4));x.fillStyle=c1;
+ for(let k=-Math.ceil(ch/S);k<=Math.ceil(cw/S);k+=2){x.beginPath();x.moveTo(k*S,0);x.lineTo(k*S+S,0);x.lineTo(k*S+S+ch,ch);x.lineTo(k*S+ch,ch);x.closePath();x.fill();}
+}
+function drawWordmark(x,cw,ch,R,c1,c2,A){
+ let txt=String(A&&A.text||'').trim();if(!txt)txt='ISLAM';if(A&&A.upper)txt=txt.toUpperCase();
+ const lines=txt.split('\n').slice(0,4),wt=(A&&A.weight)||'900',fam=(A&&A.font)||'Anton, sans-serif';
+ let size=ch/lines.length*0.92;x.font=wt+' '+size+'px '+fam;
+ let mx=0;lines.forEach(function(l){mx=Math.max(mx,x.measureText(l).width);});
+ if(mx>cw*0.98)size=size*cw*0.98/mx;
+ x.font=wt+' '+size+'px '+fam;x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
+ const lh=size*(lines.length>1?0.98:1),y0=ch/2-(lines.length-1)*lh/2;
+ lines.forEach(function(l,i){
+  const yy=y0+i*lh;
+  if(A&&A.wstyle==='fill'){
+   if(c2){const g=x.createLinearGradient(0,yy-size/2,0,yy+size/2);g.addColorStop(0,c1);g.addColorStop(1,c2);x.fillStyle=g;}else x.fillStyle=c1;
+   x.fillText(l,cw/2,yy);
+  }else{x.lineWidth=Math.max(2,size*0.022);x.strokeStyle=c1;x.strokeText(l,cw/2,yy);}
+ });
+}
+
+function artCanvas(kind,w,h,color,seed,color2,A){
+ const soft=/^(glow|rays|bokeh|grain|rings)$/.test(kind);
+ const k=Math.min(1,(soft?720:1400)/Math.max(w,h,1));
  const cw=Math.max(8,Math.round(w*k)),ch=Math.max(8,Math.round(h*k));
  const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');const R=rng(seed||7);
  x.fillStyle=color;x.strokeStyle=color;
- if(kind==='splatter')drawSplatter(x,cw,ch,R);else if(kind==='ring')drawRing(x,cw,ch,R);else if(kind==='scribble')drawScribble(x,cw,ch,R);else if(kind==='halftone')drawHalftone(x,cw,ch,R);else drawBrush(x,cw,ch,R);
+ const c2=color2||null;
+ if(kind==='splatter')drawSplatter(x,cw,ch,R);else if(kind==='ring')drawRing(x,cw,ch,R);else if(kind==='scribble')drawScribble(x,cw,ch,R);else if(kind==='halftone')drawHalftone(x,cw,ch,R);
+ else if(kind==='glow')drawGlow(x,cw,ch,R,color);else if(kind==='rays')drawRays(x,cw,ch,R,color);else if(kind==='bokeh')drawBokeh(x,cw,ch,R,color,c2);
+ else if(kind==='sparkle')drawSparkle(x,cw,ch,R,color);else if(kind==='grain')drawGrain(x,cw,ch,R,color);else if(kind==='star8')drawStar8(x,cw,ch,R,color);
+ else if(kind==='lattice')drawLattice(x,cw,ch,R,color);else if(kind==='frame')drawFrame(x,cw,ch,R,color,c2);else if(kind==='divider')drawDivider(x,cw,ch,R,color,c2);
+ else if(kind==='corner')drawCorner(x,cw,ch,R,color,c2);else if(kind==='wave')drawWave(x,cw,ch,R,color);else if(kind==='burst')drawBurst(x,cw,ch,R,color,c2);
+ else if(kind==='rings')drawRings(x,cw,ch,R,color);else if(kind==='orb')drawOrb(x,cw,ch,R,color,c2);else if(kind==='ribbon')drawRibbon(x,cw,ch,R,color,c2);
+ else if(kind==='gradbar')drawGradbar(x,cw,ch,R,color,c2);else if(kind==='stripes')drawStripes(x,cw,ch,R,color);
+ else if(kind==='wordmark')drawWordmark(x,cw,ch,R,color,c2,A);
+ else drawBrush(x,cw,ch,R);
  return c;
 }
 
@@ -24693,6 +24894,30 @@ function normAttach(a){
  if(!a||typeof a!=='object'||a.to==null||a.to==='')return null;
  return {to:a.to,mode:/^(wrap|under|above)$/.test(a.mode)?a.mode:'wrap',padX:a.padX,padY:a.padY,gap:a.gap,wRatio:a.wRatio,h:a.h,align:/^(left|center|right)$/.test(a.align)?a.align:'center',z:a.z==='front'?'front':'behind'};
 }
+const GSK={};
+function gradSkin(cols){
+ const k=cols.join(',');if(GSK[k])return GSK[k];
+ const c=document.createElement('canvas');c.width=1024;c.height=64;const x=c.getContext('2d');
+ const g=x.createLinearGradient(0,0,0,64),n=cols.length;
+ g.addColorStop(0,cols[0]);
+ for(let i=0;i<n;i++)g.addColorStop(0.36+0.28*(n===1?0:i/(n-1)),cols[i]);
+ g.addColorStop(1,cols[n-1]);
+ x.fillStyle=g;x.fillRect(0,0,1024,64);GSK[k]=c.toDataURL('image/png');c.width=0;c.height=0;return GSK[k];
+}
+function applyAccent(el,acc){
+ const norm=function(w){return String(w).toLowerCase().replace(/[^a-z0-9\u00C0-\u024F\u0600-\u06FF]/g,'');};
+ const want=acc.words.map(norm).filter(Boolean);if(!want.length)return;
+ let gi=0;el.wordStyles=el.wordStyles||{};
+ String(el.text).split('\n').forEach(function(p){
+  if(!p){gi++;return;}
+  const ws=p.split(' ').filter(function(w){return w.length>0;});
+  if(!ws.length){gi++;return;}
+  ws.forEach(function(w){
+   if(want.indexOf(norm(w))>=0){const st={color:hex(acc.color,'#D4AF37')};if(acc.weight)st.fontWeight=String(acc.weight);el.wordStyles[gi]=st;}
+   gi++;
+  });
+ });
+}
 function mkText(L,d){
  const size=clamp(L.size,1.6,20)/100*d.W;
  const el={id:newId(),type:'text',text:String(L.text==null?'':L.text),
@@ -24703,6 +24928,16 @@ function mkText(L,d){
   filters:{brightness:100,contrast:100,saturate:100,hue:0},
   shadow:shadowOf(L.shadow)||{color:'transparent',blur:0,angle:45,distance:0,alpha:0},transparency:Object.assign({},TRANSP),
   _adz:{kind:'text',name:L.name||'Teks',footer:!!L._footer}};
+ const sc=d.W/1080;
+ if(L.glow&&typeof L.glow==='object'&&!L.shadow)el.shadow={color:hex(L.glow.color,'#FFD27A'),blur:clamp(L.glow.blur==null?18:L.glow.blur,2,40),angle:45,distance:0,alpha:clamp(L.glow.opacity==null?0.8:L.glow.opacity,0,1)};
+ if(L.stroke&&+L.stroke.width>0){el.borderWidth=clamp(L.stroke.width,0,14)*sc;el.borderColor=hex(L.stroke.color,'#000000');}
+ if(L.gradient&&Array.isArray(L.gradient.colors)&&L.gradient.colors.length>=2){
+  const u=gradSkin(L.gradient.colors.slice(0,4).map(function(c){return hex(c,'#FFFFFF');}));
+  el.textSkinSrc=u;el.textSkinImg=getImageFromCache(u);el.textSkinBlend='source-in';el.textSkinScale=1;el.textSkinOffsetX=0;el.textSkinOffsetY=0;
+ }
+ if(L.innerShadow&&typeof L.innerShadow==='object')el.innerShadow={color:hex(L.innerShadow.color,'#000000'),blur:clamp(L.innerShadow.blur==null?6:L.innerShadow.blur,0,20),distance:clamp(L.innerShadow.distance==null?3:L.innerShadow.distance,0,12),angle:+L.innerShadow.angle||45,alpha:clamp(L.innerShadow.opacity==null?0.7:L.innerShadow.opacity,0,1)};
+ if(L.accent&&typeof L.accent==='object'&&Array.isArray(L.accent.words)&&L.accent.words.length)applyAccent(el,L.accent);
+ if(L.extrude&&typeof L.extrude==='object'&&+L.extrude.depth>0)el._adz.extrude={color:hex(L.extrude.color,'#7A5A12'),depth:clamp(L.extrude.depth,2,20)*sc,angle:(+L.extrude.angle)||55};
  el._adz.leftPx=clamp(L.x,0,100)/100*d.W;el._adz.topPx=clamp(L.y,0,100)/100*d.H;
  return el;
 }
@@ -24713,7 +24948,7 @@ function mkShape(L,d){
  const bleed=!!L.bleed||(w>=d.W*0.96&&h>=d.H*0.9);
  return {id:newId(),type:'shape',shapeType:type,x:x+w/2,y:y+h/2,width:w,height:h,color:hex(L.color,'#D4AF37'),
   opacity:clamp(L.opacity==null?1:L.opacity,0,1),rotation:clamp(L.rotation||0,-360,360),cornerRadius:type==='rect'?clamp(L.radius||0,0,150):0,
-  borderWidth:clamp(L.borderWidth||0,0,40),borderBlur:0,borderColor:hex(L.borderColor,'#ffffff'),blendMode:'normal',
+  borderWidth:clamp(L.borderWidth||0,0,40),borderBlur:0,borderColor:hex(L.borderColor,'#ffffff'),blendMode:(ADZ_BLENDS.indexOf(L.blend)>0?L.blend:'normal'),
   shadow:shadowOf(L.shadow)||{color:'transparent',blur:0,angle:45,distance:0},locked:false,groupId:null,transparency:Object.assign({},TRANSP),
   _adz:{kind:'shape',bleed:bleed,name:L.name||'Bentuk'}};
 }
@@ -24750,7 +24985,10 @@ function mkAsset(L,d){
  const w=clamp(L.w,1,140)/100*d.W,h=clamp(L.h,0.3,140)/100*d.H;
  const x=clamp(L.x,-30,130)/100*d.W,y=clamp(L.y,-30,130)/100*d.H;
  const el=imageBase(getImageFromCache(TINY),TINY,x+w/2,y+h/2,w,h,clamp(L.rotation||0,-360,360),clamp(L.opacity==null?1:L.opacity,0,1));
- el._adz={kind:'asset',art:art,color:hex(L.color,'#D4AF37'),seed:Math.abs(parseInt(L.seed)||0)||(Math.floor(Math.random()*9000)+11),bleed:false,name:L.name||'Aset'};
+ const bleed=!!L.bleed||(w>=d.W*0.96&&h>=d.H*0.9);
+ el._adz={kind:'asset',art:art,color:hex(L.color,'#D4AF37'),color2:(L.color2&&/^#/.test(String(L.color2)))?hex(L.color2,'#FFFFFF'):'',seed:Math.abs(parseInt(L.seed)||0)||(Math.floor(Math.random()*9000)+11),bleed:bleed,name:L.name||'Aset',
+  text:String(L.text||''),font:adzFont(L.font||'Anton'),weight:String(L.weight||'900'),wstyle:L.style==='fill'?'fill':'outline',upper:L.uppercase!==false};
+ if(ADZ_BLENDS.indexOf(L.blend)>0)el.blendMode=L.blend;
  return el;
 }
 function mkKeep(L,d,old){
@@ -24763,8 +25001,10 @@ function mkKeep(L,d,old){
 }
 async function finalizeAssets(els){
  for(const e of els){
+  if(e.type==='text'&&e.textSkinImg){await waitImg(e.textSkinImg);e._cachedCanvas=null;e._cachedHash=null;}
   const a=e._adz;if(!a||a.kind!=='asset')continue;
-  const c=artCanvas(a.art,e.width,e.height,a.color,a.seed);const url=c.toDataURL('image/png');c.width=0;c.height=0;
+  if(a.art==='wordmark'){try{await fontsToLoad([{type:'text',fontFamily:a.font,fontWeight:a.weight,fontStyle:'normal',text:a.text}]);}catch(x){}}
+  const c=artCanvas(a.art,e.width,e.height,a.color,a.seed,a.color2||null,a);const url=c.toDataURL('image/png');c.width=0;c.height=0;
   const im=getImageFromCache(url);await waitImg(im);
   e.img=im;e.src=url;e.origWidth=im.width;e.origHeight=im.height;e._cachedCanvas=null;e._cachedHash=null;
  }
@@ -25002,7 +25242,7 @@ function layoutAll(target,d,m){
 
 /* ---------- Lint otomatis + tabel layer untuk penilai ---------- */
 function lint(slide,d,m){
- const out=[],els=slide.elements,T=els.filter(function(e){return e.type==='text';});
+ const out=[],els=slide.elements,T=els.filter(function(e){return e.type==='text'&&!(e._adz&&e._adz.fx);});
  const sf=m*0.8;
  const nm=function(e){return (e._adz&&e._adz.name)||e.type;};
  const bx=T.map(boxOf);
@@ -25025,7 +25265,7 @@ function lint(slide,d,m){
  return out.slice(0,14);
 }
 function layerTable(slide,d){
- return slide.elements.map(function(e){
+ return slide.elements.filter(function(e){return !(e._adz&&e._adz.fx);}).map(function(e){
   const a=e._adz||{},b=boxOf(e);
   const o={i:a.idx,kind:a.kind||e.type,name:a.name,x:pc(b.l/d.W),y:pc(b.t/d.H),w:pc((b.r-b.l)/d.W),h:pc((b.b-b.t)/d.H)};
   if(e.type==='text'){o.text=String(e.text||'').replace(/\n/g,' / ').slice(0,60);o.sizePct=pc(e.fontSize/d.W);o.align=e.textAlign;o.color=e.color;}
@@ -25048,6 +25288,29 @@ function applyFixes(L,fixes){
 
 /* ---------- Eksekusi ---------- */
 function uniqueNm(base,used){let n=String(base||'layer').trim().toLowerCase()||'layer',k=n,c=2;while(used[k]){k=n+' '+c;c++;}used[k]=1;return k;}
+function addExtrusions(target,d){
+ const out=[];let used=0;
+ target.elements.forEach(function(e){
+  const xt=e._adz&&e._adz.extrude;
+  if(e.type==='text'&&xt&&used<2){
+   used++;
+   const steps=Math.max(4,Math.min(12,Math.round(xt.depth/(d.W/1080*1.5)))),ang=xt.angle*Math.PI/180,dx=Math.cos(ang),dy=Math.sin(ang);
+   const nm=(e._adz.nm||e._adz.name||'teks');
+   for(let i=steps;i>=1;i--){
+    const t=i/steps,col=t>0.5?shade(xt.color,-0.42*(t-0.5)*2):shade(xt.color,0.18*(1-t*2));
+    const c=Object.assign({},e,{id:newId(),x:e.x+dx*xt.depth*t,y:e.y+dy*xt.depth*t,color:col,
+     shadow:(i===steps)?{color:'#000000',blur:Math.round(16*d.W/1080),angle:45,distance:Math.round(xt.depth*0.55),alpha:0.5}:{color:'transparent',blur:0,angle:45,distance:0,alpha:0},
+     wordStyles:{},textSkinImg:null,textSkinSrc:null,innerShadow:null,borderColor:col,
+     _calculatedHeight:null,_renderedW:null,_cachedCanvas:null,_cachedHash:null});
+    c._adz={kind:'text',name:'3D '+nm,nm:'3d '+nm+' '+i,fx:true,fxOf:e._adz.idx,idx:1000+(e._adz.idx||0)*20+i,bleed:false};
+    out.push(c);
+   }
+   delete e._adz.extrude;
+  }
+  out.push(e);
+ });
+ target.elements=out;
+}
 async function compose(target,L,d,m,keepSrc,noRender){
  const els=[],used={};
  for(let i=0;i<L.length;i++){
@@ -25075,7 +25338,8 @@ async function compose(target,L,d,m,keepSrc,noRender){
  await fontsToLoad(els);
  fitFooter(els,d,m);
  const res=layoutAll(target,d,m);
- await finalizeAssets(els);
+ addExtrusions(target,d);
+ await finalizeAssets(target.elements);
  if(!noRender)renderAll();
  return res;
 }
@@ -25163,8 +25427,8 @@ function labelFor(e){
  const a=e._adz||{},nm=a.nm||a.name||'';
  if(e.type==='text')return 'Menulis: '+String(e.text||'').replace(/\s+/g,' ').slice(0,26);
  if(e.type==='fade')return 'Gradasi tepi';
- if(e.type==='image')return 'Gambar: '+nm;
  if(a.art)return 'Aset: '+(nm||a.art);
+ if(e.type==='image')return 'Gambar: '+nm;
  return 'Bentuk: '+nm;
 }
 /* layer muncul satu per satu: kursor menyentuh layer, bingkai putus-putus, lalu layer meluncur halus dan memudar masuk */
@@ -25172,16 +25436,18 @@ async function ghostReveal(target,d){
  const full=target.elements.slice();
  if(!gWatching()||!full.length){renderAll();return;}
  G.mode='reveal';
- const n=full.length,per=Math.min(1,26000/(n*1000));
+ const fxBy={};full.forEach(function(e){const a=e._adz;if(a&&a.fx)(fxBy[a.fxOf]=fxBy[a.fxOf]||[]).push(e);});
+ const n=full.filter(function(e){return !(e._adz&&e._adz.fx);}).length,per=Math.min(1,26000/(n*1000));
  const orig=full.map(function(e){return {e:e,op:e.opacity===undefined?1:e.opacity,x:e.x,y:e.y};});
  target.elements=[];renderAll();
  try{
   const r=mainCanvas.getBoundingClientRect();
   gSay('Latar & kanvas');
   await gMove(r.left+r.width*0.5,r.top+r.height*0.45,Math.max(300,700*per));gClick();await gWait(260*per);
-  for(let i=0;i<n;i++){
+  for(let i=0;i<full.length;i++){
    const e=full[i];
-   if(!gWatching()){for(let j=i;j<n;j++)target.elements.push(full[j]);break;}
+   if(e._adz&&e._adz.fx)continue;
+   if(!gWatching())break;
    const b=boxOf(e),bleed=!!(e._adz&&e._adz.bleed);
    const p=c2s(bleed?d.W*0.5:(b.l+b.r)/2,bleed?d.H*0.5:(b.t+b.b)/2);
    gSay(labelFor(e));
@@ -25191,6 +25457,11 @@ async function ghostReveal(target,d){
    e.opacity=0;e.y=o.y-off;target.elements.push(e);renderAll();
    await tween(Math.max(160,340*per),function(k){const q=1-Math.pow(1-k,3);e.opacity=o.op*q;e.y=o.y-off*(1-q);renderAll();});
    e.opacity=o.op;e.y=o.y;renderAll();
+   const cl=fxBy[e._adz&&e._adz.idx];
+   if(cl&&cl.length&&gWatching()){
+    const mi=target.elements.indexOf(e);
+    for(let q=cl.length-1;q>=0&&gWatching();q--){const c=cl[q];target.elements.splice(mi,0,c);renderAll();await gWait(45*per);}
+   }
    await gWait((e.type==='text'?240+Math.min(480,String(e.text||'').length*5):120)*per);
    gFrameHide();
   }
@@ -25294,7 +25565,7 @@ async function adzRun(cont,canRetry){
    if(LAST_REPAIRED)log('Jawaban AI terpotong; bagian yang utuh diselamatkan. Jika desain kurang lengkap, coba lagi atau ganti model.','wn');
    S.ck.spec=spec;
   }
-  const L=(Array.isArray(spec.layers)?spec.layers.slice(0,28):[]).filter(function(l){return l&&typeof l==='object';});
+  const L=(Array.isArray(spec.layers)?spec.layers.slice(0,48):[]).filter(function(l){return l&&typeof l==='object';});
   if(!L.length)throw new Error('AI tidak menghasilkan layer. Coba perintah yang lebih jelas.');
   enforceFooter(L,d);
   const nAsset=L.filter(function(l){return l.kind==='asset';}).length;
