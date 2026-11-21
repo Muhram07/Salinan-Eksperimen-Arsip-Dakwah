@@ -1,15 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v2.6.6
+Studio Poster Maker Pro - Update v2.6.7
+
+v2.6.7:
+1. MESIN FREELLMAPI: AI Desainer kini memakai FreeLLMAPI (router OpenAI-compatible yang menggabungkan kuota gratis puluhan penyedia: Google, Groq, Cerebras, Mistral, OpenRouter, dll.) lewat satu alamat dan satu Unified key. Gemini langsung tetap ada sebagai mesin alternatif dan cadangan otomatis bila FreeLLMAPI tidak terjangkau.
+2. PANTANG MENYERAH UNTUK FREELLMAPI: limit/sibuk/timeout ditunggu dengan jeda acak lalu diulang sendiri; diagnosa koneksi bertahap (alamat, server, CORS, kunci, model, vision, mode JSON) dengan petunjuk perbaikan yang jelas.
+3. MENU DIROMBAK: tiga tab (Buat, Koneksi, Lanjutan), preset kualitas Cepat/Pro/Maksimal, panduan setup 5 langkah, skrip Worker CORS siap salin, status koneksi di judul.
+4. KUALITAS: normalisasi otomatis keluaran model yang kurang disiplin (nama jenis layer, angka teks, pecahan 0-1), contoh format mini dan aturan JSON di prompt.
 
 v2.6.6:
-1. MODE DESAINER PRO: AI kini merancang 24-44 layer (latar bertingkat, cahaya, pola, bingkai, ornamen, lencana, watermark tipografi, teks berefek) dengan gaya 3D atau 2D yang konsisten. Bisa dimatikan lewat opsi bila ingin poster sederhana.
-2. 18 ASET PNG LOKAL BARU (gratis, tanpa kuota): glow, rays, bokeh, sparkle, grain, star8, lattice, frame, divider, corner, wave, burst, rings, orb 3D, ribbon, gradbar logam, stripes, wordmark. Mendukung blend mode.
-3. EFEK TEKS: gradasi emas/logam, outline, glow, bayangan dalam, ketebalan 3D (extrude), kata beraksen warna.
-4. GAMBAR AI DIMATIKAN secara bawaan (hasil Gemini kurang memukau); Gemini dipakai untuk teks, tata letak, dan penilaian.
-
-v2.6.5:
-1. MODE PANTANG MENYERAH: menunggu dengan jeda acak lalu mencoba lagi sendiri saat limit/server sibuk.
-2. DAFTAR MODEL OTOMATIS dibaca dari akun dan dipakai bergantian; model 404 dilewati.
+1. MODE DESAINER PRO 24-44 layer, 18 aset PNG lokal baru, efek teks (gradasi emas, outline, glow, bayangan dalam, 3D extrude, kata beraksen), gambar AI dimatikan bawaan.
 -->
 
 
@@ -953,7 +952,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 /* v2.0.0: modal Hapus Objek AI memakai kelas Hapus BG */
 
-/* v2.6.6: AI Desainer (Gemini via API key manual) */
+/* v2.6.7: AI Desainer (FreeLLMAPI / Gemini) */
 #adzModal{position:fixed;inset:0;z-index:9000000;display:none;flex-direction:column;background:#0b0b0b;color:#e5e7eb;font-family:inherit;}
 #adzModal.active{display:flex;}
 #adzModal *{box-sizing:border-box;}
@@ -1006,6 +1005,21 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 .adz-log div{padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.07);}
 .adz-log div:last-child{border-bottom:0;}
 .adz-log .ok{color:#7ee2a8;}.adz-log .er{color:#ff8a8a;}.adz-log .wn{color:#FFE259;}
+.adz-nav{flex:0 0 auto;display:flex;gap:6px;padding:8px 12px;background:#0f0e0a;border-bottom:1px solid rgba(255,255,255,.08);}
+.adz-nav button{flex:1;position:relative;padding:9px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#9CA3AF;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;}
+.adz-nav button.on{background:rgba(212,175,55,.16);border-color:#D4AF37;color:#FFE259;}
+.adz-nav button i{position:absolute;top:6px;right:9px;width:7px;height:7px;border-radius:50%;background:#ff6b6b;display:none;}
+.adz-nav button i.on{display:block;}
+.adz-pane{display:none;flex-direction:column;gap:12px;}
+.adz-pane.on{display:flex;}
+.adz-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:#9CA3AF;vertical-align:middle;}
+.adz-dot.ok{background:#52d98a;}.adz-dot.er{background:#ff6b6b;}.adz-dot.wn{background:#FFE259;}
+.adz-code{background:#0a0907;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#cfe8ff;white-space:pre-wrap;word-break:break-all;margin-top:6px;max-height:190px;overflow-y:auto;overscroll-behavior:contain;}
+.adz-steps{display:flex;flex-direction:column;gap:10px;margin:8px 0 0;padding:0;list-style:none;counter-reset:s;}
+.adz-steps li{counter-increment:s;position:relative;padding-left:30px;font-size:12px;line-height:1.55;color:#d6d9df;}
+.adz-steps li::before{content:counter(s);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:rgba(212,175,55,.18);border:1px solid #D4AF37;color:#FFE259;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;}
+.adz-warn{border:1px solid rgba(255,226,89,.4);background:rgba(255,226,89,.07);color:#FFE259;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.55;}
+.adz-sub{font-size:10.5px;font-weight:600;display:block;margin-top:2px;}
 .adz-foot{flex:0 0 auto;padding:10px 14px max(12px,env(safe-area-inset-bottom));background:#0f0e0a;border-top:1px solid rgba(212,175,55,.3);display:flex;gap:8px;}
 .adz-foot .adz-btn{flex:1;height:44px;border-radius:22px;font-size:13.5px;font-weight:800;}
 .adz-foot .adz-btn.cancel{flex:0 0 auto;padding:0 16px;}
@@ -2382,7 +2396,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.6.6';
+const APP_VERSION = 'v2.6.7';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -23965,7 +23979,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 </div>
 </div>
 <script>
-/* ===== v2.6.6: AI DESAINER (Gemini via API key manual) =====
+/* ===== v2.6.7: AI DESAINER (FreeLLMAPI / Gemini) =====
    Modul mandiri: tidak mengubah fungsi lama. Memakai struktur elemen yang sama dengan addNewText/addNewShape/addNewFadeEdge/handleImageUpload. */
 (function(){
 'use strict';
@@ -23983,11 +23997,12 @@ const ADZ_STYLES=[
  ['Vintage kertas','vintage paper poster, warm beige/sepia tones, serif fonts, thin rules and frames'],
  ['Gradasi modern','modern vibrant gradient poster, glassy cards, rounded shapes, clean sans-serif']
 ];
-const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:'',cool:{},dead:{},daily:{},allModels:null,poolT:0,curM:{txt:'',img:''},lastModel:'',autoCancel:false};
+const S={conn:'',useGem:false,noJsonMode:false,pane:'make',mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:'',cool:{},dead:{},daily:{},allModels:null,poolT:0,curM:{txt:'',img:''},lastModel:'',autoCancel:false};
 let cfg=loadCfg();
 if(!cfg._v266){cfg.useImages=false;cfg.assets=true;cfg.rich=true;cfg._v266=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
+if(!cfg._v267){cfg.engine=(cfg.key&&!cfg.freeKey)?'gemini':'free';cfg.useImages=false;cfg._v267=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 if(cfg.fallbackModel==='gemini-2.5-flash-lite'){cfg.fallbackModel='';try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
-function loadCfg(){let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}return Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,fallbackModel:'',ghost:true,rich:true},c);}
+function loadCfg(){let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}return Object.assign({key:'',layoutModel:'gemini-2.5-flash',imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,fallbackModel:'',ghost:true,rich:true,engine:'free',freeUrl:'http://127.0.0.1:3001',freeKey:'',freeModel:'auto:smart',freeModelVision:'auto:smart',geminiBackup:true},c);}
 function saveCfg(){try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 const $=function(id){return document.getElementById(id);};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -24004,42 +24019,80 @@ function build(){
  if($('adzModal'))return;
  const m=document.createElement('div');m.id='adzModal';
  m.innerHTML=
- '<div class="adz-head"><span class="adz-logo"><svg class="ic" aria-hidden="true"><use href="#ic-aidesign"/></svg></span><h2>AI Desainer<small>Buat &amp; tiru poster jadi layer lengkap</small></h2><button class="adz-x" id="adzX" onclick="adzClose()" aria-label="Tutup" title="Tutup">✕</button></div>'+
+ '<div class="adz-head"><span class="adz-logo"><svg class="ic" aria-hidden="true"><use href="#ic-aidesign"/></svg></span><h2>AI Desainer<small id="adzSub" class="adz-sub"></small></h2><button class="adz-x" id="adzX" onclick="adzClose()" aria-label="Tutup" title="Tutup">✕</button></div>'+
+ '<div class="adz-nav" id="adzNav"><button class="on" data-p="make" onclick="adzPane(\'make\')">Buat</button><button data-p="conn" onclick="adzPane(\'conn\')">Koneksi<i id="adzNavDot"></i></button><button data-p="adv" onclick="adzPane(\'adv\')">Lanjutan</button></div>'+
  '<div class="adz-body">'+
- '<details class="adz-card" id="adzApiCard"><summary>Pengaturan API &amp; Model</summary>'+
-  '<label class="adz-lab">API Key Gemini</label><div class="adz-row"><input id="adzKey" class="adz-in" type="password" autocomplete="off" spellcheck="false" placeholder="Tempel API key (AIza...)"><button class="adz-btn" onclick="adzToggleKey()">Lihat</button></div>'+
-  '<div class="adz-hint">Key disimpan hanya di perangkat ini (localStorage) dan dikirim langsung ke Google, tidak lewat server kami. Ambil gratis di aistudio.google.com/apikey</div>'+
-  '<label class="adz-lab">Model layout &amp; analisis (teks/vision)</label><input id="adzModelL" class="adz-in" list="adzListL" placeholder="gemini-2.5-flash"><datalist id="adzListL"></datalist>'+
-  '<label class="adz-lab">Model gambar (opsional)</label><input id="adzModelI" class="adz-in" list="adzListI" placeholder="gemini-2.5-flash-image"><datalist id="adzListI"></datalist>'+
-  '<label class="adz-lab">Model cadangan tambahan (opsional, pisahkan dengan koma)</label><input id="adzModelF" class="adz-in" list="adzListL" placeholder="kosong = otomatis memakai semua model akun">'+
-  '<div class="adz-hint">Kosongkan saja: daftar model akun dibaca otomatis dan dipakai bergantian saat ada yang limit (kuota Gemini dihitung per model). Isi hanya bila ingin menentukan urutan sendiri.</div>'+
-  '<div class="adz-row" style="margin-top:10px"><button class="adz-btn" style="flex:1" onclick="adzLoadModels()">Muat daftar model</button><button class="adz-btn" style="flex:1" onclick="adzTest()">Tes koneksi</button></div>'+
- '</details>'+
- '<div class="adz-card"><div class="adz-tabs" id="adzTabs">'+
-  '<button class="adz-tab on" data-m="new" onclick="adzMode(\'new\')">Buat Baru<br><span style="font-weight:600;font-size:10px">dari perintah</span></button>'+
-  '<button class="adz-tab" data-m="ref" onclick="adzMode(\'ref\')">Tiru Referensi<br><span style="font-weight:600;font-size:10px">jiplak gaya</span></button>'+
-  '<button class="adz-tab" data-m="remix" onclick="adzMode(\'remix\')">Rombak Slide<br><span style="font-weight:600;font-size:10px">desain ulang</span></button></div>'+
-  '<div class="adz-hint" id="adzModeHint"></div>'+
-  '<label class="adz-lab">Perintah / isi poster</label><textarea id="adzPrompt" class="adz-ta" placeholder="Contoh singkat: Poster dakwah 4:5 tema &quot;Amal yang menemani di kubur&quot;, akun @tauhidsunnah_id di bawah, nuansa hitam-emas. (Singkat pun tidak apa-apa, AI akan menganalisis maksudnya.)"></textarea>'+
-  '<label class="adz-lab">Username di bawah poster</label><input id="adzUsers" class="adz-in" autocomplete="off" spellcheck="false" placeholder="@tauhidsunnah_id, @an.nashiha_daily">'+
-  '<div class="adz-chips" style="margin-top:6px" id="adzSepChips"></div>'+
-  '<label class="adz-chk"><input type="checkbox" id="adzUserOn"><span>Pasang username otomatis satu baris di bawah poster (tidak perlu ditulis di perintah). Pisahkan beberapa username dengan koma.</span></label>'+
-  '<div class="adz-hint" id="adzUserPrev"></div>'+
-  '<label class="adz-lab">Gaya desain (opsional)</label><div class="adz-chips" id="adzStyles"></div>'+
-  '<div id="adzRefBox"><label class="adz-lab">Gambar referensi / berkas proyek</label>'+
+ /* ===== TAB BUAT ===== */
+ '<div class="adz-pane on" id="adzPaneMake">'+
+  '<div class="adz-card"><div class="adz-tabs" id="adzTabs">'+
+   '<button class="adz-tab on" data-m="new" onclick="adzMode(\'new\')">Buat Baru<br><span style="font-weight:600;font-size:10px">dari perintah</span></button>'+
+   '<button class="adz-tab" data-m="ref" onclick="adzMode(\'ref\')">Tiru Referensi<br><span style="font-weight:600;font-size:10px">jiplak gaya</span></button>'+
+   '<button class="adz-tab" data-m="remix" onclick="adzMode(\'remix\')">Rombak Slide<br><span style="font-weight:600;font-size:10px">desain ulang</span></button></div>'+
+   '<div class="adz-hint" id="adzModeHint"></div>'+
+   '<label class="adz-lab">Perintah / isi poster</label><textarea id="adzPrompt" class="adz-ta" placeholder="Contoh singkat: Poster dakwah 4:5 tema &quot;Amal yang menemani di kubur&quot;, nuansa hitam-emas. (Singkat pun tidak apa-apa, AI akan menganalisis maksudnya. Username di bawah poster diatur terpisah di bawah.)"></textarea>'+
+   '<label class="adz-lab">Kualitas desain</label><div class="adz-tabs" id="adzPreset">'+
+    '<button class="adz-tab" data-k="cepat" onclick="adzPreset(\'cepat\')">Cepat<br><span style="font-weight:600;font-size:10px">8-20 layer</span></button>'+
+    '<button class="adz-tab" data-k="pro" onclick="adzPreset(\'pro\')">Pro<br><span style="font-weight:600;font-size:10px">24-44 layer · 2 koreksi</span></button>'+
+    '<button class="adz-tab" data-k="maksimal" onclick="adzPreset(\'maksimal\')">Maksimal<br><span style="font-weight:600;font-size:10px">3 koreksi</span></button></div>'+
+   '<label class="adz-lab">Gaya desain (opsional)</label><div class="adz-chips" id="adzStyles"></div>'+
+  '</div>'+
+  '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Username di bawah poster</div>'+
+   '<input id="adzUsers" class="adz-in" autocomplete="off" spellcheck="false" placeholder="@tauhidsunnah_id, @an.nashiha_daily">'+
+   '<div class="adz-chips" style="margin-top:6px" id="adzSepChips"></div>'+
+   '<label class="adz-chk"><input type="checkbox" id="adzUserOn"><span>Pasang username otomatis satu baris di bawah poster. Pisahkan beberapa username dengan koma.</span></label>'+
+   '<div class="adz-hint" id="adzUserPrev"></div></div>'+
+  '<div class="adz-card" id="adzRefBox"><div class="adz-lab" style="margin-top:0">Gambar referensi / berkas proyek</div>'+
    '<div class="adz-row"><button class="adz-btn" style="flex:1" onclick="adzPick(\'img\')">+ Gambar referensi</button><button class="adz-btn" style="flex:1" onclick="adzPick(\'file\')">+ JSON / ZIP</button></div>'+
    '<input type="file" id="adzFileImg" accept="image/*" multiple style="display:none"><input type="file" id="adzFileDoc" accept=".json,.zip,.txt,.md,application/json,application/zip" multiple style="display:none">'+
-   '<div class="adz-thumbs" id="adzThumbs"></div><div class="adz-hint">Maks. 4 gambar. Poster referensi dibaca gayanya (warna, font, tata letak, kuas, ornamen, ilustrasi), lalu dibuat ulang sebagai layer terpisah. JSON/ZIP dibaca sebagai konteks (teks &amp; gambar di dalamnya).</div></div>'+
+   '<div class="adz-thumbs" id="adzThumbs"></div><div class="adz-hint">Maks. 4 gambar. Poster referensi dibaca gayanya (warna, font, tata letak, ornamen), lalu dibuat ulang sebagai layer terpisah. Butuh model vision aktif di FreeLLMAPI. JSON/ZIP dibaca sebagai konteks.</div></div>'+
  '</div>'+
- '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Opsi hasil</div>'+
-  '<label class="adz-lab" style="margin-top:6px">Ruang tepi kosong: <span id="adzMarginV">7</span>%</label><input id="adzMargin" class="adz-range" type="range" min="4" max="12" step="1" value="7">'+
-  '<label class="adz-chk"><input type="checkbox" id="adzSmart"><span>Mode cerdas: AI menganalisis maksud perintah dulu (walau singkat), menyusun brief, lalu mendesain.</span></label>'+
-  '<label class="adz-chk"><input type="checkbox" id="adzRich"><span>Mode desainer pro: poster rumit 24-44 layer (cahaya, pola, bingkai, ornamen, lencana, watermark tipografi, teks berefek emas/outline/3D). Matikan untuk poster sederhana.</span></label>'+
-  '<label class="adz-chk"><input type="checkbox" id="adzAssets"><span>Aset PNG otomatis: kuas, coretan, lingkaran, percikan, halftone, glow, sinar, bokeh, kilau, grain, pola bintang, bingkai, sudut ornamen, pemisah, gelombang, lencana, bola 3D, pita, plat emas, watermark. Dibuat lokal (gratis, tanpa kuota).</span></label>'+
-  '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Gambar AI (tidak disarankan: hasil Gemini kurang memukau, lambat, boros kuota). Biarkan mati: desain memakai gradasi, bentuk, teks berefek, dan aset PNG lokal.</span></label>'+
-  '<label class="adz-lab">Putaran koreksi otomatis: <span id="adzRevV">2</span> (AI menilai hasil lalu merapikan posisi; 0 = mati)</label><input id="adzRev" class="adz-range" type="range" min="0" max="3" step="1" value="2">'+
-  '<label class="adz-chk"><input type="checkbox" id="adzGhost"><span>Animasi hantu: saat panel di-X, kursor emas bergerak alami dan layer muncul satu per satu (hanya tampilan, tidak menambah pemakaian AI).</span></label>'+
-  '<label class="adz-chk"><input type="checkbox" id="adzReplace"><span>Ganti isi slide saat ini (bisa dibatalkan dengan Undo). Jika mati, hasil dibuat di slide baru.</span></label>'+
+ /* ===== TAB KONEKSI ===== */
+ '<div class="adz-pane" id="adzPaneConn">'+
+  '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Mesin AI</div>'+
+   '<div class="adz-tabs" id="adzEngTabs"><button class="adz-tab" id="adzEngFree" onclick="adzEng(\'free\')">FreeLLMAPI<br><span style="font-weight:600;font-size:10px">banyak penyedia gratis</span></button><button class="adz-tab" id="adzEngGem" onclick="adzEng(\'gemini\')">Gemini langsung<br><span style="font-weight:600;font-size:10px">satu penyedia</span></button></div>'+
+   '<div id="adzFreeBox">'+
+    '<label class="adz-lab">Alamat FreeLLMAPI</label><input id="adzFreeUrl" class="adz-in" autocomplete="off" spellcheck="false" inputmode="url" placeholder="http://127.0.0.1:3001  atau  https://alamat-anda.workers.dev">'+
+    '<div class="adz-hint">Boleh tanpa /v1, aplikasi menambahkannya. Server di HP yang sama: http://127.0.0.1:3001. Server di PC/VPS: pakai alamat https:// publik.</div>'+
+    '<label class="adz-lab">Unified key</label><div class="adz-row"><input id="adzFreeKey" class="adz-in" type="password" autocomplete="off" spellcheck="false" placeholder="freellmapi-..."><button class="adz-btn" onclick="adzToggleFreeKey()">Lihat</button></div>'+
+    '<div class="adz-hint">Salin dari halaman Keys di dashboard FreeLLMAPI. Disimpan hanya di perangkat ini.</div>'+
+    '<label class="adz-lab">Model perancang &amp; penulis</label><input id="adzFreeModel" class="adz-in" list="adzListF" placeholder="auto:smart"><datalist id="adzListF"></datalist>'+
+    '<div class="adz-hint">auto:smart = model paling cerdas yang sedang tersedia (disarankan). Alternatif: auto (urutan rantai Anda), auto:fast, auto:reliable, nama profil auto:nama, atau id model tertentu.</div>'+
+    '<label class="adz-lab">Model penilai visual (koreksi otomatis &amp; Tiru Referensi)</label><input id="adzFreeVision" class="adz-in" list="adzListF" placeholder="auto:smart"><div class="adz-hint">Permintaan berisi gambar otomatis hanya dikirim ke model bertanda Vision.</div>'+
+    '<label class="adz-chk"><input type="checkbox" id="adzGemBackup"><span>Bila FreeLLMAPI tidak terjangkau, pakai Gemini langsung (key di kolom Gemini) sebagai cadangan otomatis.</span></label>'+
+   '</div>'+
+   '<div id="adzGemBox" style="display:none">'+
+    '<label class="adz-lab">API Key Gemini</label><div class="adz-row"><input id="adzKey" class="adz-in" type="password" autocomplete="off" spellcheck="false" placeholder="Tempel API key (AIza...)"><button class="adz-btn" onclick="adzToggleKey()">Lihat</button></div>'+
+    '<div class="adz-hint">Dipakai sebagai mesin utama (mode Gemini langsung) atau sebagai cadangan. Ambil gratis di aistudio.google.com/apikey</div>'+
+    '<label class="adz-lab">Model layout &amp; analisis (teks/vision)</label><input id="adzModelL" class="adz-in" list="adzListL" placeholder="gemini-2.5-flash"><datalist id="adzListL"></datalist>'+
+    '<label class="adz-lab">Model gambar (opsional)</label><input id="adzModelI" class="adz-in" list="adzListI" placeholder="gemini-2.5-flash-image"><datalist id="adzListI"></datalist>'+
+    '<label class="adz-lab">Model cadangan tambahan (opsional, pisahkan dengan koma)</label><input id="adzModelF" class="adz-in" list="adzListL" placeholder="kosong = otomatis memakai semua model akun">'+
+   '</div>'+
+   '<div class="adz-row" style="margin-top:12px"><button class="adz-btn" style="flex:1" onclick="adzLoadModels()">Muat daftar model</button><button class="adz-btn gold" style="flex:1" onclick="adzTest()">Tes koneksi (diagnosa)</button></div>'+
+   '<div class="adz-hint">Hasil diagnosa tampil di Monitor Proses AI di bawah.</div>'+
+  '</div>'+
+  '<details class="adz-card"><summary>Panduan setup FreeLLMAPI (5 langkah)</summary>'+
+   '<ol class="adz-steps">'+
+    '<li><b>Jalankan server.</b> PC/laptop/VPS dengan Docker: perintah di bawah, lalu buka http://localhost:3001. Di Android ada aplikasi FreeLLMAPI di Play Store (tertera di README resmi) dan panduan Termux (eksperimental).<div class="adz-code" id="adzCmd1">curl -fsSL https://freellmapi.co/install.sh | bash</div><button class="adz-mini" style="margin-top:6px" onclick="adzCopyEl(\'adzCmd1\')">Salin perintah</button></li>'+
+    '<li><b>Isi key penyedia gratis</b> di halaman Keys dashboard: Google AI Studio (pakai key Gemini Anda), Groq, Cerebras, Mistral, OpenRouter, NVIDIA, Cloudflare, dll. Makin banyak penyedia, makin jarang habis. FreeLLMAPI menggabungkan jatah gratis yang sudah ada, bukan membuat jatah baru.</li>'+
+    '<li><b>Aktifkan model Vision</b> (bertanda Vision) di Fallback Chain agar koreksi otomatis dan Tiru Referensi jalan.</li>'+
+    '<li><b>Salin Unified key</b> (freellmapi-...) dari halaman Keys, tempel di sini bersama alamat server, lalu tekan Tes koneksi.</li>'+
+    '<li><b>Akses dari luar rumah / HP ke PC atau VPS:</b> buka lewat Cloudflare Tunnel, tambahkan hostnya ke ALLOWED_HOSTS di .env server, lalu bila browser memblokir (CORS) pasang Worker di bawah dan pakai alamat Worker di kolom alamat.<div class="adz-code" id="adzCmd2">cloudflared tunnel --url http://localhost:3001\n# .env server:\nALLOWED_HOSTS=nama-host-tunnel-anda</div><button class="adz-mini" style="margin-top:6px" onclick="adzCopyEl(\'adzCmd2\')">Salin</button> <button class="adz-mini" style="margin-top:6px" onclick="adzCopyWorker()">Salin skrip Worker CORS</button></li>'+
+   '</ol>'+
+   '<div class="adz-warn" style="margin-top:10px">Catatan jujur: tidak ada jaminan "tidak pernah habis". Total jatah = jumlah penyedia yang Anda isi. Model gratis tidak sekelas model berbayar, dan kualitas turun menjelang akhir hari saat jatah model terbaik habis (reset sekitar tengah malam UTC). Aplikasi ini menunggu dan mengulang otomatis, tetapi hasil tetap bergantung model yang melayani. FreeLLMAPI dirancang untuk pemakaian pribadi; patuhi ketentuan tiap penyedia.</div>'+
+  '</details>'+
+ '</div>'+
+ /* ===== TAB LANJUTAN ===== */
+ '<div class="adz-pane" id="adzPaneAdv">'+
+  '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Opsi hasil</div>'+
+   '<label class="adz-lab" style="margin-top:6px">Ruang tepi kosong: <span id="adzMarginV">7</span>%</label><input id="adzMargin" class="adz-range" type="range" min="4" max="12" step="1" value="7">'+
+   '<label class="adz-chk"><input type="checkbox" id="adzSmart"><span>Mode cerdas: AI menganalisis maksud perintah dulu (walau singkat), menyusun brief, lalu mendesain.</span></label>'+
+   '<label class="adz-chk"><input type="checkbox" id="adzRich"><span>Mode desainer pro: poster rumit 24-44 layer (cahaya, pola, bingkai, ornamen, lencana, watermark tipografi, teks berefek emas/outline/3D). Matikan untuk poster sederhana.</span></label>'+
+   '<label class="adz-chk"><input type="checkbox" id="adzAssets"><span>Aset PNG otomatis (dibuat lokal, gratis, tanpa kuota): kuas, coretan, glow, sinar, bokeh, kilau, grain, pola bintang, bingkai, sudut ornamen, pemisah, lencana, bola 3D, pita, plat emas, watermark.</span></label>'+
+   '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Gambar AI (hanya mesin Gemini langsung; dimatikan di FreeLLMAPI karena hasil kurang memukau dan boros jatah).</span></label>'+
+   '<label class="adz-lab">Putaran koreksi otomatis: <span id="adzRevV">2</span> (AI menilai tangkapan layar lalu merapikan posisi; 0 = mati)</label><input id="adzRev" class="adz-range" type="range" min="0" max="3" step="1" value="2">'+
+   '<label class="adz-chk"><input type="checkbox" id="adzGhost"><span>Animasi hantu: saat panel di-X, kursor emas bergerak alami dan layer muncul satu per satu (hanya tampilan, tidak memakai jatah AI).</span></label>'+
+   '<label class="adz-chk"><input type="checkbox" id="adzReplace"><span>Ganti isi slide saat ini (bisa dibatalkan dengan Undo). Jika mati, hasil dibuat di slide baru.</span></label>'+
+  '</div>'+
  '</div>'+
  '</div>'+
  '<div class="adz-logbox" id="adzLogBox"><div class="adz-loghead"><b>Monitor Proses AI</b><span id="adzPct">0%</span><button class="adz-mini" id="adzLogSizeBtn" onclick="adzLogSize()">Besarkan</button><button class="adz-mini" onclick="adzLogCopy()">Salin</button></div><div class="adz-prog"><i id="adzProgBar"></i></div><div class="adz-log" id="adzLog"></div></div>'+
@@ -24063,7 +24116,9 @@ function build(){
  $('adzFileImg').addEventListener('change',function(e){addImages(e.target.files);e.target.value='';});
  $('adzFileDoc').addEventListener('change',function(e){addDocs(e.target.files);e.target.value='';});
  $('adzMargin').addEventListener('input',function(){$('adzMarginV').textContent=this.value;});
- $('adzRev').addEventListener('input',function(){$('adzRevV').textContent=this.value;});
+ $('adzRev').addEventListener('input',function(){$('adzRevV').textContent=this.value;paintPreset();});
+ $('adzRich').addEventListener('change',paintPreset);
+ ['adzFreeUrl','adzFreeKey'].forEach(function(id){$(id).addEventListener('input',function(){S.conn='';readCfg();paintEngine();});});
 }
 function paintChips(){Array.prototype.forEach.call($('adzStyles').children,function(b,i){b.classList.toggle('on',i===S.style);});}
 function paintThumbs(){
@@ -24077,7 +24132,8 @@ window.openAiDesigner=function(){
  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRich').checked=cfg.rich!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
  $('adzModelF').value=cfg.fallbackModel==null?'':cfg.fallbackModel;$('adzGhost').checked=cfg.ghost!==false;
- $('adzApiCard').open=!cfg.key;
+ $('adzFreeUrl').value=cfg.freeUrl||'';$('adzFreeKey').value=cfg.freeKey||'';$('adzFreeModel').value=cfg.freeModel||'auto:smart';$('adzFreeVision').value=cfg.freeModelVision||'auto:smart';$('adzGemBackup').checked=cfg.geminiBackup!==false;
+ paintEngine();paintPreset();if(!engineReady())adzPane('conn');else adzPane(S.pane==='conn'?'make':S.pane);
  paintChips();paintThumbs();adzMode(S.mode);
  $('adzModal').classList.add('active');
  S.min=false;chipHide();shieldSet(false);
@@ -24226,6 +24282,7 @@ function readCfg(){
  cfg.key=$('adzKey').value.trim();cfg.layoutModel=$('adzModelL').value.trim()||'gemini-2.5-flash';cfg.imageModel=$('adzModelI').value.trim()||'gemini-2.5-flash-image';
  cfg.fallbackModel=($('adzModelF').value||'').trim();cfg.ghost=$('adzGhost').checked;
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
+ cfg.freeUrl=($('adzFreeUrl').value||'').trim();cfg.freeKey=($('adzFreeKey').value||'').trim();cfg.freeModel=($('adzFreeModel').value||'').trim()||'auto:smart';cfg.freeModelVision=($('adzFreeVision').value||'').trim()||'auto:smart';cfg.geminiBackup=$('adzGemBackup').checked;
  cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.rich=$('adzRich').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
 }
 
@@ -24302,6 +24359,32 @@ async function waitOn(ms,why){
   await delay(500);
  }
 }
+function pickLayers(spec){
+ if(!spec||typeof spec!=='object')return [];
+ const c=[spec.layers,spec.elements,spec.items,spec.design&&spec.design.layers,spec.poster&&spec.poster.layers];
+ for(let i=0;i<c.length;i++)if(Array.isArray(c[i])&&c[i].length)return c[i];
+ return [];
+}
+function normLayers(L){
+ const num=['x','y','w','h','size','opacity','rotation','lineHeight','letterSpacing','radius','borderWidth','depth'];
+ L.forEach(function(l){
+  if(!l||typeof l!=='object')return;
+  if(!l.kind&&l.type)l.kind=l.type;
+  let k=String(l.kind||'').toLowerCase().trim();
+  if(/^(rect|rectangle|box|card|panel|pill|badge|circle)$/.test(k)){if(!l.shape)l.shape=(k==='circle')?'circle':(k==='pill'||k==='badge')?'capsule':'rect';k='shape';}
+  else if(/^(textbox|heading|title|paragraph|label|caption|headline|subtitle|body|footer|kicker)$/.test(k))k='text';
+  else if(/^(decor|decoration|ornament|art|graphic|png)$/.test(k))k='asset';
+  l.kind=k;
+  if(l.size==null&&l.fontSize!=null)l.size=l.fontSize;
+  if(l.w==null&&l.width!=null)l.w=l.width;
+  if(l.h==null&&l.height!=null)l.h=l.height;
+  num.forEach(function(p){if(typeof l[p]==='string'){const v=parseFloat(l[p]);if(isFinite(v))l[p]=v;else delete l[p];}});
+  ['color','color2','borderColor','highlight'].forEach(function(p){if(typeof l[p]==='string'&&/^([0-9a-f]{3}|[0-9a-f]{6})$/i.test(l[p].trim()))l[p]='#'+l[p].trim();});
+ });
+ const geo=[];
+ L.forEach(function(l){if(l&&l.kind!=='fade')['x','y','w'].forEach(function(p){if(typeof l[p]==='number')geo.push(Math.abs(l[p]));});});
+ if(geo.length>=12&&Math.max.apply(null,geo)<=1.0001){L.forEach(function(l){if(l)['x','y','w','h'].forEach(function(p){if(typeof l[p]==='number')l[p]=l[p]*100;});});}
+}
 function rnd(a,b){return a+Math.random()*(b-a);}
 function uniq(a){const s={},o=[];a.forEach(function(x){if(x&&!s[x]){s[x]=1;o.push(x);}});return o;}
 function pacificReset(){const n=new Date();let t=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),7,5,0);if(t<=Date.now())t+=86400000;return t;}
@@ -24332,8 +24415,8 @@ function imagePool(primary){
  cand.sort(function(a,b){return modelVer(b)-modelVer(a)||a.localeCompare(b);});
  return uniq([primary].concat(cand));
 }
-async function gem(model,parts,gen,system){
- if(!cfg.key)throw new Error('API key belum diisi (buka Pengaturan API & Model)');
+async function gemGemini(model,parts,gen,system){
+ if(!cfg.key)throw new Error('API key Gemini belum diisi (tab Koneksi)');
  const body={contents:[{role:'user',parts:parts}],generationConfig:gen||{}};
  if(system)body.systemInstruction={parts:[{text:system}]};
  const kind=(gen&&gen.responseModalities)?'img':'txt';
@@ -24394,6 +24477,106 @@ async function gem(model,parts,gen,system){
   log('Model "'+mdl+'" bermasalah ('+msg.slice(0,80)+'), diistirahatkan.','wn');
  }
 }
+
+/* ---------- v2.6.7: mesin FreeLLMAPI (OpenAI-compatible) ---------- */
+function freeBase(){
+ let u=String(cfg.freeUrl||'').trim().replace(/\/+$/,'');
+ u=u.replace(/\/chat\/completions$/i,'').replace(/\/+$/,'');
+ if(!u)return '';
+ if(!/^https?:\/\//i.test(u))u='http://'+u;
+ if(!/\/v1$/i.test(u))u+='/v1';
+ return u;
+}
+function engineReady(){return cfg.engine==='gemini'?!!cfg.key:!!(freeBase()&&cfg.freeKey);}
+function modelLabel(){return cfg.engine==='gemini'?cfg.layoutModel:(cfg.freeModel||'auto:smart');}
+function isMixed(base){return location.protocol==='https:'&&/^http:\/\//i.test(base)&&!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])/i.test(base);}
+async function probeFree(){
+ try{const o=new URL(freeBase()).origin;await fetch(o+'/api/ping',{mode:'no-cors',cache:'no-store'});return true;}catch(e){return false;}
+}
+function freeErr(msg,flags){const e=new Error(msg);Object.assign(e,flags||{});return e;}
+async function gemFree(parts,gen,system){
+ const base=freeBase();
+ if(!base)throw freeErr('Alamat FreeLLMAPI belum diisi (tab Koneksi)',{fatalCfg:true});
+ if(!cfg.freeKey)throw freeErr('Unified key FreeLLMAPI belum diisi (tab Koneksi)',{fatalCfg:true});
+ if(isMixed(base))throw freeErr('Halaman ini HTTPS tetapi alamat FreeLLMAPI HTTP biasa: browser memblokirnya (mixed content). Pakai alamat https:// (Cloudflare Tunnel + Worker) atau http://127.0.0.1 bila server di HP yang sama.',{fatalCfg:true});
+ const inl=function(p){const d=p&&(p.inlineData||p.inline_data);return d?{mime:d.mimeType||d.mime_type||'image/jpeg',data:d.data}:null;};
+ const hasImg=parts.some(function(p){return !!inl(p);});
+ const model=String((hasImg?cfg.freeModelVision:cfg.freeModel)||'auto').trim()||'auto';
+ const msgs=[];if(system)msgs.push({role:'system',content:system});
+ let content;
+ if(hasImg){content=[];parts.forEach(function(p){if(p.text!=null)content.push({type:'text',text:String(p.text)});else{const d=inl(p);if(d)content.push({type:'image_url',image_url:{url:'data:'+d.mime+';base64,'+d.data}});}});}
+ else content=parts.map(function(p){return p.text!=null?String(p.text):'';}).join('\n\n');
+ msgs.push({role:'user',content:content});
+ const wantJson=!!(gen&&gen.responseMimeType==='application/json');
+ let maxTok=Math.min((gen&&gen.maxOutputTokens)||8192,12000);
+ let jsonMode=wantJson&&!S.noJsonMode;
+ let busy=0,net=0;
+ for(;;){
+  const sig=S.ctl&&S.ctl.signal;
+  if(sig&&sig.aborted)throw new Error('Dibatalkan / waktu habis');
+  const body={model:model,messages:msgs,temperature:(gen&&gen.temperature!=null)?gen.temperature:0.7,max_tokens:maxTok,stream:false};
+  if(jsonMode)body.response_format={type:'json_object'};
+  const gap=rnd(800,2000)-(Date.now()-(S.lastCall||0));if(gap>0)await delay(gap);
+  const c=new AbortController();let timedOut=false;
+  const onAb=function(){c.abort();};if(sig)sig.addEventListener('abort',onAb,{once:true});
+  const tm=setTimeout(function(){timedOut=true;c.abort();},170000);
+  let r=null,j=null,netErr=null,raw='';
+  try{r=await fetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.freeKey},body:JSON.stringify(body),signal:c.signal});try{raw=await r.text();j=JSON.parse(raw);}catch(e){}}
+  catch(e){netErr=e;}
+  clearTimeout(tm);if(sig)sig.removeEventListener('abort',onAb);S.lastCall=Date.now();
+  if(sig&&sig.aborted)throw new Error('Dibatalkan / waktu habis');
+  if(r&&r.ok&&j&&j.choices&&j.choices[0]){
+   let t=j.choices[0].message&&j.choices[0].message.content;
+   if(Array.isArray(t))t=t.map(function(x){return x&&x.text?x.text:(typeof x==='string'?x:'');}).join('');
+   t=String(t==null?'':t);
+   if(t.trim()){
+    let routed=null;try{routed=r.headers.get('x-routed-via');}catch(e){}
+    routed=routed||j.model||'';
+    if(routed&&routed!==S.lastRoute){S.lastRoute=routed;log('  ↳ dilayani: '+routed);}
+    return {candidates:[{content:{parts:[{text:t}]}}],_routed:routed};
+   }
+  }
+  const st=r?r.status:0;
+  const msg=((j&&j.error&&(j.error.message||j.error))||(raw&&raw.length<300?raw:'')||(netErr?(timedOut?'Waktu tunggu habis':netErr.message):('HTTP '+st)));
+  const code=String((j&&j.error&&j.error.code)||'');
+  if(netErr&&!timedOut){
+   if(navigator.onLine===false){await waitOn(rnd(4000,7000),'Tidak ada koneksi internet, menunggu');continue;}
+   net++;
+   if(net>=2){
+    const reach=await probeFree();
+    if(reach)throw freeErr('Server FreeLLMAPI terjangkau tetapi browser memblokir jawabannya (CORS). Pasang Worker CORS (tab Koneksi, tombol "Salin skrip Worker CORS") atau izinkan origin halaman ini di server, lalu isi alamat Worker sebagai alamat FreeLLMAPI.',{fatalCfg:true,cors:true});
+    if(net>=3)throw freeErr('FreeLLMAPI tidak terjangkau di '+base+'. Pastikan server menyala, alamat benar, dan HP bisa menjangkaunya.',{unreachable:true});
+   }
+   await waitOn(rnd(2500,5000),'Koneksi ke FreeLLMAPI gagal, mencoba lagi');continue;
+  }
+  if(st===401)throw freeErr('Unified key FreeLLMAPI ditolak (401). Salin ulang dari halaman Keys di dashboard FreeLLMAPI.',{fatalCfg:true});
+  if(st===403)throw freeErr('Ditolak (403): alamat/host ini belum diizinkan server. Tambahkan host ke ALLOWED_HOSTS di .env FreeLLMAPI lalu restart.',{fatalCfg:true});
+  if(st===404)throw freeErr('Alamat salah (404). Alamat FreeLLMAPI harus menunjuk ke server yang benar (berakhiran /v1).',{fatalCfg:true});
+  if(st===422&&/vision/i.test(code+msg))throw freeErr('Tidak ada model vision aktif di FreeLLMAPI. Aktifkan model bertanda Vision di Fallback Chain dashboard.',{noVision:true});
+  if(st===400||st===422){
+   if(jsonMode){jsonMode=false;S.noJsonMode=true;log('Model terpilih belum mendukung mode JSON; lanjut tanpa mode itu.','wn');continue;}
+   if(maxTok>3500){maxTok=Math.max(3500,Math.floor(maxTok/2));continue;}
+   throw new Error('Permintaan ditolak ('+st+'): '+String(msg).slice(0,160));
+  }
+  /* 429 / 5xx / 524 / kosong / waktu habis: tunggu jeda acak lalu ulangi */
+  busy++;
+  let ra=null;try{ra=parseFloat(r&&r.headers.get('retry-after'));}catch(e){}
+  if(busy>=14)throw new Error('FreeLLMAPI terus sibuk atau limit ('+String(msg).slice(0,100)+').');
+  const wait=(ra&&isFinite(ra)&&ra<=120)?ra*1000+rnd(500,3000):Math.min(90000,rnd(12000,32000)*(1+Math.min(busy,6)*0.25));
+  await waitOn(wait,(st===429?'Semua penyedia sedang limit':(timedOut?'Waktu tunggu habis':'Server sibuk'))+', menunggu (percobaan '+busy+')');
+ }
+}
+async function gem(model,parts,gen,system){
+ if(gen&&gen.responseModalities)return gemGemini(model,parts,gen,system);
+ if(cfg.engine!=='gemini'&&!S.useGem){
+  try{return await gemFree(parts,gen,system);}
+  catch(e){
+   if(e&&e.unreachable&&cfg.geminiBackup&&cfg.key){S.useGem=true;log('FreeLLMAPI tidak terjangkau; beralih ke Gemini langsung (cadangan) untuk sisa proses.','wn');}
+   else throw e;
+  }
+ }
+ return gemGemini(cfg.layoutModel,parts,gen,system);
+}
 function partsOf(j){const c=j&&j.candidates&&j.candidates[0];if(!c){const br=j&&j.promptFeedback&&j.promptFeedback.blockReason;throw new Error(br?('Diblokir: '+br):'Respon AI kosong');}return (c.content&&c.content.parts)||[];}
 function textOf(j){return partsOf(j).map(function(p){return p.text||'';}).join('');}
 function repairJson(t){
@@ -24422,25 +24605,169 @@ function parseJson(t){
  throw new Error('AI tidak mengembalikan JSON yang valid. Coba lagi atau sederhanakan perintah.');
 }
 window.adzLoadModels=async function(){
- readCfg();if(!cfg.key){showToast('Isi API key dulu');return;}
+ readCfg();
+ if(cfg.engine==='gemini'){
+  if(!cfg.key){showToast('Isi API key dulu');return;}
+  try{
+   const r=await fetch(API+'models?pageSize=200',{headers:{'x-goog-api-key':cfg.key}});const j=await r.json();
+   if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));
+   const L=[],I=[];(j.models||[]).forEach(function(m){
+    if(!(m.supportedGenerationMethods||[]).includes('generateContent'))return;
+    const n=String(m.name||'').replace(/^models\//,'');
+    if(/tts|embed|aqa|live|audio|robotics|computer-use/i.test(n))return;
+    if(/image/i.test(n))I.push(n);else if(/gemini/i.test(n))L.push(n);
+   });
+   $('adzListL').innerHTML=L.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
+   $('adzListI').innerHTML=I.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
+   showToast('Model dimuat: '+L.length+' teks/vision, '+I.length+' gambar. Ketuk kolom model untuk memilih.');
+  }catch(e){showToast('Gagal memuat model: '+e.message);}
+  return;
+ }
+ const base=freeBase();if(!base||!cfg.freeKey){showToast('Isi alamat dan Unified key dulu');return;}
  try{
-  const r=await fetch(API+'models?pageSize=200',{headers:{'x-goog-api-key':cfg.key}});const j=await r.json();
-  if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));
-  const L=[],I=[];(j.models||[]).forEach(function(m){
-   if(!(m.supportedGenerationMethods||[]).includes('generateContent'))return;
-   const n=String(m.name||'').replace(/^models\//,'');
-   if(/tts|embed|aqa|live|audio|robotics|computer-use/i.test(n))return;
-   if(/image/i.test(n))I.push(n);else if(/gemini/i.test(n))L.push(n);
-  });
-  $('adzListL').innerHTML=L.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
-  $('adzListI').innerHTML=I.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
-  showToast('Model dimuat: '+L.length+' teks/vision, '+I.length+' gambar. Ketuk kolom model untuk memilih.');
- }catch(e){showToast('Gagal memuat model: '+e.message);}
+  const r=await fetch(base+'/models?execution_status=ready',{headers:{'Authorization':'Bearer '+cfg.freeKey}});
+  const j=await r.json();if(!r.ok)throw new Error((j.error&&(j.error.message||j.error))||('HTTP '+r.status));
+  const ids=((j.data||j.models||[]).map(function(m){return m.id||m.name;}).filter(Boolean));
+  const base0=['auto:smart','auto','auto:fast','auto:reliable'];
+  const all=base0.concat(ids.filter(function(x){return base0.indexOf(x)<0;}));
+  $('adzListF').innerHTML=all.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
+  showToast('Model siap dimuat: '+ids.length+'. Ketuk kolom model untuk memilih (kosongkan = otomatis).');
+ }catch(e){showToast('Gagal memuat model: '+(e&&e.message?e.message:e));}
 };
+function fetchT(url,opt,ms){
+ const c=new AbortController();const t=setTimeout(function(){c.abort();},ms||25000);
+ return fetch(url,Object.assign({signal:c.signal},opt||{})).finally(function(){clearTimeout(t);});
+}
 window.adzTest=async function(){
- readCfg();S.ctl=new AbortController();S.fb=false;clearLog();log('Menguji '+cfg.layoutModel+' ...');
- try{const j=await gem(cfg.layoutModel,[{text:'Balas hanya dengan kata: OK'}],{maxOutputTokens:512});setProg(100);log('Terhubung. Balasan: '+textOf(j).trim().slice(0,40),'ok');}
- catch(e){log('Gagal: '+e.message,'er');}
+ readCfg();S.ctl=new AbortController();S.useGem=false;S.noJsonMode=false;clearLog();
+ if(cfg.engine==='gemini'){
+  log('Menguji Gemini langsung · '+cfg.layoutModel+' ...');
+  try{const j=await gemGemini(cfg.layoutModel,[{text:'Balas hanya dengan kata: OK'}],{maxOutputTokens:512});setProg(100);S.conn='ok';log('Terhubung. Balasan: '+textOf(j).trim().slice(0,40),'ok');}
+  catch(e){S.conn='bad';log('Gagal: '+e.message,'er');}
+  paintEngine();return;
+ }
+ const base=freeBase();
+ log('Diagnosa FreeLLMAPI · '+(base||'(alamat kosong)'));
+ let okAll=true;
+ if(!base||!cfg.freeKey){log('1/6 Alamat atau Unified key masih kosong.','er');S.conn='bad';paintEngine();return;}
+ if(isMixed(base)){log('1/6 Halaman HTTPS tidak boleh memanggil alamat HTTP biasa (mixed content). Pakai https:// atau http://127.0.0.1.','er');S.conn='bad';paintEngine();return;}
+ log('1/6 Format alamat benar.','ok');setProg(10);
+ const reach=await probeFree();
+ if(!reach){log('2/6 Server tidak terjangkau. Cek: server menyala? alamat/port benar? tunnel hidup? (di HP yang sama pakai http://127.0.0.1:3001).','er');S.conn='bad';paintEngine();return;}
+ log('2/6 Server terjangkau.','ok');setProg(28);
+ let ids=[];
+ try{
+  const r=await fetchT(base+'/models?execution_status=ready',{headers:{'Authorization':'Bearer '+cfg.freeKey}});
+  if(r.status===401){log('3/6 Unified key ditolak (401). Salin ulang dari halaman Keys di dashboard.','er');S.conn='bad';paintEngine();return;}
+  if(r.status===403){log('3/6 Ditolak (403): tambahkan host ini ke ALLOWED_HOSTS di .env server lalu restart.','er');S.conn='bad';paintEngine();return;}
+  if(r.status===404){log('3/6 Alamat salah (404). Pastikan menunjuk ke server FreeLLMAPI.','er');S.conn='bad';paintEngine();return;}
+  const j=await r.json();ids=(j.data||j.models||[]).map(function(m){return m.id||m.name;}).filter(Boolean);
+  log('3/6 Kunci diterima. Model siap pakai: '+ids.length+'.',ids.length?'ok':'wn');
+  if(!ids.length){okAll=false;log('   Belum ada model siap: tambahkan key penyedia di halaman Keys dashboard.','wn');}
+  else{$('adzListF').innerHTML=['auto:smart','auto','auto:fast','auto:reliable'].concat(ids).map(function(n){return '<option value="'+esc(n)+'">';}).join('');}
+ }catch(e){
+  log('3/6 Browser memblokir jawaban server (CORS) atau jaringan terputus. Pasang Worker CORS (tombol di bawah) lalu pakai alamat Worker.','er');S.conn='bad';paintEngine();return;
+ }
+ setProg(46);
+ const model=(cfg.freeModel||'auto:smart');
+ try{
+  const t0=Date.now();
+  const r=await fetchT(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.freeKey},body:JSON.stringify({model:model,messages:[{role:'user',content:'Balas hanya dengan kata: OK'}],max_tokens:64,stream:false})},60000);
+  const j=await r.json().catch(function(){return null;});
+  if(r.ok&&j&&j.choices){let rt=null;try{rt=r.headers.get('x-routed-via');}catch(e){}log('4/6 Obrolan berhasil ('+Math.round((Date.now()-t0)/100)/10+' dtk, '+(rt||j.model||model)+').','ok');}
+  else{okAll=false;log('4/6 Obrolan gagal: '+((j&&j.error&&(j.error.message||j.error))||('HTTP '+r.status)),'er');}
+ }catch(e){okAll=false;log('4/6 Obrolan gagal: '+e.message,'er');}
+ setProg(64);
+ try{
+  const r=await fetchT(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.freeKey},body:JSON.stringify({model:model,messages:[{role:'user',content:'Balas hanya JSON {"ok":true}'}],max_tokens:64,response_format:{type:'json_object'},stream:false})},60000);
+  log('5/6 Mode JSON: '+(r.ok?'didukung.':'belum didukung model terpilih (aplikasi otomatis jalan tanpa mode ini).'),r.ok?'ok':'wn');
+ }catch(e){log('5/6 Mode JSON tidak teruji: '+e.message,'wn');}
+ setProg(82);
+ try{
+  const png=TINY.split(',')[1];
+  const r=await fetchT(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.freeKey},body:JSON.stringify({model:(cfg.freeModelVision||'auto:smart'),messages:[{role:'user',content:[{type:'text',text:'Apa ini? Jawab satu kata.'},{type:'image_url',image_url:{url:'data:image/png;base64,'+png}}]}],max_tokens:32,stream:false})},60000);
+  if(r.ok)log('6/6 Model vision tersedia: koreksi otomatis dan Tiru Referensi bisa dipakai.','ok');
+  else{log('6/6 Model vision belum tersedia: koreksi otomatis dilewati dan Tiru Referensi tidak bisa. Aktifkan model bertanda Vision di Fallback Chain.','wn');okAll=false;}
+ }catch(e){log('6/6 Vision tidak teruji: '+e.message,'wn');}
+ setProg(100);S.conn=okAll?'ok':'bad';
+ log(okAll?'Selesai: FreeLLMAPI siap dipakai.':'Selesai dengan catatan: periksa baris berwarna kuning/merah.',okAll?'ok':'wn');
+ paintEngine();
+};
+
+/* ---------- v2.6.7: tab, mesin, preset, panduan ---------- */
+window.adzPane=function(p){
+ S.pane=p;
+ const map={make:'adzPaneMake',conn:'adzPaneConn',adv:'adzPaneAdv'};
+ Object.keys(map).forEach(function(k){const el=$(map[k]);if(el)el.classList.toggle('on',k===p);});
+ Array.prototype.forEach.call(document.querySelectorAll('#adzNav button'),function(b){b.classList.toggle('on',b.getAttribute('data-p')===p);});
+ const bd=document.querySelector('#adzModal .adz-body');if(bd)bd.scrollTop=0;
+};
+window.adzEng=function(e){readCfg();cfg.engine=e;saveCfg();S.conn='';paintEngine();};
+function paintEngine(){
+ if(!$('adzSub'))return;
+ const free=cfg.engine!=='gemini';
+ [['adzEngFree',true],['adzEngGem',false]].forEach(function(a){$(a[0]).classList.toggle('on',a[1]===free);});
+ $('adzFreeBox').style.display=free?'block':'none';$('adzGemBox').style.display=free?'none':'block';
+ const ok=engineReady(),nm=free?'FreeLLMAPI':'Gemini langsung';
+ let cls='wn',txt=nm+' · belum dites';
+ if(!ok){cls='er';txt=nm+' · belum diatur';}
+ else if(S.conn==='ok'){cls='ok';txt=nm+' · terhubung';}
+ else if(S.conn==='bad'){cls='er';txt=nm+' · gagal terhubung';}
+ $('adzSub').innerHTML='<span class="adz-dot '+cls+'"></span>'+esc(txt);
+ $('adzNavDot').classList.toggle('on',!ok||S.conn==='bad');
+ const ui=$('adzUseImg');if(ui){if(free){ui.checked=false;ui.disabled=true;}else ui.disabled=false;}
+}
+const ADZ_PRESETS={cepat:{rich:false,review:0},pro:{rich:true,review:2},maksimal:{rich:true,review:3}};
+window.adzPreset=function(k){
+ const p=ADZ_PRESETS[k];if(!p)return;
+ $('adzRich').checked=p.rich;$('adzRev').value=p.review;$('adzRevV').textContent=p.review;$('adzSmart').checked=true;$('adzAssets').checked=true;
+ readCfg();paintPreset();
+};
+function paintPreset(){
+ const box=$('adzPreset');if(!box)return;
+ const rich=$('adzRich').checked,rv=+$('adzRev').value;let k='';
+ if(!rich&&rv===0)k='cepat';else if(rich&&rv===2)k='pro';else if(rich&&rv>=3)k='maksimal';
+ Array.prototype.forEach.call(box.children,function(b){b.classList.toggle('on',b.getAttribute('data-k')===k);});
+}
+window.adzToggleFreeKey=function(){const k=$('adzFreeKey');k.type=(k.type==='password')?'text':'password';};
+window.adzCopyEl=function(id){
+ const el=$(id);if(!el)return;const t=el.textContent;
+ const done=function(){showToast('Disalin ke papan klip');};
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,function(){fallbackCopy(t,done);});}else fallbackCopy(t,done);
+};
+function fallbackCopy(t,cb){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();cb();}
+const ADZ_WORKER=[
+ '// Cloudflare Worker: relay CORS untuk FreeLLMAPI',
+ '// Variabel: UPSTREAM (mis. https://freellm.domainanda.com) dan ALLOW_ORIGINS (origin halaman Maker, pisah koma; kosong = semua)',
+ 'export default {',
+ '  async fetch(req, env) {',
+ '    const allow = (env.ALLOW_ORIGINS || "*").split(",").map(s => s.trim());',
+ '    const origin = req.headers.get("Origin") || "";',
+ '    const ok = allow.includes("*") || allow.includes(origin);',
+ '    const cors = {',
+ '      "Access-Control-Allow-Origin": ok ? (origin || "*") : "null",',
+ '      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",',
+ '      "Access-Control-Allow-Headers": "Authorization, Content-Type",',
+ '      "Access-Control-Expose-Headers": "X-Routed-Via, X-Fallback-Attempts",',
+ '      "Access-Control-Max-Age": "86400",',
+ '      "Vary": "Origin"',
+ '    };',
+ '    if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });',
+ '    if (!ok) return new Response("Origin ditolak", { status: 403, headers: cors });',
+ '    const u = new URL(req.url);',
+ '    const target = new URL(u.pathname + u.search, env.UPSTREAM);',
+ '    const h = new Headers();',
+ '    ["authorization", "content-type", "accept"].forEach(k => { const v = req.headers.get(k); if (v) h.set(k, v); });',
+ '    const r = await fetch(target, { method: req.method, headers: h, body: ["GET", "HEAD"].includes(req.method) ? undefined : req.body });',
+ '    const out = new Headers(r.headers);',
+ '    Object.entries(cors).forEach(([k, v]) => out.set(k, v));',
+ '    return new Response(r.body, { status: r.status, headers: out });',
+ '  }',
+ '};'
+].join('\n');
+window.adzCopyWorker=function(){
+ const done=function(){showToast('Skrip Worker disalin. Tempel di Cloudflare Workers.');};
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ADZ_WORKER).then(done,function(){fallbackCopy(ADZ_WORKER,done);});}else fallbackCopy(ADZ_WORKER,done);
 };
 
 /* ---------- Prompt ---------- */
@@ -24487,6 +24814,8 @@ function systemPrompt(m){
  'SPACING RULES: decorative layers sit BEHIND text and must not hide it; any non-text shape that overlaps text but is not a real card must set bleed true (otherwise it is treated as a card and resized). A real card is a shape without bleed whose area contains the text center. Keep frames and corners clear of text (inset at least 4 percent).\n'
  :'ASSETS: add 2-5 decorative asset layers so the poster looks designed (for the da\'wah/modern style: brush stroke behind the key headline word, scribble underline under a keyword, ring around one word, splatter or halftone accent at a corner with low opacity 0.15-0.5). ')
  +'In reference mode recreate every decorative device seen in the reference using the closest kind. If an illustration is needed and image generation is ON, add ONE image layer with cutout:true (sticker-style), placed above the background and below the text unless overlap is intended; keep text readable.\n'+
+ 'JSON DISCIPLINE: output ONE JSON object that starts with { and ends with }, no markdown fences, no comments, no trailing commas, plain numbers (percent without the % sign, range 0-100 never 0-1), every layer has "kind" and a unique "name", every text layer has text,font,size,x,y,w. Before answering, silently check: nothing outside the safe area, no text overlapping text, headline is the largest, footer is last.\n'+
+ 'MINI EXAMPLE (format only, never copy its content): {"title":"Contoh","background":{"type":"gradient","gradType":"radial","angle":0,"colors":["#16324a","#0a1624","#050b14"]},"layers":[{"kind":"asset","name":"Cahaya","art":"glow","color":"#E8B923","opacity":0.5,"blend":"screen","bleed":true,"x":-10,"y":5,"w":120,"h":60},{"kind":"text","name":"Judul","text":"JUDUL","font":"Anton","size":12,"weight":"900","color":"#FFFFFF","align":"center","x":8,"y":20,"w":84,"lineHeight":1,"gradient":{"colors":["#FFF1B8","#E8B923","#9A6A00"]}},{"kind":"text","name":"Isi","text":"Kalimat isi poster.","font":"Playfair Display","size":3.6,"color":"#F3EAD0","align":"center","x":12,"y":48,"w":76,"lineHeight":1.45}]}\n'+
  'RULES: 1) Real layers like a designer: background, decor, optional illustration, headline, body, source/credit, footer/handle. 2) Use at most 3 fonts. Arabic text must use Amiri, Scheherazade New, Aref Ruqaa, Cairo or Reem Kufi with align center. 3) '+COPY_RULES+' 4) '+(cfg.rich?'24-44':'8-20')+' layers total, at most '+(cfg.useImages?'2':'0')+' image layers'+(cfg.useImages?'':' (image generation is OFF: use only shapes, assets, fades and text; use keepId only in remix mode)')+(cfg.assets?'':'; asset layers are OFF: do not output kind asset')+'. 5) Full-canvas backgrounds/overlays set "bleed":true; everything else stays inside the safe area. 6) Follow the APPROVED CREATIVE BRIEF when given: its palette, fonts, copy, decor list and zones.';
 }
 function qaSystem(m){
@@ -25530,7 +25859,7 @@ async function adzRun(cont,canRetry){
  if(!cont){
   if(S.busy)return 'fatal';
   readCfg();promptSave(true);clearLog();
-  if(!cfg.key){$('adzApiCard').open=true;showToast('Isi API key Gemini dulu');return 'fatal';}
+  if(!engineReady()){adzPane('conn');showToast(cfg.engine==='gemini'?'Isi API key Gemini dulu':'Isi alamat dan Unified key FreeLLMAPI dulu');return 'fatal';}
   if(checkDemo())return 'fatal';
   if(S.mode==='ref'&&!S.refs.length){showToast('Tambahkan minimal 1 gambar referensi');return 'fatal';}
   if(!($('adzPrompt').value||'').trim()&&S.mode!=='remix'&&!S.refs.length&&!S.ctxTexts.length){showToast('Tulis perintah dulu');return 'fatal';}
@@ -25543,7 +25872,7 @@ async function adzRun(cont,canRetry){
  let newEls=[],undoTarget=null,keptTarget=null,willRetry=false,rv='ok';
  try{
   const d=canvasDims(),m=Math.round(d.W*cfg.margin/100);
-  log('Mulai · '+cfg.layoutModel+(cfg.useImages?(' + '+cfg.imageModel):'')+' · kanvas '+d.W+'×'+d.H);
+  log('Mulai · '+(cfg.engine==='gemini'?'Gemini · ':'FreeLLMAPI · ')+modelLabel()+((cfg.useImages&&cfg.engine==='gemini')?(' + '+cfg.imageModel):'')+' · kanvas '+d.W+'×'+d.H);
 
   /* 1) brief / analisis maksud */
   let brief=null;
@@ -25559,13 +25888,14 @@ async function adzRun(cont,canRetry){
   let spec;
   if(S.ck.spec){spec=S.ck.spec;step(18,'2/5 Memakai rancangan layer yang sudah jadi.');}
   else{
-   step(18,'2/5 Merancang layer dengan '+cfg.layoutModel+' ...');
+   step(18,'2/5 Merancang layer dengan '+modelLabel()+' ...');
    const j=await gem(cfg.layoutModel,await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
    spec=parseJson(textOf(j));
    if(LAST_REPAIRED)log('Jawaban AI terpotong; bagian yang utuh diselamatkan. Jika desain kurang lengkap, coba lagi atau ganti model.','wn');
    S.ck.spec=spec;
   }
-  const L=(Array.isArray(spec.layers)?spec.layers.slice(0,48):[]).filter(function(l){return l&&typeof l==='object';});
+  const L=pickLayers(spec).slice(0,48).filter(function(l){return l&&typeof l==='object';});
+  normLayers(L);
   if(!L.length)throw new Error('AI tidak menghasilkan layer. Coba perintah yang lebih jelas.');
   enforceFooter(L,d);
   const nAsset=L.filter(function(l){return l.kind==='asset';}).length;
@@ -25573,7 +25903,7 @@ async function adzRun(cont,canRetry){
   if(S.mode==='ref'&&brief&&brief.illustration&&brief.illustration.needed&&!cfg.useImages)log('Referensi punya ilustrasi. Aktifkan "Buat ilustrasi dengan model gambar" agar ilustrasi mirip ikut dibuat sebagai PNG.','wn');
 
   /* 3) gambar AI (opsional): ilustrasi jadi PNG transparan */
-  const wantImg=!!cfg.useImages;let imgDone=0,imgFail=0;
+  const wantImg=!!cfg.useImages&&(cfg.engine==='gemini'||S.useGem)&&!!cfg.key;let imgDone=0,imgFail=0;
   const jobs=[];
   if(wantImg&&spec.background&&spec.background.type==='image'&&spec.background.imagePrompt&&!spec._bgSrc)jobs.push({bg:true,prompt:spec.background.imagePrompt,w:d.W,h:d.H});
   if(wantImg)L.forEach(function(l){if(l.kind==='image'&&!l.keepId&&!l._res&&l.imagePrompt&&jobs.length<3)jobs.push({layer:l,prompt:l.imagePrompt,w:clamp(l.w,5,100)/100*d.W,h:clamp(l.h,5,100)/100*d.H});});
@@ -25658,7 +25988,7 @@ async function adzRun(cont,canRetry){
   setTimeout(function(){if(!S.busy&&$('adzModal').classList.contains('active')){$('adzModal').classList.remove('active');}},1600);
  }catch(e){
   const cancelled=!!(S.ctl&&S.ctl.signal.aborted)||S.autoCancel;
-  const fatal=/API key|Akses ditolak|Tidak ada model|kehabisan kuota harian/i.test(e.message);
+  const fatal=!!e.fatalCfg||!!e.unreachable||!!e.noVision&&S.mode==='ref'||/API key|Akses ditolak|Tidak ada model|kehabisan kuota harian/i.test(e.message);
   if(S.ck)S.ck.failed=true;
   if(/JSON|layer/i.test(e.message)&&S.lastModel)S.cool[S.lastModel]=Date.now()+60000;
   if(!cancelled&&!fatal&&canRetry&&!newEls.length){
@@ -25678,7 +26008,7 @@ async function adzRun(cont,canRetry){
 }
 window.adzGenerate=async function(){
  if(S.busy)return;
- S.autoCancel=false;
+ S.autoCancel=false;S.useGem=false;S.noJsonMode=false;S.lastRoute='';
  const MAX=6;let r='retry',i=0;
  try{
   while(r==='retry'){
