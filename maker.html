@@ -1,15 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v2.6.8
+Studio Poster Maker Pro - Update v2.6.9
+
+v2.6.9:
+1. LOG MONITOR AI PERMANEN: log proses tidak lagi hilang saat selesai, saat panel ditutup/dibuka lagi, saat refresh, atau saat versi koding diganti. Log bisa dilihat, diperbesar, disalin, DITUTUP (tombol Tutup) dan dibuka lagi (tombol "Lihat Log Proses AI"). Log baru hilang bila Anda menekan "Hapus". Panel tidak menutup sendiri lagi setelah desain selesai.
+2. DATA TOOL AI DESAINER TERSIMPAN DI INDEXEDDB: gambar referensi, berkas JSON/ZIP konteks, daftar logo, log, perintah, username, dan pengaturan tetap ada walau refresh/update versi. Hilang hanya bila Anda menghapusnya sendiri (tombol x).
+3. LOGO OTOMATIS PROFESIONAL (maks. 7, bisa dicentang/dimatikan/dihapus): logo yang belum PNG dibuat transparan dengan tepi halus, area transparan di sekitar logo dipangkas, tinggi isi semua logo disamakan, lalu dipasang di bagian atas dengan latar kapsul/jajar genjang/persegi tumpul berwarna kontras serasi poster. 1 logo di tengah, 2 logo di sudut kiri-kanan, 3+ logo berjejer di tengah dalam satu kapsul panjang (7 logo yang sempit otomatis dua baris). Zona atas dicadangkan agar teks tidak menabrak logo.
 
 v2.6.8:
 1. MODEL SEPENUHNYA OTOMATIS: pilih model manual dihapus. Cukup isi 1 API key (key 2-5 hanya cadangan). Pekerjaan ringan (analisis maksud, teks) memakai model hemat; pekerjaan berat (merancang poster berlayer banyak, merapikan posisi dan ukuran, menilai hasil) hanya memakai model terbesar/tercerdas yang tersedia, tidak pernah turun ke model lemah.
 2. ROTARY SWITCH PINTAR: limit/gagal berpindah key, lalu model, lalu provider lain (bila key-nya terisi) dengan isi permintaan yang sama. Rancangan yang terlalu sedikit/rusak otomatis diulang dengan model lebih kuat.
 3. PROSES BISA DIBATALKAN, DITUNDA/DILANJUT, dan DIULANG dari awal. Putaran koreksi otomatis bawaan menjadi 3 agar hasil lebih rapi.
-
-v2.6.7:
-1. AI DESAINER MULTI-PROVIDER: pilih Google Gemini (AI Studio), Mistral, OpenRouter, Groq atau Cerebras untuk membandingkan mana yang paling worth it.
-2. 5 API KEY PER PROVIDER (5 akun Gmail) BERGILIR OTOMATIS saat limit: permintaan yang sama dikirim ulang apa adanya, brief/rancangan JSON yang sudah jadi tidak rusak dan proses berlanjut. Provider juga bisa diganti lalu "Lanjutkan (hemat token)".
-3. MODEL BERTINGKAT: model berat/besar untuk poster berlayer banyak, penataan rapi dan penilaian visual; model ringan untuk brief/teks. Tautan langsung untuk mengambil API key tiap provider, titik status per key, tes semua key.
 -->
 
 
@@ -1014,6 +1014,21 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 .adz-foot{flex:0 0 auto;padding:10px 14px max(12px,env(safe-area-inset-bottom));background:#0f0e0a;border-top:1px solid rgba(212,175,55,.3);display:flex;gap:8px;}
 .adz-foot .adz-btn{flex:1;height:44px;border-radius:22px;font-size:13.5px;font-weight:800;}
 .adz-foot .adz-btn.cancel{flex:0 0 auto;padding:0 16px;}
+/* v2.6.9: log permanen + logo AI Desainer */
+.adz-logopen{display:none;flex:0 0 auto;margin:0 12px 8px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.5);color:#FFE259;border-radius:12px;padding:10px 12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;text-align:center;}
+.adz-logopen.on{display:block;}
+.adz-logopen:active{transform:scale(.98);}
+.adz-log .sep{color:#D4AF37;font-weight:800;text-align:center;font-size:12px;border-bottom:0;padding-top:8px;}
+.adz-logos{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.adz-lg{position:relative;width:76px;height:76px;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,.55);background-color:#eceff3;background-image:linear-gradient(45deg,#cfd4dc 25%,transparent 25%,transparent 75%,#cfd4dc 75%),linear-gradient(45deg,#cfd4dc 25%,transparent 25%,transparent 75%,#cfd4dc 75%);background-size:12px 12px;background-position:0 0,6px 6px;display:flex;align-items:center;justify-content:center;}
+.adz-lg img{max-width:84%;max-height:84%;object-fit:contain;display:block;}
+.adz-lg.off img{opacity:.3;}
+.adz-lg .lx,.adz-lg .lc,.adz-lg .lm{position:absolute;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.8);color:#fff;font-size:12px;font-weight:800;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;border:0;padding:0;font-family:inherit;}
+.adz-lg .lx{top:3px;right:3px;}
+.adz-lg .lc{bottom:3px;left:3px;border:1.5px solid #D4AF37;background:rgba(0,0,0,.55);color:#D4AF37;}
+.adz-lg .lc.on{background:#D4AF37;color:#1a1405;}
+.adz-lg .lm{bottom:3px;right:3px;}
+
 /* v2.6.3: kapsul minimize + pelindung kanvas */
 #adzShield{position:fixed;inset:0;z-index:8999000;display:none;background:transparent;touch-action:none;-webkit-tap-highlight-color:transparent;}
 #adzShield.on{display:block;}
@@ -2387,7 +2402,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.6.8';
+const APP_VERSION = 'v2.6.9';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -24005,12 +24020,13 @@ const ADZ_STYLES=[
  ['Gradasi modern','modern vibrant gradient poster, glassy cards, rounded shapes, clean sans-serif']
 ];
 const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:'',cool:{},dead:{},daily:{},kdead:{},disc:{},kptr:{},cur:{txt:'',img:''},kstat:{},cap:{},nojson:{},warned:{},lastKey:'',lastModel:'',autoCancel:false};
+const AX={logBuf:[],logHidden:false,logLoaded:false,rLoaded:false,lLoaded:false,started:false,logos:[],plan:null,top:0,cache:new Map()};
 let cfg=loadCfg();
 if(!cfg._v268){cfg.review=Math.max(parseInt(cfg.review)||0,3);cfg._v268=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 if(!cfg._v266){cfg.useImages=false;cfg.assets=true;cfg.rich=true;cfg._v266=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 function loadCfg(){
  let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}
- c=Object.assign({provider:'gemini',keys:{},models:{},imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,ghost:true,rich:true},c);
+ c=Object.assign({provider:'gemini',keys:{},models:{},imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,ghost:true,rich:true,logoOn:true,logoShape:'auto',logoColor:'auto',logoLayout:'auto'},c);
  if(!c.keys||typeof c.keys!=='object')c.keys={};
  if(!c.models||typeof c.models!=='object')c.models={};
  Object.keys(PROVS).forEach(function(p){let a=Array.isArray(c.keys[p])?c.keys[p].slice(0,5):[];while(a.length<5)a.push('');c.keys[p]=a;if(!c.models[p]||typeof c.models[p]!=='object')c.models[p]={hi:'',lo:'',vis:''};});
@@ -24019,12 +24035,28 @@ function loadCfg(){
  if(!PROVS[c.provider])c.provider='gemini';
  return c;
 }
-function saveCfg(){try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
+function saveCfg(){try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}try{pdbPut('cfg',JSON.parse(JSON.stringify(cfg))).catch(function(){});}catch(e){}}
 const $=function(id){return document.getElementById(id);};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function delay(ms){return new Promise(function(r){setTimeout(r,ms);});}
-function log(msg,cls){const b=$('adzLogBox'),l=$('adzLog');if(!l||!b)return;b.classList.add('on');const d=document.createElement('div');if(cls)d.className=cls;d.textContent=msg;const nb=(l.scrollHeight-l.scrollTop-l.clientHeight)<70;l.appendChild(d);if(nb)l.scrollTop=l.scrollHeight;}
-function clearLog(){const b=$('adzLogBox'),l=$('adzLog');if(l)l.innerHTML='';if(b)b.classList.remove('on');setProg(0);}
+function log(msg,cls){
+ AX.logBuf.push({m:String(msg).slice(0,1500),c:cls||''});
+ if(AX.logBuf.length>1500)AX.logBuf.splice(0,AX.logBuf.length-1500);
+ logSaveSoon();
+ const b=$('adzLogBox'),l=$('adzLog');if(!l||!b)return;
+ if(!AX.logHidden)b.classList.add('on');
+ const d=document.createElement('div');if(cls)d.className=cls;d.textContent=msg;
+ const nb=(l.scrollHeight-l.scrollTop-l.clientHeight)<70;l.appendChild(d);
+ while(l.children.length>1500)l.removeChild(l.firstChild);
+ if(nb)l.scrollTop=l.scrollHeight;
+ logOpenBtnSync();
+}
+/* v2.6.9: log tidak dihapus saat proses baru; hanya diberi garis pemisah. Hapus total lewat tombol Hapus. */
+function clearLog(){
+ if(AX.logBuf.length)log('──── Proses baru · '+new Date().toLocaleString('id-ID')+' ────','sep');
+ AX.logHidden=false;const b=$('adzLogBox');if(b&&AX.logBuf.length)b.classList.add('on');
+ setProg(0);logOpenBtnSync();
+}
 function setProg(p){const bar=$('adzProgBar');if(bar)bar.style.width=Math.max(0,Math.min(100,p))+'%';const t=$('adzPct');if(t)t.textContent=Math.round(Math.max(0,Math.min(100,p)))+'%';S.pct=Math.round(Math.max(0,Math.min(100,p)));chipSync();}
 function step(p,msg){setProg(p);log(msg);S.stepTxt=msg;}
 window.adzLogSize=function(){const b=$('adzLogBox');b.classList.toggle('big');$('adzLogSizeBtn').textContent=b.classList.contains('big')?'Kecilkan':'Besarkan';setTimeout(function(){const l=$('adzLog');l.scrollTop=l.scrollHeight;},50);};
@@ -24065,6 +24097,15 @@ function build(){
    '<input type="file" id="adzFileImg" accept="image/*" multiple style="display:none"><input type="file" id="adzFileDoc" accept=".json,.zip,.txt,.md,application/json,application/zip" multiple style="display:none">'+
    '<div class="adz-thumbs" id="adzThumbs"></div><div class="adz-hint">Maks. 4 gambar. Poster referensi dibaca gayanya (warna, font, tata letak, kuas, ornamen, ilustrasi), lalu dibuat ulang sebagai layer terpisah. JSON/ZIP dibaca sebagai konteks (teks &amp; gambar di dalamnya).</div></div>'+
  '</div>'+
+ '<div class="adz-card" id="adzLogoCard"><div class="adz-lab" style="margin-top:0">Logo di atas poster</div>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzLogoOn"><span>Pasang logo otomatis di bagian atas poster (maks. 7). Letak, bentuk latar, dan warna dipilih serasi seperti poster profesional, tidak perlu ditulis di perintah.</span></label>'+
+  '<div class="adz-row" style="margin-top:8px"><button class="adz-btn" style="flex:1" onclick="adzLogoPick()">+ Tambah logo</button><button class="adz-btn" onclick="adzLogoAll(true)">Centang semua</button><button class="adz-btn" onclick="adzLogoAll(false)">Matikan semua</button></div>'+
+  '<input type="file" id="adzFileLogo" accept="image/*" multiple style="display:none">'+
+  '<div class="adz-logos" id="adzLogos"></div><div class="adz-hint" id="adzLogoHint"></div>'+
+  '<label class="adz-lab">Bentuk latar logo</label><div class="adz-chips" id="adzLogoShape"></div>'+
+  '<label class="adz-lab">Warna latar logo</label><div class="adz-chips" id="adzLogoColor"></div>'+
+  '<label class="adz-lab">Tata letak logo</label><div class="adz-chips" id="adzLogoLay"></div>'+
+  '<div class="adz-hint">Logo yang belum PNG otomatis dibuat transparan dengan tepi halus, area kosong di sekitar logo dipangkas, dan tinggi isi semua logo disamakan. Tanda centang = dipakai, tanda x = hapus dari penyimpanan, tanda panah = geser urutan. Semua tersimpan di IndexedDB dan tidak hilang saat refresh atau update versi.</div></div>'+
  '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Opsi hasil</div>'+
   '<label class="adz-lab" style="margin-top:6px">Ruang tepi kosong: <span id="adzMarginV">7</span>%</label><input id="adzMargin" class="adz-range" type="range" min="4" max="12" step="1" value="7">'+
   '<label class="adz-chk"><input type="checkbox" id="adzSmart"><span>Mode cerdas: AI menganalisis maksud perintah dulu (walau singkat), menyusun brief, lalu mendesain.</span></label>'+
@@ -24076,7 +24117,8 @@ function build(){
   '<label class="adz-chk"><input type="checkbox" id="adzReplace"><span>Ganti isi slide saat ini (bisa dibatalkan dengan Undo). Jika mati, hasil dibuat di slide baru.</span></label>'+
  '</div>'+
  '</div>'+
- '<div class="adz-logbox" id="adzLogBox"><div class="adz-loghead"><b>Monitor Proses AI</b><span id="adzPct">0%</span><button class="adz-mini" id="adzLogSizeBtn" onclick="adzLogSize()">Besarkan</button><button class="adz-mini" onclick="adzLogCopy()">Salin</button></div><div class="adz-prog"><i id="adzProgBar"></i></div><div class="adz-log" id="adzLog"></div></div>'+
+ '<button class="adz-logopen" id="adzLogOpen" onclick="adzLogShow()">Lihat Log Proses AI (<span id="adzLogN">0</span> baris)</button>'+
+ '<div class="adz-logbox" id="adzLogBox"><div class="adz-loghead"><b>Monitor Proses AI</b><span id="adzPct">0%</span><button class="adz-mini" id="adzLogSizeBtn" onclick="adzLogSize()">Besarkan</button><button class="adz-mini" onclick="adzLogCopy()">Salin</button><button class="adz-mini" onclick="adzLogHide()">Tutup</button><button class="adz-mini" onclick="adzLogClear()">Hapus</button></div><div class="adz-prog"><i id="adzProgBar"></i></div><div class="adz-log" id="adzLog"></div></div>'+
  '<div class="adz-foot"><button class="adz-btn cancel" id="adzCancel" onclick="adzCancel()" style="display:none">Batal</button><button class="adz-btn cancel" id="adzPause" onclick="adzPause()" style="display:none">Tunda</button><button class="adz-btn" id="adzFresh" onclick="adzFresh()" style="display:none;flex:0 0 auto;height:44px;border-radius:22px;padding:0 14px;font-size:12px">Ulang awal</button><button class="adz-btn gold" id="adzGo" onclick="adzGenerate()">Buat Desain</button></div>';
  document.body.appendChild(m);
  buildChip();
@@ -24099,9 +24141,11 @@ function build(){
  $('adzMargin').addEventListener('input',function(){$('adzMarginV').textContent=this.value;});
  $('adzRev').addEventListener('input',function(){$('adzRevV').textContent=this.value;});
  buildProv();
+ buildLogoUi();
 }
 function paintChips(){Array.prototype.forEach.call($('adzStyles').children,function(b,i){b.classList.toggle('on',i===S.style);});}
 function paintThumbs(){
+ refsSaveSoon();
  const t=$('adzThumbs');t.innerHTML='';
  S.refs.forEach(function(r,i){const d=document.createElement('div');d.className='adz-th';const im=document.createElement('img');im.src=r.url;d.appendChild(im);const x=document.createElement('b');x.textContent='×';x.onclick=function(){S.refs.splice(i,1);paintThumbs();};d.appendChild(x);t.appendChild(d);});
  S.ctxTexts.forEach(function(c,i){const d=document.createElement('div');d.className='adz-th';d.textContent=c.name;const x=document.createElement('b');x.textContent='×';x.onclick=function(){S.ctxTexts.splice(i,1);paintThumbs();};d.appendChild(x);t.appendChild(d);});
@@ -24114,6 +24158,7 @@ window.openAiDesigner=function(){
  $('adzGhost').checked=cfg.ghost!==false;
  $('adzApiCard').open=!keysOf(provId()).length;
  paintChips();paintThumbs();adzMode(S.mode);
+ paintLogoUi();persistLoad();
  $('adzModal').classList.add('active');
  S.min=false;chipHide();shieldSet(false);
  const lg=$('adzLog');if(lg)setTimeout(function(){lg.scrollTop=lg.scrollHeight;},40);
@@ -24176,6 +24221,368 @@ function chipSync(){
  else{tx.textContent='AI Desainer';sb.textContent='Ketuk: buka';x.textContent='✕';}
  if(bar)bar.style.width=(S.busy||S.done==='ok'?S.pct:0)+'%';
 }
+/* ===== v2.6.9: penyimpanan permanen (log, referensi, logo, pengaturan) + logo otomatis profesional ===== */
+let AXlogT=null,AXrefT=null,AXlogoT=null;
+function logSaveSoon(){clearTimeout(AXlogT);AXlogT=setTimeout(logSaveNow,700);}
+function logSaveNow(){if(!AX.logLoaded)return;try{pdbPut('log',{b:AX.logBuf,t:Date.now()}).catch(function(){});}catch(e){}}
+function logOpenBtnSync(){const o=$('adzLogOpen'),n=$('adzLogN');if(n)n.textContent=AX.logBuf.length;if(o)o.classList.toggle('on',AX.logBuf.length>0&&AX.logHidden);}
+function logRestoreDom(){
+ const l=$('adzLog'),b=$('adzLogBox');if(!l||!b)return;
+ l.innerHTML='';const fr=document.createDocumentFragment();
+ AX.logBuf.forEach(function(x){const d=document.createElement('div');if(x.c)d.className=x.c;d.textContent=x.m;fr.appendChild(d);});
+ l.appendChild(fr);b.classList.toggle('on',AX.logBuf.length>0&&!AX.logHidden);logOpenBtnSync();
+ setTimeout(function(){l.scrollTop=l.scrollHeight;},30);
+}
+window.adzLogHide=function(){AX.logHidden=true;const b=$('adzLogBox');if(b)b.classList.remove('on');logOpenBtnSync();};
+window.adzLogShow=function(){
+ AX.logHidden=false;const b=$('adzLogBox');if(b&&AX.logBuf.length)b.classList.add('on');logOpenBtnSync();
+ setTimeout(function(){const l=$('adzLog');if(l)l.scrollTop=l.scrollHeight;},40);
+};
+window.adzLogClear=function(){
+ if(AX.logBuf.length&&!confirm('Hapus seluruh log proses AI? Log yang dihapus tidak bisa dikembalikan.'))return;
+ AX.logBuf=[];AX.logHidden=false;
+ const l=$('adzLog');if(l)l.innerHTML='';
+ const b=$('adzLogBox');if(b)b.classList.remove('on');
+ if(!S.busy)setProg(0);
+ logOpenBtnSync();
+ try{pdbPut('log',{b:[],t:Date.now()}).catch(function(){});}catch(e){}
+ showToast('Log dihapus');
+};
+function refsSaveSoon(){if(!AX.rLoaded)return;clearTimeout(AXrefT);AXrefT=setTimeout(refsSaveNow,350);}
+function refsSaveNow(){
+ if(!AX.rLoaded)return;
+ try{pdbPut('refs',{refs:S.refs.map(function(r){return {url:r.url,name:r.name};}),ctx:S.ctxTexts.map(function(c){return {name:c.name,text:c.text};}),t:Date.now()}).catch(function(){});}catch(e){}
+}
+function logosSaveSoon(){clearTimeout(AXlogoT);AXlogoT=setTimeout(logosSaveNow,300);}
+function logosSaveNow(){
+ if(!AX.lLoaded)return;
+ try{pdbPut('logos',{items:AX.logos.map(function(g){return {id:g.id,name:g.name,url:g.url,w:g.w,h:g.h,lum:g.lum,on:!!g.on,cut:!!g.cut};}),t:Date.now()}).catch(function(){});}catch(e){}
+}
+function flushAll(){clearTimeout(AXlogT);clearTimeout(AXrefT);clearTimeout(AXlogoT);logSaveNow();refsSaveNow();logosSaveNow();}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')flushAll();});
+window.addEventListener('pagehide',flushAll);
+function cfgUiSync(){
+ try{
+  paintProv();$('adzAutoProv').checked=cfg.autoProv!==false;
+  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
+  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRich').checked=cfg.rich!==false;
+  $('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;$('adzGhost').checked=cfg.ghost!==false;
+  paintLogoUi();
+ }catch(e){}
+}
+function persistLoad(){
+ if(AX.started)return;AX.started=true;
+ pdbGet('log').then(function(v){
+  const old=(v&&Array.isArray(v.b))?v.b.filter(function(x){return x&&typeof x.m==='string';}):[];
+  if(old.length){AX.logBuf=old.concat(AX.logBuf).slice(-1500);AX.logHidden=!S.busy;}
+  AX.logLoaded=true;
+  if(old.length)logRestoreDom();
+  logOpenBtnSync();
+ }).catch(function(){AX.logLoaded=true;});
+ pdbGet('refs').then(function(v){
+  AX.rLoaded=true;
+  if(v&&Array.isArray(v.refs)&&!S.refs.length&&!S.ctxTexts.length){
+   S.refs=v.refs.filter(function(r){return r&&typeof r.url==='string';}).slice(0,4).map(function(r){return {url:r.url,name:r.name||'referensi'};});
+   S.ctxTexts=(Array.isArray(v.ctx)?v.ctx:[]).filter(function(c){return c&&typeof c.text==='string';}).slice(0,12).map(function(c){return {name:c.name||'berkas',text:c.text};});
+   paintThumbs();updGo();
+  }
+ }).catch(function(){AX.rLoaded=true;});
+ pdbGet('logos').then(function(v){
+  AX.lLoaded=true;
+  if(v&&Array.isArray(v.items)&&!AX.logos.length){
+   AX.logos=v.items.filter(function(g){return g&&typeof g.url==='string'&&g.w>0&&g.h>0;}).slice(0,7).map(function(g){return {id:g.id||newId(),name:g.name||'logo',url:g.url,w:g.w,h:g.h,lum:(typeof g.lum==='number'?g.lum:0.5),on:g.on!==false,cut:!!g.cut};});
+   paintLogoUi();
+  }
+ }).catch(function(){AX.lLoaded=true;});
+ pdbGet('cfg').then(function(v){
+  let has=false;try{has=Object.keys(cfg.keys||{}).some(function(p){return (cfg.keys[p]||[]).some(Boolean);});}catch(e){}
+  let hv=false;try{hv=!!(v&&v.keys&&Object.keys(v.keys).some(function(p){return Array.isArray(v.keys[p])&&v.keys[p].some(Boolean);}));}catch(e){}
+  if(!has&&hv){try{localStorage.setItem(LS_KEY,JSON.stringify(v));}catch(e){}cfg=loadCfg();cfgUiSync();}
+ }).catch(function(){});
+}
+function logoSig(){return cfg.logoOn===false?'logo-off':(AX.logos.filter(function(g){return g.on;}).map(function(g){return g.id;}).join(',')+'|'+cfg.logoShape+'|'+cfg.logoColor+'|'+cfg.logoLayout);}
+
+/* ---------- UI logo ---------- */
+const LOGO_SHAPES=[['auto','Otomatis'],['capsule','Kapsul'],['para','Jajar genjang'],['rect','Persegi tumpul']];
+const LOGO_COLORS=[['auto','Otomatis (kontras)'],['white','Putih'],['black','Hitam']];
+const LOGO_LAYS=[['auto','Otomatis'],['center','Tengah berjejer'],['corner','Sudut kiri-kanan']];
+const LOGO_GROUPS=[['adzLogoShape',LOGO_SHAPES,'logoShape'],['adzLogoColor',LOGO_COLORS,'logoColor'],['adzLogoLay',LOGO_LAYS,'logoLayout']];
+function buildLogoUi(){
+ LOGO_GROUPS.forEach(function(g){
+  const w=$(g[0]);if(!w||w.children.length)return;
+  g[1].forEach(function(a){const b=document.createElement('button');b.className='adz-chip';b.setAttribute('data-v',a[0]);b.textContent=a[1];b.onclick=function(){cfg[g[2]]=a[0];saveCfg();paintLogoUi();};w.appendChild(b);});
+ });
+ $('adzFileLogo').addEventListener('change',function(e){logoAdd(e.target.files);e.target.value='';});
+ $('adzLogoOn').addEventListener('change',function(){cfg.logoOn=this.checked;saveCfg();paintLogoUi();});
+}
+function paintLogoUi(){
+ LOGO_GROUPS.forEach(function(g){const w=$(g[0]);if(!w)return;Array.prototype.forEach.call(w.children,function(b){b.classList.toggle('on',b.getAttribute('data-v')===(cfg[g[2]]||'auto'));});});
+ const on=$('adzLogoOn');if(on)on.checked=cfg.logoOn!==false;
+ const box=$('adzLogos');if(!box)return;
+ box.innerHTML='';
+ AX.logos.forEach(function(g,i){
+  const d=document.createElement('div');d.className='adz-lg'+(g.on?'':' off');
+  const im=document.createElement('img');im.src=g.url;im.alt=g.name;d.appendChild(im);
+  const x=document.createElement('button');x.className='lx';x.textContent='×';x.title='Hapus logo';
+  x.onclick=function(){AX.logos.splice(i,1);paintLogoUi();logosSaveSoon();};d.appendChild(x);
+  const c=document.createElement('button');c.className='lc'+(g.on?' on':'');c.textContent=g.on?'✓':'';c.title=g.on?'Dipakai (ketuk untuk matikan)':'Tidak dipakai (ketuk untuk pakai)';
+  c.onclick=function(){g.on=!g.on;paintLogoUi();logosSaveSoon();};d.appendChild(c);
+  if(i>0){const mv=document.createElement('button');mv.className='lm';mv.textContent='‹';mv.title='Geser ke depan';
+   mv.onclick=function(){const t=AX.logos[i-1];AX.logos[i-1]=AX.logos[i];AX.logos[i]=t;paintLogoUi();logosSaveSoon();};d.appendChild(mv);}
+  box.appendChild(d);
+ });
+ const h=$('adzLogoHint');
+ if(h){const used=AX.logos.filter(function(g){return g.on;}).length;h.textContent=AX.logos.length?(used+' logo dipakai dari '+AX.logos.length+' tersimpan (maks. 7). Urutan di sini = urutan kiri ke kanan di poster.'):'Belum ada logo. Tekan "+ Tambah logo" (boleh banyak sekaligus).';}
+}
+window.adzLogoPick=function(){const f=$('adzFileLogo');if(f)f.click();};
+window.adzLogoAll=function(v){AX.logos.forEach(function(g){g.on=!!v;});paintLogoUi();logosSaveSoon();};
+async function logoAdd(files){
+ let added=0,cut=0;
+ for(const f of Array.from(files||[])){
+  if(AX.logos.length>=7){showToast('Maksimal 7 logo');break;}
+  try{
+   const r=await processLogo(await readAsDataURL(f));
+   AX.logos.push({id:newId(),name:String(f.name||'logo').replace(/\.[a-z0-9]+$/i,'').slice(0,24),url:r.url,w:r.w,h:r.h,lum:r.lum,on:true,cut:r.cut});
+   added++;if(r.cut)cut++;
+  }catch(e){showToast('Logo gagal: '+(f.name||'')+' ('+e.message+')');}
+ }
+ if(added){cfg.logoOn=true;saveCfg();paintLogoUi();logosSaveSoon();showToast(added+' logo ditambahkan'+(cut?(' · '+cut+' dibuat transparan'):''));}
+}
+
+/* ---------- pemrosesan logo: transparansi halus, pangkas ke isi, ukuran terkendali ---------- */
+function cutBg(D,w,h){
+ const N=w*h,bs=[];
+ const px=function(x,y){const p=(y*w+x)*4;bs.push(D[p],D[p+1],D[p+2]);};
+ const sx=Math.max(1,Math.floor(w/160)),sy=Math.max(1,Math.floor(h/160));
+ for(let x=0;x<w;x+=sx){px(x,0);px(x,h-1);}
+ for(let y=0;y<h;y+=sy){px(0,y);px(w-1,y);}
+ const ns=bs.length/3;if(!ns)return false;
+ const hist={};let best='',bc=0;
+ for(let i=0;i<ns;i++){
+  const key=(bs[i*3]>>4)+','+(bs[i*3+1]>>4)+','+(bs[i*3+2]>>4);
+  const e=hist[key]||(hist[key]={n:0,r:0,g:0,b:0});e.n++;e.r+=bs[i*3];e.g+=bs[i*3+1];e.b+=bs[i*3+2];
+  if(e.n>bc){bc=e.n;best=key;}
+ }
+ const E=hist[best],R0=E.r/E.n,G0=E.g/E.n,B0=E.b/E.n;
+ let near=0;for(let i=0;i<ns;i++){const dr=bs[i*3]-R0,dg=bs[i*3+1]-G0,db=bs[i*3+2]-B0;if(dr*dr+dg*dg+db*db<2025)near++;}
+ if(near<ns*0.7)return false;
+ const T1=24,T2=72;
+ const dist=function(p){const dr=D[p]-R0,dg=D[p+1]-G0,db=D[p+2]-B0;return Math.sqrt(dr*dr+dg*dg+db*db);};
+ const seen=new Uint8Array(N),q=new Int32Array(N);let qh=0,qt=0;
+ const tp=function(i){if(seen[i])return;if(dist(i*4)<T2){seen[i]=1;q[qt++]=i;}};
+ for(let x=0;x<w;x++){tp(x);tp((h-1)*w+x);}
+ for(let y=0;y<h;y++){tp(y*w);tp(y*w+w-1);}
+ while(qh<qt){const i=q[qh++],x=i%w,y=(i/w)|0;if(x>0)tp(i-1);if(x<w-1)tp(i+1);if(y>0)tp(i-w);if(y<h-1)tp(i+w);}
+ if(qt<N*0.02||qt>N*0.985)return false;
+ const A=new Float32Array(N);for(let i=0;i<N;i++)A[i]=D[i*4+3]/255;
+ for(let k=0;k<qt;k++){
+  const i=q[k],p=i*4,dd=dist(p);
+  let a=dd<=T1?0:(dd-T1)/(T2-T1);a=a*a*(3-2*a);
+  if(a<A[i])A[i]=a;
+  if(a>0.05&&a<1){
+   D[p]=Math.max(0,Math.min(255,Math.round((D[p]-R0*(1-a))/a)));
+   D[p+1]=Math.max(0,Math.min(255,Math.round((D[p+1]-G0*(1-a))/a)));
+   D[p+2]=Math.max(0,Math.min(255,Math.round((D[p+2]-B0*(1-a))/a)));
+  }
+ }
+ const A0=A.slice();
+ for(let k=0;k<qt;k++){
+  const i=q[k];if(A0[i]<=0)continue;
+  const x=i%w,y=(i/w)|0;
+  const l=x>0?A0[i-1]:A0[i],r=x<w-1?A0[i+1]:A0[i],u=y>0?A0[i-w]:A0[i],dn=y<h-1?A0[i+w]:A0[i];
+  if(A0[i]<0.999||l<0.999||r<0.999||u<0.999||dn<0.999)A[i]=(A0[i]*2+l+r+u+dn)/6;
+ }
+ for(let k=0;k<qt;k++){const i=q[k];D[i*4+3]=Math.round(A[i]*255);}
+ return true;
+}
+async function processLogo(src){
+ const im=await loadImg(src);
+ const k=Math.min(1,900/Math.max(im.width,im.height));
+ const w=Math.max(1,Math.round(im.width*k)),h=Math.max(1,Math.round(im.height*k));
+ const c=document.createElement('canvas');c.width=w;c.height=h;
+ const x=c.getContext('2d',{willReadFrequently:true});
+ x.imageSmoothingQuality='high';x.drawImage(im,0,0,w,h);
+ let id;try{id=x.getImageData(0,0,w,h);}catch(e){c.width=0;throw new Error('gambar tidak bisa dibaca');}
+ const D=id.data;let sem=0;
+ for(let i=3;i<D.length;i+=4)if(D[i]<235)sem++;
+ let cut=false;
+ if(sem<w*h*0.004)cut=cutBg(D,w,h);
+ let l=w,t=h,r=-1,b=-1;
+ for(let yy=0;yy<h;yy++){const o=yy*w*4;for(let xx=0;xx<w;xx++){if(D[o+xx*4+3]>14){if(xx<l)l=xx;if(xx>r)r=xx;if(yy<t)t=yy;if(yy>b)b=yy;}}}
+ if(r<0){c.width=0;throw new Error('logo kosong');}
+ x.putImageData(id,0,0);
+ const cw=r-l+1,chh=b-t+1,sc=Math.min(1,700/Math.max(cw,chh));
+ const ow=Math.max(1,Math.round(cw*sc)),oh=Math.max(1,Math.round(chh*sc));
+ const o=document.createElement('canvas');o.width=ow;o.height=oh;
+ const ox=o.getContext('2d');ox.imageSmoothingQuality='high';ox.drawImage(c,l,t,cw,chh,0,0,ow,oh);
+ let sl=0,sa=0;
+ for(let yy=t;yy<=b;yy+=2){const oo=yy*w*4;for(let xx=l;xx<=r;xx+=2){const p=oo+xx*4,a=D[p+3];if(a>14){sl+=(0.2126*D[p]+0.7152*D[p+1]+0.0722*D[p+2])*a;sa+=a;}}}
+ const lum=sa?sl/sa/255:0.5;
+ const url=o.toDataURL('image/png');
+ c.width=0;c.height=0;o.width=0;o.height=0;
+ return {url:url,w:ow,h:oh,lum:lum,cut:cut};
+}
+
+/* ---------- rencana tata letak logo (px) ---------- */
+function lumOf(c){const v=_rgb(c);return (0.2126*v[0]+0.7152*v[1]+0.0722*v[2])/255;}
+function logoGeom(items,d,m){
+ const W=d.W,H=d.H,availW=W-2*m,n=items.length;
+ const kind=(cfg.logoShape==='capsule'||cfg.logoShape==='para'||cfg.logoShape==='rect')?cfg.logoShape:(S.style===3?'para':'capsule');
+ let mode=(cfg.logoLayout==='center'||cfg.logoLayout==='corner')?cfg.logoLayout:(n===2?'corner':'center');
+ if(n===1||(mode==='corner'&&n!==2))mode='center';
+ const bt=Math.round(m*0.8);
+ const CH=Math.round(Math.max(52,Math.min(W*0.085,H*0.1)));
+ const slantF=kind==='para'?0.36:0;
+ const dims=function(ch){const ih=ch*0.6,sl=ch*slantF;return {ih:ih,sl:sl,padX:ih*0.9+sl*0.6,gap:ih*0.75};};
+ const rowW=function(list,ch){const q=dims(ch);let s=q.padX*2+q.gap*(list.length-1);list.forEach(function(it){s+=it.ar*q.ih;});return s;};
+ let rows=[items],ch=CH;
+ if(mode==='center'){
+  const w1=rowW(items,CH),s1=Math.min(1,availW/w1);
+  let best={rows:[items],ch:Math.round(CH*s1)};
+  if(n>=4&&CH*s1<W*0.058){
+   const a=items.slice(0,Math.ceil(n/2)),b=items.slice(Math.ceil(n/2));
+   const s2=Math.min(1,availW/Math.max(rowW(a,CH),rowW(b,CH)));
+   if(CH*s2>CH*s1*1.25)best={rows:[a,b],ch:Math.round(CH*s2)};
+  }
+  rows=best.rows;ch=best.ch;
+ }else{
+  const s=Math.min(1,(availW-m*0.5)/(rowW([items[0]],CH)+rowW([items[1]],CH)));
+  ch=Math.round(CH*s);rows=[[items[0]],[items[1]]];
+ }
+ const q=dims(ch),gapRow=Math.round(ch*0.2),plates=[],divs=[];
+ if(mode==='center'){
+  rows.forEach(function(list,ri){
+   const pw=Math.round(rowW(list,ch)),px0=Math.round((W-pw)/2),py=bt+ri*(ch+gapRow);
+   plates.push({x:px0,y:py,w:pw,h:ch});
+   let cx=px0+q.padX;
+   list.forEach(function(it,k){
+    const iw=Math.round(it.ar*q.ih),ih=Math.round(q.ih);
+    it.x=Math.round(cx);it.y=Math.round(py+(ch-ih)/2);it.w=iw;it.h=ih;cx+=iw;
+    if(k<list.length-1){divs.push({x:Math.round(cx+q.gap/2),y:Math.round(py+ch*0.2),h:Math.round(ch*0.6)});cx+=q.gap;}
+   });
+  });
+ }else{
+  [0,1].forEach(function(k){
+   const it=items[k],pw=Math.round(rowW([it],ch)),px0=k===0?m:W-m-pw;
+   plates.push({x:px0,y:bt,w:pw,h:ch});
+   const iw=Math.round(it.ar*q.ih),ih=Math.round(q.ih);
+   it.x=Math.round(px0+(pw-iw)/2);it.y=Math.round(bt+(ch-ih)/2);it.w=iw;it.h=ih;
+  });
+ }
+ const nr=(mode==='center')?rows.length:1,zb=bt+nr*ch+(nr-1)*gapRow,gapAfter=Math.round(H*0.02);
+ const lumSum=items.reduce(function(a,it){return a+it.g.lum*it.ar;},0),arSum=items.reduce(function(a,it){return a+it.ar;},0);
+ return {items:items,plates:plates,divs:divs,kind:kind,mode:mode,ch:ch,slant:Math.round(q.sl),zb:zb,gapAfter:gapAfter,
+  top:zb+gapAfter,zonePct:+(((zb+gapAfter)/H)*100).toFixed(1),lum:arSum?lumSum/arSum:0.5,
+  desc:(mode==='corner')?'two logo plates at the top-left and top-right corners':(rows.length>1?'two stacked, centered logo plates':'one centered logo plate')};
+}
+async function prepLogoPlan(d,m){
+ AX.plan=null;AX.top=0;AX.warned=false;AX.cache.clear();
+ if(cfg.logoOn===false)return;
+ const act=AX.logos.filter(function(g){return g.on;}).slice(0,7);
+ if(!act.length)return;
+ try{
+  const items=act.map(function(g){return {g:g,ar:Math.max(0.15,Math.min(8,g.w/g.h))};});
+  const P=logoGeom(items,d,m);
+  AX.plan=P;AX.top=P.top;
+  log('Logo: '+items.length+' logo · tata letak '+P.mode+' · latar '+P.kind+' · zona atas '+P.zonePct+'% dicadangkan.');
+ }catch(e){AX.plan=null;AX.top=0;log('Logo dilewati: '+e.message,'wn');}
+}
+function logoPal(P,L,target,d){
+ let accent=null;
+ try{const a=S.ck&&S.ck.brief&&S.ck.brief.palette&&S.ck.brief.palette.accent;if(a&&/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(a).trim()))accent=String(a).trim();}catch(e){}
+ for(let i=0;i<L.length&&!accent;i++){const l=L[i];if(l&&l.kind==='asset'&&/frame|divider|corner|gradbar|ring/.test(String(l.art||''))&&/^#([0-9a-f]{3}|[0-9a-f]{6})/i.test(String(l.color||'')))accent=hex(l.color);}
+ for(let i=0;i<L.length&&!accent;i++){const l=L[i];if(l&&l.kind==='text'&&l.accent&&l.accent.color&&/^#([0-9a-f]{3}|[0-9a-f]{6})/i.test(String(l.accent.color)))accent=hex(l.accent.color);}
+ accent=accent||'#D4AF37';
+ let fill;
+ if(cfg.logoColor==='white')fill='#FFFFFF';
+ else if(cfg.logoColor==='black')fill='#0D0D0D';
+ else{
+  /* otomatis: pilih latar terang/gelap yang membuat paling sedikit logo hilang (kontras rendah) */
+  const fw=P.items.filter(function(it){return Math.abs(1-it.g.lum)<0.2;}).length,fd=P.items.filter(function(it){return Math.abs(0.08-it.g.lum)<0.2;}).length;
+  const light=(fw!==fd)?(fw<fd):(P.lum<0.52);
+  fill=light?mixc('#FFFFFF',accent,0.05):mixc('#0D0D0D',accent,0.1);
+ }
+ const dark=lumOf(fill)<0.5;
+ if(!AX.warned){
+  AX.warned=true;
+  const bad=P.items.filter(function(it){return Math.abs(lumOf(fill)-it.g.lum)<0.2;}).map(function(it){return it.g.name;});
+  if(bad.length)log('Peringatan logo: '+bad.join(', ')+' kurang kontras di latar '+(dark?'gelap':'terang')+'. Ubah "Warna latar logo" (Putih/Hitam) atau matikan logo itu bila perlu.','wn');
+ }
+ let border=accent;
+ if(Math.abs(lumOf(border)-lumOf(fill))<0.28)border=dark?shade(accent,0.45):shade(accent,-0.45);
+ return {fill:fill,border:border,accent:accent,dark:dark,bw:Math.max(2,Math.round(d.W*0.0022))};
+}
+function rrPoly(x,P,r){
+ const n=P.length;x.beginPath();
+ x.moveTo((P[0][0]+P[n-1][0])/2,(P[0][1]+P[n-1][1])/2);
+ for(let i=0;i<n;i++){const p=P[i],nx=P[(i+1)%n];x.arcTo(p[0],p[1],(p[0]+nx[0])/2,(p[1]+nx[1])/2,r);}
+ x.closePath();
+}
+function logoPlateUrl(w,h,slant,pal){
+ const key='pl|'+w+'|'+h+'|'+Math.round(slant)+'|'+pal.fill+'|'+pal.border;
+ if(AX.cache.has(key))return AX.cache.get(key);
+ const sc=Math.min(2,1400/Math.max(w,h)),W=Math.max(4,Math.round(w*sc)),H=Math.max(4,Math.round(h*sc));
+ const c=document.createElement('canvas');c.width=W;c.height=H;
+ const x=c.getContext('2d'),bw=pal.bw*sc,s=slant*sc,o=bw/2+1;
+ const P=[[s+o,o],[W-o,o],[W-s-o,H-o],[o,H-o]];
+ rrPoly(x,P,Math.max(2,Math.min(H*0.16,s*0.6+2)));
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,pal.fill);g.addColorStop(1,shade(pal.fill,pal.dark?0.08:-0.06));
+ x.fillStyle=g;x.fill();
+ x.lineWidth=bw;x.strokeStyle=pal.border;x.lineJoin='round';x.stroke();
+ const url=c.toDataURL('image/png');c.width=0;c.height=0;
+ AX.cache.set(key,url);return url;
+}
+async function logoScaled(g,tw,th){
+ if(tw>=g.w)return g.url;
+ const key=g.id+'|'+tw;if(AX.cache.has(key))return AX.cache.get(key);
+ const im=await loadImg(g.url);
+ let cw=im.width,chh=im.height,src=im,cur=null;
+ while(cw/2>tw){
+  const c=document.createElement('canvas');cw=Math.max(tw,Math.round(cw/2));chh=Math.max(th,Math.round(chh/2));
+  c.width=cw;c.height=chh;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,cw,chh);
+  if(cur)cur.width=0;cur=c;src=c;
+ }
+ const c2=document.createElement('canvas');c2.width=tw;c2.height=th;
+ const x2=c2.getContext('2d');x2.imageSmoothingQuality='high';x2.drawImage(src,0,0,tw,th);
+ const url=c2.toDataURL('image/png');c2.width=0;if(cur)cur.width=0;
+ if(AX.cache.size>40)AX.cache.delete(AX.cache.keys().next().value);
+ AX.cache.set(key,url);return url;
+}
+async function addLogoEls(target,L,d,m){
+ const P=AX.plan;if(!P)return;
+ try{
+  const pal=logoPal(P,L,target,d),out=[];let z=0;
+  const tag=function(nmx){return {kind:'logo',logo:true,bleed:true,name:nmx,nm:nmx.toLowerCase(),idx:2000+(z++)};};
+  const shd=function(){return {color:'#000000',blur:Math.round(d.W*0.012),distance:Math.round(d.W*0.004),opacity:pal.dark?0.5:0.28};};
+  for(let pi=0;pi<P.plates.length;pi++){
+   const p=P.plates[pi];let e;
+   if(P.kind==='para'){
+    const url=logoPlateUrl(p.w,p.h,P.slant,pal),img=getImageFromCache(url);await waitImg(img);
+    e=imageBase(img,url,p.x+p.w/2,p.y+p.h/2,p.w,p.h,0,1);
+    e.shadow={color:'#000000',blur:shd().blur,angle:45,distance:shd().distance,alpha:shd().opacity};
+   }else{
+    e=mkShape({shape:P.kind==='rect'?'rect':'capsule',x:p.x/d.W*100,y:p.y/d.H*100,w:p.w/d.W*100,h:p.h/d.H*100,color:pal.fill,opacity:1,radius:Math.round(p.h*0.24),borderWidth:pal.bw,borderColor:pal.border,bleed:true,shadow:shd()},d);
+   }
+   e._adz=Object.assign(e._adz||{},tag('Latar logo '+(pi+1)));
+   out.push(e);
+  }
+  const thick=Math.max(2,Math.round(P.ch*0.025));
+  P.divs.forEach(function(v,k){
+   const e=mkShape({shape:'rect',x:(v.x-thick/2)/d.W*100,y:v.y/d.H*100,w:thick/d.W*100,h:v.h/d.H*100,color:pal.border,opacity:0.55,bleed:true},d);
+   e._adz=Object.assign(e._adz||{},tag('Pemisah logo '+(k+1)));
+   out.push(e);
+  });
+  for(let k=0;k<P.items.length;k++){
+   const it=P.items[k],tw=Math.max(2,Math.min(it.g.w,Math.round(it.w*2))),th=Math.max(2,Math.round(tw*it.g.h/it.g.w));
+   const url=await logoScaled(it.g,tw,th),img=getImageFromCache(url);await waitImg(img);
+   const e=imageBase(img,url,it.x+it.w/2,it.y+it.h/2,it.w,it.h,0,1);
+   e._adz=tag('Logo '+(k+1));
+   out.push(e);
+  }
+  target.elements=target.elements.concat(out);
+ }catch(err){log('  logo dilewati: '+err.message,'wn');}
+}
+
 /* ---------- cegah scroll bocor ke belakang ---------- */
 function guardScroll(el){
  if(!el)return;let y0=0;
@@ -24278,6 +24685,7 @@ window.adzMode=function(m){
 function readCfg(){
  readProvFields();cfg.autoProv=$('adzAutoProv').checked;cfg.imageModel=cfg.imageModel||'gemini-2.5-flash-image';
  cfg.ghost=$('adzGhost').checked;
+ if($('adzLogoOn'))cfg.logoOn=$('adzLogoOn').checked;
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
  cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.rich=$('adzRich').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
 }
@@ -24729,7 +25137,7 @@ function systemPrompt(m){
  const d=canvasDims(),mx=+(m/d.W*100).toFixed(1),my=+(m/d.H*100).toFixed(1),ratio=(d.W/d.H).toFixed(3);
  return 'You are a senior poster art director and layout engineer who outputs EDITABLE layer stacks with pixel-accurate positions. Reply with ONE JSON object only (no markdown, no commentary).\n'+
  'CANVAS: '+d.W+'x'+d.H+' px, aspect W/H = '+ratio+'. ALL geometry is in PERCENT: x = LEFT edge % of canvas width, y = TOP edge % of canvas height, w = width % of canvas width, h = height % of canvas height. For text layers h is ignored (height is automatic); y is the top of the text block. For centered text use x=(100-w)/2.\n'+
- 'SAFE AREA: keep every non-bleed layer inside x>='+mx+', x+w<='+(100-mx).toFixed(1)+', y>='+my+', y+h<='+(100-my).toFixed(1)+'. Text never touches edges or other text.\n'+
+ 'SAFE AREA: keep every non-bleed layer inside x>='+mx+', x+w<='+(100-mx).toFixed(1)+', y>='+Math.max(my,AX.plan?AX.plan.zonePct:0)+', y+h<='+(100-my).toFixed(1)+'. Text never touches edges or other text.\n'+
  'SCHEMA:\n{"title":"short name","background":{"type":"gradient|solid|image","gradType":"linear|radial","angle":0-360,"colors":["#hex","#hex"],"imagePrompt":"only when type is image","darken":0-0.7},\n"layers":[ ...ordered from BOTTOM to TOP... ]}\n'+
  'LAYER KINDS (every layer needs a unique, descriptive "name" such as "Judul", "Kartu isi", "Kuas judul"):\n'+
  '- {"kind":"shape","name":"...","shape":"'+ADZ_SHAPES.join('|')+'","blend":"normal|screen|overlay|soft-light","x":,"y":,"w":,"h":,"color":"#hex","opacity":0-1,"radius":0-100 (rect only, px),"borderWidth":px,"borderColor":"#hex","rotation":deg,"bleed":false,"shadow":{"color":"#000000","blur":0-30,"distance":0-12,"opacity":0-1}|null,"attach":{...}|null}\n'+
@@ -24807,6 +25215,7 @@ function baseTask(){
  t+=styleTxt+'USER REQUEST (may be short or informal, infer the real intent):\n'+(prompt||(S.mode==='remix'?'Rapikan dan percantik desain ini.':'Buat poster yang bagus.'))+'\n';
  const ftl=footerLine();
  if(ftl)t+='\nFIXED FOOTER (set by the app, overrides anything in the request): the poster footer is ONE single-line text layer, centered inside the bottom safe area, with this EXACT text: "'+ftl+'". Name that layer "Username". Do not write any other @handles anywhere else and never split it over two lines.\n';
+ if(AX.plan)t+='\nLOGO BAND (drawn by the app, do NOT create any logo layer): the top '+AX.plan.zonePct+'% of the canvas (y from 0 to '+AX.plan.zonePct+') is reserved for '+AX.plan.desc+'. Keep that band free of text, cards, frames, corner ornaments and illustrations (full-bleed backgrounds, fades, glows and textures may pass behind it). Start every other layer at y >= '+AX.plan.zonePct+'.\n';
  if(S.ctxTexts.length){t+='\nATTACHED PROJECT FILES (context, may be a poster project JSON; reuse its texts/colors/fonts as relevant):\n';S.ctxTexts.forEach(function(c){t+='--- '+c.name+' ---\n'+c.text+'\n';});}
  return t;
 }
@@ -25332,7 +25741,7 @@ function arrange(slide,d,m){
   if(t.x>l&&t.x<r&&t.y>tp&&t.y<bt){const ar=c.width*c.height;if(ar<ba){ba=ar;best=c;}}});
   if(best)owner.set(t,best);});
  const orig=new Map();cards.forEach(function(c){orig.set(c,{l:c.x-c.width/2,r:c.x+c.width/2,t:c.y-c.height/2,b:c.y+c.height/2});});
- const limT=m,limB=d.H-m;
+ const limT=Math.max(m,AX.top),limB=d.H-m;
  function hov(a,b){return Math.min(a.x+a.width/2,b.x+b.width/2)-Math.max(a.x-a.width/2,b.x-b.width/2)>=Math.min(a.width,b.width)*0.12;}
  texts.forEach(function(t){const h=textH(t);if(t.y-h/2<limT)t.y=limT+h/2;if(t.y+h/2>limB)t.y=limB-h/2;});
  for(let pass=0;pass<4;pass++){
@@ -25358,7 +25767,7 @@ function fitStack(slide,d,m){
  for(let it=0;it<5;it++){
   const T=A.texts;if(!T.length)break;
   let top=1e9;T.forEach(function(t){top=Math.min(top,t.y-textH(t)/2);});
-  if(top>=m-0.5)break;
+  if(top>=Math.max(m,AX.top)-0.5)break;
   T.forEach(function(t){t.fontSize=Math.max(Math.round(d.W*0.018),Math.round(t.fontSize*0.92));t._calculatedHeight=null;t._cachedCanvas=null;t._cachedHash=null;});
   A=arrange(slide,d,m);
  }
@@ -25472,7 +25881,7 @@ function resolveBlocks(slide,d,m,A){
    if(need>0.5){shift(G[i],need);moved=true;}}}
   if(!moved)break;
  }
- const limB=d.H-m*0.85,limT=m*0.85;
+ const limB=d.H-m*0.85,limT=Math.max(m*0.85,AX.top);
  let bottom=-1e9,top=1e9;G.forEach(function(g){bottom=Math.max(bottom,g.box.b);top=Math.min(top,g.box.t);});
  let over=bottom-limB;
  if(over>1){
@@ -25528,7 +25937,7 @@ function lint(slide,d,m){
  return out.slice(0,14);
 }
 function layerTable(slide,d){
- return slide.elements.filter(function(e){return !(e._adz&&e._adz.fx);}).map(function(e){
+ return slide.elements.filter(function(e){return !(e._adz&&(e._adz.fx||e._adz.logo));}).map(function(e){
   const a=e._adz||{},b=boxOf(e);
   const o={i:a.idx,kind:a.kind||e.type,name:a.name,x:pc(b.l/d.W),y:pc(b.t/d.H),w:pc((b.r-b.l)/d.W),h:pc((b.b-b.t)/d.H)};
   if(e.type==='text'){o.text=String(e.text||'').replace(/\n/g,' / ').slice(0,60);o.sizePct=pc(e.fontSize/d.W);o.align=e.textAlign;o.color=e.color;}
@@ -25603,6 +26012,7 @@ async function compose(target,L,d,m,keepSrc,noRender){
  const res=layoutAll(target,d,m);
  addExtrusions(target,d);
  await finalizeAssets(target.elements);
+ await addLogoEls(target,L,d,m);
  if(!noRender)renderAll();
  return res;
 }
@@ -25697,6 +26107,7 @@ function gStop(){G.tok++;G.mode='';if(G.el)G.el.classList.remove('on');gFrameHid
 function labelFor(e){
  const a=e._adz||{},nm=a.nm||a.name||'';
  if(e.type==='text')return 'Menulis: '+String(e.text||'').replace(/\s+/g,' ').slice(0,26);
+ if(a.logo)return 'Logo: '+nm;
  if(e.type==='fade')return 'Gradasi tepi';
  if(a.art)return 'Aset: '+(nm||a.art);
  if(e.type==='image')return 'Gambar: '+nm;
@@ -25777,7 +26188,7 @@ async function ghostMorph(target,old,d){
 }
 /* ---------- titik pemulihan: lanjut tanpa mengulang tahap yang sudah jadi ---------- */
 function ckSig(){
- return JSON.stringify([S.mode,S.style,($('adzPrompt').value||'').trim(),footerLine(),S.refs.map(function(r){return r.url.length;}),S.ctxTexts.map(function(c){return c.text.length;}),cfg.useImages,cfg.margin,cfg.smart,cfg.assets]);
+ return JSON.stringify([S.mode,S.style,($('adzPrompt').value||'').trim(),footerLine(),S.refs.map(function(r){return r.url.length;}),S.ctxTexts.map(function(c){return c.text.length;}),cfg.useImages,cfg.margin,cfg.smart,cfg.assets,logoSig()]);
 }
 function updGo(){
  const go=$('adzGo'),fr=$('adzFresh');if(!go||S.busy)return;
@@ -25815,6 +26226,7 @@ async function adzRun(cont,canRetry){
  try{
   const d=canvasDims(),m=Math.round(d.W*cfg.margin/100);
   log('Mulai · '+PROVS[provId()].s+' · '+keysOf(provId()).length+' key'+(cfg.useImages?(' + gambar '+cfg.imageModel):'')+' · kanvas '+d.W+'×'+d.H);
+  await prepLogoPlan(d,m);
 
   /* 1) brief / analisis maksud */
   let brief=null;
@@ -25936,7 +26348,7 @@ async function adzRun(cont,canRetry){
   else{S.done='ok';
   log('Selesai: '+cnt+' layer dibuat'+(imgFail?(' ('+imgFail+' gambar gagal dilewati)'):'')+'. Buka tool Lapisan untuk melihat tiap layer.','ok');
   showToast('Desain AI selesai: '+cnt+' layer');}
-  setTimeout(function(){if(!S.busy&&$('adzModal').classList.contains('active')){$('adzModal').classList.remove('active');}},1600);
+  setTimeout(function(){const lg=$('adzLog');if(lg)lg.scrollTop=lg.scrollHeight;},160);
  }catch(e){
   const cancelled=!!(S.ctl&&S.ctl.signal.aborted)||S.autoCancel;
   const fatal=/API key|Akses ditolak|Tidak ada model|kehabisan kuota harian/i.test(e.message);
@@ -25954,7 +26366,7 @@ async function adzRun(cont,canRetry){
   if(undoTarget){try{undoTarget();}catch(x){}}
   else if(newEls.length){newEls.forEach(function(x){if(x){delete x._adz;x._calculatedHeight=null;x._renderedW=null;x._cachedCanvas=null;x._cachedHash=null;}});try{pushHistoryState();}catch(x){}}
   try{renderBottomToolbar();renderCarouselThumbs();renderAll();}catch(x){}
- }finally{if(!willRetry){setBusy(false);if(S.min){try{renderAll();}catch(x){}if(S.done==='ok')showToast('Desain AI selesai. Ketuk kapsul AI untuk melihat log.');}}}
+ }finally{AX.top=0;AX.plan=null;if(!willRetry){setBusy(false);if(S.min){try{renderAll();}catch(x){}if(S.done==='ok')showToast('Desain AI selesai. Ketuk kapsul AI untuk melihat log.');}}}
  return rv;
 }
 window.adzGenerate=async function(){
