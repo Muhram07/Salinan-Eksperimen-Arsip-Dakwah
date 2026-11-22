@@ -1,16 +1,15 @@
 <!--
-Studio Poster Maker Pro - Update v2.6.7
+Studio Poster Maker Pro - Update v2.6.8
+
+v2.6.8:
+1. MODEL SEPENUHNYA OTOMATIS: pilih model manual dihapus. Cukup isi 1 API key (key 2-5 hanya cadangan). Pekerjaan ringan (analisis maksud, teks) memakai model hemat; pekerjaan berat (merancang poster berlayer banyak, merapikan posisi dan ukuran, menilai hasil) hanya memakai model terbesar/tercerdas yang tersedia, tidak pernah turun ke model lemah.
+2. ROTARY SWITCH PINTAR: limit/gagal berpindah key, lalu model, lalu provider lain (bila key-nya terisi) dengan isi permintaan yang sama. Rancangan yang terlalu sedikit/rusak otomatis diulang dengan model lebih kuat.
+3. PROSES BISA DIBATALKAN, DITUNDA/DILANJUT, dan DIULANG dari awal. Putaran koreksi otomatis bawaan menjadi 3 agar hasil lebih rapi.
 
 v2.6.7:
 1. AI DESAINER MULTI-PROVIDER: pilih Google Gemini (AI Studio), Mistral, OpenRouter, Groq atau Cerebras untuk membandingkan mana yang paling worth it.
 2. 5 API KEY PER PROVIDER (5 akun Gmail) BERGILIR OTOMATIS saat limit: permintaan yang sama dikirim ulang apa adanya, brief/rancangan JSON yang sudah jadi tidak rusak dan proses berlanjut. Provider juga bisa diganti lalu "Lanjutkan (hemat token)".
 3. MODEL BERTINGKAT: model berat/besar untuk poster berlayer banyak, penataan rapi dan penilaian visual; model ringan untuk brief/teks. Tautan langsung untuk mengambil API key tiap provider, titik status per key, tes semua key.
-
-v2.6.6:
-1. MODE DESAINER PRO: AI kini merancang 24-44 layer (latar bertingkat, cahaya, pola, bingkai, ornamen, lencana, watermark tipografi, teks berefek) dengan gaya 3D atau 2D yang konsisten. Bisa dimatikan lewat opsi bila ingin poster sederhana.
-2. 18 ASET PNG LOKAL BARU (gratis, tanpa kuota): glow, rays, bokeh, sparkle, grain, star8, lattice, frame, divider, corner, wave, burst, rings, orb 3D, ribbon, gradbar logam, stripes, wordmark. Mendukung blend mode.
-3. EFEK TEKS: gradasi emas/logam, outline, glow, bayangan dalam, ketebalan 3D (extrude), kata beraksen warna.
-4. GAMBAR AI DIMATIKAN secara bawaan (hasil Gemini kurang memukau); Gemini dipakai untuk teks, tata letak, dan penilaian.
 -->
 
 
@@ -954,7 +953,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 /* v2.0.0: modal Hapus Objek AI memakai kelas Hapus BG */
 
-/* v2.6.7: AI Desainer (multi-provider, 5 key bergilir) */
+/* v2.6.8: AI Desainer (model otomatis, 5 key bergilir, tunda/ulang) */
 #adzModal{position:fixed;inset:0;z-index:9000000;display:none;flex-direction:column;background:#0b0b0b;color:#e5e7eb;font-family:inherit;}
 #adzModal.active{display:flex;}
 #adzModal *{box-sizing:border-box;}
@@ -2388,7 +2387,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.6.7';
+const APP_VERSION = 'v2.6.8';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -23971,7 +23970,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 </div>
 </div>
 <script>
-/* ===== v2.6.7: AI DESAINER (multi-provider: Gemini, Mistral, OpenRouter, Groq, Cerebras) =====
+/* ===== v2.6.8: AI DESAINER (model otomatis; Gemini, Mistral, OpenRouter, Groq, Cerebras) =====
    Modul mandiri: tidak mengubah fungsi lama. Memakai struktur elemen yang sama dengan addNewText/addNewShape/addNewFadeEdge/handleImageUpload. */
 (function(){
 'use strict';
@@ -23979,16 +23978,16 @@ const LS_KEY='ADZ_SETTINGS_V1';
 const PROVS={
  gemini:{n:'Google Gemini (AI Studio)',s:'Gemini',base:'https://generativelanguage.googleapis.com/v1beta/',keyUrl:'https://aistudio.google.com/apikey',ph:'AIza...',vision:true,
   how:'Cara: tekan tombol di bawah, login dengan Gmail, pilih "Create API key", salin lalu tempel. Ulangi dengan Gmail lain untuk key 2-5. Kuota gratis dihitung per model.',
-  def:{hi:['gemini-2.5-pro','gemini-2.5-flash'],lo:['gemini-2.5-flash-lite','gemini-2.5-flash'],vis:['gemini-2.5-flash','gemini-2.5-pro']}},
+  def:{hi:['gemini-2.5-pro','gemini-2.5-flash'],lo:['gemini-2.5-flash-lite','gemini-2.5-flash'],vis:['gemini-2.5-pro','gemini-2.5-flash'],visLo:['gemini-2.5-flash','gemini-2.5-flash-lite']}},
  mistral:{n:'Mistral (La Plateforme)',s:'Mistral',base:'https://api.mistral.ai/v1/',keyUrl:'https://console.mistral.ai/api-keys',ph:'tempel key',vision:true,
   how:'Cara: tombol di bawah, daftar/login Gmail, pilih paket gratis "Experiment" (perlu verifikasi nomor HP), lalu "Create new key". Satu akun Gmail = satu key.',
   def:{hi:['mistral-large-latest'],lo:['mistral-small-latest','open-mistral-nemo'],vis:['pixtral-large-latest','mistral-small-latest','pixtral-12b-2409']}},
  openrouter:{n:'OpenRouter (model gratis :free)',s:'OpenRouter',base:'https://openrouter.ai/api/v1/',keyUrl:'https://openrouter.ai/keys',ph:'sk-or-...',vision:true,
   how:'Cara: tombol di bawah, login Gmail, "Create Key". Hanya model berakhiran :free yang dipakai. Batas harian akun gratis kecil, jadi 5 akun sangat membantu.',
-  def:{hi:['deepseek/deepseek-chat-v3.1:free','qwen/qwen3-235b-a22b:free','meta-llama/llama-3.3-70b-instruct:free'],lo:['meta-llama/llama-3.3-70b-instruct:free','mistralai/mistral-small-3.2-24b-instruct:free','google/gemma-3-27b-it:free'],vis:['google/gemma-3-27b-it:free','mistralai/mistral-small-3.2-24b-instruct:free','meta-llama/llama-4-maverick:free']}},
+  def:{hi:['deepseek/deepseek-chat-v3.1:free','qwen/qwen3-235b-a22b:free','meta-llama/llama-3.3-70b-instruct:free'],lo:['meta-llama/llama-3.3-70b-instruct:free','mistralai/mistral-small-3.2-24b-instruct:free','google/gemma-3-27b-it:free'],vis:['meta-llama/llama-4-maverick:free','mistralai/mistral-small-3.2-24b-instruct:free','google/gemma-3-27b-it:free']}},
  groq:{n:'Groq',s:'Groq',base:'https://api.groq.com/openai/v1/',keyUrl:'https://console.groq.com/keys',ph:'gsk_...',vision:true,
   how:'Cara: tombol di bawah, login Gmail, "Create API Key". Sangat cepat, tetapi batas token per menit akun gratis kecil; bila terlalu besar, model lain dicoba otomatis.',
-  def:{hi:['openai/gpt-oss-120b','llama-3.3-70b-versatile'],lo:['llama-3.1-8b-instant','openai/gpt-oss-20b'],vis:['meta-llama/llama-4-scout-17b-16e-instruct','meta-llama/llama-4-maverick-17b-128e-instruct']}},
+  def:{hi:['openai/gpt-oss-120b','llama-3.3-70b-versatile'],lo:['llama-3.1-8b-instant','openai/gpt-oss-20b'],vis:['meta-llama/llama-4-maverick-17b-128e-instruct','meta-llama/llama-4-scout-17b-16e-instruct']}},
  cerebras:{n:'Cerebras',s:'Cerebras',base:'https://api.cerebras.ai/v1/',keyUrl:'https://cloud.cerebras.ai/',ph:'csk-...',vision:false,
   how:'Cara: tombol di bawah, login Gmail, buka menu API Keys lalu buat key. Cerebras tidak membaca gambar: mode Tiru Referensi dan penilaian visual hanya memakai teks.',
   def:{hi:['gpt-oss-120b','qwen-3-235b-a22b-instruct-2507','llama-3.3-70b'],lo:['llama3.1-8b','llama-3.3-70b'],vis:[]}}
@@ -24007,6 +24006,7 @@ const ADZ_STYLES=[
 ];
 const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:'',cool:{},dead:{},daily:{},kdead:{},disc:{},kptr:{},cur:{txt:'',img:''},kstat:{},cap:{},nojson:{},warned:{},lastKey:'',lastModel:'',autoCancel:false};
 let cfg=loadCfg();
+if(!cfg._v268){cfg.review=Math.max(parseInt(cfg.review)||0,3);cfg._v268=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 if(!cfg._v266){cfg.useImages=false;cfg.assets=true;cfg.rich=true;cfg._v266=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 function loadCfg(){
  let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}
@@ -24038,19 +24038,16 @@ function build(){
  m.innerHTML=
  '<div class="adz-head"><span class="adz-logo"><svg class="ic" aria-hidden="true"><use href="#ic-aidesign"/></svg></span><h2>AI Desainer<small>Buat &amp; tiru poster jadi layer lengkap</small></h2><button class="adz-x" id="adzX" onclick="adzClose()" aria-label="Tutup" title="Tutup">✕</button></div>'+
  '<div class="adz-body">'+
- '<details class="adz-card" id="adzApiCard"><summary>Pengaturan AI Provider, API Key &amp; Model</summary>'+
+ '<details class="adz-card" id="adzApiCard"><summary>Pengaturan AI Provider &amp; API Key</summary>'+
   '<label class="adz-lab">Provider AI (pilih satu untuk dinilai)</label><div class="adz-chips" id="adzProv"></div>'+
   '<div class="adz-hint" id="adzProvInfo"></div>'+
   '<a id="adzProvLink" class="adz-btn gold adz-link" href="#" target="_blank" rel="noopener noreferrer">Dapatkan API key ↗</a>'+
-  '<label class="adz-lab">5 API key (1 key per akun Gmail, dipakai bergiliran saat limit)</label>'+keyRowsHtml()+
+  '<label class="adz-lab">API key (cukup isi 1; key 2-5 hanya cadangan bila limit, 1 key per akun Gmail)</label>'+keyRowsHtml()+
   '<div class="adz-row" style="margin-top:8px"><button class="adz-btn" style="flex:1" onclick="adzToggleKey()">Lihat / sembunyikan key</button></div>'+
   '<div class="adz-hint">Key disimpan hanya di perangkat ini (localStorage) dan dikirim langsung ke provider yang dipilih, tidak lewat server kami. Saat key 1 kena limit, permintaan yang sama persis dikirim ulang ke key 2, 3, 4, lalu 5, sehingga brief/rancangan JSON yang sudah jadi tidak rusak dan proses berlanjut. Titik: hijau = berhasil, kuning = limit, merah = ditolak.</div>'+
-  '<label class="adz-lab">Model BERAT: merancang poster berlayer banyak &amp; merapikan (opsional)</label><input id="adzModelH" class="adz-in" list="adzListL" autocomplete="off" spellcheck="false">'+
-  '<label class="adz-lab">Model RINGAN: brief &amp; teks (opsional)</label><input id="adzModelL" class="adz-in" list="adzListL" autocomplete="off" spellcheck="false">'+
-  '<label class="adz-lab">Model VISION: membaca gambar &amp; menilai hasil (opsional)</label><input id="adzModelV" class="adz-in" list="adzListL" autocomplete="off" spellcheck="false"><datalist id="adzListL"></datalist>'+
-  '<div class="adz-hint">Kosong = otomatis: model terbesar dipakai untuk poster berlayer banyak (penataan lebih rapi), model kecil/hemat untuk analisis teks, model yang bisa membaca gambar untuk referensi dan penilaian. Boleh mengisi beberapa nama dipisah koma untuk menentukan urutan sendiri.</div>'+
-  '<label class="adz-lab">Model gambar (opsional, hanya Gemini)</label><input id="adzModelI" class="adz-in" list="adzListI" placeholder="gemini-2.5-flash-image"><datalist id="adzListI"></datalist>'+
-  '<div class="adz-row" style="margin-top:10px"><button class="adz-btn" style="flex:1" onclick="adzLoadModels()">Muat daftar model</button><button class="adz-btn" style="flex:1" onclick="adzTest()">Tes semua key</button></div>'+
+  '<div class="adz-hint">Pemilihan model sepenuhnya otomatis: pekerjaan ringan (analisis maksud, teks) memakai model hemat; pekerjaan berat (merancang poster berlayer banyak, merapikan posisi &amp; ukuran, menilai hasil) hanya memakai model terbesar yang tersedia di akun. Bila satu model atau key kena limit, otomatis pindah ke berikutnya tanpa turun ke model lemah.</div>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzAutoProv"><span>Pindah provider otomatis bila semua key provider terpilih limit/habis (memakai provider lain yang key-nya sudah diisi).</span></label>'+
+  '<div class="adz-row" style="margin-top:10px"><button class="adz-btn" style="flex:1" onclick="adzTest()">Tes semua key</button></div>'+
  '</details>'+
  '<div class="adz-card"><div class="adz-tabs" id="adzTabs">'+
   '<button class="adz-tab on" data-m="new" onclick="adzMode(\'new\')">Buat Baru<br><span style="font-weight:600;font-size:10px">dari perintah</span></button>'+
@@ -24080,7 +24077,7 @@ function build(){
  '</div>'+
  '</div>'+
  '<div class="adz-logbox" id="adzLogBox"><div class="adz-loghead"><b>Monitor Proses AI</b><span id="adzPct">0%</span><button class="adz-mini" id="adzLogSizeBtn" onclick="adzLogSize()">Besarkan</button><button class="adz-mini" onclick="adzLogCopy()">Salin</button></div><div class="adz-prog"><i id="adzProgBar"></i></div><div class="adz-log" id="adzLog"></div></div>'+
- '<div class="adz-foot"><button class="adz-btn cancel" id="adzCancel" onclick="adzCancel()" style="display:none">Batal</button><button class="adz-btn" id="adzFresh" onclick="adzFresh()" style="display:none;flex:0 0 auto;height:44px;border-radius:22px;padding:0 14px;font-size:12px">Ulang awal</button><button class="adz-btn gold" id="adzGo" onclick="adzGenerate()">Buat Desain</button></div>';
+ '<div class="adz-foot"><button class="adz-btn cancel" id="adzCancel" onclick="adzCancel()" style="display:none">Batal</button><button class="adz-btn cancel" id="adzPause" onclick="adzPause()" style="display:none">Tunda</button><button class="adz-btn" id="adzFresh" onclick="adzFresh()" style="display:none;flex:0 0 auto;height:44px;border-radius:22px;padding:0 14px;font-size:12px">Ulang awal</button><button class="adz-btn gold" id="adzGo" onclick="adzGenerate()">Buat Desain</button></div>';
  document.body.appendChild(m);
  buildChip();
  guardScroll(m.querySelector('.adz-body'));guardScroll($('adzLog'));
@@ -24111,7 +24108,7 @@ function paintThumbs(){
 }
 window.openAiDesigner=function(){
  build();cfg=loadCfg();
- paintProv();$('adzModelI').value=cfg.imageModel;
+ paintProv();$('adzAutoProv').checked=cfg.autoProv!==false;
  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRich').checked=cfg.rich!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
  $('adzGhost').checked=cfg.ghost!==false;
@@ -24173,7 +24170,7 @@ function chipSync(){
  const c=$('adzChip');if(!c||!c.classList.contains('on'))return;
  const tx=$('adzChipTxt'),sb=$('adzChipSub'),bar=$('adzChipBar'),x=$('adzChipX');
  c.classList.remove('ok','er');
- if(S.busy){tx.textContent='AI bekerja · '+S.pct+'%';sb.textContent='Kanvas dikunci · ketuk: lihat log';x.textContent='⏹';x.setAttribute('aria-label','Batalkan');}
+ if(S.busy){tx.textContent=(S.paused?'Ditunda · ':'AI bekerja · ')+S.pct+'%';sb.textContent='Kanvas dikunci · ketuk: lihat log';x.textContent='⏹';x.setAttribute('aria-label','Batalkan');}
  else if(S.done==='ok'){c.classList.add('ok');tx.textContent='Selesai ✓';sb.textContent='Ketuk: lihat log';x.textContent='✕';x.setAttribute('aria-label','Tutup');}
  else if(S.done==='er'){c.classList.add('er');tx.textContent='Gagal / dibatalkan';sb.textContent='Ketuk: lihat log';x.textContent='✕';x.setAttribute('aria-label','Tutup');}
  else{tx.textContent='AI Desainer';sb.textContent='Ketuk: buka';x.textContent='✕';}
@@ -24259,18 +24256,13 @@ function readProvFields(){
  if(!$('adzKey1'))return;
  const p=provId();
  cfg.keys[p]=[1,2,3,4,5].map(function(i){return ($('adzKey'+i).value||'').trim();});
- cfg.models[p]={hi:($('adzModelH').value||'').trim(),lo:($('adzModelL').value||'').trim(),vis:($('adzModelV').value||'').trim()};
 }
 function paintProv(){
  const p=provId(),P=PROVS[p];
  Array.prototype.forEach.call($('adzProv').children,function(b){b.classList.toggle('on',b.getAttribute('data-p')===p);});
- for(let i=1;i<=5;i++){const el=$('adzKey'+i);el.value=(cfg.keys[p]&&cfg.keys[p][i-1])||'';el.placeholder='Key '+i+' · Gmail '+i+' ('+P.ph+')';}
- const mo=cfg.models[p]||{};
- $('adzModelH').value=mo.hi||'';$('adzModelL').value=mo.lo||'';$('adzModelV').value=mo.vis||'';
- $('adzModelH').placeholder=(P.def.hi[0]||'otomatis');$('adzModelL').placeholder=(P.def.lo[0]||'otomatis');$('adzModelV').placeholder=(P.def.vis[0]||(P.vision?'otomatis':'tidak didukung'));
+ for(let i=1;i<=5;i++){const el=$('adzKey'+i);el.value=(cfg.keys[p]&&cfg.keys[p][i-1])||'';el.placeholder='Key '+i+(i===1?' · utama':' · cadangan (opsional)')+' ('+P.ph+')';}
  $('adzProvLink').href=P.keyUrl;$('adzProvLink').textContent='Dapatkan API key '+P.s+' ↗';
  $('adzProvInfo').textContent=P.n+'. '+P.how;
- $('adzListL').innerHTML='';
  paintKeyDots();
 }
 window.adzPick=function(w){(w==='img'?$('adzFileImg'):$('adzFileDoc')).click();};
@@ -24284,7 +24276,7 @@ window.adzMode=function(m){
  $('adzRefBox').style.display='block';
 };
 function readCfg(){
- readProvFields();cfg.imageModel=$('adzModelI').value.trim()||'gemini-2.5-flash-image';
+ readProvFields();cfg.autoProv=$('adzAutoProv').checked;cfg.imageModel=cfg.imageModel||'gemini-2.5-flash-image';
  cfg.ghost=$('adzGhost').checked;
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
  cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.rich=$('adzRich').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
@@ -24344,7 +24336,7 @@ async function readZip(file){
  if(!imgs&&!docs)showToast('ZIP tidak berisi JSON/gambar yang bisa dibaca');
 }
 
-/* ---------- v2.6.7: Multi-provider AI (Gemini, Mistral, OpenRouter, Groq, Cerebras) + rotasi 5 key ---------- */
+/* ---------- v2.6.8: Multi-provider AI (Gemini, Mistral, OpenRouter, Groq, Cerebras) + rotasi 5 key + tingkat model otomatis ---------- */
 function gPart(x){if(x.img){const b=b64(x.img);return {inline_data:{mime_type:b.mime,data:b.data}};}return {text:x.text||''};}
 function b64(url){const i=url.indexOf(',');return {mime:url.slice(5,url.indexOf(';')),data:url.slice(i+1)};}
 function imgPart(url){return {img:url};}
@@ -24382,7 +24374,7 @@ function splitList(s){return String(s||'').split(/[,\s]+/).filter(Boolean);}
 function modelVer(n){const m=/gemini-(\d+(?:\.\d+)?)/i.exec(n);return m?parseFloat(m[1]):0;}
 function sizeOf(id){
  const s=String(id).toLowerCase().replace(/[_\/]/g,'-');
- if(/maverick/.test(s))return 400;if(/scout/.test(s))return 109;
+ if(/maverick/.test(s))return 400;if(/scout/.test(s))return 109;if(/deepseek/.test(s))return 200;if(/kimi|glm-4/.test(s))return 300;if(/qwen3-coder/.test(s))return 400;
  const m=/(\d+(?:\.\d+)?)b(?![a-z])/.exec(s);if(m)return parseFloat(m[1]);
  if(/ministral/.test(s))return 8;
  if(/large|\bpro\b|opus|ultra/.test(s))return 150;
@@ -24440,23 +24432,23 @@ function discRank(p,tier,vision){
  let c=L.filter(function(m){return !vision||m.vision;});
  if(p==='gemini'){
   c=c.filter(function(m){return /^gemini/i.test(m.id)&&!/image|tts|embed|aqa|live|audio|imagen|veo|robot|computer|learnlm|gemma/i.test(m.id);});
+  if(tier==='hi'){const st=c.filter(function(m){return !/lite|flash-8b/i.test(m.id);});if(st.length)c=st;}
   const tr=function(n){return tier==='hi'?(/pro/i.test(n)?0:(/lite/i.test(n)?2:1)):(/lite/i.test(n)?0:(/flash/i.test(n)?1:2));};
   const pre=function(n){return /preview|exp/i.test(n)?1:0;};
   c.sort(function(a,b){return (tr(a.id)-tr(b.id))||(pre(a.id)-pre(b.id))||(modelVer(b.id)-modelVer(a.id))||a.id.localeCompare(b.id);});
  }else{
   c=c.filter(function(m){return !BADTXT.test(m.id)&&(!m.ctx||m.ctx>=16000);});
+  if(tier==='hi'){const mn=vision?20:60;const st=c.filter(function(m){return sizeOf(m.id)>=mn;});if(st.length)c=st;}
   c.sort(function(a,b){return (tier==='hi'?(sizeOf(b.id)-sizeOf(a.id)):(sizeOf(a.id)-sizeOf(b.id)))||a.id.localeCompare(b.id);});
  }
  return c.slice(0,10).map(function(m){return m.id;});
 }
 function modelPool(p,tier,vision){
- const P=PROVS[p],ov=(cfg.models&&cfg.models[p])||{};
- const key=vision?'vis':tier;
- const user=splitList(ov[key]);
- let defs=(P.def[key]||[]).slice();
+ const P=PROVS[p];
+ let defs=((vision&&tier==='lo')?(P.def.visLo||(P.def.vis||[]).slice().reverse()):(P.def[vision?'vis':tier]||[])).slice();
  const L=(S.disc[p]&&S.disc[p].list)||[];
  if(L.length){const have={};L.forEach(function(m){have[m.id]=1;});defs=defs.filter(function(n){return have[n];});}
- return uniq(user.concat(defs,discRank(p,tier,vision)));
+ return uniq(defs.concat(discRank(p,tier,vision)));
 }
 function geminiImagePool(){
  const L=(S.disc.gemini&&S.disc.gemini.list)||[];
@@ -24508,6 +24500,7 @@ async function aiCall(rq){
  for(;;){
   const sig=S.ctl&&S.ctl.signal;
   if(sig&&sig.aborted)throw new Error('Dibatalkan / waktu habis');
+  await pauseGate();
   const ks=liveKeys(p);
   if(!ks.length)throw new Error('Semua API key '+P.s+' ditolak / tidak valid. Periksa kembali key Anda.');
   const pool=rq.pool||modelPool(p,rq.tier||'hi',vision);
@@ -24521,10 +24514,11 @@ async function aiCall(rq){
   const ready=cands.filter(function(c){return cdOf(c)<=now;});
   if(!ready.length){
    if(cands.every(function(c){return (S.daily[p+'|'+c.k.i+'|'+c.m]||0)>now;})){
-    throw new Error((kind==='img'?'Kuota model gambar':'Semua key dan model '+P.s+' kehabisan kuota harian')+' habis. Ganti provider lalu tekan "Lanjutkan (hemat token)", atau coba lagi setelah kuota reset.');
+    throw new Error((kind==='img'?'Kuota model gambar habis':'Semua key dan model '+P.s+' kehabisan kuota harian')+'. Ganti provider lalu tekan "Lanjutkan (hemat token)", atau coba lagi setelah kuota reset.');
    }
    if(kind==='img'&&now-t0>150000)throw new Error('Kuota/limit model gambar penuh; gambar dilewati.');
    const soon=Math.min.apply(null,cands.map(cdOf));
+   if(rq.maxWait!=null&&soon-now>rq.maxWait){const er=new Error('Semua key '+P.s+' sedang limit');er.sw=true;throw er;}
    await waitOn(Math.min(90000,Math.max(2000,soon-now)+rnd(600,3200)),'Semua key sedang limit, menunggu giliran');
    continue;
   }
@@ -24603,7 +24597,48 @@ async function aiCall(rq){
   log('Key '+slot+' / "'+mdl+'" bermasalah ('+String(msg).slice(0,80)+'), diistirahatkan.'+(netErr&&!timedOut?' Jika terus gagal, provider ini mungkin memblokir akses dari browser (CORS).':''),'wn');
  }
 }
-function ai(tier,parts,gen,system){return aiCall({p:provId(),tier:tier,parts:parts,gen:gen,system:system});}
+async function ai(tier,parts,gen,system){
+ const sel=provId();
+ const hasImg=parts.some(function(x){return x.img;});
+ const order=[sel];
+ if(cfg.autoProv!==false)Object.keys(PROVS).forEach(function(p){if(p!==sel&&keysOf(p).length&&(!hasImg||PROVS[p].vision))order.push(p);});
+ let lastErr=null;
+ for(let i=0;i<order.length;i++){
+  const p=order[i],last=(i===order.length-1);
+  try{
+   if(i>0&&S.provNow!==p)log('Beralih ke provider '+PROVS[p].s+'. Isi permintaan yang sama dikirim ulang; brief/rancangan yang sudah jadi tetap dipakai.','wn');
+   const r=await aiCall({p:p,tier:tier,parts:parts,gen:gen,system:system,maxWait:last?null:25000});
+   S.provNow=p;return r;
+  }catch(e){
+   lastErr=e;
+   if(!last&&(e.sw||/kehabisan kuota harian|Semua API key|Tidak ada model|belum diisi/.test(e.message))){log(PROVS[p].s+' tidak bisa melayani sekarang ('+String(e.message).slice(0,80)+'); mencoba provider lain.','wn');continue;}
+   throw e;
+  }
+ }
+ throw lastErr||new Error('Tidak ada provider yang tersedia');
+}
+async function pauseGate(){
+ if(!S.paused)return;
+ log('Proses ditunda. Tekan "Lanjut" untuk meneruskan.','wn');S.stepTxt='Ditunda';chipSync();
+ while(S.paused){
+  if(S.ctl&&S.ctl.signal.aborted)throw new Error('Dibatalkan / waktu habis');
+  await delay(300);
+ }
+}
+function coolModel(ck){
+ const a=String(ck||'').split('|');if(a.length<3)return;
+ const p=a[0],mdl=a.slice(2).join('|'),until=Date.now()+30*60000;
+ for(let i=1;i<=5;i++)S.cool[p+'|'+i+'|'+mdl]=until;
+}
+function specQuality(sp){
+ const L=Array.isArray(sp&&sp.layers)?sp.layers.filter(function(l){return l&&typeof l==='object';}):[];
+ const tx=L.filter(function(l){return l.kind==='text'&&String(l.text||'').trim();}).length;
+ const min=cfg.rich?16:6;
+ if(L.length<min)return {ok:false,why:'hanya '+L.length+' layer (minimal '+min+')'};
+ if(tx<2)return {ok:false,why:'teks kurang dari 2 layer'};
+ if(!sp.background)return {ok:false,why:'latar tidak ada'};
+ return {ok:true,why:''};
+}
 function partsOf(j){const c=j&&j.candidates&&j.candidates[0];if(!c){const br=j&&j.promptFeedback&&j.promptFeedback.blockReason;throw new Error(br?('Diblokir: '+br):'Respon AI kosong');}return (c.content&&c.content.parts)||[];}
 function textOf(j){return partsOf(j).map(function(p){return p.text||'';}).join('');}
 function repairJson(t){
@@ -24631,22 +24666,6 @@ function parseJson(t){
  if(rp){try{const o=JSON.parse(rp);if(o&&typeof o==='object'){LAST_REPAIRED=true;return o;}}catch(e){}}
  throw new Error('AI tidak mengembalikan JSON yang valid. Coba lagi atau sederhanakan perintah.');
 }
-window.adzLoadModels=async function(){
- readCfg();const p=provId(),P=PROVS[p],ks=keysOf(p);
- if(!ks.length){showToast('Isi minimal 1 API key '+P.s+' dulu');return;}
- try{
-  const list=await fetchModels(p,ks[0].k);
-  S.disc[p]={t:Date.now(),list:list};
-  const T=[],I=[];
-  list.forEach(function(m){
-   if(p==='gemini'){if(/image/i.test(m.id)&&!/imagen/i.test(m.id))I.push(m.id);else if(/^gemini/i.test(m.id)&&!/tts|embed|aqa|live|audio|robotics|computer-use/i.test(m.id))T.push(m.id);}
-   else if(!BADTXT.test(m.id))T.push(m.id);
-  });
-  $('adzListL').innerHTML=T.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
-  if(p==='gemini')$('adzListI').innerHTML=I.map(function(n){return '<option value="'+esc(n)+'">';}).join('');
-  showToast('Model '+P.s+' dimuat: '+T.length+' teks/vision'+(p==='gemini'?(', '+I.length+' gambar'):'')+'. Ketuk kolom model untuk memilih.');
- }catch(e){showToast('Gagal memuat model: '+e.message);}
-};
 async function testKey(p,k){
  const P=PROVS[p];
  const pool=modelPool(p,'lo',false).slice(0,4);
@@ -25591,7 +25610,15 @@ async function snapshotUrl(){
  renderAll();await delay(220);renderAll();
  return await shrink(mainCanvas.toDataURL('image/jpeg',0.88),1280,0.88);
 }
-window.adzCancel=function(){S.autoCancel=true;if(S.ctl){try{S.ctl.abort();}catch(e){}}};
+window.adzCancel=function(){S.autoCancel=true;S.paused=false;if(S.ctl){try{S.ctl.abort();}catch(e){}}};
+window.adzPause=function(){
+ if(!S.busy)return;
+ S.paused=!S.paused;
+ const pb=$('adzPause');if(pb)pb.textContent=S.paused?'Lanjut':'Tunda';
+ if(S.paused)log('Penundaan diminta: proses berhenti setelah langkah yang sedang berjalan selesai. Selama ditunda tidak ada kuota baru terpakai.','wn');
+ else log('Dilanjutkan.','ok');
+ chipSync();
+};
 
 /* ---------- v2.6.4: kursor hantu (hanya tampilan, memakai DOM ringan; kanvas digambar ulang lewat renderAll yang sudah ada) ---------- */
 const G={el:null,cur:null,lab:null,box:null,rip:null,x:0,y:0,mode:'',tok:0,init:false};
@@ -25756,10 +25783,10 @@ function updGo(){
  const go=$('adzGo'),fr=$('adzFresh');if(!go||S.busy)return;
  let ok=false;try{ok=!!(S.ck&&S.ck.failed&&S.ck.sig===ckSig());}catch(e){}
  go.textContent=ok?'Lanjutkan (hemat token)':'Buat Desain';
- if(fr)fr.style.display=ok?'block':'none';
+ if(fr){fr.textContent='Ulang dari awal';fr.style.display=(ok||S.done==='er')?'block':'none';}
 }
 window.adzFresh=function(){S.ck=null;updGo();adzGenerate();};
-function setBusy(b){S.busy=b;if(b){S.done='';S.pct=0;}$('adzX').title=b?'Sembunyikan panel (proses AI tetap berjalan)':'Tutup';if(S.min)shieldSet(b);chipSync();$('adzGo').disabled=b;$('adzGo').textContent=b?'Sedang membuat...':'Buat Desain';$('adzCancel').style.display=b?'block':'none';if(b&&$('adzFresh'))$('adzFresh').style.display='none';if(b){if(S.min)gStart();}else{updGo();setTimeout(function(){if(!S.busy)gStop();},900);}}
+function setBusy(b){S.busy=b;if(b){S.done='';S.pct=0;}$('adzX').title=b?'Sembunyikan panel (proses AI tetap berjalan)':'Tutup';if(S.min)shieldSet(b);chipSync();$('adzGo').disabled=b;$('adzGo').textContent=b?'Sedang membuat...':'Buat Desain';$('adzCancel').style.display=b?'block':'none';S.paused=false;{const pb=$('adzPause');if(pb){pb.style.display=b?'block':'none';pb.textContent='Tunda';}}if(b&&$('adzFresh'))$('adzFresh').style.display='none';if(b){if(S.min)gStart();}else{updGo();setTimeout(function(){if(!S.busy)gStop();},900);}}
 function briefLog(b){
  try{
   if(b.intent)log('Maksud: '+String(b.intent).slice(0,260));
@@ -25804,8 +25831,18 @@ async function adzRun(cont,canRetry){
   if(S.ck.spec){spec=S.ck.spec;step(18,'2/5 Memakai rancangan layer yang sudah jadi.');}
   else{
    step(18,'2/5 Merancang layer dengan model berat '+PROVS[provId()].s+' ...');
-   const j=await ai('hi',await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
-   spec=parseJson(textOf(j));
+   let tries=0;
+   for(;;){
+    const j=await ai('hi',await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
+    let sp=null,why='';
+    try{sp=parseJson(textOf(j));}catch(e){why=e.message;}
+    const q=sp?specQuality(sp):{ok:false,why:why};
+    if(sp&&q.ok){spec=sp;break;}
+    tries++;
+    if(tries>=3){if(sp){spec=sp;log('Rancangan dipakai walau belum ideal: '+q.why,'wn');break;}throw new Error('AI tidak mengembalikan rancangan yang valid: '+q.why);}
+    log('Rancangan dari "'+String(S.lastKey).split('|').slice(2).join('|')+'" belum layak ('+q.why+'); diulang dengan model lain yang lebih kuat.','wn');
+    coolModel(S.lastKey);
+   }
    if(LAST_REPAIRED)log('Jawaban AI terpotong; bagian yang utuh diselamatkan. Jika desain kurang lengkap, coba lagi atau ganti model.','wn');
    S.ck.spec=spec;
   }
