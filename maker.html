@@ -1,15 +1,18 @@
 <!--
-Studio Poster Maker Pro - Update v2.6.9
+Studio Poster Maker Pro - Update v2.7.0
+
+v2.7.0:
+1. LOGO SERAGAM WARNA: semua logo di atas poster otomatis disamakan menjadi satu warna (putih, hitam, atau warna aksen) mengikuti suasana warna poster; latar kapsul logo ikut disesuaikan agar kontras. Pilihan baru "Warna logo" (Otomatis / Warna asli / Putih / Hitam / Warna aksen).
+2. LOG MONITOR: deretan tombol (Besarkan, Salin, Tutup, Hapus) kini bisa digulir ke kiri-kanan dan tidak keluar dari kotak lagi.
+3. TEKS LEBIH BESAR: ukuran teks isi dan username dibesarkan (isi 3.2-4.2%, username 2.8-3.5% lebar kanvas) agar mudah dibaca di HP.
+4. JUDUL CERAH 3D: judul berwarna cerah otomatis diberi bayangan luar blur pekat; bayangan tebal 3D pada judul ekstrusi juga dipertebal.
+5. EFEK ATMOSFER PNG LOKAL OTOMATIS (blur lembut, transparan, di belakang teks): dedaunan melayang, percikan api, percikan tanah, cahaya silau (lens flare), dan debu berkilau; dipilih sesuai tema poster. Bisa dimatikan lewat opsi hasil.
+6. KANVAS EDIT DINAIKKAN: posisi dan tinggi kanvas edit kini sejajar dengan kanvas demo.
 
 v2.6.9:
 1. LOG MONITOR AI PERMANEN: log proses tidak lagi hilang saat selesai, saat panel ditutup/dibuka lagi, saat refresh, atau saat versi koding diganti. Log bisa dilihat, diperbesar, disalin, DITUTUP (tombol Tutup) dan dibuka lagi (tombol "Lihat Log Proses AI"). Log baru hilang bila Anda menekan "Hapus". Panel tidak menutup sendiri lagi setelah desain selesai.
 2. DATA TOOL AI DESAINER TERSIMPAN DI INDEXEDDB: gambar referensi, berkas JSON/ZIP konteks, daftar logo, log, perintah, username, dan pengaturan tetap ada walau refresh/update versi. Hilang hanya bila Anda menghapusnya sendiri (tombol x).
 3. LOGO OTOMATIS PROFESIONAL (maks. 7, bisa dicentang/dimatikan/dihapus): logo yang belum PNG dibuat transparan dengan tepi halus, area transparan di sekitar logo dipangkas, tinggi isi semua logo disamakan, lalu dipasang di bagian atas dengan latar kapsul/jajar genjang/persegi tumpul berwarna kontras serasi poster. 1 logo di tengah, 2 logo di sudut kiri-kanan, 3+ logo berjejer di tengah dalam satu kapsul panjang (7 logo yang sempit otomatis dua baris). Zona atas dicadangkan agar teks tidak menabrak logo.
-
-v2.6.8:
-1. MODEL SEPENUHNYA OTOMATIS: pilih model manual dihapus. Cukup isi 1 API key (key 2-5 hanya cadangan). Pekerjaan ringan (analisis maksud, teks) memakai model hemat; pekerjaan berat (merancang poster berlayer banyak, merapikan posisi dan ukuran, menilai hasil) hanya memakai model terbesar/tercerdas yang tersedia, tidak pernah turun ke model lemah.
-2. ROTARY SWITCH PINTAR: limit/gagal berpindah key, lalu model, lalu provider lain (bila key-nya terisi) dengan isi permintaan yang sama. Rancangan yang terlalu sedikit/rusak otomatis diulang dengan model lebih kuat.
-3. PROSES BISA DIBATALKAN, DITUNDA/DILANJUT, dan DIULANG dari awal. Putaran koreksi otomatis bawaan menjadi 3 agar hasil lebih rapi.
 -->
 
 
@@ -106,7 +109,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b0b0b;color:#fff;f
 .save-dot{width:7px;height:7px;border-radius:50%;background:#4CAF50;transition:.3s;}
 .save-dot.syncing{background:#FFA000;animation:pulseSync 1s infinite;}
 @keyframes pulseSync{0%,100%{opacity:.3;}50%{opacity:1;}}
-.workspace-viewport{position:absolute;top:50px;bottom:120px;left:0;right:0;background:#060606;background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 0);background-size:20px 20px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;}
+.workspace-viewport{position:absolute;top:50px;bottom:120px;left:0;right:0;padding-bottom:88px;box-sizing:border-box;background:#060606;background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 0);background-size:20px 20px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;}
 .artboard-container{position:relative;box-shadow:0 15px 45px rgba(0,0,0,.9),0 0 0 1px rgba(212,175,55,.3);border-radius:6px;overflow:visible;background:#181818;transform-origin:center center;touch-action:none;transition:transform .05s ease-out;}
 #mainCanvas{display:block;width:100%;height:100%;border-radius:6px;touch-action:none;}
 #drawingCanvasOverlay{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:6px;pointer-events:none;z-index:150;display:none;}
@@ -999,10 +1002,11 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 .adz-chk input{margin-top:2px;accent-color:#D4AF37;}
 .adz-logbox{display:none;flex:0 0 auto;margin:0 12px 8px;background:#0a0907;border:1px solid rgba(212,175,55,.5);border-radius:14px;padding:10px 10px 8px;box-shadow:0 -6px 18px rgba(0,0,0,.5);}
 .adz-logbox.on{display:flex;flex-direction:column;}
-.adz-loghead{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:#FFE259;}
-.adz-loghead b{flex:1;font-weight:800;letter-spacing:.2px;}
-.adz-loghead span{font-weight:800;color:#D4AF37;font-size:13px;min-width:38px;text-align:right;}
-.adz-mini{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:#e5e7eb;border-radius:8px;padding:5px 9px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+.adz-loghead{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:#FFE259;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;scrollbar-width:none;padding-bottom:2px;}
+.adz-loghead::-webkit-scrollbar{display:none;}
+.adz-loghead b{flex:1 0 auto;white-space:nowrap;font-weight:800;letter-spacing:.2px;}
+.adz-loghead span{flex:0 0 auto;font-weight:800;color:#D4AF37;font-size:13px;min-width:38px;text-align:right;}
+.adz-mini{flex:0 0 auto;white-space:nowrap;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:#e5e7eb;border-radius:8px;padding:5px 9px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;}
 .adz-mini:active{transform:scale(.96);}
 .adz-prog{height:6px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:8px;flex:0 0 auto;}
 .adz-prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FFE259,#D4AF37);transition:width .35s;}
@@ -2402,7 +2406,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.6.9';
+const APP_VERSION = 'v2.7.0';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -4284,7 +4288,7 @@ smartGuideCanvas.height=targetH;
 const vp=document.getElementById('workspaceViewport');
 const padding=24;
 const availW=vp.clientWidth-padding;
-const availH=vp.clientHeight-padding-(vp.classList.contains('demo-pager-on')?88:0);
+const availH=vp.clientHeight-padding-88;
 const scaleW=availW/targetW;
 const scaleH=availH/targetH;
 canvasScale=Math.min(scaleW,scaleH);
@@ -24009,7 +24013,7 @@ const PROVS={
 };
 const ADZ_FONTS=['Anton','Montserrat','Playfair Display','Cinzel','Bebas Neue','Poppins','Plus Jakarta Sans','Outfit','Oswald','Lora','Amiri','Aref Ruqaa','Cairo','Scheherazade New','Reem Kufi','Pacifico','Dancing Script','Great Vibes','Caveat','Permanent Marker','Abril Fatface','Lobster','Archivo Black','Righteous','Staatliches','Teko','Inter','Mali','Alfa Slab One','Metal Mania','Pirata One','Special Elite'];
 const ADZ_SHAPES=['rect','circle','triangle','star','polygon','pentagon','octagon','heart','arrow','cross','capsule','trapezoid','parallelogram','rhombus','crescent','shield','chat','tag','bookmark','line'];
-const ADZ_ARTS=['brush','splatter','ring','scribble','halftone','glow','rays','bokeh','sparkle','grain','star8','lattice','frame','divider','corner','wave','burst','rings','orb','ribbon','gradbar','stripes','wordmark'];
+const ADZ_ARTS=['leaves','embers','dirt','flare','dust','brush','splatter','ring','scribble','halftone','glow','rays','bokeh','sparkle','grain','star8','lattice','frame','divider','corner','wave','burst','rings','orb','ribbon','gradbar','stripes','wordmark'];
 const ADZ_BLENDS=['normal','screen','overlay','soft-light','multiply','lighten','hard-light','color-dodge'];
 const ADZ_STYLES=[
  ['Elegan emas gelap','dark elegant luxury poster, deep black/brown background, gold (#D4AF37) accents, serif display headings, generous whitespace'],
@@ -24026,7 +24030,7 @@ if(!cfg._v268){cfg.review=Math.max(parseInt(cfg.review)||0,3);cfg._v268=1;try{lo
 if(!cfg._v266){cfg.useImages=false;cfg.assets=true;cfg.rich=true;cfg._v266=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 function loadCfg(){
  let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}
- c=Object.assign({provider:'gemini',keys:{},models:{},imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,ghost:true,rich:true,logoOn:true,logoShape:'auto',logoColor:'auto',logoLayout:'auto'},c);
+ c=Object.assign({provider:'gemini',keys:{},models:{},imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,ghost:true,rich:true,logoOn:true,logoShape:'auto',logoColor:'auto',logoLayout:'auto',logoTint:'auto',fx:true},c);
  if(!c.keys||typeof c.keys!=='object')c.keys={};
  if(!c.models||typeof c.models!=='object')c.models={};
  Object.keys(PROVS).forEach(function(p){let a=Array.isArray(c.keys[p])?c.keys[p].slice(0,5):[];while(a.length<5)a.push('');c.keys[p]=a;if(!c.models[p]||typeof c.models[p]!=='object')c.models[p]={hi:'',lo:'',vis:''};});
@@ -24103,7 +24107,7 @@ function build(){
   '<input type="file" id="adzFileLogo" accept="image/*" multiple style="display:none">'+
   '<div class="adz-logos" id="adzLogos"></div><div class="adz-hint" id="adzLogoHint"></div>'+
   '<label class="adz-lab">Bentuk latar logo</label><div class="adz-chips" id="adzLogoShape"></div>'+
-  '<label class="adz-lab">Warna latar logo</label><div class="adz-chips" id="adzLogoColor"></div>'+
+  '<label class="adz-lab">Warna logo (disamakan semua)</label><div class="adz-chips" id="adzLogoTint"></div><label class="adz-lab">Warna latar logo</label><div class="adz-chips" id="adzLogoColor"></div>'+
   '<label class="adz-lab">Tata letak logo</label><div class="adz-chips" id="adzLogoLay"></div>'+
   '<div class="adz-hint">Logo yang belum PNG otomatis dibuat transparan dengan tepi halus, area kosong di sekitar logo dipangkas, dan tinggi isi semua logo disamakan. Tanda centang = dipakai, tanda x = hapus dari penyimpanan, tanda panah = geser urutan. Semua tersimpan di IndexedDB dan tidak hilang saat refresh atau update versi.</div></div>'+
  '<div class="adz-card"><div class="adz-lab" style="margin-top:0">Opsi hasil</div>'+
@@ -24111,6 +24115,7 @@ function build(){
   '<label class="adz-chk"><input type="checkbox" id="adzSmart"><span>Mode cerdas: AI menganalisis maksud perintah dulu (walau singkat), menyusun brief, lalu mendesain.</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzRich"><span>Mode desainer pro: poster rumit 24-44 layer (cahaya, pola, bingkai, ornamen, lencana, watermark tipografi, teks berefek emas/outline/3D). Matikan untuk poster sederhana.</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzAssets"><span>Aset PNG otomatis: kuas, coretan, lingkaran, percikan, halftone, glow, sinar, bokeh, kilau, grain, pola bintang, bingkai, sudut ornamen, pemisah, gelombang, lencana, bola 3D, pita, plat emas, watermark. Dibuat lokal (gratis, tanpa kuota).</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzFx"><span>Efek atmosfer PNG otomatis (blur lembut): dedaunan melayang, percikan api, percikan tanah, cahaya silau, dan debu berkilau dipasang sesuai tema poster, di belakang teks dengan transparansi rendah.</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Gambar AI (tidak disarankan: hasil Gemini kurang memukau, lambat, boros kuota). Biarkan mati: desain memakai gradasi, bentuk, teks berefek, dan aset PNG lokal.</span></label>'+
   '<label class="adz-lab">Putaran koreksi otomatis: <span id="adzRevV">2</span> (AI menilai hasil lalu merapikan posisi; 0 = mati)</label><input id="adzRev" class="adz-range" type="range" min="0" max="3" step="1" value="2">'+
   '<label class="adz-chk"><input type="checkbox" id="adzGhost"><span>Animasi hantu: saat panel di-X, kursor emas bergerak alami dan layer muncul satu per satu (hanya tampilan, tidak menambah pemakaian AI).</span></label>'+
@@ -24123,7 +24128,8 @@ function build(){
  document.body.appendChild(m);
  buildChip();
  guardScroll(m.querySelector('.adz-body'));guardScroll($('adzLog'));
- m.addEventListener('touchmove',function(e){if(e.defaultPrevented)return;const t=e.target;if(t&&t.closest&&(t.closest('.adz-body')||t.closest('.adz-log')))return;if(e.cancelable)e.preventDefault();},{passive:false});
+ (function(h){if(!h)return;h.addEventListener('touchmove',function(e){e.stopPropagation();},{passive:true});h.addEventListener('wheel',function(e){if(e.deltaY&&!e.deltaX){h.scrollLeft+=e.deltaY;e.preventDefault();}e.stopPropagation();},{passive:false});})(m.querySelector('.adz-loghead'));
+ m.addEventListener('touchmove',function(e){if(e.defaultPrevented)return;const t=e.target;if(t&&t.closest&&(t.closest('.adz-body')||t.closest('.adz-log')||t.closest('.adz-loghead')))return;if(e.cancelable)e.preventDefault();},{passive:false});
  m.addEventListener('pointerdown',function(e){e.stopPropagation();});
  m.addEventListener('pointermove',function(e){e.stopPropagation();});
  $('adzPrompt').addEventListener('input',function(){promptSave();updGo();});
@@ -24154,7 +24160,7 @@ window.openAiDesigner=function(){
  build();cfg=loadCfg();
  paintProv();$('adzAutoProv').checked=cfg.autoProv!==false;
  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
- $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRich').checked=cfg.rich!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
+ $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;if($('adzFx'))$('adzFx').checked=cfg.fx!==false;$('adzRich').checked=cfg.rich!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
  $('adzGhost').checked=cfg.ghost!==false;
  $('adzApiCard').open=!keysOf(provId()).length;
  paintChips();paintThumbs();adzMode(S.mode);
@@ -24265,7 +24271,7 @@ function cfgUiSync(){
  try{
   paintProv();$('adzAutoProv').checked=cfg.autoProv!==false;
   $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
-  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;$('adzRich').checked=cfg.rich!==false;
+  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;if($('adzFx'))$('adzFx').checked=cfg.fx!==false;$('adzRich').checked=cfg.rich!==false;
   $('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;$('adzGhost').checked=cfg.ghost!==false;
   paintLogoUi();
  }catch(e){}
@@ -24300,13 +24306,14 @@ function persistLoad(){
   if(!has&&hv){try{localStorage.setItem(LS_KEY,JSON.stringify(v));}catch(e){}cfg=loadCfg();cfgUiSync();}
  }).catch(function(){});
 }
-function logoSig(){return cfg.logoOn===false?'logo-off':(AX.logos.filter(function(g){return g.on;}).map(function(g){return g.id;}).join(',')+'|'+cfg.logoShape+'|'+cfg.logoColor+'|'+cfg.logoLayout);}
+function logoSig(){return cfg.logoOn===false?'logo-off':(AX.logos.filter(function(g){return g.on;}).map(function(g){return g.id;}).join(',')+'|'+cfg.logoShape+'|'+cfg.logoColor+'|'+cfg.logoLayout+'|'+(cfg.logoTint||'auto'));}
 
 /* ---------- UI logo ---------- */
 const LOGO_SHAPES=[['auto','Otomatis'],['capsule','Kapsul'],['para','Jajar genjang'],['rect','Persegi tumpul']];
 const LOGO_COLORS=[['auto','Otomatis (kontras)'],['white','Putih'],['black','Hitam']];
 const LOGO_LAYS=[['auto','Otomatis'],['center','Tengah berjejer'],['corner','Sudut kiri-kanan']];
-const LOGO_GROUPS=[['adzLogoShape',LOGO_SHAPES,'logoShape'],['adzLogoColor',LOGO_COLORS,'logoColor'],['adzLogoLay',LOGO_LAYS,'logoLayout']];
+const LOGO_TINTS=[['auto','Otomatis (serasi poster)'],['orig','Warna asli'],['white','Putih'],['black','Hitam'],['accent','Warna aksen']];
+const LOGO_GROUPS=[['adzLogoTint',LOGO_TINTS,'logoTint'],['adzLogoShape',LOGO_SHAPES,'logoShape'],['adzLogoColor',LOGO_COLORS,'logoColor'],['adzLogoLay',LOGO_LAYS,'logoLayout']];
 function buildLogoUi(){
  LOGO_GROUPS.forEach(function(g){
   const w=$(g[0]);if(!w||w.children.length)return;
@@ -24487,30 +24494,108 @@ async function prepLogoPlan(d,m){
   log('Logo: '+items.length+' logo · tata letak '+P.mode+' · latar '+P.kind+' · zona atas '+P.zonePct+'% dicadangkan.');
  }catch(e){AX.plan=null;AX.top=0;log('Logo dilewati: '+e.message,'wn');}
 }
+function lumHexSafe(c){try{return lumOf(hex(c,'#FFFFFF'));}catch(e){return 1;}}
+function satOf(c){const v=_rgb(c),mx=Math.max(v[0],v[1],v[2]),mn=Math.min(v[0],v[1],v[2]);return mx?(mx-mn)/mx:0;}
+/* v2.7.0: kecerahan latar poster (0 gelap - 1 terang), dipakai untuk memilih warna logo seragam */
+function posterLum(target){
+ try{
+  const bg=target&&target.background;
+  if(bg){
+   if(bg.bgType==='image'&&bg.img){
+    const c=document.createElement('canvas');c.width=16;c.height=16;const x=c.getContext('2d',{willReadFrequently:true});
+    x.drawImage(bg.img,0,0,16,16);const D=x.getImageData(0,0,16,5).data;let s=0,n=0;
+    for(let i=0;i<D.length;i+=4){s+=(0.2126*D[i]+0.7152*D[i+1]+0.0722*D[i+2])/255;n++;}
+    c.width=0;return Math.max(0,(n?s/n:0.3)*(1-(bg.darken||0)));
+   }
+   const cs=(bg.colorStops&&bg.colorStops.length)?bg.colorStops.map(function(c){return c.color;}):[bg.color1||'#111111'];
+   let s=0;cs.forEach(function(c){s+=lumHexSafe(c);});
+   const avg=s/cs.length;
+   return bg.gradType==='radial'?(0.65*lumHexSafe(cs[cs.length-1])+0.35*avg):avg;
+  }
+ }catch(e){}
+ return 0.2;
+}
 function logoPal(P,L,target,d){
  let accent=null;
  try{const a=S.ck&&S.ck.brief&&S.ck.brief.palette&&S.ck.brief.palette.accent;if(a&&/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(a).trim()))accent=String(a).trim();}catch(e){}
  for(let i=0;i<L.length&&!accent;i++){const l=L[i];if(l&&l.kind==='asset'&&/frame|divider|corner|gradbar|ring/.test(String(l.art||''))&&/^#([0-9a-f]{3}|[0-9a-f]{6})/i.test(String(l.color||'')))accent=hex(l.color);}
  for(let i=0;i<L.length&&!accent;i++){const l=L[i];if(l&&l.kind==='text'&&l.accent&&l.accent.color&&/^#([0-9a-f]{3}|[0-9a-f]{6})/i.test(String(l.accent.color)))accent=hex(l.accent.color);}
  accent=accent||'#D4AF37';
- let fill;
- if(cfg.logoColor==='white')fill='#FFFFFF';
- else if(cfg.logoColor==='black')fill='#0D0D0D';
- else{
-  /* otomatis: pilih latar terang/gelap yang membuat paling sedikit logo hilang (kontras rendah) */
-  const fw=P.items.filter(function(it){return Math.abs(1-it.g.lum)<0.2;}).length,fd=P.items.filter(function(it){return Math.abs(0.08-it.g.lum)<0.2;}).length;
-  const light=(fw!==fd)?(fw<fd):(P.lum<0.52);
-  fill=light?mixc('#FFFFFF',accent,0.05):mixc('#0D0D0D',accent,0.1);
+ const mode=cfg.logoTint||'auto';
+ let fill,tint=null;
+ if(mode==='orig'){
+  if(cfg.logoColor==='white')fill='#FFFFFF';
+  else if(cfg.logoColor==='black')fill='#0D0D0D';
+  else{
+   /* warna asli: pilih latar terang/gelap yang membuat paling sedikit logo hilang (kontras rendah) */
+   const fw=P.items.filter(function(it){return Math.abs(1-it.g.lum)<0.2;}).length,fd=P.items.filter(function(it){return Math.abs(0.08-it.g.lum)<0.2;}).length;
+   const light=(fw!==fd)?(fw<fd):(P.lum<0.52);
+   fill=light?mixc('#FFFFFF',accent,0.05):mixc('#0D0D0D',accent,0.1);
+  }
+ }else{
+  /* seragam: satu warna untuk semua logo, dipilih dari suasana warna poster */
+  const pl=posterLum(target);
+  if(mode==='white')tint='#FFFFFF';
+  else if(mode==='black')tint='#111111';
+  else if(mode==='accent')tint=accent;
+  else if(pl<0.5)tint=(satOf(accent)>=0.5&&lumOf(accent)>=0.5&&lumOf(accent)<=0.9)?mixc(accent,'#FFFFFF',0.2):'#FFFFFF';
+  else tint='#111111';
+  const tl=lumOf(tint);
+  if(cfg.logoColor==='white')fill='#FFFFFF';
+  else if(cfg.logoColor==='black')fill='#0D0D0D';
+  else fill=tl>=0.5?mixc('#0D0D0D',accent,0.1):mixc('#FFFFFF',accent,0.05);
+  if(Math.abs(lumOf(fill)-tl)<0.42)tint=lumOf(fill)<0.5?'#FFFFFF':'#111111';
  }
  const dark=lumOf(fill)<0.5;
  if(!AX.warned){
   AX.warned=true;
-  const bad=P.items.filter(function(it){return Math.abs(lumOf(fill)-it.g.lum)<0.2;}).map(function(it){return it.g.name;});
-  if(bad.length)log('Peringatan logo: '+bad.join(', ')+' kurang kontras di latar '+(dark?'gelap':'terang')+'. Ubah "Warna latar logo" (Putih/Hitam) atau matikan logo itu bila perlu.','wn');
+  if(tint)log('Logo seragam: semua logo diberi warna '+tint+' di atas latar '+(dark?'gelap':'terang')+' (suasana poster '+(posterLum(target)<0.5?'gelap':'terang')+').');
+  else{
+   const bad=P.items.filter(function(it){return Math.abs(lumOf(fill)-it.g.lum)<0.2;}).map(function(it){return it.g.name;});
+   if(bad.length)log('Peringatan logo: '+bad.join(', ')+' kurang kontras di latar '+(dark?'gelap':'terang')+'. Pilih "Warna logo" Otomatis/Putih/Hitam atau matikan logo itu bila perlu.','wn');
+  }
  }
  let border=accent;
  if(Math.abs(lumOf(border)-lumOf(fill))<0.28)border=dark?shade(accent,0.45):shade(accent,-0.45);
- return {fill:fill,border:border,accent:accent,dark:dark,bw:Math.max(2,Math.round(d.W*0.0022))};
+ return {fill:fill,border:border,accent:accent,dark:dark,tint:tint,bw:Math.max(2,Math.round(d.W*0.0022))};
+}
+/* v2.7.0: ubah logo menjadi satu warna (siluet bila punya transparansi; berbasis kecerahan bila latarnya masih solid) */
+async function logoTinted(url,color,key){
+ const ck='tn|'+key+'|'+color;if(AX.cache.has(ck))return AX.cache.get(ck);
+ try{
+  const im=await loadImg(url),w=im.width,h=im.height;
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0);
+  const id=x.getImageData(0,0,w,h),D=id.data,N=w*h,tv=_rgb(color),tl=lumOf(color);
+  let tr=0;for(let i=3;i<D.length;i+=4)if(D[i]<200)tr++;
+  let out=url;
+  if(tr/N>0.06){
+   let op=0,lt=0,dk=0;
+   for(let i=0;i<D.length;i+=4){if(D[i+3]>200){op++;const l=(0.2126*D[i]+0.7152*D[i+1]+0.0722*D[i+2])/255;if(l>0.9)lt++;else if(l<0.1)dk++;}}
+   const fL=op?lt/op:0,fD=op?dk/op:0,pL=fL>0.01&&fL<0.4,pD=!pL&&fL>0.55&&fD>0.01&&fD<0.3;
+   for(let i=0;i<D.length;i+=4){
+    let a=D[i+3];
+    if(a>0&&(pL||pD)){
+     const l=(0.2126*D[i]+0.7152*D[i+1]+0.0722*D[i+2])/255;
+     const f=pL?Math.max(0,Math.min(1,(l-0.8)/0.14)):Math.max(0,Math.min(1,(0.2-l)/0.14));
+     a=Math.round(a*(1-f));
+    }
+    D[i]=tv[0];D[i+1]=tv[1];D[i+2]=tv[2];D[i+3]=a;
+   }
+   x.putImageData(id,0,0);out=c.toDataURL('image/png');
+  }else{
+   let bs=0,bn=0;
+   const pk=function(xx,yy){const p=(yy*w+xx)*4;bs+=(0.2126*D[p]+0.7152*D[p+1]+0.0722*D[p+2])/255;bn++;};
+   for(let xx=0;xx<w;xx+=Math.max(1,(w/40)|0)){pk(xx,0);pk(xx,h-1);}
+   for(let yy=0;yy<h;yy+=Math.max(1,(h/40)|0)){pk(0,yy);pk(w-1,yy);}
+   const bl=bn?bs/bn:1,A=new Uint8ClampedArray(N);let cov=0;
+   for(let i=0;i<N;i++){const p=i*4,l=(0.2126*D[p]+0.7152*D[p+1]+0.0722*D[p+2])/255;let a=Math.min(1,Math.abs(l-bl)*2.4);if(a<0.07)a=0;A[i]=Math.round(a*D[p+3]);cov+=A[i];}
+   if(cov/(N*255)>0.015){for(let i=0;i<N;i++){const p=i*4;D[p]=tv[0];D[p+1]=tv[1];D[p+2]=tv[2];D[p+3]=A[i];}x.putImageData(id,0,0);out=c.toDataURL('image/png');}
+  }
+  c.width=0;c.height=0;
+  if(AX.cache.size>60)AX.cache.delete(AX.cache.keys().next().value);
+  AX.cache.set(ck,out);return out;
+ }catch(e){return url;}
 }
 function rrPoly(x,P,r){
  const n=P.length;x.beginPath();
@@ -24574,7 +24659,7 @@ async function addLogoEls(target,L,d,m){
   });
   for(let k=0;k<P.items.length;k++){
    const it=P.items[k],tw=Math.max(2,Math.min(it.g.w,Math.round(it.w*2))),th=Math.max(2,Math.round(tw*it.g.h/it.g.w));
-   const url=await logoScaled(it.g,tw,th),img=getImageFromCache(url);await waitImg(img);
+   let url=await logoScaled(it.g,tw,th);if(pal.tint)url=await logoTinted(url,pal.tint,it.g.id+'|'+tw);const img=getImageFromCache(url);await waitImg(img);
    const e=imageBase(img,url,it.x+it.w/2,it.y+it.h/2,it.w,it.h,0,1);
    e._adz=tag('Logo '+(k+1));
    out.push(e);
@@ -24687,7 +24772,7 @@ function readCfg(){
  cfg.ghost=$('adzGhost').checked;
  if($('adzLogoOn'))cfg.logoOn=$('adzLogoOn').checked;
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
- cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.rich=$('adzRich').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
+ cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.fx=$('adzFx')?$('adzFx').checked:true;cfg.rich=$('adzRich').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
 }
 
 /* ---------- Berkas: gambar, JSON, ZIP ---------- */
@@ -25142,16 +25227,16 @@ function systemPrompt(m){
  'LAYER KINDS (every layer needs a unique, descriptive "name" such as "Judul", "Kartu isi", "Kuas judul"):\n'+
  '- {"kind":"shape","name":"...","shape":"'+ADZ_SHAPES.join('|')+'","blend":"normal|screen|overlay|soft-light","x":,"y":,"w":,"h":,"color":"#hex","opacity":0-1,"radius":0-100 (rect only, px),"borderWidth":px,"borderColor":"#hex","rotation":deg,"bleed":false,"shadow":{"color":"#000000","blur":0-30,"distance":0-12,"opacity":0-1}|null,"attach":{...}|null}\n'+
  '- {"kind":"fade","name":"...","dir":"top|bottom|left|right|horizontal|vertical","depth":20-80,"color":"#hex"}  (soft gradient edge overlay, always full-bleed)\n'+
- '- {"kind":"text","name":"...","text":"...(use \\n for manual line breaks)","font":"one of: '+ADZ_FONTS.join(', ')+'","size":font size as % of canvas width (headline 7-14, subhead 3.6-5.5, body 2.6-3.8, small 2-2.6),"weight":"400|700|800|900","italic":false,"color":"#hex","align":"left|center|right|justify","x":,"y":,"w":,"lineHeight":1.05-1.8,"letterSpacing":px,"uppercase":false,"shadow":{...}|null,"highlight":"#hex|null","opacity":0-1,"stroke":{"color":"#hex","width":2-8}|null,"gradient":{"colors":["#top","#middle","#bottom"]}|null (vertical metal/gold fill, 2-3 colors),"glow":{"color":"#hex","blur":8-30,"opacity":0.3-1}|null,"innerShadow":{"color":"#hex","blur":2-10,"distance":1-6,"opacity":0.3-0.9}|null,"extrude":{"color":"#hex","depth":6-18,"angle":45-90}|null (fake 3D thickness for a big headline only),"accent":{"words":["word"],"color":"#hex","weight":"900"}|null (recolors specific words)}\n'+
- '- {"kind":"asset","name":"...","art":"'+ADZ_ARTS.join('|')+'","color":"#hex","color2":"#hex|null","opacity":0-1,"rotation":deg,"seed":int,"blend":"normal|screen|overlay|soft-light|multiply|lighten","bleed":false,"x":,"y":,"w":,"h":,"attach":{...}|null}  (PNG decoration drawn locally with transparency. brush = rough paint band, scribble = wavy underline, ring = hand-drawn circle, splatter = ink splash, halftone = fading dots, glow = soft radial light (blend screen), rays = sunburst beams from the center (blend screen), bokeh = soft light discs, sparkle = 4-point stars, grain = film noise (color #ffffff, blend overlay), star8 = Islamic 8-point star pattern, lattice = fine diamond grid, frame = ornamental double-line frame with notched corners, divider = line-diamond-line separator (wide and short, h 1.5-3), corner = corner flourish drawn for the TOP-LEFT (use rotation 90/180/270 at other corners, bleed true), wave = flowing line swooshes, burst = starburst badge, rings = concentric ripples, orb = glossy 3D sphere (color body, color2 rim light), ribbon = banner with folded tails (place a text above it), gradbar = metallic or gradient pill/plate (color to color2, metallic when color2 is null), stripes = diagonal stripes, wordmark = giant watermark word (also give "text","font","weight","style":"outline|fill","uppercase":true))\n'+
+ '- {"kind":"text","name":"...","text":"...(use \\n for manual line breaks)","font":"one of: '+ADZ_FONTS.join(', ')+'","size":font size as % of canvas width (headline 7-14, subhead 4-5.8, body 3.2-4.2, small text and footer handle 2.7-3.4; text must be easy to read on a phone, body never below 3.0),"weight":"400|700|800|900","italic":false,"color":"#hex","align":"left|center|right|justify","x":,"y":,"w":,"lineHeight":1.05-1.8,"letterSpacing":px,"uppercase":false,"shadow":{...}|null,"highlight":"#hex|null","opacity":0-1,"stroke":{"color":"#hex","width":2-8}|null,"gradient":{"colors":["#top","#middle","#bottom"]}|null (vertical metal/gold fill, 2-3 colors),"glow":{"color":"#hex","blur":8-30,"opacity":0.3-1}|null,"innerShadow":{"color":"#hex","blur":2-10,"distance":1-6,"opacity":0.3-0.9}|null,"extrude":{"color":"#hex","depth":6-18,"angle":45-90}|null (fake 3D thickness for a big headline only),"accent":{"words":["word"],"color":"#hex","weight":"900"}|null (recolors specific words)}\n'+
+ '- {"kind":"asset","name":"...","art":"'+ADZ_ARTS.join('|')+'","color":"#hex","color2":"#hex|null","opacity":0-1,"rotation":deg,"seed":int,"blend":"normal|screen|overlay|soft-light|multiply|lighten","bleed":false,"x":,"y":,"w":,"h":,"attach":{...}|null}  (PNG decoration drawn locally with transparency. brush = rough paint band, scribble = wavy underline, ring = hand-drawn circle, splatter = ink splash, halftone = fading dots, glow = soft radial light (blend screen), rays = sunburst beams from the center (blend screen), bokeh = soft light discs, sparkle = 4-point stars, grain = film noise (color #ffffff, blend overlay), star8 = Islamic 8-point star pattern, lattice = fine diamond grid, frame = ornamental double-line frame with notched corners, divider = line-diamond-line separator (wide and short, h 1.5-3), corner = corner flourish drawn for the TOP-LEFT (use rotation 90/180/270 at other corners, bleed true), wave = flowing line swooshes, burst = starburst badge, rings = concentric ripples, orb = glossy 3D sphere (color body, color2 rim light), ribbon = banner with folded tails (place a text above it), gradbar = metallic or gradient pill/plate (color to color2, metallic when color2 is null), stripes = diagonal stripes, leaves = soft blurred floating leaves (blend normal, opacity 0.3-0.6, bleed true, color green or autumn orange, color2 darker), embers = blurred fire sparks rising from the bottom (blend screen, color orange, color2 yellow), dirt = flying soil clods and dust (blend normal, color brown), flare = soft glare / lens flare light (blend screen, opacity 0.35-0.6, accent color), dust = sparkling blurred glitter particles (blend screen, bleed true), wordmark = giant watermark word (also give "text","font","weight","style":"outline|fill","uppercase":true))\n'+
  '- {"kind":"image","name":"...","imagePrompt":"detailed English prompt of ONE flat-style object illustration, no text, no people/animals","cutout":true|false,"keyColor":"magenta|green","x":,"y":,"w":,"h":,"radius":0-50,"keepId":"id of an existing image layer (remix mode only)"}  (cutout:true = subject is generated on a flat key color and automatically turned into a transparent PNG sticker; use for illustrations/objects. cutout:false = rectangular photo/picture)\n'+
  'ATTACH (makes decoration hug the REAL rendered text, so positions are always exact): "attach":{"to":"layer name" or ["name1","name2"],"mode":"wrap|under|above","padX":% of canvas width (wrap),"padY":% of canvas height (wrap),"gap":% of canvas height (under/above),"wRatio":0.1-1.5 (under/above width relative to target text width),"h":% of canvas height (under/above thickness),"align":"center|left|right","z":"behind|front"}. When attach is present, x/y/w/h are ignored (give approximate values anyway). Use it for: cards/panels behind a text or a group of texts (wrap, padX 3-5, padY 1.5-3), pill/badge behind a handle or kicker (wrap, shape capsule or rect with radius), brush stroke behind a headline word (asset brush, wrap, padX 2-4, padY 0.5-1.2, rotation -1 to -3), underline lines/scribbles (under, gap 0.4-1), ring around a word (asset ring, wrap, padX 3, padY 1.5). NEVER guess coordinates for anything that belongs to a text: attach it.\n'+
  'TYPE FITTING MATH (do this before choosing y of the next block): average glyph width = 0.52 x size for normal fonts, 0.40 x size for condensed fonts (Anton, Bebas Neue, Oswald, Staatliches, Teko), 0.62 x size for wide bold display fonts. charsPerLine = w / (size x factor). lines = ceil(chars / charsPerLine). Block height as % of canvas height = lines x size x lineHeight x '+ratio+'. Next block y = previous y + previous height + gap (at least 2.5). The total must end above y='+(100-my).toFixed(1)+'; if it does not fit, reduce sizes (never overlap).\n'+
  'COMPOSITION: pick ONE archetype and keep one alignment axis (all centered OR all left at the same x). Hierarchy: headline dominant (at least 2.2x body size), max 3 text sizes + one small kicker/footer. Vertical rhythm: kicker near the top, headline block, subheadline, body (or card), closing, footer/handles at the bottom, with consistent gaps. Body line length 28-48 characters. Balance whitespace: no empty band taller than 15% of the canvas. Contrast: light text on dark areas and vice versa; if text sits on a busy area add a card or fade. Round numbers: card radius 16-40, handle pills use capsule.\n'+
  (cfg.rich?
  'PRO TYPOGRAPHER MODE: build the poster like a top-tier typography designer, 24-44 layers, elegant and eye-catching. Pick ONE look and keep it consistent: (A) 3D-LIT = extruded glossy headline, glow behind it, orbs or ribbon, soft shadows, light rays or bokeh; (B) REFINED 2D = editorial lock-up, gold/metal gradient type, outlines, ornamental frames, patterns, wordmark watermark. Follow brief.look when given. Match the tone: sacred/luxury = gold on deep navy, emerald or black; modern/bold = high contrast with ONE hot accent.\n'+
- 'LAYER RECIPE (bottom to top): 1) background gradient (radial, 3 colors, dark edges). 2) atmosphere: asset glow (blend screen, bleed true, opacity 0.35-0.7, accent color) behind the headline; asset rays or bokeh (bleed true, blend screen, opacity 0.15-0.4); fade vignettes top and bottom. 3) texture: asset star8 or lattice (bleed true, opacity 0.05-0.14, accent color) and asset grain (bleed true, color #ffffff, blend overlay, opacity 0.25-0.45). 4) structure: asset frame inside the safe area (opacity 0.6-0.9) plus 2-4 asset corner at the corners (rotation 0/90/180/270, bleed true), or gradbar lines; a glass card for the body (shape rect radius 24-40, white or black at opacity 0.06-0.18, borderWidth 1-2, accent borderColor); asset ribbon or burst behind a kicker or key stat; asset divider between headline group and body (h 1.5-3). 5) optional giant asset wordmark (outline, opacity 0.06-0.14, bleed true) behind the headline. 6) type: kicker (small, uppercase, letterSpacing 6-12, accent), headline in 2-4 stacked lines with size contrast and effects, subheadline, body, closing, footer. 7) accents on top: 2-4 small sparkle assets (bleed true, blend screen) near the headline, never over body text.\n'+
- 'TYPE CRAFT: display font only for kicker/headline, a readable font for body; headline leading 0.95-1.1; uppercase display letterSpacing 1-4; max 3 fonts; contrast at least 4.5:1. Effects budget: at most 2 text layers with extrude (never body text), at most 4 text layers with gradient/stroke/glow/innerShadow; gradient colors go top to bottom (gold: #FFF1B8, #E8B923, #9A6A00); stroke width 2-6; use accent OR gradient on one layer, not both. Every effect must stay readable.\n'+
+ 'LAYER RECIPE (bottom to top): 1) background gradient (radial, 3 colors, dark edges). 2) atmosphere: asset glow (blend screen, bleed true, opacity 0.35-0.7, accent color) behind the headline; asset rays or bokeh (bleed true, blend screen, opacity 0.15-0.4); fade vignettes top and bottom. 3) texture: asset star8 or lattice (bleed true, opacity 0.05-0.14, accent color) and asset grain (bleed true, color #ffffff, blend overlay, opacity 0.25-0.45). 4) structure: asset frame inside the safe area (opacity 0.6-0.9) plus 2-4 asset corner at the corners (rotation 0/90/180/270, bleed true), or gradbar lines; a glass card for the body (shape rect radius 24-40, white or black at opacity 0.06-0.18, borderWidth 1-2, accent borderColor); asset ribbon or burst behind a kicker or key stat; asset divider between headline group and body (h 1.5-3). 5) optional giant asset wordmark (outline, opacity 0.06-0.14, bleed true) behind the headline. 6) type: kicker (small, uppercase, letterSpacing 6-12, accent), headline in 2-4 stacked lines with size contrast and effects, subheadline, body, closing, footer. 7) accents on top: 2-4 small sparkle assets (bleed true, blend screen) near the headline, never over body text. 8) ATMOSPHERE PNG for a pro photo-edit feel (all bleed true, low opacity 0.25-0.55, always BEHIND the text, never hiding headline or body): leaves for nature, wind, rezeki or hijrah themes; embers for fire, zeal or warning themes; dirt for grave, death or earth themes; flare for light, guidance or dawn themes; dust (sparkling blur) on almost every poster.\n'+
+ 'TYPE CRAFT: display font only for kicker/headline, a readable font for body; headline leading 0.95-1.1; uppercase display letterSpacing 1-4; max 3 fonts; contrast at least 4.5:1. Effects budget: at most 2 text layers with extrude (never body text), at most 4 text layers with gradient/stroke/glow/innerShadow; gradient colors go top to bottom (gold: #FFF1B8, #E8B923, #9A6A00); stroke width 2-6; use accent OR gradient on one layer, not both. Every effect must stay readable. A bright headline (white, gold, yellow or a light gradient) MUST have a dense dark outer shadow (color #000000, blur 14-24, distance 6-12, opacity 0.85-0.95) so it lifts off the background in 3D.\n'+
  'SPACING RULES: decorative layers sit BEHIND text and must not hide it; any non-text shape that overlaps text but is not a real card must set bleed true (otherwise it is treated as a card and resized). A real card is a shape without bleed whose area contains the text center. Keep frames and corners clear of text (inset at least 4 percent).\n'
  :'ASSETS: add 2-5 decorative asset layers so the poster looks designed (for the da\'wah/modern style: brush stroke behind the key headline word, scribble underline under a keyword, ring around one word, splatter or halftone accent at a corner with low opacity 0.15-0.5). ')
  +'In reference mode recreate every decorative device seen in the reference using the closest kind. If an illustration is needed and image generation is ON, add ONE image layer with cutout:true (sticker-style), placed above the background and below the text unless overlap is intended; keep text readable.\n'+
@@ -25160,7 +25245,7 @@ function systemPrompt(m){
 function qaSystem(m){
  const d=canvasDims(),ratio=(d.W/d.H).toFixed(3);
  return 'You are a meticulous poster QA art director. You get a screenshot of the rendered poster plus a table of its layers (percent geometry measured from the real render: x,y = top-left, w,h = size) and automatic lint warnings. Find real visual defects and propose minimal numeric fixes. Reply with ONE JSON object only.\n'+
- 'CHECK: text clipped or touching edges; text overlapping text; text crossing the edge of its card; card/pill/brush/ring that does not hug its text (it should be centered on it with even padding); decorative PNG covering text or floating in the wrong place; inconsistent alignment (centers/left edges); uneven vertical spacing; hierarchy too weak; low contrast; big empty areas or crowded areas; footer too close to body; element outside the safe margin ('+cfg.margin+'%).\n'+
+ 'CHECK: text clipped or touching edges; text overlapping text; text crossing the edge of its card; card/pill/brush/ring that does not hug its text (it should be centered on it with even padding); decorative PNG covering text or floating in the wrong place; inconsistent alignment (centers/left edges); uneven vertical spacing; hierarchy too weak; body text under 3.2 or footer under 2.8 percent of width is too small for a phone (raise size); low contrast; big empty areas or crowded areas; footer too close to body; element outside the safe margin ('+cfg.margin+'%).\n'+
  'SCHEMA: {"score":0-10,"verdict":"ok|fix","issues":["short Indonesian sentences, max 6"],"fixes":[{"i":layer index from the table,"x":,"y":,"w":,"h":,"size":font size % of canvas width,"color":"#hex","opacity":0-1,"align":"left|center|right|justify","lineHeight":,"rotation":deg,"attach":{...same as design schema}|null,"remove":false}]}\n'+
  'RULES: geometry is percent of the canvas (aspect W/H '+ratio+'); for text only x,y,w,size matter (height is automatic); never change wording; prefer fixing decoration via "attach" instead of coordinates; at most 8 fixes; omit unchanged fields; if the poster is already clean answer verdict "ok" with an empty fixes array and score >= 8.';
 }
@@ -25181,7 +25266,7 @@ function enforceFooter(L,d){
  const cand=L.filter(function(l){return l&&l.kind==='text'&&!l._skip&&isHandleOnly(l.text);});
  let main=cand.filter(function(l){return /user|akun|handle|footer|sosmed|medsos/i.test(l.name||'');})[0]||cand[cand.length-1]||null;
  cand.forEach(function(l){if(l!==main)l._skip=true;});
- let sz=clamp(main&&main.size?main.size:2.6,2,3);
+ let sz=clamp(main&&main.size?main.size:3.1,2.8,3.5);
  if(ft.length*sz*0.56>avail)sz=Math.max(1.4,avail/(ft.length*0.56));
  if(main){
   main.text=ft;main.size=sz;main._footer=true;main.x=mx;main.w=avail;
@@ -25192,6 +25277,64 @@ function enforceFooter(L,d){
   const my=mx*d.W/d.H;
   L.push({kind:'text',name:'Username',text:ft,font:ref.font||'Montserrat',size:sz,weight:'700',align:'center',color:ref.color||'#E5E7EB',opacity:0.92,x:mx,w:avail,y:+(100-my-sz*d.W/d.H*1.7).toFixed(1),_footer:true});
  }
+}
+/* ===== v2.7.0: teks lebih terbaca, judul cerah berbayangan pekat, efek atmosfer PNG otomatis ===== */
+function enforceReadable(L){
+ L.forEach(function(l){
+  if(!l||l.kind!=='text'||l._skip||l._footer)return;
+  const sz=+l.size||0,len=String(l.text||'').length;
+  if(sz>=5.2)return;
+  if(len>=28&&sz<3.2)l.size=Math.min(3.4,Math.max(sz*1.12,3.1));
+  else if(len<28&&sz<2.6)l.size=2.6;
+ });
+}
+function boostHeadlineShadow(L){
+ L.forEach(function(l){
+  if(!l||l.kind!=='text'||l._skip||l._footer)return;
+  if((+l.size||0)<6.2)return;
+  let lum=lumHexSafe(l.color);
+  if(l.gradient&&Array.isArray(l.gradient.colors)&&l.gradient.colors.length){let s=0;l.gradient.colors.forEach(function(c){s+=lumHexSafe(c);});lum=Math.max(lum,s/l.gradient.colors.length);}
+  if(lum<0.5)return;
+  const o=(l.shadow&&typeof l.shadow==='object')?l.shadow:{};
+  l.shadow={color:'#000000',blur:Math.max(+o.blur||0,18),distance:Math.max(+o.distance||0,8),opacity:Math.max(+o.opacity||0,0.92)};
+ });
+}
+function addAtmosphere(L,d,brief){
+ if(cfg.fx===false||cfg.assets===false)return 0;
+ let T=String(($('adzPrompt')&&$('adzPrompt').value)||'');
+ try{if(brief)T+=' '+[brief.intent,brief.tone,brief.effects,JSON.stringify(brief.copy||{}),(Array.isArray(brief.decor)?brief.decor.join(' '):'')].join(' ');}catch(e){}
+ L.forEach(function(l){if(l&&l.kind==='text')T+=' '+String(l.text||'');});
+ T=T.toLowerCase();
+ const has={};L.forEach(function(l){if(l&&l.kind==='asset')has[l.art]=1;});
+ let acc='#D4AF37',acc2=null;
+ try{const p=brief&&brief.palette;if(p){if(p.accent&&/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(p.accent).trim()))acc=String(p.accent).trim();if(p.accent2&&/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(p.accent2).trim()))acc2=String(p.accent2).trim();}}catch(e){}
+ const score=function(re){const m=T.match(new RegExp(re.source,'g'));return m?m.length:0;};
+ const th=[
+  {k:'leaves',s:score(/daun|dedaunan|hutan|pohon|taman|\balam\b|angin|hijau|musim|gugur|rezeki|rahmat|subur|tumbuh|kebun|ranting/)},
+  {k:'embers',s:score(/\bapi\b|neraka|\bbara\b|membara|berkobar|jihad|azab|murka|panas|bakar|syahwat|fitnah|semangat/)},
+  {k:'dirt',s:score(/tanah|kubur|\bmaut\b|\bmati\b|kematian|liang|jenazah|\bbumi\b|debu|fana|sakaratul|barzakh|gersang|puing|reruntuh/)},
+  {k:'flare',s:score(/cahaya|\bnur\b|hidayah|terang|sinar|fajar|subuh|mentari|matahari|harapan|petunjuk|iman|cerah|pagi/)}
+ ].filter(function(o){return o.s>0&&!has[o.k];}).sort(function(a,b){return b.s-a.s;}).slice(0,2);
+ let hash=0;for(let i=0;i<T.length;i++)hash=(hash*31+T.charCodeAt(i))>>>0;
+ const sd=function(i){return (hash%9000)+11+i*37;};
+ const autumn=/gugur|kering|musim/.test(T);
+ const defs={
+  leaves:{art:'leaves',name:'Efek dedaunan blur',color:autumn?'#C9822E':mixc('#5F9B54',acc,0.1),color2:autumn?'#8E4A1B':'#2F6B3A',blend:'normal',opacity:0.5,x:-2,y:-2,w:104,h:104},
+  embers:{art:'embers',name:'Efek percikan api blur',color:'#FF6A1A',color2:'#FFD27A',blend:'screen',opacity:0.72,x:0,y:28,w:100,h:76},
+  dirt:{art:'dirt',name:'Efek percikan tanah',color:'#7A5636',color2:'#2A1C12',blend:'normal',opacity:0.6,x:0,y:56,w:100,h:48},
+  flare:{art:'flare',name:'Efek cahaya silau',color:mixc(acc,'#FFFFFF',0.45),color2:acc2||acc,blend:'screen',opacity:0.55,x:35,y:-8,w:80,h:58},
+  dust:{art:'dust',name:'Efek debu berkilau blur',color:mixc(acc,'#FFFFFF',0.5),color2:'#FFFFFF',blend:'screen',opacity:0.5,x:0,y:0,w:100,h:100}
+ };
+ const pick=th.map(function(o){return o.k;});
+ if(!pick.length&&!has.flare)pick.push('flare');
+ if(!has.dust)pick.push('dust');
+ const add=[];
+ pick.forEach(function(k,i){const o=Object.assign({kind:'asset',bleed:true,rotation:0,seed:sd(i),attach:null},defs[k]);if(k==='flare'&&!th.length)o.opacity=0.38;add.push(o);});
+ if(!add.length)return 0;
+ let at=-1;for(let i=0;i<L.length;i++){if(L[i]&&L[i].kind==='text'&&!L[i]._skip){at=i;break;}}
+ if(at<0)at=L.length;
+ L.splice.apply(L,[at,0].concat(add));
+ return add.length;
 }
 function fitFooter(els,d,m){
  els.forEach(function(e){
@@ -25523,8 +25666,95 @@ function drawWordmark(x,cw,ch,R,c1,c2,A){
  });
 }
 
+/* ===== v2.7.0: aset efek atmosfer (blur lembut): dedaunan, bara api, tanah, cahaya silau, debu berkilau ===== */
+function _softDraw(x,cw,col,blur,fn){
+ const OFF=cw*3+600;
+ x.save();x.shadowColor=col;x.shadowBlur=Math.max(0,blur);x.shadowOffsetX=OFF;x.shadowOffsetY=0;x.translate(-OFF,0);
+ x.fillStyle='#000000';fn();x.restore();
+}
+function _leafPath(x,L,W){
+ x.beginPath();x.moveTo(0,-L/2);x.quadraticCurveTo(W,-L*0.12,0,L/2);x.quadraticCurveTo(-W,-L*0.12,0,-L/2);x.closePath();
+}
+function drawLeaves(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),n=16+Math.floor(R()*10),b2=c2||shade(c1,-0.35);
+ for(let i=0;i<n;i++){
+  let px=R()*cw,py=R()*ch;
+  if(R()<0.72){const s=R();if(s<0.34)px=R()*cw*0.26;else if(s<0.68)px=cw-R()*cw*0.26;else if(s<0.84)py=R()*ch*0.2;else py=ch-R()*ch*0.2;}
+  const dz=R(),L=mn*(0.07+dz*dz*0.2),W=L*(0.28+R()*0.14),rot=R()*Math.PI*2;
+  const col=mixc(c1,b2,R()),a=0.5+R()*0.45,blur=dz>0.55?L*(0.32+R()*0.3):(dz>0.25?L*0.1:0);
+  if(blur>0.5){
+   _softDraw(x,cw,rgba(col,a),blur,function(){x.translate(px,py);x.rotate(rot);_leafPath(x,L,W);x.fill();});
+  }else{
+   x.save();x.translate(px,py);x.rotate(rot);_leafPath(x,L,W);x.fillStyle=rgba(col,a*0.85);x.fill();
+   x.strokeStyle=rgba(shade(col,-0.35),a*0.5);x.lineWidth=Math.max(0.6,L*0.025);x.beginPath();x.moveTo(0,-L*0.46);x.lineTo(0,L*0.46);x.stroke();x.restore();
+  }
+ }
+}
+function drawEmbers(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),hot=c2||'#FFD27A',n=46+Math.floor(R()*34);
+ const hz=x.createLinearGradient(0,ch,0,ch*0.55);hz.addColorStop(0,rgba(c1,0.34));hz.addColorStop(1,rgba(c1,0));
+ x.fillStyle=hz;x.fillRect(0,ch*0.55,cw,ch*0.45);
+ for(let i=0;i<n;i++){
+  const py=ch*(1-Math.pow(R(),1.7)),px=R()*cw,dz=R(),r=mn*(0.0035+dz*dz*dz*0.026),soft=dz>0.5?3.4:(dz>0.2?2:1.2),a=0.45+R()*0.5;
+  const an=-Math.PI/2+(R()-0.5)*0.9,len=r*(3+R()*6),ex=px+Math.cos(an)*len,ey=py+Math.sin(an)*len;
+  const tg=x.createLinearGradient(px,py,ex,ey);tg.addColorStop(0,rgba(hot,a*0.8));tg.addColorStop(1,rgba(c1,0));
+  x.strokeStyle=tg;x.lineWidth=Math.max(0.8,r*0.9);x.lineCap='round';x.beginPath();x.moveTo(px,py);x.lineTo(ex,ey);x.stroke();
+  const g=x.createRadialGradient(px,py,0,px,py,r*soft);g.addColorStop(0,rgba(hot,a));g.addColorStop(0.45,rgba(c1,a*0.6));g.addColorStop(1,rgba(c1,0));
+  x.fillStyle=g;x.beginPath();x.arc(px,py,r*soft,0,Math.PI*2);x.fill();
+ }
+}
+function drawDirt(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),dk=c2||shade(c1,-0.55),n=70+Math.floor(R()*40);
+ const hz=x.createLinearGradient(0,ch,0,ch*0.62);hz.addColorStop(0,rgba(dk,0.45));hz.addColorStop(1,rgba(dk,0));
+ x.fillStyle=hz;x.fillRect(0,ch*0.62,cw,ch*0.38);
+ for(let i=0;i<n;i++){
+  const py=ch*(1-Math.pow(R(),1.9)),px=R()*cw,dz=R(),r=mn*(0.005+Math.pow(dz,2.6)*0.05);
+  const col=mixc(c1,dk,R()*0.8),a=0.5+R()*0.45,v=5+Math.floor(R()*3),rot=R()*Math.PI*2,jit=[];
+  for(let k=0;k<v;k++)jit.push(0.62+R()*0.5);
+  const poly=function(){x.beginPath();for(let k=0;k<v;k++){const an=k*2*Math.PI/v+rot,rr=r*jit[k];const qx=px+Math.cos(an)*rr,qy=py+Math.sin(an)*rr*0.85;if(k===0)x.moveTo(qx,qy);else x.lineTo(qx,qy);}x.closePath();};
+  if(dz>0.6)_softDraw(x,cw,rgba(col,a),r*1.1,function(){poly();x.fill();});
+  else{poly();x.fillStyle=rgba(col,a);x.fill();x.fillStyle=rgba(shade(col,0.3),a*0.25);x.beginPath();x.arc(px-r*0.2,py-r*0.25,r*0.35,0,Math.PI*2);x.fill();}
+ }
+ for(let i=0;i<46;i++){x.fillStyle=rgba(c1,0.15+R()*0.35);x.beginPath();x.arc(R()*cw,ch*(1-Math.pow(R(),1.5)),Math.max(0.8,mn*0.002),0,Math.PI*2);x.fill();}
+}
+function drawFlare(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),cx=cw*0.62,cy=ch*0.42,warm=c2||c1;
+ let g=x.createRadialGradient(cx,cy,0,cx,cy,mn*0.42);
+ g.addColorStop(0,'rgba(255,255,255,0.95)');g.addColorStop(0.12,rgba(shade(c1,0.55),0.7));g.addColorStop(0.4,rgba(c1,0.22));g.addColorStop(1,rgba(c1,0));
+ x.fillStyle=g;x.fillRect(0,0,cw,ch);
+ x.save();x.translate(cx,cy);x.scale(1,0.04);
+ g=x.createRadialGradient(0,0,0,0,0,cw*0.5);g.addColorStop(0,'rgba(255,255,255,0.85)');g.addColorStop(0.3,rgba(shade(c1,0.4),0.35));g.addColorStop(1,rgba(c1,0));
+ x.fillStyle=g;x.beginPath();x.arc(0,0,cw*0.5,0,Math.PI*2);x.fill();x.restore();
+ const ex=cw-cx,ey=ch-cy;
+ for(let i=0;i<5;i++){
+  const t=0.35+i*0.32+R()*0.08,px=cx+(ex-cx)*t,py=cy+(ey-cy)*t,r=mn*(0.025+R()*0.06),col=mixc(c1,warm,R());
+  x.beginPath();for(let k=0;k<6;k++){const an=k*Math.PI/3+0.3;const qx=px+Math.cos(an)*r,qy=py+Math.sin(an)*r;if(k===0)x.moveTo(qx,qy);else x.lineTo(qx,qy);}x.closePath();
+  x.fillStyle=rgba(col,0.1+R()*0.14);x.fill();x.lineWidth=Math.max(1,r*0.06);x.strokeStyle=rgba(shade(col,0.4),0.28);x.stroke();
+ }
+ x.beginPath();x.arc(cx,cy,mn*0.27,0,Math.PI*2);x.lineWidth=mn*0.012;x.strokeStyle=rgba(c1,0.14);x.stroke();
+}
+function drawDust(x,cw,ch,R,c1,c2){
+ const mn=Math.min(cw,ch),n=46+Math.floor(R()*30),hi=c2||shade(c1,0.5);
+ for(let i=0;i<n;i++){
+  const px=R()*cw,py=R()*ch,dz=R(),r=mn*(0.003+dz*dz*dz*0.03),a=0.35+R()*0.6,col=R()<0.5?c1:hi,rr=r*(dz>0.55?3:1.8);
+  const g=x.createRadialGradient(px,py,0,px,py,rr);g.addColorStop(0,rgba(col,a));g.addColorStop(0.35,rgba(col,a*0.45));g.addColorStop(1,rgba(col,0));
+  x.fillStyle=g;x.beginPath();x.arc(px,py,rr,0,Math.PI*2);x.fill();
+ }
+ const ns=5+Math.floor(R()*4);
+ for(let i=0;i<ns;i++){
+  const px=R()*cw,py=R()*ch,r=mn*(0.02+R()*0.035);
+  [[1,0.06],[0.06,1]].forEach(function(s){
+   x.save();x.translate(px,py);x.scale(s[0],s[1]);
+   const g=x.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'rgba(255,255,255,0.9)');g.addColorStop(0.4,rgba(hi,0.35));g.addColorStop(1,rgba(hi,0));
+   x.fillStyle=g;x.beginPath();x.arc(0,0,r,0,Math.PI*2);x.fill();x.restore();
+  });
+  const g2=x.createRadialGradient(px,py,0,px,py,r*0.35);g2.addColorStop(0,'rgba(255,255,255,0.9)');g2.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g2;x.beginPath();x.arc(px,py,r*0.35,0,Math.PI*2);x.fill();
+ }
+}
+
 function artCanvas(kind,w,h,color,seed,color2,A){
- const soft=/^(glow|rays|bokeh|grain|rings)$/.test(kind);
+ const soft=/^(glow|rays|bokeh|grain|rings|leaves|embers|dirt|flare|dust)$/.test(kind);
  const k=Math.min(1,(soft?720:1400)/Math.max(w,h,1));
  const cw=Math.max(8,Math.round(w*k)),ch=Math.max(8,Math.round(h*k));
  const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');const R=rng(seed||7);
@@ -25538,6 +25768,8 @@ function artCanvas(kind,w,h,color,seed,color2,A){
  else if(kind==='rings')drawRings(x,cw,ch,R,color);else if(kind==='orb')drawOrb(x,cw,ch,R,color,c2);else if(kind==='ribbon')drawRibbon(x,cw,ch,R,color,c2);
  else if(kind==='gradbar')drawGradbar(x,cw,ch,R,color,c2);else if(kind==='stripes')drawStripes(x,cw,ch,R,color);
  else if(kind==='wordmark')drawWordmark(x,cw,ch,R,color,c2,A);
+ else if(kind==='leaves')drawLeaves(x,cw,ch,R,color,c2);else if(kind==='embers')drawEmbers(x,cw,ch,R,color,c2);else if(kind==='dirt')drawDirt(x,cw,ch,R,color,c2);
+ else if(kind==='flare')drawFlare(x,cw,ch,R,color,c2);else if(kind==='dust')drawDust(x,cw,ch,R,color,c2);
  else drawBrush(x,cw,ch,R);
  return c;
 }
@@ -25971,7 +26203,7 @@ function addExtrusions(target,d){
    for(let i=steps;i>=1;i--){
     const t=i/steps,col=t>0.5?shade(xt.color,-0.42*(t-0.5)*2):shade(xt.color,0.18*(1-t*2));
     const c=Object.assign({},e,{id:newId(),x:e.x+dx*xt.depth*t,y:e.y+dy*xt.depth*t,color:col,
-     shadow:(i===steps)?{color:'#000000',blur:Math.round(16*d.W/1080),angle:45,distance:Math.round(xt.depth*0.55),alpha:0.5}:{color:'transparent',blur:0,angle:45,distance:0,alpha:0},
+     shadow:(i===steps)?{color:'#000000',blur:Math.round(24*d.W/1080),angle:45,distance:Math.round(xt.depth*0.8),alpha:0.82}:{color:'transparent',blur:0,angle:45,distance:0,alpha:0},
      wordStyles:{},textSkinImg:null,textSkinSrc:null,innerShadow:null,borderColor:col,
      _calculatedHeight:null,_renderedW:null,_cachedCanvas:null,_cachedHash:null});
     c._adz={kind:'text',name:'3D '+nm,nm:'3d '+nm+' '+i,fx:true,fxOf:e._adz.idx,idx:1000+(e._adz.idx||0)*20+i,bleed:false};
@@ -26188,7 +26420,7 @@ async function ghostMorph(target,old,d){
 }
 /* ---------- titik pemulihan: lanjut tanpa mengulang tahap yang sudah jadi ---------- */
 function ckSig(){
- return JSON.stringify([S.mode,S.style,($('adzPrompt').value||'').trim(),footerLine(),S.refs.map(function(r){return r.url.length;}),S.ctxTexts.map(function(c){return c.text.length;}),cfg.useImages,cfg.margin,cfg.smart,cfg.assets,logoSig()]);
+ return JSON.stringify([S.mode,S.style,($('adzPrompt').value||'').trim(),footerLine(),S.refs.map(function(r){return r.url.length;}),S.ctxTexts.map(function(c){return c.text.length;}),cfg.useImages,cfg.margin,cfg.smart,cfg.assets,cfg.fx,logoSig()]);
 }
 function updGo(){
  const go=$('adzGo'),fr=$('adzFresh');if(!go||S.busy)return;
@@ -26261,6 +26493,8 @@ async function adzRun(cont,canRetry){
   const L=(Array.isArray(spec.layers)?spec.layers.slice(0,48):[]).filter(function(l){return l&&typeof l==='object';});
   if(!L.length)throw new Error('AI tidak menghasilkan layer. Coba perintah yang lebih jelas.');
   enforceFooter(L,d);
+  enforceReadable(L);boostHeadlineShadow(L);
+  const nFx=addAtmosphere(L,d,brief);if(nFx)log('Efek atmosfer PNG: '+nFx+' lapis (blur lembut, di belakang teks) dipasang sesuai tema.','ok');
   const nAsset=L.filter(function(l){return l.kind==='asset';}).length;
   step(38,'Rancangan diterima: '+L.length+' layer'+(spec.title?(' · "'+spec.title+'"'):'')+(cfg.assets?(' · '+nAsset+' aset PNG'):''));
   if(S.mode==='ref'&&brief&&brief.illustration&&brief.illustration.needed&&!cfg.useImages)log('Referensi punya ilustrasi. Aktifkan "Buat ilustrasi dengan model gambar" agar ilustrasi mirip ikut dibuat sebagai PNG.','wn');
