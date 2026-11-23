@@ -1,15 +1,14 @@
 <!--
-Studio Poster Maker Pro - Update v2.7.4
+Studio Poster Maker Pro - Update v2.7.5
+
+v2.7.5:
+1. AI DESAINER, ROTASI KEY/MODEL DIPERBAIKI: (a) galat 503 "high demand" kini dianggap model penuh di sisi Google (berlaku untuk semua key), jadi model itu diistirahatkan di semua key lalu langsung pindah ke model lain, tidak lagi memutar 5 key satu per satu. (b) Gemini kini ditunggu sampai pulih (maks. 8 menit) sebelum pindah provider; bila provider cadangan juga tidak bisa, proses kembali menunggu Gemini, tidak langsung gagal. (c) Model ringan jadi cadangan terakhir tahap desain berat. (d) Tombol Buat/Lanjutkan mereset status istirahat/ditolak yang basi (kuota harian yang benar-benar habis tetap dihormati). (e) Deteksi kuota harian lebih teliti (quotaId PerDay vs PerMinute) dan jam reset kuota mengikuti zona Pasifik.
+2. REKAM ANIMASI LAYER (opsi baru di Pengaturan AI Desainer): hanya saat layer muncul satu per satu dan saat dirapikan AI, kanvas poster beserta kursor emas direkam otomatis (HD 720p, hemat penyimpanan, sekitar 2-6 MB), berhenti saat layer tidak berubah lagi. Hasil bisa diputar, disimpan, atau dibagikan.
+3. KAPSUL "AI BEKERJA": sekarang di bawah poster (tengah), tidak menutupi poster. Tetap bisa digeser.
+4. BAR KANAN: garis pembatas antara ikon layar penuh dan ikon edit dihapus, sehingga tinggi bar kanan sama dengan bar kiri.
 
 v2.7.4:
 1. TUTUP BAR HANYA UNTUK BERLANGGANAN: selama mode trial tombol Tutup bar kiri/kanan dikunci (muncul pemberitahuan) dan bar selalu terbuka, agar tidak dipakai untuk screenshot bersih. Edit bar tetap bebas. Pilihan tutup/buka milik pengguna berlangganan tidak berubah dan kembali berlaku setelah trial berakhir.
-
-v2.7.3:
-1. PETS DZIKIR: kini benar-benar berjalan sampai mentok atas, bawah, kiri, dan kanan (tidak berbalik di tengah jalan), berhenti sebentar di tepi, lalu lanjut. Waktu tempuh dihitung dari jarak.
-2. TOOL POSISI, GARIS HITAM: garis 1px hitam saat menggulir panel (Pilih Beberapa ON) dihilangkan; efek blend di dalam panel diganti warna statis yang setara.
-3. GESER LEBIH LANCAR: pratinjau mengambang digabung per frame dan memakai kualitas sedang saat sering berubah (kembali tinggi setelah diam). Joystick bergerak berbasis waktu per frame sehingga kecepatan rata walau perangkat sedang berat. Magnet dan garis bantu tetap sama.
-4. EDIT BAR KIRI & KANAN: tombol Edit dan tombol Tutup/Buka (animasi geser pelan) di bawah bar kanan. Edit: hapus (x), urutkan, tambah/pindah tool (20 pilihan), kembalikan satu ikon ke default, atau reset semua. Ikon redup/abu bila butuh elemen, emas bila aktif (Grup, Kunci, Transparan). Tersimpan permanen (IndexedDB + localStorage), tidak berubah saat refresh atau update.
-5. COPY MASSAL: daftar kini bergambar kecil seperti Lapisan/Grup, ada Pilih Semua/Invert/Kosongkan dan penghitung; urutan lapisan asli dipertahankan saat disalin.
 
 -->
 
@@ -1059,6 +1058,17 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 #adzChip .cx{width:42px;border:0;border-left:1px solid rgba(212,175,55,.4);background:rgba(255,107,107,.12);color:#ffb3b3;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;}
 #adzChip.ok .cm{color:#7ee2a8;}#adzChip.er .cm{color:#ff8a8a;}
 #adzChip.ok .cx,#adzChip.er .cx{background:rgba(255,255,255,.06);color:#e5e7eb;}
+/* v2.7.5: hasil rekaman animasi layer */
+#adzRecOv{position:fixed;inset:0;z-index:9000200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:16px;}
+#adzRecOv.on{display:flex;}
+#adzRecOv .rc{width:min(94vw,420px);max-height:94vh;overflow:auto;border-radius:18px;border:1px solid rgba(212,175,55,.75);background:#0d0b08;box-shadow:0 10px 40px rgba(0,0,0,.7);padding:14px;display:flex;flex-direction:column;gap:10px;color:#eee;font-family:inherit;}
+#adzRecOv .rc b{color:#FFE259;font-size:14px;}
+#adzRecOv video{width:100%;max-height:56vh;border-radius:10px;background:#000;object-fit:contain;}
+#adzRecOv .rs{font-size:11.5px;color:#9CA3AF;line-height:1.4;}
+#adzRecOv .rb{display:flex;gap:8px;flex-wrap:wrap;}
+#adzRecOv .rb button{flex:1 1 auto;min-height:40px;padding:0 12px;border-radius:20px;border:1px solid rgba(212,175,55,.7);background:rgba(212,175,55,.14);color:#FFE259;font-weight:800;font-size:12.5px;font-family:inherit;cursor:pointer;}
+#adzRecOv .rb button.gold{background:linear-gradient(135deg,#FFE259,#D4AF37);color:#1a1405;}
+#adzRecOv .rb button.rd{border-color:rgba(255,107,107,.6);background:rgba(255,107,107,.1);color:#ffb3b3;}
 /* v2.6.4: kursor hantu */
 #adzGhost{position:fixed;left:0;top:0;width:0;height:0;z-index:8999400;display:none;pointer-events:none;}
 #adzGhost.on{display:block;}
@@ -2421,7 +2431,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.7.4';
+const APP_VERSION = 'v2.7.5';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -24359,7 +24369,7 @@ if(!cfg._v268){cfg.review=Math.max(parseInt(cfg.review)||0,3);cfg._v268=1;try{lo
 if(!cfg._v266){cfg.useImages=false;cfg.assets=true;cfg.rich=true;cfg._v266=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
 function loadCfg(){
  let c={};try{c=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}
- c=Object.assign({provider:'gemini',keys:{},models:{},imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,ghost:true,rich:true,logoOn:true,logoShape:'auto',logoColor:'auto',logoLayout:'auto',logoTint:'auto',fx:true,tone:'gaul'},c);
+ c=Object.assign({provider:'gemini',keys:{},models:{},imageModel:'gemini-2.5-flash-image',useImages:false,replace:false,margin:7,lang:'id',smart:true,assets:true,review:2,ghost:true,rich:true,logoOn:true,logoShape:'auto',logoColor:'auto',logoLayout:'auto',logoTint:'auto',fx:true,tone:'gaul',rec:false},c);
  if(!c.keys||typeof c.keys!=='object')c.keys={};
  if(!c.models||typeof c.models!=='object')c.models={};
  Object.keys(PROVS).forEach(function(p){let a=Array.isArray(c.keys[p])?c.keys[p].slice(0,5):[];while(a.length<5)a.push('');c.keys[p]=a;if(!c.models[p]||typeof c.models[p]!=='object')c.models[p]={hi:'',lo:'',vis:''};});
@@ -24449,6 +24459,7 @@ function build(){
   '<label class="adz-chk"><input type="checkbox" id="adzUseImg"><span>Gambar AI (tidak disarankan: hasil Gemini kurang memukau, lambat, boros kuota). Biarkan mati: desain memakai gradasi, bentuk, teks berefek, dan aset PNG lokal.</span></label>'+
   '<label class="adz-lab">Putaran koreksi otomatis: <span id="adzRevV">2</span> (AI menilai hasil lalu merapikan posisi; 0 = mati)</label><input id="adzRev" class="adz-range" type="range" min="0" max="3" step="1" value="2">'+
   '<label class="adz-chk"><input type="checkbox" id="adzGhost"><span>Animasi hantu: saat panel di-X, kursor emas bergerak alami dan layer muncul satu per satu (hanya tampilan, tidak menambah pemakaian AI).</span></label>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzRec"><span>\uD83C\uDFAC Rekam animasi layer (HD hemat): hanya saat layer muncul satu per satu dan dirapikan AI, kanvas poster beserta kursor emas direkam otomatis, berhenti saat layer tidak berubah lagi. Panel otomatis disembunyikan agar animasi terlihat. Hasil sekitar 2-6 MB; bisa diputar, disimpan, atau dibagikan.</span></label>'+
   '<label class="adz-chk"><input type="checkbox" id="adzReplace"><span>Ganti isi slide saat ini (bisa dibatalkan dengan Undo). Jika mati, hasil dibuat di slide baru.</span></label>'+
  '</div>'+
  '</div>'+
@@ -24469,7 +24480,15 @@ function build(){
  const sp=$('adzSepChips');
  [['//','Garis miring  //'],['•','Titik  •']].forEach(function(a){const b=document.createElement('button');b.className='adz-chip';b.setAttribute('data-s',a[0]);b.textContent=a[1];b.onclick=function(){S.sep=a[0];S.uTouched=true;paintSep();userPrev();promptSave();updGo();};sp.appendChild(b);});
  paintSep();userPrev();
- $('adzGhost').addEventListener('change',function(){cfg.ghost=this.checked;saveCfg();});
+ $('adzGhost').addEventListener('change',function(){cfg.ghost=this.checked;if(!this.checked&&$('adzRec')&&$('adzRec').checked){$('adzRec').checked=false;cfg.rec=false;}saveCfg();});
+ $('adzRec').addEventListener('change',function(){
+  cfg.rec=this.checked;
+  if(this.checked){
+   if(!recSupported()){showToast('Browser ini belum mendukung rekam kanvas');this.checked=false;cfg.rec=false;}
+   else if(!$('adzGhost').checked){$('adzGhost').checked=true;cfg.ghost=true;showToast('Animasi hantu ikut diaktifkan (diperlukan untuk rekaman)');}
+  }
+  saveCfg();
+ });
  const st=$('adzStyles');
  ADZ_STYLES.forEach(function(s,i){const b=document.createElement('button');b.className='adz-chip';b.textContent=s[0];b.onclick=function(){S.style=(S.style===i)?-1:i;paintChips();promptSave();};st.appendChild(b);});
  $('adzFileImg').addEventListener('change',function(e){addImages(e.target.files);e.target.value='';});
@@ -24491,7 +24510,7 @@ window.openAiDesigner=function(){
  paintProv();$('adzAutoProv').checked=cfg.autoProv!==false;
  $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
  $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;if($('adzFx'))$('adzFx').checked=cfg.fx!==false;$('adzRich').checked=cfg.rich!==false;$('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;
- $('adzGhost').checked=cfg.ghost!==false;
+ $('adzGhost').checked=cfg.ghost!==false;$('adzRec').checked=!!cfg.rec&&cfg.ghost!==false;
  $('adzApiCard').open=!keysOf(provId()).length;
  paintChips();paintThumbs();adzMode(S.mode);
  paintLogoUi();persistLoad();
@@ -24535,7 +24554,7 @@ function buildChip(){
  c.addEventListener('pointerdown',function(e){drag={x:e.clientX,y:e.clientY,r:c.getBoundingClientRect()};moved=false;try{c.setPointerCapture(e.pointerId);}catch(x){}});
  c.addEventListener('pointermove',function(e){
   if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
-  if(!moved&&Math.abs(dx)+Math.abs(dy)<8)return;moved=true;
+  if(!moved&&Math.abs(dx)+Math.abs(dy)<8)return;moved=true;c._moved=true;
   const w=drag.r.width,h=drag.r.height;
   const l=Math.max(4,Math.min(window.innerWidth-w-4,drag.r.left+dx)),t=Math.max(4,Math.min(window.innerHeight-h-4,drag.r.top+dy));
   c.style.left=l+'px';c.style.top=t+'px';c.style.right='auto';
@@ -24544,7 +24563,24 @@ function buildChip(){
  c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
  window.adzChipTap=function(){if(moved)return;adzRestore();};
 }
-function chipShow(){buildChip();$('adzChip').classList.add('on');chipSync();}
+/* v2.7.5: kapsul 'AI bekerja' diletakkan di bawah poster (tengah) agar poster tidak tertutup; bila sudah digeser pengguna, posisinya dihormati */
+function chipPlace(){
+ const c=$('adzChip');if(!c||c._moved||!c.classList.contains('on'))return;
+ try{
+  const rc=c.getBoundingClientRect(),w=rc.width||260,h=rc.height||56;
+  let top=window.innerHeight-h-190;
+  try{
+   const r=mainCanvas.getBoundingClientRect();
+   const cb=document.querySelector('.carousel-bar'),lim=cb?cb.getBoundingClientRect().top:window.innerHeight-130;
+   top=Math.min(r.bottom+10,lim-h-8);
+  }catch(e){}
+  c.style.left=Math.max(4,(window.innerWidth-w)/2)+'px';
+  c.style.top=Math.max(4,top)+'px';
+  c.style.right='auto';
+ }catch(e){}
+}
+function chipShow(){buildChip();$('adzChip').classList.add('on');chipSync();chipPlace();setTimeout(chipPlace,150);}
+window.addEventListener('resize',function(){setTimeout(chipPlace,120);});
 function chipHide(){const c=$('adzChip');if(c)c.classList.remove('on');}
 function shieldSet(on){const s=$('adzShield');if(s)s.classList.toggle('on',!!on);}
 function chipSync(){
@@ -24602,7 +24638,7 @@ function cfgUiSync(){
   paintProv();$('adzAutoProv').checked=cfg.autoProv!==false;
   $('adzUseImg').checked=!!cfg.useImages;$('adzReplace').checked=!!cfg.replace;$('adzMargin').value=cfg.margin;$('adzMarginV').textContent=cfg.margin;
   $('adzSmart').checked=cfg.smart!==false;$('adzAssets').checked=cfg.assets!==false;if($('adzFx'))$('adzFx').checked=cfg.fx!==false;$('adzRich').checked=cfg.rich!==false;
-  $('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;$('adzGhost').checked=cfg.ghost!==false;
+  $('adzRev').value=cfg.review;$('adzRevV').textContent=cfg.review;$('adzGhost').checked=cfg.ghost!==false;if($('adzRec'))$('adzRec').checked=!!cfg.rec&&cfg.ghost!==false;
   paintLogoUi();paintToneUi();
  }catch(e){}
 }
@@ -25100,6 +25136,7 @@ window.adzMode=function(m){
 function readCfg(){
  readProvFields();cfg.autoProv=$('adzAutoProv').checked;cfg.imageModel=cfg.imageModel||'gemini-2.5-flash-image';
  cfg.ghost=$('adzGhost').checked;
+ cfg.rec=!!($('adzRec')&&$('adzRec').checked)&&cfg.ghost;
  if($('adzLogoOn'))cfg.logoOn=$('adzLogoOn').checked;
  cfg.useImages=$('adzUseImg').checked;cfg.replace=$('adzReplace').checked;cfg.margin=parseInt($('adzMargin').value)||7;
  cfg.smart=$('adzSmart').checked;cfg.assets=$('adzAssets').checked;cfg.fx=$('adzFx')?$('adzFx').checked:true;cfg.rich=$('adzRich').checked;cfg.review=Math.max(0,Math.min(3,parseInt($('adzRev').value)||0));saveCfg();
@@ -25170,7 +25207,13 @@ function parseRetry(j,msg){
  if(s==null){const m=/(?:try again|retry)[^0-9]{0,14}(?:(\d+)h)?(?:(\d+)m(?!s))?(?:([\d.]+)s)?/i.exec(msg||'');if(m){const v=(+m[1]||0)*3600+(+m[2]||0)*60+(+m[3]||0);if(v>0)s=v;}}
  return s;
 }
-function isDaily(j,msg){let t=String(msg||'');try{t+=JSON.stringify((j&&j.error&&j.error.details)||'');}catch(e){}return /PerDay|per[ -]day|daily|TPD|RPD/i.test(t);}
+function quotaIds(j){const a=[];try{((j&&j.error&&j.error.details)||[]).forEach(function(d){((d&&d.violations)||[]).forEach(function(v){if(v&&v.quotaId)a.push(String(v.quotaId));});});}catch(e){}return a;}
+function isDaily(j,msg){
+ /* v2.7.5: bila Google menyebut quotaId, putuskan dari situ (PerDay saja = harian; ada PerMinute = tunggu menit, harian akan terdeteksi di percobaan berikutnya) */
+ const q=quotaIds(j);
+ if(q.length){const day=q.some(function(x){return /PerDay/i.test(x);}),mn=q.some(function(x){return /PerMinute/i.test(x);});if(day&&!mn)return true;if(mn)return false;}
+ let t=String(msg||'');try{t+=JSON.stringify((j&&j.error&&j.error.details)||'');}catch(e){}return /PerDay|per[ -]day|daily|TPD|RPD/i.test(t);
+}
 function errMsg(j,st){
  if(j){
   if(j.error){if(typeof j.error==='string')return j.error;if(j.error.message)return String(j.error.message);}
@@ -25189,7 +25232,25 @@ async function waitOn(ms,why){
 }
 function rnd(a,b){return a+Math.random()*(b-a);}
 function uniq(a){const s={},o=[];a.forEach(function(x){if(x&&!s[x]){s[x]=1;o.push(x);}});return o;}
-function pacificReset(){const n=new Date();let t=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),7,5,0);if(t<=Date.now())t+=86400000;return t;}
+function pacificReset(){
+ /* v2.7.5: reset kuota harian Gemini = tengah malam zona Pasifik (otomatis mengikuti musim panas/dingin) + 5 menit */
+ try{
+  const now=Date.now(),f=new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',hourCycle:'h23',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const o={};f.formatToParts(new Date(now)).forEach(function(x){o[x.type]=x.value;});
+  const since=(((+o.hour%24)*60+(+o.minute))*60+(+o.second))*1000;
+  return now-since+86400000+5*60000;
+ }catch(e){}
+ const n=new Date();let t=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),8,5,0);if(t<=Date.now())t+=86400000;return t;
+}
+/* v2.7.5: dipanggil saat pengguna menekan Buat Desain / Lanjutkan: status istirahat, penolakan, dan daftar model yang basi dibersihkan; kuota harian yang benar-benar habis tetap dipertahankan */
+function resetAiHealth(){
+ const now=Date.now(),cool={};
+ Object.keys(S.daily).forEach(function(k){if(S.daily[k]>now)cool[k]=S.daily[k];else delete S.daily[k];});
+ S.cool=cool;S.kdead={};S.kstat={};
+ Object.keys(S.dead).forEach(function(k){if(now-(+S.dead[k]||0)>20*60000)delete S.dead[k];});
+ Object.keys(S.disc).forEach(function(p){if(!S.disc[p]||!(S.disc[p].list||[]).length)delete S.disc[p];});
+ try{paintKeyDots();}catch(e){}
+}
 function provId(){return PROVS[cfg.provider]?cfg.provider:'gemini';}
 function keysOf(p){const a=(cfg.keys&&cfg.keys[p])||[];const o=[];for(let i=0;i<5;i++){const k=String(a[i]||'').trim();if(k)o.push({i:i+1,k:k});}return o;}
 function liveKeys(p){return keysOf(p).filter(function(x){return !S.kdead[p+'|'+x.i];});}
@@ -25271,7 +25332,14 @@ function modelPool(p,tier,vision){
  let defs=((vision&&tier==='lo')?(P.def.visLo||(P.def.vis||[]).slice().reverse()):(P.def[vision?'vis':tier]||[])).slice();
  const L=(S.disc[p]&&S.disc[p].list)||[];
  if(L.length){const have={};L.forEach(function(m){have[m.id]=1;});defs=defs.filter(function(n){return have[n];});}
- return uniq(defs.concat(discRank(p,tier,vision)));
+ let pool=uniq(defs.concat(discRank(p,tier,vision)));
+ /* v2.7.5: tahap desain berat memakai model ringan sebagai cadangan TERAKHIR (hanya dipilih bila semua model kuat limit/penuh), agar proses tidak gagal */
+ if(p==='gemini'&&tier==='hi'){
+  const have={};L.forEach(function(m){have[m.id]=1;});
+  const tail=(P.def.lo||[]).filter(function(n){return !L.length||have[n];}).concat(discRank(p,'lo',vision).filter(function(n){return /lite/i.test(n);})).slice(0,4);
+  pool=uniq(pool.concat(tail));
+ }
+ return pool;
 }
 function geminiImagePool(){
  const L=(S.disc.gemini&&S.disc.gemini.list)||[];
@@ -25342,6 +25410,7 @@ async function aiCall(rq){
    if(kind==='img'&&now-t0>150000)throw new Error('Kuota/limit model gambar penuh; gambar dilewati.');
    const soon=Math.min.apply(null,cands.map(cdOf));
    if(rq.maxWait!=null&&soon-now>rq.maxWait){const er=new Error('Semua key '+P.s+' sedang limit');er.sw=true;throw er;}
+   if(now-t0>480000)throw new Error('Semua key '+P.s+' masih sibuk/limit setelah menunggu 8 menit. Proses dicoba lagi otomatis, atau ganti provider.');
    await waitOn(Math.min(90000,Math.max(2000,soon-now)+rnd(600,3200)),'Semua key sedang limit, menunggu giliran');
    continue;
   }
@@ -25388,10 +25457,10 @@ async function aiCall(rq){
   const keyBad=(p==='gemini')?((st===400&&/API key/i.test(msg))||(st===403&&/API key|api_key|consumer|permission denied/i.test(msg)&&!/model/i.test(msg)))
    :(st===401||(st===403&&/invalid|api key|unauthor|credential|forbidden/i.test(msg)&&!/model/i.test(msg)));
   if(keyBad){S.kdead[p+'|'+slot]=1;S.kstat[p+'|'+slot]='er';paintKeyDots();log('Key '+slot+' ditolak ('+String(msg).slice(0,70)+'), dilewati; memakai key lain.','wn');continue;}
-  if(st===404){S.dead[p+'|'+mdl]=1;log('Model "'+mdl+'" tidak tersedia di akun ini, dilewati.','wn');continue;}
+  if(st===404){S.dead[p+'|'+mdl]=Date.now();log('Model "'+mdl+'" tidak tersedia di akun ini, dilewati.','wn');continue;}
   if(st===429||st===402){
    const ra=(parseRetry(j,msg)!=null)?parseRetry(j,msg):hdrWait;
-   if(p==='gemini'&&/limit:\s*0\b/.test(msg)){S.dead[p+'|'+mdl]=1;log('Model "'+mdl+'" tidak punya kuota gratis di akun ini, dilewati.','wn');continue;}
+   if(p==='gemini'&&/limit:\s*0\b/.test(msg)){S.dead[p+'|'+mdl]=Date.now();log('Model "'+mdl+'" tidak punya kuota gratis di akun ini, dilewati.','wn');continue;}
    if(st===402){S.cool[ck]=Date.now()+30*60000;S.kstat[p+'|'+slot]='lim';paintKeyDots();log('Key '+slot+' ('+mdl+'): saldo/kuota habis, pindah.','wn');continue;}
    const daily=isDaily(j,msg)||(ra!=null&&ra>900);
    if(daily){
@@ -25413,7 +25482,20 @@ async function aiCall(rq){
    log('Model "'+mdl+'" menolak permintaan ('+String(msg).slice(0,90)+'), dicoba model lain.','wn');continue;
   }
   if(st===403){S.cool[ck]=Date.now()+10*60000;log('Key '+slot+' / "'+mdl+'" ditolak ('+String(msg).slice(0,80)+'), dicoba kombinasi lain.','wn');continue;}
-  /* 5xx / jaringan / waktu habis: ulangi sekali di kombinasi yang sama, lalu istirahatkan */
+  /* v2.7.5: 503 / "high demand" = model penuh di sisi server (berlaku untuk SEMUA key), bukan salah key ini:
+     ulangi sekali, lalu istirahatkan model itu di semua key dan langsung pindah ke model berikutnya */
+  const busy=!netErr&&(st===503||/high demand|overloaded|currently experiencing|UNAVAILABLE/i.test(String(msg)));
+  if(busy){
+   const bk='b|'+p+'|'+mdl;
+   sameTry[bk]=(sameTry[bk]||0)+1;
+   if(sameTry[bk]<2){await waitOn(rnd(2500,6000),'Server sibuk, mencoba lagi');continue;}
+   sameTry[bk]=0;
+   const until=Date.now()+rnd(45000,75000);
+   ks.forEach(function(k){S.cool[p+'|'+k.i+'|'+mdl]=until;});
+   log('Model "'+mdl+'" sedang penuh di server '+P.s+' ('+String(msg).slice(0,60)+'); model ini diistirahatkan ±1 menit di semua key, langsung mencoba model lain.','wn');
+   continue;
+  }
+  /* 5xx lain / jaringan / waktu habis: ulangi sekali di kombinasi yang sama, lalu istirahatkan */
   sameTry[ck]=(sameTry[ck]||0)+1;
   if(sameTry[ck]<2){await waitOn(rnd(2500,6000),(timedOut?'Waktu tunggu habis':'Server sibuk')+', mencoba lagi');continue;}
   S.cool[ck]=Date.now()+rnd(60000,95000);sameTry[ck]=0;
@@ -25425,18 +25507,28 @@ async function ai(tier,parts,gen,system){
  const hasImg=parts.some(function(x){return x.img;});
  const order=[sel];
  if(cfg.autoProv!==false)Object.keys(PROVS).forEach(function(p){if(p!==sel&&keysOf(p).length&&(!hasImg||PROVS[p].vision))order.push(p);});
- let lastErr=null;
+ let lastErr=null,primaryTemp=false;
  for(let i=0;i<order.length;i++){
   const p=order[i],last=(i===order.length-1);
   try{
    if(i>0&&S.provNow!==p)log('Beralih ke provider '+PROVS[p].s+'. Isi permintaan yang sama dikirim ulang; brief/rancangan yang sudah jadi tetap dipakai.','wn');
-   const r=await aiCall({p:p,tier:tier,parts:parts,gen:gen,system:system,maxWait:last?null:25000});
+   /* v2.7.5: provider utama ditunggu sampai 100 dtk bila hanya istirahat sementara (dulu 25 dtk, terlalu cepat melepas Gemini) */
+   const r=await aiCall({p:p,tier:tier,parts:parts,gen:gen,system:system,maxWait:last?null:100000});
    S.provNow=p;return r;
   }catch(e){
    lastErr=e;
-   if(!last&&(e.sw||/kehabisan kuota harian|Semua API key|Tidak ada model|belum diisi/.test(e.message))){log(PROVS[p].s+' tidak bisa melayani sekarang ('+String(e.message).slice(0,80)+'); mencoba provider lain.','wn');continue;}
+   if(i===0&&e.sw)primaryTemp=true;
+   const soft=e.sw||/kehabisan kuota harian|Semua API key|Tidak ada model|belum diisi/.test(e.message);
+   if(!last&&soft){log(PROVS[p].s+' tidak bisa melayani sekarang ('+String(e.message).slice(0,80)+'); mencoba provider lain.','wn');continue;}
+   if(last&&i>0&&primaryTemp&&!/Dibatalkan/.test(e.message))break;
    throw e;
   }
+ }
+ /* v2.7.5: provider cadangan tidak bisa melayani, sedangkan provider utama hanya sedang istirahat sementara -> kembali menunggu provider utama pulih, bukan gagal */
+ if(primaryTemp){
+  log('Provider cadangan tidak bisa melayani; kembali menunggu '+PROVS[sel].s+' pulih (key & model bergantian otomatis) ...','wn');
+  const r=await aiCall({p:sel,tier:tier,parts:parts,gen:gen,system:system,maxWait:null});
+  S.provNow=sel;return r;
  }
  throw lastErr||new Error('Tidak ada provider yang tersedia');
 }
@@ -26846,6 +26938,157 @@ async function ghostMorph(target,old,d){
   G.mode='';gFrameHide();renderAll();
  }
 }
+
+/* ---------- v2.7.5: rekam animasi layer (kanvas poster + kursor/bingkai hantu digambar ulang ke kanvas rekam; HD 720p, bitrate hemat) ---------- */
+const REC={on:false,paused:true,cv:null,cx:null,mr:null,stream:null,chunks:[],raf:0,last:0,W:0,H:0,mime:'',act:0,t1:0,url:'',blob:null,saved:false,cur:null};
+function recSupported(){try{return !!(window.MediaRecorder&&HTMLCanvasElement.prototype.captureStream);}catch(e){return false;}}
+function recMime(){
+ const L=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp8','video/webm;codecs=vp9','video/webm'];
+ for(let i=0;i<L.length;i++){try{if(MediaRecorder.isTypeSupported(L[i]))return L[i];}catch(e){}}
+ return '';
+}
+function recRound(cx,x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath();}
+function recDraw(){
+ if(!REC.on)return;
+ REC.raf=requestAnimationFrame(recDraw);
+ if(REC.paused)return;
+ const now=performance.now();if(now-REC.last<33)return;REC.last=now;
+ const cx=REC.cx,W=REC.W,H=REC.H;
+ try{cx.drawImage(mainCanvas,0,0,W,H);}catch(e){return;}
+ try{
+  const r=mainCanvas.getBoundingClientRect();if(!r.width)return;
+  const k=W/r.width;
+  if(G.el&&G.el.classList.contains('on')){
+   if(G.box&&G.box.style.opacity==='1'){
+    const bx=(parseFloat(G.box.style.left)-r.left)*k,by=(parseFloat(G.box.style.top)-r.top)*k,bw=parseFloat(G.box.style.width)*k,bh=parseFloat(G.box.style.height)*k;
+    cx.save();cx.setLineDash([8*k,6*k]);cx.lineWidth=Math.max(1.5,2*k);cx.strokeStyle='#FFE259';cx.shadowColor='rgba(212,175,55,.6)';cx.shadowBlur=10*k;cx.strokeRect(bx,by,bw,bh);cx.restore();
+   }
+   const px=(G.x-r.left)*k,py=(G.y-r.top)*k;
+   cx.save();cx.translate(px-4*k,py-4*k);cx.scale(1.25*k,1.25*k);
+   const pth=new Path2D('M4 2.5l1 18.2 4.6-4.3 3.3 6.4 3-1.5-3.2-6.3 6.3-.5z');
+   cx.fillStyle='#FFE259';cx.strokeStyle='#1a1405';cx.lineWidth=1.5;cx.lineJoin='round';cx.shadowColor='rgba(0,0,0,.6)';cx.shadowBlur=4;cx.fill(pth);cx.stroke(pth);cx.restore();
+   const tx=G.lab&&G.lab.textContent;
+   if(tx){
+    cx.save();const fs=Math.max(10,11.5*k);cx.font='700 '+fs+'px sans-serif';
+    const tw=cx.measureText(tx).width+16*k,th=fs+10*k;
+    let lx=Math.min(W-tw-4,Math.max(4,px+24*k*1.0)),ly=Math.min(H-th-4,Math.max(4,py+26*k*1.0));
+    cx.fillStyle='rgba(10,9,7,.88)';recRound(cx,lx,ly,tw,th,th/2);cx.fill();cx.strokeStyle='rgba(212,175,55,.75)';cx.lineWidth=1;cx.stroke();
+    cx.fillStyle='#FFE259';cx.textBaseline='middle';cx.fillText(tx,lx+8*k,ly+th/2);cx.restore();
+   }
+  }
+ }catch(e){}
+}
+function recStart(){
+ if(REC.on||!recSupported())return false;
+ try{
+  const W0=mainCanvas.width,H0=mainCanvas.height;
+  const sc=Math.min(1,1280/Math.max(W0,H0),720/Math.min(W0,H0));
+  const W=Math.max(2,Math.round(W0*sc/2)*2),H=Math.max(2,Math.round(H0*sc/2)*2);
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const cx=cv.getContext('2d',{alpha:false});cx.imageSmoothingQuality='high';
+  cx.fillStyle='#000';cx.fillRect(0,0,W,H);
+  const stream=cv.captureStream(30);
+  const mime=recMime();
+  const opt={videoBitsPerSecond:Math.max(900000,Math.min(3000000,Math.round(W*H*24*0.11)))};
+  if(mime)opt.mimeType=mime;
+  const mr=new MediaRecorder(stream,opt);
+  REC.chunks=[];
+  mr.ondataavailable=function(e){if(e.data&&e.data.size)REC.chunks.push(e.data);};
+  REC.cv=cv;REC.cx=cx;REC.mr=mr;REC.stream=stream;REC.W=W;REC.H=H;REC.mime=mr.mimeType||mime||'video/webm';
+  REC.act=0;REC.t1=performance.now();REC.on=true;REC.paused=false;REC.last=0;
+  mr.start(1000);
+  REC.raf=requestAnimationFrame(recDraw);
+  return true;
+ }catch(e){
+  REC.on=false;try{if(REC.stream)REC.stream.getTracks().forEach(function(t){t.stop();});}catch(x){}
+  REC.cv=REC.cx=REC.mr=REC.stream=null;
+  log('Rekam animasi tidak bisa dimulai: '+String(e&&e.message||e).slice(0,100),'wn');
+  return false;
+ }
+}
+function recPause(){
+ if(!REC.on||REC.paused)return;
+ REC.act+=performance.now()-REC.t1;REC.paused=true;
+ try{if(REC.mr&&REC.mr.state==='recording')REC.mr.pause();}catch(e){}
+}
+function recResume(){
+ if(!REC.on||!REC.paused)return;
+ REC.t1=performance.now();REC.paused=false;
+ try{if(REC.mr&&REC.mr.state==='paused')REC.mr.resume();}catch(e){}
+}
+async function recHoldPause(ms){if(!REC.on)return;await delay(ms);recPause();}
+function recStop(){
+ return new Promise(function(res){
+  if(!REC.on){res(null);return;}
+  if(!REC.paused)REC.act+=performance.now()-REC.t1;
+  REC.on=false;REC.paused=true;cancelAnimationFrame(REC.raf);
+  const mr=REC.mr,mime=REC.mime;let done=false;
+  const fin=function(){
+   if(done)return;done=true;
+   try{if(REC.stream)REC.stream.getTracks().forEach(function(t){t.stop();});}catch(e){}
+   const blob=REC.chunks.length?new Blob(REC.chunks,{type:String(mime||'video/webm').split(';')[0]}):null;
+   REC.chunks=[];
+   try{if(REC.cv){REC.cv.width=1;REC.cv.height=1;}}catch(e){}
+   REC.cv=REC.cx=REC.mr=REC.stream=null;
+   res(blob);
+  };
+  try{
+   if(!mr||mr.state==='inactive'){fin();return;}
+   mr.onstop=fin;
+   try{mr.requestData();}catch(e){}
+   mr.stop();
+   setTimeout(fin,2500);
+  }catch(e){fin();}
+ });
+}
+function recClear(){
+ try{if(REC.url)URL.revokeObjectURL(REC.url);}catch(e){}
+ REC.url='';REC.blob=null;REC.saved=false;
+ const ov=$('adzRecOv');if(ov){ov.classList.remove('on');ov.innerHTML='';}
+}
+function recName(){const d=new Date(),z=function(n){return (n<10?'0':'')+n;};return 'animasi-layer-'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())+z(d.getSeconds())+'.'+(/mp4/.test(REC.blob&&REC.blob.type)?'mp4':'webm');}
+function recShow(blob,sec){
+ recClear();
+ REC.blob=blob;REC.url=URL.createObjectURL(blob);
+ let ov=$('adzRecOv');if(!ov){ov=document.createElement('div');ov.id='adzRecOv';document.body.appendChild(ov);}
+ const mb=(blob.size/1048576).toFixed(1),ext=/mp4/.test(blob.type)?'MP4':'WebM';
+ let canShare=false;try{const f=new File([blob],recName(),{type:blob.type});canShare=!!(navigator.canShare&&navigator.canShare({files:[f]}));}catch(e){}
+ ov.innerHTML='<div class="rc"><b>🎬 Rekaman animasi layer siap</b><video id="adzRecVid" src="'+REC.url+'" controls playsinline muted loop autoplay></video>'+
+  '<div class="rs">'+ext+' · '+REC.W+'×'+REC.H+' · '+Math.max(1,Math.round(sec))+' dtk · '+mb+' MB. Rekaman hanya ada di memori sampai Anda menyimpannya; menutup tanpa menyimpan akan menghapusnya.</div>'+
+  '<div class="rb"><button class="gold" onclick="adzRecSave()">Simpan video</button>'+(canShare?'<button onclick="adzRecShare()">Bagikan</button>':'')+'<button class="rd" onclick="adzRecDrop()">Tutup</button></div></div>';
+ ov.classList.add('on');
+}
+window.adzRecSave=function(){
+ if(!REC.blob||!REC.url)return;
+ const a=document.createElement('a');a.href=REC.url;a.download=recName();a.style.display='none';document.body.appendChild(a);a.click();
+ setTimeout(function(){try{a.remove();}catch(e){}},1500);
+ REC.saved=true;showToast('Video disimpan (cek folder Unduhan)');
+};
+window.adzRecShare=async function(){
+ if(!REC.blob)return;
+ try{const f=new File([REC.blob],recName(),{type:REC.blob.type});await navigator.share({files:[f],title:'Animasi layer poster'});REC.saved=true;}
+ catch(e){if(e&&e.name!=='AbortError')showToast('Tidak bisa membagikan; gunakan Simpan video');}
+};
+window.adzRecDrop=function(){
+ if(REC.blob&&!REC.saved&&!confirm('Rekaman belum disimpan. Tutup dan hapus rekaman?'))return;
+ recClear();
+};
+/* mulai merekam tepat sebelum layer muncul satu per satu: panel disembunyikan otomatis agar kursor & layer terlihat */
+async function recBegin(){
+ if(!cfg.rec||REC.on)return;
+ if(!recSupported()){log('Rekam animasi tidak didukung browser ini (butuh MediaRecorder).','wn');return;}
+ try{if(!S.min)adzMinimize();}catch(e){}
+ await delay(500);
+ if(recStart())log('🎬 Rekam animasi layer dimulai (HD hemat). Berhenti otomatis saat layer tidak berubah lagi.','ok');
+}
+async function recEnd(){
+ if(!REC.on)return;
+ const sec=REC.paused?REC.act/1000:(REC.act+performance.now()-REC.t1)/1000;
+ const blob=await recStop();
+ if(blob&&blob.size>20000&&sec>=1){recShow(blob,sec);log('🎬 Rekaman animasi layer siap: '+(blob.size/1048576).toFixed(1)+' MB. Simpan dari kotak yang muncul.','ok');}
+ else log('Rekaman animasi terlalu singkat, tidak disimpan.','wn');
+}
+async function recAbort(){if(REC.on)await recStop();}
 /* ---------- titik pemulihan: lanjut tanpa mengulang tahap yang sudah jadi ---------- */
 function ckSig(){
  return JSON.stringify([S.mode,S.style,($('adzPrompt').value||'').trim(),footerLine(),S.refs.map(function(r){return r.url.length;}),S.ctxTexts.map(function(c){return c.text.length;}),cfg.useImages,cfg.margin,cfg.smart,cfg.assets,cfg.fx,cfg.tone,logoSig()]);
@@ -26876,6 +27119,7 @@ async function adzRun(cont,canRetry){
   if(checkDemo())return 'fatal';
   if(S.mode==='ref'&&!S.refs.length){showToast('Tambahkan minimal 1 gambar referensi');return 'fatal';}
   if(!($('adzPrompt').value||'').trim()&&S.mode!=='remix'&&!S.refs.length&&!S.ctxTexts.length){showToast('Tulis perintah dulu');return 'fatal';}
+  resetAiHealth();   /* v2.7.5 */
  }
  S.ctl=new AbortController();S.fb=false;
  const sig=ckSig();
@@ -26962,7 +27206,9 @@ async function adzRun(cont,canRetry){
   let lay=await compose(target,L,d,m,keepSrc,true);
   undoTarget=null;
   newEls=target.elements;
+  if(cfg.rec)await recBegin();
   await ghostReveal(target,d);
+  await recHoldPause(900);
   if(lay.overflow>1)log('  isi terlalu padat, ukuran teks diperkecil '+Math.round((1-lay.k)*100)+'%','wn');
   let issues=lint(target,d,m);
   log(issues.length?('Pemeriksaan otomatis: '+issues.length+' catatan'):'Pemeriksaan otomatis: bersih','ok');
@@ -26991,12 +27237,15 @@ async function adzRun(cont,canRetry){
    const oldGeo=geoSnap(target.elements);
    lay=await compose(target,L,d,m,keepSrc,true);
    newEls=target.elements;
+   recResume();
    await ghostMorph(target,oldGeo,d);
+   await recHoldPause(900);
    issues=lint(target,d,m);
    log(issues.length?('Setelah koreksi: '+issues.length+' catatan'):'Setelah koreksi: bersih','ok');
   }
 
   /* selesai */
+  if(cfg.rec)await recEnd();
   newEls.forEach(function(e){delete e._adz;e._calculatedHeight=null;e._renderedW=null;e._cachedCanvas=null;e._cachedHash=null;});
   newEls=[];
   try{preloadSlideFonts();}catch(e){}
@@ -27025,6 +27274,7 @@ async function adzRun(cont,canRetry){
    log('Gagal: '+e.message,'er');
    if(S.ck&&(S.ck.brief||S.ck.spec))log('Tahap yang sudah jadi disimpan. Tekan "Lanjutkan (hemat token)" untuk meneruskan tanpa mengulang dari awal.','wn');
   }
+  if(REC.on){if(willRetry)await recAbort();else await recEnd();}
   if(undoTarget){try{undoTarget();}catch(x){}}
   else if(newEls.length){newEls.forEach(function(x){if(x){delete x._adz;x._calculatedHeight=null;x._renderedW=null;x._cachedCanvas=null;x._cachedHash=null;}});try{pushHistoryState();}catch(x){}}
   try{renderBottomToolbar();renderCarouselThumbs();renderAll();}catch(x){}
@@ -27181,7 +27431,7 @@ function buildBackground(B,d,imgSrc){
         const L=el$('leftBar'),R=el$('rightBar');if(!L||!R)return;
         const z=el$('zoomLevelLabel');if(z)_zt=z.textContent||_zt;
         L.innerHTML=cfg.l.map(btnHtml).join('');
-        R.innerHTML=cfg.r.map(btnHtml).join('')+(cfg.r.length?'<div class="bar-sep"></div>':'')
+        R.innerHTML=cfg.r.map(btnHtml).join('')   /* v2.7.5: garis pembatas dihapus agar tinggi bar kanan = bar kiri */
             +'<button class="bar-fixed" onclick="barsEditOpen()" title="Edit bar kiri & kanan">'+icon('ic-barsedit')+'</button>'
             +'<button class="bar-fixed" onclick="barsToggle()" title="Tutup bar">'+icon('ic-chevr')+'</button>';
         L.style.display=cfg.l.length?'':'none';
