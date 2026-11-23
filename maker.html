@@ -1,14 +1,17 @@
 <!--
-Studio Poster Maker Pro - Update v2.7.5
+Studio Poster Maker Pro - Update v2.7.6
+
+v2.7.6:
+1. AI DESAINER TIDAK LAGI MACET DI 18%: penyebabnya perubahan v2.7.5 yang menganggap galat 503 "high demand" berlaku untuk SEMUA key, lalu mengistirahatkan satu model 45-75 dtk di kelima key sekaligus. Padahal di log terbukti model yang sama sering langsung berhasil di key lain. Akibatnya semua model bergantian "istirahat" dan proses menunggu terus. Sekarang 503 hanya mengistirahatkan kombinasi key+model itu 5-12 dtk dan langsung mencoba key berikutnya (seperti perilaku dasar v2.6.9, tanpa menunggu); model baru diistirahatkan singkat (±30 dtk) bila semua key padat, lalu dicoba lagi.
+2. PROSES SELALU BERUJUNG: bila model kuat habis kuota/penuh dan model ringan hanya menghasilkan rancangan sedikit layer, rancangan terbaik yang sudah ada dipakai (paling lama ±2,5 menit), tidak dibuang lalu menunggu tanpa akhir. Penilaian AI (tahap 5/5) dibatasi 2 menit lalu dilewati; desain yang sudah jadi tetap disimpan.
+3. PERSEN LOADING TIDAK BEKU: selama menunggu/memanggil AI, persen bergerak pelan dan tidak pernah melewati batas tahap berikutnya (angka akhir tetap 100% hanya saat benar-benar selesai).
+4. Model tanpa kuota gratis (limit: 0) diingat 3 jam, jadi tidak diuji ulang di setiap proses (menghemat waktu awal tahap 2/5).
 
 v2.7.5:
 1. AI DESAINER, ROTASI KEY/MODEL DIPERBAIKI: (a) galat 503 "high demand" kini dianggap model penuh di sisi Google (berlaku untuk semua key), jadi model itu diistirahatkan di semua key lalu langsung pindah ke model lain, tidak lagi memutar 5 key satu per satu. (b) Gemini kini ditunggu sampai pulih (maks. 8 menit) sebelum pindah provider; bila provider cadangan juga tidak bisa, proses kembali menunggu Gemini, tidak langsung gagal. (c) Model ringan jadi cadangan terakhir tahap desain berat. (d) Tombol Buat/Lanjutkan mereset status istirahat/ditolak yang basi (kuota harian yang benar-benar habis tetap dihormati). (e) Deteksi kuota harian lebih teliti (quotaId PerDay vs PerMinute) dan jam reset kuota mengikuti zona Pasifik.
 2. REKAM ANIMASI LAYER (opsi baru di Pengaturan AI Desainer): hanya saat layer muncul satu per satu dan saat dirapikan AI, kanvas poster beserta kursor emas direkam otomatis (HD 720p, hemat penyimpanan, sekitar 2-6 MB), berhenti saat layer tidak berubah lagi. Hasil bisa diputar, disimpan, atau dibagikan.
 3. KAPSUL "AI BEKERJA": sekarang di bawah poster (tengah), tidak menutupi poster. Tetap bisa digeser.
 4. BAR KANAN: garis pembatas antara ikon layar penuh dan ikon edit dihapus, sehingga tinggi bar kanan sama dengan bar kiri.
-
-v2.7.4:
-1. TUTUP BAR HANYA UNTUK BERLANGGANAN: selama mode trial tombol Tutup bar kiri/kanan dikunci (muncul pemberitahuan) dan bar selalu terbuka, agar tidak dipakai untuk screenshot bersih. Edit bar tetap bebas. Pilihan tutup/buka milik pengguna berlangganan tidak berubah dan kembali berlaku setelah trial berakhir.
 
 -->
 
@@ -2431,7 +2434,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.7.5';
+const APP_VERSION = 'v2.7.6';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -24362,7 +24365,7 @@ const ADZ_STYLES=[
  ['Vintage kertas','vintage paper poster, warm beige/sepia tones, serif fonts, thin rules and frames'],
  ['Gradasi modern','modern vibrant gradient poster, glassy cards, rounded shapes, clean sans-serif']
 ];
-const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:'',cool:{},dead:{},daily:{},kdead:{},disc:{},kptr:{},cur:{txt:'',img:''},kstat:{},cap:{},nojson:{},warned:{},lastKey:'',lastModel:'',autoCancel:false};
+const S={mode:'new',style:-1,refs:[],ctxTexts:[],busy:false,ctl:null,models:null,min:false,pct:0,done:'',pLoaded:false,sep:'//',uTouched:false,ck:null,fb:false,lastCall:0,stepTxt:'',cool:{},dead:{},daily:{},kdead:{},disc:{},kptr:{},cur:{txt:'',img:''},kstat:{},cap:{},nojson:{},warned:{},lastKey:'',lastModel:'',autoCancel:false,pcap:0,pf:0};
 const AX={logBuf:[],logHidden:false,logLoaded:false,rLoaded:false,lLoaded:false,started:false,logos:[],plan:null,top:0,cache:new Map()};
 let cfg=loadCfg();
 if(!cfg._v268){cfg.review=Math.max(parseInt(cfg.review)||0,3);cfg._v268=1;try{localStorage.setItem(LS_KEY,JSON.stringify(cfg));}catch(e){}}
@@ -24401,7 +24404,23 @@ function clearLog(){
  setProg(0);logOpenBtnSync();
 }
 function setProg(p){const bar=$('adzProgBar');if(bar)bar.style.width=Math.max(0,Math.min(100,p))+'%';const t=$('adzPct');if(t)t.textContent=Math.round(Math.max(0,Math.min(100,p)))+'%';S.pct=Math.round(Math.max(0,Math.min(100,p)));chipSync();}
-function step(p,msg){setProg(p);log(msg);S.stepTxt=msg;}
+/* v2.7.6: persen bergerak pelan selama menunggu AI, tidak pernah melewati batas tahap berikutnya (S.pcap) */
+function step(p,msg,span){
+ setProg(p);log(msg);S.stepTxt=msg;S.pf=p;
+ const ms=[4,18,38,42,62,72,90,100];let nx=100;
+ for(let i=0;i<ms.length;i++){if(ms[i]>p){nx=ms[i];break;}}
+ S.pcap=p+Math.max(0,(span||(nx-p))-1.5);
+}
+function creepTick(){
+ if(!S.busy||S.paused||!(S.pcap>S.pct))return;
+ let f=(Math.round(S.pf)===S.pct)?S.pf:S.pct;
+ f=Math.min(S.pcap,f+Math.max(0.02,(S.pcap-f)*0.006));
+ S.pf=f;
+ const bar=$('adzProgBar');if(bar)bar.style.width=f+'%';
+ const t=$('adzPct');if(t)t.textContent=Math.round(f)+'%';
+ const r=Math.round(f);
+ if(r!==S.pct){S.pct=r;chipSync();}
+}
 window.adzLogSize=function(){const b=$('adzLogBox');b.classList.toggle('big');$('adzLogSizeBtn').textContent=b.classList.contains('big')?'Kecilkan':'Besarkan';setTimeout(function(){const l=$('adzLog');l.scrollTop=l.scrollHeight;},50);};
 window.adzLogCopy=function(){const t=Array.prototype.map.call($('adzLog').children,function(x){return x.textContent;}).join('\n');try{navigator.clipboard.writeText(t);showToast('Log disalin');}catch(e){showToast('Gagal menyalin log');}};
 
@@ -25227,6 +25246,7 @@ async function waitOn(ms,why){
  while(Date.now()-t0<ms){
   if(S.ctl&&S.ctl.signal.aborted)throw new Error('Dibatalkan / waktu habis');
   S.stepTxt=why+' '+Math.ceil((ms-(Date.now()-t0))/1000)+' dtk';
+  creepTick();
   await delay(500);
  }
 }
@@ -25387,11 +25407,12 @@ async function aiCall(rq){
  }
  if(!keysOf(p).length)throw new Error('API key '+P.s+' belum diisi (buka Pengaturan AI Provider)');
  if(!rq.pool)await ensureDisc(p);
- const t0=Date.now();const sameTry={};
+ let t0=Date.now();const sameTry={},busyRun={};
  for(;;){
   const sig=S.ctl&&S.ctl.signal;
   if(sig&&sig.aborted)throw new Error('Dibatalkan / waktu habis');
-  await pauseGate();
+  const pz=Date.now();await pauseGate();t0+=Date.now()-pz;
+  if(rq.budget&&Date.now()-t0>rq.budget)throw new Error('Waktu tunggu AI habis ('+Math.round(rq.budget/1000)+' dtk); tahap ini dilewati agar proses tidak macet.');
   const ks=liveKeys(p);
   if(!ks.length)throw new Error('Semua API key '+P.s+' ditolak / tidak valid. Periksa kembali key Anda.');
   const pool=rq.pool||modelPool(p,rq.tier||'hi',vision);
@@ -25437,10 +25458,11 @@ async function aiCall(rq){
   const ctl=new AbortController();let timedOut=false;
   const onAb=function(){ctl.abort();};if(sig)sig.addEventListener('abort',onAb,{once:true});
   const tm=setTimeout(function(){timedOut=true;ctl.abort();},180000);
+  const cr=setInterval(creepTick,600);
   let r=null,j=null,netErr=null;const t1=Date.now();
   try{r=await fetch(url,{method:'POST',headers:headers,body:JSON.stringify(body),signal:ctl.signal});try{j=await r.json();}catch(e){}}
   catch(e){netErr=e;}
-  clearTimeout(tm);if(sig)sig.removeEventListener('abort',onAb);S.lastCall=Date.now();
+  clearTimeout(tm);clearInterval(cr);if(sig)sig.removeEventListener('abort',onAb);S.lastCall=Date.now();
   if(sig&&sig.aborted)throw new Error('Dibatalkan / waktu habis');
   let st=r?r.status:0;
   let msg=netErr?(timedOut?'Waktu tunggu habis':netErr.message):errMsg(j,st);
@@ -25460,7 +25482,7 @@ async function aiCall(rq){
   if(st===404){S.dead[p+'|'+mdl]=Date.now();log('Model "'+mdl+'" tidak tersedia di akun ini, dilewati.','wn');continue;}
   if(st===429||st===402){
    const ra=(parseRetry(j,msg)!=null)?parseRetry(j,msg):hdrWait;
-   if(p==='gemini'&&/limit:\s*0\b/.test(msg)){S.dead[p+'|'+mdl]=Date.now();log('Model "'+mdl+'" tidak punya kuota gratis di akun ini, dilewati.','wn');continue;}
+   if(p==='gemini'&&/limit:\s*0\b/.test(msg)){S.dead[p+'|'+mdl]=Date.now()+3*3600000;log('Model "'+mdl+'" tidak punya kuota gratis di akun ini, dilewati.','wn');continue;}
    if(st===402){S.cool[ck]=Date.now()+30*60000;S.kstat[p+'|'+slot]='lim';paintKeyDots();log('Key '+slot+' ('+mdl+'): saldo/kuota habis, pindah.','wn');continue;}
    const daily=isDaily(j,msg)||(ra!=null&&ra>900);
    if(daily){
@@ -25482,17 +25504,23 @@ async function aiCall(rq){
    log('Model "'+mdl+'" menolak permintaan ('+String(msg).slice(0,90)+'), dicoba model lain.','wn');continue;
   }
   if(st===403){S.cool[ck]=Date.now()+10*60000;log('Key '+slot+' / "'+mdl+'" ditolak ('+String(msg).slice(0,80)+'), dicoba kombinasi lain.','wn');continue;}
-  /* v2.7.5: 503 / "high demand" = model penuh di sisi server (berlaku untuk SEMUA key), bukan salah key ini:
-     ulangi sekali, lalu istirahatkan model itu di semua key dan langsung pindah ke model berikutnya */
+  /* v2.7.6: 503 / "high demand" = lonjakan sementara di server Google, dan terbukti model yang sama sering langsung berhasil di key lain.
+     Maka hanya kombinasi key+model ini yang diistirahatkan sebentar (5-12 dtk) lalu LANGSUNG mencoba key berikutnya tanpa menunggu.
+     Bila semua key sudah dicoba berturut-turut dan tetap padat, model itu diistirahatkan singkat (20-38 dtk) agar giliran pindah ke model lain, lalu kembali lagi. */
   const busy=!netErr&&(st===503||/high demand|overloaded|currently experiencing|UNAVAILABLE/i.test(String(msg)));
   if(busy){
    const bk='b|'+p+'|'+mdl;
-   sameTry[bk]=(sameTry[bk]||0)+1;
-   if(sameTry[bk]<2){await waitOn(rnd(2500,6000),'Server sibuk, mencoba lagi');continue;}
-   sameTry[bk]=0;
-   const until=Date.now()+rnd(45000,75000);
-   ks.forEach(function(k){S.cool[p+'|'+k.i+'|'+mdl]=until;});
-   log('Model "'+mdl+'" sedang penuh di server '+P.s+' ('+String(msg).slice(0,60)+'); model ini diistirahatkan ±1 menit di semua key, langsung mencoba model lain.','wn');
+   busyRun[bk]=(busyRun[bk]||0)+1;
+   S.stepTxt='Server '+P.s+' padat, memutar key/model';
+   if(busyRun[bk]<=ks.length){
+    S.cool[ck]=Date.now()+rnd(5000,12000);
+    log('Server '+P.s+' padat (Key '+slot+' · '+mdl+'); langsung mencoba key lain.','wn');
+   }else{
+    busyRun[bk]=0;
+    const until=Date.now()+rnd(20000,38000);
+    ks.forEach(function(k){S.cool[p+'|'+k.i+'|'+mdl]=until;});
+    log('Model "'+mdl+'" masih padat di semua key; diistirahatkan sebentar (±30 dtk), mencoba model lain.','wn');
+   }
    continue;
   }
   /* 5xx lain / jaringan / waktu habis: ulangi sekali di kombinasi yang sama, lalu istirahatkan */
@@ -25502,7 +25530,7 @@ async function aiCall(rq){
   log('Key '+slot+' / "'+mdl+'" bermasalah ('+String(msg).slice(0,80)+'), diistirahatkan.'+(netErr&&!timedOut?' Jika terus gagal, provider ini mungkin memblokir akses dari browser (CORS).':''),'wn');
  }
 }
-async function ai(tier,parts,gen,system){
+async function ai(tier,parts,gen,system,opt){
  const sel=provId();
  const hasImg=parts.some(function(x){return x.img;});
  const order=[sel];
@@ -25513,7 +25541,7 @@ async function ai(tier,parts,gen,system){
   try{
    if(i>0&&S.provNow!==p)log('Beralih ke provider '+PROVS[p].s+'. Isi permintaan yang sama dikirim ulang; brief/rancangan yang sudah jadi tetap dipakai.','wn');
    /* v2.7.5: provider utama ditunggu sampai 100 dtk bila hanya istirahat sementara (dulu 25 dtk, terlalu cepat melepas Gemini) */
-   const r=await aiCall({p:p,tier:tier,parts:parts,gen:gen,system:system,maxWait:last?null:100000});
+   const r=await aiCall({p:p,tier:tier,parts:parts,gen:gen,system:system,maxWait:last?null:100000,budget:opt&&opt.budget});
    S.provNow=p;return r;
   }catch(e){
    lastErr=e;
@@ -25527,7 +25555,7 @@ async function ai(tier,parts,gen,system){
  /* v2.7.5: provider cadangan tidak bisa melayani, sedangkan provider utama hanya sedang istirahat sementara -> kembali menunggu provider utama pulih, bukan gagal */
  if(primaryTemp){
   log('Provider cadangan tidak bisa melayani; kembali menunggu '+PROVS[sel].s+' pulih (key & model bergantian otomatis) ...','wn');
-  const r=await aiCall({p:sel,tier:tier,parts:parts,gen:gen,system:system,maxWait:null});
+  const r=await aiCall({p:sel,tier:tier,parts:parts,gen:gen,system:system,maxWait:null,budget:opt&&opt.budget});
   S.provNow=sel;return r;
  }
  throw lastErr||new Error('Tidak ada provider yang tersedia');
@@ -25539,6 +25567,14 @@ async function pauseGate(){
   if(S.ctl&&S.ctl.signal.aborted)throw new Error('Dibatalkan / waktu habis');
   await delay(300);
  }
+}
+/* v2.7.6: masih adakah model yang lebih kuat (bukan "lite") yang belum habis kuota harian / tidak ditolak? */
+function strongerLeft(ck,vision){
+ const a=String(ck||'').split('|');if(a.length<3)return true;
+ const p=a[0],cur=a.slice(2).join('|'),weak=/lite|flash-8b|nano|instant|small|(^|[-_\/:.])mini([-_\/:.]|$)|(^|[^a-z0-9])8b/i;
+ if(!weak.test(cur))return true;
+ const now=Date.now(),ks=liveKeys(p);
+ return modelPool(p,'hi',!!vision).some(function(n){return !weak.test(n)&&!S.dead[p+'|'+n]&&ks.some(function(k){return (S.daily[p+'|'+k.i+'|'+n]||0)<=now;});});
 }
 function coolModel(ck){
  const a=String(ck||'').split('|');if(a.length<3)return;
@@ -27147,15 +27183,28 @@ async function adzRun(cont,canRetry){
   if(S.ck.spec){spec=S.ck.spec;step(18,'2/5 Memakai rancangan layer yang sudah jadi.');}
   else{
    step(18,'2/5 Merancang layer dengan model berat '+PROVS[provId()].s+' ...');
-   let tries=0;
+   let tries=0,best=null,bestN=-1,last=null;const t2=Date.now();
    for(;;){
-    const j=await ai('hi',await designParts(brief),{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
+    const dp=await designParts(brief);
+    const j=await ai('hi',dp,{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:16384},systemPrompt(m));
     let sp=null,why='';
     try{sp=parseJson(textOf(j));}catch(e){why=e.message;}
     const q=sp?specQuality(sp):{ok:false,why:why};
     if(sp&&q.ok){spec=sp;break;}
     tries++;
-    if(tries>=3){if(sp){spec=sp;log('Rancangan dipakai walau belum ideal: '+q.why,'wn');break;}throw new Error('AI tidak mengembalikan rancangan yang valid: '+q.why);}
+    if(sp){
+     last=sp;
+     const Ls=Array.isArray(sp.layers)?sp.layers:[];
+     const nl=Ls.length,nt=Ls.filter(function(l){return l&&l.kind==='text'&&String(l.text||'').trim();}).length;
+     if(nt>=2&&nl>bestN){best=sp;bestN=nl;}
+    }
+    /* v2.7.6: bila model kuat habis/penuh, rancangan terbaik yang sudah ada dipakai (maks. ±2,5 menit) agar proses tidak macet */
+    const hv=dp.some(function(x){return x&&x.img;});
+    if(tries>=3||(best&&bestN>=6&&(Date.now()-t2>150000||!strongerLeft(S.lastKey,hv)))){
+     const use=best||last;
+     if(use){spec=use;log('Rancangan terbaik yang tersedia dipakai ('+(Array.isArray(use.layers)?use.layers.length:0)+' layer; '+q.why+') agar proses tidak macet.','wn');break;}
+     throw new Error('AI tidak mengembalikan rancangan yang valid: '+q.why);
+    }
     log('Rancangan dari "'+String(S.lastKey).split('|').slice(2).join('|')+'" belum layak ('+q.why+'); diulang dengan model lain yang lebih kuat.','wn');
     coolModel(S.lastKey);
    }
@@ -27187,7 +27236,7 @@ async function adzRun(cont,canRetry){
     else if(cut){const k=await keyOut(raw,1400);if(k)job.layer._res={url:k.url,w:k.w,h:k.h,cut:true};else{log('  latar gambar tidak bisa dipotong, dipakai sebagai gambar persegi','wn');job.layer._res={url:raw,cut:false};}}
     else job.layer._res={url:raw,cut:false};
     imgDone++;log('  gambar '+imgDone+' selesai'+(job.bg?' (latar)':(job.layer._res&&job.layer._res.cut?' (PNG transparan)':'')),'ok');
-    setProg(42+imgDone/jobs.length*18);
+    setProg(Math.max(S.pct,42+imgDone/jobs.length*18));
    }catch(e){if(/Dibatalkan/.test(e.message))throw e;imgFail++;log('  gambar dilewati: '+e.message,'wn');}
   }
 
@@ -27218,12 +27267,12 @@ async function adzRun(cont,canRetry){
   const rounds=cfg.review;
   for(let r=1;r<=rounds;r++){
    if(S.ctl.signal.aborted){log('Dibatalkan: hasil sementara tetap disimpan.','wn');break;}
-   step(72+(r-1)*(18/Math.max(1,rounds)),'5/5 Penilaian AI putaran '+r+'/'+rounds+' ...');
+   step(72+(r-1)*(18/Math.max(1,rounds)),'5/5 Penilaian AI putaran '+r+'/'+rounds+' ...',18/Math.max(1,rounds));
    let q;
    try{
     const shot=await snapshotUrl();
     const t='LAYER TABLE (measured from the render):\n'+JSON.stringify(layerTable(target,d))+'\n\nAUTOMATIC LINT WARNINGS:\n'+(issues.length?issues.join('\n'):'none')+'\n\nUSER REQUEST (for context): '+(($('adzPrompt').value||'').trim().slice(0,600)||'-')+'\n\nThe screenshot is the current render. Judge it and return the JSON.';
-    const jq=await ai('hi',[{text:t},{text:'[RENDERED POSTER]'},imgPart(shot)],{responseMimeType:'application/json',temperature:0.3,maxOutputTokens:8192},qaSystem(m));
+    const jq=await ai('hi',[{text:t},{text:'[RENDERED POSTER]'},imgPart(shot)],{responseMimeType:'application/json',temperature:0.3,maxOutputTokens:8192},qaSystem(m),{budget:120000});
     q=parseJson(textOf(jq));
    }catch(e){log('Penilaian AI dilewati: '+e.message+' · desain yang sudah jadi tetap disimpan.','wn');break;}
    const score=clamp(q.score==null?7:q.score,0,10);
