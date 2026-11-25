@@ -1,17 +1,17 @@
 <!--
-Studio Poster Maker Pro - Update v2.7.7
+Studio Poster Maker Pro - Update v2.7.8
+
+v2.7.8:
+1. FITUR CAROUSEL DI AI DESAINER: kartu baru "Carousel / Poster Bersambung" (maks. 17 slide). Isi perintah tiap slide ditulis di kolomnya sendiri; kolom "Perintah / isi poster" di atas menjadi topik umum. Tombol: Buat semua, Lanjutkan dari slide berikutnya (bila limit habis/gagal, slide yang sudah jadi tidak diulang), dan Buat slide ini saja.
+2. TEMA: "Sama persis" (desain slide acuan dikunci, hanya isi teks berubah), "Serasi tapi variasi" atau "Beda tema" (kolom tema khusus per slide). Slide acuan otomatis slide pertama; bisa diganti dengan tombol "Jadikan slide aktif sebagai acuan" sehingga carousel bisa disambung di lain waktu.
+3. NOMOR PART (01/05): posisi atas/bawah kiri-tengah-kanan atau di antara username, 7 gaya tulisan, pemisah (sama, |, garis, titik, kotak) dan 3 ukuran. Dipasang otomatis dan dikunci ke posisinya setelah tata letak.
+4. Perintah per slide, jumlah slide, dan pilihan carousel tersimpan (localStorage + IndexedDB), jadi tidak hilang saat update versi. Dasar AI Desainer v2.7.6/v2.7.7 tidak diubah.
 
 v2.7.7:
 1. TOMBOL BUKA BAR SEJAJAR: saat bar kiri/kanan ditutup, tombol pembuka kini turun dan sejajar tepat dengan posisi tombol penutup (tinggi tengahnya dihitung otomatis dari tombol penutup, ikut menyesuaikan jumlah ikon bar & ukuran layar). Ukuran kotaknya disamakan dengan tombol penutup (34x34).
 2. IKON BAR BERGARIS EMAS-ABU-ABU: ikon Pengaturan (Edit bar) dan ikon Tutup/Buka bar kini memakai gaya khas aplikasi (garis abu-abu + aksen emas), tidak lagi emas polos / segitiga pejal.
 3. BLOK KATA MENGIKUTI KATANYA, BUKAN NOMOR URUT: warna, format (tebal/miring/garis bawah/kapital), stabilo, font, dan gaya per-kata lainnya kini "menempel" pada kata itu sendiri. Menambah kata di depan/tengah/belakang paragraf, menambah baris, atau mengetik huruf di dalam kata yang diblok tidak menggeser blok ke kata lain. Kata yang diedit (ditambah/dikurangi huruf) tetap bergaya, kata yang dipecah spasi tetap bergaya, dan kata baru yang disisipkan DI TENGAH rangkaian kata bergaya sama ikut bergaya. Pilihan kata di panel (Blok Kata Terpilih) juga ikut bergeser mengikuti kata.
 4. TAMBAH/PINDAHKAN TOOL KE BAR KIRI-KANAN KINI LENGKAP: dari 21 menjadi lebih dari 80 tool (semua tool Maker Pro: sisipkan, slide & projek, posisi & ukuran, teks, warna & cahaya, efek, foto, tabel, bagan, konektor, lapisan & salin). Daftar dikelompokkan per kategori dengan kolom pencarian; slot default bar tetap sama. Tool khusus jenis elemen (mis. Stabilo untuk teks) otomatis redup bila elemen terpilih tidak cocok, dengan pesan penjelasan saat diketuk.
-
-v2.7.6:
-1. AI DESAINER TIDAK LAGI MACET DI 18%: penyebabnya perubahan v2.7.5 yang menganggap galat 503 "high demand" berlaku untuk SEMUA key, lalu mengistirahatkan satu model 45-75 dtk di kelima key sekaligus. Padahal di log terbukti model yang sama sering langsung berhasil di key lain. Akibatnya semua model bergantian "istirahat" dan proses menunggu terus. Sekarang 503 hanya mengistirahatkan kombinasi key+model itu 5-12 dtk dan langsung mencoba key berikutnya (seperti perilaku dasar v2.6.9, tanpa menunggu); model baru diistirahatkan singkat (±30 dtk) bila semua key padat, lalu dicoba lagi.
-2. PROSES SELALU BERUJUNG: bila model kuat habis kuota/penuh dan model ringan hanya menghasilkan rancangan sedikit layer, rancangan terbaik yang sudah ada dipakai (paling lama ±2,5 menit), tidak dibuang lalu menunggu tanpa akhir. Penilaian AI (tahap 5/5) dibatasi 2 menit lalu dilewati; desain yang sudah jadi tetap disimpan.
-3. PERSEN LOADING TIDAK BEKU: selama menunggu/memanggil AI, persen bergerak pelan dan tidak pernah melewati batas tahap berikutnya (angka akhir tetap 100% hanya saat benar-benar selesai).
-4. Model tanpa kuota gratis (limit: 0) diingat 3 jam, jadi tidak diuji ulang di setiap proses (menghemat waktu awal tahap 2/5).
 
 -->
 
@@ -2438,7 +2438,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.7.7';
+const APP_VERSION = 'v2.7.8';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -24669,7 +24669,7 @@ function build(){
  $('adzMargin').addEventListener('input',function(){$('adzMarginV').textContent=this.value;});
  $('adzRev').addEventListener('input',function(){$('adzRevV').textContent=this.value;});
  buildProv();
- buildLogoUi();buildToneUi();
+ buildLogoUi();buildToneUi();buildCarUi();
 }
 function paintChips(){Array.prototype.forEach.call($('adzStyles').children,function(b,i){b.classList.toggle('on',i===S.style);});}
 function paintThumbs(){
@@ -24686,7 +24686,7 @@ window.openAiDesigner=function(){
  $('adzGhost').checked=cfg.ghost!==false;$('adzRec').checked=!!cfg.rec&&cfg.ghost!==false;
  $('adzApiCard').open=!keysOf(provId()).length;
  paintChips();paintThumbs();adzMode(S.mode);
- paintLogoUi();persistLoad();
+ paintLogoUi();persistLoad();carRefresh();
  $('adzModal').classList.add('active');
  S.min=false;chipHide();shieldSet(false);
  const lg=$('adzLog');if(lg)setTimeout(function(){lg.scrollTop=lg.scrollHeight;},40);
@@ -25240,6 +25240,7 @@ function pdbOpen(){
 function pdbPut(id,v){return pdbOpen().then(function(db){return new Promise(function(res,rej){const tx=db.transaction(PDB_STORE,'readwrite');tx.objectStore(PDB_STORE).put({id:id,v:v});tx.oncomplete=function(){res();};tx.onerror=function(){rej(tx.error);};tx.onabort=function(){rej(tx.error);};});});}
 function pdbGet(id){return pdbOpen().then(function(db){return new Promise(function(res,rej){const rq=db.transaction(PDB_STORE,'readonly').objectStore(PDB_STORE).get(id);rq.onsuccess=function(){res(rq.result?rq.result.v:null);};rq.onerror=function(){rej(rq.error);};});});}
 function promptSave(now){
+ if(S.carLock)return;
  clearTimeout(pTimer);
  const f=function(){
   const el=$('adzPrompt');if(!el||!S.pLoaded)return;
@@ -25931,11 +25932,11 @@ function footerLine(){
  const m=raw.match(/@?[A-Za-z0-9._]{2,}/g)||[];
  const seen={},list=[];
  m.forEach(function(u){const h=(u.charAt(0)==='@'?u:('@'+u));const k=h.toLowerCase();if(!seen[k]){seen[k]=1;list.push(h);}});
- return list.join(' '+S.sep+' ');
+ return carMidJoin(list);
 }
 function userPrev(){const p=$('adzUserPrev');if(!p)return;const f=footerLine();p.textContent=f?('Tampil di poster: '+f):'Username otomatis mati: AI memakai username dari perintah Anda (bila ada).';}
 function paintSep(){const sp=$('adzSepChips');if(!sp)return;Array.prototype.forEach.call(sp.children,function(b){b.classList.toggle('on',b.getAttribute('data-s')===S.sep);});}
-function isHandleOnly(t){t=String(t||'').trim();return t.length>0&&t.length<=120&&/@[A-Za-z0-9._]+/.test(t)&&t.replace(/@[A-Za-z0-9._]+/g,'').replace(/[\s\/|•·,\-–—]+/g,'')==='';}
+function isHandleOnly(t){t=String(t||'').trim();if(S.carCtx)t=t.replace(/\[?\s*(PART\s*)?\d{1,2}\s*[\/\u2014\u2013-]\s*\d{1,2}\s*\]?/gi,'').replace(/[\u2039\u203A\u2022\[\]]/g,' ').trim();return t.length>0&&t.length<=120&&/@[A-Za-z0-9._]+/.test(t)&&t.replace(/@[A-Za-z0-9._]+/g,'').replace(/[\s\/|•·,\-–—]+/g,'')==='';}
 function enforceFooter(L,d){
  const ft=footerLine();if(!ft)return;
  const mx=cfg.margin,avail=100-2*mx;
@@ -27365,9 +27366,10 @@ async function adzRun(cont,canRetry){
    if(LAST_REPAIRED)log('Jawaban AI terpotong; bagian yang utuh diselamatkan. Jika desain kurang lengkap, coba lagi atau ganti model.','wn');
    S.ck.spec=spec;
   }
+  S.lastSpec=spec;
   const L=(Array.isArray(spec.layers)?spec.layers.slice(0,48):[]).filter(function(l){return l&&typeof l==='object';});
   if(!L.length)throw new Error('AI tidak menghasilkan layer. Coba perintah yang lebih jelas.');
-  enforceFooter(L,d);
+  enforceFooter(L,d);carInject(L,d);
   enforceReadable(L);scrubCopy(L);boostHeadlineShadow(L);
   const nFx=addAtmosphere(L,d,brief);if(nFx)log('Efek atmosfer PNG: '+nFx+' lapis (blur lembut, di belakang teks) dipasang sesuai tema.','ok');
   const nAsset=L.filter(function(l){return l.kind==='asset';}).length;
@@ -27406,7 +27408,7 @@ async function adzRun(cont,canRetry){
   target.background=buildBackground(spec.background,d,bgSrc);
   if(target!==s){slides.push(target);currentSlideIndex=slides.length-1;}
   keptTarget=target;
-  let lay=await compose(target,L,d,m,keepSrc,true);
+  let lay=await compose(target,L,d,m,keepSrc,true);carPin(target,d);
   undoTarget=null;
   newEls=target.elements;
   if(cfg.rec)await recBegin();
@@ -27438,7 +27440,7 @@ async function adzRun(cont,canRetry){
    if(!n){log('Koreksi tidak bisa diterapkan.','wn');break;}
    log('Menerapkan '+n+' koreksi ...');
    const oldGeo=geoSnap(target.elements);
-   lay=await compose(target,L,d,m,keepSrc,true);
+   lay=await compose(target,L,d,m,keepSrc,true);carPin(target,d);
    newEls=target.elements;
    recResume();
    await ghostMorph(target,oldGeo,d);
@@ -27500,6 +27502,207 @@ window.adzGenerate=async function(){
  }catch(e){if(!/Dibatalkan/.test(e.message)){log('Gagal: '+e.message,'er');}S.done='er';}
  finally{if(S.busy){setBusy(false);}}
 };
+
+/* ===== v2.7.8: CAROUSEL (poster bersambung) =====
+   Modul tambahan: memanggil alur adzGenerate yang sudah ada per slide (dasar AI tidak diubah). */
+const CAR_POS=[['tl','Atas kiri'],['tc','Atas tengah'],['tr','Atas kanan'],['bl','Bawah kiri'],['bc','Bawah tengah'],['br','Bawah kanan'],['mid','Antara username']];
+const CAR_STY=[['pl','01/05'],['sp','01 / 05'],['dash','01 \u2014 05'],['part','PART 01/05'],['box','[ 01/05 ]'],['dot','\u2022 01/05 \u2022'],['ang','\u2039 01/05 \u203A']];
+const CAR_MSEP=[['same','Sama username'],['bar','|'],['dash','\u2014'],['dot','\u2022'],['box','Kotak [ ]']];
+const CAR_SZ=[['s','Kecil',2.5],['m','Sedang',3.2],['l','Besar',4.2]];
+const CAR_MAX=17;
+function carCfg(){
+ let c=cfg.car;if(!c||typeof c!=='object'){c={};cfg.car=c;}
+ const D={on:false,n:5,theme:'same',num:true,pos:'bc',sty:'pl',msep:'same',sz:'m',next:1,ref:-1};
+ Object.keys(D).forEach(function(k){if(c[k]===undefined)c[k]=D[k];});
+ c.n=Math.max(1,Math.min(CAR_MAX,parseInt(c.n)||5));
+ if(!Array.isArray(c.slides))c.slides=[];
+ while(c.slides.length<CAR_MAX)c.slides.push({t:'',th:''});
+ return c;
+}
+let carTimer=0;
+function carSaveSoon(){clearTimeout(carTimer);carTimer=setTimeout(function(){saveCfg();},500);}
+function carPad(n,w){n=String(n);while(n.length<w)n='0'+n;return n;}
+function carLabel(k,N,st){
+ const w=Math.max(2,String(N).length),a=carPad(k,w),b=carPad(N,w);
+ switch(st){case 'sp':return a+' / '+b;case 'dash':return a+' \u2014 '+b;case 'part':return 'PART '+a+'/'+b;case 'box':return '[ '+a+'/'+b+' ]';case 'dot':return '\u2022 '+a+'/'+b+' \u2022';case 'ang':return '\u2039 '+a+'/'+b+' \u203A';default:return a+'/'+b;}
+}
+function carMidJoin(list){
+ const c=carCfg();
+ if(!S.carCtx||!c.num||c.pos!=='mid'||!list.length)return list.join(' '+S.sep+' ');
+ const box=c.msep==='box';
+ const lab=box?carLabel(S.carCtx.k,S.carCtx.N,'box'):carLabel(S.carCtx.k,S.carCtx.N,c.sty);
+ const sp={same:S.sep,bar:'|',dash:'\u2014',dot:'\u2022',box:S.sep}[c.msep]||S.sep;
+ const h=Math.floor(list.length/2)||list.length;
+ const parts=list.slice(0,h).concat([lab],list.slice(h));
+ if(box){const a=list.slice(0,h).join(' '+S.sep+' '),b=list.slice(h).join(' '+S.sep+' ');return [a,lab,b].filter(Boolean).join('  ');}
+ return parts.join(' '+sp+' ');
+}
+function carSizePct(){const c=carCfg();const z=CAR_SZ.filter(function(x){return x[0]===c.sz;})[0]||CAR_SZ[1];return z[2];}
+function carInject(L,d){
+ const c=carCfg();if(!S.carCtx||!c.num)return;
+ let pos=c.pos;const foot=L.filter(function(l){return l&&l._footer;})[0];
+ if(pos==='mid'){if(foot)return;pos='bc';}
+ const lab=carLabel(S.carCtx.k,S.carCtx.N,c.sty),sz=carSizePct();
+ const mx=cfg.margin,my=mx*d.W/d.H,avail=100-2*mx;
+ const T=L.filter(function(l){return l&&l.kind==='text'&&!l._skip;});
+ const ref=foot||T[T.length-1]||{};
+ const col=pos.charAt(1),top=pos.charAt(0)==='t';
+ const w=col==='c'?avail:28;
+ const x=col==='l'?mx:(col==='r'?100-mx-w:mx);
+ const y=top?my:Math.max(0,100-my-sz*d.W/d.H*3.6);
+ L.push({kind:'text',name:'Nomor Part',text:lab,font:ref.font||'Montserrat',size:sz,weight:'800',align:col==='l'?'left':(col==='r'?'right':'center'),color:ref.color||'#E5E7EB',opacity:0.95,letterSpacing:2,x:x,w:w,y:+y.toFixed(1)});
+}
+function carPin(target,d){
+ const c=carCfg();if(!S.carCtx||!c.num)return;
+ const el=target.elements.filter(function(e){return e._adz&&e._adz.name==='Nomor Part';})[0];if(!el)return;
+ let pos=c.pos;if(pos==='mid')pos='bc';
+ const W=d.W,H=d.H,m=Math.round(W*cfg.margin/100),b=boxOf(el),col=pos.charAt(1);
+ let dx=0,dy=0;
+ if(col==='l')dx=m-b.l;else if(col==='r')dx=(W-m)-b.r;else dx=W/2-(b.l+b.r)/2;
+ if(pos.charAt(0)==='t')dy=m+(AX.plan?H*0.105:0)-b.t;
+ else{const fe=target.elements.filter(function(e){return e!==el&&e._adz&&e._adz.footer;})[0];const fb=fe?boxOf(fe):null;dy=(fb?fb.t-H*0.012:H-m)-b.b;}
+ el.x+=dx;el.y+=dy;
+ el._calculatedHeight=null;el._renderedW=null;el._cachedCanvas=null;el._cachedHash=null;
+}
+function carRefText(){
+ if(S.carSpec){
+  try{return JSON.stringify(S.carSpec,function(k,v){if(k==='imagePrompt')return undefined;if(typeof v==='string'&&v.length>90)return v.slice(0,90)+'...';return v;}).slice(0,11000);}catch(e){}
+ }
+ const c=carCfg(),s=slides[c.ref]||null;if(!s)return '';
+ const d=canvasDims();let bg='';
+ try{const B=s.background||{};bg=JSON.stringify({type:B.bgType,gradType:B.gradType,angle:B.angle,stops:(B.colorStops||[]).map(function(x){return x.color;}),color:B.color1});}catch(e){}
+ try{return 'BACKGROUND '+bg+'\nLAYERS '+JSON.stringify(layerTable(s,d)).slice(0,9000);}catch(e){return '';}
+}
+function carPrompt(k){
+ const c=carCfg(),N=c.n,sl=c.slides[k-1]||{t:'',th:''};
+ const base=(S.carBase||'').trim();
+ const role=k===1?'slide pembuka (judul/hook yang menarik)':(k===N?'slide penutup (kesimpulan, pesan akhir, ajakan)':'slide isi (poin lanjutan)');
+ let p=base?(base+'\n\n'):'';
+ p+='[CAROUSEL SLIDE '+k+' DARI '+N+'] Ini satu slide dari poster carousel bersambung. Buat HANYA isi slide ini, jangan memuat isi slide lain. Peran slide ini: '+role+'.\n';
+ const flow=[];for(let i=1;i<=N;i++){const x=(c.slides[i-1]&&c.slides[i-1].t||'').replace(/\s+/g,' ').trim();if(x)flow.push(i+') '+x.slice(0,50));}
+ if(flow.length>1)p+='ALUR CAROUSEL (agar nyambung): '+flow.join(' | ')+'\n';
+ p+='ISI/PERINTAH SLIDE INI: '+((sl.t||'').trim()||'lanjutkan alur topik umum secara logis sesuai peran slide ini')+'\n';
+ if(c.num&&c.pos!=='mid')p+='Sisakan ruang kosong untuk nomor part di '+(CAR_POS.filter(function(x){return x[0]===c.pos;})[0]||['','bawah'])[1].toLowerCase()+'; jangan menulis nomor part sendiri dan jangan menaruh teks lain di sana.\n';
+ if(c.theme==='same'){
+  if(k>1){
+   const r=carRefText();
+   if(r)p+='DESAIN TERKUNCI: slide ini WAJIB memakai desain yang SAMA PERSIS dengan slide acuan berikut (latar/gradasi, palet warna, font dan ukuran judul/isi, ornamen/aset/bingkai, efek, posisi dan ukuran tiap layer). Ubah HANYA teks isi sesuai perintah slide ini (panjang teks boleh menyesuaikan, jaga padding dan keterbacaan). Jangan membuat tema baru. ACUAN: '+r+'\n';
+  }
+ }else{
+  p+='TEMA: pakai palet warna, latar, dan ornamen yang BERBEDA dari slide lain, tetapi tetap satu keluarga carousel (font judul, gaya username, dan nomor part serasi).'+((sl.th||'').trim()?(' Tema slide ini: '+sl.th.trim()+'.'):'')+'\n';
+ }
+ return p;
+}
+window.adzCarGo=async function(from,only){
+ if(S.busy)return;
+ const c=carCfg();
+ if(!c.on){showToast('Aktifkan Mode Carousel dulu');return;}
+ const N=c.n;from=Math.max(1,Math.min(N,parseInt(from)||1));
+ const end=only?from:N;
+ const pe=$('adzPrompt'),rp=$('adzReplace'),origTxt=pe.value,origRep=rp.checked;
+ if(!origTxt.trim()&&!c.slides.slice(0,N).some(function(x){return (x.t||'').trim();})){showToast('Isi topik umum atau perintah per slide dulu');return;}
+ S.carBase=origTxt;S.carLock=true;
+ if(!only&&from===1){S.carSpec=null;}
+ let made=0,failed=0;
+ try{
+  for(let k=from;k<=end;k++){
+   S.carCtx={k:k,N:N};
+   pe.value=carPrompt(k);
+   rp.checked=(only||k===1)?origRep:false;
+   carRefresh(k);
+   S.done='';
+   await adzGenerate();
+   if(S.done!=='ok'){failed=k;c.next=k;break;}
+   made++;
+   const st=c.status||(c.status={});st[k]='ok';
+   if(k===1&&!only){c.ref=currentSlideIndex;}
+   if(c.theme==='same'&&!S.carSpec&&S.lastSpec&&!only)S.carSpec=S.lastSpec;
+   c.next=(k+1>N)?1:k+1;
+   saveCfg();
+   if(k<end){S.carCtx=null;await delay(rnd(2500,6000));}
+  }
+ }catch(e){failed=failed||from;log('Carousel berhenti: '+e.message,'er');}
+ finally{
+  pe.value=origTxt;rp.checked=origRep;S.carLock=false;S.carCtx=null;S.carBase='';
+  try{readCfg();}catch(e){}
+  carRefresh();
+ }
+ if(failed){const st=c.status||(c.status={});st[failed]='er';saveCfg();carRefresh();showToast('Carousel berhenti di slide '+failed+'. Tekan Lanjutkan untuk menyambung.');}
+ else if(made){showToast(only?('Slide '+from+' selesai'):('Carousel selesai: '+made+' slide'));}
+};
+window.adzCarOne=function(k){adzCarGo(k,true);};
+window.adzCarAll=function(){const c=carCfg();c.status={};c.next=1;saveCfg();adzCarGo(1,false);};
+window.adzCarNext=function(){const c=carCfg();adzCarGo(c.next>c.n?1:c.next,false);};
+window.adzCarReset=function(){const c=carCfg();c.status={};c.next=1;saveCfg();carRefresh();showToast('Status carousel direset');};
+window.adzCarRef=function(){const c=carCfg();c.ref=currentSlideIndex;S.carSpec=null;saveCfg();carRefresh();showToast('Slide '+(currentSlideIndex+1)+' dijadikan acuan desain');};
+function carChips(id,arr,key,after){
+ const w=$(id);if(!w)return;
+ if(!w.children.length)arr.forEach(function(a){const b=document.createElement('button');b.className='adz-chip';b.setAttribute('data-v',a[0]);b.textContent=a[1];b.onclick=function(){carCfg()[key]=a[0];saveCfg();carRefresh();};w.appendChild(b);});
+ const cur=carCfg()[key];Array.prototype.forEach.call(w.children,function(b){b.classList.toggle('on',b.getAttribute('data-v')===cur);});
+}
+function carList(){
+ const c=carCfg(),w=$('adzCarList');if(!w)return;
+ const sig=c.n+'|'+c.theme;
+ if(w.getAttribute('data-sig')===sig)return;
+ w.setAttribute('data-sig',sig);w.innerHTML='';
+ for(let k=1;k<=c.n;k++){
+  const d=document.createElement('div');d.className='car-slide';
+  const lab=(k===1?'Slide 1 (pembuka)':(k===c.n?('Slide '+k+' (penutup)'):('Slide '+k)));
+  d.innerHTML='<div class="car-h"><span>'+lab+'<span class="car-st" id="adzCarSt'+k+'"></span></span><button class="adz-mini" onclick="adzCarOne('+k+')">Buat slide ini</button></div>'+
+   '<textarea class="adz-ta" data-k="'+k+'" placeholder="Isi / perintah slide '+k+'. Contoh: judul, poin utama, dalil, atau kalimat penutup"></textarea>'+
+   (c.theme==='same'?'':'<input class="adz-in" data-th="'+k+'" autocomplete="off" placeholder="Tema khusus slide '+k+' (opsional), mis. hijau zamrud + emas">');
+  w.appendChild(d);
+  const ta=d.querySelector('textarea');ta.value=c.slides[k-1].t||'';
+  ta.addEventListener('input',function(){c.slides[k-1].t=this.value;carSaveSoon();});
+  const th=d.querySelector('input');if(th){th.value=c.slides[k-1].th||'';th.addEventListener('input',function(){c.slides[k-1].th=this.value;carSaveSoon();});}
+ }
+}
+function carRefresh(running){
+ if(!$('adzCarCard'))return;
+ const c=carCfg();
+ $('adzCarOn').checked=!!c.on;$('adzCarBody').style.display=c.on?'block':'none';
+ $('adzCarN').value=c.n;$('adzCarNV').textContent=c.n;$('adzCarNum').checked=!!c.num;
+ carChips('adzCarTheme',[['same','Sama persis'],['vary','Beda tema (serasi)']],'theme');
+ carChips('adzCarPos',CAR_POS,'pos');carChips('adzCarSty',CAR_STY,'sty');carChips('adzCarMsep',CAR_MSEP,'msep');carChips('adzCarSz',CAR_SZ,'sz');
+ $('adzCarPosBox').style.display=c.num?'block':'none';
+ $('adzCarMsepBox').style.display=(c.num&&c.pos==='mid')?'block':'none';
+ const th={same:'Desain slide 1 dikunci: latar, warna, font, ornamen, dan posisi sama persis, hanya isi teks yang berubah.',vary:'Tiap slide boleh bertema berbeda (isi kolom tema khusus), font judul, username, dan nomor part tetap serasi.'};
+ $('adzCarThemeHint').textContent=th[c.theme]||th.same;
+ const mid=c.pos==='mid';
+ $('adzCarPrev').textContent='Contoh nomor part: '+(mid?('@akun1  '+(c.msep==='box'?carLabel(2,c.n,'box'):carLabel(2,c.n,c.sty))+'  @akun2'):carLabel(2,c.n,c.sty));
+ const ref=slides[c.ref];
+ $('adzCarStat').textContent='Berikutnya: slide '+(c.next>c.n?1:c.next)+' dari '+c.n+(ref?(' \u00B7 acuan desain: slide '+(c.ref+1)):' \u00B7 acuan desain: belum ada (otomatis dari slide 1)')+'. Perintah tersimpan otomatis.';
+ carList();
+ for(let k=1;k<=c.n;k++){const s=$('adzCarSt'+k);if(!s)continue;const v=(c.status||{})[k];s.className='car-st'+(v?(' '+v):'');s.textContent=(running===k)?' \u00B7 sedang dibuat ...':(v==='ok'?' \u00B7 \u2713 jadi':(v==='er'?' \u00B7 \u2717 gagal':''));}
+ const nb=$('adzCarNextBtn');if(nb)nb.textContent='Lanjutkan dari slide '+(c.next>c.n?1:c.next);
+}
+function buildCarUi(){
+ if($('adzCarCard'))return;
+ const card=document.createElement('div');card.className='adz-card';card.id='adzCarCard';
+ card.innerHTML=
+  '<div class="adz-lab" style="margin-top:0">Carousel / Poster Bersambung</div>'+
+  '<label class="adz-chk"><input type="checkbox" id="adzCarOn"><span>Mode Carousel: buat beberapa slide berurutan (maks. 17). Kolom \u201CPerintah / isi poster\u201D di atas menjadi topik umum, isi tiap slide ditulis di bawah ini. Bisa disambung bila limit habis.</span></label>'+
+  '<div id="adzCarBody" style="display:none">'+
+   '<label class="adz-lab">Jumlah slide: <span id="adzCarNV">5</span></label><input id="adzCarN" class="adz-range" type="range" min="1" max="'+CAR_MAX+'" step="1" value="5">'+
+   '<label class="adz-lab">Tema antar slide</label><div class="adz-chips" id="adzCarTheme"></div><div class="adz-hint" id="adzCarThemeHint"></div>'+
+   '<div class="adz-row" style="margin-top:6px"><button class="adz-btn" style="flex:1" onclick="adzCarRef()">Jadikan slide aktif sebagai acuan desain</button></div>'+
+   '<label class="adz-chk"><input type="checkbox" id="adzCarNum"><span>Pasang nomor part (mis. 01/05) di setiap slide.</span></label>'+
+   '<div id="adzCarPosBox"><label class="adz-lab">Posisi nomor part</label><div class="adz-chips" id="adzCarPos"></div>'+
+    '<div id="adzCarMsepBox"><label class="adz-lab">Pemisah di antara username</label><div class="adz-chips" id="adzCarMsep"></div></div>'+
+    '<label class="adz-lab">Gaya tulisan</label><div class="adz-chips" id="adzCarSty"></div>'+
+    '<label class="adz-lab">Ukuran</label><div class="adz-chips" id="adzCarSz"></div>'+
+    '<div class="adz-hint" id="adzCarPrev"></div></div>'+
+   '<label class="adz-lab">Isi / perintah per slide</label><div id="adzCarList"></div>'+
+   '<div class="adz-row" style="margin-top:10px"><button class="adz-btn gold" style="flex:1" onclick="adzCarAll()">Buat semua slide</button></div>'+
+   '<div class="adz-row" style="margin-top:6px"><button class="adz-btn" style="flex:1" id="adzCarNextBtn" onclick="adzCarNext()">Lanjutkan</button><button class="adz-btn" onclick="adzCarReset()">Reset status</button></div>'+
+   '<div class="adz-hint" id="adzCarStat"></div>'+
+  '</div>';
+ const lc=$('adzLogoCard');lc.parentNode.insertBefore(card,lc);
+ $('adzCarOn').addEventListener('change',function(){carCfg().on=this.checked;saveCfg();carRefresh();});
+ $('adzCarN').addEventListener('input',function(){const c=carCfg();c.n=parseInt(this.value)||5;$('adzCarNV').textContent=c.n;carSaveSoon();carRefresh();});
+ $('adzCarNum').addEventListener('change',function(){carCfg().num=this.checked;saveCfg();carRefresh();});
+ carRefresh();
+}
 function buildBackground(B,d,imgSrc){
  B=B||{};const def=createDefaultSlide().background;
  const cols=(Array.isArray(B.colors)?B.colors:[]).map(function(c){return hex(c,null);}).filter(Boolean);
@@ -27513,6 +27716,15 @@ function buildBackground(B,d,imgSrc){
 })();
 </script>
 
+<style id="adzCarCss">
+/* v2.7.8: Carousel AI Desainer */
+.car-slide{margin-top:8px;padding:9px;border:1px solid rgba(212,175,55,.22);border-radius:12px;background:rgba(255,255,255,.03)}
+.car-slide .car-h{display:flex;align-items:center;gap:8px;justify-content:space-between;margin-bottom:6px;font-size:12px;font-weight:800;color:#e5e7eb}
+.car-slide .car-st{font-size:10px;font-weight:700;margin-left:6px;color:#9ca3af}
+.car-slide .car-st.ok{color:#86efac}.car-slide .car-st.er{color:#fca5a5}
+.car-slide textarea{min-height:58px}
+.car-slide input{margin-top:6px}
+</style>
 <style id="barsCss">
 /* v2.7.3: bar kiri/kanan yang bisa diedit & ditutup */
 .vertical-toolbar{transition:transform .55s cubic-bezier(.22,.85,.3,1),opacity .45s ease,visibility 0s linear 0s;}
