@@ -1,17 +1,17 @@
 <!--
-Studio Poster Maker Pro - Update v2.7.8
+Studio Poster Maker Pro - Update v2.7.9
+
+v2.7.9:
+1. AI DESAINER: PILIHAN JENIS POSTER TERPISAH. Di bawah "Pengaturan AI Provider & API Key" kini ada kartu "Jenis Poster" dengan dua tombol: Poster Tunggal dan Carousel. Pilih Poster Tunggal: hanya UI poster tunggal (tombol Buat Desain) yang tampil. Pilih Carousel: hanya UI Carousel (jumlah slide, tema, nomor part, isi per slide, tombol Buat semua slide) yang tampil, tombol Buat Desain tunggal disembunyikan sehingga tidak salah pencet.
+2. DATA TETAP TERSIMPAN. Pindah mode tidak menghapus apa pun: pilihan mode, perintah poster tunggal, isi/tema per slide, status slide, acuan desain, logo, username, dan API key tetap di localStorage + IndexedDB (tidak hilang saat refresh/update versi). Data hanya hilang bila dihapus manual lewat tombol "Hapus data" di kartu Jenis Poster (dengan konfirmasi).
+3. TOMBOL INFO (i) di kartu Jenis Poster: penjelasan perbedaan kedua mode, keamanan data, dan tips memakainya.
+4. Dasar AI Desainer dan alur Carousel v2.7.8 tidak diubah.
 
 v2.7.8:
 1. FITUR CAROUSEL DI AI DESAINER: kartu baru "Carousel / Poster Bersambung" (maks. 17 slide). Isi perintah tiap slide ditulis di kolomnya sendiri; kolom "Perintah / isi poster" di atas menjadi topik umum. Tombol: Buat semua, Lanjutkan dari slide berikutnya (bila limit habis/gagal, slide yang sudah jadi tidak diulang), dan Buat slide ini saja.
 2. TEMA: "Sama persis" (desain slide acuan dikunci, hanya isi teks berubah), "Serasi tapi variasi" atau "Beda tema" (kolom tema khusus per slide). Slide acuan otomatis slide pertama; bisa diganti dengan tombol "Jadikan slide aktif sebagai acuan" sehingga carousel bisa disambung di lain waktu.
 3. NOMOR PART (01/05): posisi atas/bawah kiri-tengah-kanan atau di antara username, 7 gaya tulisan, pemisah (sama, |, garis, titik, kotak) dan 3 ukuran. Dipasang otomatis dan dikunci ke posisinya setelah tata letak.
 4. Perintah per slide, jumlah slide, dan pilihan carousel tersimpan (localStorage + IndexedDB), jadi tidak hilang saat update versi. Dasar AI Desainer v2.7.6/v2.7.7 tidak diubah.
-
-v2.7.7:
-1. TOMBOL BUKA BAR SEJAJAR: saat bar kiri/kanan ditutup, tombol pembuka kini turun dan sejajar tepat dengan posisi tombol penutup (tinggi tengahnya dihitung otomatis dari tombol penutup, ikut menyesuaikan jumlah ikon bar & ukuran layar). Ukuran kotaknya disamakan dengan tombol penutup (34x34).
-2. IKON BAR BERGARIS EMAS-ABU-ABU: ikon Pengaturan (Edit bar) dan ikon Tutup/Buka bar kini memakai gaya khas aplikasi (garis abu-abu + aksen emas), tidak lagi emas polos / segitiga pejal.
-3. BLOK KATA MENGIKUTI KATANYA, BUKAN NOMOR URUT: warna, format (tebal/miring/garis bawah/kapital), stabilo, font, dan gaya per-kata lainnya kini "menempel" pada kata itu sendiri. Menambah kata di depan/tengah/belakang paragraf, menambah baris, atau mengetik huruf di dalam kata yang diblok tidak menggeser blok ke kata lain. Kata yang diedit (ditambah/dikurangi huruf) tetap bergaya, kata yang dipecah spasi tetap bergaya, dan kata baru yang disisipkan DI TENGAH rangkaian kata bergaya sama ikut bergaya. Pilihan kata di panel (Blok Kata Terpilih) juga ikut bergeser mengikuti kata.
-4. TAMBAH/PINDAHKAN TOOL KE BAR KIRI-KANAN KINI LENGKAP: dari 21 menjadi lebih dari 80 tool (semua tool Maker Pro: sisipkan, slide & projek, posisi & ukuran, teks, warna & cahaya, efek, foto, tabel, bagan, konektor, lapisan & salin). Daftar dikelompokkan per kategori dengan kolom pencarian; slot default bar tetap sama. Tool khusus jenis elemen (mis. Stabilo untuk teks) otomatis redup bila elemen terpilih tidak cocok, dengan pesan penjelasan saat diketuk.
 
 -->
 
@@ -2438,7 +2438,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.7.8';
+const APP_VERSION = 'v2.7.9';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -24669,7 +24669,7 @@ function build(){
  $('adzMargin').addEventListener('input',function(){$('adzMarginV').textContent=this.value;});
  $('adzRev').addEventListener('input',function(){$('adzRevV').textContent=this.value;});
  buildProv();
- buildLogoUi();buildToneUi();buildCarUi();
+ buildLogoUi();buildToneUi();buildCarUi();buildPmUi();
 }
 function paintChips(){Array.prototype.forEach.call($('adzStyles').children,function(b,i){b.classList.toggle('on',i===S.style);});}
 function paintThumbs(){
@@ -24686,7 +24686,7 @@ window.openAiDesigner=function(){
  $('adzGhost').checked=cfg.ghost!==false;$('adzRec').checked=!!cfg.rec&&cfg.ghost!==false;
  $('adzApiCard').open=!keysOf(provId()).length;
  paintChips();paintThumbs();adzMode(S.mode);
- paintLogoUi();persistLoad();carRefresh();
+ paintLogoUi();persistLoad();pmApply();
  $('adzModal').classList.add('active');
  S.min=false;chipHide();shieldSet(false);
  const lg=$('adzLog');if(lg)setTimeout(function(){lg.scrollTop=lg.scrollHeight;},40);
@@ -27291,7 +27291,7 @@ function updGo(){
  if(fr){fr.textContent='Ulang dari awal';fr.style.display=(ok||S.done==='er')?'block':'none';}
 }
 window.adzFresh=function(){S.ck=null;updGo();adzGenerate();};
-function setBusy(b){S.busy=b;if(b){S.done='';S.pct=0;}$('adzX').title=b?'Sembunyikan panel (proses AI tetap berjalan)':'Tutup';if(S.min)shieldSet(b);chipSync();$('adzGo').disabled=b;$('adzGo').textContent=b?'Sedang membuat...':'Buat Desain';$('adzCancel').style.display=b?'block':'none';S.paused=false;{const pb=$('adzPause');if(pb){pb.style.display=b?'block':'none';pb.textContent='Tunda';}}if(b&&$('adzFresh'))$('adzFresh').style.display='none';if(b){if(S.min)gStart();}else{updGo();setTimeout(function(){if(!S.busy)gStop();},900);}}
+function setBusy(b){S.busy=b;pmSync();if(b){S.done='';S.pct=0;}$('adzX').title=b?'Sembunyikan panel (proses AI tetap berjalan)':'Tutup';if(S.min)shieldSet(b);chipSync();$('adzGo').disabled=b;$('adzGo').textContent=b?'Sedang membuat...':'Buat Desain';$('adzCancel').style.display=b?'block':'none';S.paused=false;{const pb=$('adzPause');if(pb){pb.style.display=b?'block':'none';pb.textContent='Tunda';}}if(b&&$('adzFresh'))$('adzFresh').style.display='none';if(b){if(S.min)gStart();}else{updGo();setTimeout(function(){if(!S.busy)gStop();},900);}}
 function briefLog(b){
  try{
   if(b.intent)log('Maksud: '+String(b.intent).slice(0,260));
@@ -27601,7 +27601,7 @@ window.adzCarGo=async function(from,only){
  const end=only?from:N;
  const pe=$('adzPrompt'),rp=$('adzReplace'),origTxt=pe.value,origRep=rp.checked;
  if(!origTxt.trim()&&!c.slides.slice(0,N).some(function(x){return (x.t||'').trim();})){showToast('Isi topik umum atau perintah per slide dulu');return;}
- S.carBase=origTxt;S.carLock=true;
+ S.carBase=origTxt;S.carLock=true;pmSync();
  if(!only&&from===1){S.carSpec=null;}
  let made=0,failed=0;
  try{
@@ -27623,7 +27623,7 @@ window.adzCarGo=async function(from,only){
   }
  }catch(e){failed=failed||from;log('Carousel berhenti: '+e.message,'er');}
  finally{
-  pe.value=origTxt;rp.checked=origRep;S.carLock=false;S.carCtx=null;S.carBase='';
+  pe.value=origTxt;rp.checked=origRep;S.carLock=false;pmSync();S.carCtx=null;S.carBase='';
   try{readCfg();}catch(e){}
   carRefresh();
  }
@@ -27703,6 +27703,90 @@ function buildCarUi(){
  $('adzCarNum').addEventListener('change',function(){carCfg().num=this.checked;saveCfg();carRefresh();});
  carRefresh();
 }
+/* ===== v2.7.9: PILIHAN JENIS POSTER (Poster Tunggal / Carousel) =====
+   Hanya mengatur tampilan & mode; data kedua mode tidak pernah dihapus kecuali lewat tombol hapus manual. */
+function pmMode(){
+ const m=cfg.pm;
+ if(m==='car'||m==='single')return m;
+ return carCfg().on?'car':'single';
+}
+function pmSync(){const m=$('adzModal');if(m)m.classList.toggle('adz-isbusy',!!(S.busy||S.carLock));}
+function pmApply(){
+ const m=$('adzModal');if(!m||!$('adzPmCard'))return;
+ const pm=pmMode(),car=pm==='car',c=carCfg();
+ if(cfg.pm!==pm||c.on!==car){cfg.pm=pm;c.on=car;saveCfg();}
+ m.classList.toggle('adz-pm-car',car);m.classList.toggle('adz-pm-single',!car);
+ Array.prototype.forEach.call($('adzPmTabs').children,function(b){const on=b.getAttribute('data-pm')===pm;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});
+ $('adzPmHint').textContent=car
+  ?'Mode Carousel: buat beberapa slide berurutan (maks. 17). Kolom "Topik umum" di bawah menjadi tema besar, isi tiap slide ditulis di kartu Carousel. Bisa disambung bila limit habis.'
+  :'Mode Poster Tunggal: satu perintah menghasilkan satu poster berlayer lengkap.';
+ const pe=$('adzPrompt');
+ if(pe){
+  const lb=pe.previousElementSibling;
+  if(pe.getAttribute('data-ph0')===null)pe.setAttribute('data-ph0',pe.placeholder||'');
+  if(lb&&lb.classList&&lb.classList.contains('adz-lab'))lb.textContent=car?'Topik umum carousel (opsional bila tiap slide sudah diisi)':'Perintah / isi poster';
+  pe.placeholder=car?'Contoh: Carousel dakwah 4:5 tentang "Adab menuntut ilmu", nuansa hitam-emas, akun di bawah. Isi tiap slide ditulis di kartu Carousel.':pe.getAttribute('data-ph0');
+ }
+ const clr=$('adzPmClr');if(clr)clr.textContent=car?'Hapus data Carousel':'Hapus perintah poster tunggal';
+ carRefresh();
+}
+window.adzPmSet=function(m){
+ if(S.busy||S.carLock){showToast('Tunggu proses AI selesai dulu, lalu ganti jenis poster');return;}
+ if(m!=='car')m='single';
+ cfg.pm=m;carCfg().on=(m==='car');saveCfg();pmApply();
+ try{const b=document.querySelector('#adzModal .adz-body');if(b)b.scrollTo({top:0,behavior:'smooth'});}catch(e){}
+ showToast(m==='car'?'Mode Carousel aktif':'Mode Poster Tunggal aktif');
+};
+window.adzPmClear=function(){
+ if(S.busy||S.carLock){showToast('Tunggu proses AI selesai dulu');return;}
+ const car=pmMode()==='car';
+ if(!confirm(car?'Hapus semua isi, tema, dan status slide Carousel? (Pengaturan, poster tunggal, logo, dan API key tidak ikut terhapus.)':'Kosongkan perintah poster tunggal? (Data Carousel, logo, dan API key tidak ikut terhapus.)'))return;
+ if(car){
+  const c=carCfg();c.slides=[];c.status={};c.next=1;c.ref=-1;S.carSpec=null;carCfg();
+  const w=$('adzCarList');if(w)w.removeAttribute('data-sig');
+  saveCfg();carRefresh();showToast('Data Carousel dihapus');
+ }else{
+  const pe=$('adzPrompt');if(pe)pe.value='';
+  promptSave(true);updGo();showToast('Perintah poster tunggal dikosongkan');
+ }
+};
+window.adzPmInfo=function(open){
+ let ov=$('adzPmOv');
+ if(!ov){
+  ov=document.createElement('div');ov.id='adzPmOv';
+  ov.innerHTML='<div class="pm-box" role="dialog" aria-label="Info Jenis Poster">'+
+   '<div class="pm-hd"><span class="pm-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2" stroke="#D4AF37" stroke-width="2"/><circle cx="12" cy="7.8" r="1.1" fill="#D4AF37" stroke="none"/></svg></span><b>Info: Jenis Poster</b><button class="adz-x" type="button" onclick="adzPmInfo(false)" aria-label="Tutup">\u2715</button></div>'+
+   '<div class="pm-bd">'+
+   '<h4>Poster Tunggal</h4><ul><li>Satu perintah menghasilkan satu poster berlayer lengkap.</li><li>Tampil: kolom perintah, username, gaya, referensi, logo, dan tombol <b>Buat Desain</b>.</li></ul>'+
+   '<h4>Carousel</h4><ul><li>Beberapa slide berurutan (maks. 17) yang saling nyambung, opsional bernomor part (01/05).</li><li>Tampil: jumlah slide, tema antar slide, nomor part, isi per slide, serta tombol <b>Buat semua slide</b>, <b>Lanjutkan</b>, dan <b>Buat slide ini</b>.</li><li>Kolom perintah utama berfungsi sebagai topik umum carousel.</li><li>Bila limit/token habis, tekan <b>Lanjutkan</b>: slide yang sudah jadi tidak diulang.</li></ul>'+
+   '<h4>Dipisah agar tidak salah pencet</h4><ul><li>Pilih salah satu jenis; tombol aksi jenis lain otomatis disembunyikan.</li><li>Pilihan terakhir diingat saat panel dibuka lagi.</li><li>Ganti jenis hanya bisa saat tidak ada proses AI yang berjalan.</li></ul>'+
+   '<h4>Data tetap tersimpan</h4><ul><li>Pindah jenis tidak menghapus apa pun: perintah poster tunggal, isi dan tema tiap slide, status, acuan desain, logo, username, dan API key.</li><li>Semua tersimpan di perangkat ini (localStorage + IndexedDB), aman dari refresh dan update versi Maker.</li><li>Data hanya hilang bila Anda menghapusnya sendiri lewat tombol <b>Hapus data</b> di kartu Jenis Poster (ada konfirmasi).</li></ul>'+
+   '<h4>Berlaku untuk keduanya</h4><ul><li>Username, logo, gaya bahasa, opsi hasil, dan pengaturan API dipakai bersama oleh kedua jenis.</li></ul>'+
+   '</div></div>';
+  document.body.appendChild(ov);
+  ['touchstart','pointerdown','pointermove','pointerup','click','wheel'].forEach(function(t){ov.addEventListener(t,function(e){e.stopPropagation();},{passive:true});});
+  ov.addEventListener('touchmove',function(e){e.stopPropagation();if(!(e.target.closest&&e.target.closest('.pm-bd'))&&e.cancelable)e.preventDefault();},{passive:false});
+  ov.addEventListener('click',function(e){if(e.target===ov)adzPmInfo(false);});
+ }
+ ov.classList.toggle('show',open!==false);
+};
+function buildPmUi(){
+ if($('adzPmCard'))return;
+ const ic1='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 16h6M9 13h6" stroke="#D4AF37"/><circle cx="12" cy="8.5" r="1.8" stroke="#D4AF37"/></svg>';
+ const ic2='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="7" height="12" rx="1.6"/><rect x="8.5" y="4" width="7" height="16" rx="1.6" stroke="#D4AF37"/><rect x="14.5" y="6" width="7" height="12" rx="1.6"/></svg>';
+ const icI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2" stroke="#D4AF37" stroke-width="2"/><circle cx="12" cy="7.8" r="1.1" fill="#D4AF37" stroke="none"/></svg>';
+ const card=document.createElement('div');card.className='adz-card';card.id='adzPmCard';
+ card.innerHTML=
+  '<div class="pm-head"><div class="adz-lab" style="margin:0">Jenis Poster</div><button type="button" class="adz-mini pm-info" onclick="adzPmInfo(true)" aria-label="Info jenis poster" title="Info">'+icI+'<span>Info</span></button></div>'+
+  '<div class="adz-tabs" id="adzPmTabs" style="margin-top:8px">'+
+   '<button type="button" class="adz-tab" data-pm="single" onclick="adzPmSet(\'single\')">'+ic1+'<b>Poster Tunggal</b><span>1 poster dari 1 perintah</span></button>'+
+   '<button type="button" class="adz-tab" data-pm="car" onclick="adzPmSet(\'car\')">'+ic2+'<b>Carousel</b><span>Hingga 17 slide bersambung</span></button>'+
+  '</div>'+
+  '<div class="adz-hint" id="adzPmHint"></div>'+
+  '<div class="adz-row" style="margin-top:8px"><button type="button" class="adz-mini" id="adzPmClr" onclick="adzPmClear()">Hapus data</button><div class="adz-hint" style="margin:0;flex:1">Data kedua jenis tetap tersimpan saat berpindah; hanya terhapus lewat tombol ini.</div></div>';
+ const ac=$('adzApiCard');ac.parentNode.insertBefore(card,ac.nextSibling);
+ pmApply();
+}
 function buildBackground(B,d,imgSrc){
  B=B||{};const def=createDefaultSlide().background;
  const cols=(Array.isArray(B.colors)?B.colors:[]).map(function(c){return hex(c,null);}).filter(Boolean);
@@ -27724,6 +27808,30 @@ function buildBackground(B,d,imgSrc){
 .car-slide .car-st.ok{color:#86efac}.car-slide .car-st.er{color:#fca5a5}
 .car-slide textarea{min-height:58px}
 .car-slide input{margin-top:6px}
+/* v2.7.9: pilihan jenis poster */
+#adzPmCard .pm-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#adzPmCard .adz-tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px}
+#adzPmCard .adz-tab svg{width:28px;height:28px;color:#9CA3AF;flex:0 0 auto}
+#adzPmCard .adz-tab.on svg{color:#FFE259}
+#adzPmCard .adz-tab span{font-weight:600;font-size:10px;opacity:.85}
+#adzPmCard .pm-info{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-color:rgba(212,175,55,.5);color:#D4AF37}
+#adzPmCard .pm-info svg{width:15px;height:15px}
+#adzModal.adz-pm-single #adzCarCard{display:none !important}
+#adzModal.adz-pm-car #adzGo{display:none !important}
+#adzModal.adz-pm-car:not(.adz-isbusy) .adz-foot{display:none}
+#adzCarCard>label.adz-chk{display:none}
+#adzPmOv{position:fixed;inset:0;z-index:9000300;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:16px}
+#adzPmOv.show{display:flex}
+#adzPmOv *{box-sizing:border-box}
+#adzPmOv .pm-box{width:100%;max-width:480px;max-height:86vh;max-height:86dvh;display:flex;flex-direction:column;background:#15130e;border:1px solid rgba(212,175,55,.45);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.85);color:#e5e7eb}
+#adzPmOv .pm-hd{display:flex;align-items:center;gap:10px;padding:12px 14px 8px;color:#D4AF37;font-size:14px}
+#adzPmOv .pm-hd b{flex:1;font-weight:800}
+#adzPmOv .pm-ic svg{width:24px;height:24px;color:#9CA3AF;display:block}
+#adzPmOv .pm-bd{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 16px 16px;font-size:12px;line-height:1.6;color:#d6d9df}
+#adzPmOv .pm-bd h4{margin:14px 0 4px;font-size:12px;font-weight:800;color:#D4AF37}
+#adzPmOv .pm-bd ul{margin:0;padding-left:18px}
+#adzPmOv .pm-bd li{margin:2px 0}
+#adzPmOv .pm-bd b{color:#FFE259}
 </style>
 <style id="barsCss">
 /* v2.7.3: bar kiri/kanan yang bisa diedit & ditutup */
