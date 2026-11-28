@@ -1,17 +1,18 @@
 <!--
-Studio Poster Maker Pro - Update v2.7.9
+Studio Poster Maker Pro - Update v2.8.0
+
+v2.8.0:
+1. AI DESAINER CAROUSEL: AKAR MASALAH ISI SLIDE BERUBAH SENDIRI DIPERBAIKI. Kolom isi slide dulu terikat ke data lama (panel dimuat ulang tiap dibuka), sehingga ketikan tidak tersimpan dan yang dibaca AI adalah isi lama. Kini setiap ketikan langsung masuk ke data aktif, isi kolom disinkronkan ulang saat panel dibuka, dan saat tombol Buat ditekan isi semua kolom difoto dulu lalu dipakai persis itu.
+2. POSTER TUNGGAL DAN CAROUSEL TERPISAH MUTLAK. Kolom perintah umum kini punya penyimpanan sendiri per mode (teks Tunggal tidak muncul di Carousel dan sebaliknya). Ganti mode juga membuang titik pemulihan dan acuan desain mode sebelumnya.
+3. TIDAK ADA MATERI LAMA YANG BOCOR. Tiap slide dikirim sebagai permintaan baru yang berdiri sendiri: isi slide dibatasi penanda khusus, materi generate/slide lain/teks di gambar referensi dan berkas lampiran dinyatakan bukan isi, mode Redesain tidak dipakai di Carousel, acuan desain "Sama persis" kini hanya berisi gaya (teks slide acuan dikosongkan, tidak lagi dipotong jadi "...") dan disimpan bersama carousel yang sedang dibuat, bukan nomor slide lama. Tombol Buat semua slide selalu mulai bersih.
+4. TEKS UTUH, TIDAK DISINGKAT. Kotak baru "Pakai teks tiap slide UTUH" (aktif bawaan): aturan penyingkatan, nada bahasa, dan pembersih tanda baca dimatikan untuk slide yang kolomnya terisi; teks panjang dipecah jadi beberapa layer dan font diperkecil agar muat, kata tidak dipotong. Di Poster Tunggal, mode ini aktif otomatis bila perintah Anda memuat larangan menyingkat/meringkas. Log monitor mencatat kolom slide mana yang dipakai.
+5. Dasar AI Desainer dan fitur lain tidak diubah.
 
 v2.7.9:
 1. AI DESAINER: PILIHAN JENIS POSTER TERPISAH. Di bawah "Pengaturan AI Provider & API Key" kini ada kartu "Jenis Poster" dengan dua tombol: Poster Tunggal dan Carousel. Pilih Poster Tunggal: hanya UI poster tunggal (tombol Buat Desain) yang tampil. Pilih Carousel: hanya UI Carousel (jumlah slide, tema, nomor part, isi per slide, tombol Buat semua slide) yang tampil, tombol Buat Desain tunggal disembunyikan sehingga tidak salah pencet.
 2. DATA TETAP TERSIMPAN. Pindah mode tidak menghapus apa pun: pilihan mode, perintah poster tunggal, isi/tema per slide, status slide, acuan desain, logo, username, dan API key tetap di localStorage + IndexedDB (tidak hilang saat refresh/update versi). Data hanya hilang bila dihapus manual lewat tombol "Hapus data" di kartu Jenis Poster (dengan konfirmasi).
 3. TOMBOL INFO (i) di kartu Jenis Poster: penjelasan perbedaan kedua mode, keamanan data, dan tips memakainya.
 4. Dasar AI Desainer dan alur Carousel v2.7.8 tidak diubah.
-
-v2.7.8:
-1. FITUR CAROUSEL DI AI DESAINER: kartu baru "Carousel / Poster Bersambung" (maks. 17 slide). Isi perintah tiap slide ditulis di kolomnya sendiri; kolom "Perintah / isi poster" di atas menjadi topik umum. Tombol: Buat semua, Lanjutkan dari slide berikutnya (bila limit habis/gagal, slide yang sudah jadi tidak diulang), dan Buat slide ini saja.
-2. TEMA: "Sama persis" (desain slide acuan dikunci, hanya isi teks berubah), "Serasi tapi variasi" atau "Beda tema" (kolom tema khusus per slide). Slide acuan otomatis slide pertama; bisa diganti dengan tombol "Jadikan slide aktif sebagai acuan" sehingga carousel bisa disambung di lain waktu.
-3. NOMOR PART (01/05): posisi atas/bawah kiri-tengah-kanan atau di antara username, 7 gaya tulisan, pemisah (sama, |, garis, titik, kotak) dan 3 ukuran. Dipasang otomatis dan dikunci ke posisinya setelah tata letak.
-4. Perintah per slide, jumlah slide, dan pilihan carousel tersimpan (localStorage + IndexedDB), jadi tidak hilang saat update versi. Dasar AI Desainer v2.7.6/v2.7.7 tidak diubah.
 
 -->
 
@@ -2438,7 +2439,7 @@ body.editing-text-mode .vertical-toolbar{pointer-events:none;opacity:.22;transit
 
 <script>
 /* v1.6.7: satu sumber versi (sinkron dengan catatan atas file) */
-const APP_VERSION = 'v2.7.9';
+const APP_VERSION = 'v2.8.0';
 const TABLE_DEFAULT_PAD_X = 32; // jarak kiri-kanan teks dalam kotak tabel (bawaan, px kanvas) 
 const STORAGE_KEY='MAKER_STUDIO_ACTIVE_PROJ_V8';
 const CURRENT_PROJ_ID_KEY='MAKER_STUDIO_CURRENT_ID_V8';
@@ -24695,6 +24696,7 @@ window.openAiDesigner=function(){
 window.adzClose=function(){
  /* v2.6.3: saat AI bekerja, X hanya menyembunyikan panel (proses tetap jalan) agar kanvas terlihat */
  if(S.busy){adzMinimize();return;}
+ try{carSyncFromDom();}catch(e){}
  readCfg();promptSave(true);$('adzModal').classList.remove('active');chipHide();shieldSet(false);S.min=false;gStop();
 };
 window.adzMinimize=function(){
@@ -25244,7 +25246,9 @@ function promptSave(now){
  clearTimeout(pTimer);
  const f=function(){
   const el=$('adzPrompt');if(!el||!S.pLoaded)return;
-  const v={text:el.value,mode:S.mode,style:S.style,users:($('adzUsers')||{}).value||'',sep:S.sep,on:!!($('adzUserOn')&&$('adzUserOn').checked),t:Date.now()};
+  const pcar=(pmMode()==='car');
+  if(pcar){const cc=carCfg();if(cc.base!==el.value){cc.base=el.value;saveCfg();}}else S.singleText=el.value;
+  const v={text:pcar?(S.singleText||''):el.value,mode:S.mode,style:S.style,users:($('adzUsers')||{}).value||'',sep:S.sep,on:!!($('adzUserOn')&&$('adzUserOn').checked),t:Date.now()};
   try{localStorage.setItem(LS_PROMPT,JSON.stringify(v));}catch(e){}
   pdbPut('prompt',v).catch(function(){});
  };
@@ -25256,7 +25260,8 @@ function promptLoad(){
   if(S.pLoaded)return;S.pLoaded=true;
   if(!v||typeof v!=='object')return;
   const el=$('adzPrompt');
-  if(el&&!el.value&&typeof v.text==='string')el.value=v.text;
+  S.singleText=(typeof v.text==='string')?v.text:'';
+  if(el&&!el.value)el.value=(pmMode()==='car')?(carCfg().base||''):S.singleText;
   if(v.style!=null&&v.style>=-1&&v.style<ADZ_STYLES.length){S.style=v.style;paintChips();}
   if(v.mode==='new'||v.mode==='ref'||v.mode==='remix')adzMode(v.mode);
   if(!S.uTouched){
@@ -25887,11 +25892,24 @@ function slideSummary(){
   return o;
  });
 }
+/* ===== v2.8.0: mode teks utuh (verbatim) + mode efektif ===== */
+const VERB_RE=/(jangan|tidak\s*boleh|dilarang|tanpa|gak\s*boleh|ga\s*boleh|nggak\s*boleh)\s*(di)?\s*(menyingkat|singkat|meringkas|ringkas|persingkat|memotong|potong|mengurangi|kurangi)|kata\s*per\s*kata|word\s*for\s*word|verbatim|(teks|isi|materi)\s*(nya)?\s*(harus\s*)?(utuh|full|penuh)|(utuh|full)\s*(teks|isi|materi)/i;
+function verbOn(){
+ if(S.carCtx)return !!S.verb;
+ const pe=$('adzPrompt');const v=pe?String(pe.value||''):'';
+ return VERB_RE.test(v);
+}
+function effMode(){return (S.carCtx&&S.mode==='remix')?'new':S.mode;}
+const VERB_SYS=' 7) VERBATIM OVERRIDE (wins over every length, size and copy rule above): the text layers must contain ALL of the user text, word for word, in the same order. If the brief copy is shorter or different, ignore the brief copy. Use several body text layers inside one large card, body size 2.4-3.2 percent of width, lines up to 60 characters; the headline and kicker come from the user text itself. Never output "..." or truncated sentences.';
+function copyRules(){
+ if(!verbOn())return COPY_RULES;
+ return 'COPY RULES (VERBATIM MODE, da\'wah content): (a) The user supplied the FULL text of this poster. Use EVERY word of it VERBATIM, in the same order, with the same paragraphs and line breaks, spelling, numbers, Arabic text, hadith or verse references and @usernames. NEVER summarize, shorten, abbreviate, paraphrase, merge, reorder, translate or drop anything, and never cut text with "...". (b) NEVER add Quran verses, hadith, quotes, citations, numbers or rulings the user did not write. (c) Write no extra original copy. (d) Long text is expected: split it over several text layers (kicker, title, body paragraphs, closing) and make room by REDUCING font size and spacing (body may go down to 2.4 percent of width, line length up to 60 characters) and by enlarging the text card; if it still does not fit, reduce sizes further but never cut words. The headline is the user\'s own title line, never a new invented one. (e) Write in the language of the text. (f) Do not depict people, faces or animals in any illustration.\n';
+}
 const COPY_RULES=
  'COPY RULES (da\'wah content): (a) Any wording, @usernames, hadith/verse/scholar text the user supplied is used VERBATIM. (b) NEVER invent Quran verses, hadith, scholar quotes, citations, numbers, sources or fiqh rulings. (c) Where the user gave only a theme or a message, you may write short original reminder copy in plain Indonesian (diksi singkat, kontras, bermakna dalam, bernada nasihat yang santun dan sedikit menyentil kelalaian, tanpa menghina, mengkafirkan atau menunjuk orang). Original copy is never put in quotation marks as if it were someone\'s saying and never attributed to anyone. (d) Keep the copy tight: kicker 2-6 words, headline max 7 words, body max about 45 words in total, closing line max 12 words. (e) Write in the language of the request (default Indonesian). (f) Do not depict people, faces or animals in any illustration; use objects, architecture, nature, calligraphy-free symbols or abstract shapes.\n';
 function briefSystem(d){
  return 'You are the creative director who interprets SHORT, informal client requests (usually Indonesian) for da\'wah / Islamic reminder posters and social cards. Understand the real intent even if the request is brief or loosely worded, then decide the copy, hierarchy, palette and decoration. Reply with ONE JSON object only.\n'+
- 'CANVAS: '+d.W+'x'+d.H+' px (aspect '+(d.W/d.H).toFixed(3)+').\n'+COPY_RULES+toneRules()+
+ 'CANVAS: '+d.W+'x'+d.H+' px (aspect '+(d.W/d.H).toFixed(3)+').\n'+copyRules()+toneRules()+
  'If reference image(s) are attached (labelled), analyse them deeply: palette (hex), font personality, how the headline is built (stacked lines, two colors, brush stroke behind a word...), card/pill shapes, decorative devices (brush strokes, stickers, rings, dots, rays, frames), illustration subject and where it sits, margins, vertical rhythm. Reproduce the DNA, not the exact text.\n'+
  'SCHEMA: {"intent":"1-2 sentences: what the poster must achieve","audience":"","tone":"","archetype":"stack-center|editorial-left|card-focus|split-band|illustration-hero","look":"3d-lit|refined-2d","effects":"which text effects and light/ornament devices to use (gold gradient, extrude, glow, frame, corners, rays, bokeh, star pattern, wordmark watermark, ribbon, orb)","copy":{"kicker":"","headline":"","headlineEmphasis":"the one word/phrase to highlight, or empty","subheadline":"","body":["short paragraph 1","optional paragraph 2"],"closing":"","footer":["@handle1","@handle2"]},"palette":{"bg":["#hex","#hex"],"accent":"#hex","accent2":"#hex","text":"#hex","muted":"#hex"},"fonts":{"display":"","body":"","accent":""},"decor":["each decorative device to build, e.g. brush stroke behind headline emphasis, gold gradient headline, glow behind title, light rays, bokeh, star8 pattern, ornamental frame and corners, divider, ribbon or burst badge, wordmark watermark, sparkles"],"illustration":{"needed":true,"description":"English prompt for ONE flat-style object illustration without people/animals/text, or empty","placement":"where it sits (e.g. top-right, behind headline, bottom-center)"},"referenceDNA":"what to copy from the reference(s), or empty","zones":[{"role":"kicker|headline|subheadline|body|closing|footer|illustration","yPct":0,"hPct":0}]}';
 }
@@ -25917,7 +25935,7 @@ function systemPrompt(m){
  'SPACING RULES: decorative layers sit BEHIND text and must not hide it; any non-text shape that overlaps text but is not a real card must set bleed true (otherwise it is treated as a card and resized). A real card is a shape without bleed whose area contains the text center. Keep frames and corners clear of text (inset at least 4 percent).\n'
  :'ASSETS: add 2-5 decorative asset layers so the poster looks designed (for the da\'wah/modern style: brush stroke behind the key headline word, scribble underline under a keyword, ring around one word, splatter or halftone accent at a corner with low opacity 0.15-0.5). ')
  +'In reference mode recreate every decorative device seen in the reference using the closest kind. If an illustration is needed and image generation is ON, add ONE image layer with cutout:true (sticker-style), placed above the background and below the text unless overlap is intended; keep text readable.\n'+
- 'RULES: 1) Real layers like a designer: background, decor, optional illustration, headline, body, source/credit, footer/handle. 2) Use at most 3 fonts. Arabic text must use Amiri, Scheherazade New, Aref Ruqaa, Cairo or Reem Kufi with align center. 3) '+COPY_RULES+toneRules()+' 4) '+(cfg.rich?'24-44':'8-20')+' layers total, at most '+(cfg.useImages?'2':'0')+' image layers'+(cfg.useImages?'':' (image generation is OFF: use only shapes, assets, fades and text; use keepId only in remix mode)')+(cfg.assets?'':'; asset layers are OFF: do not output kind asset')+'. 5) Full-canvas backgrounds/overlays set "bleed":true; everything else stays inside the safe area. 6) Follow the APPROVED CREATIVE BRIEF when given: its palette, fonts, copy, decor list and zones.';
+ 'RULES: 1) Real layers like a designer: background, decor, optional illustration, headline, body, source/credit, footer/handle. 2) Use at most 3 fonts. Arabic text must use Amiri, Scheherazade New, Aref Ruqaa, Cairo or Reem Kufi with align center. 3) '+copyRules()+toneRules()+' 4) '+(cfg.rich?'24-44':'8-20')+' layers total, at most '+(cfg.useImages?'2':'0')+' image layers'+(cfg.useImages?'':' (image generation is OFF: use only shapes, assets, fades and text; use keepId only in remix mode)')+(cfg.assets?'':'; asset layers are OFF: do not output kind asset')+'. 5) Full-canvas backgrounds/overlays set "bleed":true; everything else stays inside the safe area. 6) Follow the APPROVED CREATIVE BRIEF when given: its palette, fonts, copy, decor list and zones.'+(verbOn()?VERB_SYS:'');
 }
 function qaSystem(m){
  const d=canvasDims(),ratio=(d.W/d.H).toFixed(3);
@@ -25969,6 +25987,7 @@ function paintToneUi(){
  const h=$('adzToneHint');if(h){const t=ADZ_TONES.filter(function(a){return a[0]===cur;})[0];h.textContent=(t?t[2]:'')+' Tanda titik dua otomatis dibuang dari teks poster.';}
 }
 function toneRules(){
+ if(verbOn())return 'TEXT MODE = VERBATIM: the user text is final. Do not rewrite, rephrase, restyle, shorten or add to it; ignore every voice and tone rule for text the user supplied.\n';
  const t=cfg.tone||'gaul';
  const base="HUMAN VOICE RULES (the copy must read like a real da'wah team writer talking, never like an AI): (1) NEVER use a colon in any poster text (no 'Kami Jawab :' or 'Ingat:' or 'Pesan:'); use a period, comma, three dots or a line break instead. Colons are allowed only inside verse or hadith references such as 2:255. Never use em dashes and never use 'label: explanation' patterns. (2) Write the way people actually talk: short and medium sentences mixed, a rhetorical question now and then, concrete everyday pictures, one clear point per poster. Every sentence must make logical sense on its own and every word must be exact; if a phrase sounds odd when read aloud, rewrite it. (3) Forbidden AI-sounding wording: 'mari kita', 'sudahkah kita', 'ingatlah bahwa', 'penting untuk diingat', 'perlu diketahui', 'di era modern ini', 'di zaman sekarang ini', 'sebagai seorang muslim', 'tidak hanya ... tetapi juga', lists of three abstract nouns, and abstract words like hikmah, esensi, urgensi, komprehensif, fundamental, signifikan. (4) No hollow filler, no empty slogans, no repeated sentence patterns. (5) The ending line must hit the heart (ngena): a blunt, honest, caring line that makes the reader pause, never a generic motivational line. (6) Always polite: no insults, no mocking, no pointing at a person, no takfir; nasihat yang nyentil tapi tetap sayang. ";
  const style={
@@ -25979,7 +25998,7 @@ function toneRules(){
  return base+(style[t]||style.gaul)+"\n";
 }
 function scrubCopy(L){
- if(S.mode==='remix')return;
+ if(S.mode==='remix'||verbOn())return;
  L.forEach(function(l){
   if(!l||l.kind!=='text'||l._skip||l._footer)return;
   let t=String(l.text||'');if(!t||/https?:|www\./i.test(t)||isHandleOnly(t))return;
@@ -25991,9 +26010,11 @@ function scrubCopy(L){
  });
 }
 function enforceReadable(L){
+ const vb=verbOn();
  L.forEach(function(l){
   if(!l||l.kind!=='text'||l._skip||l._footer)return;
   const sz=+l.size||0,len=String(l.text||'').length;
+  if(vb){if(sz<2.4)l.size=2.4;return;}
   if(sz>=5.2)return;
   if(len>=28&&sz<3.2)l.size=Math.min(3.4,Math.max(sz*1.12,3.1));
   else if(len<28&&sz<2.6)l.size=2.6;
@@ -26061,22 +26082,24 @@ function fitFooter(els,d,m){
 }
 function baseTask(){
  const prompt=($('adzPrompt').value||'').trim();
+ const em=effMode(),vb=verbOn();
  const styleTxt=S.style>=0?('STYLE DIRECTION: '+ADZ_STYLES[S.style][1]+'\n'):'';
  let t='';
- if(S.mode==='new')t='TASK: Design a brand-new poster from this request.\n';
- else if(S.mode==='ref')t='TASK: The attached image(s) labelled REFERENCE are STYLE REFERENCES. Recreate their visual language (palette, typography mood, composition, ornaments, brush strokes, spacing, illustration role) for a NEW poster with the content below. Do not copy their text or logos; use the user content. Decompose into separate layers.\n';
+ if(em==='new')t='TASK: Design a brand-new poster from this request.\n';
+ else if(em==='ref')t='TASK: The attached image(s) labelled REFERENCE are STYLE REFERENCES. Recreate their visual language (palette, typography mood, composition, ornaments, brush strokes, spacing, illustration role) for a NEW poster with the content below. Do not copy their text or logos; use the user content. Decompose into separate layers.\n';
  else t='TASK: Redesign the CURRENT slide (the image labelled CURRENT SLIDE is its screenshot). Keep the existing text content (same wording) unless the user asks to change it; improve layout, hierarchy, spacing, colors and decoration. Current layers (percent geometry):\n'+JSON.stringify(slideSummary())+'\n';
- t+=styleTxt+'USER REQUEST (may be short or informal, infer the real intent):\n'+(prompt||(S.mode==='remix'?'Rapikan dan percantik desain ini.':'Buat poster yang bagus.'))+'\n';
+ t+=styleTxt+'USER REQUEST (may be short or informal, infer the real intent):\n'+(prompt||(em==='remix'?'Rapikan dan percantik desain ini.':'Buat poster yang bagus.'))+'\n';
+ if(vb)t+='\nVERBATIM TEXT MODE: the text of this request marked as the slide/poster content is the FULL final text of the poster. Place ALL of it word for word (no summarizing, shortening, abbreviating, paraphrasing or reordering). In the creative brief JSON, copy.body must hold that text in full, split into paragraphs, unchanged, and copy.headline is the user\'s own title line. Long text is fine: split it into several text layers and lower the font size to make it fit, never cut words.\n';
  const ftl=footerLine();
  if(ftl)t+='\nFIXED FOOTER (set by the app, overrides anything in the request): the poster footer is ONE single-line text layer, centered inside the bottom safe area, with this EXACT text: "'+ftl+'". Name that layer "Username". Do not write any other @handles anywhere else and never split it over two lines.\n';
  if(AX.plan)t+='\nLOGO BAND (drawn by the app, do NOT create any logo layer): the top '+AX.plan.zonePct+'% of the canvas (y from 0 to '+AX.plan.zonePct+') is reserved for '+AX.plan.desc+'. Keep that band free of text, cards, frames, corner ornaments and illustrations (full-bleed backgrounds, fades, glows and textures may pass behind it). Start every other layer at y >= '+AX.plan.zonePct+'.\n';
- if(S.ctxTexts.length){t+='\nATTACHED PROJECT FILES (context, may be a poster project JSON; reuse its texts/colors/fonts as relevant):\n';S.ctxTexts.forEach(function(c){t+='--- '+c.name+' ---\n'+c.text+'\n';});}
+ if(S.ctxTexts.length){t+=((S.carCtx||vb)?'\nATTACHED PROJECT FILES (style, palette and font context ONLY; NEVER take any wording or topic from them):\n':'\nATTACHED PROJECT FILES (context, may be a poster project JSON; reuse its texts/colors/fonts as relevant):\n');S.ctxTexts.forEach(function(c){t+='--- '+c.name+' ---\n'+c.text+'\n';});}
  return t;
 }
 async function imageParts(){
  const out=[];
  S.refs.forEach(function(r,i){out.push({text:'[REFERENCE IMAGE '+(i+1)+']'});out.push(imgPart(r.url));});
- if(S.mode==='remix'){try{out.push({text:'[CURRENT SLIDE screenshot]'});out.push(imgPart(await shrink(mainCanvas.toDataURL('image/jpeg',0.8),1100,0.8)));}catch(e){}}
+ if(effMode()==='remix'){try{out.push({text:'[CURRENT SLIDE screenshot]'});out.push(imgPart(await shrink(mainCanvas.toDataURL('image/jpeg',0.8),1100,0.8)));}catch(e){}}
  return out;
 }
 async function makeBrief(d){
@@ -26087,6 +26110,7 @@ async function makeBrief(d){
 async function designParts(brief){
  let t=baseTask();
  if(brief)t+='\nAPPROVED CREATIVE BRIEF (follow it; it was derived from the request and the references):\n'+JSON.stringify(brief)+'\n';
+ if(verbOn())t+='\nVERBATIM: if brief.copy is shorter than or different from the user text, the user text wins; place all of it.\n';
  t+='\nReturn the poster JSON now.';
  return [{text:t}].concat(await imageParts());
 }
@@ -27321,6 +27345,8 @@ async function adzRun(cont,canRetry){
  try{
   const d=canvasDims(),m=Math.round(d.W*cfg.margin/100);
   log('Mulai · '+PROVS[provId()].s+' · '+keysOf(provId()).length+' key'+(cfg.useImages?(' + gambar '+cfg.imageModel):'')+' · kanvas '+d.W+'×'+d.H);
+  if(S.carCtx&&S.carInfo)log(S.carInfo,'ok');
+  if(verbOn())log('Mode teks utuh aktif: isi dipakai kata per kata, tidak diringkas.','ok');
   await prepLogoPlan(d,m);
 
   /* 1) brief / analisis maksud */
@@ -27512,7 +27538,7 @@ const CAR_SZ=[['s','Kecil',2.5],['m','Sedang',3.2],['l','Besar',4.2]];
 const CAR_MAX=17;
 function carCfg(){
  let c=cfg.car;if(!c||typeof c!=='object'){c={};cfg.car=c;}
- const D={on:false,n:5,theme:'same',num:true,pos:'bc',sty:'pl',msep:'same',sz:'m',next:1,ref:-1};
+ const D={on:false,n:5,theme:'same',num:true,pos:'bc',sty:'pl',msep:'same',sz:'m',next:1,ref:-1,base:'',refMode:'auto',snap:'',full:true};
  Object.keys(D).forEach(function(k){if(c[k]===undefined)c[k]=D[k];});
  c.n=Math.max(1,Math.min(CAR_MAX,parseInt(c.n)||5));
  if(!Array.isArray(c.slides))c.slides=[];
@@ -27564,77 +27590,114 @@ function carPin(target,d){
  el.x+=dx;el.y+=dy;
  el._calculatedHeight=null;el._renderedW=null;el._cachedCanvas=null;el._cachedHash=null;
 }
+/* v2.8.0: teks slide acuan DIKOSONGKAN (hanya gaya yang dikunci) agar isi slide lama tidak menular */
+function carSpecText(sp){
+ try{return JSON.stringify(sp,function(k,v){
+  if(k==='imagePrompt'||k==='words'||k==='title')return undefined;
+  if(k==='text'&&typeof v==='string'&&this&&this.kind==='text')return '[teks slide acuan, '+v.length+' karakter: GANTI dengan isi slide ini]';
+  if(typeof v==='string'&&v.length>90)return v.slice(0,90)+'...';
+  return v;
+ }).slice(0,11000);}catch(e){return '';}
+}
 function carRefText(){
- if(S.carSpec){
-  try{return JSON.stringify(S.carSpec,function(k,v){if(k==='imagePrompt')return undefined;if(typeof v==='string'&&v.length>90)return v.slice(0,90)+'...';return v;}).slice(0,11000);}catch(e){}
+ const c=carCfg();
+ if(c.refMode==='slide'){
+  const s=slides[c.ref]||null;
+  if(s){
+   const d=canvasDims();let bg='';
+   try{const B=s.background||{};bg=JSON.stringify({type:B.bgType,gradType:B.gradType,angle:B.angle,stops:(B.colorStops||[]).map(function(x){return x.color;}),color:B.color1});}catch(e){}
+   try{return 'BACKGROUND '+bg+'\nLAYERS '+JSON.stringify(layerTable(s,d).map(function(o){if(o&&typeof o.text==='string')o.text='[teks slide acuan: GANTI]';return o;})).slice(0,9000);}catch(e){return '';}
+  }
  }
- const c=carCfg(),s=slides[c.ref]||null;if(!s)return '';
- const d=canvasDims();let bg='';
- try{const B=s.background||{};bg=JSON.stringify({type:B.bgType,gradType:B.gradType,angle:B.angle,stops:(B.colorStops||[]).map(function(x){return x.color;}),color:B.color1});}catch(e){}
- try{return 'BACKGROUND '+bg+'\nLAYERS '+JSON.stringify(layerTable(s,d)).slice(0,9000);}catch(e){return '';}
+ if(S.carSpec)return carSpecText(S.carSpec);
+ return c.snap||'';
+}
+function carTxt(k){
+ const sn=S.carSnap;if(sn&&sn[k-1])return sn[k-1];
+ const x=carCfg().slides[k-1]||{};return {t:String(x.t||'').trim(),th:String(x.th||'').trim()};
+}
+function carSyncFromDom(){
+ const c=carCfg(),w=$('adzCarList');
+ if(w){
+  Array.prototype.forEach.call(w.querySelectorAll('textarea[data-k]'),function(t){const k=parseInt(t.getAttribute('data-k'));if(k>=1&&k<=CAR_MAX&&c.slides[k-1])c.slides[k-1].t=t.value;});
+  Array.prototype.forEach.call(w.querySelectorAll('input[data-th]'),function(t){const k=parseInt(t.getAttribute('data-th'));if(k>=1&&k<=CAR_MAX&&c.slides[k-1])c.slides[k-1].th=t.value;});
+ }
+ const pe=$('adzPrompt');if(pe&&pmMode()==='car')c.base=pe.value;
+ saveCfg();
 }
 function carPrompt(k){
- const c=carCfg(),N=c.n,sl=c.slides[k-1]||{t:'',th:''};
+ const c=carCfg(),N=c.n,sl=carTxt(k),vb=!!S.verb;
  const base=(S.carBase||'').trim();
  const role=k===1?'slide pembuka (judul/hook yang menarik)':(k===N?'slide penutup (kesimpulan, pesan akhir, ajakan)':'slide isi (poin lanjutan)');
- let p=base?(base+'\n\n'):'';
- p+='[CAROUSEL SLIDE '+k+' DARI '+N+'] Ini satu slide dari poster carousel bersambung. Buat HANYA isi slide ini, jangan memuat isi slide lain. Peran slide ini: '+role+'.\n';
- const flow=[];for(let i=1;i<=N;i++){const x=(c.slides[i-1]&&c.slides[i-1].t||'').replace(/\s+/g,' ').trim();if(x)flow.push(i+') '+x.slice(0,50));}
- if(flow.length>1)p+='ALUR CAROUSEL (agar nyambung): '+flow.join(' | ')+'\n';
- p+='ISI/PERINTAH SLIDE INI: '+((sl.t||'').trim()||'lanjutkan alur topik umum secara logis sesuai peran slide ini')+'\n';
+ let p='[PERMINTAAN BARU \u00B7 CAROUSEL SLIDE '+k+' DARI '+N+'] Ini generate TERBARU yang berdiri sendiri. ABAIKAN semua materi, topik, dan hasil dari generate atau obrolan sebelumnya, dari slide lain yang sudah ada di proyek, dan teks yang terlihat pada gambar referensi atau berkas lampiran (itu hanya acuan gaya, BUKAN isi). Isi poster HANYA berasal dari bagian ISI SLIDE INI di bawah.\n';
+ if(base)p+='PERINTAH UMUM PENGGUNA (berlaku untuk semua slide: gaya, aturan, larangan; BUKAN isi slide):\n'+base+'\n';
+ p+='Buat HANYA isi slide ini, jangan memuat isi slide lain. Peran slide ini: '+role+'.\n';
+ if(sl.t){
+  p+='ISI SLIDE INI'+(vb?' (WAJIB dipakai UTUH kata per kata, urutan dan susunan paragraf tetap, tanpa diringkas, tanpa disingkat, tanpa ditambah)':'')+':\n<<<ISI_SLIDE_'+k+'\n'+sl.t+'\nISI_SLIDE_'+k+'>>>\n';
+ }else{
+  const flow=[];for(let i=1;i<=N;i++){if(i===k)continue;const x=(carTxt(i).t||'').replace(/\s+/g,' ');if(x)flow.push(i+') '+x.slice(0,50));}
+  if(flow.length)p+='KONTEKS ALUR (hanya agar nyambung, JANGAN disalin ke slide ini): '+flow.join(' | ')+'\n';
+  p+='ISI SLIDE INI: kolom kosong. Tulis sendiri isi slide ini sesuai peran slide dan perintah umum, nyambung dengan alur.\n';
+ }
  if(c.num&&c.pos!=='mid')p+='Sisakan ruang kosong untuk nomor part di '+(CAR_POS.filter(function(x){return x[0]===c.pos;})[0]||['','bawah'])[1].toLowerCase()+'; jangan menulis nomor part sendiri dan jangan menaruh teks lain di sana.\n';
  if(c.theme==='same'){
   if(k>1){
    const r=carRefText();
-   if(r)p+='DESAIN TERKUNCI: slide ini WAJIB memakai desain yang SAMA PERSIS dengan slide acuan berikut (latar/gradasi, palet warna, font dan ukuran judul/isi, ornamen/aset/bingkai, efek, posisi dan ukuran tiap layer). Ubah HANYA teks isi sesuai perintah slide ini (panjang teks boleh menyesuaikan, jaga padding dan keterbacaan). Jangan membuat tema baru. ACUAN: '+r+'\n';
+   if(r)p+='DESAIN TERKUNCI: slide ini WAJIB memakai desain yang SAMA PERSIS dengan slide acuan berikut (latar/gradasi, palet warna, font dan ukuran judul/isi, ornamen/aset/bingkai, efek, posisi dan ukuran tiap layer). Teks slide acuan SUDAH DIKOSONGKAN dan bukan isi: jangan menyalin apa pun darinya. Isi semua layer teks HANYA dengan ISI SLIDE INI (panjang teks boleh menyesuaikan, perkecil font bila perlu, jaga padding dan keterbacaan, jangan memotong kata). Jangan membuat tema baru. ACUAN: '+r+'\n';
   }
  }else{
-  p+='TEMA: pakai palet warna, latar, dan ornamen yang BERBEDA dari slide lain, tetapi tetap satu keluarga carousel (font judul, gaya username, dan nomor part serasi).'+((sl.th||'').trim()?(' Tema slide ini: '+sl.th.trim()+'.'):'')+'\n';
+  p+='TEMA: pakai palet warna, latar, dan ornamen yang BERBEDA dari slide lain, tetapi tetap satu keluarga carousel (font judul, gaya username, dan nomor part serasi).'+(sl.th?(' Tema slide ini: '+sl.th+'.'):'')+'\n';
  }
  return p;
 }
 window.adzCarGo=async function(from,only){
  if(S.busy)return;
- const c=carCfg();
- if(!c.on){showToast('Aktifkan Mode Carousel dulu');return;}
- const N=c.n;from=Math.max(1,Math.min(N,parseInt(from)||1));
+ try{carSyncFromDom();}catch(e){}
+ const c0=carCfg();
+ if(!c0.on){showToast('Aktifkan Mode Carousel dulu');return;}
+ const N=c0.n;from=Math.max(1,Math.min(N,parseInt(from)||1));
  const end=only?from:N;
  const pe=$('adzPrompt'),rp=$('adzReplace'),origTxt=pe.value,origRep=rp.checked;
- if(!origTxt.trim()&&!c.slides.slice(0,N).some(function(x){return (x.t||'').trim();})){showToast('Isi topik umum atau perintah per slide dulu');return;}
- S.carBase=origTxt;S.carLock=true;pmSync();
- if(!only&&from===1){S.carSpec=null;}
+ /* v2.8.0: isi semua kolom difoto saat tombol ditekan; proses memakai foto ini, bukan data lain */
+ const SN=[];for(let i=0;i<N;i++){const x=c0.slides[i]||{};SN.push({t:String(x.t||'').trim(),th:String(x.th||'').trim()});}
+ const full=c0.full!==false;
+ if(!origTxt.trim()&&!SN.some(function(x){return x.t;})){showToast('Isi perintah umum atau isi per slide dulu');return;}
+ S.carBase=origTxt;S.carSnap=SN;S.carLock=true;pmSync();
+ if(!only&&from===1){S.carSpec=null;c0.snap='';c0.refMode='auto';}
  let made=0,failed=0;
  try{
   for(let k=from;k<=end;k++){
    S.carCtx={k:k,N:N};
+   S.verb=full&&!!SN[k-1].t;
+   S.lastSpec=null;
+   S.carInfo='Carousel slide '+k+'/'+N+': '+(SN[k-1].t?('isi diambil dari kolom slide '+k+' ('+SN[k-1].t.length+' karakter'+(S.verb?', dipakai utuh tanpa diringkas':'')+') \u00B7 awal: '+SN[k-1].t.replace(/\s+/g,' ').slice(0,48)):'kolom slide kosong, AI menulis dari perintah umum');
    pe.value=carPrompt(k);
    rp.checked=(only||k===1)?origRep:false;
    carRefresh(k);
    S.done='';
    await adzGenerate();
-   if(S.done!=='ok'){failed=k;c.next=k;break;}
+   if(S.done!=='ok'){failed=k;carCfg().next=k;break;}
    made++;
-   const st=c.status||(c.status={});st[k]='ok';
-   if(k===1&&!only){c.ref=currentSlideIndex;}
-   if(c.theme==='same'&&!S.carSpec&&S.lastSpec&&!only)S.carSpec=S.lastSpec;
-   c.next=(k+1>N)?1:k+1;
+   const cx=carCfg();const st=cx.status||(cx.status={});st[k]='ok';
+   if(k===1&&cx.theme==='same'&&S.lastSpec){S.carSpec=S.lastSpec;cx.snap=carSpecText(S.lastSpec);cx.refMode='auto';cx.ref=currentSlideIndex;}
+   cx.next=(k+1>N)?1:k+1;
    saveCfg();
-   if(k<end){S.carCtx=null;await delay(rnd(2500,6000));}
+   if(k<end){S.carCtx=null;S.verb=false;await delay(rnd(2500,6000));}
   }
  }catch(e){failed=failed||from;log('Carousel berhenti: '+e.message,'er');}
  finally{
-  pe.value=origTxt;rp.checked=origRep;S.carLock=false;pmSync();S.carCtx=null;S.carBase='';
+  pe.value=origTxt;rp.checked=origRep;S.carLock=false;pmSync();S.carCtx=null;S.carBase='';S.verb=false;S.carSnap=null;S.carInfo='';S.lastSpec=null;
   try{readCfg();}catch(e){}
   carRefresh();
  }
- if(failed){const st=c.status||(c.status={});st[failed]='er';saveCfg();carRefresh();showToast('Carousel berhenti di slide '+failed+'. Tekan Lanjutkan untuk menyambung.');}
+ if(failed){const cx=carCfg();const st=cx.status||(cx.status={});st[failed]='er';saveCfg();carRefresh();showToast('Carousel berhenti di slide '+failed+'. Tekan Lanjutkan untuk menyambung.');}
  else if(made){showToast(only?('Slide '+from+' selesai'):('Carousel selesai: '+made+' slide'));}
 };
 window.adzCarOne=function(k){adzCarGo(k,true);};
-window.adzCarAll=function(){const c=carCfg();c.status={};c.next=1;saveCfg();adzCarGo(1,false);};
+window.adzCarAll=function(){if(S.busy)return;const c=carCfg();c.status={};c.next=1;c.snap='';c.refMode='auto';S.carSpec=null;S.lastSpec=null;S.ck=null;saveCfg();adzCarGo(1,false);};
 window.adzCarNext=function(){const c=carCfg();adzCarGo(c.next>c.n?1:c.next,false);};
-window.adzCarReset=function(){const c=carCfg();c.status={};c.next=1;saveCfg();carRefresh();showToast('Status carousel direset');};
-window.adzCarRef=function(){const c=carCfg();c.ref=currentSlideIndex;S.carSpec=null;saveCfg();carRefresh();showToast('Slide '+(currentSlideIndex+1)+' dijadikan acuan desain');};
+window.adzCarReset=function(){const c=carCfg();c.status={};c.next=1;c.snap='';c.refMode='auto';S.carSpec=null;S.lastSpec=null;S.ck=null;saveCfg();carRefresh();showToast('Status carousel direset');};
+window.adzCarRef=function(){const c=carCfg();c.ref=currentSlideIndex;c.refMode='slide';c.snap='';S.carSpec=null;saveCfg();carRefresh();showToast('Slide '+(currentSlideIndex+1)+' dijadikan acuan desain');};
 function carChips(id,arr,key,after){
  const w=$(id);if(!w)return;
  if(!w.children.length)arr.forEach(function(a){const b=document.createElement('button');b.className='adz-chip';b.setAttribute('data-v',a[0]);b.textContent=a[1];b.onclick=function(){carCfg()[key]=a[0];saveCfg();carRefresh();};w.appendChild(b);});
@@ -27643,7 +27706,12 @@ function carChips(id,arr,key,after){
 function carList(){
  const c=carCfg(),w=$('adzCarList');if(!w)return;
  const sig=c.n+'|'+c.theme;
- if(w.getAttribute('data-sig')===sig)return;
+ if(w.getAttribute('data-sig')===sig){
+  /* v2.8.0: kolom selalu mencerminkan data aktif (kecuali yang sedang diketik) */
+  Array.prototype.forEach.call(w.querySelectorAll('textarea[data-k]'),function(t){const k=parseInt(t.getAttribute('data-k')),v=(c.slides[k-1]&&c.slides[k-1].t)||'';if(t!==document.activeElement&&t.value!==v)t.value=v;});
+  Array.prototype.forEach.call(w.querySelectorAll('input[data-th]'),function(t){const k=parseInt(t.getAttribute('data-th')),v=(c.slides[k-1]&&c.slides[k-1].th)||'';if(t!==document.activeElement&&t.value!==v)t.value=v;});
+  return;
+ }
  w.setAttribute('data-sig',sig);w.innerHTML='';
  for(let k=1;k<=c.n;k++){
   const d=document.createElement('div');d.className='car-slide';
@@ -27653,8 +27721,8 @@ function carList(){
    (c.theme==='same'?'':'<input class="adz-in" data-th="'+k+'" autocomplete="off" placeholder="Tema khusus slide '+k+' (opsional), mis. hijau zamrud + emas">');
   w.appendChild(d);
   const ta=d.querySelector('textarea');ta.value=c.slides[k-1].t||'';
-  ta.addEventListener('input',function(){c.slides[k-1].t=this.value;carSaveSoon();});
-  const th=d.querySelector('input');if(th){th.value=c.slides[k-1].th||'';th.addEventListener('input',function(){c.slides[k-1].th=this.value;carSaveSoon();});}
+  ta.addEventListener('input',function(){carCfg().slides[k-1].t=this.value;carSaveSoon();});
+  const th=d.querySelector('input');if(th){th.value=c.slides[k-1].th||'';th.addEventListener('input',function(){carCfg().slides[k-1].th=this.value;carSaveSoon();});}
  }
 }
 function carRefresh(running){
@@ -27665,13 +27733,15 @@ function carRefresh(running){
  carChips('adzCarTheme',[['same','Sama persis'],['vary','Beda tema (serasi)']],'theme');
  carChips('adzCarPos',CAR_POS,'pos');carChips('adzCarSty',CAR_STY,'sty');carChips('adzCarMsep',CAR_MSEP,'msep');carChips('adzCarSz',CAR_SZ,'sz');
  $('adzCarPosBox').style.display=c.num?'block':'none';
+ if($('adzCarFull'))$('adzCarFull').checked=c.full!==false;
  $('adzCarMsepBox').style.display=(c.num&&c.pos==='mid')?'block':'none';
  const th={same:'Desain slide 1 dikunci: latar, warna, font, ornamen, dan posisi sama persis, hanya isi teks yang berubah.',vary:'Tiap slide boleh bertema berbeda (isi kolom tema khusus), font judul, username, dan nomor part tetap serasi.'};
  $('adzCarThemeHint').textContent=th[c.theme]||th.same;
  const mid=c.pos==='mid';
  $('adzCarPrev').textContent='Contoh nomor part: '+(mid?('@akun1  '+(c.msep==='box'?carLabel(2,c.n,'box'):carLabel(2,c.n,c.sty))+'  @akun2'):carLabel(2,c.n,c.sty));
  const ref=slides[c.ref];
- $('adzCarStat').textContent='Berikutnya: slide '+(c.next>c.n?1:c.next)+' dari '+c.n+(ref?(' \u00B7 acuan desain: slide '+(c.ref+1)):' \u00B7 acuan desain: belum ada (otomatis dari slide 1)')+'. Perintah tersimpan otomatis.';
+ const refTxt=(c.refMode==='slide'&&slides[c.ref])?(' \u00B7 acuan desain: slide '+(c.ref+1)+' (pilihan Anda)'):(c.snap?' \u00B7 acuan desain: slide 1 dari carousel ini':' \u00B7 acuan desain: belum ada (otomatis dari slide 1)');
+ $('adzCarStat').textContent='Berikutnya: slide '+(c.next>c.n?1:c.next)+' dari '+c.n+refTxt+'. Perintah tersimpan otomatis.';
  carList();
  for(let k=1;k<=c.n;k++){const s=$('adzCarSt'+k);if(!s)continue;const v=(c.status||{})[k];s.className='car-st'+(v?(' '+v):'');s.textContent=(running===k)?' \u00B7 sedang dibuat ...':(v==='ok'?' \u00B7 \u2713 jadi':(v==='er'?' \u00B7 \u2717 gagal':''));}
  const nb=$('adzCarNextBtn');if(nb)nb.textContent='Lanjutkan dari slide '+(c.next>c.n?1:c.next);
@@ -27687,12 +27757,13 @@ function buildCarUi(){
    '<label class="adz-lab">Tema antar slide</label><div class="adz-chips" id="adzCarTheme"></div><div class="adz-hint" id="adzCarThemeHint"></div>'+
    '<div class="adz-row" style="margin-top:6px"><button class="adz-btn" style="flex:1" onclick="adzCarRef()">Jadikan slide aktif sebagai acuan desain</button></div>'+
    '<label class="adz-chk"><input type="checkbox" id="adzCarNum"><span>Pasang nomor part (mis. 01/05) di setiap slide.</span></label>'+
+   '<label class="adz-chk"><input type="checkbox" id="adzCarFull"><span>Pakai teks tiap slide UTUH (tidak diringkas / disingkat). Kolom slide yang kosong tetap ditulis AI dari perintah umum.</span></label>'+
    '<div id="adzCarPosBox"><label class="adz-lab">Posisi nomor part</label><div class="adz-chips" id="adzCarPos"></div>'+
     '<div id="adzCarMsepBox"><label class="adz-lab">Pemisah di antara username</label><div class="adz-chips" id="adzCarMsep"></div></div>'+
     '<label class="adz-lab">Gaya tulisan</label><div class="adz-chips" id="adzCarSty"></div>'+
     '<label class="adz-lab">Ukuran</label><div class="adz-chips" id="adzCarSz"></div>'+
     '<div class="adz-hint" id="adzCarPrev"></div></div>'+
-   '<label class="adz-lab">Isi / perintah per slide</label><div id="adzCarList"></div>'+
+   '<label class="adz-lab">Isi / perintah per slide</label><div class="adz-hint">Tiap kolom berdiri sendiri. Isi Poster Tunggal, generate sebelumnya, dan slide lain tidak ikut terbawa.</div><div id="adzCarList"></div>'+
    '<div class="adz-row" style="margin-top:10px"><button class="adz-btn gold" style="flex:1" onclick="adzCarAll()">Buat semua slide</button></div>'+
    '<div class="adz-row" style="margin-top:6px"><button class="adz-btn" style="flex:1" id="adzCarNextBtn" onclick="adzCarNext()">Lanjutkan</button><button class="adz-btn" onclick="adzCarReset()">Reset status</button></div>'+
    '<div class="adz-hint" id="adzCarStat"></div>'+
@@ -27701,6 +27772,7 @@ function buildCarUi(){
  $('adzCarOn').addEventListener('change',function(){carCfg().on=this.checked;saveCfg();carRefresh();});
  $('adzCarN').addEventListener('input',function(){const c=carCfg();c.n=parseInt(this.value)||5;$('adzCarNV').textContent=c.n;carSaveSoon();carRefresh();});
  $('adzCarNum').addEventListener('change',function(){carCfg().num=this.checked;saveCfg();carRefresh();});
+ $('adzCarFull').addEventListener('change',function(){carCfg().full=this.checked;saveCfg();});
  carRefresh();
 }
 /* ===== v2.7.9: PILIHAN JENIS POSTER (Poster Tunggal / Carousel) =====
@@ -27715,17 +27787,26 @@ function pmApply(){
  const m=$('adzModal');if(!m||!$('adzPmCard'))return;
  const pm=pmMode(),car=pm==='car',c=carCfg();
  if(cfg.pm!==pm||c.on!==car){cfg.pm=pm;c.on=car;saveCfg();}
+ {const pe0=$('adzPrompt');
+  if(pe0){
+   if(S.pmShown&&S.pmShown!==pm){
+    if(S.pmShown==='car')c.base=pe0.value;else S.singleText=pe0.value;
+    pe0.value=car?(c.base||''):(S.singleText||'');
+    saveCfg();
+   }
+   S.pmShown=pm;
+  }}
  m.classList.toggle('adz-pm-car',car);m.classList.toggle('adz-pm-single',!car);
  Array.prototype.forEach.call($('adzPmTabs').children,function(b){const on=b.getAttribute('data-pm')===pm;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});
  $('adzPmHint').textContent=car
-  ?'Mode Carousel: buat beberapa slide berurutan (maks. 17). Kolom "Topik umum" di bawah menjadi tema besar, isi tiap slide ditulis di kartu Carousel. Bisa disambung bila limit habis.'
+  ?'Mode Carousel: buat beberapa slide berurutan (maks. 17). Kolom perintah umum di bawah khusus Carousel (terpisah dari Poster Tunggal), isi tiap slide ditulis di kartu Carousel. Bisa disambung bila limit habis.'
   :'Mode Poster Tunggal: satu perintah menghasilkan satu poster berlayer lengkap.';
  const pe=$('adzPrompt');
  if(pe){
   const lb=pe.previousElementSibling;
   if(pe.getAttribute('data-ph0')===null)pe.setAttribute('data-ph0',pe.placeholder||'');
-  if(lb&&lb.classList&&lb.classList.contains('adz-lab'))lb.textContent=car?'Topik umum carousel (opsional bila tiap slide sudah diisi)':'Perintah / isi poster';
-  pe.placeholder=car?'Contoh: Carousel dakwah 4:5 tentang "Adab menuntut ilmu", nuansa hitam-emas, akun di bawah. Isi tiap slide ditulis di kartu Carousel.':pe.getAttribute('data-ph0');
+  if(lb&&lb.classList&&lb.classList.contains('adz-lab'))lb.textContent=car?'Perintah umum Carousel (berlaku untuk semua slide)':'Perintah / isi poster';
+  pe.placeholder=car?'Contoh: Carousel dakwah 4:5 tentang "Fiqih mahar", nuansa hitam-emas, teks tiap slide dipakai utuh tanpa disingkat. Isi tiap slide ditulis di kartu Carousel.':pe.getAttribute('data-ph0');
  }
  const clr=$('adzPmClr');if(clr)clr.textContent=car?'Hapus data Carousel':'Hapus perintah poster tunggal';
  carRefresh();
@@ -27734,19 +27815,22 @@ window.adzPmSet=function(m){
  if(S.busy||S.carLock){showToast('Tunggu proses AI selesai dulu, lalu ganti jenis poster');return;}
  if(m!=='car')m='single';
  cfg.pm=m;carCfg().on=(m==='car');saveCfg();pmApply();
+ S.ck=null;S.lastSpec=null;S.carSpec=null;promptSave(true);try{updGo();}catch(e){}
  try{const b=document.querySelector('#adzModal .adz-body');if(b)b.scrollTo({top:0,behavior:'smooth'});}catch(e){}
  showToast(m==='car'?'Mode Carousel aktif':'Mode Poster Tunggal aktif');
 };
 window.adzPmClear=function(){
  if(S.busy||S.carLock){showToast('Tunggu proses AI selesai dulu');return;}
  const car=pmMode()==='car';
- if(!confirm(car?'Hapus semua isi, tema, dan status slide Carousel? (Pengaturan, poster tunggal, logo, dan API key tidak ikut terhapus.)':'Kosongkan perintah poster tunggal? (Data Carousel, logo, dan API key tidak ikut terhapus.)'))return;
+ if(!confirm(car?'Hapus semua isi, tema, status slide, dan perintah umum Carousel? (Poster tunggal, logo, dan API key tidak ikut terhapus.)':'Kosongkan perintah poster tunggal? (Data Carousel, logo, dan API key tidak ikut terhapus.)'))return;
  if(car){
-  const c=carCfg();c.slides=[];c.status={};c.next=1;c.ref=-1;S.carSpec=null;carCfg();
+  const c=carCfg();c.slides=[];c.status={};c.next=1;c.ref=-1;c.base='';c.snap='';c.refMode='auto';S.carSpec=null;S.ck=null;carCfg();
+  {const pe1=$('adzPrompt');if(pe1)pe1.value='';}
   const w=$('adzCarList');if(w)w.removeAttribute('data-sig');
   saveCfg();carRefresh();showToast('Data Carousel dihapus');
  }else{
   const pe=$('adzPrompt');if(pe)pe.value='';
+  S.singleText='';S.ck=null;
   promptSave(true);updGo();showToast('Perintah poster tunggal dikosongkan');
  }
 };
@@ -27758,9 +27842,9 @@ window.adzPmInfo=function(open){
    '<div class="pm-hd"><span class="pm-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2" stroke="#D4AF37" stroke-width="2"/><circle cx="12" cy="7.8" r="1.1" fill="#D4AF37" stroke="none"/></svg></span><b>Info: Jenis Poster</b><button class="adz-x" type="button" onclick="adzPmInfo(false)" aria-label="Tutup">\u2715</button></div>'+
    '<div class="pm-bd">'+
    '<h4>Poster Tunggal</h4><ul><li>Satu perintah menghasilkan satu poster berlayer lengkap.</li><li>Tampil: kolom perintah, username, gaya, referensi, logo, dan tombol <b>Buat Desain</b>.</li></ul>'+
-   '<h4>Carousel</h4><ul><li>Beberapa slide berurutan (maks. 17) yang saling nyambung, opsional bernomor part (01/05).</li><li>Tampil: jumlah slide, tema antar slide, nomor part, isi per slide, serta tombol <b>Buat semua slide</b>, <b>Lanjutkan</b>, dan <b>Buat slide ini</b>.</li><li>Kolom perintah utama berfungsi sebagai topik umum carousel.</li><li>Bila limit/token habis, tekan <b>Lanjutkan</b>: slide yang sudah jadi tidak diulang.</li></ul>'+
+   '<h4>Carousel</h4><ul><li>Beberapa slide berurutan (maks. 17) yang saling nyambung, opsional bernomor part (01/05).</li><li>Tampil: jumlah slide, tema antar slide, nomor part, isi per slide, serta tombol <b>Buat semua slide</b>, <b>Lanjutkan</b>, dan <b>Buat slide ini</b>.</li><li>Kolom perintah utama berfungsi sebagai perintah umum carousel (gaya, aturan, larangan), tersimpan terpisah dari Poster Tunggal.</li><li>Tiap tombol Buat adalah permintaan baru: materi dari generate sebelumnya, slide lain, dan teks pada gambar referensi tidak ikut terbawa.</li><li>Kotak <b>Pakai teks tiap slide UTUH</b> membuat isi kolom dipakai kata per kata tanpa diringkas.</li><li>Bila limit/token habis, tekan <b>Lanjutkan</b>: slide yang sudah jadi tidak diulang.</li></ul>'+
    '<h4>Dipisah agar tidak salah pencet</h4><ul><li>Pilih salah satu jenis; tombol aksi jenis lain otomatis disembunyikan.</li><li>Pilihan terakhir diingat saat panel dibuka lagi.</li><li>Ganti jenis hanya bisa saat tidak ada proses AI yang berjalan.</li></ul>'+
-   '<h4>Data tetap tersimpan</h4><ul><li>Pindah jenis tidak menghapus apa pun: perintah poster tunggal, isi dan tema tiap slide, status, acuan desain, logo, username, dan API key.</li><li>Semua tersimpan di perangkat ini (localStorage + IndexedDB), aman dari refresh dan update versi Maker.</li><li>Data hanya hilang bila Anda menghapusnya sendiri lewat tombol <b>Hapus data</b> di kartu Jenis Poster (ada konfirmasi).</li></ul>'+
+   '<h4>Data tetap tersimpan</h4><ul><li>Pindah jenis tidak menghapus apa pun: perintah poster tunggal, perintah umum Carousel, isi dan tema tiap slide, status, acuan desain, logo, username, dan API key. Kedua jenis tidak saling menampilkan isi.</li><li>Semua tersimpan di perangkat ini (localStorage + IndexedDB), aman dari refresh dan update versi Maker.</li><li>Data hanya hilang bila Anda menghapusnya sendiri lewat tombol <b>Hapus data</b> di kartu Jenis Poster (ada konfirmasi).</li></ul>'+
    '<h4>Berlaku untuk keduanya</h4><ul><li>Username, logo, gaya bahasa, opsi hasil, dan pengaturan API dipakai bersama oleh kedua jenis.</li></ul>'+
    '</div></div>';
   document.body.appendChild(ov);
